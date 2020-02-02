@@ -1,0 +1,57 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1806                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+scale   1;
+
+vertices
+(
+    {% for v in vertices %}
+    {{ v }}{% endfor %}
+);
+
+blocks
+(
+    {% for b in blocks %}
+    {{ b }}{% endfor %}
+);
+
+edges
+(
+    {% for e in edges %}
+    {{ e }}{% endfor %}
+);
+
+boundary
+(
+    {% for patch, faces in patches.items() %}
+    {{ patch }}
+    {
+        type patch;
+        faces
+        (
+            {% for f in faces %}{{f}}
+            {% endfor %}
+        );
+
+    }
+    {% endfor %}
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //
