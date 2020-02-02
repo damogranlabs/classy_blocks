@@ -1,4 +1,5 @@
 # classyBlocks
+![Screenshot](https://github.com/FranzBangar/classyBlocks/blob/master/screenshot.png?raw=true "Screenshot")
 
 Python classes for easier creation of openFoam's blockMesh dictionaries.
 
