@@ -82,7 +82,7 @@ def sweep_block(start_points, center, axis, angle=np.pi/2):
             vertices[i+4], # last point
             edge_points[i]) # point on arc
 
-    elbow_arc_length = angle * (r_elbow-(d/2))
+    elbow_arc_length = abs(angle * (r_elbow-(d/2)))
     cell_size = d/10
     n_cells = int(elbow_arc_length/cell_size)
     block = mesh.add_block(vertices, [10, 10, n_cells])
