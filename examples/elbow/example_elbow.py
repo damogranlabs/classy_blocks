@@ -1,6 +1,10 @@
 #!/usr/bin/python3
 import os
 
+# path to classy_blocks
+import sys
+sys.path.append(os.path.abspath("."))
+
 import classy_blocks
 from functions import vector, rotate, norm
 import numpy as np
@@ -111,7 +115,7 @@ outlet_extrude = vector(0, l_outlet, 0)
 outlet_block, _ = extrude_block(p_b3, outlet_extrude, inverse_grading=False)
 outlet_block.set_patch(['right'], 'outlet')
 
-mesh.write('blockMeshDict.template', 'example/system/blockMeshDict')
+mesh.write('blockMeshDict.template', 'examples/elbow/system/blockMeshDict')
 
 # run blockMesh
-os.system("blockMesh -case example")
+os.system("blockMesh -case examples/elbow")

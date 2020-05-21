@@ -26,6 +26,11 @@ there and then just throw everything into blockMeshDicts. This tool is a link be
     - set patches with block.set_patches()
 - write the mesh with mesh.write()
 
+## Prerequisites
+ - numpy
+ - scipy
+ - jinja2
+
 ## Example usage
 Here's a rather simple example of a single-block box with curved edges.
 
@@ -87,10 +92,17 @@ os.system("blockMesh")
 ```
 
 ## Example example
-Check out `example.py` for a little more complicated real-life example of a multi-block duct.
-You can play with parameters a little. There's also a little more intuitive example of grading calculation;
-in the example inlet and outlet parts have only half the number of cells but cells are of the same size
-around important zones (near curves).
+### Elbow
+Run `python examples/elbow/example_elbow.py` from this repository's top-level directory.
+Then open `examples/annulus/case.foam` in ParaView and check the mesh: it's a
+square cross-section ventilation duct with two elbows. `block.set_cell_size()` is used to 
+match cell size on block boundaries and to save on cell count where high resolution is not critical.
+
+### 
+Run `python examples/annulus/example_annulus.py`. This is a simplified model of a wet-running electric motor.
+The inner cylinder is rotating and that creates not only rotating field but a complex array of so-called
+[Taylor vortexes](https://www.google.com/search?tbm=isch&q=taylor+vortex). Here, blocks are graded as well
+to save on cell count.
 
 ## Bonus: geometry functions
 Check out `functions.py` for bonus functions. More about that is written in my blog post, [https://damogranlabs.com/2019/11/points-and-vectors/].
