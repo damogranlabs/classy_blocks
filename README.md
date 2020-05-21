@@ -1,5 +1,5 @@
 # classyBlocks
-![Screenshot](https://github.com/FranzBangar/classyBlocks/blob/master/screenshot.png?raw=true "Screenshot")
+![Elbows](https://github.com/FranzBangar/classyBlocks/blob/master/showcase/elbows.png?raw=true "Elbows")
 
 Python classes for easier creation of openFoam's blockMesh dictionaries.
 
@@ -110,3 +110,10 @@ There are also a couple of functions used in the example.
 Of course you are free to use your own :)
 
 Have fun!
+
+## Showcase
+A single channel of an impeller, without volute and with infinite blade thickness:
+![Impeller](https://github.com/FranzBangar/classyBlocks/blob/master/showcase/impeller.png?raw=true "Impeller")
+
+A full volute and inlet (impeller mesh is created separately):
+![Volute](https://github.com/FranzBangar/classyBlocks/blob/master/showcase/volute.png?raw=true "Volute")
