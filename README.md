@@ -94,7 +94,7 @@ os.system("blockMesh")
 ## Example example
 ### Elbow
 Run `python examples/elbow/example_elbow.py` from this repository's top-level directory.
-Then open `examples/annulus/case.foam` in ParaView and check the mesh: it's a
+Then open `examples/elbow/case.foam` in ParaView and check the mesh: it's a
 square cross-section ventilation duct with two elbows. `block.set_cell_size()` is used to 
 match cell size on block boundaries and to save on cell count where high resolution is not critical.
 
@@ -116,7 +116,7 @@ Of course you are free to use your own :)
 Have fun!
 
 ## Showcase
-A single channel of an impeller, without volute and with infinite blade thickness:
+A single channel of an impeller, without volute and with infinitely thin blades:
 ![Impeller](https://github.com/FranzBangar/classyBlocks/blob/master/showcase/impeller.png?raw=true "Impeller")
 
 A full volute and inlet (impeller mesh is created separately):
