@@ -15,7 +15,7 @@ postProcessing
 */!0.org
 */constant/extendedFeatureEdgeMesh
 *.eMesh
-*/constant/polyMesh/*
+*polyMesh
 */constant/cellToRegion
 *.obj
 *.stl

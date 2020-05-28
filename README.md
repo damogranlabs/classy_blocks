@@ -108,6 +108,9 @@ to save on cell count.
 After running `python examples/nozzle/example_nozzle.py` you get a nice axisymmetric wedge mesh
 of a kind of a nozzle.
 
+### Fully 3D mesh: cylinder
+A cylindrical pipe made from 5 blocks.
+
 ## Bonus: geometry functions
 Check out `functions.py` for bonus functions. More about that is written in my blog post, [https://damogranlabs.com/2019/11/points-and-vectors/].
 There are also a couple of functions used in the example.
