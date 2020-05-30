@@ -32,6 +32,7 @@ there and then just throw everything into blockMeshDicts. This tool is a link be
  - jinja2
 
 ## Example usage
+# TODO: update
 Here's a rather simple example of a single-block box with curved edges.
 
 ```python
@@ -91,7 +92,7 @@ mesh.write('blockMeshDict.template', 'system/blockMeshDict')
 os.system("blockMesh")
 ```
 
-## Example example
+## Other Examples
 ### Elbow
 Run `python examples/elbow/example_elbow.py` from this repository's top-level directory.
 Then open `examples/elbow/case.foam` in ParaView and check the mesh: it's a

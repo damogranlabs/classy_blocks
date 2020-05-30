@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
-import math, os
-
 import numpy as np
 import scipy as sp
-
-import warnings
 
 def deg2rad(deg):
     """ convert degrees (input) to radians """
