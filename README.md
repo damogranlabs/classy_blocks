@@ -69,26 +69,6 @@ vertex/edge/block indexes. You do:
 ## Example usage
 Uncomment the desired example in `./run_example.py`. Then run the file and open `examples/meshCase/case.foam` with ParaView.
 
-## Other Examples
-### Elbow
-Run `python examples/elbow/example_elbow.py` from this repository's top-level directory.
-Then open `examples/elbow/case.foam` in ParaView and check the mesh: it's a
-square cross-section ventilation duct with two elbows. `block.set_cell_size()` is used to 
-match cell size on block boundaries and to save on cell count where high resolution is not critical.
-
-### Annulus & Taylor vortices
-Run `python examples/annulus/example_annulus.py`. This is a simplified model of a wet-running electric motor.
-The core cylinder is rotating and that creates not only rotating field but a complex array of so-called
-[Taylor vortexes](https://www.google.com/search?tbm=isch&q=taylor+vortex). Here, blocks are graded as well
-to save on cell count.
-
-### Axisymmetric mesh: nozzle
-After running `python examples/nozzle/example_nozzle.py` you get a nice axisymmetric wedge mesh
-of a kind of a nozzle.
-
-### Fully 3D mesh: cylinder
-A cylindrical pipe made from 5 blocks.
-
 ## Prerequisites
  - numpy
  - scipy
