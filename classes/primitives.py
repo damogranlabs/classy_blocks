@@ -7,79 +7,96 @@ from util import geometry as g
 from util import tools, constants
 
 # see README for terminology, terminolology, lol
-class Point():
-    """ vertex without an index (for, like, edges and stuff) """
-    def __init__(self, coordinates):
-        self.coordinates = coordinates
-        
-    @property
-    def short_output(self):
-        # output for edge definitions
-        return "({} {} {})".format(self.coordinates[0], self.coordinates[1], self.coordinates[2]) 
-    
-    @property
-    def long_output(self):
-        # output for Vertex definitions
-        return "({}\t{}\t{})".format(
-            self.coordinates[0], self.coordinates[1], self.coordinates[2]
-        )
-
-    def __add__(self, other):
-        return np.array(self.coordinates) + np.array(other.coordinates)
-
-    def __sub__(self, other):
-        return np.array(self.coordinates) - np.array(other.coordinates)
-
-
 class Vertex():
-    """ point with an index that's used in block and face definition """
-    def __init__(self, point, index):
-        self.point = Point(point)
-        self.index = index
+    """ point with an index that's used in block and face definition
+    and can output in OpenFOAM format """
+    def __init__(self, point):
+        self.point = np.array(point)
+        self.mesh_index = None # will be changed in Mesh.prepare_data()
         
-    @property
-    def output(self):
-        return self.point.long_output + " // {}".format(self.index)
-    
-    @property
-    def printout(self):
-        return "Vertex {} {}".format(self.index, self.point.short_output)
-    
     def __repr__(self):
-        return self.output
-
-    def __str__(self):
-        return self.output
+        s = constants.vector_format(self.point)
         
-    def __unicode__(self):
-        return self.output
-
+        if self.mesh_index is not None:
+            s += " // {}".format(self.mesh_index)
+        
+        return s
 
 class Edge():
-    def __init__(self, vertex_1, vertex_2, point, index):
-        """ an edge is defined by two vertices and a point in between;
-            all edges are treated as circular arcs
+    def __init__(self, index_1, index_2, points):
+        """ an edge is defined by two vertices and points in between;
+        a single point edge is treated as 'arc', more points are
+        treated as 'spline'.
+
+        passed indexes refer to position in Block.edges[] list; Mesh.prepare_data()
+        will assign actual Vertex objects.
         """
-        self.vertex_1 = vertex_1
-        self.vertex_2 = vertex_2
-        self.point = Point(point)
+
+        # indexes in block.edges[] list
+        self.block_index_1 = index_1
+        self.block_index_2 = index_2
+
+        # these will refer to actual Vertex objects after Mesh.prepare_data()
+        self.vertex_1 = None
+        self.vertex_2 = None
+
+        self.type, self.points = self.get_type(points)
+
+    @staticmethod
+    def get_type(points):
+        """ returns edge type and a list of points:
+        'None' for a straight line,
+        'arc' for a circular arc,
+        'spline' for a spline """
+
+        if points is None:
+            return None, None
+
+        # if multiple points are given check that they are of correct length
+        points = np.array(points)
+        shape = np.shape(points)
+
+        if len(shape) == 1:
+            t = 'arc'
+        else:
+            assert len(shape) == 2
+            for p in points:
+                assert len(p) == 3
+            
+            t = 'spline'
+
+        return t, points
+        
 
     @property
-    def output(self):
-        return "arc {} {} {}".format(
-            self.vertex_1.index,
-            self.vertex_2.index,
-            self.point.short_output
-        )
-
+    def point_list(self):
+        if self.type == 'arc':
+            return constants.vector_format(self.points)
+        else:
+            return "(" +  \
+                   " ".join([constants.vector_format(p) for p in self.points]) + \
+                   ")"
+    
     @property
     def is_valid(self):
-        # returns True if the edge is not an arc;
-        # in case the three points are collinear, blockMesh
-        # will find an arc with infinite radius and crash.
-        OA = np.array(self.vertex_1.point.coordinates)
-        OB = np.array(self.vertex_2.point.coordinates)
-        OC = np.array(self.point.coordinates)
+        # 'all' spline edges are 'valid'
+        if self.type == 'spline':
+            return True
+        
+        # wedge geometries produce coincident 
+        # edges and vertices; drop those
+        if g.norm(self.vertex_1.point - self.vertex_2.point) < constants.tol:
+            return False
+
+        # if case vertex1, vertex2 and point in between
+        # are collinear, blockMesh will find an arc with
+        # infinite radius and crash.
+        # so, check for collinearity; if the three points
+        # are actually collinear, this edge is redundant and can be
+        # silently dropped
+        OA = self.vertex_1.point
+        OB = self.vertex_2.point
+        OC = self.points
 
         # if point C is on the same line as A and B:
         # OC = OA + k*(OB-OA)
@@ -91,5 +108,28 @@ class Edge():
 
         return d > constants.tol
 
+    def get_length(self):
+        # TODO: test
+        def curve_length(points):
+            points = [self.vertex_1.point] + self.points + [self.vertex_2.point]
+            l = 0
+
+            for i in range(len(points)-1):
+                l += g.norm(points[i+1] - points[i])
+
+            return l
+
+        if self.type == 'arc':
+            return curve_length([self.points])
+        elif self.type == 'spline':
+            return curve_length(self.points)
+        
+        return 0
+
     def __repr__(self):
-        return self.output
+        return "{} {} {} {}".format(
+            self.type,
+            self.vertex_1.mesh_index,
+            self.vertex_2.mesh_index,
+            self.point_list
+        )

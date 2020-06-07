@@ -1,7 +1,7 @@
 from util import geometry as g
 from util import constants, tools
 
-from classes.primitives import Point, Vertex, Edge
+from classes.primitives import Vertex, Edge
 from classes.block import Block
 
 class Mesh():
@@ -11,66 +11,45 @@ class Mesh():
         self.edges = [] # list of edges
         self.blocks = [] # list of blocks
 
-    @property
-    def iVertex(self):
-        return len(self.vertices)
+    def find_vertex(self, new_vertex):
+        """ checks if any of existing vertices in self.vertices are
+        in the same location as the passed one; if so, returns
+        the existing vertex """
 
-    @property
-    def iEdge(self):
-        return len(self.edges)
-    
-    @property
-    def iBlock(self):
-        return len(self.blocks)
+        for mesh_vertex in self.vertices:
+            if g.norm(mesh_vertex.point - new_vertex.point) < constants.tol:
+                return mesh_vertex
 
-    def add_vertex(self, point, duplicate=False):
-        """ creates a vertex, adds it to the mesh and returns the Vertex() object"""
-        vertex = None
+        return None
 
-        if not duplicate:
-            # check if there's already a vertex at this point;
-            # if so, just return the existing vertex
-            for v in self.vertices:
-                dl = g.norm(v.point.coordinates - point)
-                if dl < constants.tol:
-                    return v
-
-        # create a new vertex even if there's already one in the same place
-        vertex = Vertex(point, self.iVertex)
-        self.vertices.append(vertex)
-
-        return vertex
-
-    def add_vertices(self, points, duplicate=False):
-        """ the same as add_vertex but returns a list of Vertex objects """
-        return [self.add_vertex(p, duplicate=duplicate) for p in points]
-
-    def add_edge(self, v_1, v_2, point):
-        # check if there's the same edge in the list already;
-        # if there is, just return a reference to that
+    def find_edge(self, vertex_1, vertex_2):
+        """ checks if an edge with the same pair of vertices
+        exists in self.edges already """
         for e in self.edges:
-            if set([v_1.index, v_2.index]) == set([e.vertex_1.index, e.vertex_2.index]):
-                # print("Duplicated edge: {}".format(e))
+            mesh_set = set([vertex_1.mesh_index, vertex_2.mesh_index])
+            edge_set = set([e.vertex_1.mesh_index, e.vertex_2.mesh_index])
+            if mesh_set == edge_set:
                 return e
 
-        edge = Edge(v_1, v_2, point, self.iEdge)
-        if edge.is_valid:
-            self.edges.append(edge)
-            return True
-        else:
-            del edge
-            return False
+        return None
 
-    def add_block(self, vertices, cells, cellZone=None, description=""):
-        block = Block(vertices, self.iBlock, cells, cellZone, description)
+    def add_block(self, block):
+        # block.mesh_index is not required but will come in handy for debugging
+        block.mesh_index = len(self.blocks)
         self.blocks.append(block)
 
-        return block
+    def add_operation(self, operation):
+        self.add_block(operation.block)
+
+    def add_shape(self, shape):
+        for block in shape.blocks:
+            self.add_block(block)
 
     @property
     def patches(self):
         # Block contains patches according to the example in __init__()
         # this method collects all faces for a patch name from all blocks
+        # (a format ready for jinja2 template)
 
         # collect all patch names
         patch_names = []
@@ -90,7 +69,44 @@ class Mesh():
         
         return patches
 
+    def prepare_data(self):
+        # 1. collect all vertices from all blocks,
+        # check for duplicates and give them indexes
+        for block in self.blocks:
+            for i, block_vertex in enumerate(block.vertices):
+                found_vertex = self.find_vertex(block_vertex)
+
+                if found_vertex is None:
+                    block.vertices[i].mesh_index = len(self.vertices)
+                    self.vertices.append(block_vertex)
+                else:
+                    block.vertices[i] = found_vertex
+        
+        # 2. collect all edges from all blocks;
+        for block in self.blocks:
+            # check for duplicates (same vertex pairs) and
+            # check for validity (no straight-line arcs)
+            for i, block_edge in enumerate(block.edges):
+                # block.vertices by now contain index to mesh.vertices;
+                # edge vertex therefore refers to actual mesh vertex
+                v_1 = block.vertices[block_edge.block_index_1]
+                v_2 = block.vertices[block_edge.block_index_2]
+
+                block.edges[i].vertex_1 = v_1
+                block.edges[i].vertex_2 = v_2
+
+                if not block_edge.is_valid:
+                    # invalid edges should not be added
+                    continue
+
+                if self.find_edge(v_1, v_2) is None:
+                    # only non-existing edges are added
+                    self.edges.append(block_edge)
+
+
     def write(self, template_path, output_path, context=None):
+        self.prepare_data()
+
         context = {
             'vertices': self.vertices,
             'edges': self.edges,

@@ -61,6 +61,34 @@ def rotate(point, angle, axis='x'):
 
     return point.dot(rot_matrix)
     
+def arbitrary_rotation_matrix(axis, theta):
+    """
+    Return the rotation matrix associated with counterclockwise rotation about
+    the given axis by theta radians.
+    """
+    # Kudos to
+    # https://stackoverflow.com/questions/6802577/rotation-of-3d-vector
+    #import math
+    # 
+    # axis = np.asarray(axis)
+    # axis = axis / math.sqrt(np.dot(axis, axis))
+    # a = math.cos(theta / 2.0)
+    # b, c, d = -axis * math.sin(theta / 2.0)
+    # aa, bb, cc, dd = a * a, b * b, c * c, d * d
+    # bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
+    # return np.array([[aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac)],
+    #                  [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
+    #                  [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]])
+
+    # Also Kudos to the guy with another answer for the same question
+    return sp.linalg.expm(np.cross(np.eye(3), axis/norm(axis)*theta))
+    
+def arbitrary_rotation(point, axis, theta, origin):
+    """ rotates point around any axis given by axis by angle theta [radians] """
+
+    rotated_point = np.dot(arbitrary_rotation_matrix(axis, theta), point - origin)
+    return rotated_point + origin
+
 def de_rotate(p):
     """ rotate the point p around x-axis so that z-axis=0 """
     # measure angle between normal and point
