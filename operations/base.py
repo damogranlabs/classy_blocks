@@ -128,22 +128,31 @@ class Operation():
         )
 
     def set_cell_count(self, axis, count):
-        """ axis:
+        """ Directly set number of cells for given axis:
          0: along first edge of a face
          1: along second edge of a face
          2: between faces / along operation path
         """
         self.block.n_cells[axis] = int(count)
 
-    def set_cell_size(self, axis, size):
-        """ sets block grading so that the final cell size is as required;
+    def count_to_size(self, axis, cell_size):
+        """ Calculate cell count to meet cell_size.
+        Axes:
+         0: along first edge of a face
+         1: along second edge of a face
+         2: between faces / along operation path
+        """
+        return self.block.count_to_size(axis, cell_size)
+
+    def grade_to_size(self, axis, size):
+        """ Sets block grading so that the final cell size is as required;
         to set that cell size on opposite (beginning) side, use negative size.
 
-        axis:
+        Axes:
          0: along first edge of a face
          1: along second edge of a face
          2: between faces / along operation path """
-        self.block.set_cell_size(axis, abs(size), size<0)
+        self.block.grade_to_size(axis, abs(size), size<0)
 
     def set_patch(self, sides, patch_name):
         # TODO: typing

@@ -33,9 +33,9 @@ def create():
 
     block.n_cells = [20, 20, 20]
 
-    block.set_cell_size(0, 0.01)
-    block.set_cell_size(1, 0.02)
-    block.set_cell_size(2, 0.05)
+    block.count_to_size(0, 0.01)
+    block.count_to_size(1, 0.02)
+    block.count_to_size(2, 0.05)
 
     mesh = Mesh()
     mesh.add_block(block)

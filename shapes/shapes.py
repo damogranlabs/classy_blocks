@@ -91,17 +91,14 @@ class Elbow:
         self.core.set_cell_count(1, count)
 
     def set_axial_cell_size(self, size):
-        # size of core block is different than 
-        # shell blocks; calculate grading for core
-        # and then just copy it to other blocks
-        self.core.set_cell_size(2, size)
-
-        for s in self.shell:
-            s.block.grading[2] = self.core.block.grading[2]
+        # 'core' is the first block to be added;
+        # other blocks' grading will be copied from it
+        self.core.grade_to_size(2, size)
 
     def set_outer_cell_size(self, size):
-        for s in self.shell:
-            s.set_cell_size(0, -size)
+        # only set grading for the first shell block,
+        # mesh will copy it to others
+        self.shell[0].grade_to_size(0, -size)
 
 
 class Frustum(Elbow):
@@ -177,11 +174,11 @@ class Ring:
     
     def set_axial_cell_size(self, size):
         for o in self.operations:
-            o.set_cell_size(0, size)
+            o.grade_to_size(0, size)
     
     def set_radial_cell_size(self, size):
         for o in self.operations:
-            o.set_cell_size(1, size)
+            o.grade_to_size(1, size)
 
     def set_patch(self, side, patch_name):
         for b in self.blocks:

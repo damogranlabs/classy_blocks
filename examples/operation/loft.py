@@ -7,6 +7,7 @@ from operations.base import Face
 from operations.operations import Loft
 
 def create():
+    # Example geometry using Loft:
     bottom_face = Face(
         [ # vertices
             [0, 0, 0], # 0
@@ -38,18 +39,20 @@ def create():
     )
 
     side_edges = [
-        [ [0.02, 0.02, 0.5], [-0.02, -0.02, 1.0], [0.02, 0.02, 1.5], ], # 0-4 (spline edge)
+        [ [0.1, 0.1, 0.5], [0.2, 0.2, 1.0], [0.1, 0.1, 1.5], ], # 0-4 (spline edge)
         [0.9, 0.1, 1], # 1-5
         [0.9, 0.9, 1], # 2-6
         [0.1, 0.9, 1]  # 3-7
     ]
 
     loft = Loft(bottom_face, top_face, side_edges)
+    loft.set_cell_count(0, 10)
+    loft.set_cell_count(1, 10)
     loft.set_cell_count(2, 30)
-    loft.set_cell_size(2, 0.01)
+    loft.grade_to_size(2, 0.01)
 
     mesh = Mesh()
-    mesh.add_block(loft.block)
+    mesh.add_operation(loft)
     mesh.write('util/blockMeshDict.template', 'examples/meshCase/system/blockMeshDict')
 
     # run blockMesh

@@ -15,10 +15,16 @@ Since it is easier to crunch numbers and vectors and everything else with `numpy
 - If you don't want to waste energy on low-level stuff such as numbering vertices
 - If you have a rather simplish parametric model and would like to make a bunch of simulations with changing geometry (optimizations etc.)
 
-# Usage
-The basis is the `Mesh` class. You can add vertices, edges, blocks and shapes to it. When you're done, a blockMeshDict is created using `mesh.write()`.
+# Features
+- Write your parametric model's geometry with a short Python script and translate it directly to `blockMeshDict`
+- Predefined shapes like `Cylinder` or operations like `Extrude` and `Revolve`*
+- Simple specification of edges: a single point for circular or a list of points for a spline edge
+- Automatic calculation of number of cells with `block.count_to_size(cell_size)`
+- Automatic cell grading calculation by setting required cell size `block.grade_to_size(cell_size)`
+- Automatic propagation of grading and cell count from block to block as required by blockMesh
 
-There are 3 different abstraction levels:
+
+*There are 3 different abstraction levels:
 1. Shapes take points and vectors as parameters (depending on that shape) and returns an object that is passed to Mesh. Everything (including blocks) is created implicitly and you don't have to deal with any of the low-level stuff.
 1. An _Operation_ combines a `Face` (4 points, 4 edges) and transforms it into a block using a rule based on the operation itself. `Revolve`, for instance, rotates the face around a specified axis and also creates circular edges between the two faces.
 1. The lowest-level approach is to calculate vertex and edge points manually and create blocks from those.
@@ -105,16 +111,16 @@ Finally, all blocks must be added to Mesh. That will prepare data for blockMesh 
 `Mesh` only contains a list of blocks. Each block self-contains its data. Since blocks share vertices and edges and blockMesh needs separate lists of the latter, `Mesh.prepare_data()` will traverse its list of blocks and store vertices and edges to separate lists. During that it will check for duplicates and drop them. It will also collect patches from all blocks and store them into a template-readable list.
 
 ## Bonus: geometry functions
-Check out `functions.py` for bonus functions. More about that is written in my blog post, [https://damogranlabs.com/2019/11/points-and-vectors/].
+Check out `util/geometry.py` for bonus functions. More about that is written in my blog post, [https://damogranlabs.com/2019/11/points-and-vectors/].
 There are also a couple of functions used in the example.
 Of course you are free to use your own :)
 
 # TODO
- - More sophisticated tests
- - Neighbour awareness between blocks (consistent grading, cell count, etc.)
- - Block.size (multiple issues)
+ - `block.count_to_size()` (take smallest/biggest/average size)
  - More examples from real life
     - heater/boiler
     - labyrinth seals
     - rotating annulus (Taylor-Couette vortex)
+    - More tests (and more sophisticated ones!)
+    - Include examples in tests
  - Package (`pip install...`)

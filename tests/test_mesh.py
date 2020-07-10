@@ -11,8 +11,7 @@ from tests.test_block import FixturedTestCase
 
 class TestMesh(FixturedTestCase):
     def test_find_vertex(self):
-        # an existing object must be returned when adding
-        # a vertex at an existing location
+        """ an existing object must be returned when adding a vertex at an existing location """
         v = Vertex([0, 0, 0])
         v.index = 0
 
@@ -23,7 +22,7 @@ class TestMesh(FixturedTestCase):
         self.assertIsNone(mesh.find_vertex(Vertex([1, 1, 1])))
 
     def test_find_edge(self):
-        # do not duplicate edges between the same vertices
+        """ edges between the same vertices must not be duplicated """
         mesh = Mesh()
 
         v1 = Vertex([0, 0, 0])
@@ -51,6 +50,7 @@ class TestMesh(FixturedTestCase):
         self.assertIsNone(mesh.find_edge(v1, v3))
 
     def test_prepare_data(self):
+        """ a functional test on mesh.prepare_data() """
         self.mesh.prepare_data()
 
         # 4 out of 16 vertices are shared between blocks and must not be duplicated
@@ -65,7 +65,10 @@ class TestMesh(FixturedTestCase):
         # only 4 out of 6 edges should be added (one is duplicated, one invalid)
         self.assertEqual(len(self.mesh.edges), 4)
 
-    """def test_patches(self):
+    def test_patches(self):
+        """ check patch output """
+        self.mesh.prepare_data()
+
         self.assertDictEqual(
             self.mesh.patches,
             {
@@ -73,7 +76,20 @@ class TestMesh(FixturedTestCase):
                 'walls': ['(4 0 3 7)', '(5 1 2 6)', '(4 5 1 0)', '(7 6 2 3)'],
                 'inlet': ['(0 1 2 3)']
             }
-        )"""
+        )
+
+    def test_find_neighbour_success(self):
+        """ block_2 must copy block_1's cell count and grading on axis 0 and 1"""
+        self.mesh.prepare_data()
+
+        self.assertTrue(self.mesh.copy_cells(self.block_2, 0))
+        self.assertTrue(self.mesh.copy_cells(self.block_2, 1))
+        
+    def test_find_neighbour_fail(self):
+        """ block_2 cannot copy cell count and grading from block_1 on axis 2 """
+        self.block_2.n_cells = [None, None, None]
+
+        self.assertRaises(Exception, self.mesh.prepare_data)
 
 
 if __name__ == '__main__':

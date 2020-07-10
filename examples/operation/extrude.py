@@ -17,10 +17,10 @@ def create():
     extrude.set_cell_count(1, 10)
     extrude.set_cell_count(2, 50)
 
-    extrude.set_cell_size(2, -0.02)
+    extrude.grade_to_size(2, -0.02)
 
     mesh = Mesh()
-    mesh.add_block(extrude.block)
+    mesh.add_operation(extrude)
 
     mesh.write('util/blockMeshDict.template', 'examples/meshCase/system/blockMeshDict')
 

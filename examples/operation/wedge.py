@@ -14,7 +14,7 @@ def create():
     base = Face(
         [ [0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0] ],
         [ None, None, [
-            [0.75, 0.9, 0], # a spline edges
+            [0.75, 0.9, 0], # a spline edge
             [0.50, 1.0, 0], # with 3
             [0.25, 1.1, 0], # points
         ],
@@ -29,11 +29,12 @@ def create():
 
         wedge.set_cell_count(0, 15)
         wedge.set_cell_count(1, 30)
-        wedge.set_cell_size(1, -0.01)
+        
+        wedge.grade_to_size(1, -0.01)
         wedge.set_outer_patch('wall')
         wedges.append(wedge)
 
-        mesh.add_block(wedge.block)
+        mesh.add_operation(wedge)
 
         base = base.translate([1, 0, 0])
 

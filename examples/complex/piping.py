@@ -40,7 +40,13 @@ def create():
     # shapes
     inlet = Cylinder([0, 0, 0], [l_inlet, 0, 0], [0, r_pipe, 0])
     inlet.set_bottom_patch('inlet')
+
+    # set cell counts on all directions - for first block/operation/shape only!
     inlet.set_axial_cell_count(l_inlet/cell_size/cell_ratio)
+    inlet.set_radial_cell_count(n_cells_radial)
+    inlet.set_tangential_cell_count(n_cells_tangential)
+
+    # grade to desired cell size
     inlet.set_axial_cell_size(-cell_size) # negative size means we're setting at the other end
 
     elbow_1 = Elbow(
@@ -54,6 +60,7 @@ def create():
     )
     elbow_cell_count = (np.pi/2)*(r_elbow+r_pipe)/cell_size
     elbow_1.set_axial_cell_count(elbow_cell_count)
+    
 
     connection = Cylinder(
         elbow_1.circle_2.center_point,
@@ -86,9 +93,6 @@ def create():
     mesh = Mesh()
 
     for shape in [inlet, elbow_1, connection, elbow_2, outlet]:
-        shape.set_radial_cell_count(n_cells_radial)
-        shape.set_tangential_cell_count(n_cells_tangential)
-
         shape.set_outer_patch('wall')
         mesh.add_shape(shape)
 

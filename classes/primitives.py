@@ -111,7 +111,6 @@ class Edge():
     def get_length(self):
         # TODO: test
         def curve_length(points):
-            points = [self.vertex_1.point] + self.points + [self.vertex_2.point]
             l = 0
 
             for i in range(len(points)-1):
@@ -120,11 +119,26 @@ class Edge():
             return l
 
         if self.type == 'arc':
-            return curve_length([self.points])
+            edge_points = np.array([
+                self.vertex_1.point,
+                self.points,
+                self.vertex_2.point
+            ])
+
+            return curve_length(edge_points)
         elif self.type == 'spline':
-            return curve_length(self.points)
-        
-        return 0
+            print(self.vertex_1.point)
+            print(self.points)
+            print(self.vertex_2.point)
+
+            edge_points = np.concatenate((
+                [self.vertex_1.point],
+                self.points,
+                [self.vertex_2.point]), axis=0)
+            print("edges: ", edge_points)
+            return curve_length(edge_points)
+        else:
+            raise AttributeError(f"Unknown edge type: {self.type}")
 
     def __repr__(self):
         return "{} {} {} {}".format(

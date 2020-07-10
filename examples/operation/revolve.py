@@ -20,10 +20,10 @@ def create():
     revolve.set_cell_count(1, 10)
     revolve.set_cell_count(2, 50)
 
-    revolve.set_cell_size(2, -0.02)
+    revolve.grade_to_size(2, -0.02)
 
     mesh = Mesh()
-    mesh.add_block(revolve.block)
+    mesh.add_operation(revolve)
 
     mesh.write('util/blockMeshDict.template', 'examples/meshCase/system/blockMeshDict')
 
