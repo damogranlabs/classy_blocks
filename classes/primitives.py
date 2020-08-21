@@ -127,15 +127,10 @@ class Edge():
 
             return curve_length(edge_points)
         elif self.type == 'spline':
-            print(self.vertex_1.point)
-            print(self.points)
-            print(self.vertex_2.point)
-
             edge_points = np.concatenate((
                 [self.vertex_1.point],
                 self.points,
                 [self.vertex_2.point]), axis=0)
-            print("edges: ", edge_points)
             return curve_length(edge_points)
         else:
             raise AttributeError(f"Unknown edge type: {self.type}")

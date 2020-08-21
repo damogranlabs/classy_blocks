@@ -77,12 +77,20 @@ class TestUtils(unittest.TestCase):
             f.vector(0, 1, 0)
         )
 
-    def test_to_polar(self):
-        """ cartesian coordinate system to polar c.s. """
-        point = f.vector(1, 1, 1)
-        polar = f.vector(2**0.5, np.pi/4, 1)
+    def test_to_polar_z_axis(self):
+        """ cartesian coordinate system to polar c.s., rotation around z-axis """
+        cartesian = f.vector(2, 2, 5)
+        polar = f.vector(8**0.5, np.pi/4, 5)
 
-        self.assert_np_almost_equal(polar, f.to_polar(point))
+        self.assert_np_almost_equal(polar, f.to_polar(cartesian, axis='z'))
+
+    def test_to_polar_x_axis(self):
+        """ cartesian coordinate system to polar c.s., rotation around x-axis """
+        cartesian = f.vector(5, 2, 2)
+        polar = f.vector(8**0.5, np.pi/4, 5)
+
+        self.assert_np_almost_equal(polar, f.to_polar(cartesian, axis='x'))
+
 
     def test_lin_map(self):
         """ map a value """
@@ -125,18 +133,30 @@ class TestUtils(unittest.TestCase):
         p = np.array([1, np.pi/2, 2])
 
         # cartesian versions
-        # rotation_axis: z
+        # axis: z
         self.assert_np_almost_equal(
-            f.to_cartesian(p),
+            f.to_cartesian(p, axis='z'),
             f.vector(0, 1, 2))
 
         self.assert_np_almost_equal(
-            f.to_cartesian(p, rotation_axis='x'),
+            f.to_cartesian(p, axis='x'),
             f.vector(2, 0, 1))
 
         self.assert_np_almost_equal(
-            f.to_cartesian(p, rotation_axis='x', direction=-1),
+            f.to_cartesian(p, axis='x', direction=-1),
             f.vector(2, 0, -1))
+
+    def test_polar2cartesian_x_axis(self):
+        cp = np.array([32, 198, 95])
+        pp = f.to_polar(cp, axis='x')
+        
+        self.assert_np_almost_equal(cp, f.to_cartesian(pp, axis='x'))
+
+    def test_polar2cartesian_z_axis(self):
+        cp = np.array([32, 198, 95])
+        pp = f.to_polar(cp, axis='z')
+        
+        self.assert_np_almost_equal(cp, f.to_cartesian(pp, axis='z'))
 
     def test_to_cartesian_asserts(self):
         """ garbage input to f.to_cartesian() """
@@ -146,7 +166,7 @@ class TestUtils(unittest.TestCase):
             f.to_cartesian(p, direction=0)
         
         with self.assertRaises(AssertionError):
-            f.to_cartesian(p, rotation_axis='a')
+            f.to_cartesian(p, axis='a')
 
     def test_dilute_indexes(self):
         """ generate equally-spaced indexes """

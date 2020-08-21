@@ -51,7 +51,7 @@ class Block():
         self.grading = [1, 1, 1] # this is written to blockMeshDict
 
         # cellZone to which the block belongs to
-        self.cellZone = ""
+        self.cell_zone = ""
 
         # written as a comment after block description
         # (visible in blockMeshDict, useful for debugging)
@@ -245,10 +245,10 @@ class Block():
         # hex definition
         output = "hex "
         # vertices
-        output += " ( " + " ".join([str(v.mesh_index) for v in self.vertices]) + " ) "
+        output += " ( " + " ".join(str(v.mesh_index) for v in self.vertices) + " ) "
     
         # cellZone
-        output += self.cellZone
+        output += self.cell_zone
         # number of cells
         output += " ({} {} {}) ".format(self.n_cells[0], self.n_cells[1], self.n_cells[2])
         # grading

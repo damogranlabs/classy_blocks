@@ -86,38 +86,45 @@ def rotate(point, angle, axis='x'):
 
     return arbitrary_rotation(point, axis, angle, vector(0, 0, 0))
 
-def to_polar(point):
-    """ Convert (x, y, z) point to (r, phi, z) """
-    r = (point[1]**2 + point[2]**2)**0.5
-    phi = np.arctan2(point[2], point[1])
+def to_polar(point, axis='z'):
+    """ Convert (x, y, z) point to (radius, angle, height);
+    the axis of the new polar coordinate system can be chosen ('x' or 'z') """
 
-    return vector(r, phi, point[0])
+    assert axis in ['x', 'z']
 
-def to_cartesian(p, direction=1, rotation_axis='z'):
+    if axis == 'z':
+        radius = (point[0]**2 + point[1]**2)**0.5
+        angle = np.arctan2(point[1], point[0])
+        height = point[2]
+    else: # axis == 'x'
+        radius = (point[1]**2 + point[2]**2)**0.5
+        angle = np.arctan2(point[2], point[1])
+        height = point[0]
+
+    return vector(radius, angle, height)
+
+def to_cartesian(p, direction=1, axis='z'):
     """ Converts a point given in (r, theta, z) coordinates to
     cartesian coordinate system.
 
-    optionally, rotation_axis can be aligned with any cartesian axis x/y/z and
-    rotation sense can be inverted with direction=-1 """
+    optionally, axis can be aligned with either cartesian axis x* or z and
+    rotation sense can be inverted with direction=-1
+
+    *when axis is 'x': theta goes from 0 at y-axis toward z-axis
+
+    """
     assert direction in [-1, 1]
-    assert rotation_axis in ['x', 'y', 'z']
+    assert axis in ['x', 'z']
 
-    if rotation_axis == 'x':
-        return vector(
-            p[2],
-            p[0]*np.cos(direction*p[1]),
-            p[0]*np.sin(direction*p[1]))
+    radius = p[0]
+    angle = direction*p[1]
+    height = p[2]
 
-    if rotation_axis == 'y':
-        return vector(
-            p[0]*np.cos(direction*p[1]),
-            p[2],
-            p[0]*np.sin(direction*p[1]))
-
-    return vector( # rotation_axis = 'z'
-        p[0]*np.cos(direction*p[1]),
-        p[0]*np.sin(direction*p[1]),
-        p[2])
+    if axis == 'z':
+        return vector(radius*np.cos(angle), radius*np.sin(angle), height)
+        
+    # axis == 'x'
+    return vector( height, radius*np.cos(angle), radius*np.sin(angle) )
 
 def lin_map(x, x_min, x_max, out_min, out_max, limit=False):
     """ map x that should take values from x_min to x_max
