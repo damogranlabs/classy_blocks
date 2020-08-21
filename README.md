@@ -3,7 +3,7 @@
 
 Python classes for easier creation of openFoam's blockMesh dictionaries.
 
-> Warning! This project is currently under development and is not yet very user-friendly. It still lacks some important features and probably features a lof of bugs. However, you're welcome to suggest features, improvements, and point out bugs. There is also no other way to use it but copy the directory but in the future it might become a _pip package_.
+> Warning! This project is currently under development and is not yet very user-friendly. It still lacks some important features and probably features a lof of bugs. However, you're welcome to suggest features, improvements, and point out bugs. Until it becomes a_pip package_ you can use it as a [submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules), use `sys.path.append()` or any other way you choose.
 
 # What is it
 This is a collection of Python classes for creation of blockMeshDict files for OpenFOAM's blockMesh tool. Its purpose is to avoid manual entering of numbers into blockMeshDict and also avoid the dreadful `m4` or `#calc`.
