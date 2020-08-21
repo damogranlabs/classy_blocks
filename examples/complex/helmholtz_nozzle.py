@@ -7,8 +7,6 @@ from classes.mesh import Mesh
 from operations.base import Face
 from shapes.shapes import Cylinder, Frustum, Ring
 
-from util.methematics import functions as g
-
 def create():
     # A nozzle with a chamber that produces self-induced oscillations.
     # See helmholtz_nozzle.svg for geometry explanation.

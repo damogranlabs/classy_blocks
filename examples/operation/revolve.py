@@ -6,7 +6,7 @@ from classes.mesh import Mesh
 from operations.base import Face
 from operations.operations import Revolve
 
-from util.methematics import functions as g
+from util import functions as f
 
 def create():
     base = Face(
@@ -14,7 +14,7 @@ def create():
         [ [0.5, -0.2, 0], None, None, None]
     )
 
-    revolve = Revolve(base, g.deg2rad(60), [0, -1, 0], [-2, 0, 0])
+    revolve = Revolve(base, f.deg2rad(60), [0, -1, 0], [-2, 0, 0])
 
     revolve.set_cell_count(0, 15)
     revolve.set_cell_count(1, 10)

@@ -5,8 +5,6 @@ from classes.mesh import Mesh
 
 from shapes.shapes import Cylinder
 
-from util.methematics import functions as g
-
 def create():
     axis_point_1 = [0, 0, 0]
     axis_point_2 = [5, 5, 0]

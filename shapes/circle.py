@@ -2,7 +2,7 @@ import numpy as np
 
 from operations.base import Face
 
-from util.methematics import functions as g
+from util import functions as f
 from util import constants
 
 class Circle:
@@ -15,7 +15,7 @@ class Circle:
         self.radius_vector = self.radius_point - self.center_point
 
         def rotate(p, angle):
-            return g.arbitrary_rotation(p, self.normal, angle, self.center_point)
+            return f.arbitrary_rotation(p, self.normal, angle, self.center_point)
 
         # default settings
         self.vertex_ratio = constants.frustum_core_to_outer
@@ -56,14 +56,14 @@ class Circle:
         # rotate center point and radius point around origin;
         # rotate normal around zero
 
-        new_center_point = g.arbitrary_rotation(self.center_point, axis, angle, origin)
-        new_radius_point = g.arbitrary_rotation(self.radius_point, axis, angle, origin)
-        new_normal = g.arbitrary_rotation(self.normal, axis, angle, [0, 0, 0])
+        new_center_point = f.arbitrary_rotation(self.center_point, axis, angle, origin)
+        new_radius_point = f.arbitrary_rotation(self.radius_point, axis, angle, origin)
+        new_normal = f.arbitrary_rotation(self.normal, axis, angle, [0, 0, 0])
 
         return Circle(new_center_point, new_radius_point, new_normal)
 
     def scale(self, new_radius):
-        radius_vector = self.radius_vector/g.norm(self.radius_vector) * new_radius
+        radius_vector = self.radius_vector/f.norm(self.radius_vector) * new_radius
         new_radius_point = self.center_point + radius_vector
 
         # normal does not change during scaling

@@ -6,8 +6,6 @@ from classes.mesh import Mesh
 
 from shapes.shapes import Elbow
 
-from util.methematics import functions as g
-
 def create():
     center_point_1 = [0, 0, 0]
     radius_point_1 = [1, 0, 0]

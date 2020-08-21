@@ -3,7 +3,7 @@ import os, jinja2
 import numpy as np
 import scipy.optimize
 
-from util.methematics import functions as g
+from util import functions as f
 from util import tools, constants
 
 # see README for terminology, terminolology, lol
@@ -85,7 +85,7 @@ class Edge():
         
         # wedge geometries produce coincident 
         # edges and vertices; drop those
-        if g.norm(self.vertex_1.point - self.vertex_2.point) < constants.tol:
+        if f.norm(self.vertex_1.point - self.vertex_2.point) < constants.tol:
             return False
 
         # if case vertex1, vertex2 and point in between
@@ -103,8 +103,8 @@ class Edge():
         AB = OB - OA
         AC = OC - OA
 
-        k = g.norm(AC)/g.norm(AB)
-        d = g.norm((OA+AC) - (OA + k*AB))
+        k = f.norm(AC)/f.norm(AB)
+        d = f.norm((OA+AC) - (OA + k*AB))
 
         return d > constants.tol
 
@@ -114,7 +114,7 @@ class Edge():
             l = 0
 
             for i in range(len(points)-1):
-                l += g.norm(points[i+1] - points[i])
+                l += f.norm(points[i+1] - points[i])
 
             return l
 

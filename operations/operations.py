@@ -2,7 +2,7 @@ from typing import List
 
 import numpy as np
 
-from util.methematics import functions as g
+from util import functions as f
 from util import constants, tools
 
 from operations.base import Face, Operation
@@ -41,14 +41,14 @@ class Revolve(Loft):
         # there are 4 side edges: rotate each vertex of bottom_face
         # by angle/2
         side_edges = [
-            g.arbitrary_rotation(p, self.axis, self.angle/2, self.origin)
+            f.arbitrary_rotation(p, self.axis, self.angle/2, self.origin)
             for p in self.base.points
         ]
 
         super().__init__(bottom_face, top_face, side_edges)
 
 class Wedge(Revolve):
-    def __init__(self, face:Face, angle=g.deg2rad(5)):
+    def __init__(self, face:Face, angle=f.deg2rad(5)):
         """ Revolves 'face' around x-axis symetrically by +/- angle/2.
         By default, angle is 2 degrees.
 

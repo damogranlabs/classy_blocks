@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.optimize
 
-from util.methematics import functions as g
+from util import functions as f
 from util import constants
 
 from classes.primitives import Vertex, Edge
@@ -114,7 +114,7 @@ class Block():
             return None
 
         def vertex_distance(index_1, index_2):
-            return g.norm(
+            return f.norm(
                 self.vertices[index_1].point - self.vertices[index_2].point
             )
     
@@ -245,7 +245,7 @@ class Block():
         # hex definition
         output = "hex "
         # vertices
-        output += " ( " + " ".join(str(v.mesh_index) for v in self.vertices) + " ) "
+        output += " ( " + " ".join([str(v.mesh_index) for v in self.vertices]) + " ) "
     
         # cellZone
         output += self.cellZone

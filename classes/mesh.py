@@ -1,6 +1,6 @@
 import numpy as np
 
-from util.methematics import functions as g
+from util import functions as g
 from util import constants, tools
 
 from classes.primitives import Vertex, Edge

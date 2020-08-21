@@ -7,8 +7,6 @@ from classes.mesh import Mesh
 from operations.base import Face
 from shapes.shapes import Cylinder, Elbow
 
-from util.methematics import functions as g
-
 def create():
     # a pipe with two 90-degree elbows:
     # to demonstrate vortex creation in consecutive elbows in different planes;

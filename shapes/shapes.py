@@ -8,7 +8,7 @@ from operations.operations import Loft, Revolve
 
 from shapes.circle import Circle
 
-from util.methematics import functions as g
+from util import functions as f
 from util import constants
 
 class Elbow:
@@ -24,13 +24,13 @@ class Elbow:
         self.arc_center = np.array(arc_center)
         self.rotation_axis = np.array(rotation_axis)
 
-        self.radius_1_length = g.norm(self.center_point_1 - self.radius_point_1)
+        self.radius_1_length = f.norm(self.center_point_1 - self.radius_point_1)
         self.radius_2_length = radius_2
 
         self.circle_1 = Circle(self.center_point_1, self.radius_point_1, self.normal_1)
 
         def rotate_circle(angle, radius):
-            center_point = g.arbitrary_rotation(self.center_point_1, self.rotation_axis, angle, self.arc_center)
+            center_point = f.arbitrary_rotation(self.center_point_1, self.rotation_axis, angle, self.arc_center)
 
             return self.circle_1 \
                 .rotate(self.rotation_axis, angle, self.arc_center) \
@@ -114,7 +114,7 @@ class Frustum(Elbow):
 
         self.axis_point_2 = np.array(axis_point_2)
         self.radius_2_length = radius_2
-        self.radius_point_2 = self.axis_point_2 + g.unit_vector(self.radius_1)*self.radius_2_length
+        self.radius_point_2 = self.axis_point_2 + f.unit_vector(self.radius_1)*self.radius_2_length
 
         self.axis = self.axis_point_2 - self.axis_point_1
 
@@ -132,7 +132,7 @@ class Frustum(Elbow):
 class Cylinder(Frustum):
     def __init__(self, axis_point_1:list, axis_point_2:list, radius_point_1:list):
         """ a Frustum with constant radius """
-        radius_1 = g.norm(np.array(radius_point_1) - np.array(axis_point_1))
+        radius_1 = f.norm(np.array(radius_point_1) - np.array(axis_point_1))
 
         super().__init__(axis_point_1, axis_point_2, radius_point_1, radius_1)
 

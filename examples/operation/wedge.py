@@ -8,8 +8,6 @@ from classes.mesh import Mesh
 from operations.base import Face
 from operations.operations import Wedge
 
-from util.methematics import functions as g
-
 def create():
     base = Face(
         [ [0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0] ],

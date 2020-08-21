@@ -4,7 +4,7 @@ import numpy as np
 from classes.primitives import Vertex, Edge
 from classes.mesh import Mesh
 
-from operations.operation import Face
+from operations.operations import Face
 
 from util import constants
 

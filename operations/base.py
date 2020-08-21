@@ -3,7 +3,7 @@ from typing import List, Callable
 import numpy as np
 import copy
 
-from util.methematics import functions as g
+from util import functions as f
 from util import constants, tools
 
 from classes.primitives import Vertex, Edge
@@ -95,7 +95,7 @@ class Face:
         axis = np.array(axis)
         origin = np.array(origin)
 
-        r = lambda point: g.arbitrary_rotation(point, axis, angle, origin)
+        r = lambda point: f.arbitrary_rotation(point, axis, angle, origin)
 
         return self.transform(r)
 
@@ -189,7 +189,7 @@ class Operation():
 
         side_edges = transform_edges(
             self.side_edges,
-            lambda point: g.arbitrary_rotation(point, axis, angle, origin)
+            lambda point: f.arbitrary_rotation(point, axis, angle, origin)
         )
 
         return Operation(bottom_face, top_face, side_edges)
