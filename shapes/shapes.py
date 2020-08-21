@@ -8,7 +8,7 @@ from operations.operations import Loft, Revolve
 
 from shapes.circle import Circle
 
-from util import geometry as g
+from util.methematics import functions as g
 from util import constants
 
 class Elbow:

@@ -7,7 +7,7 @@ from classes.mesh import Mesh
 from operations.base import Face
 from shapes.shapes import Cylinder, Elbow
 
-from util import geometry as g
+from util.methematics import functions as g
 
 def create():
     # a pipe with two 90-degree elbows:

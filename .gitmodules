@@ -1,0 +1,3 @@
+[submodule "util/methematics"]
+	path = util/methematics
+	url = git@github.com:damogranlabs/methematics.git

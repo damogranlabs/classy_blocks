@@ -6,7 +6,7 @@ from classes.mesh import Mesh
 from operations.base import Face
 from operations.operations import Revolve
 
-from util import geometry as g
+from util.methematics import functions as g
 
 def create():
     base = Face(

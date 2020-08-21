@@ -3,7 +3,7 @@ from typing import List, Callable
 import numpy as np
 import copy
 
-from util import geometry as g
+from util.methematics import functions as g
 from util import constants, tools
 
 from classes.primitives import Vertex, Edge

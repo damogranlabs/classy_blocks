@@ -2,7 +2,7 @@ import numpy as np
 
 from operations.base import Face
 
-from util import geometry as g
+from util.methematics import functions as g
 from util import constants
 
 class Circle:

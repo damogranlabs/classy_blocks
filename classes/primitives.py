@@ -3,7 +3,7 @@ import os, jinja2
 import numpy as np
 import scipy.optimize
 
-from util import geometry as g
+from util.methematics import functions as g
 from util import tools, constants
 
 # see README for terminology, terminolology, lol

@@ -2,7 +2,7 @@ from typing import List
 
 import numpy as np
 
-from util import geometry as g
+from util.methematics import functions as g
 from util import constants, tools
 
 from operations.base import Face, Operation
