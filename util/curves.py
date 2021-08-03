@@ -4,7 +4,7 @@
 import numpy as np
 import scipy.spatial
 
-from util import functions as f
+from . import functions as f
 
 def dilute_indexes(n, l):
     """ choose <l> points from an array of length <n> """

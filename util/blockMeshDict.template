@@ -16,6 +16,13 @@ FoamFile
 
 scale   1;
 
+// the updated blockMesh (openfoam.com) fails on some meshes with default options;
+// it reports report inconsistent number of faces although the mesh is still OK.
+// this happens where two 'wedge' blocks with different numbers of cells join in the same
+// point/edge.
+mergeType points;
+checkFaceCorrespondence false;
+
 vertices
 (
     {% for v in vertices %}

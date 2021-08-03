@@ -1,10 +1,12 @@
+import collections
+
 import numpy as np
 import scipy.optimize
 
-from util import functions as f
-from util import constants
+from ..util import functions as f
+from ..util import constants
 
-from classes.primitives import Vertex, Edge
+from .primitives import Vertex
 
 class DeferredFunction:
     """ stores a function and its variables to be used at a later time """
@@ -39,21 +41,21 @@ class Block():
     )
 
     def __init__(self, vertices, edges):
-        # a list of 8 Vertex object for each corner of the block
+        # a list of 8 Vertex and Edge objects for each corner/edge of the block
         self.vertices = vertices
         self.edges = edges
 
         # number of block cells, one number for x, y, and z direction
         # when None, try to get it from neighbour blocks
-        self.n_cells = [None, None, None] # this is written to blockMeshDict
+        self.n_cells = [None, None, None]
 
-        # block grading: only modified for axes where cell_size is not None
-        self.grading = [1, 1, 1] # this is written to blockMeshDict
+        # block grading; when None, default to 1
+        self.grading = [None, None, None]
 
         # cellZone to which the block belongs to
         self.cell_zone = ""
 
-        # written as a comment after block description
+        # written as a comment after block definition
         # (visible in blockMeshDict, useful for debugging)
         self.description = ""
 
@@ -69,8 +71,26 @@ class Block():
         
         # functions like count_to_size and some other
         # can only run after mesh.prepare_data() has been
-        # completed; until then, store those functions here
-        self.deferred_functions = []
+        # done its job; this is a queue 
+        self.deferred_counts = []
+        self.deferred_gradings = []
+
+    @property
+    def is_count_defined(self):
+        return all(self.n_cells)
+    
+    @property
+    def is_any_count_defined(self):
+        return any(self.n_cells)
+    
+    @property
+    def is_grading_defined(self):
+        return all(self.grading)
+
+    @property
+    def is_any_grading_defined(self):
+        return any(self.grading)
+
 
     @classmethod
     def create_from_points(cls, points, edges=[]):
@@ -81,6 +101,8 @@ class Block():
             [Vertex(p) for p in points],
             edges
         )
+
+        block.feature = 'From points'
 
         return block
 
@@ -103,10 +125,6 @@ class Block():
         # returns an approximate block dimensions:
         # if an edge is defined, use the edge.get_length(),
         # otherwise simply distance between two points
-
-        # x-direction: vertices 0 and 1
-        # y-direction: vertices 1 and 2
-        # z-direction: vertices 0 and 4
         def find_edge(index_1, index_2):
             for e in self.edges:
                 if {e.block_index_1, e.block_index_2} == {index_1, index_2}:
@@ -123,21 +141,25 @@ class Block():
             if edge:
                 return edge.get_length()
 
-            # TODO: take average of all edges in this direction (?)
             return vertex_distance(index_1, index_2)
         
-        if axis == 0:
-            return block_size(0, 1)
-        elif axis == 1:
-            return block_size(1, 2)
-
-        return block_size(0, 4)
+        sum_edges = 0
+        for pair in self.axis_pair_indexes[axis]:
+            sum_edges += block_size(pair[0], pair[1])
+        
+        return sum_edges/4
 
     def get_axis_vertex_pairs(self, axis):
         """ returns 4 pairs of Vertex.mesh_indexes along given axis """
         pairs = []
 
         for pair in self.axis_pair_indexes[axis]:
+            # TEST
+            if self.vertices[pair[0]].mesh_index == self.vertices[pair[1]].mesh_index:
+                # omit vertices in the same spot; there is no edge anyway
+                # (wedges and pyramids)
+                continue
+
             pairs.append({
                 self.vertices[pair[0]].mesh_index,
                 self.vertices[pair[1]].mesh_index
@@ -171,9 +193,10 @@ class Block():
         self.patches[patch_name] += sides
     
     def count_to_size(self, axis, cell_size):
-        """ set number of cells so that cell size equals cell_size """
+        """ Takes the average length of all edges of the block along given axis
+        and sets the number of cells to obtain the desired cell size. """
         df = DeferredFunction(self._count_to_size, axis, cell_size)
-        self.deferred_functions.append(df)
+        self.deferred_counts.append(df)
 
     def _count_to_size(self, axis, cell_size):
         block_size = self.get_size(axis)
@@ -183,9 +206,10 @@ class Block():
         return count
 
     def grade_to_size(self, axis, cell_size, inverse=False):
-        """ calculate grading for given axis so that first cell will be of cell_size """
+        """ Calculate grading for given axis so that first cell will be of cell_size;
+        If a negative cell_size is given, the last cell size is being set. """
         df = DeferredFunction(self._grade_to_size, axis, cell_size, inverse)
-        self.deferred_functions.append(df)
+        self.deferred_gradings.append(df)
 
     def _grade_to_size(self, axis, cell_size, inverse=False):
         # calculate grading so that first cell will be of cell_size
@@ -250,11 +274,12 @@ class Block():
         # cellZone
         output += self.cell_zone
         # number of cells
-        output += " ({} {} {}) ".format(self.n_cells[0], self.n_cells[1], self.n_cells[2])
-        # grading
-        output += " simpleGrading ({} {} {})".format(self.grading[0], self.grading[1], self.grading[2])
+        output += f" ({self.n_cells[0]} {self.n_cells[1]} {self.n_cells[2]}) "
+        # grading: use 1 if not defined
+        grading = [self.grading[i] if self.grading[i] is not None else 1 for i in range(3)]
+        output += f" simpleGrading ({grading[0]} {grading[1]} {grading[2]})"
 
         # add a comment with block index
-        output += " // {} {}".format(self.mesh_index, self.description)
+        output += f" // {self.mesh_index} {self.description}"
 
         return output

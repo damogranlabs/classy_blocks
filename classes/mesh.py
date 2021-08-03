@@ -1,10 +1,7 @@
 import numpy as np
 
-from util import functions as g
-from util import constants, tools
-
-from classes.primitives import Vertex, Edge
-from classes.block import Block
+from ..util import functions as g
+from ..util import constants, tools
 
 class Mesh():
     """ contains blocks, edges and all necessary methods for assembling blockMeshDict """
@@ -71,7 +68,7 @@ class Mesh():
         
         return patches
 
-    def copy_cells(self, block, axis):
+    def copy_count(self, block, axis):
         """ finds a block that shares an edge with given block
         and copies its cell count along that edge """
         # there are 4 pairs of vertices on specified axis:
@@ -89,13 +86,31 @@ class Mesh():
                         # this block has the cell count set
                         # so we can (must) copy it
                         block.n_cells[axis] = b.n_cells[b_axis]
+                        return True
+        
+        return False
+
+    def copy_grading(self, block, axis):
+        """ same as self.copy_count but for grading """
+        # TEST
+        match_pairs = block.get_axis_vertex_pairs(axis)
+
+        for b in self.blocks:
+            for p in match_pairs:
+                b_axis = b.get_axis_from_pair(p)
+                if b_axis is not None:
+                    # b.get_axis_from_pair() returns axis index in
+                    # the block we want to copy from
+                    if b.grading[b_axis] is not None:
+                        # this block has the cell count set
+                        # so we can (must) copy it
                         block.grading[axis] = b.grading[b_axis]
                         return True
 
         return False
 
     def prepare_data(self):
-        # 1. collect all vertices from all blocks,
+        # collect all vertices from all blocks,
         # check for duplicates and give them indexes
         for block in self.blocks:
             for i, block_vertex in enumerate(block.vertices):
@@ -107,7 +122,7 @@ class Mesh():
                 else:
                     block.vertices[i] = found_vertex
         
-        # 2. collect all edges from all blocks;
+        # collect all edges from all blocks;
         for block in self.blocks:
             # check for duplicates (same vertex pairs) and
             # check for validity (no straight-line arcs)
@@ -128,29 +143,71 @@ class Mesh():
                     # only non-existing edges are added
                     self.edges.append(block_edge)
 
-        # 3. run deferred block functions
+        # now is the time to set counts
         for block in self.blocks:
-            for f in block.deferred_functions:
+            for f in block.deferred_counts:
                 f.call()
 
-        # 4. propagate cell count and grading:
-        # the first block needs all three cell counts defined.
-        # next blocks must copy count from the previous block
-        # on shared edges
-        for i_block, block in enumerate(self.blocks):
-            for i_axis in range(3):
-                if block.n_cells[i_axis] is None:
-                    # if this is the first block, we'll find no blocks to match count;
-                    # this will not work.
-                    if i_block == 0:
-                        raise Exception("Set cell counts for all axes on the first added block!")
+        # propagate cell count:
+        # a riddle similar to sudoku, keep traversing
+        # and copying counts until there's no undefined blocks left
+        n_blocks = len(self.blocks)
+        all_blocks = set(range(n_blocks))
+        defined_blocks = set() # indexes of blocks that have count well-defined
+        prev_defined_blocks = set() # blocks, defined in last iteration
 
-                if not self.copy_cells(block, i_axis):
-                    message = f"Could not find a neighbouring block to copy cell count: block {i_block}, axis {i_axis}"
-                    raise Exception(message)
+        for n_iter in range(n_blocks):
+            for i, block in enumerate(self.blocks):
+                for axis in range(3):
+                    if block.n_cells[axis] is None:
+                        self.copy_count(block, axis)
 
+                if block.is_count_defined:
+                    defined_blocks.add(i)
+                    continue
 
-    def write(self, template_path, output_path, context=None):
+            if defined_blocks == all_blocks:
+                break # done!
+
+            if defined_blocks == prev_defined_blocks: # TEST
+                # a whole 'round' went by without any added blocks;
+                # the next one won't do anything
+                break
+
+            prev_defined_blocks |= defined_blocks
+        
+        if defined_blocks != all_blocks:
+            raise Exception(f"Blocks with non-defined counts: {all_blocks - defined_blocks}")
+        
+        # now is the time to set gradings
+        for block in self.blocks:
+            for f in block.deferred_gradings:
+                f.call()
+
+        # propagate grading:
+        # very similar to counts
+        defined_blocks = set()
+        prev_defined_blocks = set()
+
+        for n_iter in range(n_blocks):
+            for i, block in enumerate(self.blocks):
+                if block.is_grading_defined:
+                    defined_blocks.add(i)
+                    continue
+
+                for axis in range(3):
+                    if block.grading[axis] is None:
+                        self.copy_grading(block, axis)
+
+            if len(defined_blocks) == len(self.blocks):
+                break
+
+            if defined_blocks == prev_defined_blocks: # TEST
+                break
+    
+            prev_defined_blocks |= defined_blocks
+
+    def write(self, output_path, context=None, template_path='classy_blocks/util/blockMeshDict.template'):
         self.prepare_data()
 
         context = {

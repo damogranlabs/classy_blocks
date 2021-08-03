@@ -1,7 +1,5 @@
 .vscode
-examples/meshCase/constant/polyMesh
-examples/meshCase/constant/cellToRegion
-examples/meshCase/system/blockMeshDict
+*.code-workspace
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

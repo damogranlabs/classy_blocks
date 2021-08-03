@@ -3,14 +3,16 @@
 
 Python classes for easier creation of openFoam's blockMesh dictionaries.
 
-> Warning! This project is currently under development and is not yet very user-friendly. It still lacks some important features and probably features a lof of bugs. However, you're welcome to suggest features, improvements, and point out bugs. Until it becomes a_pip package_ you can use it as a [submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules), use `sys.path.append()` or any other way you choose.
+> Warning! This project is currently under development and is not yet very user-friendly. It still lacks some important features and probably features a lof of bugs. However, you're welcome to suggest features, improvements, and point out bugs. Until it becomes a_pip package_ you can use it as a [submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules) or just download the code and import stuff to your project.
 
-# What is it
+> tl;dr: clone the [classy_examples](https://github.com/damogranlabs/classy_examples) repository, install `jinja2` and run `run.py`.
+
+# What Is It
 This is a collection of Python classes for creation of blockMeshDict files for OpenFOAM's blockMesh tool. Its purpose is to avoid manual entering of numbers into blockMeshDict and also avoid the dreadful `m4` or `#calc`.
 
 Since it is easier to crunch numbers and vectors and everything else with `numpy` it is a better idea to do that there and then just throw everything into blockMeshDicts. This tool is a link between these two steps.
 
-# When to use it
+# When To Use It
 - If your brain hurts during meticulous tasks such as manual copying of numbers from excel or even paper
 - If you don't want to waste energy on low-level stuff such as numbering vertices
 - If you have a rather simplish parametric model and would like to make a bunch of simulations with changing geometry (optimizations etc.)
@@ -35,7 +37,7 @@ Since it is easier to crunch numbers and vectors and everything else with `numpy
  - Ring (annulus)
  - Elbow (bent pipe)
 
-> See `examples/shape` for example use of each 'shape'. See `examples/complex` for a more real-life example usage of shapes.
+> See [examples/shape](https://github.com/damogranlabs/classy_examples) for example use of each 'shape'. See [examples/complex](https://github.com/damogranlabs/classy_examples) for a more real-life example usage of shapes.
 
 ## Using Operations
 A `Face` is a collection of 4 vertices and 4 edges. It is a 2D object analogous to a _sketch_ in most CAD modelers - once defined, it can be used to create 3D shapes with various _operations_.
@@ -52,11 +54,13 @@ A special case of revolve for 2D axisymmetric meshes. A list of `(x,y)` points i
 ### Loft
 A single block, created between two `Face`s. Edges between the same vertices on the two faces can also be specified.
 
-> See `examples/operations` for an example of each operation.
+> See [examples/operations](https://github.com/damogranlabs/classy_examples) for an example of each operation.
 
 **Basically any kind of block can be created with Loft so this is usually as low-level as you'll need to go.**
 
-## Low level: Manual block creation using vertices, edges, etc.
+## Low level
+Manual block creation using vertices, edges, etc.
+
 Workflow is similar to bare-bones blockMeshDict but you don't have to track
 vertex/edge/block indexes. You do:
 
@@ -70,10 +74,7 @@ vertex/edge/block indexes. You do:
  1. Pray you did everything right
  1. Cry because you didn't
 
-> See `examples/primitive/` for a demonstration.
-
-## Example usage
-Uncomment the desired example in `./run_example.py`. Then run the file and open `examples/meshCase/case.foam` with ParaView.
+> See [examples/primitive](https://github.com/damogranlabs/classy_examples) for a demonstration.
 
 ## Prerequisites
  - numpy
@@ -87,7 +88,10 @@ A single channel of an impeller, without volute and with infinitely thin blades:
 A full volute and inlet (impeller mesh is created separately):
 ![Volute](https://github.com/FranzBangar/classyBlocks/blob/master/showcase/volute.png?raw=true "Volute")
 
-# Technical information
+A real-life square volute with a blunt cutwater:
+![Square Volute](https://github.com/FranzBangar/classyBlocks/blob/master/showcase/volute_square.png?raw=true "Square Volute")
+
+# Technical Information
 ## Classes
 These contain data to be written to blockMeshDict and also methods for point manipulation and output formatting.
 
@@ -97,7 +101,7 @@ These contain data to be written to blockMeshDict and also methods for point man
 - `Block`: contains `Vertex` and `Edge` objects and other block data: patches, number of cells, grading, cell zone, description.
 - `Mesh`: holds lists of all blockMeshDict data: `Vertex`, `Edge`, `Block`.
 
-## Block (Geometry) creation
+## Block (Geometry) Creation
 A blockMesh is created from a number of blocks, therefore a `Block` object is in the center of attention. A `Block` can be created in different ways:
  1. Directly from 8 vertices. The order of vertices follows the [sketch on openfoam.com user manual](https://www.openfoam.com/documentation/user-guide/blockMesh.php). Edges are added to block by specifying vertex indexes and a list of points in between.
  1. From 2 `Face` objects. Edges between the same vertex on both faces can be provided as well.
@@ -107,20 +111,30 @@ A blockMesh is created from a number of blocks, therefore a `Block` object is in
 Once blocks are created, additional data may be added (number of cells, grading, patches).
 Finally, all blocks must be added to Mesh. That will prepare data for blockMesh and create a blockMeshDict from a template.
 
-## Data preparation
+## Data Preparation
 `Mesh` only contains a list of blocks. Each block self-contains its data. Since blocks share vertices and edges and blockMesh needs separate lists of the latter, `Mesh.prepare_data()` will traverse its list of blocks and store vertices and edges to separate lists. During that it will check for duplicates and drop them. It will also collect patches from all blocks and store them into a template-readable list.
 
-## Bonus: geometry functions
+## Bonus:
+### Geometry functions
 Check out `util/geometry.py` for bonus functions. More about that is written in my blog post, [https://damogranlabs.com/2019/11/points-and-vectors/].
 There are also a couple of functions used in the example.
 Of course you are free to use your own :)
 
 # TODO
- - `block.count_to_size()` (take smallest/biggest/average size)
  - More examples from real life
-    - heater/boiler
-    - labyrinth seals
-    - rotating annulus (Taylor-Couette vortex)
-    - More tests (and more sophisticated ones!)
-    - Include examples in tests
- - Package (`pip install...`)
+ - More Shapes
+   - ElbowWall
+ - Predefined ready-to-use parametric objects
+   - T-joint
+   - X-joint
+   - Elbow from segments
+   - Elbow wall from segments
+ - Optional face merging
+ - Tools
+   - refineWallLayer script
+ - Technicalities:
+   - More Tests, including examples
+   - logging for info/debug
+   - output geometry to .obj for debugging
+   - shorter imports (something to do with `__init__.py` files)
+ - A proper documentation

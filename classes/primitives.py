@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-import os, jinja2
 import numpy as np
-import scipy.optimize
 
-from util import functions as f
-from util import tools, constants
+from ..util import functions as f
+from ..util import constants
 
 # see README for terminology, terminolology, lol
 class Vertex():

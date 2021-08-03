@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import math, os
-
 import numpy as np
 
 import scipy
