@@ -1,0 +1,13 @@
+#!/bin/bash
+cd "${0%/*}" || exit
+source $WM_PROJECT_DIR/bin/tools/RunFunctions
+source $WM_PROJECT_DIR/bin/tools/CleanFunctions
+
+cleanCase
+touch case.foam
+
+runApplication blockMesh
+runApplication checkMesh -constant
+runApplication setsToZones -noFlipMap -constant
+
+cat log.checkMesh
