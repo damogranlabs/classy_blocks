@@ -48,5 +48,5 @@ loft.set_cell_count(2, 30)
 loft.grade_to_size(2, 0.01)
 
 mesh = Mesh()
-mesh.add_operation(loft)
+mesh.add(loft)
 mesh.write('case/system/blockMeshDict')

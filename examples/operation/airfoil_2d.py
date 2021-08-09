@@ -176,12 +176,12 @@ extrude_bottom_3 = Extrude(face_bottom_3, thickness)
 
 
 mesh = Mesh()
-mesh.add_operation(extrude_top_1)
-mesh.add_operation(extrude_top_2)
-mesh.add_operation(extrude_top_3)
+mesh.add(extrude_top_1)
+mesh.add(extrude_top_2)
+mesh.add(extrude_top_3)
 
-mesh.add_operation(extrude_bottom_1)
-mesh.add_operation(extrude_bottom_2)
-mesh.add_operation(extrude_bottom_3)
+mesh.add(extrude_bottom_1)
+mesh.add(extrude_bottom_2)
+mesh.add(extrude_bottom_3)
 
 mesh.write('case/system/blockMeshDict')

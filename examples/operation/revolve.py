@@ -19,6 +19,6 @@ revolve.set_cell_count(2, 50)
 revolve.grade_to_size(2, -0.02)
 
 mesh = Mesh()
-mesh.add_operation(revolve)
+mesh.add(revolve)
 
 mesh.write('case/system/blockMeshDict')

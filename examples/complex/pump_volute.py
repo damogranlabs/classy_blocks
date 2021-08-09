@@ -191,7 +191,7 @@ def create_block(i_start, i_end, i_edge, p0, p1, p2, p3, description):
     loft = Loft(start_face, end_face, edge_points)
     loft.block.description = f"(Sketch: {description})"
 
-    volute.add_operation(loft)
+    volute.add(loft)
 
     return loft
 
@@ -272,7 +272,7 @@ def discharge_set(start_face):
     discharge_revolve = Revolve(start_face, angle, [1, 0, 0], p_rev)
     discharge_revolve.count_to_size(2, cell_size)
 
-    volute.add_operation(discharge_revolve)
+    volute.add(discharge_revolve)
 
     # outlet pipe: 'extrude' the last face by 5*(pipe diameter)
     # find the direction of extrude first
@@ -289,7 +289,7 @@ def discharge_set(start_face):
     outlet_extrude.count_to_size(2, cell_size*3)
     outlet_extrude.grade_to_size(2, cell_size)
 
-    volute.add_operation(outlet_extrude)
+    volute.add(outlet_extrude)
 
 discharge_set(block_6.top_face)
 discharge_set(block_7.top_face)

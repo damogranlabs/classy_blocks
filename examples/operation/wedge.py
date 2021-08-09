@@ -34,7 +34,7 @@ for _ in range(5):
     wedge.set_inner_patch('rotating_walls')
 
     wedges.append(wedge)
-    mesh.add_operation(wedge)
+    mesh.add(wedge)
 
     base = base.translate([1, 0, 0])
 

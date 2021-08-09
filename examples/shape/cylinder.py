@@ -17,10 +17,10 @@ cylinder.set_axial_cell_count(30)
 cylinder.set_radial_cell_count(20)
 cylinder.set_tangential_cell_count(15)
 
-cylinder.set_axial_cell_size(-0.05)
-cylinder.set_outer_cell_size(0.03)
+cylinder.grade_to_size_axial(-0.05)
+cylinder.grade_to_size_radial(0.03)
 
 mesh = Mesh()
-mesh.add_shape(cylinder)
+mesh.add(cylinder)
 
 mesh.write('case/system/blockMeshDict')

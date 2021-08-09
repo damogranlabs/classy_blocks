@@ -20,10 +20,9 @@ import os
 # import examples.shape.ring
 
 # complex
-import examples.complex.piping
+# import examples.complex.piping
 # import examples.complex.helmholtz_nozzle
-# import examples.complex.heat_exchanger # not finished
-
+import examples.complex.karman
 # import examples.complex.pump_volute
 
 os.system("case/Allrun.mesh")

@@ -42,7 +42,7 @@ inlet.set_radial_cell_count(n_cells_radial)
 inlet.set_tangential_cell_count(n_cells_tangential)
 
 # grade to desired cell size
-inlet.set_axial_cell_size(-cell_size) # negative size means we're setting at the other end
+inlet.grade_to_size_axial(-cell_size) # negative size means we're setting at the other end
 
 elbow_1 = Elbow(
     inlet.axis_point_2, 
@@ -82,13 +82,13 @@ outlet = Cylinder(
 )
 outlet.set_top_patch('outlet')
 outlet.set_axial_cell_count(l_outlet/cell_size/cell_ratio)
-outlet.set_axial_cell_size(cell_size)
+outlet.grade_to_size_axial(cell_size)
 
 ### adjust other, common stuff and add shapes to mesh
 mesh = Mesh()
 
 for shape in [inlet, elbow_1, connection, elbow_2, outlet]:
     shape.set_outer_patch('wall')
-    mesh.add_shape(shape)
+    mesh.add(shape)
 
 mesh.write('case/system/blockMeshDict')

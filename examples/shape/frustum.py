@@ -18,10 +18,10 @@ frustum.set_axial_cell_count(30)
 frustum.set_radial_cell_count(20)
 frustum.set_tangential_cell_count(15)
 
-frustum.set_axial_cell_size(-0.02)
-frustum.set_outer_cell_size(0.03)
+frustum.grade_to_size_axial(-0.02)
+frustum.grade_to_size_radial(0.03)
 
 mesh = Mesh()
-mesh.add_shape(frustum)
+mesh.add(frustum)
 
 mesh.write('case/system/blockMeshDict')

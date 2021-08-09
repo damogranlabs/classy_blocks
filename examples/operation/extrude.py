@@ -17,6 +17,6 @@ extrude.set_cell_count(2, 50)
 extrude.grade_to_size(2, -0.02)
 
 mesh = Mesh()
-mesh.add_operation(extrude)
+mesh.add(extrude)
 
 mesh.write('case/system/blockMeshDict')
