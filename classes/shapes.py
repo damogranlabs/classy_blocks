@@ -1,12 +1,25 @@
 import numpy as np
 
-from ..classes.operations import Face, Loft, Revolve
+from ..classes.operations import Face, Loft, Revolve, Extrude
 
 from ..util import functions as f
 from ..util import constants
 
-### 2D shapes
-class CircularBase:
+class Box(Extrude):
+    def __init__(self, point_min:list, point_max:list):
+        """ A box, aligned with coordinate system """
+        base = Face([
+            [point_min[0], point_min[1], point_min[2]],
+            [point_max[0], point_min[1], point_min[2]],
+            [point_max[0], point_max[1], point_min[2]],
+            [point_min[0], point_max[1], point_min[2]],
+        ], check_coplanar=True)
+
+        extrude_vector = [0, 0, point_max[2] - point_min[2]]
+
+        super().__init__(base, extrude_vector)
+
+class Circle:
     """ A base shape for Circle, Annulus and whatnot """
     def __init__(self, center_point, radius_point, normal):
         self.center_point = np.array(center_point)
@@ -64,7 +77,6 @@ class CircularBase:
     def rotate(self, axis, angle, origin):
         # rotate center point and radius point around origin;
         # rotate normal around zero
-
         new_center_point = f.arbitrary_rotation(self.center_point, axis, angle, origin)
         new_radius_point = f.arbitrary_rotation(self.radius_point, axis, angle, origin)
         new_normal = f.arbitrary_rotation(self.normal, axis, angle, [0, 0, 0])
@@ -78,23 +90,6 @@ class CircularBase:
         # normal does not change during scaling
         return self.__class__(self.center_point, new_radius_point, self.normal)
 
-class Circle(CircularBase):
-    pass
-    #def __init__(self, center_point, radius_point, normal):
-    #    """ creates 5 faces that serve as a base for other Shapes; """
-    #    super().__init__(center_point, radius_point, normal)
-
-class Annulus(CircularBase):
-    def __init__(self, center_point, radius_point, normal, thickness):
-        self.thickness = thickness
-
-        super().__init__(center_point, radius_point, normal)
-    
-    def get_vertex_ratio(self):
-        return 1 - self.thickness/self.radius
-    
-    def get_edge_ratio(self):
-        return self.get_vertex_ratio()
 
 class Elbow:
     # mappings between block sides and 'human-readable' geometry
@@ -159,6 +154,7 @@ class Elbow:
     def blocks(self):
         return [o.block for o in self.operations]
     
+    ### Patches
     def set_patch(self, side, patch_name):
         for b in self.blocks:
             b.set_patch(side, patch_name)
@@ -173,6 +169,7 @@ class Elbow:
         for s in self.shell:
             s.block.set_patch(self.outer_patch, patch_name)
 
+    ### Manual cell counts
     def set_axial_cell_count(self, count):
         self.shell[0].set_cell_count(self.axial_axis, count)
 
@@ -183,12 +180,24 @@ class Elbow:
         self.core.set_cell_count(self.radial_axis, count)
         self.core.set_cell_count(self.tangential_axis, count)
 
-    def set_axial_cell_size(self, size):
+    ### Count to size
+    def count_to_size_axial(self, cell_size):
+        self.core.count_to_size(self.axial_axis, cell_size)
+
+    def count_to_size_radial(self, cell_size):
+        self.shell[0].count_to_size(self.radial_axis, cell_size)
+
+    def count_to_size_tangential(self, cell_size):
+        self.core.count_to_size(self.radial_axis, cell_size)
+        self.core.count_to_size(self.tangential_axis, cell_size)
+
+    ### Grading
+    def grade_to_size_axial(self, size):
         # 'core' is the first block to be added;
         # other blocks' grading will be copied from it
         self.core.grade_to_size(self.axial_axis, size)
 
-    def set_outer_cell_size(self, size):
+    def grade_to_size_radial(self, size):
         # only set grading for the first shell block,
         # mesh will copy it to others
         self.shell[0].grade_to_size(self.radial_axis, -size)
@@ -265,9 +274,17 @@ class RevolvedRing(Elbow):
         for s in self.shell:
             s.block.set_patch('front', patch_name)
 
+    def count_to_size_axial(self, cell_size):
+        self.shell[0].count_to_size(self.axial_axis, cell_size)
+
+    def count_to_size_tangential(self, cell_size):
+        for s in self.shell:
+            s.count_to_size(self.tangential_axis, cell_size)
+
 class ExtrudedRing(RevolvedRing):
     """ a ring specified like a Cylinder """
     def __init__(self, axis_point_1:list, axis_point_2:list, inner_radius_point_1:list, outer_radius:float, n_blocks=4):
+        # calculate parameters for
         axis_point_1 = np.array(axis_point_1)
         axis_point_2 = np.array(axis_point_2)
         inner_radius_point_1 = np.array(inner_radius_point_1)

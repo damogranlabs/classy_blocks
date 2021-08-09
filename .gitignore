@@ -23,8 +23,6 @@ postProcessing
 *.obj
 *.stl
 
-
-
 # C extensions
 *.so
 

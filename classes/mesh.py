@@ -37,12 +37,12 @@ class Mesh():
         block.mesh_index = len(self.blocks)
         self.blocks.append(block)
 
-    def add_operation(self, operation):
-        self.add_block(operation.block)
-
-    def add_shape(self, shape):
-        for block in shape.blocks:
-            self.add_block(block)
+    def add(self, item):
+        if hasattr(item, 'block'):
+            self.add_block(item.block)
+        else:
+            for block in item.blocks:
+                self.add_block(block)
 
     @property
     def patches(self):
