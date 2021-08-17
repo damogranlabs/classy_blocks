@@ -53,17 +53,17 @@ class TestMesh(FixturedTestCase):
         """ a functional test on mesh.prepare_data() """
         self.mesh.prepare_data()
 
-        # 4 out of 16 vertices are shared between blocks and must not be duplicated
-        self.assertEqual(len(self.mesh.vertices), 12)
+        # 8 out of 24 vertices are shared between blocks and must not be duplicated
+        self.assertEqual(len(self.mesh.vertices), 16)
 
         # check that it's the same vertex
-        self.assertEqual(self.block_1.vertices[4], self.block_2.vertices[0])
-        self.assertEqual(self.block_1.vertices[5], self.block_2.vertices[1])
-        self.assertEqual(self.block_1.vertices[6], self.block_2.vertices[2])
-        self.assertEqual(self.block_1.vertices[7], self.block_2.vertices[3])
+        self.assertEqual(self.block_0.vertices[1], self.block_1.vertices[0])
+        self.assertEqual(self.block_0.vertices[2], self.block_1.vertices[3])
+        self.assertEqual(self.block_0.vertices[5], self.block_1.vertices[4])
+        self.assertEqual(self.block_0.vertices[6], self.block_1.vertices[7])
 
-        # only 4 out of 6 edges should be added (one is duplicated, one invalid)
-        self.assertEqual(len(self.mesh.edges), 4)
+        # only 2 out of 4 edges should be added (one is duplicated, one invalid)
+        self.assertEqual(len(self.mesh.edges), 2)
 
     def test_patches(self):
         """ check patch output """
@@ -72,9 +72,13 @@ class TestMesh(FixturedTestCase):
         self.assertDictEqual(
             self.mesh.patches,
             {
-                'outlet': ['(4 5 6 7)'],
-                'walls': ['(4 0 3 7)', '(5 1 2 6)', '(4 5 1 0)', '(7 6 2 3)'],
-                'inlet': ['(0 1 2 3)']
+                'inlet': ['(4 0 3 7)'],
+                'outlet': ['(15 14 12 13)'],
+                'walls': [
+                    '(0 1 2 3)', '(4 5 6 7)', '(4 5 1 0)', '(7 6 2 3)', # block_0
+                    '(1 8 9 2)', '(5 10 11 6)', '(10 8 9 11)', '(5 10 8 1)', # block_1
+                    '(2 9 12 13)', '(6 11 14 15)', '(6 2 13 15)', '(11 9 12 14)' # block_2
+                ],
             }
         )
 
@@ -87,7 +91,7 @@ class TestMesh(FixturedTestCase):
         
     def test_find_neighbour_fail(self):
         """ block_2 cannot copy cell count and grading from block_1 on axis 2 """
-        self.block_2.n_cells = [None, None, None]
+        self.block_1.n_cells = [None, None, None]
 
         self.assertRaises(Exception, self.mesh.prepare_data)
 

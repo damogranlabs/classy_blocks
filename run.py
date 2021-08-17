@@ -4,25 +4,27 @@ import os
 # uncomment the example you wish to run
 
 # primitive
-# import examples.primitive.from_points
+# from examples.primitive import from_points as example
 
 # operations
-# import examples.operation.extrude
-# import examples.operation.loft
-# import examples.operation.revolve
-# import examples.operation.wedge
-# import examples.operation.airfoil_2d
+# from examples.operation import extrude as example
+# from examples.operation import loft as example
+# from examples.operation import revolve as example
+# from examples.operation import wedge as example
+# from examples.operation import airfoil_2d as example
 
 # shapes
-# import examples.shape.elbow
-# import examples.shape.frustum
-# import examples.shape.cylinder
-# import examples.shape.ring
+# from examples.shape import elbow as example
+# from examples.shape import frustum as example
+# from examples.shape import cylinder as example
+# from examples.shape import ring as example
 
-# complex
-# import examples.complex.piping
-# import examples.complex.helmholtz_nozzle
-import examples.complex.karman
-# import examples.complex.pump_volute
+# complex cases
+# from examples.complex import piping as example
+# from examples.complex import helmholtz_nozzle as example
+from examples.complex import karman as example
+# from examples.complex import pump_volute as example
 
+mesh = example.get_mesh()
+mesh.write('case/system/blockMeshDict')
 os.system("case/Allrun.mesh")
