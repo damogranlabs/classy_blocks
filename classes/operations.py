@@ -71,8 +71,7 @@ class Face:
 
         return r
 
-    def transform(self, function):
-        # TODO: typing
+    def _transform(self, function):
         """ copis this object and transforms all block-defining points
         with given function. used for translation, rotating, etc. """
         t = copy.copy(self)
@@ -81,14 +80,12 @@ class Face:
 
         return t
 
-    def translate(self, vector):
-        # TODO: typing 
+    def translate(self, vector:List):
         """ move points by 'vector' """
         vector = np.array(vector)
-        return self.transform(lambda point: point + vector)
+        return self._transform(lambda point: point + vector)
 
-    def rotate(self, axis, angle, origin=[0, 0, 0]):
-        # TODO: typing
+    def rotate(self, axis:List, angle:float, origin:List=[0, 0, 0]):
         """ copies the object and rotates all block-points by 'angle'
         around 'axis' going through 'origin' """
         axis = np.array(axis)
@@ -96,7 +93,7 @@ class Face:
 
         r = lambda point: f.arbitrary_rotation(point, axis, angle, origin)
 
-        return self.transform(r)
+        return self._transform(r)
 
 
 class Operation():
@@ -153,8 +150,7 @@ class Operation():
          2: between faces / along operation path """
         self.block.grade_to_size(axis, abs(size), size<0)
 
-    def set_patch(self, sides, patch_name):
-        # TODO: typing
+    def set_patch(self, sides, patch_name:str):
         """ bottom: bottom face
         top: top face
 
@@ -165,8 +161,7 @@ class Operation():
         left: opposite right """
         self.block.set_patch(sides, patch_name)
 
-    def translate(self, vector):
-        # TODO: test
+    def translate(self, vector:List):
         """ returns a translated copy of this Operation """
         vector = np.array(vector)
         
@@ -177,9 +172,7 @@ class Operation():
 
         return Operation(bottom_face, top_face, side_edges)
                 
-    def rotate(self, axis, angle, origin=[0, 0, 0]):
-        # TODO: typing
-        # TODO: test
+    def rotate(self, axis:List, angle:float, origin:List=[0, 0, 0]):
         axis = np.array(axis)
         origin = np.array(origin)
 

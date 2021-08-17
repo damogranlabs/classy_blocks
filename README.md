@@ -130,11 +130,13 @@ Of course you are free to use your own :)
    - Elbow from segments
    - Elbow wall from segments
  - Optional face merging
+ - Operations on collections of faces
  - Tools
    - refineWallLayer script
  - Technicalities:
-   - More Tests, including examples
+   - More Tests
    - logging for info/debug
    - output geometry to .obj for debugging
    - shorter imports (something to do with `__init__.py` files)
+   - a grading calculator (set number of cells/expansion ratio/first layer thickness/...)
  - A proper documentation

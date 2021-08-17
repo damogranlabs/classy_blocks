@@ -92,6 +92,8 @@ class Circle:
 
 
 class Elbow:
+    """ A general round shape """
+
     # mappings between block sides and 'human-readable' geometry
     top_patch = 'top'
     bottom_patch = 'bottom'
@@ -144,7 +146,6 @@ class Elbow:
     
     @property
     def operations(self):
-        # TEST
         if hasattr(self, 'core'):
             return [self.core] + self.shell
         
@@ -288,7 +289,9 @@ class RevolvedRing(Elbow):
 
 class ExtrudedRing(RevolvedRing):
     """ a ring specified like a Cylinder """
-    def __init__(self, axis_point_1:list, axis_point_2:list, inner_radius_point_1:list, outer_radius:float, n_blocks=4):
+    def __init__(self, axis_point_1:list, axis_point_2:list,
+        inner_radius_point_1:list, outer_radius:float, n_blocks=4):
+
         # calculate parameters for
         axis_point_1 = np.array(axis_point_1)
         axis_point_2 = np.array(axis_point_2)

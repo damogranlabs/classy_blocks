@@ -154,16 +154,21 @@ class Block():
         pairs = []
 
         for pair in self.axis_pair_indexes[axis]:
-            # TEST
-            if self.vertices[pair[0]].mesh_index == self.vertices[pair[1]].mesh_index:
+            pair = {
+                self.vertices[pair[0]].mesh_index,
+                self.vertices[pair[1]].mesh_index
+            }
+
+            if len(pair) == 1:
                 # omit vertices in the same spot; there is no edge anyway
                 # (wedges and pyramids)
                 continue
 
-            pairs.append({
-                self.vertices[pair[0]].mesh_index,
-                self.vertices[pair[1]].mesh_index
-            })
+            if pair in pairs:
+                # also omit duplicates
+                continue
+
+            pairs.append(pair)
         
         return pairs
 

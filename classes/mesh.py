@@ -1,3 +1,4 @@
+import os
 import numpy as np
 
 from ..util import functions as g
@@ -92,7 +93,6 @@ class Mesh():
 
     def copy_grading(self, block, axis):
         """ same as self.copy_count but for grading """
-        # TEST
         match_pairs = block.get_axis_vertex_pairs(axis)
 
         for b in self.blocks:
@@ -169,7 +169,7 @@ class Mesh():
             if defined_blocks == all_blocks:
                 break # done!
 
-            if defined_blocks == prev_defined_blocks: # TEST
+            if defined_blocks == prev_defined_blocks:
                 # a whole 'round' went by without any added blocks;
                 # the next one won't do anything
                 break
@@ -202,12 +202,17 @@ class Mesh():
             if len(defined_blocks) == len(self.blocks):
                 break
 
-            if defined_blocks == prev_defined_blocks: # TEST
+            if defined_blocks == prev_defined_blocks:
                 break
     
             prev_defined_blocks |= defined_blocks
 
-    def write(self, output_path, context=None, template_path='classy_blocks/util/blockMeshDict.template'):
+    def write(self, output_path, context=None, template_path=None):
+        # if template path is not given, find the default relative to this file
+        if template_path is None:
+            classy_dir = os.path.dirname(__file__)
+            template_path = os.path.join(classy_dir, '..', 'util', 'blockMeshDict.template')
+
         self.prepare_data()
 
         context = {

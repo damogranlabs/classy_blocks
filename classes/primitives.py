@@ -64,7 +64,6 @@ class Edge():
             t = 'spline'
 
         return t, points
-        
 
     @property
     def point_list(self):
@@ -107,7 +106,6 @@ class Edge():
         return d > constants.tol
 
     def get_length(self):
-        # TODO: test
         def curve_length(points):
             l = 0
 
