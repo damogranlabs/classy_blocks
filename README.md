@@ -1,5 +1,5 @@
 # classy_blocks
-![Elbows](showcase/piping.png "Elbows")
+![Piping](https://github.com/FranzBangar/classy_examples/blob/master/showcase/piping.png?raw=true "Piping")
 
 Python classes for easier creation of openFoam's blockMesh dictionaries.
 
@@ -81,16 +81,6 @@ vertex/edge/block indexes. You do:
  - scipy
  - jinja2
 
-## Showcase
-A single channel of an impeller, without volute and with infinitely thin blades:
-![Impeller](https://github.com/FranzBangar/classyBlocks/blob/master/showcase/impeller.png?raw=true "Impeller")
-
-A full volute and inlet (impeller mesh is created separately):
-![Volute](https://github.com/FranzBangar/classyBlocks/blob/master/showcase/volute.png?raw=true "Volute")
-
-A real-life square volute with a blunt cutwater:
-![Square Volute](https://github.com/FranzBangar/classyBlocks/blob/master/showcase/volute_square.png?raw=true "Square Volute")
-
 # Technical Information
 ## Classes
 These contain data to be written to blockMeshDict and also methods for point manipulation and output formatting.
@@ -130,13 +120,11 @@ Of course you are free to use your own :)
    - Elbow from segments
    - Elbow wall from segments
  - Optional face merging
- - Operations on collections of faces
  - Tools
    - refineWallLayer script
  - Technicalities:
-   - More Tests
+   - More Tests, including examples
    - logging for info/debug
    - output geometry to .obj for debugging
    - shorter imports (something to do with `__init__.py` files)
-   - a grading calculator (set number of cells/expansion ratio/first layer thickness/...)
  - A proper documentation
