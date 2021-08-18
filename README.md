@@ -1,5 +1,5 @@
 # classy_blocks
-![Piping](https://github.com/FranzBangar/classy_examples/blob/master/showcase/piping.png?raw=true "Piping")
+![Piping](https://raw.githubusercontent.com/damogranlabs/classy_examples/240ed5fdc70084846dae4b8c6af0588206c43020/showcase/piping.png "Piping")
 
 Python classes for easier creation of openFoam's blockMesh dictionaries.
 
