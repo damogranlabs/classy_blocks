@@ -79,10 +79,10 @@ class Mesh():
         # edges in match_pairs:
         for b in self.blocks:
             for p in match_pairs:
-                b_axis = b.get_axis_from_pair(p)
+                b_axis, _ = b.get_axis_from_pair(p)
                 if b_axis is not None:
                     # b.get_axis_from_pair() returns axis index in
-                    # the block we want to copy from
+                    # the block we want to copy from;
                     if b.n_cells[b_axis] is not None:
                         # this block has the cell count set
                         # so we can (must) copy it
@@ -97,14 +97,18 @@ class Mesh():
 
         for b in self.blocks:
             for p in match_pairs:
-                b_axis = b.get_axis_from_pair(p)
+                b_axis, direction = b.get_axis_from_pair(p)
                 if b_axis is not None:
                     # b.get_axis_from_pair() returns axis index in
                     # the block we want to copy from
                     if b.grading[b_axis] is not None:
-                        # this block has the cell count set
-                        # so we can (must) copy it
-                        block.grading[axis] = b.grading[b_axis]
+                        # this block has the cell count set;
+                        # if it's created in reverse, invert the grading as well
+                        if direction:
+                            block.grading[axis] = b.grading[b_axis]
+                        else:
+                            block.grading[axis] = 1/b.grading[b_axis]
+
                         return True
 
         return False

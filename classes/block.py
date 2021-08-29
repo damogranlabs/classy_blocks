@@ -35,9 +35,9 @@ class Block():
 
     # pairs of vertices (index in block.vertices) along axes
     axis_pair_indexes = (
-        ([0, 1], [3, 2], [4, 5], [7, 6]), # x
-        ([0, 3], [1, 2], [5, 6], [4, 7]), # y
-        ([0, 4], [1, 5], [2, 6], [3, 7]), # z
+        ((0, 1), (3, 2), (4, 5), (7, 6)), # x
+        ((0, 3), (1, 2), (5, 6), (4, 7)), # y
+        ((0, 4), (1, 5), (2, 6), (3, 7)), # z
     )
 
     def __init__(self, vertices, edges):
@@ -154,12 +154,12 @@ class Block():
         pairs = []
 
         for pair in self.axis_pair_indexes[axis]:
-            pair = {
+            pair = [
                 self.vertices[pair[0]].mesh_index,
                 self.vertices[pair[1]].mesh_index
-            }
+            ]
 
-            if len(pair) == 1:
+            if pair[0] == pair[1]:
                 # omit vertices in the same spot; there is no edge anyway
                 # (wedges and pyramids)
                 continue
@@ -173,13 +173,20 @@ class Block():
         return pairs
 
     def get_axis_from_pair(self, pair):
-        """ returns axis index from a given pair of vertices;
-        returns None if this block does not have an edge between given pair """
+        """ returns axis index and orientation from a given pair of vertices;
+        orientation is True if blocks are aligned or false when inverted """
+        riap = [pair[1], pair[0]]
+
         for i in range(3):
-            if set(pair) in self.get_axis_vertex_pairs(i):
-                return i
+            pairs = self.get_axis_vertex_pairs(i)
+            
+            if pair in pairs:
+                return i, True
+
+            if riap in pairs:
+                return i, False
         
-        return None
+        return None, None
 
     ###
     ### Manipulation
@@ -205,7 +212,7 @@ class Block():
 
     def _count_to_size(self, axis, cell_size):
         block_size = self.get_size(axis)
-        count = int(block_size/cell_size)
+        count = max(1, int(block_size/cell_size))
 
         self.n_cells[axis] = count
         return count
