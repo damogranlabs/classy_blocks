@@ -6,9 +6,9 @@ from classy_blocks.classes.block import Block
 from classy_blocks.classes.mesh import Mesh
 from classy_blocks.util import constants
 
-from tests.fixtures import FixturedTestCase
+from tests.fixtures import FixturedTestCase, ExecutedTestsBase
 
-class TestBlock(FixturedTestCase):
+class TestBlock(FixturedTestCase, ExecutedTestsBase):
     ###
     ### Block tests
     ###
@@ -153,22 +153,26 @@ class TestBlock(FixturedTestCase):
         """ return the correct pairs of points along each axis """
         self.mesh.prepare_data()
 
-        # this only works for the first block, where
-        # index in block.vertices[] and vertex.mesh_index coincide;
-        # later these numbers differ
         pairs = [
             [[0, 1], [3, 2], [4, 5], [7, 6]],
             [[0, 3], [1, 2], [5, 6], [4, 7]],
             [[0, 4], [1, 5], [2, 6], [3, 7]],
         ]
 
-        for i, pair in enumerate(pairs):
+        for i in range(3):
             for j in range(4):
-                v1 = self.block_1.vertices[pair[j][0]].mesh_index
-                v2 = self.block_1.vertices[pair[j][1]].mesh_index
+                pair = pairs[i][j]
 
-                self.assertEqual(
-                    self.block_1.get_axis_from_pair((v1, v2)), i)
+                v1 = self.block_0.vertices[pair[0]].mesh_index
+                v2 = self.block_0.vertices[pair[1]].mesh_index
+
+                axis, direction = self.block_0.get_axis_from_pair([v1, v2])
+                self.assertEqual(axis, i)
+                self.assertTrue(direction)
+
+                axis, direction = self.block_0.get_axis_from_pair([v2, v1])
+                self.assertEqual(axis, i)
+                self.assertFalse(direction)
 
     def test_axis_vertex_pairs(self):
         """ pairs of vertices for wedges """ 
@@ -209,6 +213,64 @@ class TestBlock(FixturedTestCase):
 
         self.assertIsNotNone(self.block_1.grading[2])
         self.assertIsNotNone(self.block_2.grading[2])
+
+    def test_count_to_size(self):
+        """ assign no less than 1 cell in block """
+        mesh = Mesh()
+        
+        self.block_0.count_to_size(0, 1.1)
+        self.block_0.count_to_size(1, 1.1)
+        self.block_0.count_to_size(2, 1.1)
+
+        mesh.add_block(self.block_0)
+        mesh.prepare_data()
+
+        self.assertGreaterEqual(self.block_0.n_cells[0], 1)
+        self.assertGreaterEqual(self.block_0.n_cells[1], 1)
+        self.assertGreaterEqual(self.block_0.n_cells[2], 1)
+
+    def test_grading_invert(self):
+        """ copy grading when neighbor blocks are upside-down """
+        # points & blocks:
+        # 3---2---5
+        # | 0 | 1 |
+        # 0---1---4
+        fl = [ # floor
+            [0, 0, 0], # 0
+            [1, 0, 0], # 1
+            [1, 1, 0], # 2
+            [0, 1, 0], # 3
+            [2, 0, 0], # 4
+            [2, 1, 0], # 5
+        ]
+
+        # ceiling
+        cl = [[p[0], p[1], 1] for p in fl]
+
+        block_0 = Block.create_from_points([
+            fl[0], fl[1], fl[2], fl[3],
+            cl[0], cl[1], cl[2], cl[3]
+        ])
+        block_0.n_cells = [10, 10, 10]
+        block_0.grade_to_size(2, 0.02)
+        
+        # block_1 is created upside-down
+        block_1 = Block.create_from_points([
+            cl[2], cl[5], cl[4], cl[1],
+            fl[2], fl[5], fl[4], fl[1],
+        ])
+        block_1.n_cells = [10, 10, 10]
+
+
+        self.mesh = Mesh()
+        self.mesh.add_block(block_0)
+        self.mesh.add_block(block_1)
+        self.mesh.prepare_data()
+
+        # also check in real life that calculations are good enough for blockMesh
+        self.assertAlmostEqual(block_0.grading[2], 1/block_1.grading[2])
+        self.run_and_check()
+
 
 if __name__ == '__main__':
     unittest.main()

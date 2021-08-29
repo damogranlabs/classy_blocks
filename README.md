@@ -6,7 +6,6 @@ Example project and cases for [classy_blocks](https://github.com/damogranlabs/cl
 1. Prerequisites
     1. OpenFOAM (just about any version)
     1. python3
-    1. _Optional: use a virtual environment_
     1. `pip install numpy scipy jinja2`
 1. Fetch classy_blocks in one of the following ways:
     1. As a [git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules): `git submodule add git@github.com:damogranlabs/classy_examples.git`
