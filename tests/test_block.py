@@ -268,7 +268,9 @@ class TestBlock(FixturedTestCase, ExecutedTestsBase):
         self.mesh.prepare_data()
 
         # also check in real life that calculations are good enough for blockMesh
-        self.assertAlmostEqual(block_0.grading[2], 1/block_1.grading[2])
+        self.assertAlmostEqual(
+            block_0.grading[2].expansion_ratios[0],
+            1/block_1.grading[2].expansion_ratios[0])
         self.run_and_check()
 
 
