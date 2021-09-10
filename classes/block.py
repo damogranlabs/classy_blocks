@@ -7,6 +7,7 @@ from ..util import functions as f
 from ..util import constants
 
 from .primitives import Vertex
+from .grading import Grading
 
 class DeferredFunction:
     """ stores a function and its variables to be used at a later time """
@@ -90,7 +91,6 @@ class Block():
     @property
     def is_any_grading_defined(self):
         return any(self.grading)
-
 
     @classmethod
     def create_from_points(cls, points, edges=[]):
@@ -257,10 +257,32 @@ class Block():
         # find a grading that produces correct last_cell_size
         scipy.optimize.newton(fcell_size, 1)
 
+        self.grading[axis] = Grading()
+
         if inverse:
-            self.grading[axis] = cell_sizes[-1]/cell_sizes[0]
+            self.grading[axis].add_division(1, 1, cell_sizes[-1]/cell_sizes[0])
+            # = cell_sizes[-1]/cell_sizes[0]
         else:
-            self.grading[axis] = cell_sizes[0]/cell_sizes[-1]
+            self.grading[axis].add_division(1, 1, cell_sizes[0]/cell_sizes[-1])
+            #self.grading[axis] = cell_sizes[0]/cell_sizes[-1]
+
+    def manual_multigrade(self, axis, grading_data):
+        """ `grading_data` is a list of lists containing 
+            instructions for grading:
+            grading_data = [
+                length_fraction,
+                count_fraction,
+                expansion_ratio
+            ]
+            the list is thrown directly into blockMesh definition
+            so it's up to the user to get the numbers right.
+
+            TODO: make this user-friendlier.
+        """
+        self.grading[axis] = Grading()
+
+        for g in grading_data:
+            self.grading[axis].add_division(g)
 
     ###
     ### Output/formatting

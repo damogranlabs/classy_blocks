@@ -105,9 +105,9 @@ class Mesh():
                         # this block has the cell count set;
                         # if it's created in reverse, invert the grading as well
                         if direction:
-                            block.grading[axis] = b.grading[b_axis]
+                            block.grading[axis] = b.grading[b_axis].copy()
                         else:
-                            block.grading[axis] = 1/b.grading[b_axis]
+                            block.grading[axis] = b.grading[b_axis].copy(invert=True)
 
                         return True
 
