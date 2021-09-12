@@ -282,7 +282,7 @@ class Block():
         self.grading[axis] = Grading()
 
         for g in grading_data:
-            self.grading[axis].add_division(g)
+            self.grading[axis].add_division(*g)
 
     ###
     ### Output/formatting

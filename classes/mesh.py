@@ -158,30 +158,37 @@ class Mesh():
         n_blocks = len(self.blocks)
         all_blocks = set(range(n_blocks))
         defined_blocks = set() # indexes of blocks that have count well-defined
-        prev_defined_blocks = set() # blocks, defined in last iteration
+        updated = False
 
-        for n_iter in range(n_blocks):
+        for _ in range(n_blocks+1):
             for i, block in enumerate(self.blocks):
-                for axis in range(3):
-                    if block.n_cells[axis] is None:
-                        self.copy_count(block, axis)
-
                 if block.is_count_defined:
                     defined_blocks.add(i)
                     continue
 
+                for axis in range(3):
+                    if block.n_cells[axis] is None:
+                        updated = self.copy_count(block, axis) or updated
+                        
             if defined_blocks == all_blocks:
                 break # done!
 
-            if defined_blocks == prev_defined_blocks:
-                # a whole 'round' went by without any added blocks;
-                # the next one won't do anything
+            if not updated:
+                # a whole iteration went around without an update;
+                # next iterations won't get any better
                 break
 
-            prev_defined_blocks |= defined_blocks
+            updated = False
         
         if defined_blocks != all_blocks:
-            raise Exception(f"Blocks with non-defined counts: {all_blocks - defined_blocks}")
+            # gather more detailed information about non-defined blocks:
+            message = "Blocks with non-defined counts: \n"
+            non_defined_blocks = all_blocks - defined_blocks
+            for i in list(non_defined_blocks):
+                message += f"\t{i}: {str(self.blocks[i].n_cells)}\n"
+            message += '\n'
+            
+            raise Exception(message)
         
         # now is the time to set gradings
         for block in self.blocks:
@@ -191,9 +198,9 @@ class Mesh():
         # propagate grading:
         # very similar to counts
         defined_blocks = set()
-        prev_defined_blocks = set()
+        updated = False
 
-        for n_iter in range(n_blocks):
+        for _ in range(n_blocks):
             for i, block in enumerate(self.blocks):
                 if block.is_grading_defined:
                     defined_blocks.add(i)
@@ -201,15 +208,13 @@ class Mesh():
 
                 for axis in range(3):
                     if block.grading[axis] is None:
-                        self.copy_grading(block, axis)
+                        updated = self.copy_grading(block, axis) or updated
 
             if len(defined_blocks) == len(self.blocks):
                 break
 
-            if defined_blocks == prev_defined_blocks:
+            if not updated:
                 break
-    
-            prev_defined_blocks |= defined_blocks
 
     def write(self, output_path, context=None, template_path=None):
         # if template path is not given, find the default relative to this file
