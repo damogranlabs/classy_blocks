@@ -11,6 +11,8 @@ class Mesh():
         self.edges = [] # list of edges
         self.blocks = [] # list of blocks
 
+        self.default_patch = None
+
     def find_vertex(self, new_vertex):
         """ checks if any of existing vertices in self.vertices are
         in the same location as the passed one; if so, returns
@@ -69,6 +71,21 @@ class Mesh():
         
         return patches
 
+    def assign_neighbours(self, block):
+        # TEST
+        for axis in range(3):
+            axis_pairs = block.get_axis_vertex_pairs(axis)
+
+            for i in range(len(self.blocks)):
+                mb = self.blocks[i]
+
+                for p in axis_pairs:
+                    b_axis, _ = mb.get_axis_from_pair(p)
+                    if b_axis is not None:
+                        # block 'mb' shares the same edge or face
+                        block.neighbours.add(mb)
+
+
     def copy_count(self, block, axis):
         """ finds a block that shares an edge with given block
         and copies its cell count along that edge """
@@ -77,7 +94,7 @@ class Mesh():
 
         # first, find a block in mesh that shares one of the
         # edges in match_pairs:
-        for b in self.blocks:
+        for b in block.neighbours:
             for p in match_pairs:
                 b_axis, _ = b.get_axis_from_pair(p)
                 if b_axis is not None:
@@ -95,7 +112,7 @@ class Mesh():
         """ same as self.copy_count but for grading """
         match_pairs = block.get_axis_vertex_pairs(axis)
 
-        for b in self.blocks:
+        for b in block.neighbours:
             for p in match_pairs:
                 b_axis, direction = b.get_axis_from_pair(p)
                 if b_axis is not None:
@@ -147,6 +164,12 @@ class Mesh():
                     # only non-existing edges are added
                     self.edges.append(block_edge)
 
+        # collect all neighbours from all blocks;
+        # when setting counts and gradings, each block will iterate over them
+        # only and not through all blocks
+        for block in self.blocks:
+            self.assign_neighbours(block)
+
         # now is the time to set counts
         for block in self.blocks:
             for f in block.deferred_counts:
@@ -156,23 +179,22 @@ class Mesh():
         # a riddle similar to sudoku, keep traversing
         # and copying counts until there's no undefined blocks left
         n_blocks = len(self.blocks)
-        all_blocks = set(range(n_blocks))
-        defined_blocks = set() # indexes of blocks that have count well-defined
+        undefined_blocks = set(range(n_blocks))
         updated = False
 
-        for _ in range(n_blocks+1):
-            for i, block in enumerate(self.blocks):
-                if block.is_count_defined:
-                    defined_blocks.add(i)
-                    continue
+        while len(undefined_blocks) > 0:
+            for i in undefined_blocks:
+                block = self.blocks[i]
 
                 for axis in range(3):
                     if block.n_cells[axis] is None:
                         updated = self.copy_count(block, axis) or updated
+                
+                if block.is_count_defined:
+                    undefined_blocks.remove(i)
+                    updated = True
+                    break
                         
-            if defined_blocks == all_blocks:
-                break # done!
-
             if not updated:
                 # a whole iteration went around without an update;
                 # next iterations won't get any better
@@ -180,11 +202,10 @@ class Mesh():
 
             updated = False
         
-        if defined_blocks != all_blocks:
+        if len(undefined_blocks) > 0:
             # gather more detailed information about non-defined blocks:
             message = "Blocks with non-defined counts: \n"
-            non_defined_blocks = all_blocks - defined_blocks
-            for i in list(non_defined_blocks):
+            for i in list(undefined_blocks):
                 message += f"\t{i}: {str(self.blocks[i].n_cells)}\n"
             message += '\n'
             
@@ -197,24 +218,34 @@ class Mesh():
 
         # propagate grading:
         # very similar to counts
-        defined_blocks = set()
+        undefined_blocks = set(range(n_blocks))
         updated = False
 
-        for _ in range(n_blocks):
-            for i, block in enumerate(self.blocks):
-                if block.is_grading_defined:
-                    defined_blocks.add(i)
-                    continue
+        while len(undefined_blocks) > 0:
+            for i in undefined_blocks:
+                block = self.blocks[i]
 
                 for axis in range(3):
                     if block.grading[axis] is None:
                         updated = self.copy_grading(block, axis) or updated
 
-            if len(defined_blocks) == len(self.blocks):
-                break
+                if block.is_grading_defined:
+                    undefined_blocks.remove(i)
+                    updated = True
+                    break
 
             if not updated:
                 break
+
+            updated = False
+        
+    def set_default_patch(self, name, type):
+        assert type in ('patch', 'wall', 'empty', 'wedge')
+
+        self.default_patch = {
+            'name': name,
+            'type': type
+        }
 
     def write(self, output_path, context=None, template_path=None):
         # if template path is not given, find the default relative to this file
@@ -229,6 +260,7 @@ class Mesh():
             'edges': self.edges,
             'blocks': self.blocks,
             'patches': self.patches,
+            'default_patch': self.default_patch,
         }
 
         tools.template_to_dict(template_path, output_path, context)

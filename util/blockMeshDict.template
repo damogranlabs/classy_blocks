@@ -61,4 +61,12 @@ mergePatchPairs
 (
 );
 
+{% if default_patch %}
+defaultPatch
+{
+    name {{ default_patch.name }};
+    type {{ default_patch.type }};
+}
+{% endif %}
+
 // ************************************************************************* //

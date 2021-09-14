@@ -45,7 +45,7 @@ class Grading:
         self.expansion_ratios.append(expansion_ratio)
 
     def invert(self):
-        # invert gradings and stuff in case neighbors are defined upside-down
+        # invert gradings and stuff in case neighbuors are defined upside-down
         if len(self.length_ratios) == 0:
             return # nothing to invert
         
@@ -57,7 +57,7 @@ class Grading:
 
     def copy(self, invert=False):
         # copy grading from one block to another;
-        # use invert=True when neighbors are defined "upside-down"
+        # use invert=True when neighbours are defined "upside-down"
         g = copy.deepcopy(self)
         if invert:
             g.invert()

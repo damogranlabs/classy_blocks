@@ -76,6 +76,10 @@ class Block():
         self.deferred_counts = []
         self.deferred_gradings = []
 
+        # a list of blocks that share an edge with this block;
+        # will be assigned by Mesh().prepare_data()
+        self.neighbours = set()
+
     @property
     def is_count_defined(self):
         return all(self.n_cells)
