@@ -17,24 +17,28 @@ Example project and cases for [classy_blocks](https://github.com/damogranlabs/cl
 These are some screenshots of parametric models, built with classy_blocks.
 
 Rectangular ducts (Extrude and Revolve Operations)
-![Ducts](https://raw.githubusercontent.com/damogranlabs/classy_examples/240ed5fdc70084846dae4b8c6af0588206c43020/showcase/elbows.png "Ducts")
+![Ducts](https://raw.githubusercontent.com/damogranlabs/classy_examples/main/showcase/elbows.png "Ducts")
 
 3D pipes with twists and turns (Elbow and Cylinder Shapes)
-![Piping](https://raw.githubusercontent.com/damogranlabs/classy_examples/240ed5fdc70084846dae4b8c6af0588206c43020/showcase/piping.png "Piping")
+![Piping](https://raw.githubusercontent.com/damogranlabs/classy_examples/main/showcase/piping.png "Piping")
 
 A single channel of an impeller, without volute and with infinitely thin blades:
-![Impeller](https://raw.githubusercontent.com/damogranlabs/classy_examples/240ed5fdc70084846dae4b8c6af0588206c43020/showcase/impeller.png "Impeller")
+![Impeller](https://raw.githubusercontent.com/damogranlabs/classy_examples/main/showcase/impeller.png "Impeller")
 
 2D mesh for studying Karman Vortex Street
-![Karman Vortex Street](https://raw.githubusercontent.com/damogranlabs/classy_examples/240ed5fdc70084846dae4b8c6af0588206c43020/showcase/karman.png "Karman vortex street")
+![Karman Vortex Street](https://raw.githubusercontent.com/damogranlabs/classy_examples/main/showcase/karman.png "Karman vortex street")
 
 Helmholtz nozzle, a resonator with sharp edges. See [this sketch](https://www.researchgate.net/figure/Schematic-diagram-of-a-Helmholtz-oscillator-and-its-operating-principles_fig6_305275686).
 
-![Helmholtz nozzle](https://raw.githubusercontent.com/damogranlabs/classy_examples/240ed5fdc70084846dae4b8c6af0588206c43020/showcase/resonator.png "Helmholtz resonator")
+![Helmholtz nozzle](https://raw.githubusercontent.com/damogranlabs/classy_examples/main/showcase/resonator.png "Helmholtz resonator")
 
 A full volute and suction pipe (impeller mesh is created separately). This has a sharp cutwater that causes
 a little unphysical overlap but numerically it is just fine and also quite accurate.
-![Volute](https://raw.githubusercontent.com/damogranlabs/classy_examples/240ed5fdc70084846dae4b8c6af0588206c43020/showcase/volute.png "Volute")
+![Volute](https://raw.githubusercontent.com/damogranlabs/classy_examples/main/showcase/volute.png "Volute")
 
 A real-life square volute with a blunt cutwater:
-![Square Volute](https://raw.githubusercontent.com/damogranlabs/classy_examples/240ed5fdc70084846dae4b8c6af0588206c43020/showcase/volute_square.png "Square Volute")
+![Square Volute](https://raw.githubusercontent.com/damogranlabs/classy_examples/main/showcase/volute_square.png "Square Volute")
+
+A parametric, Low-Re mesh of a real-life impeller:
+*Not included in examples*
+![Impeller - Low Re](https://raw.githubusercontent.com/damogranlabs/classy_examples/main/showcase/impeller_full.png "Low-Re Impeller")
