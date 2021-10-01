@@ -10,6 +10,7 @@ class Mesh():
         self.vertices = [] # list of vertices
         self.edges = [] # list of edges
         self.blocks = [] # list of blocks
+        self.faces = [] # projected faces
 
         self.default_patch = None
 
@@ -164,6 +165,16 @@ class Mesh():
                     # only non-existing edges are added
                     self.edges.append(block_edge)
 
+            # projected edges:
+            for e in block.projected_edges:
+                # TEST
+                # no special checking here (TODO?)
+                v_1 = block.vertices[e[0]].mesh_index
+                v_2 = block.vertices[e[1]].mesh_index
+
+                self.edges.append(f"project {v_1} {v_2} ({e[2]})")
+                
+
         # collect all neighbours from all blocks;
         # when setting counts and gradings, each block will iterate over them
         # only and not through all blocks
@@ -239,6 +250,14 @@ class Mesh():
 
             updated = False
         
+        # projected faces:
+        for b in self.blocks:
+            for f in b.projected_faces:
+                self.faces.append([
+                    b.format_face(f[0]), # face, like (8 12 15 11) 
+                    f[1] # the geometry to project to
+                ])
+
     def set_default_patch(self, name, type):
         assert type in ('patch', 'wall', 'empty', 'wedge')
 
@@ -260,6 +279,7 @@ class Mesh():
             'edges': self.edges,
             'blocks': self.blocks,
             'patches': self.patches,
+            'faces': self.faces,
             'default_patch': self.default_patch,
         }
 
