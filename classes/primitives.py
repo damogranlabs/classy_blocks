@@ -12,6 +12,11 @@ class Vertex():
         self.point = np.array(point)
         self.mesh_index = None # will be changed in Mesh.prepare_data()
         
+    def rotate(self, angle, axis=[1, 0, 0], origin=[0, 0, 0]):
+        """ returns a new, rotated Vertex """
+        point = f.arbitrary_rotation(self.point, axis, angle, origin)
+        return Vertex(point)
+
     def __repr__(self):
         s = constants.vector_format(self.point)
         
@@ -131,6 +136,14 @@ class Edge():
         else:
             raise AttributeError(f"Unknown edge type: {self.type}")
 
+    def rotate(self, angle, axis=[1, 0, 0], origin=[0, 0, 0]):
+        if self.type == 'arc':
+            points = f.arbitrary_rotation(self.points, axis, angle, origin)
+        else:
+            points = [f.arbitrary_rotation(p, axis, angle, origin) for p in self.points]
+        
+        return Edge(self.block_index_1, self.block_index_2, points)
+        
     def __repr__(self):
         return "{} {} {} {}".format(
             self.type,

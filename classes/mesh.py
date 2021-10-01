@@ -44,9 +44,11 @@ class Mesh():
     def add(self, item):
         if hasattr(item, 'block'):
             self.add_block(item.block)
-        else:
+        elif hasattr(item, 'blocks'):
             for block in item.blocks:
                 self.add_block(block)
+        else:
+            self.add_block(item)
 
     @property
     def patches(self):
