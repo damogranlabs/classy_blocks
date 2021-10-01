@@ -25,6 +25,11 @@ class Vertex():
         
         return s
 
+    def rotate(self, angle, axis=[1, 0, 0], origin=[0, 0, 0]):
+        """ returns a new, rotated Vertex """
+        point = f.arbitrary_rotation(self.point, axis, angle, origin)
+        return Vertex(point)
+
 class Edge():
     def __init__(self, index_1, index_2, points):
         """ an edge is defined by two vertices and points in between;

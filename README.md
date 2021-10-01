@@ -24,7 +24,6 @@ Since it is easier to crunch numbers and vectors and everything else with `numpy
 - Automatic calculation of number of cells with `block.count_to_size(cell_size)`
 - Automatic cell grading calculation by setting required cell size `block.grade_to_size(cell_size)`
 - Automatic propagation of grading and cell count from block to block as required by blockMesh
-- Support for projection of faces and edges to a defined geometry (see `examples/advanced/project.py`)
 
 
 *There are 3 different abstraction levels:
