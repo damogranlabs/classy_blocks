@@ -67,6 +67,22 @@ class Block():
         # }
         self.patches = { }
 
+        # a list of projected faces
+        self.projected_faces = [
+            # ['bottom', 'terrain'],
+            # ['right', 'building'],
+            # ['back', 'building'],
+        ]
+        
+
+        # included in edges but assigned after
+        # faces and blocks have been set up;
+        # self.projected_edges = {
+        #     'terrain': [ {0, 1}, {1, 2}, {2, 3} ...],
+        #     'building': [ {2, 6}, {3, 7}, ... ]
+        # }
+        self.projected_edges = [ ]
+
         # set in Mesh.prepare_data()
         self.mesh_index = None
         
@@ -80,6 +96,9 @@ class Block():
         # will be assigned by Mesh().prepare_data()
         self.neighbours = set()
 
+    ###
+    ### Information
+    ###
     @property
     def is_count_defined(self):
         return all(self.n_cells)
@@ -95,24 +114,7 @@ class Block():
     @property
     def is_any_grading_defined(self):
         return any(self.grading)
-
-    @classmethod
-    def create_from_points(cls, points, edges=[]):
-        """ create a block from a raw list of 8 points;
-        edges are optional; edge's 2 vertex indexes refer to
-        block.vertices list (0 - 7) """
-        block = cls(
-            [Vertex(p) for p in points],
-            edges
-        )
-
-        block.feature = 'From points'
-
-        return block
-
-    ###
-    ### Information
-    ###
+    
     def get_faces(self, patch):
         if patch not in self.patches:
             return []
@@ -288,6 +290,16 @@ class Block():
         for g in grading_data:
             self.grading[axis].add_division(*g)
 
+    def project_face(self, side, geometry):
+        """ assign one or more block faces (self.face_map)
+        to be projected to a geometry (defined in blockMeshDict) """
+        assert side in self.face_map.keys()
+        
+        self.projected_faces.append([side, geometry])
+    
+    def project_edge(self, v1, v2, geometry):
+        self.projected_edges.append([v1, v2, geometry])
+
     ###
     ### Output/formatting
     ###
@@ -321,3 +333,20 @@ class Block():
         output += f" // {self.mesh_index} {self.description}"
 
         return output
+
+    ###
+    ### class methods
+    ###
+    @classmethod
+    def create_from_points(cls, points, edges=[]):
+        """ create a block from a raw list of 8 points;
+        edges are optional; edge's 2 vertex indexes refer to
+        block.vertices list (0 - 7) """
+        block = cls(
+            [Vertex(p) for p in points],
+            edges
+        )
+
+        block.feature = 'From points'
+
+        return block
