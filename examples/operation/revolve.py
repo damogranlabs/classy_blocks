@@ -1,9 +1,9 @@
-import os
-
 from classy_blocks.classes.mesh import Mesh
 from classy_blocks.classes.operations import Face, Revolve
 
 from classy_blocks.util import functions as f
+
+template_path = None # use default template
 
 def get_mesh():
     base = Face(

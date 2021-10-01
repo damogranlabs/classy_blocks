@@ -273,6 +273,21 @@ class TestBlock(FixturedTestCase, ExecutedTestsBase):
             1/block_1.grading[2].expansion_ratios[0])
         self.run_and_check()
 
+    def test_block_project_face(self):
+        self.mesh.prepare_data()
+
+        self.block_0.project_face('bottom', 'terrain')
+        self.block_0.project_face('left', 'building')
+
+        expected_list = [
+            ['bottom', 'terrain'],
+            ['left', 'building']
+        ]
+        
+
+        self.assertListEqual(
+            expected_list, self.block_0.projected_faces
+        )
 
 if __name__ == '__main__':
     unittest.main()

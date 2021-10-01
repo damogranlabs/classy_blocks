@@ -39,6 +39,9 @@ a little unphysical overlap but numerically it is just fine and also quite accur
 A real-life square volute with a blunt cutwater:
 ![Square Volute](https://raw.githubusercontent.com/damogranlabs/classy_examples/main/showcase/volute_square.png "Square Volute")
 
+Edges and faces, projected to an STL surface
+![Projected](https://raw.githubusercontent.com/damogranlabs/classy_examples/main/showcase/projected.png "Projected edges and faces")
+
 A parametric, Low-Re mesh of a real-life impeller:
 *Not included in examples*
 ![Impeller - Low Re](https://raw.githubusercontent.com/damogranlabs/classy_examples/main/showcase/impeller_full.png "Low-Re Impeller")

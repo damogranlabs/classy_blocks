@@ -1,11 +1,11 @@
-#!/usr/bin/python3
-import os
 import numpy as np
 
 from classy_blocks.classes import mesh
 from classy_blocks.classes.operations import Face, Loft, Extrude, Revolve
 
 import classy_blocks.util.functions as f
+
+template_path = None # use default template
 
 class Geometry:
     """ calculation of a centrifugal pump is done separately;

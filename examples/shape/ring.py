@@ -1,6 +1,8 @@
 from classy_blocks.classes.mesh import Mesh
 from classy_blocks.classes.shapes import ExtrudedRing
 
+template_path = None # use default template
+
 def get_mesh():
     mesh = Mesh()
 

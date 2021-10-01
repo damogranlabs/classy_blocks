@@ -3,6 +3,8 @@ import numpy as np
 from classy_blocks.classes.mesh import Mesh
 from classy_blocks.classes.shapes import Cylinder, Elbow
 
+template_path = None # use default template
+
 def get_mesh():
     # a pipe with two 90-degree elbows:
     # to demonstrate vortex creation in consecutive elbows in different planes;

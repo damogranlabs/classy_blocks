@@ -1,7 +1,7 @@
-import os
-
 from classy_blocks.classes.mesh import Mesh
 from classy_blocks.classes.operations import Face, Wedge
+
+template_path = None # use default template
 
 def get_mesh():
     mesh = Mesh()

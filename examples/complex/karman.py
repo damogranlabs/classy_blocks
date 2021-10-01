@@ -1,6 +1,8 @@
 from classy_blocks.classes.mesh import Mesh
 from classy_blocks.classes.shapes import ExtrudedRing, Box
 
+template_path = None # use default template
+
 def get_mesh():
     cylinder_diameter = 20e-3 # [m]
     ring_thickness = 5e-3 # [m]

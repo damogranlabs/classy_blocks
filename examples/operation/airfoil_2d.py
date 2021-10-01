@@ -5,6 +5,8 @@ from classy_blocks.classes.operations import Face, Extrude
 
 import numpy as np
 
+template_path = None # use default template
+
 def load_airfoil_file(filename, chord=1):
     points_upper = []
     points_lower = []

@@ -22,9 +22,15 @@ import os
 # complex cases
 # from examples.complex import piping as example
 # from examples.complex import helmholtz_nozzle as example
-from examples.complex import karman as example
+# from examples.complex import karman as example
 # from examples.complex import pump_volute as example
 
+from examples.advanced import project as example
+
 mesh = example.get_mesh()
-mesh.write('case/system/blockMeshDict')
+
+mesh.write(
+    output_path=os.path.join('case', 'system', 'blockMeshDict'),
+    template_path=example.template_path
+)
 os.system("case/Allrun.mesh")

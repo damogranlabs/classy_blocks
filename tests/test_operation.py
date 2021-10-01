@@ -64,7 +64,7 @@ class FaceTests(unittest.TestCase):
         for i in range(len(face_edges[1])):
             np.testing.assert_almost_equal(
                 translated_face.edges[1][i] - translate_vector,
-                original_face.edges[1][i] 
+                original_face.edges[1][i]
             )
 
     def test_rotate_face(self):
@@ -135,7 +135,8 @@ class OperationTests(unittest.TestCase):
             return op.top_face.points[0] - op.bottom_face.points[0]
 
         np.testing.assert_almost_equal(
-            f.angle_between(extrude_direction(original_op), extrude_direction(rotated_op)),
+            f.angle_between(extrude_direction(original_op),
+            extrude_direction(rotated_op)),
             angle
         )
 
