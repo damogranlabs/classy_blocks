@@ -29,6 +29,11 @@ class Mesh():
         """ checks if an edge with the same pair of vertices
         exists in self.edges already """
         for e in self.edges:
+            if type(e) == str:
+                # projected edges are just strings
+                # TODO: consolidate edges and projected edges
+                continue
+
             mesh_set = set([vertex_1.mesh_index, vertex_2.mesh_index])
             edge_set = set([e.vertex_1.mesh_index, e.vertex_2.mesh_index])
             if mesh_set == edge_set:
@@ -268,7 +273,7 @@ class Mesh():
             'type': type
         }
 
-    def write(self, output_path, context=None, template_path=None):
+    def write(self, output_path, template_path=None, geometry=None):
         # if template path is not given, find the default relative to this file
         if template_path is None:
             classy_dir = os.path.dirname(__file__)
@@ -283,6 +288,7 @@ class Mesh():
             'patches': self.patches,
             'faces': self.faces,
             'default_patch': self.default_patch,
+            'geometry': geometry,
         }
 
         tools.template_to_dict(template_path, output_path, context)
