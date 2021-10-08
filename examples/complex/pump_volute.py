@@ -5,8 +5,6 @@ from classy_blocks.classes.operations import Face, Loft, Extrude, Revolve
 
 import classy_blocks.util.functions as f
 
-template_path = None # use default template
-
 class Geometry:
     """ calculation of a centrifugal pump is done separately;
     since that is not the topic of this showcase it is conveniently omitted.

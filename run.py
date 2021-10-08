@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import os
 
+geometry = None
+
 # uncomment the example you wish to run
 
 # primitive
@@ -23,14 +25,13 @@ import os
 # from examples.complex import piping as example
 # from examples.complex import helmholtz_nozzle as example
 # from examples.complex import karman as example
-# from examples.complex import pump_volute as example
+from examples.complex import pump_volute as example
 
-from examples.advanced import project as example
+# advanced: projection
+#from examples.advanced import project as example
+#geometry = example.geometry
 
 mesh = example.get_mesh()
 
-mesh.write(
-    output_path=os.path.join('case', 'system', 'blockMeshDict'),
-    template_path=example.template_path
-)
+mesh.write(output_path=os.path.join('case', 'system', 'blockMeshDict'), geometry=geometry)
 os.system("case/Allrun.mesh")

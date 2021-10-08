@@ -284,10 +284,46 @@ class TestBlock(FixturedTestCase, ExecutedTestsBase):
             ['left', 'building']
         ]
         
-
         self.assertListEqual(
             expected_list, self.block_0.projected_faces
         )
+
+class BlockSizingTests(unittest.TestCase):
+    def setUp(self):
+        points = [
+            [0, 0, 0],
+            [1, 0, 0],
+            [1, 1, 0],
+            [0, 1, 0],
+
+            [0, 0, 0.5],
+            [1, 0, 1],
+            [1, 1, 1],
+            [0, 1, 1],
+        ]
+        self.block = Block.create_from_points(points)
+
+        for i in range(3):
+            self.block.count_to_size(i, 1)
+
+        self.mesh = Mesh()
+        self.mesh.add_block(self.block)
+        self.mesh.prepare_data()
+
+    def test_min_block_size(self):
+        self.assertAlmostEqual(self.block.get_size(0, take='min'), 1)
+        self.assertAlmostEqual(self.block.get_size(1, take='min'), 1)
+        self.assertAlmostEqual(self.block.get_size(2, take='min'), 0.5)
+        
+    def test_max_block_size(self):
+        self.assertAlmostEqual(self.block.get_size(0, take='max'), 1.118033989)
+        self.assertAlmostEqual(self.block.get_size(1, take='max'), 1.118033989)
+        self.assertAlmostEqual(self.block.get_size(2, take='max'), 1)
+
+    def test_avg_block_size(self):
+        self.assertAlmostEqual(self.block.get_size(0), 1.0295084971874737)
+        self.assertAlmostEqual(self.block.get_size(1), 1.0295084971874737)
+        self.assertAlmostEqual(self.block.get_size(2), 0.875)
 
 if __name__ == '__main__':
     unittest.main()

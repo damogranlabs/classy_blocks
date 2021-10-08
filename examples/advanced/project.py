@@ -3,10 +3,13 @@ import os
 from classy_blocks.classes.mesh import Mesh
 from classy_blocks.classes.operations import Face, Extrude, Loft
 
-template_path = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), # location of THIS file
-    'blockMeshDictAdvanced.template' # template relative to the above
-)
+geometry = {
+    'terrain': [
+        'type triSurfaceMesh;',
+        'name terrain;',
+        'file "terrain.stl";',
+    ]
+}
 
 def get_mesh():
     base = Face([

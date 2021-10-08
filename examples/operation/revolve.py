@@ -3,8 +3,6 @@ from classy_blocks.classes.operations import Face, Revolve
 
 from classy_blocks.util import functions as f
 
-template_path = None # use default template
-
 def get_mesh():
     base = Face(
         [ [0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0] ],

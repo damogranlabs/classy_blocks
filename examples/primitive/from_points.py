@@ -2,8 +2,6 @@ from classy_blocks.classes.primitives import Edge
 from classy_blocks.classes.block import Block
 from classy_blocks.classes.mesh import Mesh
 
-template_path = None # use default template
-
 def get_mesh():
     block_points = [
         [0, 0, 0],

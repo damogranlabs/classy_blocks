@@ -1,8 +1,6 @@
 from classy_blocks.classes.mesh import Mesh
 from classy_blocks.classes.operations import Face, Loft
 
-template_path = None # use default template
-
 def get_mesh():
     # Example geometry using Loft:
     bottom_face = Face(

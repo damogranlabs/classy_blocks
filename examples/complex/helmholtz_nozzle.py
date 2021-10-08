@@ -2,8 +2,6 @@ from classy_blocks.classes.mesh import Mesh
 from classy_blocks.classes.operations import Face
 from classy_blocks.classes.shapes import Cylinder, Frustum, RevolvedRing
 
-template_path = None # use default template
-
 def get_mesh():
     # A nozzle with a chamber that produces self-induced oscillations.
     # See helmholtz_nozzle.svg for geometry explanation.

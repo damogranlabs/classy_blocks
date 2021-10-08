@@ -1,8 +1,6 @@
 from classy_blocks.classes.operations import Face, Extrude
 from classy_blocks.classes.mesh import Mesh
 
-template_path = None # use default template
-
 def get_mesh():
     base = Face(
         [ [0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0] ],
