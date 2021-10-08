@@ -23,6 +23,20 @@ scale   1;
 mergeType points;
 checkFaceCorrespondence false;
 
+{% if geometry %}
+geometry
+{
+    {% for name, params in geometry.items() %}
+    {{ name }}
+    {
+        {% for p in params %}
+            {{ p }};
+        {% endfor %}
+    }
+    {% endfor %}
+}
+{% endif %}
+
 vertices
 (
     {% for v in vertices %}
@@ -66,7 +80,15 @@ defaultPatch
 {
     name {{ default_patch.name }};
     type {{ default_patch.type }};
-}
+};
 {% endif %}
+
+faces
+(
+    {% for f in faces %}
+    project {{ f.0 }} {{ f.1 }}
+    {% endfor %}
+);
+
 
 // ************************************************************************* //

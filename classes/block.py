@@ -127,7 +127,7 @@ class Block():
         
         return faces
 
-    def get_size(self, axis):
+    def get_size(self, axis, take='avg'):
         # returns an approximate block dimensions:
         # if an edge is defined, use the edge.get_length(),
         # otherwise simply distance between two points
@@ -149,11 +149,20 @@ class Block():
 
             return vertex_distance(index_1, index_2)
         
-        sum_edges = 0
-        for pair in self.axis_pair_indexes[axis]:
-            sum_edges += block_size(pair[0], pair[1])
+        edge_lengths = [
+            block_size(pair[0], pair[1]) for pair in self.axis_pair_indexes[axis]
+        ]
+
+        if take == 'avg':
+            return sum(edge_lengths)/len(edge_lengths)
         
-        return sum_edges/4
+        if take == 'min':
+            return min(edge_lengths)
+        
+        if take == 'max':
+            return max(edge_lengths)
+
+        raise ValueError(f"Unknown sizing specification: {take}. Available: min, max, avg")
 
     def get_axis_vertex_pairs(self, axis):
         """ returns 4 pairs of Vertex.mesh_indexes along given axis """
@@ -210,14 +219,14 @@ class Block():
         
         self.patches[patch_name] += sides
     
-    def count_to_size(self, axis, cell_size):
-        """ Takes the average length of all edges of the block along given axis
+    def count_to_size(self, axis, cell_size, take='avg'):
+        """ Takes the average/maximum/minimum length of all edges of the block along given axis
         and sets the number of cells to obtain the desired cell size. """
-        df = DeferredFunction(self._count_to_size, axis, cell_size)
+        df = DeferredFunction(self._count_to_size, axis, cell_size, take=take)
         self.deferred_counts.append(df)
 
-    def _count_to_size(self, axis, cell_size):
-        block_size = self.get_size(axis)
+    def _count_to_size(self, axis, cell_size, take='avg'):
+        block_size = self.get_size(axis, take=take)
         count = max(1, int(block_size/cell_size))
 
         self.n_cells[axis] = count

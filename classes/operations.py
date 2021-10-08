@@ -131,14 +131,14 @@ class Operation():
         """
         self.block.n_cells[axis] = int(count)
 
-    def count_to_size(self, axis, cell_size):
+    def count_to_size(self, axis, cell_size, take='avg'):
         """ Calculate cell count to meet cell_size.
         Axes:
          0: along first edge of a face
          1: along second edge of a face
          2: between faces / along operation path
         """
-        return self.block.count_to_size(axis, cell_size)
+        return self.block.count_to_size(axis, cell_size, take=take)
 
     def grade_to_size(self, axis, size):
         """ Sets block grading so that the final cell size is as required;
