@@ -25,11 +25,15 @@ geometry = None
 # from examples.complex import piping as example
 # from examples.complex import helmholtz_nozzle as example
 # from examples.complex import karman as example
-from examples.complex import pump_volute as example
+# from examples.complex import pump_volute as example
 
 # advanced: projection
 #from examples.advanced import project as example
 #geometry = example.geometry
+
+# advanced: flow around sphere
+from examples.advanced import sphere as example
+geometry = example.geometry
 
 mesh = example.get_mesh()
 
