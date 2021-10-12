@@ -1,5 +1,4 @@
 import os
-import numpy as np
 
 from ..util import functions as g
 from ..util import constants, tools
@@ -29,11 +28,6 @@ class Mesh():
         """ checks if an edge with the same pair of vertices
         exists in self.edges already """
         for e in self.edges:
-            if type(e) == str:
-                # projected edges are just strings
-                # TODO: consolidate edges and projected edges
-                continue
-
             mesh_set = set([vertex_1.mesh_index, vertex_2.mesh_index])
             edge_set = set([e.vertex_1.mesh_index, e.vertex_2.mesh_index])
             if mesh_set == edge_set:
@@ -170,17 +164,7 @@ class Mesh():
 
                 if self.find_edge(v_1, v_2) is None:
                     # only non-existing edges are added
-                    self.edges.append(block_edge)
-
-            # projected edges:
-            for e in block.projected_edges:
-                # TEST
-                # no special checking here (TODO?)
-                v_1 = block.vertices[e[0]].mesh_index
-                v_2 = block.vertices[e[1]].mesh_index
-
-                self.edges.append(f"project {v_1} {v_2} ({e[2]})")
-                
+                    self.edges.append(block_edge)                
 
         # collect all neighbours from all blocks;
         # when setting counts and gradings, each block will iterate over them
@@ -258,8 +242,10 @@ class Mesh():
             updated = False
         
         # projected faces:
+        self.faces = []
         for b in self.blocks:
-            for f in b.projected_faces:
+            # TODO: check for existing faces
+            for f in b.faces:
                 self.faces.append([
                     b.format_face(f[0]), # face, like (8 12 15 11) 
                     f[1] # the geometry to project to

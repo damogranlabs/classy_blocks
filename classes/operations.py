@@ -33,7 +33,7 @@ class Face:
         if len(points) != 4:
             raise Exception("Provide exactly 4 points")
 
-        self.points = np.array(points)
+        self.points = np.asarray(points)
 
         if edges is not None:
             if len(edges) != 4:
@@ -94,6 +94,10 @@ class Face:
         r = lambda point: f.arbitrary_rotation(point, axis, angle, origin)
 
         return self._transform(r)
+
+    def invert(self):
+        """ reverses the order of points """
+        self.points = np.flip(self.points, axis=0)
 
 
 class Operation():

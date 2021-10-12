@@ -6,7 +6,7 @@ import scipy.optimize
 from ..util import functions as f
 from ..util import constants
 
-from .primitives import Vertex
+from .primitives import Vertex, Edge
 from .grading import Grading
 
 class DeferredFunction:
@@ -45,6 +45,8 @@ class Block():
         # a list of 8 Vertex and Edge objects for each corner/edge of the block
         self.vertices = vertices
         self.edges = edges
+        self.faces = [] # a list of projected faces;
+        # [['bottom', 'terrain'], ['right', 'building'], ['back', 'building'],]
 
         # number of block cells, one number for x, y, and z direction
         # when None, try to get it from neighbour blocks
@@ -66,22 +68,6 @@ class Block():
         #     'volute_walls': ['bottom'],
         # }
         self.patches = { }
-
-        # a list of projected faces
-        self.projected_faces = [
-            # ['bottom', 'terrain'],
-            # ['right', 'building'],
-            # ['back', 'building'],
-        ]
-        
-
-        # included in edges but assigned after
-        # faces and blocks have been set up;
-        # self.projected_edges = {
-        #     'terrain': [ {0, 1}, {1, 2}, {2, 3} ...],
-        #     'building': [ {2, 6}, {3, 7}, ... ]
-        # }
-        self.projected_edges = [ ]
 
         # set in Mesh.prepare_data()
         self.mesh_index = None
@@ -127,23 +113,24 @@ class Block():
         
         return faces
 
+    def find_edge(self, index_1, index_2):
+        # TEST
+        for e in self.edges:
+            if {e.block_index_1, e.block_index_2} == {index_1, index_2}:
+                return e
+        return None
+
     def get_size(self, axis, take='avg'):
         # returns an approximate block dimensions:
         # if an edge is defined, use the edge.get_length(),
         # otherwise simply distance between two points
-        def find_edge(index_1, index_2):
-            for e in self.edges:
-                if {e.block_index_1, e.block_index_2} == {index_1, index_2}:
-                    return e
-            return None
-
         def vertex_distance(index_1, index_2):
             return f.norm(
                 self.vertices[index_1].point - self.vertices[index_2].point
             )
     
         def block_size(index_1, index_2):
-            edge = find_edge(index_1, index_2)
+            edge = self.find_edge(index_1, index_2)
             if edge:
                 return edge.get_length()
 
@@ -299,16 +286,30 @@ class Block():
         for g in grading_data:
             self.grading[axis].add_division(*g)
 
-    def project_face(self, side, geometry):
+    def project_edge(self, index_1, index_2, geometry):
+        # TEST
+        # index_N are vertices relative to block (0...7)
+        if self.find_edge(index_1, index_2):
+            return
+        
+        self.edges.append(Edge(index_1, index_2, geometry))
+
+    def project_face(self, side, geometry, edges=False):
         """ assign one or more block faces (self.face_map)
         to be projected to a geometry (defined in blockMeshDict) """
         assert side in self.face_map.keys()
         
-        self.projected_faces.append([side, geometry])
-    
-    def project_edge(self, v1, v2, geometry):
-        self.projected_edges.append([v1, v2, geometry])
+        self.faces.append([side, geometry])
 
+        if edges:
+            # TEST
+            vertices = self.face_map[side]
+            for i in range(4):
+                self.project_edge(
+                    vertices[i], 
+                    vertices[(i+1)%4],
+                    geometry)
+    
     ###
     ### Output/formatting
     ###

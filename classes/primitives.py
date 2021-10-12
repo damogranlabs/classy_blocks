@@ -4,12 +4,16 @@ import numpy as np
 from ..util import functions as f
 from ..util import constants
 
+class WrongEdgeTypeException(Exception):
+    def __init__(self, edge_type, *args, **kwargs):
+        raise Exception(f"Wrong edge type: {edge_type}", *args, **kwargs)
+
 # see README for terminology, terminolology, lol
 class Vertex():
     """ point with an index that's used in block and face definition
     and can output in OpenFOAM format """
     def __init__(self, point):
-        self.point = np.array(point)
+        self.point = np.asarray(point)
         self.mesh_index = None # will be changed in Mesh.prepare_data()
         
     def rotate(self, angle, axis=[1, 0, 0], origin=[0, 0, 0]):
@@ -54,11 +58,17 @@ class Edge():
     def get_type(points):
         """ returns edge type and a list of points:
         'None' for a straight line,
+        'project' for projection to geometry,
         'arc' for a circular arc,
         'spline' for a spline """
 
         if points is None:
             return None, None
+
+        # it 'points' is a string, this is a projected edge;
+        # TEST
+        if type(points) == str:
+            return 'project', points
 
         # if multiple points are given check that they are of correct length
         points = np.array(points)
@@ -77,17 +87,26 @@ class Edge():
 
     @property
     def point_list(self):
+        # TEST
+        if self.type == 'project':
+            return f"({self.points})"
+
         if self.type == 'arc':
             return constants.vector_format(self.points)
-        else:
+        
+        if self.type == 'spline':
             return "(" +  \
-                   " ".join([constants.vector_format(p) for p in self.points]) + \
-                   ")"
+                " ".join([constants.vector_format(p) for p in self.points]) + \
+                ")"
+        
+        # TEST
+        raise WrongEdgeTypeException(self.type)
     
     @property
     def is_valid(self):
-        # 'all' spline edges are 'valid'
-        if self.type == 'spline':
+        # 'all' spline and projected edges are 'valid'
+        # TEST
+        if self.type in ('spline', 'project'):
             return True
         
         # wedge geometries produce coincident 
@@ -116,6 +135,10 @@ class Edge():
         return d > constants.tol
 
     def get_length(self):
+        # TEST
+        if self.type == 'project':
+            return f.norm(self.vertex_1.point - self.vertex_2.point)
+
         def curve_length(points):
             l = 0
 
@@ -125,6 +148,7 @@ class Edge():
             return l
 
         if self.type == 'arc':
+            # an approximate length, that is
             edge_points = np.array([
                 self.vertex_1.point,
                 self.points,
@@ -132,19 +156,24 @@ class Edge():
             ])
 
             return curve_length(edge_points)
-        elif self.type == 'spline':
+        
+        if self.type == 'spline':
             edge_points = np.concatenate((
                 [self.vertex_1.point],
                 self.points,
                 [self.vertex_2.point]), axis=0)
             return curve_length(edge_points)
-        else:
-            raise AttributeError(f"Unknown edge type: {self.type}")
+        
+        raise WrongEdgeTypeException(self.type)
 
     def rotate(self, angle, axis=[1, 0, 0], origin=[0, 0, 0]):
-        if self.type == 'arc':
+        # TEST
+        # TODO: rotate projected edges including geometry?
+        if self.type == 'project':
+            points = None
+        elif self.type == 'arc':
             points = f.arbitrary_rotation(self.points, axis, angle, origin)
-        else:
+        elif self.type == 'spline':
             points = [f.arbitrary_rotation(p, axis, angle, origin) for p in self.points]
         
         return Edge(self.block_index_1, self.block_index_2, points)
