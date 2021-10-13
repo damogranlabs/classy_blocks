@@ -104,15 +104,15 @@ class Edge():
     
     @property
     def is_valid(self):
-        # 'all' spline and projected edges are 'valid'
-        # TEST
-        if self.type in ('spline', 'project'):
-            return True
-        
         # wedge geometries produce coincident 
         # edges and vertices; drop those
         if f.norm(self.vertex_1.point - self.vertex_2.point) < constants.tol:
             return False
+        
+        # 'all' spline and projected edges are 'valid'
+        # TEST
+        if self.type in ('spline', 'project'):
+            return True
 
         # if case vertex1, vertex2 and point in between
         # are collinear, blockMesh will find an arc with
