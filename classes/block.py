@@ -100,16 +100,24 @@ class Block():
     @property
     def is_any_grading_defined(self):
         return any(self.grading)
-    
-    def get_faces(self, patch):
+
+    def get_face(self, side, internal=False):
+        # returns vertex indexes for this face;
+        # TEST
+        indexes = self.face_map[side]
+        if internal:
+            return indexes
+        
+        vertices = np.take(self.vertices, indexes)
+
+        return [v.mesh_index for v in vertices]
+
+    def get_faces(self, patch, internal=False):
         if patch not in self.patches:
             return []
 
         sides = self.patches[patch]
-        faces = []
-
-        for side in sides:
-            faces.append(self.format_face(side))
+        faces = [self.get_face(s, internal=internal) for s in sides]
         
         return faces
 
@@ -309,21 +317,10 @@ class Block():
                     vertices[i], 
                     vertices[(i+1)%4],
                     geometry)
-    
+
     ###
     ### Output/formatting
-    ###
-    def format_face(self, side):
-        indexes = self.face_map[side]
-        vertices = np.take(self.vertices, indexes)
-
-        return "({} {} {} {})".format(
-            vertices[0].mesh_index,
-            vertices[1].mesh_index,
-            vertices[2].mesh_index,
-            vertices[3].mesh_index
-        )
-    
+    ###    
     def __repr__(self):
         """ outputs block's definition for blockMeshDict file """
         # hex definition

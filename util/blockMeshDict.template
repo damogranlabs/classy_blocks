@@ -56,24 +56,23 @@ edges
 );
 
 boundary
-(
-    {% for patch, faces in patches.items() %}
+({% for patch, faces in patches.items() %}
     {{ patch }}
     {
         type patch;
         faces
         (
-            {% for f in faces %}{{f}}
+            {% for f in faces %}({{f.0}} {{f.1}} {{f.2}} {{f.3}})
             {% endfor %}
         );
 
     }
-    {% endfor %}
-);
+{% endfor %});
 
 mergePatchPairs
-(
-);
+({% for patch in merged_patches %}
+    ({{ patch.0 }} {{ patch.1 }})
+{% endfor %});
 
 {% if default_patch %}
 defaultPatch
@@ -84,11 +83,9 @@ defaultPatch
 {% endif %}
 
 faces
-(
-    {% for f in faces %}
-    project {{ f.0 }} {{ f.1 }}
-    {% endfor %}
-);
+({% for f in faces %}
+    project ({{f.0.0}} {{f.0.1}} {{f.0.2}} {{f.0.3}}) {{ f.1 }}
+{% endfor %});
 
 
 // ************************************************************************* //
