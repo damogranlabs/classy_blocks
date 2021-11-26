@@ -148,6 +148,32 @@ class Mesh():
                 else:
                     block.vertices[i] = found_vertex
         
+        # merged patches: duplicate all points that define slave patches
+        # TEST
+        duplicated_points = {} # { original_index:new_vertex }
+        slave_patches = [mp[1] for mp in self.merged_patches]
+
+        for patch in slave_patches:
+            for block in self.blocks:
+                if patch in block.patches:
+                    for face in block.get_faces(patch, internal=True):
+                        for i in range(4):
+                            i_vertex = face[i]
+                            i_next_vertex = face[(i+1)%4]
+
+                            vertex = block.vertices[i_vertex]
+
+                            if vertex.mesh_index not in duplicated_points:
+                                new_vertex = Vertex(vertex.point)
+                                new_vertex.mesh_index = len(self.vertices)
+                                self.vertices.append(new_vertex)
+
+                                block.vertices[i_vertex] = new_vertex
+
+                                duplicated_points[vertex.mesh_index] = new_vertex
+                            else:
+                                block.vertices[i_vertex] = duplicated_points[vertex.mesh_index]
+
         # collect all edges from all blocks;
         for block in self.blocks:
             # check for duplicates (same vertex pairs) and
@@ -165,9 +191,13 @@ class Mesh():
                     # invalid edges should not be added
                     continue
 
+                if block_edge.type == 'line':
+                    # no need to add lines
+                    continue
+
                 if self.find_edge(v_1, v_2) is None:
                     # only non-existing edges are added
-                    self.edges.append(block_edge)                
+                    self.edges.append(block_edge)
 
         # collect all neighbours from all blocks;
         # when setting counts and gradings, each block will iterate over them
@@ -243,32 +273,6 @@ class Mesh():
                 break
 
             updated = False
-
-
-        # merged patches: duplicate all points that define slave patches
-        # TEST
-        duplicated_points = {} # { original_index:new_vertex }
-        slave_patches = [mp[1] for mp in self.merged_patches]
-
-        for patch in slave_patches:
-            for block in self.blocks:
-                if patch in block.patches:
-                    for face in block.get_faces(patch, internal=True):
-                        for ivertex in face:
-                            vertex = block.vertices[ivertex]
-
-                            if vertex.mesh_index not in duplicated_points:
-                                new_vertex = Vertex(vertex.point)
-                                new_vertex.mesh_index = len(self.vertices)
-                                self.vertices.append(new_vertex)
-
-                                block.vertices[ivertex] = new_vertex
-
-                                duplicated_points[vertex.mesh_index] = new_vertex
-                            else:
-                                block.vertices[ivertex] = duplicated_points[vertex.mesh_index]
-
-        print(duplicated_points)
 
         # projected faces:
         self.faces = []

@@ -63,7 +63,7 @@ class Edge():
         'spline' for a spline """
 
         if points is None:
-            return None, None
+            return 'line', None
 
         # it 'points' is a string, this is a projected edge;
         # TEST
@@ -88,6 +88,9 @@ class Edge():
     @property
     def point_list(self):
         # TEST
+        if self.type == 'line':
+            return None
+            
         if self.type == 'project':
             return f"({self.points})"
 
@@ -111,7 +114,7 @@ class Edge():
         
         # 'all' spline and projected edges are 'valid'
         # TEST
-        if self.type in ('spline', 'project'):
+        if self.type in ('line', 'spline', 'project'):
             return True
 
         # if case vertex1, vertex2 and point in between
@@ -136,7 +139,7 @@ class Edge():
 
     def get_length(self):
         # TEST
-        if self.type == 'project':
+        if self.type in('line', 'project'):
             return f.norm(self.vertex_1.point - self.vertex_2.point)
 
         def curve_length(points):
@@ -169,8 +172,10 @@ class Edge():
     def rotate(self, angle, axis=[1, 0, 0], origin=[0, 0, 0]):
         # TEST
         # TODO: rotate projected edges including geometry?
-        if self.type == 'project':
+        if self.type == 'line':
             points = None
+        elif self.type == 'project':
+            points = self.points
         elif self.type == 'arc':
             points = f.arbitrary_rotation(self.points, axis, angle, origin)
         elif self.type == 'spline':
