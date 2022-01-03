@@ -73,7 +73,7 @@ class Block():
         self.mesh_index = None
         
         # functions like count_to_size and some other
-        # can only run after mesh.prepare_data() has been
+        # can only run after mesh.prepare_data() had
         # done its job; this is a queue 
         self.deferred_counts = []
         self.deferred_gradings = []
