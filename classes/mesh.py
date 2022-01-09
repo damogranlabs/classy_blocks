@@ -39,7 +39,7 @@ class Mesh():
         # block.mesh_index is not required but will come in handy for debugging
         block.mesh_index = len(self.blocks)
         self.blocks.append(block)
-
+        
     def add(self, item):
         if hasattr(item, 'block'):
             self.add_block(item.block)
@@ -87,10 +87,9 @@ class Mesh():
                         # block 'mb' shares the same edge or face
                         block.neighbours.add(mb)
 
-
-    def copy_count(self, block, axis):
+    def copy_grading(self, block, axis):
         """ finds a block that shares an edge with given block
-        and copies its cell count along that edge """
+        and copies its grading along that axis """
         # there are 4 pairs of vertices on specified axis:
         match_pairs = block.get_axis_vertex_pairs(axis)
 
@@ -98,38 +97,19 @@ class Mesh():
         # edges in match_pairs:
         for b in block.neighbours:
             for p in match_pairs:
-                b_axis, _ = b.get_axis_from_pair(p)
-                if b_axis is not None:
-                    # b.get_axis_from_pair() returns axis index in
-                    # the block we want to copy from;
-                    if b.n_cells[b_axis] is not None:
-                        # this block has the cell count set
-                        # so we can (must) copy it
-                        block.n_cells[axis] = b.n_cells[b_axis]
-                        return True
-        
-        return False
-
-    def copy_grading(self, block, axis):
-        """ same as self.copy_count but for grading """
-        match_pairs = block.get_axis_vertex_pairs(axis)
-
-        for b in block.neighbours:
-            for p in match_pairs:
                 b_axis, direction = b.get_axis_from_pair(p)
                 if b_axis is not None:
                     # b.get_axis_from_pair() returns axis index in
-                    # the block we want to copy from
-                    if b.grading[b_axis] is not None:
-                        # this block has the cell count set;
-                        # if it's created in reverse, invert the grading as well
+                    # the block we want to copy from;
+                    if b.grading[b_axis].is_defined:
+                        # this block's count/grading is defined on this axis
+                        # so we can (must) copy it
                         if direction:
                             block.grading[axis] = b.grading[b_axis].copy()
                         else:
                             block.grading[axis] = b.grading[b_axis].copy(invert=True)
-
+                        
                         return True
-
         return False
 
     def collect_vertices(self):
@@ -174,10 +154,10 @@ class Mesh():
         for block in self.blocks:
             self.assign_neighbours(block)
 
-    def set_counts(self):
+    def set_gradings(self):
         # now is the time to set counts
         for block in self.blocks:
-            for f in block.deferred_counts:
+            for f in block.deferred_gradings:
                 f.call()
 
         # propagate cell count:
@@ -192,10 +172,10 @@ class Mesh():
                 block = self.blocks[i]
 
                 for axis in range(3):
-                    if block.n_cells[axis] is None:
-                        updated = self.copy_count(block, axis) or updated
+                    if not block.grading[axis].is_defined:
+                        updated = self.copy_grading(block, axis) or updated
                 
-                if block.is_count_defined:
+                if block.is_grading_defined:
                     undefined_blocks.remove(i)
                     updated = True
                     break
@@ -216,36 +196,6 @@ class Mesh():
             
             raise Exception(message)
 
-    def set_gradings(self):
-        # now is the time to set gradings
-        for block in self.blocks:
-            for f in block.deferred_gradings:
-                f.call()
-
-        # propagate grading:
-        # very similar to counts
-        n_blocks = len(self.blocks)
-        undefined_blocks = set(range(n_blocks))
-        updated = False
-
-        while len(undefined_blocks) > 0:
-            for i in undefined_blocks:
-                block = self.blocks[i]
-
-                for axis in range(3):
-                    if block.grading[axis] is None:
-                        updated = self.copy_grading(block, axis) or updated
-
-                if block.is_grading_defined:
-                    undefined_blocks.remove(i)
-                    updated = True
-                    break
-
-            if not updated:
-                break
-
-            updated = False
-
     def project_faces(self):
         # projected faces:
         self.faces = []
@@ -261,8 +211,6 @@ class Mesh():
         self.collect_vertices()
         self.collect_edges()
         self.collect_neighbours()
-
-        self.set_counts()
         self.set_gradings()
         self.project_faces()
 

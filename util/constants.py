@@ -13,6 +13,6 @@ def vector_format(vector):
 # cylinder/frustum creation:
 # ratio of radius of internal block vertex of a cylinder/frustum
 # to outer radius of that cylinder/frustum
-frustum_core_to_outer = 0.4
+frustum_core_to_outer = 0.65
 # the same as above but is used for edge points
-frustum_edge_to_outer = 0.33
+frustum_edge_to_outer = 0.5
