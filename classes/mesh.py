@@ -132,7 +132,7 @@ class Mesh():
 
         return False
 
-    def prepare_data(self):
+    def collect_vertices(self):
         # collect all vertices from all blocks,
         # check for duplicates and give them indexes
         for block in self.blocks:
@@ -144,7 +144,8 @@ class Mesh():
                     self.vertices.append(block_vertex)
                 else:
                     block.vertices[i] = found_vertex
-        
+
+    def collect_edges(self):
         # collect all edges from all blocks;
         for block in self.blocks:
             # check for duplicates (same vertex pairs) and
@@ -166,12 +167,14 @@ class Mesh():
                     # only non-existing edges are added
                     self.edges.append(block_edge)                
 
+    def collect_neighbours(self):
         # collect all neighbours from all blocks;
         # when setting counts and gradings, each block will iterate over them
         # only and not through all blocks
         for block in self.blocks:
             self.assign_neighbours(block)
 
+    def set_counts(self):
         # now is the time to set counts
         for block in self.blocks:
             for f in block.deferred_counts:
@@ -212,7 +215,8 @@ class Mesh():
             message += '\n'
             
             raise Exception(message)
-        
+
+    def set_gradings(self):
         # now is the time to set gradings
         for block in self.blocks:
             for f in block.deferred_gradings:
@@ -220,6 +224,7 @@ class Mesh():
 
         # propagate grading:
         # very similar to counts
+        n_blocks = len(self.blocks)
         undefined_blocks = set(range(n_blocks))
         updated = False
 
@@ -240,7 +245,8 @@ class Mesh():
                 break
 
             updated = False
-        
+
+    def project_faces(self):
         # projected faces:
         self.faces = []
         for b in self.blocks:
@@ -250,6 +256,15 @@ class Mesh():
                     b.format_face(f[0]), # face, like (8 12 15 11) 
                     f[1] # the geometry to project to
                 ])
+
+    def prepare_data(self):
+        self.collect_vertices()
+        self.collect_edges()
+        self.collect_neighbours()
+
+        self.set_counts()
+        self.set_gradings()
+        self.project_faces()
 
     def set_default_patch(self, name, type):
         assert type in ('patch', 'wall', 'empty', 'wedge')
