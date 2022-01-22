@@ -44,8 +44,9 @@ import warnings
 
 # calculations meticulously transcribed from the blockmesh grading calculator:
 # https://gitlab.com/herpes-free-engineer-hpe/blockmeshgradingweb/-/blob/master/calcBlockMeshGrading.coffee
+# (since block length is always known, there's less wrestling but the calculation principle is similar)
 
-# gather available functions for calculation
+# gather available functions for calculation of grading parameters
 functions = [] # list [ [return_value, {parameters}, function], ... ]
 
 for m in inspect.getmembers(gc):
@@ -58,6 +59,8 @@ for m in inspect.getmembers(gc):
         )
 
 def calculate(length, parameters):
+    # calculates cell count and total expansion ratio for a block
+    # by calling functions that take known variables and return new values
     keys = parameters.keys()
     calculated = set()
 
@@ -105,6 +108,7 @@ class Grading:
          - end_size: width of end cell
          - count: cell count in given direction
          - c2c_expansion: cell-to-cell expansion ratio (default=1)
+         - total_expansion: ratio between first and last cell size
 
         You must specify start_size and/or count.
         c2c_expansion is optional - will be used to create graded cells
@@ -116,7 +120,7 @@ class Grading:
         https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading """
         assert self.length is not None
         assert 0 < length_ratio <= 1
-        
+
         # default: take c2c_expansion=1 if there's less than 2 parameters given
         grading_params = [start_size, end_size, c2c_expansion, count]
         if grading_params.count(None) > len(grading_params) - 2:
@@ -177,7 +181,7 @@ class Grading:
     def __repr__(self):
         if len(self.divisions) == 0:
             # no grading specified: default to 1
-            return '1'
+            return 'Undefined'
         
         if len(self.divisions) == 1:
             # its a one-number simpleGrading:

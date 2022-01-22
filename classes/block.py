@@ -1,11 +1,6 @@
-import collections
-
 import numpy as np
-import scipy.optimize
 
 from ..util import functions as f
-from ..util import constants
-
 from .primitives import Vertex, Edge
 from .grading import Grading
 
@@ -50,7 +45,6 @@ class Block():
 
         # block grading; when None, default to 1
         self.grading = [Grading(), Grading(), Grading()]
-        self._n_cells = None # caching for n_cells property
 
         # cellZone to which the block belongs to
         self.cell_zone = ""
@@ -69,10 +63,9 @@ class Block():
         # set in Mesh.prepare_data()
         self.mesh_index = None
         
-        # functions like count_to_size and some other
-        # can only run after mesh.prepare_data() had
+        # functions like chop() and some other
+        # can only run after mesh.prepare_data() has
         # done its job; this is a queue 
-        self.deferred_counts = []
         self.deferred_gradings = []
 
         # a list of blocks that share an edge with this block;
@@ -196,8 +189,10 @@ class Block():
         Exactly two of the following keyword arguments must be provided:
 
         start_size: size of the first cell (last if invert==True)
+        end_size: size of the last cell
         c2c_expansion: cell-to-cell expansion ratio
         count: number of cells
+        total_expansion: ratio between first and last cell size
 
         Optional:
         invert: reverses grading if True
@@ -254,10 +249,7 @@ class Block():
 
     @property
     def n_cells(self):
-        if self._n_cells is None:
-            self._n_cells = [g.count for g in self.grading]
-        
-        return self._n_cells
+        return [g.count for g in self.grading]
     
     def __repr__(self):
         """ outputs block's definition for blockMeshDict file """

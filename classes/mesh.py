@@ -95,19 +95,16 @@ class Mesh():
 
         # first, find a block in mesh that shares one of the
         # edges in match_pairs:
-        for b in block.neighbours:
+        for n in block.neighbours:
             for p in match_pairs:
-                b_axis, direction = b.get_axis_from_pair(p)
+                b_axis, direction = n.get_axis_from_pair(p)
                 if b_axis is not None:
                     # b.get_axis_from_pair() returns axis index in
                     # the block we want to copy from;
-                    if b.grading[b_axis].is_defined:
+                    if n.grading[b_axis].is_defined:
                         # this block's count/grading is defined on this axis
                         # so we can (must) copy it
-                        if direction:
-                            block.grading[axis] = b.grading[b_axis].copy()
-                        else:
-                            block.grading[axis] = b.grading[b_axis].copy(invert=True)
+                        block.grading[axis] = n.grading[b_axis].copy(invert=not direction)
                         
                         return True
         return False
@@ -159,6 +156,7 @@ class Mesh():
         for block in self.blocks:
             for f in block.deferred_gradings:
                 f.call()
+            block.deferred_gradings = []
 
         # propagate cell count:
         # a riddle similar to sudoku, keep traversing
