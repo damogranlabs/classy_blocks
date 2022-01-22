@@ -19,17 +19,11 @@ Since it is easier to crunch numbers and vectors and everything else with `numpy
 
 # Features
 - Write your parametric model's geometry with a short Python script and translate it directly to `blockMeshDict`
-- Predefined shapes like `Cylinder` or operations like `Extrude` and `Revolve`*
+- Predefined shapes like `Cylinder` or operations like `Extrude` and `Revolve`
 - Simple specification of edges: a single point for circular or a list of points for a spline edge
-- Automatic calculation of number of cells with `block.count_to_size(cell_size)`
-- Automatic cell grading calculation by setting required cell size `block.grade_to_size(cell_size)`
+- Automatic calculation of cell count and grading by specifying any of a number of parameters (cell-to-cell expansion ratio, start cell width, end cell width, total expansion ratio)
 - Automatic propagation of grading and cell count from block to block as required by blockMesh
-
-
-*There are 3 different abstraction levels:
-1. Shapes take points and vectors as parameters (depending on that shape) and returns an object that is passed to Mesh. Everything (including blocks) is created implicitly and you don't have to deal with any of the low-level stuff.
-1. An _Operation_ combines a `Face` (4 points, 4 edges) and transforms it into a block using a rule based on the operation itself. `Revolve`, for instance, rotates the face around a specified axis and also creates circular edges between the two faces.
-1. The lowest-level approach is to calculate vertex and edge points manually and create blocks from those.
+- projections of edges and block faces to `geometry` (STL meshes and searchable surfaces)
 
 ## Predefined Shapes
  - Cone Frustum (truncated cone)
@@ -37,16 +31,59 @@ Since it is easier to crunch numbers and vectors and everything else with `numpy
  - Ring (annulus)
  - Elbow (bent pipe)
 
+A simple exapmle:
+```python
+inlet = Cylinder([x_start, 0, 0], [x_end, 0, 0], [0, 0, radius])
+inlet.chop_radial(count=n_cells_radial, end_size=boundary_layer_thickness)
+inlet.chop_axial(start_size=axial_cell_size, end_size=2*axial_cell_size)
+inlet.chop_tangential(count=n_cells_tangential)
+
+inlet.set_bottom_patch('inlet')
+inlet.set_outer_patch('wall')
+inlet.set_top_patch('outlet')
+mesh.add(inlet)
+```
+
 > See [examples/shape](https://github.com/damogranlabs/classy_examples) for example use of each 'shape'. See [examples/complex](https://github.com/damogranlabs/classy_examples) for a more real-life example usage of shapes.
 
-## Using Operations
-A `Face` is a collection of 4 vertices and 4 edges. It is a 2D object analogous to a _sketch_ in most CAD modelers - once defined, it can be used to create 3D shapes with various _operations_.
+## Operations
+An _operation_ is a 2D face (analogous to a sketch in 3D CAD software), swiped into a 3D shape by one of the below rules. A `Face` is a collection of 4 vertices and 4 edges.
 
 ### Extrude
 A single block is created from a `Face` translated by an extrude vector.
 
 ### Revolve
 A single face is revolved around a given axis so that a circular object with a constant cross-section is created.
+
+```python
+# a quadrangle with one curved side
+base = Face(
+    [ # quad vertices
+        [0, 0, 0],
+        [1, 0, 0],
+        [1, 1, 0],
+        [0, 1, 0]
+    ],
+    [ # edges: None specifies straight edge
+        [0.5, -0.2, 0], # single point: arc
+        None,
+        None,
+        None
+  ]
+)
+
+revolve = Revolve(
+    base, # face to revolve
+    f.deg2rad(45), # revolve angle
+    [0, -1, 0], # axis
+    [-2, 0, 0]  # origin
+)
+
+revolve.chop(0, count=15) # first edge
+revolve.chop(1, count=15) # second edge
+revolve.chop(2, start_size=0.05) # revolve direction
+mesh.add(revolve)
+```
 
 ### Wedge
 A special case of revolve for 2D axisymmetric meshes. A list of `(x,y)` points is revolved symetrically around x-axis as required by a `wedge` boundary condition in OpenFOAM.
@@ -56,32 +93,43 @@ A single block, created between two `Face`s. Edges between the same vertices on 
 
 > See [examples/operations](https://github.com/damogranlabs/classy_examples) for an example of each operation.
 
-**Basically any kind of block can be created with Loft so this is usually as low-level as you'll need to go.**
+### Projection To Geometry
+```python
+geometry = {
+    'terrain': [ 
+        'type triSurfaceMesh;',
+        'name terrain;',
+        'file "terrain.stl";',
+    ]
+}
+base = Face([
+    [-1, -1, -1],
+    [ 1, -1, -1],
+    [ 1,  1, -1],
+    [-1,  1, -1]
+])
 
-## Low level
-Manual block creation using vertices, edges, etc.
+extrude = Extrude(base, [0, 0, 2])
+extrude.block.project_face('bottom', 'terrain', edges=True)
+extrude.chop(0, count=20)
+extrude.chop(1, count=20)
+extrude.chop(2, start_size=0.01, c2c_expansion=1.2)
 
-Workflow is similar to bare-bones blockMeshDict but you don't have to track
-vertex/edge/block indexes. You do:
+extrude.set_patch('bottom', 'terrain')
+mesh.add(extrude)
+mesh.set_default_patch('atmosphere', 'patch')
+```
 
- 1. Calculate block vertices
- 1. Calculate edge points, if any
- 1. Create a Mesh object
- 1. Create a Block object with vertices and edges for each block
- 1. Add blocks to mesh
- 1. Set block cell count and sizes
- 1. Assign patches
- 1. Pray you did everything right
- 1. Cry because you didn't
-
-> See [examples/primitive](https://github.com/damogranlabs/classy_examples) for a demonstration.
-
-## Prerequisites
+# Prerequisites
  - numpy
  - scipy
  - jinja2
+ - blockMesh
 
 # Technical Information
+
+There's no official documentation yet so here are some tips for easier navigation through source.
+
 ## Classes
 These contain data to be written to blockMeshDict and also methods for point manipulation and output formatting.
 
@@ -91,18 +139,23 @@ These contain data to be written to blockMeshDict and also methods for point man
 - `Block`: contains `Vertex` and `Edge` objects and other block data: patches, number of cells, grading, cell zone, description.
 - `Mesh`: holds lists of all blockMeshDict data: `Vertex`, `Edge`, `Block`.
 
-## Block (Geometry) Creation
-A blockMesh is created from a number of blocks, therefore a `Block` object is in the center of attention. A `Block` can be created in different ways:
- 1. Directly from 8 vertices. The order of vertices follows the [sketch on openfoam.com user manual](https://www.openfoam.com/documentation/user-guide/blockMesh.php). Edges are added to block by specifying vertex indexes and a list of points in between.
- 1. From 2 `Face` objects. Edges between the same vertex on both faces can be provided as well.
- 1. From any of the Operations. Creation of a Block with an Operation depends on type of specific operation.
- 1. By using a predefined Shape. Creation procedure again differs from shape to shape. Usually multiple blocks are returned.
+## Block Creation
+A blockMesh is created from a number of blocks, therefore a `Block` object is in the center of attention. It is always created from 8 vertices - the order of which follows the [sketch on openfoam.com user manual](https://www.openfoam.com/documentation/user-guide/blockMesh.php). Edges are added to block by specifying vertex indexes and a list of points in between.
 
-Once blocks are created, additional data may be added (number of cells, grading, patches).
+`Operation`s simply provide an interface for calculating those 8 vertices in a _user-friendly_ way, taking care of intricate calculations of points and edges.
+
+Once blocks are created, additional data must/may be added (number of cells, grading, patches, projections).
 Finally, all blocks must be added to Mesh. That will prepare data for blockMesh and create a blockMeshDict from a template.
 
 ## Data Preparation
-`Mesh` only contains a list of blocks. Each block self-contains its data. Since blocks share vertices and edges and blockMesh needs separate lists of the latter, `Mesh.prepare_data()` will traverse its list of blocks and store vertices and edges to separate lists. During that it will check for duplicates and drop them. It will also collect patches from all blocks and store them into a template-readable list.
+After all blocks have been added, an instance of `Mesh` class only contains a list of blocks. Each block self-contains its own data. Since blocks share vertices and edges and blockMesh needs separate lists of both, `Mesh.prepare_data()` will translate all individual blocks' data to format blockMesh will understand:
+ - collect new vertices and re-use existing ones
+ - collect block edges, skipping duplicates
+ - assign neighbours of each block, then try to propagate cell counts and gradings through the whole mesh; if that fails, an `Exception` is raised
+ - gather a list of projected faces and edges
+
+## Deferred Functions
+Block edges are shared between block - an edge can be specified in one block but up to 4 blocks can use it. Since block size depends on its edges, those must first be propagated throughout the mesh, only then can sizing and chopping begin. For convenience reasons `block.chop()` function is available at once but not executed; its parameters are stored and the function is called in `mesh.prepare_data()`. This makes debugging a little more difficult but the scripts for geometry generation are much prettier - each block's properties can be kept in one place.
 
 ## Bonus:
 ### Geometry functions
@@ -113,18 +166,15 @@ Of course you are free to use your own :)
 # TODO
  - More examples from real life
  - More Shapes
-   - ElbowWall
- - Predefined ready-to-use parametric objects
+   - Elbow Wall (bent pipe wall)
    - T-joint
    - X-joint
+ - Face collections (common operations on groups of faces)
+ - Specifying number of blocks in operation direction
    - Elbow from segments
    - Elbow wall from segments
- - Optional face merging
- - Tools
-   - refineWallLayer script
  - Technicalities:
-   - More Tests, including examples
+   - More Tests
    - logging for info/debug
    - output geometry to .obj for debugging
-   - shorter imports (something to do with `__init__.py` files)
  - A proper documentation

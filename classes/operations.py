@@ -127,32 +127,13 @@ class Operation():
             self.edges
         )
 
-    def set_cell_count(self, axis, count):
-        """ Directly set number of cells for given axis:
+    def chop(self, axis, **kwargs):
+        """ Chop the operation (count/grading) in given axis:
          0: along first edge of a face
          1: along second edge of a face
          2: between faces / along operation path
         """
-        self.block.n_cells[axis] = int(count)
-
-    def count_to_size(self, axis, cell_size, take='avg'):
-        """ Calculate cell count to meet cell_size.
-        Axes:
-         0: along first edge of a face
-         1: along second edge of a face
-         2: between faces / along operation path
-        """
-        return self.block.count_to_size(axis, cell_size, take=take)
-
-    def grade_to_size(self, axis, size):
-        """ Sets block grading so that the final cell size is as required;
-        to set that cell size on opposite (beginning) side, use negative size.
-
-        Axes:
-         0: along first edge of a face
-         1: along second edge of a face
-         2: between faces / along operation path """
-        self.block.grade_to_size(axis, abs(size), size<0)
+        self.block.chop(axis, **kwargs)
 
     def set_patch(self, sides, patch_name:str):
         """ bottom: bottom face
@@ -276,7 +257,7 @@ class Wedge(Revolve):
         super().set_patch('bottom', 'wedge_back')
 
         # there's also only 1 cell in z-direction
-        self.set_cell_count(2, 1)
+        self.chop(2, count=1)
 
     def set_patch(self):
         raise NotImplementedError("Use set_[outer|inner|left|right]_patch methods for wedges")

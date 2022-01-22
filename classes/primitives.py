@@ -8,7 +8,6 @@ class WrongEdgeTypeException(Exception):
     def __init__(self, edge_type, *args, **kwargs):
         raise Exception(f"Wrong edge type: {edge_type}", *args, **kwargs)
 
-# see README for terminology, terminolology, lol
 class Vertex():
     """ point with an index that's used in block and face definition
     and can output in OpenFOAM format """

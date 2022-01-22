@@ -1,11 +1,6 @@
-import collections
-
 import numpy as np
-import scipy.optimize
 
 from ..util import functions as f
-from ..util import constants
-
 from .primitives import Vertex, Edge
 from .grading import Grading
 
@@ -48,12 +43,8 @@ class Block():
         self.faces = [] # a list of projected faces;
         # [['bottom', 'terrain'], ['right', 'building'], ['back', 'building'],]
 
-        # number of block cells, one number for x, y, and z direction
-        # when None, try to get it from neighbour blocks
-        self.n_cells = [None, None, None]
-
         # block grading; when None, default to 1
-        self.grading = [None, None, None]
+        self.grading = [Grading(), Grading(), Grading()]
 
         # cellZone to which the block belongs to
         self.cell_zone = ""
@@ -72,10 +63,9 @@ class Block():
         # set in Mesh.prepare_data()
         self.mesh_index = None
         
-        # functions like count_to_size and some other
-        # can only run after mesh.prepare_data() had
+        # functions like chop() and some other
+        # can only run after mesh.prepare_data() has
         # done its job; this is a queue 
-        self.deferred_counts = []
         self.deferred_gradings = []
 
         # a list of blocks that share an edge with this block;
@@ -86,21 +76,9 @@ class Block():
     ### Information
     ###
     @property
-    def is_count_defined(self):
-        return all(self.n_cells)
-    
-    @property
-    def is_any_count_defined(self):
-        return any(self.n_cells)
-    
-    @property
     def is_grading_defined(self):
-        return all(self.grading)
+        return all([g.is_defined for g in self.grading])
 
-    @property
-    def is_any_grading_defined(self):
-        return any(self.grading)
-    
     def get_faces(self, patch):
         if patch not in self.patches:
             return []
@@ -205,86 +183,31 @@ class Block():
             self.patches[patch_name] = []
         
         self.patches[patch_name] += sides
-    
-    def count_to_size(self, axis, cell_size, take='avg'):
-        """ Takes the average/maximum/minimum length of all edges of the block along given axis
-        and sets the number of cells to obtain the desired cell size. """
-        df = DeferredFunction(self._count_to_size, axis, cell_size, take=take)
-        self.deferred_counts.append(df)
 
-    def _count_to_size(self, axis, cell_size, take='avg'):
-        block_size = self.get_size(axis, take=take)
-        count = max(1, int(block_size/cell_size))
+    def chop(self, axis, **kwargs):
+        """ Set block's cell count/size and grading for a given direction/axis.
+        Exactly two of the following keyword arguments must be provided:
 
-        self.n_cells[axis] = count
-        return count
+        start_size: size of the first cell (last if invert==True)
+        end_size: size of the last cell
+        c2c_expansion: cell-to-cell expansion ratio
+        count: number of cells
+        total_expansion: ratio between first and last cell size
 
-    def grade_to_size(self, axis, cell_size, inverse=False):
-        """ Calculate grading for given axis so that first cell will be of cell_size;
-        If a negative cell_size is given, the last cell size is being set. """
-        df = DeferredFunction(self._grade_to_size, axis, cell_size, inverse)
-        self.deferred_gradings.append(df)
-
-    def _grade_to_size(self, axis, cell_size, inverse=False):
-        # calculate grading so that first cell will be of cell_size
-        # for this axis.
-        n_cells = self.n_cells[axis]
-        block_size = self.get_size(axis)
-
-        if abs(cell_size) > block_size:
-            raise AssertionError(f"Cell size is larger than block size: {abs(cell_size)} > {block_size}")
-
-        cell_sizes = []
-
-        def fcell_size(grading):
-            nonlocal cell_sizes
-
-            cell_sizes = [1] # will be scaled later
-
-            # returns last cell size for given grading;
-            # scales everything so that block size matches the original
-            l_block = 0
-
-            for _ in range(n_cells):
-                l_block += cell_sizes[-1]
-                cell_sizes.append(cell_sizes[-1]*grading)
-
-                if cell_sizes[-1] < constants.tol:
-                    return
-            
-            cell_sizes = [c*block_size/l_block for c in cell_sizes]
-
-            return cell_size - cell_sizes[-1]
-
-        # find a grading that produces correct last_cell_size
-        scipy.optimize.newton(fcell_size, 1)
-
-        self.grading[axis] = Grading()
-
-        if inverse:
-            self.grading[axis].add_division(1, 1, cell_sizes[-1]/cell_sizes[0])
-            # = cell_sizes[-1]/cell_sizes[0]
-        else:
-            self.grading[axis].add_division(1, 1, cell_sizes[0]/cell_sizes[-1])
-            #self.grading[axis] = cell_sizes[0]/cell_sizes[-1]
-
-    def manual_multigrade(self, axis, grading_data):
-        """ `grading_data` is a list of lists containing 
-            instructions for grading:
-            grading_data = [
-                length_fraction,
-                count_fraction,
-                expansion_ratio
-            ]
-            the list is thrown directly into blockMesh definition
-            so it's up to the user to get the numbers right.
-
-            TODO: make this user-friendlier.
+        Optional:
+        invert: reverses grading if True
+        take: must be 'min', 'max', or 'avg'; takes minimum or maximum edge
+            length for block size calculation, or average of all edges in given direction.
+        length_ratio: in case the block is graded using multiple gradings, specify
+            length of current division; see
+            https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
         """
-        self.grading[axis] = Grading()
+        def deferred_chop():
+            block_size = self.get_size(axis, take=kwargs.pop('take', 'avg'))
+            self.grading[axis].set_block_size(block_size)
+            self.grading[axis].add_division(**kwargs)
 
-        for g in grading_data:
-            self.grading[axis].add_division(*g)
+        self.deferred_gradings.append(DeferredFunction(deferred_chop))
 
     def project_edge(self, index_1, index_2, geometry):
         # TEST
@@ -323,6 +246,10 @@ class Block():
             vertices[2].mesh_index,
             vertices[3].mesh_index
         )
+
+    @property
+    def n_cells(self):
+        return [g.count for g in self.grading]
     
     def __repr__(self):
         """ outputs block's definition for blockMeshDict file """

@@ -170,38 +170,20 @@ class Elbow:
         for s in self.shell:
             s.block.set_patch(self.outer_patch, patch_name)
 
-    ### Manual cell counts
-    def set_axial_cell_count(self, count):
-        self.shell[0].set_cell_count(self.axial_axis, count)
+    ### Counts and gradings
+    def chop_axial(self, **kwargs):
+        self.shell[0].chop(self.axial_axis, **kwargs)
 
-    def set_radial_cell_count(self, count):
-        self.shell[0].set_cell_count(self.radial_axis, count)
+    def chop_radial(self, **kwargs):
+        # set cell count on the outside
+        kwargs['invert'] = not kwargs.get('invert')
 
-    def set_tangential_cell_count(self, count):
-        self.core.set_cell_count(self.radial_axis, count)
-        self.core.set_cell_count(self.tangential_axis, count)
+        for s in self.shell:
+            s.chop(self.radial_axis, **kwargs)
 
-    ### Count to size
-    def count_to_size_axial(self, cell_size):
-        self.core.count_to_size(self.axial_axis, cell_size)
-
-    def count_to_size_radial(self, cell_size):
-        self.shell[0].count_to_size(self.radial_axis, cell_size)
-
-    def count_to_size_tangential(self, cell_size):
-        self.core.count_to_size(self.radial_axis, cell_size)
-        self.core.count_to_size(self.tangential_axis, cell_size)
-
-    ### Grading
-    def grade_to_size_axial(self, size):
-        # 'core' is the first block to be added;
-        # other blocks' grading will be copied from it
-        self.core.grade_to_size(self.axial_axis, size)
-
-    def grade_to_size_radial(self, size):
-        # only set grading for the first shell block,
-        # mesh will copy it to others
-        self.shell[0].grade_to_size(self.radial_axis, -size)
+    def chop_tangential(self, **kwargs):
+        for s in self.shell:
+            s.chop(self.tangential_axis, **kwargs)
 
     def set_cell_zone(self, cell_zone):
         for b in self.blocks:
@@ -267,25 +249,15 @@ class RevolvedRing(Elbow):
 
         self.shell = [revolve.rotate(axis, a, self.axis_point_1) for a in revolve_angles]
 
-    def set_tangential_cell_count(self, count):
-        for s in self.shell:
-            s.set_cell_count(self.tangential_axis, count)
+    def chop_radial(self, **kwargs):
+        # set cell count on the outside
+        # different orientation than Elbow
+        kwargs['invert'] = not kwargs.get('invert')
+        super().chop_radial(**kwargs)
 
     def set_inner_patch(self, patch_name):
         for s in self.shell:
             s.block.set_patch('front', patch_name)
-
-    def count_to_size_axial(self, cell_size):
-        self.shell[0].count_to_size(self.axial_axis, cell_size)
-
-    def count_to_size_tangential(self, cell_size):
-        for s in self.shell:
-            s.count_to_size(self.tangential_axis, cell_size)
-
-    def grade_to_size_axial(self, size):
-        # there is no 'core' block
-        self.shell[0].grade_to_size(self.axial_axis, size)
-
 
 class ExtrudedRing(RevolvedRing):
     """ a ring specified like a Cylinder """
