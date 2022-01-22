@@ -41,10 +41,9 @@ def get_mesh():
     ]
 
     loft = Loft(bottom_face, top_face, side_edges)
-    loft.set_cell_count(0, 10)
-    loft.set_cell_count(1, 10)
-    loft.set_cell_count(2, 30)
-    loft.grade_to_size(2, 0.01)
+    loft.chop(0, start_size=0.1, c2c_expansion=1)
+    loft.chop(1, c2c_expansion=1, count=20)
+    loft.chop(2, c2c_expansion=1, count=30)
 
     mesh = Mesh()
     mesh.add(loft)

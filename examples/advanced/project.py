@@ -21,16 +21,17 @@ def get_mesh():
 
     extrude = Extrude(base, [0, 0, 2])
 
-    extrude.block.project_face('bottom', 'terrain')
+    # use edges=True to include all edges;
+    extrude.block.project_face('bottom', 'terrain', edges=True)
 
-    extrude.block.project_edge(0, 1, 'terrain')
-    extrude.block.project_edge(1, 2, 'terrain')
-    extrude.block.project_edge(2, 3, 'terrain')
-    extrude.block.project_edge(3, 0, 'terrain')
+    # to project a specific edge only, use block.project_edge()
+    # extrude.block.project_edge(0, 1, 'terrain')
+    # extrude.block.project_edge(1, 2, 'terrain')
+    # extrude.block.project_edge(2, 3, 'terrain')
+    # extrude.block.project_edge(3, 0, 'terrain')
 
-    extrude.set_cell_count(0, 20)
-    extrude.set_cell_count(1, 20)
-    extrude.set_cell_count(2, 20)
+    for axis in range(3):
+        extrude.chop(axis, count=20)
 
     extrude.set_patch('bottom', 'terrain')
 

@@ -200,47 +200,47 @@ def get_mesh():
 
         # create blocks one by one
         block_0 = create_block(i_start, i_end, i_edge, p[0], p[1], p[3], p[2], 0)
-        block_0.count_to_size(0, cell_size)
-        block_0.count_to_size(1, cell_size)
-        block_0.count_to_size(2, cell_size * g.r_1T / g.r_2T)
+        block_0.chop(0, start_size=cell_size)
+        block_0.chop(1, start_size=cell_size)
+        block_0.chop(2, start_size=cell_size * g.r_1T / g.r_2T)
         block_0.set_patch('left', 'volute_rotating')
 
         block_1 = create_block(i_start, i_end, i_edge, p[2], p[3], p[7], p[6], 1)
-        block_1.count_to_size(1, cell_size)
+        block_1.chop(1, start_size=cell_size)
         block_1.set_patch(['left', 'back'], 'volute_rotating')
 
         block_2 = create_block(i_start, i_end, i_edge, p[3], p[4], p[8], p[7], 2)
-        block_2.set_cell_count(0, counts[2])
+        block_2.chop(0, count=counts[2])
         block_2.set_patch('back', 'volute_inlet')
 
         block_3 = create_block(i_start, i_end, i_edge, p[4], p[5], p[9], p[8], 3)
-        block_3.set_cell_count(0, counts[8])
+        block_3.chop(0, count=counts[8])
 
         block_4 = create_block(i_start, i_end, i_edge, p[8], p[9], p[15], p[14], 4)
         block_4.set_patch('left', 'volute_inlet')
         if i_block == 0:
-            block_4.count_to_size(1, cell_size)
+            block_4.chop(1, start_size=cell_size)
         
         block_5 = create_block(i_start, i_end, i_edge,  p[9], p[10], p[16], p[15], 5)
-        block_5.set_cell_count(0, 1 + g.e_3 / cell_size)
+        block_5.chop(0, count=(1 + g.e_3 / cell_size))
         
         block_6 = create_block(i_start, i_end, i_edge, p[10], p[11], p[17], p[16], 6)
-        block_6.set_cell_count(0, at/cell_size)
+        block_6.chop(0, count=at/cell_size)
 
         if i_end > i_square:
             # add a block 7 if cross-section is big enough already
             block_7 = create_block(i_start, i_end, i_edge, p[22], p[23], p[11], p[10], 7)
-            block_7.set_cell_count(1, (ht - g.b_3)/cell_size)
+            block_7.chop(1, count=(ht - g.b_3)/cell_size)
         
         block_8 = create_block(i_start, i_end, i_edge, p[14], p[15], p[21], p[20], 8)
-        block_8.count_to_size(1, cell_size)
+        block_8.chop(1, start_size=cell_size)
         
         block_9 = create_block(i_start, i_end, i_edge, p[13], p[14], p[20], p[19], 9)
-        block_9.set_cell_count(0, counts[2])
+        block_9.chop(0, count=counts[2])
         block_9.set_patch('front', 'volute_inlet')
 
         block_10 = create_block(i_start, i_end, i_edge, p[12], p[13], p[19], p[18], 10)
-        block_10.count_to_size(0, cell_size)
+        block_10.chop(0, start_size=cell_size)
         block_10.set_patch(['left', 'front'], 'volute_rotating')
 
 
@@ -268,7 +268,7 @@ def get_mesh():
         angle = -(eps0 - np.pi/2)
 
         discharge_revolve = Revolve(start_face, angle, [1, 0, 0], p_rev)
-        discharge_revolve.count_to_size(2, cell_size)
+        discharge_revolve.chop(2, start_size=cell_size)
 
         volute.add(discharge_revolve)
 
@@ -284,15 +284,13 @@ def get_mesh():
         outlet_extrude.set_patch('top', 'volute_outlet')
 
         # here we can afford bigger cells since the this part is not that important
-        outlet_extrude.count_to_size(2, cell_size*3)
-        outlet_extrude.grade_to_size(2, cell_size)
+        outlet_extrude.chop(2, start_size=cell_size, end_size=cell_size*3)
 
         volute.add(outlet_extrude)
 
     discharge_set(block_6.top_face)
     discharge_set(block_7.top_face)
 
-    return volute
 
     # what's left to do to get a fully working mesh:
     #  - createPatch to create "walls" from undefined "defaultFaces"
@@ -308,3 +306,4 @@ def get_mesh():
     #  - surfaceMeshExtract
     #  - Optionally: surfaceRefineRedGreen, surfaceLambdaMuSmooth
     #  - snappyHexMesh/cfMesh
+    return volute

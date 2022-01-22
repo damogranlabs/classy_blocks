@@ -8,11 +8,17 @@ def get_mesh():
     )
 
     extrude = Extrude(base, [0.5, 0.5, 3])
-    extrude.set_cell_count(0, 15)
-    extrude.set_cell_count(1, 10)
-    extrude.set_cell_count(2, 50)
 
-    extrude.grade_to_size(2, -0.02)
+    # direction 1
+    extrude.chop(0, start_size=0.02, c2c_expansion=1.2, length_ratio=0.5, invert=False)
+    extrude.chop(0, start_size=0.02, c2c_expansion=1.2, length_ratio=0.5, invert=True)
+
+    # direction 2
+    extrude.chop(1, start_size=0.02, c2c_expansion=1.2, length_ratio=0.5, invert=False)
+    extrude.chop(1, start_size=0.02, c2c_expansion=1.2, length_ratio=0.5, invert=True)
+
+    # extrude direction
+    extrude.chop(2, c2c_expansion=1, count=20)
 
     mesh = Mesh()
     mesh.add(extrude)

@@ -18,30 +18,21 @@ def get_mesh():
     r_pipe = 50e-3
     r_elbow = 60e-3
     l_inlet = 300e-3
-    l_connection = 100e-3
+    l_connection = 200e-3
     l_outlet = 500e-3
 
-    # number of cells
-    n_cells_radial = 10
-    n_cells_tangential = 12
-
-    # cell sizes to adjust cell count
-    cell_size = (2*r_pipe)/(3*n_cells_radial)
-    # ratio of cell length (flow diretion) vs. cell height;
-    # used to lower cell count where nothing interesting happens
-    cell_ratio = 3
+    # cell sizing
+    min_size = r_pipe/8
+    max_size = 5*min_size # use bigger cells around not-so-important parts
 
     # shapes
     inlet = Cylinder([0, 0, 0], [l_inlet, 0, 0], [0, r_pipe, 0])
     inlet.set_bottom_patch('inlet')
 
     # set cell counts on all directions - for first block/operation/shape only!
-    inlet.set_axial_cell_count(l_inlet/cell_size/cell_ratio)
-    inlet.set_radial_cell_count(n_cells_radial)
-    inlet.set_tangential_cell_count(n_cells_tangential)
-
-    # grade to desired cell size
-    inlet.grade_to_size_axial(-cell_size) # negative size means we're setting at the other end
+    inlet.chop_tangential(start_size=min_size) # this is propagated along all other shapes
+    inlet.chop_radial(start_size=min_size/2) # this too
+    inlet.chop_axial(start_size=max_size, end_size=min_size)
 
     elbow_1 = Elbow(
         inlet.axis_point_2, 
@@ -52,16 +43,15 @@ def get_mesh():
         [0, 0, 1], # rotation axis
         r_pipe # radius 2
     )
-    elbow_cell_count = (np.pi/2)*(r_elbow+r_pipe)/cell_size
-    elbow_1.set_axial_cell_count(elbow_cell_count)
-
+    elbow_1.chop_axial(start_size=min_size)
 
     connection = Cylinder(
         elbow_1.circle_2.center_point,
         elbow_1.circle_2.center_point + np.array([0, l_connection, 0]),
         elbow_1.circle_2.radius_point
     )
-    connection.set_axial_cell_count(l_connection/cell_size)
+    connection.chop_axial(length_ratio=0.5, start_size=min_size, c2c_expansion=1.2)
+    connection.chop_axial(length_ratio=0.5, end_size=min_size, c2c_expansion=1/1.2)
 
     elbow_2 = Elbow(
         connection.axis_point_2,
@@ -72,7 +62,7 @@ def get_mesh():
         [1, 0, 0],
         r_pipe
     )
-    elbow_2.set_axial_cell_count(elbow_cell_count)
+    elbow_2.chop_axial(start_size=min_size)
 
     outlet = Cylinder(
         elbow_2.circle_2.center_point,
@@ -80,8 +70,7 @@ def get_mesh():
         elbow_2.circle_2.radius_point
     )
     outlet.set_top_patch('outlet')
-    outlet.set_axial_cell_count(l_outlet/cell_size/cell_ratio)
-    outlet.grade_to_size_axial(cell_size)
+    outlet.chop_axial(start_size=min_size, end_size=max_size)
 
     ### adjust other, common stuff and add shapes to mesh
     mesh = Mesh()

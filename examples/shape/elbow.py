@@ -15,7 +15,8 @@ def get_mesh():
     rotation_axis = [0, 0, 1]
 
     radius_2 = 0.4
-    cell_size = 0.05
+    boundary_size = 0.01
+    core_size = 0.08
 
     elbow = Elbow(
         center_point_1, radius_point_1, normal_1,
@@ -26,19 +27,10 @@ def get_mesh():
     elbow.set_top_patch('outlet')
     elbow.set_outer_patch('walls')
 
-    # set cell sizes
-    elbow.count_to_size_axial(cell_size)
-    elbow.count_to_size_radial(cell_size)
-    elbow.count_to_size_tangential(cell_size)
-
-    # or counts
-    #elbow.set_axial_cell_count(25)
-    #elbow.set_radial_cell_count(15)
-    #elbow.set_tangential_cell_count(8)
-
-    # grading in axial direction;
-    # negative to set cell size on the opposite side
-    elbow.grade_to_size_axial(-cell_size * radius_2/radius_1)
+    # counts and gradings
+    elbow.chop_tangential(start_size=core_size)
+    elbow.chop_radial(start_size=boundary_size, end_size=core_size)
+    elbow.chop_axial(start_size=2*core_size)
 
     mesh = Mesh()
     mesh.add(elbow)

@@ -26,9 +26,10 @@ def get_mesh():
     # number of cells:
     n_cells_radial = 8
     n_cells_tangential = 12
-    cell_ratio = 2 # ratio between axial (flow-aligned) and radial cell size
+    cell_ratio = 4 # ratio between axial (flow-aligned) and radial cell size
     outer_cell_size = (2*r_nozzle)/(3*n_cells_radial)
     axial_cell_size = outer_cell_size*cell_ratio
+    c2c_expansion = 1.2
 
     mesh = Mesh()
 
@@ -36,9 +37,9 @@ def get_mesh():
     x_start = 0
     x_end = l_inlet
     inlet = Cylinder([x_start, 0, 0], [x_end, 0, 0], [0, 0, r_inlet])
-    inlet.set_radial_cell_count(n_cells_radial)
-    inlet.set_axial_cell_count((x_end-x_start)/axial_cell_size)
-    inlet.set_tangential_cell_count(n_cells_tangential)
+    inlet.chop_radial(count=n_cells_radial)
+    inlet.chop_axial(start_size=axial_cell_size)
+    inlet.chop_tangential(count=n_cells_tangential)
 
     inlet.set_bottom_patch('inlet')
     inlet.set_outer_patch('wall')
@@ -48,10 +49,9 @@ def get_mesh():
     x_start = x_end
     x_end += l_nozzle
     nozzle = Frustum([x_start, 0, 0], [x_end, 0, 0], [x_start, 0, r_inlet], r_nozzle)
-    nozzle.set_axial_cell_count((x_end-x_start)/axial_cell_size)
     # the interesting part is the sharp edge: make cells denser here;
     # since we need the requested cell size at the end of the block, just use a negative size
-    nozzle.grade_to_size_axial(-outer_cell_size)
+    nozzle.chop_axial(start_size=axial_cell_size, end_size=outer_cell_size)
     nozzle.set_outer_patch('wall')
     mesh.add(nozzle)
 
@@ -59,8 +59,9 @@ def get_mesh():
     x_start = x_end
     x_end = x_end + l_chamber_inner
     chamber_inner = Cylinder([x_start, 0, 0], [x_end, 0, 0], [x_start, 0, r_nozzle])
-    chamber_inner.set_axial_cell_count((x_end-x_start)/axial_cell_size)
-    chamber_inner.grade_to_size_axial(outer_cell_size)
+    # create smaller cells at inlet and outlet but leave them bigger in the middle;
+    chamber_inner.chop_axial(length_ratio=0.5, start_size=outer_cell_size, end_size=axial_cell_size)
+    chamber_inner.chop_axial(length_ratio=0.5, start_size=axial_cell_size, end_size=outer_cell_size)
     mesh.add(chamber_inner)
 
     # chamber outer: ring
@@ -71,23 +72,22 @@ def get_mesh():
         [x_start, r_chamber_outer, 0]
     ])
     chamber_outer = RevolvedRing([x_start, 0, 0], [x_end, 0, 0], ring_face)
-    chamber_outer.set_axial_cell_count((x_end-x_start)/axial_cell_size)
-    chamber_outer.set_radial_cell_count((r_chamber_outer-r_nozzle)/axial_cell_size)
-
-    chamber_outer.grade_to_size_radial(outer_cell_size)
+    chamber_outer.chop_radial(length_ratio=0.5, start_size=outer_cell_size, c2c_expansion=c2c_expansion)
+    chamber_outer.chop_radial(length_ratio=0.5, end_size=outer_cell_size, c2c_expansion=1/c2c_expansion)
     chamber_outer.set_bottom_patch('wall')
     chamber_outer.set_top_patch('wall')
     chamber_outer.set_outer_patch('wall')
     mesh.add(chamber_outer)
 
+
     # outlet pipe
     x_start = x_end
     x_end = x_end + l_outlet
     outlet = Cylinder([x_start, 0, 0], [x_end, 0, 0], [x_start, 0, r_nozzle])
-    outlet.set_axial_cell_count((x_end-x_start)/axial_cell_size)
+    outlet.chop_axial(start_size=outer_cell_size, end_size=axial_cell_size)
     outlet.set_outer_patch('wall')
     outlet.set_top_patch('outlet')
     mesh.add(outlet)
 
-    # done.    
     return mesh
+    

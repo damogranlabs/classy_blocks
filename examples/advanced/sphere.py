@@ -3,9 +3,8 @@ import os
 
 import numpy as np
 
-from classy_blocks.classes import block, operations
+from classy_blocks.classes import operations
 from classy_blocks.classes.mesh import Mesh
-from classy_blocks.util.tools import get_count
 
 # sphere radius
 r = 0.5
@@ -95,7 +94,6 @@ def get_mesh():
 
     # add inner blocks
     ci = r / 3**0.5
-    n_bl_cells = get_count(r_prism - r, first_layer_thickness, expansion_ratio)
 
     for i in projected_faces:
         block = oplist[i].block
@@ -114,11 +112,10 @@ def get_mesh():
 
         o = operations.Loft(bottom_face, top_face)
         o.block.project_face('top', 'inner_sphere', edges=True)
-        o.count_to_size(0, ball_cell_size)
-        o.count_to_size(1, ball_cell_size)
 
-        o.set_cell_count(2, n_bl_cells)
-        o.grade_to_size(2, -first_layer_thickness)
+        o.chop(0, start_size=ball_cell_size)
+        o.chop(1, start_size=ball_cell_size)
+        o.chop(2, start_size=ball_cell_size, end_size=first_layer_thickness)
 
         o.set_patch('top', 'sphere')
         m.add(o)
@@ -127,15 +124,15 @@ def get_mesh():
     # of blocks need specific counts set
     # x-direction
     for i in (12, 14):
-        oplist[i].count_to_size(0, domain_cell_size)
+        oplist[i].chop(0, start_size=domain_cell_size)
 
     # y-direction
     for i in (10, 16):
-        oplist[i].count_to_size(1, domain_cell_size)
+        oplist[i].chop(1, start_size=domain_cell_size)
 
     # z-direction:
     for i in (3, 21):
-        oplist[i].count_to_size(2, domain_cell_size)
+        oplist[i].chop(2, start_size=domain_cell_size)
 
     m.set_default_patch('sides', 'wall')
 

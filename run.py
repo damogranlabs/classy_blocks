@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 import os
 
-geometry = None
-
 # uncomment the example you wish to run
 
 # primitive
@@ -10,7 +8,7 @@ geometry = None
 
 # operations
 # from examples.operation import extrude as example
-# from examples.operation import loft as example
+from examples.operation import loft as example
 # from examples.operation import revolve as example
 # from examples.operation import wedge as example
 # from examples.operation import airfoil_2d as example
@@ -24,16 +22,17 @@ geometry = None
 # complex cases
 # from examples.complex import piping as example
 # from examples.complex import helmholtz_nozzle as example
-# from examples.complex import karman as example
+# from examples.complex import karman as example ###
 # from examples.complex import pump_volute as example
 
-# advanced: projection
-#from examples.advanced import project as example
-#geometry = example.geometry
+# advanced
+# from examples.advanced import project as example # projection to STL surface
+# from examples.advanced import sphere as example # flow around sphere
 
-# advanced: flow around sphere
-from examples.advanced import sphere as example
-geometry = example.geometry
+try:
+    geometry = example.geometry
+except:
+    geometry = None
 
 mesh = example.get_mesh()
 

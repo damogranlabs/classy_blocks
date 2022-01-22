@@ -9,18 +9,18 @@ def get_mesh():
     radius_point_1 = [0, 0, 2]
     radius_2 = 0.5
 
+    bl_thickness = 0.01
+    core_size = 0.1
+
     frustum = Frustum(axis_point_1, axis_point_2, radius_point_1, radius_2)
 
     frustum.set_bottom_patch('inlet')
     frustum.set_top_patch('outlet')
     frustum.set_outer_patch('walls')
 
-    frustum.set_axial_cell_count(30)
-    frustum.set_radial_cell_count(20)
-    frustum.set_tangential_cell_count(15)
-
-    frustum.grade_to_size_axial(-0.02)
-    frustum.grade_to_size_radial(0.03)
+    frustum.chop_axial(count=30)
+    frustum.chop_radial(start_size=bl_thickness, end_size=core_size)
+    frustum.chop_tangential(start_size=core_size)
 
     mesh = Mesh()
     mesh.add(frustum)

@@ -11,11 +11,10 @@ def get_mesh():
 
     revolve = Revolve(base, f.deg2rad(60), [0, -1, 0], [-2, 0, 0])
 
-    revolve.set_cell_count(0, 15)
-    revolve.set_cell_count(1, 10)
-    revolve.set_cell_count(2, 50)
-
-    revolve.grade_to_size(2, -0.02)
+    # a shortcut for setting count only
+    revolve.chop(0, count=10)
+    revolve.chop(1, count=10)
+    revolve.chop(2, count=30)
 
     mesh = Mesh()
     mesh.add(revolve)

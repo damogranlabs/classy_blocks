@@ -14,12 +14,12 @@ def get_mesh():
     cylinder.set_top_patch('outlet')
     cylinder.set_outer_patch('walls')
 
-    cylinder.set_axial_cell_count(30)
-    cylinder.set_radial_cell_count(20)
-    cylinder.set_tangential_cell_count(15)
+    bl_thickness=0.05
+    core_size = 0.2
 
-    cylinder.grade_to_size_axial(-0.05)
-    cylinder.grade_to_size_radial(0.03)
+    cylinder.chop_axial(count=30)
+    cylinder.chop_radial(start_size=bl_thickness, end_size=core_size)
+    cylinder.chop_tangential(start_size=core_size)
 
     mesh = Mesh()
     mesh.add(cylinder)

@@ -4,6 +4,7 @@ import os
 import numpy as np
 
 from classy_blocks.classes.primitives import Vertex, Edge
+from classy_blocks.classes.grading import Grading
 from classy_blocks.classes.mesh import Mesh
 from classy_blocks.util import constants
 
@@ -86,13 +87,14 @@ class TestMesh(FixturedTestCase):
         """ block_2 must copy block_1's cell count and grading on axis 0 and 1"""
         self.mesh.prepare_data()
 
-        self.assertTrue(self.mesh.copy_count(self.block_2, 0))
-        self.assertTrue(self.mesh.copy_count(self.block_2, 1))
+        self.assertTrue(self.mesh.copy_grading(self.block_2, 0))
+        self.assertTrue(self.mesh.copy_grading(self.block_2, 1))
         
     def test_find_neighbour_fail(self):
         """ block_2 cannot copy cell count and grading from block_1 on axis 2 """
-        self.block_1.n_cells = [None, None, None]
-
+        self.block_1.grading = [Grading(), Grading(), Grading()]
+        self.block_1.deferred_gradings = []
+        
         self.assertRaises(Exception, self.mesh.prepare_data)
 
 

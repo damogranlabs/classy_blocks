@@ -5,13 +5,15 @@ def get_mesh():
     cylinder_diameter = 20e-3 # [m]
     ring_thickness = 5e-3 # [m]
 
-    # increase domain height for "proper" simulation
-    domain_height = 0.05 # [m]
+    # domain size
+    domain_height = 0.05 # [m] (increase for "proper" simulation)
     upstream_length = 0.03 # [m]
     downstream_length = 0.05 # [m]
 
     # size to roughly match cells outside ring
     cell_size = 0.3*ring_thickness
+    bl_thickness = 1e-4
+    c2c_expansion = 1.2 # cell-to-cell expansion ratio
 
     # it's a 2-dimensional case
     z = 0.01
@@ -30,12 +32,9 @@ def get_mesh():
         cylinder_diameter/2 + ring_thickness
     )
 
-    wall_ring.set_axial_cell_count(1)
-    wall_ring.set_radial_cell_count(10)
-    wall_ring.count_to_size_tangential(ring_thickness/3)
-
-    wall_ring.grade_to_size_radial(0.001)
-
+    wall_ring.chop_axial(count=1)
+    wall_ring.chop_tangential(start_size=cell_size)
+    wall_ring.chop_radial(start_size=bl_thickness, c2c_expansion=c2c_expansion)
     wall_ring.set_inner_patch('cylinder')
 
     mesh.add(wall_ring)
@@ -47,7 +46,7 @@ def get_mesh():
             [p2[0], p2[1], z])
 
         for axis in size_axes:
-            box.count_to_size(axis, cell_size)
+            box.chop(axis, start_size=cell_size)
         
         for side, name in patches.items():
             box.set_patch(side, name)

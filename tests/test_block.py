@@ -4,6 +4,7 @@ import numpy as np
 
 from classy_blocks.classes.block import Block
 from classy_blocks.classes.mesh import Mesh
+from classy_blocks.classes.grading import Grading
 from classy_blocks.util import constants
 
 from tests.fixtures import FixturedTestCase, ExecutedTestsBase
@@ -21,54 +22,13 @@ class TestBlock(FixturedTestCase, ExecutedTestsBase):
             "hex  ( 0 1 2 3 4 5 6 7 )  (6 6 7)  simpleGrading (1 1 1) // 0 Test"
         )
 
-    def test_any_grading_defined(self):
+    def test_is_grading_defined(self):
         self.mesh.prepare_data()
-        
-        self.block_1.grading = [None, None, None]
-        self.assertFalse(self.block_1.is_any_grading_defined)
+        self.assertTrue(self.block_1.is_grading_defined)
 
-        self.block_1.grading = [1, None, None]
-        self.assertTrue(self.block_1.is_any_grading_defined)
-
-    def test_any_count_defined(self):
-        self.mesh.prepare_data()
-
-        self.block_1.n_cells = [None, None, None]
-        self.assertFalse(self.block_1.is_any_count_defined)
-        
-        self.block_1.n_cells = [1, None, None]
-        self.assertTrue(self.block_1.is_any_count_defined)
-
-    def test_block_grading_undefined(self):
-        """ where grading of the block is None, use 1 """
-        self.mesh.prepare_data()
-        self.block_0.grading = [None, None, None]
-
-        self.assertEqual(
-            str(self.block_0),
-            "hex  ( 0 1 2 3 4 5 6 7 )  (6 6 7)  simpleGrading (1 1 1) // 0 Test"
-        )
-
-    def test_is_count_not_defined(self):
-        """ block.is_count_defined must be True if any of block.n_cells is None """
-        self.mesh.prepare_data()
-
-        self.block_1.n_cells = [None, None, None]
-        self.assertFalse(self.block_1.is_count_defined)
-
-        self.block_1.n_cells = [0, 0, 0]
-        self.assertFalse(self.block_1.is_count_defined)
-
-        self.block_1.n_cells = [0, 1, 10]
-        self.assertFalse(self.block_1.is_count_defined)
-
-    def test_is_count_defined(self):
-        """ block.is_count_defined must be True if any of block.n_cells is None """
-        self.mesh.prepare_data()
-
-        self.block_1.n_cells = [1, 10, 2]
-        self.assertTrue(self.block_1.is_count_defined)
-    
+        self.block_1.grading[0] = Grading()
+        self.assertFalse(self.block_1.is_grading_defined)
+   
     def test_face_format(self):
         """ the correct face format for blockMeshDict """
         self.mesh.prepare_data()
@@ -122,33 +82,6 @@ class TestBlock(FixturedTestCase, ExecutedTestsBase):
 
         self.assertAlmostEqual(self.block_0.get_size(1), 1.0121046080181824)
 
-    def test_cell_size(self):
-        """ grade_to_size must calculate the correct grading to match given cell size """
-        axis = 0
-        test_cell_size = 0.005
-        n = self.block_0.n_cells[axis]
-
-        # set the desired cell size
-        self.block_0.grade_to_size(axis, test_cell_size)
-        self.mesh.prepare_data() # runs all deferred functions
-
-        # get block grading
-        g = self.block_0.grading[axis]
-
-        # check that the sum of all elements, graded, is block size
-        cell_sizes = [test_cell_size]
-        block_size = 0
-
-        for _ in range(n):
-            s = cell_sizes[-1]*(g**(1/n))
-            cell_sizes.append(s)
-            block_size += s
-
-        self.assertAlmostEqual(block_size, self.block_0.get_size(axis))
-
-        # also check that ratio of first to last cell size is what's calculated
-        self.assertAlmostEqual(cell_sizes[-1]/cell_sizes[0], g, delta=constants.tol)
-
     def test_axis_from_pair(self):
         """ return the correct pairs of points along each axis """
         self.mesh.prepare_data()
@@ -191,7 +124,8 @@ class TestBlock(FixturedTestCase, ExecutedTestsBase):
         ]
 
         block = Block.create_from_points(block_points)
-        block.n_cells = [10, 10, 10]
+        for i in range(3):
+            block.chop(i, count=10)
 
         mesh = Mesh()
         mesh.add_block(block)
@@ -200,34 +134,6 @@ class TestBlock(FixturedTestCase, ExecutedTestsBase):
         self.assertEqual(len(block.get_axis_vertex_pairs(0)), 2)
         self.assertEqual(len(block.get_axis_vertex_pairs(1)), 4)
         self.assertEqual(len(block.get_axis_vertex_pairs(2)), 3)
-
-    def test_copy_grading(self):
-        """ grading propagation """
-        self.block_0.grade_to_size(2, 0.01)
-
-        mesh = Mesh()
-        mesh.add_block(self.block_0)
-        mesh.add_block(self.block_1)
-        mesh.add_block(self.block_2)
-        mesh.prepare_data()
-
-        self.assertIsNotNone(self.block_1.grading[2])
-        self.assertIsNotNone(self.block_2.grading[2])
-
-    def test_count_to_size(self):
-        """ assign no less than 1 cell in block """
-        mesh = Mesh()
-        
-        self.block_0.count_to_size(0, 1.1)
-        self.block_0.count_to_size(1, 1.1)
-        self.block_0.count_to_size(2, 1.1)
-
-        mesh.add_block(self.block_0)
-        mesh.prepare_data()
-
-        self.assertGreaterEqual(self.block_0.n_cells[0], 1)
-        self.assertGreaterEqual(self.block_0.n_cells[1], 1)
-        self.assertGreaterEqual(self.block_0.n_cells[2], 1)
 
     def test_grading_invert(self):
         """ copy grading when neighbor blocks are upside-down """
@@ -251,16 +157,16 @@ class TestBlock(FixturedTestCase, ExecutedTestsBase):
             fl[0], fl[1], fl[2], fl[3],
             cl[0], cl[1], cl[2], cl[3]
         ])
-        block_0.n_cells = [10, 10, 10]
-        block_0.grade_to_size(2, 0.02)
+        block_0.chop(0, count=10)
+        block_0.chop(1, count=10)
+        block_0.chop(2, start_size=0.02, end_size=0.1)
         
         # block_1 is created upside-down
         block_1 = Block.create_from_points([
             cl[2], cl[5], cl[4], cl[1],
             fl[2], fl[5], fl[4], fl[1],
         ])
-        block_1.n_cells = [10, 10, 10]
-
+        block_1.chop(0, count=10)
 
         self.mesh = Mesh()
         self.mesh.add_block(block_0)
@@ -269,9 +175,9 @@ class TestBlock(FixturedTestCase, ExecutedTestsBase):
 
         # also check in real life that calculations are good enough for blockMesh
         self.assertAlmostEqual(
-            block_0.grading[2].expansion_ratios[0],
-            1/block_1.grading[2].expansion_ratios[0])
-        self.run_and_check()
+            block_0.grading[2].divisions[0][2],
+            1/block_1.grading[2].divisions[0][2])
+        #self.run_and_check()
 
     def test_block_project_face(self):
         self.mesh.prepare_data()
@@ -285,7 +191,7 @@ class TestBlock(FixturedTestCase, ExecutedTestsBase):
         ]
         
         self.assertListEqual(
-            expected_list, self.block_0.projected_faces
+            expected_list, self.block_0.faces
         )
 
 class BlockSizingTests(unittest.TestCase):
@@ -304,7 +210,7 @@ class BlockSizingTests(unittest.TestCase):
         self.block = Block.create_from_points(points)
 
         for i in range(3):
-            self.block.count_to_size(i, 1)
+            self.block.chop(i, count=1)
 
         self.mesh = Mesh()
         self.mesh.add_block(self.block)

@@ -84,14 +84,15 @@ class FixturedTestCase(unittest.TestCase):
 
         # the most low-level way of creating a block is from 'raw' points
         self.block_0 = Block.create_from_points(self.block_0_points, self.block_0_edges)
-        self.block_0.n_cells[0] = 6
+        self.block_0.chop(0, count=6)
 
         self.block_1 = Block.create_from_points(self.block_1_points, self.block_1_edges)
-        self.block_1.n_cells = [5, 6, None]
+        self.block_1.chop(0, count=5)
+        self.block_1.chop(1, count=6)
 
         self.block_2 = Block.create_from_points(self.block_2_points)
-        self.block_2.n_cells[1] = 8
-        self.block_2.n_cells[2] = 7
+        self.block_2.chop(1, count=8)
+        self.block_2.chop(2, count=7)
 
         # other block data
         self.block_0.description = "Test"

@@ -27,7 +27,7 @@ def get_mesh():
 
         # this has to be set on all blocks;
         # others will be copied
-        wedge.set_cell_count(0, 30)
+        wedge.chop(0, count=30)
 
         wedge.set_outer_patch('static_wall')
         wedge.set_inner_patch('rotating_walls')
@@ -38,9 +38,9 @@ def get_mesh():
         base = base.translate([1, 0, 0])
 
     wedges[0].set_left_patch('inlet')
-    wedges[0].set_cell_count(1, 10) # this will be copied to all next blocks
-    wedges[0].grade_to_size(1, -0.01)
-
     wedges[-1].set_right_patch('outlet')
+
+    # this will be copied to all next blocks
+    wedges[0].chop(1, c2c_expansion=1.2, start_size=0.01, invert=True)
 
     return mesh

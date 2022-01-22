@@ -64,7 +64,7 @@ def get_mesh():
     domain_length = 10.0*chord # length of rectangular section behind the half-circle [m]
     thickness = [0, 0, 0.2] # domain thickness (extrude vector)
 
-    cell_size = 0.03
+    cell_size = 0.01
 
     ###
     ### point preparation
@@ -99,11 +99,9 @@ def get_mesh():
     extrude_top_1 = Extrude(face_top_1, thickness)
 
     # set cell counts on all axes for the first block
-    extrude_top_1.count_to_size(0, cell_size)
-    extrude_top_1.set_cell_count(1, 30)
-    extrude_top_1.set_cell_count(2, 1)
-
-    # set grading (cell size) only where it's different from 1
+    extrude_top_1.chop(0, start_size=cell_size, c2c_expansion=1.1, invert=True)
+    extrude_top_1.chop(1, count=30)
+    extrude_top_1.chop(2, count=1)
 
     # top block 2
     face_top_2_vertices = [
@@ -117,8 +115,7 @@ def get_mesh():
 
     face_top_2 = Face(face_top_2_vertices, face_top_2_edges)
     extrude_top_2 = Extrude(face_top_2, thickness)
-    extrude_top_2.count_to_size(0, cell_size)
-
+    extrude_top_2.chop(0, start_size=cell_size)
     # other cell counts must match other blocks' so they need not be set
 
     # top block 3
@@ -129,7 +126,7 @@ def get_mesh():
         [chord, domain_radius, 0]
     ])
     extrude_top_3 = Extrude(face_top_3, thickness)
-    extrude_top_3.count_to_size(0, cell_size)
+    extrude_top_3.chop(0, start_size=cell_size, c2c_expansion=1.1)
 
     # bottom block 1
     i, y, = find_y(p_lower, chord*radius_center)
@@ -149,7 +146,7 @@ def get_mesh():
 
     face_bottom_1 = Face(face_bottom_1_vertices, face_bottom_1_edges)
     extrude_bottom_1 = Extrude(face_bottom_1, thickness)
-    extrude_bottom_1.set_cell_count(0, 30)
+    extrude_bottom_1.chop(0, count=30)
 
     # bottom block 2
     face_bottom_2_vertices = [
@@ -163,7 +160,7 @@ def get_mesh():
 
     face_bottom_2 = Face(face_bottom_2_vertices, face_bottom_2_edges)
     extrude_bottom_2 = Extrude(face_bottom_2, thickness)
-    extrude_bottom_2.count_to_size(1, cell_size)
+    extrude_bottom_2.chop(1, start_size=cell_size)
 
     # bottom block 3
     face_bottom_3 = Face([
