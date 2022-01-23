@@ -3,15 +3,19 @@ import os
 from ..util import functions as g
 from ..util import constants, tools
 
+from .primitives import Vertex
+
 class Mesh():
     """ contains blocks, edges and all necessary methods for assembling blockMeshDict """
     def __init__(self):
         self.vertices = [] # list of vertices
         self.edges = [] # list of edges
         self.blocks = [] # list of blocks
+        self.patches = [] # defined in get_patches()
         self.faces = [] # projected faces
 
         self.default_patch = None
+        self.merged_patches = [] # [['master1', 'slave1'], ['master2', 'slave2']]
 
     def find_vertex(self, new_vertex):
         """ checks if any of existing vertices in self.vertices are
@@ -49,8 +53,7 @@ class Mesh():
         else:
             self.add_block(item)
 
-    @property
-    def patches(self):
+    def get_patches(self):
         # Block contains patches according to the example in __init__()
         # this method collects all faces for a patch name from all blocks
         # (a format ready for jinja2 template)
@@ -74,12 +77,14 @@ class Mesh():
         return patches
 
     def assign_neighbours(self, block):
-        # TEST
         for axis in range(3):
             axis_pairs = block.get_axis_vertex_pairs(axis)
 
             for i in range(len(self.blocks)):
                 mb = self.blocks[i]
+
+                if mb == block:
+                    continue
 
                 for p in axis_pairs:
                     b_axis, _ = mb.get_axis_from_pair(p)
@@ -122,6 +127,30 @@ class Mesh():
                 else:
                     block.vertices[i] = found_vertex
 
+        # merged patches: duplicate all points that define slave patches
+        duplicated_points = {} # { original_index:new_vertex }
+        slave_patches = [mp[1] for mp in self.merged_patches]
+
+        for patch in slave_patches:
+            for block in self.blocks:
+                if patch in block.patches:
+                    for face in block.get_faces(patch, internal=True):
+                        for i in range(4):
+                            i_vertex = face[i]
+
+                            vertex = block.vertices[i_vertex]
+
+                            if vertex.mesh_index not in duplicated_points:
+                                new_vertex = Vertex(vertex.point)
+                                new_vertex.mesh_index = len(self.vertices)
+                                self.vertices.append(new_vertex)
+
+                                block.vertices[i_vertex] = new_vertex
+
+                                duplicated_points[vertex.mesh_index] = new_vertex
+                            else:
+                                block.vertices[i_vertex] = duplicated_points[vertex.mesh_index]
+    
     def collect_edges(self):
         # collect all edges from all blocks;
         for block in self.blocks:
@@ -140,9 +169,14 @@ class Mesh():
                     # invalid edges should not be added
                     continue
 
+                if block_edge.type == 'line':
+                    # no need to add lines
+                    continue
+
                 if self.find_edge(v_1, v_2) is None:
                     # only non-existing edges are added
-                    self.edges.append(block_edge)                
+                    self.edges.append(block_edge)
+
 
     def collect_neighbours(self):
         # collect all neighbours from all blocks;
@@ -201,7 +235,7 @@ class Mesh():
             # TODO: check for existing faces
             for f in b.faces:
                 self.faces.append([
-                    b.format_face(f[0]), # face, like (8 12 15 11) 
+                    b.get_face(f[0]), # face, like (8 12 15 11) 
                     f[1] # the geometry to project to
                 ])
 
@@ -211,6 +245,11 @@ class Mesh():
         self.collect_neighbours()
         self.set_gradings()
         self.project_faces()
+        # assign patches
+        self.patches = self.get_patches()
+    
+    def merge_patches(self, master, slave):
+        self.merged_patches.append([master, slave])
 
     def set_default_patch(self, name, type):
         assert type in ('patch', 'wall', 'empty', 'wedge')
@@ -235,6 +274,7 @@ class Mesh():
             'patches': self.patches,
             'faces': self.faces,
             'default_patch': self.default_patch,
+            'merged_patches': self.merged_patches,
             'geometry': geometry,
         }
 

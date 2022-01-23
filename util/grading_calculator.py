@@ -9,7 +9,6 @@ from . import constants
 # (not all are needed in for classy_blocks because length is always a known parameter)
 r_max = 1/constants.tol
 
-### TODO: TEST EVERYTHING
 # these functions are introspected and used for calculation according to their
 # name (get_<result>__<param1>__<param2>(length, param1, param2));
 # length is a default argument, passed in always, for simplicity

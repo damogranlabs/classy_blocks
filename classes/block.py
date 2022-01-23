@@ -79,20 +79,27 @@ class Block():
     def is_grading_defined(self):
         return all([g.is_defined for g in self.grading])
 
-    def get_faces(self, patch):
+    def get_face(self, side, internal=False):
+        # returns vertex indexes for this face;
+        indexes = self.face_map[side]
+        if internal:
+            return indexes
+        
+        vertices = np.take(self.vertices, indexes)
+
+        return [v.mesh_index for v in vertices]
+
+    def get_faces(self, patch, internal=False):
         if patch not in self.patches:
             return []
 
         sides = self.patches[patch]
-        faces = []
-
-        for side in sides:
-            faces.append(self.format_face(side))
+        faces = [self.get_face(s, internal=internal) for s in sides]
         
         return faces
 
     def find_edge(self, index_1, index_2):
-        # TEST
+        # index_1 and index_2 are internal block indexes
         for e in self.edges:
             if {e.block_index_1, e.block_index_2} == {index_1, index_2}:
                 return e
@@ -210,7 +217,6 @@ class Block():
         self.deferred_gradings.append(DeferredFunction(deferred_chop))
 
     def project_edge(self, index_1, index_2, geometry):
-        # TEST
         # index_N are vertices relative to block (0...7)
         if self.find_edge(index_1, index_2):
             return
@@ -225,14 +231,13 @@ class Block():
         self.faces.append([side, geometry])
 
         if edges:
-            # TEST
             vertices = self.face_map[side]
             for i in range(4):
                 self.project_edge(
                     vertices[i], 
                     vertices[(i+1)%4],
                     geometry)
-    
+
     ###
     ### Output/formatting
     ###
