@@ -58,3 +58,16 @@ class ComplexTests(ExecutedTestsBase):
     def test_volute(self):
         from examples.complex import pump_volute as test_example
         self.run_and_check(test_example)
+
+class AdvancedTests(ExecutedTestsBase):
+    def test_project(self):
+        from examples.advanced import project as test_example
+        self.run_and_check(test_example)
+
+    def test_sphere(self):
+        from examples.advanced import sphere as test_example
+        self.run_and_check(test_example)
+
+    def test_merged(self):
+        from examples.advanced import merged as test_example
+        self.run_and_check(test_example)

@@ -73,12 +73,12 @@ class TestMesh(FixturedTestCase):
         self.assertDictEqual(
             self.mesh.patches,
             {
-                'inlet': ['(4 0 3 7)'],
-                'outlet': ['(15 14 12 13)'],
+                'inlet': [[4, 0, 3, 7]],
+                'outlet': [[15, 14, 12, 13]],
                 'walls': [
-                    '(0 1 2 3)', '(4 5 6 7)', '(4 5 1 0)', '(7 6 2 3)', # block_0
-                    '(1 8 9 2)', '(5 10 11 6)', '(10 8 9 11)', '(5 10 8 1)', # block_1
-                    '(2 9 12 13)', '(6 11 14 15)', '(6 2 13 15)', '(11 9 12 14)' # block_2
+                    [0, 1, 2, 3], [4, 5, 6, 7], [4, 5, 1, 0], [7, 6, 2, 3], # block_0
+                    [1, 8, 9, 2], [5, 10, 11, 6], [10, 8, 9, 11], [5, 10, 8, 1], # block_1
+                    [2, 9, 12, 13], [6, 11, 14, 15], [6, 2, 13, 15], [11, 9, 12, 14] # block_2
                 ],
             }
         )
@@ -97,6 +97,41 @@ class TestMesh(FixturedTestCase):
         
         self.assertRaises(Exception, self.mesh.prepare_data)
 
+    def test_assign_neighbours(self):
+        """ assign neighbours to each block """
+        self.mesh.prepare_data()
+
+        self.assertSetEqual(
+            self.block_0.neighbours,
+            {self.block_1, self.block_2}
+        )
+
+        self.assertSetEqual(
+            self.block_1.neighbours,
+            {self.block_0, self.block_2}
+        )
+
+        self.assertSetEqual(
+            self.block_2.neighbours,
+            {self.block_0, self.block_1}
+        )
+
+    def test_merge_patches_duplicate(self):
+        """ duplicate coincident points on merged patches """
+        self.block_0.set_patch('right', 'master')
+        self.block_0.chop(1, count=10)
+
+        self.block_1.set_patch('left', 'slave')
+        self.mesh.merge_patches('master', 'slave')
+        self.block_2.chop(0, count=10)
+
+        self.mesh.prepare_data()
+
+        # make sure block_0 and block_1 share no vertices
+        set_0 = set(self.block_0.get_face('right'))
+        set_1 = set(self.block_1.get_face('left'))
+
+        self.assertTrue(set_0.isdisjoint(set_1))
 
 if __name__ == '__main__':
     unittest.main()

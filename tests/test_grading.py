@@ -283,7 +283,7 @@ class TestGrading(unittest.TestCase):
             # when specifying that as well, another parameter must be provided
             self.g.add_division(c2c_expansion=1.1)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AssertionError):
             # specified total_expansion and c2c_expansion=1 aren't compatible
             self.g.add_division(total_expansion=5)
 

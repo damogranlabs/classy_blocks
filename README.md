@@ -1,5 +1,5 @@
 # classy_examples
-Example project and cases for [classy_blocks](https://github.com/damogranlabs/classy_blocks).
+Example project, cases and tests for [classy_blocks](https://github.com/damogranlabs/classy_blocks).
 
 # Usage
 ## Installation
@@ -45,6 +45,5 @@ Edges and faces, projected to an STL surface
 Mesh for studying flow around a sphere, with projected edges and faces
 ![Sphere](https://raw.githubusercontent.com/damogranlabs/classy_examples/main/showcase/sphere.png "Flow around a sphere")
 
-A parametric, Low-Re mesh of a real-life impeller:
-*Not included in examples*
+A parametric, Low-Re mesh of a real-life impeller (*not included in examples*):
 ![Impeller - Low Re](https://raw.githubusercontent.com/damogranlabs/classy_examples/main/showcase/impeller_full.png "Low-Re Impeller")

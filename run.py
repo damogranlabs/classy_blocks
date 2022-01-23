@@ -28,6 +28,7 @@ from examples.operation import loft as example
 # advanced
 # from examples.advanced import project as example # projection to STL surface
 # from examples.advanced import sphere as example # flow around sphere
+# from examples.advanced import merged as example
 
 try:
     geometry = example.geometry
