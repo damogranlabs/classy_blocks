@@ -47,13 +47,14 @@ mesh.add(inlet)
 > See [examples/shape](https://github.com/damogranlabs/classy_examples) for example use of each 'shape'. See [examples/complex](https://github.com/damogranlabs/classy_examples) for a more real-life example usage of shapes.
 
 ## Operations
-An _operation_ is a 2D face (analogous to a sketch in 3D CAD software), swiped into a 3D shape by one of the below rules. A `Face` is a collection of 4 vertices and 4 edges.
+Analogous to a sketch in 3D CAD software, a `Face` is a collection of 4 vertices and 4 edges.
+An _operation_ is a 3D shape obtained by swiping a Face into 3rd dimension following one of the rules below.
 
 ### Extrude
-A single block is created from a `Face` translated by an extrude vector.
+A block, created from a Face translated by an extrude vector.
 
 ### Revolve
-A single face is revolved around a given axis so that a circular object with a constant cross-section is created.
+A Face is revolved around a given axis so that a circular block with a constant cross-section is created.
 
 ```python
 # a quadrangle with one curved side
@@ -89,11 +90,16 @@ mesh.add(revolve)
 A special case of revolve for 2D axisymmetric meshes. A list of `(x,y)` points is revolved symetrically around x-axis as required by a `wedge` boundary condition in OpenFOAM.
 
 ### Loft
-A single block, created between two `Face`s. Edges between the same vertices on the two faces can also be specified.
+A block between two Faces. Edges in lofted direction can also be specified.
 
 > See [examples/operations](https://github.com/damogranlabs/classy_examples) for an example of each operation.
 
-### Projection To Geometry
+## Projection To Geometry
+
+[Any geometry that snappyHexMesh understands](https://www.openfoam.com/documentation/guides/latest/doc/guide-meshing-snappyhexmesh-geometry.html) is also supported by blockMesh.
+That includes searchable surfaces such as spheres and cylinders and triangulated surfaces.
+Simply provide geometry definition as documentation specifies, then call a `project_face()` on Block object.
+
 ```python
 geometry = {
     'terrain': [ 
@@ -118,6 +124,32 @@ extrude.chop(2, start_size=0.01, c2c_expansion=1.2)
 extrude.set_patch('bottom', 'terrain')
 mesh.add(extrude)
 mesh.set_default_patch('atmosphere', 'patch')
+```
+
+## Face Merging
+Simply provide names of patches to be merged and call `mesh.merge_patches(<master>, <slave>)`.
+classy_blocks will take care of point duplication and whatnot.
+
+```python
+box = Box([-0.5, -0.5, 0], [0.5, 0.5, 1])
+for i in range(3):
+    box.chop(i, count=25)
+box.set_patch('top', 'box_top')
+mesh.add(box)
+
+cylinder = Cylinder(
+    [0, 0, 1],
+    [0, 0, 2],
+    [0.25, 0, 1]
+)
+cylinder.chop_axial(count=10)
+cylinder.chop_radial(count=10)
+cylinder.chop_tangential(count=20)
+
+cylinder.set_bottom_patch('cylinder_bottom')
+mesh.add(cylinder)
+
+mesh.merge_patches('box_top', 'cylinder_bottom')
 ```
 
 # Prerequisites

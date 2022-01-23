@@ -62,10 +62,9 @@ class Edge():
         'spline' for a spline """
 
         if points is None:
-            return None, None
+            return 'line', None
 
         # it 'points' is a string, this is a projected edge;
-        # TEST
         if type(points) == str:
             return 'project', points
 
@@ -86,7 +85,9 @@ class Edge():
 
     @property
     def point_list(self):
-        # TEST
+        if self.type == 'line':
+            return None
+            
         if self.type == 'project':
             return f"({self.points})"
 
@@ -98,20 +99,18 @@ class Edge():
                 " ".join([constants.vector_format(p) for p in self.points]) + \
                 ")"
         
-        # TEST
         raise WrongEdgeTypeException(self.type)
     
     @property
     def is_valid(self):
-        # 'all' spline and projected edges are 'valid'
-        # TEST
-        if self.type in ('spline', 'project'):
-            return True
-        
         # wedge geometries produce coincident 
         # edges and vertices; drop those
         if f.norm(self.vertex_1.point - self.vertex_2.point) < constants.tol:
             return False
+        
+        # 'all' spline and projected edges are 'valid'
+        if self.type in ('line', 'spline', 'project'):
+            return True
 
         # if case vertex1, vertex2 and point in between
         # are collinear, blockMesh will find an arc with
@@ -134,8 +133,7 @@ class Edge():
         return d > constants.tol
 
     def get_length(self):
-        # TEST
-        if self.type == 'project':
+        if self.type in('line', 'project'):
             return f.norm(self.vertex_1.point - self.vertex_2.point)
 
         def curve_length(points):
@@ -166,14 +164,17 @@ class Edge():
         raise WrongEdgeTypeException(self.type)
 
     def rotate(self, angle, axis=[1, 0, 0], origin=[0, 0, 0]):
-        # TEST
-        # TODO: rotate projected edges including geometry?
-        if self.type == 'project':
+        # TODO: include/exclude projected edges?
+        if self.type == 'line':
             points = None
+        elif self.type == 'project':
+            points = self.points
         elif self.type == 'arc':
             points = f.arbitrary_rotation(self.points, axis, angle, origin)
         elif self.type == 'spline':
             points = [f.arbitrary_rotation(p, axis, angle, origin) for p in self.points]
+        else:
+            raise WrongEdgeTypeException(self.type)
         
         return Edge(self.block_index_1, self.block_index_2, points)
         
