@@ -106,7 +106,7 @@ class Block():
         return None
 
     def get_size(self, axis, take='avg'):
-        # returns an approximate block dimensions:
+        # returns block dimensions:
         # if an edge is defined, use the edge.get_length(),
         # otherwise simply distance between two points
         def vertex_distance(index_1, index_2):

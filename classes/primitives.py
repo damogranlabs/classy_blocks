@@ -136,6 +136,12 @@ class Edge():
         if self.type in('line', 'project'):
             return f.norm(self.vertex_1.point - self.vertex_2.point)
 
+        if self.type == 'arc':
+            return f.arc_length_3point(
+                self.vertex_1.point,
+                self.points,
+                self.vertex_2.point)
+
         def curve_length(points):
             l = 0
 
@@ -143,16 +149,6 @@ class Edge():
                 l += f.norm(points[i+1] - points[i])
 
             return l
-
-        if self.type == 'arc':
-            # an approximate length, that is
-            edge_points = np.array([
-                self.vertex_1.point,
-                self.points,
-                self.vertex_2.point
-            ])
-
-            return curve_length(edge_points)
         
         if self.type == 'spline':
             edge_points = np.concatenate((

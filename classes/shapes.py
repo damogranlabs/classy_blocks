@@ -178,8 +178,7 @@ class Elbow:
         # set cell count on the outside
         kwargs['invert'] = not kwargs.get('invert')
 
-        for s in self.shell:
-            s.chop(self.radial_axis, **kwargs)
+        self.shell[0].chop(self.radial_axis, **kwargs)
 
     def chop_tangential(self, **kwargs):
         for s in self.shell:

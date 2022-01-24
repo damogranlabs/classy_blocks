@@ -217,3 +217,24 @@ def extend_to_y(p_1, p_2, y):
     return p_1 + k_3*(p_2 - p_1)
 
 
+def arc_length_3point(A, B, C):
+    """ Returns length of arc defined by 3 points, A, B and C; B is the point in between """
+    A = np.asarray(A)
+    B = np.asarray(B)
+    C = np.asarray(C)
+
+    t = C - A
+    D = A + t/2
+    h = B - D
+
+    h = norm(h)
+    t = norm(t)
+
+    if h == 0:
+        return 0
+
+    fphi = lambda phi: 2*h*np.sin(phi/2) / (1 - np.cos(phi/2)) - t
+    phi = scipy.optimize.newton(fphi, 1)
+    r = h / (1-np.cos(phi/2))
+    
+    return r*phi
