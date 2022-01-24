@@ -114,12 +114,9 @@ class TestPrimitives(unittest.TestCase):
         p = [0.5, 0.5, 0]
         e = self.make_edge(p)
 
-        # although it's a circular edge,
-        # approximate length calculation is the same for arc and spline edges;
-        # just a sum of straight lines between points
         self.assertAlmostEqual(
             e.get_length(),
-            2**0.5
+            np.pi/2
         )
     
     def test_spline_edge_length(self):

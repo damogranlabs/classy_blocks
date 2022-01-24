@@ -84,11 +84,11 @@ class TestMesh(FixturedTestCase):
         )
 
     def test_find_neighbour_success(self):
-        """ block_2 must copy block_1's cell count and grading on axis 0 and 1"""
+        """ block_2 must copy block_1's cell count and grading on axis 0 and 2"""
         self.mesh.prepare_data()
 
         self.assertTrue(self.mesh.copy_grading(self.block_2, 0))
-        self.assertTrue(self.mesh.copy_grading(self.block_2, 1))
+        self.assertTrue(self.mesh.copy_grading(self.block_2, 2))
         
     def test_find_neighbour_fail(self):
         """ block_2 cannot copy cell count and grading from block_1 on axis 2 """

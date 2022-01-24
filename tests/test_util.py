@@ -220,3 +220,26 @@ class TestUtils(unittest.TestCase):
                 f.vector(2, 0, 1)
             ])
         )
+
+    def test_arc_length_3point(self):
+        A = [0, 0, 0]
+        B = [1, 1, 0]
+        C = [2, 0, 0]
+        self.assertAlmostEqual(f.arc_length_3point(A, B, C), np.pi)
+
+        s2 = 2**0.5/2
+        B = [1 - s2, s2, 0]
+        C = [1, 1, 0]
+        self.assertAlmostEqual(f.arc_length_3point(A, B, C), np.pi/2)
+
+        B = [1 + s2, s2, 0]
+        C = [1, -1, 0]
+        self.assertAlmostEqual(f.arc_length_3point(A, B, C), 3*np.pi/2)
+
+        C = [0, 0, 0]
+        B = [2, 0, 0]
+        self.assertAlmostEqual(f.arc_length_3point(A, B, C), 2*np.pi)
+
+        B = [0, 0, 0]
+        self.assertAlmostEqual(f.arc_length_3point(A, B, C), 0)
+
