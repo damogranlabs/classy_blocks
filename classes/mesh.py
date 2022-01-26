@@ -188,9 +188,7 @@ class Mesh():
     def set_gradings(self):
         # now is the time to set counts
         for block in self.blocks:
-            for f in block.deferred_gradings:
-                f.call()
-            block.deferred_gradings = []
+            block.grade()
 
         # propagate cell count:
         # a riddle similar to sudoku, keep traversing

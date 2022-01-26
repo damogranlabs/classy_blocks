@@ -6,6 +6,8 @@ import scipy.linalg
 import scipy.optimize
 import scipy.spatial
 
+from ..util import constants as c
+
 def vector(x, y, z):
     """ A shortcut for creating 3D-space vectors;
     in case you need a lot of manual np.array([...]) """
@@ -234,7 +236,9 @@ def arc_length_3point(A, B, C):
         return 0
 
     fphi = lambda phi: 2*h*np.sin(phi/2) / (1 - np.cos(phi/2)) - t
-    phi = scipy.optimize.newton(fphi, 1)
+    dx = c.tol/10
+
+    phi = scipy.optimize.root_scalar(fphi, bracket=(dx, 2*np.pi-dx)).root
     r = h / (1-np.cos(phi/2))
     
     return r*phi

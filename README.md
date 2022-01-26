@@ -3,7 +3,7 @@
 
 Python classes for easier creation of openFoam's blockMesh dictionaries.
 
-> Warning! This project is currently under development and is not yet very user-friendly. It still lacks some important features and probably features a lot of bugs. However, you're welcome to suggest features, improvements, and point out bugs. Until it becomes a_pip package_ you can use it as a [submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules) or just download the code and import stuff to your project.
+> Warning! This project is currently under development and is not yet very user-friendly. It still lacks some important features and probably features a lot of bugs. However, you're welcome to suggest features, improvements, and point out bugs. Until it becomes a _pip package_ you can use it as a [submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules) or just download the code and import stuff to your project.
 
 > tl;dr: clone the [classy_examples](https://github.com/damogranlabs/classy_examples) repository, install `jinja2` and run `run.py`.
 

@@ -4,16 +4,6 @@ from ..util import functions as f
 from .primitives import Vertex, Edge
 from .grading import Grading
 
-class DeferredFunction:
-    """ stores a function and its variables to be used at a later time """
-    def __init__(self, callable, *args, **kwargs):
-        self.callable = callable
-        self.args = args
-        self.kwargs = kwargs
-    
-    def call(self):
-        return self.callable(*self.args, **self.kwargs)
-
 class Block():
     """ a direct representation of a blockMesh block;
     contains all necessary data to create it. """
@@ -43,7 +33,10 @@ class Block():
         self.faces = [] # a list of projected faces;
         # [['bottom', 'terrain'], ['right', 'building'], ['back', 'building'],]
 
-        # block grading; when None, default to 1
+        # block grading;
+        # when adding blocks, store chop() parameters;
+        # use them in mesh.prepare_data()
+        self.chops = [[], [], []]
         self.grading = [Grading(), Grading(), Grading()]
 
         # cellZone to which the block belongs to
@@ -62,11 +55,6 @@ class Block():
 
         # set in Mesh.prepare_data()
         self.mesh_index = None
-        
-        # functions like chop() and some other
-        # can only run after mesh.prepare_data() has
-        # done its job; this is a queue 
-        self.deferred_gradings = []
 
         # a list of blocks that share an edge with this block;
         # will be assigned by Mesh().prepare_data()
@@ -98,7 +86,7 @@ class Block():
         
         return faces
 
-    def find_edge(self, index_1, index_2):
+    def find_edge(self, index_1, index_2) -> Edge:
         # index_1 and index_2 are internal block indexes
         for e in self.edges:
             if {e.block_index_1, e.block_index_2} == {index_1, index_2}:
@@ -205,16 +193,31 @@ class Block():
         invert: reverses grading if True
         take: must be 'min', 'max', or 'avg'; takes minimum or maximum edge
             length for block size calculation, or average of all edges in given direction.
+            With multigrading only the first 'take' argument is used, others are copied.
         length_ratio: in case the block is graded using multiple gradings, specify
             length of current division; see
             https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
         """
-        def deferred_chop():
-            block_size = self.get_size(axis, take=kwargs.pop('take', 'avg'))
-            self.grading[axis].set_block_size(block_size)
-            self.grading[axis].add_division(**kwargs)
+        # when this function is called, block edges are not known and so 
+        # block size can't be calculated; at this point only store parameters
+        # and call the actual Grading.chop() function later with these params
+        self.chops[axis].append(kwargs)
+    
+    def grade(self):
+        for i in range(3):
+            grading = self.grading[i]
+            params = self.chops[i]
 
-        self.deferred_gradings.append(DeferredFunction(deferred_chop))
+            if len(params) < 1:
+                continue
+
+            block_size = self.get_size(i, take=params[0].pop('take', 'avg'))
+            grading.set_block_size(block_size)
+
+            for p in params:
+                grading.add_division(**p)
+        
+        self.chops = [[], [], []]
 
     def project_edge(self, index_1, index_2, geometry):
         # index_N are vertices relative to block (0...7)
