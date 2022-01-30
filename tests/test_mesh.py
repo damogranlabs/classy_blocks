@@ -93,7 +93,7 @@ class TestMesh(FixturedTestCase):
     def test_find_neighbour_fail(self):
         """ block_2 cannot copy cell count and grading from block_1 on axis 2 """
         self.block_1.grading = [Grading(), Grading(), Grading()]
-        self.block_1.deferred_gradings = []
+        self.block_1.chops = [[], [], []]
         
         self.assertRaises(Exception, self.mesh.prepare_data)
 

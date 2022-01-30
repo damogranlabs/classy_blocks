@@ -221,25 +221,39 @@ class TestUtils(unittest.TestCase):
             ])
         )
 
-    def test_arc_length_3point(self):
+    def test_arc_length_3point_half(self):
         A = [0, 0, 0]
         B = [1, 1, 0]
         C = [2, 0, 0]
         self.assertAlmostEqual(f.arc_length_3point(A, B, C), np.pi)
 
+    def test_arc_length_3point_quarter(self):
+        A = [0, 0, 0]
         s2 = 2**0.5/2
         B = [1 - s2, s2, 0]
         C = [1, 1, 0]
         self.assertAlmostEqual(f.arc_length_3point(A, B, C), np.pi/2)
 
+    def test_arc_length_3point_3quarter(self):
+        A = [0, 0, 0]
+        s2 = 2**0.5/2
         B = [1 + s2, s2, 0]
         C = [1, -1, 0]
         self.assertAlmostEqual(f.arc_length_3point(A, B, C), 3*np.pi/2)
 
-        C = [0, 0, 0]
+    def test_arc_length_3point_full(self):
+        A = [0, 0, 0]
         B = [2, 0, 0]
-        self.assertAlmostEqual(f.arc_length_3point(A, B, C), 2*np.pi)
+        C = [0, 0, 0]
 
+        with self.assertRaises(ValueError):
+            self.assertAlmostEqual(f.arc_length_3point(A, B, C), 2*np.pi)
+
+    def test_arc_length_3point_zero(self):
+        A = [0, 0, 0]
         B = [0, 0, 0]
-        self.assertAlmostEqual(f.arc_length_3point(A, B, C), 0)
+        C = [0, 0, 0]
+
+        with self.assertRaises(ValueError):
+            self.assertAlmostEqual(f.arc_length_3point(A, B, C), 0)
 

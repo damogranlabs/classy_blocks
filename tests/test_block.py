@@ -73,7 +73,7 @@ class TestBlock(FixturedTestCase, ExecutedTestsBase):
         self.mesh.prepare_data()
 
         self.assertAlmostEqual(
-            self.block_0.get_size(0), 1.0295084971874737
+            self.block_0.get_size(0), 1.0397797556255037
         )
 
     def test_spline_block_size(self):
