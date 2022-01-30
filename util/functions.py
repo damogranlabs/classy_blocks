@@ -221,24 +221,44 @@ def extend_to_y(p_1, p_2, y):
 
 def arc_length_3point(A, B, C):
     """ Returns length of arc defined by 3 points, A, B and C; B is the point in between """
-    A = np.asarray(A)
-    B = np.asarray(B)
-    C = np.asarray(C)
+    ### Meticulously transcribed from 
+    # https://develop.openfoam.com/Development/openfoam/-/blob/master/src/mesh/blockMesh/blockEdges/arcEdge/arcEdge.C
+    p1 = np.asarray(A)
+    p2 = np.asarray(B)
+    p3 = np.asarray(C)
 
-    t = C - A
-    D = A + t/2
-    h = B - D
+    a = p2 - p1
+    b = p3 - p1
 
-    h = norm(h)
-    t = norm(t)
+    # Find centre of arcEdge
+    asqr = a.dot(a)
+    bsqr = b.dot(b)
+    adotb = a.dot(b)
 
-    if h == 0:
-        return 0
+    denom = asqr*bsqr - adotb*adotb
+    if norm(denom) < 1e-5:
+        raise ValueError("Invalid arc points!")
 
-    fphi = lambda phi: 2*h*np.sin(phi/2) / (1 - np.cos(phi/2)) - t
-    dx = c.tol/10
+    fact = 0.5*(bsqr - adotb)/denom
 
-    phi = scipy.optimize.root_scalar(fphi, bracket=(dx, 2*np.pi-dx)).root
-    r = h / (1-np.cos(phi/2))
-    
-    return r*phi
+    centre = p1 + 0.5*a + fact*(np.cross(np.cross(a, b), a))
+
+    # Position vectors from centre
+    r1 = p1 - centre
+    r2 = p2 - centre
+    r3 = p3 - centre
+
+    mag1 = norm(r1)
+    mag3 = norm(r3)
+
+    # The radius from r1 and from r3 will be identical
+    radius = r3
+
+    # Determine the angle
+    angle = np.arccos((r1.dot(r3))/(mag1*mag3))
+
+    # Check if the vectors define an exterior or an interior arcEdge
+    if np.dot(np.cross(r1, r2), np.cross(r1, r3)) < 0:
+        angle = 2*np.pi - angle
+
+    return angle*norm(radius)
