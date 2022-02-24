@@ -236,8 +236,8 @@ def arc_length_3point(A, B, C):
     adotb = a.dot(b)
 
     denom = asqr*bsqr - adotb*adotb
-    if norm(denom) < 1e-5:
-        raise ValueError("Invalid arc points!")
+    # if norm(denom) < 1e-5:
+    #     raise ValueError("Invalid arc points!")
 
     fact = 0.5*(bsqr - adotb)/denom
 
