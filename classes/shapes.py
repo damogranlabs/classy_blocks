@@ -121,11 +121,8 @@ class Elbow:
         self.circle_1 = Circle(self.center_point_1, self.radius_point_1, self.normal_1)
 
         def rotate_circle(angle, radius):
-            center_point = f.arbitrary_rotation(self.center_point_1, self.rotation_axis, angle, self.arc_center)
-
             return self.circle_1 \
                 .rotate(self.rotation_axis, angle, self.arc_center) \
-                .translate(center_point - self.center_point_1) \
                 .scale(radius)
 
         self.circle_2 = rotate_circle(self.sweep_angle, self.radius_2_length)

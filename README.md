@@ -183,11 +183,9 @@ Finally, all blocks must be added to Mesh. That will prepare data for blockMesh 
 After all blocks have been added, an instance of `Mesh` class only contains a list of blocks. Each block self-contains its own data. Since blocks share vertices and edges and blockMesh needs separate lists of both, `Mesh.prepare_data()` will translate all individual blocks' data to format blockMesh will understand:
  - collect new vertices and re-use existing ones
  - collect block edges, skipping duplicates
+ - run count and grading calculations on blocks where those are set
  - assign neighbours of each block, then try to propagate cell counts and gradings through the whole mesh; if that fails, an `Exception` is raised
  - gather a list of projected faces and edges
-
-## Deferred Functions
-Block edges are shared between block - an edge can be specified in one block but up to 4 blocks can use it. Since block size depends on its edges, those must first be propagated throughout the mesh, only then can sizing and chopping begin. For convenience reasons `block.chop()` function is available at once but not executed; its parameters are stored and the function is called in `mesh.prepare_data()`. This makes debugging a little more difficult but the scripts for geometry generation are much prettier - each block's properties can be kept in one place.
 
 ## Bonus:
 ### Geometry functions
