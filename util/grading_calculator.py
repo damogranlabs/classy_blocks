@@ -48,7 +48,7 @@ def get_count__start_size__c2c_expansion(length, start_size, c2c_expansion):
     else:
         count = length/start_size
 
-    return max(int(count), 1)
+    return int(count) + 1
 
 def get_count__end_size__c2c_expansion(length, end_size, c2c_expansion):
     assert length > 0
@@ -60,7 +60,7 @@ def get_count__end_size__c2c_expansion(length, end_size, c2c_expansion):
     else:
         count = length/end_size
 
-    return max(int(count), 1)
+    return int(count) + 1
 
 def get_count__total_expansion__c2c_expansion(length, total_expansion, c2c_expansion):
     assert length > 0
@@ -85,8 +85,7 @@ def get_count__total_expansion__start_size(length, total_expansion, start_size):
     fc = lambda n: (1 - total_expansion**(n/(n-1))) / \
         (1 - total_expansion**(1/(n-1))) - length/start_size
 
-    count = int(scipy.optimize.brentq(fc, 0, length/d_min))
-    return max(1, count)
+    return int(scipy.optimize.brentq(fc, 0, length/d_min)) + 1
 
 ### functions returning c2c_expansion
 def get_c2c_expansion__count__start_size(length, count, start_size):
