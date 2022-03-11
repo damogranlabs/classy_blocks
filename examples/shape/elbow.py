@@ -5,6 +5,8 @@ from classy_blocks.classes.mesh import Mesh
 from classy_blocks.classes.shapes import Elbow
 
 def get_mesh():
+    mesh = Mesh()
+
     radius_1 = 1
     center_point_1 = [0, 0, 0]
     radius_point_1 = [radius_1, 0, 0]
@@ -24,7 +26,6 @@ def get_mesh():
     )
 
     elbow.set_bottom_patch('inlet')
-    elbow.set_top_patch('outlet')
     elbow.set_outer_patch('walls')
 
     # counts and gradings
@@ -32,7 +33,13 @@ def get_mesh():
     elbow.chop_radial(start_size=boundary_size, end_size=core_size)
     elbow.chop_axial(start_size=2*core_size)
 
-    mesh = Mesh()
     mesh.add(elbow)
+
+    # chaining: use the existing elbow's end face
+    # as a starting parameters of the new one
+    chained = elbow.chain(-np.pi/3, arc_center, rotation_axis, radius_2)
+    chained.chop_axial(start_size=2*core_size)
+    chained.set_top_patch('outlet')
+    mesh.add(chained)
 
     return mesh

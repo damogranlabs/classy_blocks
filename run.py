@@ -8,13 +8,13 @@ import os
 
 # operations
 # from examples.operation import extrude as example
-from examples.operation import loft as example
+# from examples.operation import loft as example
 # from examples.operation import revolve as example
 # from examples.operation import wedge as example
 # from examples.operation import airfoil_2d as example
 
 # shapes
-# from examples.shape import elbow as example
+from examples.shape import elbow as example
 # from examples.shape import frustum as example
 # from examples.shape import cylinder as example
 # from examples.shape import ring as example
