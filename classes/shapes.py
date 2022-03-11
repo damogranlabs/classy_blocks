@@ -185,6 +185,18 @@ class Elbow:
         for b in self.blocks:
             b.cell_zone = cell_zone
 
+    def chain(self, sweep_angle:float, arc_center:list, rotation_axis:list, radius_2:float):
+        """ Use this elbow's end face as a base for a new one;
+        Returns a new Elbow object """
+        return Elbow(
+            self.circle_2.center_point,
+            self.circle_2.radius_point,
+            self.circle_2.normal,
+            sweep_angle, 
+            arc_center,
+            rotation_axis,
+            radius_2)
+
 class Frustum(Elbow):
     def __init__(self, axis_point_1:list, axis_point_2:list, radius_point_1:list, radius_2:float):
         """ Creates a cone frustum (truncated cylinder) with axis between points
