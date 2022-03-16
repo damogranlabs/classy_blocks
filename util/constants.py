@@ -15,4 +15,4 @@ def vector_format(vector):
 # to outer radius of that cylinder/frustum
 frustum_core_to_outer = 0.65
 # the same as above but is used for edge points
-frustum_edge_to_outer = 0.5
+frustum_edge_to_outer = 1.1*frustum_core_to_outer/2**0.5

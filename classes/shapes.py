@@ -1,5 +1,6 @@
 import numpy as np
 
+from ..util import constants as c
 from ..classes.operations import Face, Loft, Revolve, Extrude
 
 from ..util import functions as f
@@ -174,6 +175,14 @@ class Elbow:
     def chop_radial(self, **kwargs):
         # set cell count on the outside
         kwargs['invert'] = not kwargs.get('invert')
+
+        # scale all radial sizes to this ratio or core cells will be
+        # smaller than shell's
+        c2s_ratio = c.frustum_edge_to_outer/c.frustum_core_to_outer
+        if 'start_size' in kwargs:
+            kwargs['start_size'] *= c2s_ratio
+        if 'end_size' in kwargs:
+            kwargs['end_size'] *= c2s_ratio
 
         self.shell[0].chop(self.radial_axis, **kwargs)
 
