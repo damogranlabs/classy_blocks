@@ -166,7 +166,8 @@ class Mesh():
                 block.edges[i].vertex_2 = v_2
 
                 if not block_edge.is_valid:
-                    # invalid edges should not be added
+                    # invalid edges should be erased, not added to mesh
+                    del block.edges[i]
                     continue
 
                 if block_edge.type == 'line':
