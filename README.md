@@ -230,7 +230,7 @@ Of course you are free to use your own :)
     - Block.chain() (low-level), or Block.get_face() -> Face
 - Examples
     - Ramjet engine
-Technical stuff:
+- Technical stuff:
     - Debugging: connection between block and Shapes
     - More tests
     - Documentation
