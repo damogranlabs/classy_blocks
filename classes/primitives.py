@@ -8,6 +8,24 @@ class WrongEdgeTypeException(Exception):
     def __init__(self, edge_type, *args, **kwargs):
         raise Exception(f"Wrong edge type: {edge_type}", *args, **kwargs)
 
+def transform_points(points, function):
+    return [function(p) for p in points]
+
+def transform_edges(edges, function):
+    if edges is not None:
+        new_edges = [None]*4
+        for i, edge_points in enumerate(edges):
+            edge_type, edge_points = Edge.get_type(edge_points)
+
+            if edge_type == 'spline':
+                new_edges[i] = [function(e) for e in edge_points]
+            elif edge_type == 'arc':
+                new_edges[i] = function(edge_points)
+
+        return new_edges
+    
+    return None
+
 class Vertex():
     """ point with an index that's used in block and face definition
     and can output in OpenFOAM format """
@@ -27,11 +45,6 @@ class Vertex():
             s += " // {}".format(self.mesh_index)
         
         return s
-
-    def rotate(self, angle, axis=[1, 0, 0], origin=[0, 0, 0]):
-        """ returns a new, rotated Vertex """
-        point = f.arbitrary_rotation(self.point, axis, angle, origin)
-        return Vertex(point)
 
 class Edge():
     def __init__(self, index_1, index_2, points):

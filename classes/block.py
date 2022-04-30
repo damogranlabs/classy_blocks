@@ -1,10 +1,12 @@
 import numpy as np
 
+from typing import List
+
 from ..util import functions as f
 from .primitives import Vertex, Edge
 from .grading import Grading
 
-class Block():
+class Block:
     """ a direct representation of a blockMesh block;
     contains all necessary data to create it. """
     # a more intuitive and quicker way to set patches,
@@ -26,7 +28,7 @@ class Block():
         ((0, 4), (1, 5), (2, 6), (3, 7)), # z
     )
 
-    def __init__(self, vertices, edges):
+    def __init__(self, vertices:List[Vertex], edges:List[Edge]):
         # a list of 8 Vertex and Edge objects for each corner/edge of the block
         self.vertices = vertices
         self.edges = edges
@@ -165,7 +167,7 @@ class Block():
 
     ###
     ### Manipulation
-    ###
+    ###    
     def set_patch(self, sides, patch_name):
         """ assign one or more block faces (self.face_map)
         to a chosen patch name """

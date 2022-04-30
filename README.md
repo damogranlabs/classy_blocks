@@ -1,5 +1,5 @@
 # classy_blocks
-![Piping](https://raw.githubusercontent.com/damogranlabs/classy_examples/240ed5fdc70084846dae4b8c6af0588206c43020/showcase/piping.png "Piping")
+![Flywheel](https://raw.githubusercontent.com/damogranlabs/classy_examples/main/showcase/flywheel.png "Flywheel")
 
 Python classes for easier creation of openFoam's blockMesh dictionaries.
 
@@ -152,6 +152,26 @@ mesh.add(cylinder)
 mesh.merge_patches('box_top', 'cylinder_bottom')
 ```
 
+## Chaining and expand/contract
+Useful for Shapes, mostly for piping and rotational geometry; An existing Shape's start or end sketch can be reused as a
+starting sketch for a new Shape, as long as they are compatible.
+For instance, an Elbow can be _chained_ to a cylinder just like in plumbing.
+
+Moreover, all shapes can be expanded to form a 'wall' version of the same shape. For instance, expanding a Cylinder()
+creates an ExtrudedRing.
+
+Contract is only possible on ExtrudedRing and produces another, smaller ExtrudedRing.
+
+> See [examples/chaining](https://github.com/damogranlabs/classy_examples) for an example of each operation.
+
+## Debugging
+By default, `mesh.write(...)` creates a `debug.vtk` file where each block represents a hexahedral cell.
+By showing `block_ids` with a proper color scale the blocking is clearly visible.
+This is most useful when blockMesh fails with errors reporting invalid/inside-out blocks but VTK will
+happily show anything.
+
+This can be disabled by using `mesh.write(..., debug=False, ...)`.
+
 # Prerequisites
  - numpy
  - scipy
@@ -159,7 +179,6 @@ mesh.merge_patches('box_top', 'cylinder_bottom')
  - blockMesh
 
 # Technical Information
-
 There's no official documentation yet so here are some tips for easier navigation through source.
 
 ## Classes
@@ -194,17 +213,17 @@ There are also a couple of functions used in the example.
 Of course you are free to use your own :)
 
 # TODO
- - More examples from real life
- - More Shapes
-   - Elbow Wall (bent pipe wall)
-   - T-joint
-   - X-joint
- - Face collections (common operations on groups of faces)
- - Specifying number of blocks in operation direction
-   - Elbow from segments
-   - Elbow wall from segments
- - Technicalities:
-   - More Tests
-   - logging for info/debug
-   - output geometry to .obj for debugging
- - A proper documentation
+- New Shapes:
+    - T-joint
+    - X-joint
+- Wall versions of Shapes:
+    - HemisphereWall
+- Chaining:
+    - Box.chain()
+    - Block.chain() (low-level)
+- Examples
+    - Ramjet engine
+Technical stuff:
+    - Debugging: connection between block and Shapes
+    - More tests
+    - Documentation

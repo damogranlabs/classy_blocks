@@ -69,6 +69,9 @@ def arbitrary_rotation_matrix(axis, theta):
     
 def arbitrary_rotation(point, axis, theta, origin):
     """ Rotate a point around any axis given by axis by angle theta [radians] """
+    point = np.asarray(point)
+    axis = np.asarray(axis)
+    origin = np.asarray(origin)
 
     rotated_point = np.dot(arbitrary_rotation_matrix(axis, theta), point - origin)
     return rotated_point + origin
@@ -137,88 +140,6 @@ def lin_map(x, x_min, x_max, out_min, out_max, limit=False):
     else:
         return r
 
-def xy_line_intersection(p_1, p_2, p_3, p_4):
-    """ p_1 and p_2 define the first line, p_3 and p_4 define the second; 
-        return a point of intersection between these two lines in x-y plane
-
-        Kudos: https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection#Given_two_points_on_each_line
-    """
-    # only take x and y coordinates
-    x1 = p_1[0]
-    y1 = p_1[1]
-
-    x2 = p_2[0]
-    y2 = p_2[1]
-
-    x3 = p_3[0]
-    y3 = p_3[1]
-
-    x4 = p_4[0]
-    y4 = p_4[1]
-
-    def det(p1, p2, p3, p4):
-        return np.linalg.det(np.array([[p1, p2], [p3, p4]]))
-
-    Dx1 = det(x1, y1, x2, y2)
-    Dx2 = det(x1,  1, x2,  1)
-    Dx3 = det(x3, y3, x4, y4)
-    Dx4 = det(x3,  1, x4,  1)
-    Dx5 = Dx2
-    Dx6 = det(y1,  1, y2,  1)
-    Dx7 = Dx4
-    Dx8 = det(y3,  1, y4,  1)
-
-    # x-coordinate
-    Px = det(Dx1, Dx2, Dx3, Dx4)/det(Dx5, Dx6, Dx7, Dx8)
-
-    # y-coordinate
-    Dy1 = Dx1
-    Dy2 = Dx6
-    Dy3 = Dx3
-    Dy4 = Dx8
-    Dy5 = Dx2
-    Dy6 = Dx6
-    Dy7 = Dx7
-    Dy8 = Dx8
-
-    Py = det(Dy1, Dy2, Dy3, Dy4)/det(Dy5, Dy6, Dy7, Dy8)
-    return vector(Px, Py, 0)
-
-    # alternative solution with vectors
-    # A = np.array([
-    #     [p_2[0] - p_1[0], p_4[0] - p_3[0]],
-    #     [p_2[1] - p_1[1], p_4[1] - p_3[1]],
-    # ])
-    # 
-    # b = np.array([p_3[0] - p_1[0], p_3[1] - p_1[1]])
-    # 
-    # k1k2 = np.linalg.solve(A, b)
-    # k1 = k1k2[0]
-    # k2 = k1k2[1]
-    # 
-    # va = vector(
-    #     p_1[0] + k1*(p_2[0] - p_1[0]),
-    #     p_1[1] + k1*(p_2[1] - p_1[1]),
-    #     0
-    # )
-    # 
-    # vb = vector(
-    #     p_3[0] + k2*(p_4[0] - p_3[0]),
-    #     p_3[1] + k2*(p_4[1] - p_3[1]),
-    #     0
-    # )
-    # 
-    # print(P-va, P-vb, norm(va-vb))
-    # return va
-
-def extend_to_y(p_1, p_2, y):
-    """ Return a point that lies on a line defined by p_1 and p_2 and on y=y; only in xy-plane! """
-    fk_3 = lambda k: p_1[1] + k*(p_2 - p_1)[1] - y
-    k_3 = scipy.optimize.newton(fk_3, 0)
-
-    return p_1 + k_3*(p_2 - p_1)
-
-
 def arc_length_3point(A, B, C):
     """ Returns length of arc defined by 3 points, A, B and C; B is the point in between """
     ### Meticulously transcribed from 
@@ -262,3 +183,11 @@ def arc_length_3point(A, B, C):
         angle = 2*np.pi - angle
 
     return angle*norm(radius)
+
+def distance_from_line(line_point_1, line_point_2, p):
+    """ Returns distance from point p from line, defined by two points """
+    # TODO: TEST
+    axis = line_point_2 - line_point_1
+    vector = p - line_point_1
+
+    return norm(np.cross(axis, vector))/norm(axis)

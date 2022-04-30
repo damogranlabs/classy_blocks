@@ -6,6 +6,8 @@ from ..util import constants, tools
 from .primitives import Vertex
 
 class Mesh():
+    output_path = 'debug.vtk'
+
     """ contains blocks, edges and all necessary methods for assembling blockMeshDict """
     def __init__(self):
         self.vertices = [] # list of vertices
@@ -16,6 +18,7 @@ class Mesh():
 
         self.default_patch = None
         self.merged_patches = [] # [['master1', 'slave1'], ['master2', 'slave2']]
+        self.geometry = {}
 
     def find_vertex(self, new_vertex):
         """ checks if any of existing vertices in self.vertices are
@@ -52,6 +55,10 @@ class Mesh():
                 self.add_block(block)
         else:
             self.add_block(item)
+
+        # TODO: TEST
+        if hasattr(item, 'geometry'):
+            self.add_geometry(item.geometry)
 
     def get_patches(self):
         # Block contains patches according to the example in __init__()
@@ -155,7 +162,10 @@ class Mesh():
         # collect all edges from all blocks;
         for block in self.blocks:
             # check for duplicates (same vertex pairs) and
-            # check for validity (no straight-line arcs)
+            # check for validity (no lines or straight-line arcs);
+            # remove edges that don't pass those tests
+            legit_edges = []
+
             for i, block_edge in enumerate(block.edges):
                 # block.vertices by now contain index to mesh.vertices;
                 # edge vertex therefore refers to actual mesh vertex
@@ -165,19 +175,15 @@ class Mesh():
                 block.edges[i].vertex_1 = v_1
                 block.edges[i].vertex_2 = v_2
 
-                if not block_edge.is_valid:
-                    # invalid edges should be erased, not added to mesh
-                    del block.edges[i]
-                    continue
-
                 if block_edge.type == 'line':
-                    # no need to add lines
                     continue
 
-                if self.find_edge(v_1, v_2) is None:
-                    # only non-existing edges are added
-                    self.edges.append(block_edge)
+                if block_edge.is_valid:
+                    if self.find_edge(v_1, v_2) is None:
+                        legit_edges.append(block_edge)
 
+            self.edges += legit_edges
+            block.edges = legit_edges
 
     def collect_neighbours(self):
         # collect all neighbours from all blocks;
@@ -238,8 +244,12 @@ class Mesh():
                     f[1] # the geometry to project to
                 ])
 
-    def prepare_data(self):
+    def prepare_data(self, debug=False):
         self.collect_vertices()
+
+        if debug:
+            self.to_vtk()
+        
         self.collect_edges()
         self.collect_neighbours()
         self.set_gradings()
@@ -258,13 +268,21 @@ class Mesh():
             'type': type
         }
 
-    def write(self, output_path, template_path=None, geometry=None):
+    def add_geometry(self, g):
+        # TODO: TEST
+        self.geometry = {**self.geometry, **g}
+
+    def write(self, output_path, template_path=None, geometry=None, debug=True):
         # if template path is not given, find the default relative to this file
         if template_path is None:
             classy_dir = os.path.dirname(__file__)
             template_path = os.path.join(classy_dir, '..', 'util', 'blockMeshDict.template')
 
-        self.prepare_data()
+        # TODO: TEST
+        if geometry is not None:
+            self.add_geometry(geometry)
+
+        self.prepare_data(debug)
 
         context = {
             'vertices': self.vertices,
@@ -274,7 +292,21 @@ class Mesh():
             'faces': self.faces,
             'default_patch': self.default_patch,
             'merged_patches': self.merged_patches,
-            'geometry': geometry,
+            'geometry': self.geometry,
         }
 
         tools.template_to_dict(template_path, output_path, context)
+
+    def to_vtk(self):
+        """ Creates a VTK file with each mesh.block represented as a hexahedron,
+        useful for debugging when Mesh.write() succeeds but blockMesh fails.
+        Can only be called after Mesh.write() has been successfully finished! """
+        context = {
+            'points': [v.point for v in self.vertices],
+            'cells': [[v.mesh_index for v in b.vertices] for b in self.blocks]
+        }
+
+        tools.template_to_dict(
+            os.path.join(os.path.dirname(__file__), '..', 'util', 'vtk.template'),
+            self.output_path, context)
+

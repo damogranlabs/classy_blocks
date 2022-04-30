@@ -1,0 +1,22 @@
+# vtk DataFile Version 2.0
+classy_blocks debug output
+ASCII
+
+DATASET UNSTRUCTURED_GRID
+POINTS {{ points|length }} float
+{% for p in points %}{{ p.0 }} {{ p.1 }} {{ p.2 }}
+{% endfor %}
+   
+CELLS {{ cells|length }} {{ cells|length*9}}
+{% for c in cells %}8 {% for p in c %} {{ p }}{% endfor %}
+{% endfor %}
+
+CELL_TYPES {{ cells|length }}
+{% for c in cells %}12
+{% endfor %}
+
+CELL_DATA {{ cells|length }}
+SCALARS block_ids float 1
+LOOKUP_TABLE default
+{% for c in cells %}{{ loop.index0 }}
+{% endfor %}

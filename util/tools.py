@@ -3,7 +3,7 @@ import numpy as np
 
 # mesh utils
 def template_to_dict(template_path, dict_path, context):
-    """ renders template with context to product a dictionary (or anything else) """
+    """ renders template with context to produce an OF dictionary (or anything else, depends on the template) """
     template_file = open(template_path, "r")
     template_text = template_file.read()
     template_file.close()
@@ -12,3 +12,4 @@ def template_to_dict(template_path, dict_path, context):
     mesh_file = open(dict_path, "w")
     mesh_file.write(template.render(context))
     mesh_file.close()
+

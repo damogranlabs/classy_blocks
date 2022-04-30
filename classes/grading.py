@@ -152,13 +152,18 @@ class Grading:
     def invert(self):
         # invert gradings and stuff in case neighbuors are defined upside-down
         if len(self.divisions) == 0:
-            return # nothing to invert
+            return # nothing to invert 
         
         if len(self.divisions) == 1:
             self.divisions[0][2] = 1/self.divisions[0][2]
-        
         else:
-            raise NotImplementedError("Grading.invert() for multigrading")
+            # divisions: a list of lists [length ratio, count ratio, total expansion]
+            d_inverted = []
+
+            for d in reversed(self.divisions):
+                d[2] = 1/d[2]
+                d_inverted.append(d)
+                self.divisions = d_inverted
 
     def copy(self, invert=False):
         # copy grading from one block to another;
