@@ -1,5 +1,5 @@
 from classy_blocks.classes.mesh import Mesh
-from classy_blocks.classes.operations import Face, Extrude, Loft
+from classy_blocks.classes.operations import Face, Extrude
 
 geometry = {
     'terrain': [

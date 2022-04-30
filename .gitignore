@@ -5,6 +5,7 @@ polyMesh/
 cellToRegion
 blockMeshDict
 log.*
+*.vtk
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

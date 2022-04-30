@@ -1,6 +1,3 @@
-import unittest
-import os
-
 from tests.fixtures import ExecutedTestsBase
 
 class PrimitiveTests(ExecutedTestsBase):
@@ -38,25 +35,58 @@ class ShapeTests(ExecutedTestsBase):
         from examples.shape import frustum as test_example
         self.run_and_check(test_example)
     
-    def test_ring(self):
-        from examples.shape import ring as test_example
+    def test_extruded_ring(self):
+        from examples.shape import extruded_ring as test_example
+        self.run_and_check(test_example)
+
+    def test_revolved_ring(self):
+        from examples.shape import revolved_ring as test_example
+        self.run_and_check(test_example)
+
+    def test_hemisphere(self):
+        from examples.shape import hemisphere as test_example
+        self.run_and_check(test_example)
+
+    def test_frustum_wall(self):
+        from examples.shape import frustum_wall as test_example
+        self.run_and_check(test_example)
+
+    def test_elbow_wall(self):
+        from examples.shape import elbow_wall as test_example
+        self.run_and_check(test_example)
+
+class ChainingTests(ExecutedTestsBase):
+    def test_flywheel(self):
+        from examples.chaining import flywheel as test_example
+        self.run_and_check(test_example)    
+
+    def test_tank(self):
+        from examples.chaining import tank as test_example
+        self.run_and_check(test_example)   
+
+    def test_test_tube(self):
+        from examples.chaining import test_tube as test_example
+        self.run_and_check(test_example)    
+
+    def test_venturi_tube(self):
+        from examples.chaining import venturi_tube as test_example
+        self.run_and_check(test_example)    
+
+    def test_orifice_plate(self):
+        from examples.chaining import orifice_plate as test_example
+        self.run_and_check(test_example)    
+
+    def test_coriolis_flowmeter(self):
+        from examples.chaining import coriolis_flowmeter as test_example
         self.run_and_check(test_example)
 
 class ComplexTests(ExecutedTestsBase):
-    def test_piping(self):
-        from examples.complex import piping as test_example
-        self.run_and_check(test_example)
-
     def  test_helmholtz_nozzle(self):
         from examples.complex import helmholtz_nozzle as test_example
         self.run_and_check(test_example)
     
     def test_karman(self):
         from examples.complex import karman as test_example
-        self.run_and_check(test_example)
-
-    def test_volute(self):
-        from examples.complex import pump_volute as test_example
         self.run_and_check(test_example)
 
 class AdvancedTests(ExecutedTestsBase):

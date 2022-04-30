@@ -2,8 +2,6 @@ import unittest
 
 import os
 
-import pytest
-
 from classy_blocks.util import grading_calculator as gc
 from classy_blocks.classes import grading
 from classy_blocks.classes.grading import Grading

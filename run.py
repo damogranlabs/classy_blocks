@@ -14,16 +14,27 @@ import os
 # from examples.operation import airfoil_2d as example
 
 # shapes
-from examples.shape import elbow as example
+# from examples.shape import elbow as example
 # from examples.shape import frustum as example
 # from examples.shape import cylinder as example
-# from examples.shape import ring as example
+# from examples.shape import revolved_ring as example
+# from examples.shape import extruded_ring as example
+# from examples.shape import hemisphere as example
+
+# from examples.shape import elbow_wall as example
+# from examples.shape import frustum_wall as example
+
+# chaining
+from examples.chaining import tank as example
+# from examples.chaining import test_tube as example
+# from examples.chaining import venturi_tube as example
+# from examples.chaining import orifice_plate as example
+# from examples.chaining import flywheel as example
+# from examples.chaining import coriolis_flowmeter as example
 
 # complex cases
-# from examples.complex import piping as example
 # from examples.complex import helmholtz_nozzle as example
-# from examples.complex import karman as example ###
-# from examples.complex import pump_volute as example
+# from examples.complex import karman as example
 
 # advanced
 # from examples.advanced import project as example # projection to STL surface

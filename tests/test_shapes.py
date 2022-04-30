@@ -27,7 +27,7 @@ class TestElbow(unittest.TestCase):
         )
 
     def test_elbow_operations(self):
-        self.assertEqual(len(self.elbow.operations), 5)
+        self.assertEqual(len(self.elbow.operations), 12)
 
 class TestRing(unittest.TestCase):
     def setUp(self):
@@ -36,24 +36,24 @@ class TestRing(unittest.TestCase):
         self.inner_radius_point_1 = [0.5, 0, 0]
         self.outer_radius = 1
 
-        self.n_blocks = 4
+        self.n_segments = 4
         
         self.ring = ExtrudedRing(
             self.axis_point_1, self.axis_point_2,
             self.inner_radius_point_1, self.outer_radius,
-            n_blocks=self.n_blocks
+            n_segments=self.n_segments
         )
 
     def test_ring_operations(self):
-        self.assertEqual(len(self.ring.operations), self.n_blocks)
+        self.assertEqual(len(self.ring.operations), self.n_segments)
 
-    def test_n_blocks(self):
-        n_blocks = 8
+    def test_n_segments(self):
+        n_segments = 8
 
         ring = ExtrudedRing(
             self.axis_point_1, self.axis_point_2,
             self.inner_radius_point_1, self.outer_radius,
-            n_blocks=n_blocks
+            n_segments=n_segments
         )
 
-        self.assertEqual(len(ring.operations), n_blocks)
+        self.assertEqual(len(ring.operations), n_segments)

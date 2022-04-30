@@ -6,6 +6,9 @@ def get_mesh():
     # A nozzle with a chamber that produces self-induced oscillations.
     # See helmholtz_nozzle.svg for geometry explanation.
 
+    # Note that this example could be greatly simplified with the new 
+    # .chain()/.expand()/.contract() methods; it was written before.
+
     # geometry data (all dimensions in meters):
     # inlet pipe
     r_inlet = 10e-3
@@ -65,13 +68,17 @@ def get_mesh():
     mesh.add(chamber_inner)
 
     # chamber outer: ring
-    ring_face = Face([
-        [x_start, r_nozzle, 0],
-        [x_end, r_nozzle, 0],
-        [x_start + l_chamber_outer, r_chamber_outer, 0],
-        [x_start, r_chamber_outer, 0]
-    ])
-    chamber_outer = RevolvedRing([x_start, 0, 0], [x_end, 0, 0], ring_face)
+    chamber_outer = RevolvedRing(
+        [x_start, 0, 0],
+        [x_end, 0, 0],
+        [ # ring face
+            [x_start, r_nozzle, 0],
+            [x_end, r_nozzle, 0],
+            [x_start + l_chamber_outer, r_chamber_outer, 0],
+            [x_start, r_chamber_outer, 0]
+        ],
+        n_segments=8 # default for Cylinder/Frustum etc.
+    )
     chamber_outer.chop_radial(length_ratio=0.5, start_size=outer_cell_size, c2c_expansion=c2c_expansion)
     chamber_outer.chop_radial(length_ratio=0.5, end_size=outer_cell_size, c2c_expansion=1/c2c_expansion)
     chamber_outer.set_bottom_patch('wall')

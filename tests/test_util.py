@@ -107,32 +107,6 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(f.lin_map(200, 0, 10, 0, 100, limit=True), 100)
         self.assertEqual(f.lin_map(-5, 0, 10, 0, 100, limit=True), 0)
 
-    def test_xy_line_intersection(self):
-        """ intersection of two lines in xy-plane """
-        # line 1
-        p1 = f.vector(0, 0, 0)
-        p2 = f.vector(1, 1, 0)
-
-        # line 2
-        p3 = f.vector(1, 0, 0)
-        p4 = f.vector(0, 1, 0)
-
-        self.assert_np_equal(
-            f.xy_line_intersection(p1, p2, p3, p4),
-            f.vector(0.5, 0.5, 0)
-        )
-
-    def test_extend_to_y(self):
-        """ extend a line given by two points to desired y-coordinate """
-        p1 = f.vector(0, 0, 0)
-        p2 = f.vector(1, 1, 0)
-        y = 5
-
-        self.assert_np_equal(
-            f.extend_to_y(p1, p2, y),
-            f.vector(y, y, 0)
-        )
-
     def test_to_cartesian_point(self):
         """ polar point to xyz """
         # polar point

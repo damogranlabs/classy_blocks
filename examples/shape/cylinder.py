@@ -1,8 +1,6 @@
 from classy_blocks.classes.mesh import Mesh
 from classy_blocks.classes.shapes import Cylinder
 
-template_path = None # use default template
-
 axis_point_1 = [0, 0, 0]
 axis_point_2 = [5, 5, 0]
 radius_point_1 = [0, 0, 2]
@@ -18,7 +16,7 @@ def get_mesh():
     core_size = 0.2
 
     cylinder.chop_axial(count=30)
-    cylinder.chop_radial(start_size=bl_thickness, end_size=core_size)
+    cylinder.chop_radial(start_size=core_size, end_size=bl_thickness)
     cylinder.chop_tangential(start_size=core_size)
 
     mesh = Mesh()

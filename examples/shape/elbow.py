@@ -30,16 +30,9 @@ def get_mesh():
 
     # counts and gradings
     elbow.chop_tangential(start_size=core_size)
-    elbow.chop_radial(start_size=boundary_size, end_size=core_size)
+    elbow.chop_radial(start_size=core_size, end_size=boundary_size)
     elbow.chop_axial(start_size=2*core_size)
 
     mesh.add(elbow)
-
-    # chaining: use the existing elbow's end face
-    # as a starting parameters of the new one
-    chained = elbow.chain(-np.pi/3, arc_center, rotation_axis, radius_2)
-    chained.chop_axial(start_size=2*core_size)
-    chained.set_top_patch('outlet')
-    mesh.add(chained)
 
     return mesh

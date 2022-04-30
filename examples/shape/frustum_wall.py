@@ -1,16 +1,17 @@
-import os
-
 from classy_blocks.classes.mesh import Mesh
-from classy_blocks.classes.shapes import Frustum
+from classy_blocks.classes.walls import FrustumWall
 
 def get_mesh():
     axis_point_1 = [0, 0, 0]
     axis_point_2 = [2, 2, 0]
-    radius_point_1 = [0, 0, 2]
-    radius_2 = 0.5
+    outer_radius_point_1 = [0, 0, 2]
+    thickness_1 = 0.1
 
-    bl_thickness = 0.01
-    core_size = 0.1
+    outer_radius_2 = 0.5
+    thickness_2 = 0.2
+
+    bl_thickness = 0.005
+    core_size = 0.05
 
     # A note about radius_mid;
     # it can be used to create shapes of revolution with curved sides;
@@ -19,7 +20,12 @@ def get_mesh():
     # Also, in drastic cases, non-orthogonality at beginning/end face will be high
     # because of sharp edges; in those cases it is better to use RevolvedRing combined with
     # Cylinder/Frustum with non-flat start/end faces.
-    frustum = Frustum(axis_point_1, axis_point_2, radius_point_1, radius_2, radius_mid=1.1)
+    frustum = FrustumWall(
+        axis_point_1, axis_point_2,
+        outer_radius_point_1, thickness_1,
+        outer_radius_2, thickness_2,
+        outer_radius_mid=1.1,
+        n_segments=12)
 
     frustum.set_bottom_patch('inlet')
     frustum.set_top_patch('outlet')

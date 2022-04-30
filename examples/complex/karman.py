@@ -22,14 +22,14 @@ def get_mesh():
 
     # a layer of cells on the cylinder
     d = 2**0.5/2
-    ring_point = d*cylinder_diameter/2
     outer_point = d*(cylinder_diameter/2 + ring_thickness)
 
     wall_ring = ExtrudedRing(
         [0, 0, 0],
         [0, 0, z],
-        [ring_point, ring_point, 0],
-        cylinder_diameter/2 + ring_thickness
+        [outer_point, outer_point, 0],
+        cylinder_diameter/2,
+        n_segments=4 # the default is 8 but here it makes no sense to have more than 4
     )
 
     wall_ring.chop_axial(count=1)
