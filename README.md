@@ -30,8 +30,11 @@ Since it is easier to crunch numbers and vectors and everything else with `numpy
  - Cylinder
  - Ring (annulus)
  - Elbow (bent pipe)
+ - Hemisphere
+ - Elbow wall (thickened elbow shell)
+ - Frustum wall
 
-A simple exapmle:
+A simple example:
 ```python
 inlet = Cylinder([x_start, 0, 0], [x_end, 0, 0], [0, 0, radius])
 inlet.chop_radial(count=n_cells_radial, end_size=boundary_layer_thickness)
@@ -44,7 +47,7 @@ inlet.set_top_patch('outlet')
 mesh.add(inlet)
 ```
 
-> See [examples/shape](https://github.com/damogranlabs/classy_examples) for example use of each 'shape'. See [examples/complex](https://github.com/damogranlabs/classy_examples) for a more real-life example usage of shapes.
+> See [examples/shape](https://github.com/damogranlabs/classy_examples) for use of each _shape_ and [examples/complex](https://github.com/damogranlabs/classy_examples) for a more real-life example usage of shapes.
 
 ## Operations
 Analogous to a sketch in 3D CAD software, a `Face` is a collection of 4 vertices and 4 edges.
@@ -152,15 +155,15 @@ mesh.add(cylinder)
 mesh.merge_patches('box_top', 'cylinder_bottom')
 ```
 
-## Chaining and expand/contract
+## Chaining and expanding/contracting
 Useful for Shapes, mostly for piping and rotational geometry; An existing Shape's start or end sketch can be reused as a
 starting sketch for a new Shape, as long as they are compatible.
-For instance, an Elbow can be _chained_ to a cylinder just like in plumbing.
+For instance, an `Elbow` can be _chained_ to a `Cylinder` just like joining pipes in plumbing.
 
-Moreover, all shapes can be expanded to form a 'wall' version of the same shape. For instance, expanding a Cylinder()
-creates an ExtrudedRing.
+Moreover, most shapes* can be expanded to form a _wall_ version of the same shape. For instance, expanding a `Cylinder`
+creates an `ExtrudedRing`.
 
-Contract is only possible on ExtrudedRing and produces another, smaller ExtrudedRing.
+`.contract()` is only possible* on `ExtrudedRing` and produces another, smaller `ExtrudedRing`.
 
 > See [examples/chaining](https://github.com/damogranlabs/classy_examples) for an example of each operation.
 
@@ -216,11 +219,15 @@ Of course you are free to use your own :)
 - New Shapes:
     - T-joint
     - X-joint
+    - Hemisphere with given angle (a.k.a. cone cap)
 - Wall versions of Shapes:
     - HemisphereWall
 - Chaining:
+    - *FrustumWall.expand()
+    - *FrustumWall.contract()
+    - *ElbowWall.contract()
     - Box.chain()
-    - Block.chain() (low-level)
+    - Block.chain() (low-level), or Block.get_face() -> Face
 - Examples
     - Ramjet engine
 Technical stuff:
