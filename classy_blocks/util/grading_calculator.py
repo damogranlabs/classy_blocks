@@ -7,7 +7,7 @@ from . import constants
 # transcribed from the blockmesh grading calculator:
 # https://gitlab.com/herpes-free-engineer-hpe/blockmeshgradingweb/-/blob/master/calcBlockMeshGrading.coffee
 # (not all are needed in for classy_blocks because length is always a known parameter)
-r_max = 1/constants.tol
+r_max = 1 / constants.tol
 
 # these functions are introspected and used for calculation according to their
 # name (get_<result>__<param1>__<param2>(length, param1, param2));
@@ -101,9 +101,9 @@ def get_c2c_expansion__count__start_size(length, count, start_size):
     
     if count*start_size < length:
         c_max = r_max**(1/(count-1))
-        c_min = (1 + constants.tol)**(1/(count-1))
+        c_min = (1 + constants.tol) ** (1 / (count - 1))
     else:
-        c_max = (1-constants.tol)**(1/(count-1))
+        c_max = (1 - constants.tol) ** (1 / (count - 1))
         c_min = (1/r_max)**(1/(count-1))
 
     fexp = lambda c: (1- c**count) / (1-c) - length/start_size
@@ -125,9 +125,9 @@ def get_c2c_expansion__count__end_size(length, count, end_size):
     else:
         if count*end_size > length:
             c_max = r_max**(1/(count-1))
-            c_min = (1+constants.tol)**(1/(count-1))
+            c_min = (1 + constants.tol) ** (1 / (count - 1))
         else:
-            c_max= (1-constants.tol)**(1/(count-1))
+            c_max= (1 - constants.tol) ** (1 / (count - 1))
             c_min= (1/r_max)**(1/(count-1))
         
         fexp = lambda c: (1/c**(count-1))*(1 - c**count)/(1-c)-length/end_size

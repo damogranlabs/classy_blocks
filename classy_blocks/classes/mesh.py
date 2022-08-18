@@ -276,7 +276,7 @@ class Mesh():
         # if template path is not given, find the default relative to this file
         if template_path is None:
             classy_dir = os.path.dirname(__file__)
-            template_path = os.path.join(classy_dir, '..', 'util', 'blockMeshDict.template')
+            template_path = os.path.join(classy_dir, '../..', 'util', 'blockMeshDict.template')
 
         # TODO: TEST
         if geometry is not None:
@@ -307,6 +307,6 @@ class Mesh():
         }
 
         tools.template_to_dict(
-            os.path.join(os.path.dirname(__file__), '..', 'util', 'vtk.template'),
+            os.path.join(os.path.dirname(__file__), '../..', 'util', 'vtk.template'),
             self.output_path, context)
 
