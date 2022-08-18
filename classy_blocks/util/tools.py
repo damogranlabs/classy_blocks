@@ -1,5 +1,5 @@
 import jinja2
-import numpy as np
+
 
 # mesh utils
 def template_to_dict(template_path, dict_path, context):
@@ -12,4 +12,3 @@ def template_to_dict(template_path, dict_path, context):
     mesh_file = open(dict_path, "w")
     mesh_file.write(template.render(context))
     mesh_file.close()
-

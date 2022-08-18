@@ -3,6 +3,7 @@ from numpy import pi
 # geometric tolerance
 tol = 1e-7
 
+
 # number formatting
 def vector_format(vector):
     # output for edge definitions
@@ -12,10 +13,11 @@ def vector_format(vector):
         vector[2]
     )
 
+
 # Circle H-grid parameters
 # A quarter of a circle is created from 3 blocks;
 # Central 'square' (0) and two curved 'rectangles' (1 and 2)
-# 
+#
 # |*******
 # |  2    /**
 # |      /    *
@@ -34,5 +36,5 @@ circle_core_side = 0.62
 # Sphere parameters:
 # The same sketch as above but it represents sphere cross-section.
 # Vector O-S is circle normal; there are two different angles DOS;
-sphere_diagonal_angle = pi/4
-sphere_side_angle = pi/6
+sphere_diagonal_angle = pi / 4
+sphere_side_angle = pi / 6

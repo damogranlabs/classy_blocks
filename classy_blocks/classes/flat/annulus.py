@@ -3,6 +3,7 @@ import numpy as np
 from ..flat.face import Face
 from ...util import functions as f
 
+
 class Annulus:
     # In real-life, Annulus and Ring are the same 2D objects.
     # Here, however, Annulus is a 2D collection of faces whereas
@@ -20,8 +21,8 @@ class Annulus:
         self.inner_radius = inner_radius
 
         self.inner_radius_point = self.center_point + \
-            f.unit_vector(self.outer_radius_point - self.center_point)*self.inner_radius
-        
+                                  f.unit_vector(self.outer_radius_point - self.center_point) * self.inner_radius
+
         # TODO: TEST
         if n_segments is None:
             # 4 for rings, 8 for expanding shapes made from circles
@@ -29,16 +30,16 @@ class Annulus:
         self.n_segments = n_segments
 
         rot = lambda p, a: f.arbitrary_rotation(p, self.normal, a, self.center_point)
-        angle = 2*np.pi/n_segments
+        angle = 2 * np.pi / n_segments
 
         face = Face(
-            [ # points
+            [  # points
                 self.inner_radius_point, self.outer_radius_point,
                 rot(self.outer_radius_point, angle), rot(self.inner_radius_point, angle)
             ],
-            [ # edges
-                None, rot(self.outer_radius_point, angle/2),
-                None, rot(self.inner_radius_point, angle/2)
+            [  # edges
+                None, rot(self.outer_radius_point, angle / 2),
+                None, rot(self.inner_radius_point, angle / 2)
             ]
         )
 
@@ -46,7 +47,7 @@ class Annulus:
         self.core_faces = None
 
         self.shell_faces = [
-            face.rotate(self.normal, i*angle, self.center_point)
+            face.rotate(self.normal, i * angle, self.center_point)
             for i in range(self.n_segments)
         ]
 
@@ -62,7 +63,7 @@ class Annulus:
             self.radius_point + vector,
             self.normal,
             self.inner_radius, self.n_segments)
-        
+
     def rotate(self, axis, angle, origin, **kwargs):
         # TODO: TEST
         r = lambda p: f.arbitrary_rotation(p, axis, angle, origin)
@@ -77,7 +78,6 @@ class Annulus:
         # TODO: TEST
         return self.__class__(
             self.center_point,
-            self.center_point + f.unit_vector(self.radius_point - self.center_point)*outer_radius,
+            self.center_point + f.unit_vector(self.radius_point - self.center_point) * outer_radius,
             self.normal,
             inner_radius, self.n_segments)
-    

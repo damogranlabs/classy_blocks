@@ -1,19 +1,22 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
-from ..util import functions as f
 from ..util import constants
+from ..util import functions as f
+
 
 class WrongEdgeTypeException(Exception):
     def __init__(self, edge_type, *args, **kwargs):
         raise Exception(f"Wrong edge type: {edge_type}", *args, **kwargs)
 
+
 def transform_points(points, function):
     return [function(p) for p in points]
 
+
 def transform_edges(edges, function):
     if edges is not None:
-        new_edges = [None]*4
+        new_edges = [None] * 4
         for i, edge_points in enumerate(edges):
             edge_type, edge_points = Edge.get_type(edge_points)
 
@@ -23,16 +26,18 @@ def transform_edges(edges, function):
                 new_edges[i] = function(edge_points)
 
         return new_edges
-    
+
     return None
+
 
 class Vertex():
     """ point with an index that's used in block and face definition
     and can output in OpenFOAM format """
+
     def __init__(self, point):
         self.point = np.asarray(point)
-        self.mesh_index = None # will be changed in Mesh.prepare_data()
-        
+        self.mesh_index = None  # will be changed in Mesh.prepare_data()
+
     def rotate(self, angle, axis=[1, 0, 0], origin=[0, 0, 0]):
         """ returns a new, rotated Vertex """
         point = f.arbitrary_rotation(self.point, axis, angle, origin)
@@ -40,11 +45,12 @@ class Vertex():
 
     def __repr__(self):
         s = constants.vector_format(self.point)
-        
+
         if self.mesh_index is not None:
             s += " // {}".format(self.mesh_index)
-        
+
         return s
+
 
 class Edge():
     def __init__(self, index_1, index_2, points):
@@ -91,7 +97,7 @@ class Edge():
             assert len(shape) == 2
             for p in points:
                 assert len(p) == 3
-            
+
             t = 'spline'
 
         return t, points
@@ -100,27 +106,27 @@ class Edge():
     def point_list(self):
         if self.type == 'line':
             return None
-            
+
         if self.type == 'project':
             return f"({self.points})"
 
         if self.type == 'arc':
             return constants.vector_format(self.points)
-        
+
         if self.type == 'spline':
-            return "(" +  \
-                " ".join([constants.vector_format(p) for p in self.points]) + \
-                ")"
-        
+            return "(" + \
+                   " ".join([constants.vector_format(p) for p in self.points]) + \
+                   ")"
+
         raise WrongEdgeTypeException(self.type)
-    
+
     @property
     def is_valid(self):
-        # wedge geometries produce coincident 
+        # wedge geometries produce coincident
         # edges and vertices; drop those
         if f.norm(self.vertex_1.point - self.vertex_2.point) < constants.tol:
             return False
-        
+
         # 'all' spline and projected edges are 'valid'
         if self.type in ('line', 'spline', 'project'):
             return True
@@ -140,13 +146,13 @@ class Edge():
         AB = OB - OA
         AC = OC - OA
 
-        k = f.norm(AC)/f.norm(AB)
-        d = f.norm((OA+AC) - (OA + k*AB))
+        k = f.norm(AC) / f.norm(AB)
+        d = f.norm((OA + AC) - (OA + k * AB))
 
         return d > constants.tol
 
     def get_length(self):
-        if self.type in('line', 'project'):
+        if self.type in ('line', 'project'):
             return f.norm(self.vertex_1.point - self.vertex_2.point)
 
         if self.type == 'arc':
@@ -158,18 +164,18 @@ class Edge():
         def curve_length(points):
             l = 0
 
-            for i in range(len(points)-1):
-                l += f.norm(points[i+1] - points[i])
+            for i in range(len(points) - 1):
+                l += f.norm(points[i + 1] - points[i])
 
             return l
-        
+
         if self.type == 'spline':
             edge_points = np.concatenate((
                 [self.vertex_1.point],
                 self.points,
                 [self.vertex_2.point]), axis=0)
             return curve_length(edge_points)
-        
+
         raise WrongEdgeTypeException(self.type)
 
     def rotate(self, angle, axis=[1, 0, 0], origin=[0, 0, 0]):
@@ -184,9 +190,9 @@ class Edge():
             points = [f.arbitrary_rotation(p, axis, angle, origin) for p in self.points]
         else:
             raise WrongEdgeTypeException(self.type)
-        
+
         return Edge(self.block_index_1, self.block_index_2, points)
-        
+
     def __repr__(self):
         return "{} {} {} {}".format(
             self.type,

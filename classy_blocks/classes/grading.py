@@ -1,10 +1,9 @@
-import os
-
 import copy
+import inspect
+import os
+import warnings
 
 from ..util import grading_calculator as gc
-import inspect
-import warnings
 
 # In theory, combination of three of these 6 values can be specified:
 #  - Total length
@@ -47,7 +46,7 @@ import warnings
 # (since block length is always known, there's less wrestling but the calculation principle is similar)
 
 # gather available functions for calculation of grading parameters
-functions = [] # list [ [return_value, {parameters}, function], ... ]
+functions = []  # list [ [return_value, {parameters}, function], ... ]
 
 for m in inspect.getmembers(gc):
     if inspect.isfunction(m[1]):
@@ -57,6 +56,7 @@ for m in inspect.getmembers(gc):
         functions.append(
             [data[0][4:], [data[1], data[2]], m[1]]
         )
+
 
 def calculate(length, parameters):
     # calculates cell count and total expansion ratio for a block
@@ -76,31 +76,34 @@ def calculate(length, parameters):
             if freturn in calculated:
                 # this value is already calculated, go on
                 continue
-    
+
             if set(fparams).issubset(calculated):
                 parameters[freturn] = ffunction(length, parameters[fparams[0]], parameters[fparams[1]])
                 calculated.add(freturn)
 
         if {'count', 'total_expansion'}.issubset(calculated):
             return parameters['count'], parameters['total_expansion']
-    
+
     raise ValueError(f"Could not calculate count and grading for given parameters: {parameters}")
+
 
 class Grading:
     """ Grading specification for a single block direction """
+
     def __init__(self):
         # must be set before any calculation is performed
         self.length = None
 
         # "multi-grading" specification according to:
         # https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
-        self.divisions = [] # a list of lists [length ratio, count ratio, total expansion]
-    
+        self.divisions = []  # a list of lists [length ratio, count ratio, total expansion]
+
     def set_block_size(self, size):
         self.length = size
 
     def add_division(self, length_ratio=1,
-        start_size=None, c2c_expansion=None, count=None, end_size=None, total_expansion=None, invert=False):
+                     start_size=None, c2c_expansion=None, count=None, end_size=None, total_expansion=None,
+                     invert=False):
         """ Add a grading division to block specification.
         Use length_ratio for multigrading (see documentation).
         Available grading parameters are:
@@ -130,7 +133,7 @@ class Grading:
         if count is not None:
             count = int(count)
 
-        length = self.length*length_ratio
+        length = self.length * length_ratio
 
         # blockMesh needs two numbers regardless of user's input:
         # number of cells and total expansion ratio.
@@ -145,23 +148,23 @@ class Grading:
         })
 
         if invert:
-            total_expansion = 1/total_expansion
+            total_expansion = 1 / total_expansion
 
         self.divisions.append([length_ratio, count, total_expansion])
 
     def invert(self):
         # invert gradings and stuff in case neighbuors are defined upside-down
         if len(self.divisions) == 0:
-            return # nothing to invert 
-        
+            return  # nothing to invert 
+
         if len(self.divisions) == 1:
-            self.divisions[0][2] = 1/self.divisions[0][2]
+            self.divisions[0][2] = 1 / self.divisions[0][2]
         else:
             # divisions: a list of lists [length ratio, count ratio, total expansion]
             d_inverted = []
 
             for d in reversed(self.divisions):
-                d[2] = 1/d[2]
+                d[2] = 1 / d[2]
                 d_inverted.append(d)
                 self.divisions = d_inverted
 
@@ -187,11 +190,11 @@ class Grading:
         if len(self.divisions) == 0:
             # no grading specified: default to 1
             return 'Undefined'
-        
+
         if len(self.divisions) == 1:
             # its a one-number simpleGrading:
             return str(self.divisions[0][2])
-        
+
         length_ratio_sum = 0
         s = "(" + os.linesep
 
@@ -200,11 +203,10 @@ class Grading:
             s += os.linesep
 
             length_ratio_sum += d[0]
-        
+
         s += ")"
 
         if length_ratio_sum != 1:
             warnings.warn(f"Length ratio doesn't add up to 1: {length_ratio_sum}")
 
         return s
-    

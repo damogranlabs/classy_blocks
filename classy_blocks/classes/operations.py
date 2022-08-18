@@ -1,18 +1,15 @@
 from typing import List
-import copy
 
 import numpy as np
 
-from ..util import functions as f
-from ..util import constants
-
 from .block import Block
-from .primitives import Edge, transform_edges
-
 from .flat.face import Face
+from .primitives import Edge, transform_edges
+from ..util import functions as f
+
 
 class Operation():
-    def __init__(self, bottom_face:Face, top_face:Face, side_edges:List[Edge]=None):
+    def __init__(self, bottom_face: Face, top_face: Face, side_edges: List[Edge] = None):
         self.bottom_face = bottom_face
         self.top_face = top_face
 
@@ -30,7 +27,7 @@ class Operation():
                 e = self.side_edges[i]
 
                 if e is not None:
-                    self.edges.append(Edge(i, i+4, e))
+                    self.edges.append(Edge(i, i + 4, e))
 
         # create a block and edges
         self.block = Block.create_from_points(
@@ -46,7 +43,7 @@ class Operation():
         """
         self.block.chop(axis, **kwargs)
 
-    def set_patch(self, sides, patch_name:str):
+    def set_patch(self, sides, patch_name: str):
         """ bottom: bottom face
         top: top face
 
@@ -57,18 +54,18 @@ class Operation():
         left: opposite right """
         self.block.set_patch(sides, patch_name)
 
-    def translate(self, vector:List):
+    def translate(self, vector: List):
         """ returns a translated copy of this Operation """
         vector = np.array(vector)
-        
+
         bottom_face = self.bottom_face.translate(vector)
         top_face = self.top_face.translate(vector)
 
         side_edges = transform_edges(self.side_edges, lambda v: v + vector)
 
         return Operation(bottom_face, top_face, side_edges)
-                
-    def rotate(self, axis:List, angle:float, origin:List=[0, 0, 0]):
+
+    def rotate(self, axis: List, angle: float, origin: List = [0, 0, 0]):
         axis = np.array(axis)
         origin = np.array(origin)
 
@@ -92,9 +89,11 @@ class Loft(Operation):
     must also be included in Operation. """
     pass
 
+
 class Extrude(Loft):
     """ Takes a Face and extrudes it in given extrude_direction """
-    def __init__(self, base:Face, extrude_vector:list):
+
+    def __init__(self, base: Face, extrude_vector: list):
         self.base = base
         self.extrude_vector = extrude_vector
 
@@ -102,12 +101,13 @@ class Extrude(Loft):
 
         super().__init__(base, top_face)
 
+
 class Revolve(Loft):
-    def __init__(self, base:Face, angle:list, axis:list, origin:list):
+    def __init__(self, base: Face, angle: list, axis: list, origin: list):
         """ Takes a Face and revolves it by angle around axis;
         axis can be translated so that it goes through desired origin.
-        
-        Angle is given in radians, 
+
+        Angle is given in radians,
         revolve is in positive sense (counter-clockwise) """
         self.base = base
         self.angle = angle
@@ -120,14 +120,15 @@ class Revolve(Loft):
         # there are 4 side edges: rotate each vertex of bottom_face
         # by angle/2
         side_edges = [
-            f.arbitrary_rotation(p, self.axis, self.angle/2, self.origin)
+            f.arbitrary_rotation(p, self.axis, self.angle / 2, self.origin)
             for p in self.base.points
         ]
 
         super().__init__(bottom_face, top_face, side_edges)
 
+
 class Wedge(Revolve):
-    def __init__(self, face:Face, angle=f.deg2rad(2)):
+    def __init__(self, face: Face, angle=f.deg2rad(2)):
         """ Revolves 'face' around x-axis symetrically by +/- angle/2.
         By default, the angle is 2 degrees.
 
@@ -151,7 +152,7 @@ class Wedge(Revolve):
             |_______________________________|
                           inner
         __  _____  __  _____  __  _____  __  __ axis of symmetry (x) """
-        
+
         # default axis
         axis = [1, 0, 0]
         # default origin
@@ -159,7 +160,7 @@ class Wedge(Revolve):
 
         # first, rotate this face forward, then use init this as Revolve
         # and rotate the same face
-        base = face.rotate(axis, -angle/2, origin)
+        base = face.rotate(axis, -angle / 2, origin)
 
         super().__init__(base, angle, axis, origin)
 
@@ -175,7 +176,7 @@ class Wedge(Revolve):
 
     def set_outer_patch(self, patch_name):
         super().set_patch('back', patch_name)
-    
+
     def set_inner_patch(self, patch_name):
         super().set_patch('front', patch_name)
 
@@ -184,4 +185,3 @@ class Wedge(Revolve):
 
     def set_right_patch(self, patch_name):
         super().set_patch('right', patch_name)
-    

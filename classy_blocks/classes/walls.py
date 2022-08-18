@@ -1,10 +1,11 @@
 from typing import List
+
 import numpy as np
 
 from ..classes.flat.annulus import Annulus
 from ..classes.shapes import Elbow, Shape
-
 from ..util import functions as f
+
 
 class ElbowWall(Shape):
     inner_patch = 'left'
@@ -17,9 +18,9 @@ class ElbowWall(Shape):
             .scale(**kwargs)
 
     def __init__(self,
-        center_point_1:List, outer_radius_point_1:List, normal_1:List, thickness_1:float, 
-        sweep_angle:float, arc_center:List, rotation_axis:List,
-        outer_radius_2:float, thickness_2:float, n_segments:int=None):
+                 center_point_1: List, outer_radius_point_1: List, normal_1: List, thickness_1: float,
+                 sweep_angle: float, arc_center: List, rotation_axis: List,
+                 outer_radius_2: float, thickness_2: float, n_segments: int = None):
         # TODO: TEST
         self.arguments = locals()
 
@@ -38,10 +39,10 @@ class ElbowWall(Shape):
             },
             {
                 'axis': rotation_axis,
-                'angle': sweep_angle/2,
+                'angle': sweep_angle / 2,
                 'origin': arc_center,
-                'outer_radius': (outer_radius_1 + outer_radius_2)/2,
-                'inner_radius': (inner_radius_1 + inner_radius_2)/2
+                'outer_radius': (outer_radius_1 + outer_radius_2) / 2,
+                'inner_radius': (inner_radius_1 + inner_radius_2) / 2
             }
         )
 
@@ -53,7 +54,7 @@ class ElbowWall(Shape):
             s.block.set_patch(self.inner_patch, patch_name)
 
     @classmethod
-    def expand(cls, source:Elbow, thickness_1, thickness_2=None):
+    def expand(cls, source: Elbow, thickness_1, thickness_2=None):
         # would work just fine as a method but is implemented as a class method
         # to be consistent with other expands and whatnot.
         # TODO: TEST
@@ -62,12 +63,13 @@ class ElbowWall(Shape):
 
         s1 = source.sketch_1
         radius_point_1 = s1.center_point + \
-            f.unit_vector(s1.radius_point - s1.center_point)*(s1.radius + thickness_1)
+                         f.unit_vector(s1.radius_point - s1.center_point) * (s1.radius + thickness_1)
 
         return cls(
             source.sketch_1.center_point, radius_point_1, source.sketch_1.normal, thickness_1,
             source.arguments['sweep_angle'], source.arguments['arc_center'], source.arguments['rotation_axis'],
             source.sketch_2.radius + thickness_2, thickness_2, len(s1.shell_faces))
+
 
 class FrustumWall(Shape):
     inner_patch = 'left'
@@ -79,14 +81,13 @@ class FrustumWall(Shape):
             .translate(**kwargs) \
             .scale(**kwargs)
 
-    def __init__(self, axis_point_1:List, axis_point_2:List,
-        outer_radius_point_1:List, thickness_1:float,
-        outer_radius_2:float, thickness_2:float,
-        outer_radius_mid:float=None, n_segments=None):
+    def __init__(self, axis_point_1: List, axis_point_2: List,
+                 outer_radius_point_1: List, thickness_1: float,
+                 outer_radius_2: float, thickness_2: float,
+                 outer_radius_mid: float = None, n_segments=None):
 
         self.axis = np.asarray(axis_point_2) - np.asarray(axis_point_1)
 
-        
         outer_radius_1 = f.norm(np.asarray(outer_radius_point_1) - np.asarray(axis_point_1))
         inner_radius_1 = outer_radius_1 - thickness_1
         inner_radius_2 = outer_radius_2 - thickness_2
@@ -95,9 +96,9 @@ class FrustumWall(Shape):
             mid_params = None
         else:
             mid_params = {
-                'vector': self.axis/2,
+                'vector': self.axis / 2,
                 'outer_radius': outer_radius_mid,
-                'inner_radius': outer_radius_mid - (thickness_1 + thickness_2)/2
+                'inner_radius': outer_radius_mid - (thickness_1 + thickness_2) / 2
             }
 
         super().__init__(
@@ -118,6 +119,7 @@ class FrustumWall(Shape):
         # TODO
         # TODO: TEST
         pass
+
 
 class HemisphereWall(Shape):
     # TODO

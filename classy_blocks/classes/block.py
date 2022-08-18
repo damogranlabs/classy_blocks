@@ -1,10 +1,11 @@
-import numpy as np
-
 from typing import List
 
-from ..util import functions as f
-from .primitives import Vertex, Edge
+import numpy as np
+
 from .grading import Grading
+from .primitives import Vertex, Edge
+from ..util import functions as f
+
 
 class Block:
     """ a direct representation of a blockMesh block;
@@ -17,22 +18,22 @@ class Block:
         'top': (4, 5, 6, 7),
         'left': (4, 0, 3, 7),
         'right': (5, 1, 2, 6),
-        'front': (4, 5, 1, 0), 
+        'front': (4, 5, 1, 0),
         'back': (7, 6, 2, 3)
     }
 
     # pairs of vertices (index in block.vertices) along axes
     axis_pair_indexes = (
-        ((0, 1), (3, 2), (4, 5), (7, 6)), # x
-        ((0, 3), (1, 2), (5, 6), (4, 7)), # y
-        ((0, 4), (1, 5), (2, 6), (3, 7)), # z
+        ((0, 1), (3, 2), (4, 5), (7, 6)),  # x
+        ((0, 3), (1, 2), (5, 6), (4, 7)),  # y
+        ((0, 4), (1, 5), (2, 6), (3, 7)),  # z
     )
 
-    def __init__(self, vertices:List[Vertex], edges:List[Edge]):
+    def __init__(self, vertices: List[Vertex], edges: List[Edge]):
         # a list of 8 Vertex and Edge objects for each corner/edge of the block
         self.vertices = vertices
         self.edges = edges
-        self.faces = [] # a list of projected faces;
+        self.faces = []  # a list of projected faces;
         # [['bottom', 'terrain'], ['right', 'building'], ['back', 'building'],]
 
         # block grading;
@@ -53,7 +54,7 @@ class Block:
         #     'volute_rotating': ['left', 'top' ],
         #     'volute_walls': ['bottom'],
         # }
-        self.patches = { }
+        self.patches = {}
 
         # set in Mesh.prepare_data()
         self.mesh_index = None
@@ -74,7 +75,7 @@ class Block:
         indexes = self.face_map[side]
         if internal:
             return indexes
-        
+
         vertices = np.take(self.vertices, indexes)
 
         return [v.mesh_index for v in vertices]
@@ -85,7 +86,7 @@ class Block:
 
         sides = self.patches[patch]
         faces = [self.get_face(s, internal=internal) for s in sides]
-        
+
         return faces
 
     def find_edge(self, index_1, index_2) -> Edge:
@@ -103,24 +104,24 @@ class Block:
             return f.norm(
                 self.vertices[index_1].point - self.vertices[index_2].point
             )
-    
+
         def block_size(index_1, index_2):
             edge = self.find_edge(index_1, index_2)
             if edge:
                 return edge.get_length()
 
             return vertex_distance(index_1, index_2)
-        
+
         edge_lengths = [
             block_size(pair[0], pair[1]) for pair in self.axis_pair_indexes[axis]
         ]
 
         if take == 'avg':
-            return sum(edge_lengths)/len(edge_lengths)
-        
+            return sum(edge_lengths) / len(edge_lengths)
+
         if take == 'min':
             return min(edge_lengths)
-        
+
         if take == 'max':
             return max(edge_lengths)
 
@@ -146,7 +147,7 @@ class Block:
                 continue
 
             pairs.append(pair)
-        
+
         return pairs
 
     def get_axis_from_pair(self, pair):
@@ -156,18 +157,18 @@ class Block:
 
         for i in range(3):
             pairs = self.get_axis_vertex_pairs(i)
-            
+
             if pair in pairs:
                 return i, True
 
             if riap in pairs:
                 return i, False
-        
+
         return None, None
 
     ###
     ### Manipulation
-    ###    
+    ###
     def set_patch(self, sides, patch_name):
         """ assign one or more block faces (self.face_map)
         to a chosen patch name """
@@ -178,7 +179,7 @@ class Block:
 
         if patch_name not in self.patches:
             self.patches[patch_name] = []
-        
+
         self.patches[patch_name] += sides
 
     def chop(self, axis, **kwargs):
@@ -200,11 +201,11 @@ class Block:
             length of current division; see
             https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
         """
-        # when this function is called, block edges are not known and so 
+        # when this function is called, block edges are not known and so
         # block size can't be calculated; at this point only store parameters
         # and call the actual Grading.chop() function later with these params
         self.chops[axis].append(kwargs)
-    
+
     def grade(self):
         for i in range(3):
             grading = self.grading[i]
@@ -218,29 +219,29 @@ class Block:
 
             for p in params:
                 grading.add_division(**p)
-        
+
         self.chops = [[], [], []]
 
     def project_edge(self, index_1, index_2, geometry):
         # index_N are vertices relative to block (0...7)
         if self.find_edge(index_1, index_2):
             return
-        
+
         self.edges.append(Edge(index_1, index_2, geometry))
 
     def project_face(self, side, geometry, edges=False):
         """ assign one or more block faces (self.face_map)
         to be projected to a geometry (defined in blockMeshDict) """
         assert side in self.face_map.keys()
-        
+
         self.faces.append([side, geometry])
 
         if edges:
             vertices = self.face_map[side]
             for i in range(4):
                 self.project_edge(
-                    vertices[i], 
-                    vertices[(i+1)%4],
+                    vertices[i],
+                    vertices[(i + 1) % 4],
                     geometry)
 
     ###
@@ -260,14 +261,14 @@ class Block:
     @property
     def n_cells(self):
         return [g.count for g in self.grading]
-    
+
     def __repr__(self):
         """ outputs block's definition for blockMeshDict file """
         # hex definition
         output = "hex "
         # vertices
         output += " ( " + " ".join(str(v.mesh_index) for v in self.vertices) + " ) "
-    
+
         # cellZone
         output += self.cell_zone
         # number of cells

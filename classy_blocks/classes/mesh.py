@@ -1,23 +1,24 @@
 import os
 
-from ..util import functions as g
-from ..util import constants, tools
-
 from .primitives import Vertex
+from ..util import constants, tools
+from ..util import functions as g
+
 
 class Mesh():
     output_path = 'debug.vtk'
 
     """ contains blocks, edges and all necessary methods for assembling blockMeshDict """
+
     def __init__(self):
-        self.vertices = [] # list of vertices
-        self.edges = [] # list of edges
-        self.blocks = [] # list of blocks
-        self.patches = [] # defined in get_patches()
-        self.faces = [] # projected faces
+        self.vertices = []  # list of vertices
+        self.edges = []  # list of edges
+        self.blocks = []  # list of blocks
+        self.patches = []  # defined in get_patches()
+        self.faces = []  # projected faces
 
         self.default_patch = None
-        self.merged_patches = [] # [['master1', 'slave1'], ['master2', 'slave2']]
+        self.merged_patches = []  # [['master1', 'slave1'], ['master2', 'slave2']]
         self.geometry = {}
 
     def find_vertex(self, new_vertex):
@@ -46,7 +47,7 @@ class Mesh():
         # block.mesh_index is not required but will come in handy for debugging
         block.mesh_index = len(self.blocks)
         self.blocks.append(block)
-        
+
     def add(self, item):
         if hasattr(item, 'block'):
             self.add_block(item.block)
@@ -74,13 +75,13 @@ class Mesh():
         patch_names = list(set(patch_names))
 
         # create a dict with all patches
-        patches = { name: [] for name in patch_names }
+        patches = {name: [] for name in patch_names}
 
         # gather all faces of all blocks
         for block in self.blocks:
             for patch_name in patch_names:
                 patches[patch_name] += block.get_faces(patch_name)
-        
+
         return patches
 
     def assign_neighbours(self, block):
@@ -117,7 +118,7 @@ class Mesh():
                         # this block's count/grading is defined on this axis
                         # so we can (must) copy it
                         block.grading[axis] = n.grading[b_axis].copy(invert=not direction)
-                        
+
                         return True
         return False
 
@@ -135,7 +136,7 @@ class Mesh():
                     block.vertices[i] = found_vertex
 
         # merged patches: duplicate all points that define slave patches
-        duplicated_points = {} # { original_index:new_vertex }
+        duplicated_points = {}  # { original_index:new_vertex }
         slave_patches = [mp[1] for mp in self.merged_patches]
 
         for patch in slave_patches:
@@ -157,7 +158,7 @@ class Mesh():
                                 duplicated_points[vertex.mesh_index] = new_vertex
                             else:
                                 block.vertices[i_vertex] = duplicated_points[vertex.mesh_index]
-    
+
     def collect_edges(self):
         # collect all edges from all blocks;
         for block in self.blocks:
@@ -211,26 +212,26 @@ class Mesh():
                 for axis in range(3):
                     if not block.grading[axis].is_defined:
                         updated = self.copy_grading(block, axis) or updated
-                
+
                 if block.is_grading_defined:
                     undefined_blocks.remove(i)
                     updated = True
                     break
-                        
+
             if not updated:
                 # a whole iteration went around without an update;
                 # next iterations won't get any better
                 break
 
             updated = False
-        
+
         if len(undefined_blocks) > 0:
             # gather more detailed information about non-defined blocks:
             message = "Blocks with non-defined counts: \n"
             for i in list(undefined_blocks):
                 message += f"\t{i}: {str(self.blocks[i].n_cells)}\n"
             message += '\n'
-            
+
             raise Exception(message)
 
     def project_faces(self):
@@ -240,8 +241,8 @@ class Mesh():
             # TODO: check for existing faces
             for f in b.faces:
                 self.faces.append([
-                    b.get_face(f[0]), # face, like (8 12 15 11) 
-                    f[1] # the geometry to project to
+                    b.get_face(f[0]),  # face, like (8 12 15 11)
+                    f[1]  # the geometry to project to
                 ])
 
     def prepare_data(self, debug=False):
@@ -249,14 +250,14 @@ class Mesh():
 
         if debug:
             self.to_vtk()
-        
+
         self.collect_edges()
         self.collect_neighbours()
         self.set_gradings()
         self.project_faces()
         # assign patches
         self.patches = self.get_patches()
-    
+
     def merge_patches(self, master, slave):
         self.merged_patches.append([master, slave])
 
@@ -309,4 +310,3 @@ class Mesh():
         tools.template_to_dict(
             os.path.join(os.path.dirname(__file__), '../..', 'util', 'vtk.template'),
             self.output_path, context)
-

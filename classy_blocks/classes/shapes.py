@@ -1,17 +1,18 @@
-import numpy as np
 from abc import ABC
 from typing import List
 
-from ..classes.operations import Loft, Revolve, Extrude
-from ..classes.flat.face import Face
-from ..classes.flat.circle import Circle
-from ..classes.flat.annulus import Annulus
+import numpy as np
 
+from ..classes.flat.annulus import Annulus
+from ..classes.flat.circle import Circle
+from ..classes.flat.face import Face
+from ..classes.operations import Loft, Revolve, Extrude
 from ..util import constants as c
 from ..util import functions as f
 
+
 class Box(Extrude):
-    def __init__(self, point_min:List, point_max:List):
+    def __init__(self, point_min: List, point_max: List):
         """ A box, aligned with coordinate system """
         base = Face([
             [point_min[0], point_min[1], point_min[2]],
@@ -24,6 +25,7 @@ class Box(Extrude):
 
         super().__init__(base, extrude_vector)
 
+
 class Shape(ABC):
     """ An object, lofted from 3 cross-sections (sketches),
     each transformed by functions, specified in inherited classes """
@@ -35,7 +37,7 @@ class Shape(ABC):
     top_patch = 'top'
     outer_patch = 'right'
 
-    sketch_class = None # Circle/Annulus/whatever, defined in inherited classes
+    sketch_class = None  # Circle/Annulus/whatever, defined in inherited classes
 
     def transform_function(self, **kwargs):
         # a function that transforms sketch_1 to sketch_2;
@@ -57,7 +59,7 @@ class Shape(ABC):
             loft_edges = [face.points for face in self.sketch_mid.faces]
         else:
             self.sketch_mid = None
-            loft_edges = [None]*len(self.sketch_1.faces)
+            loft_edges = [None] * len(self.sketch_1.faces)
 
         self.operations = [
             Loft(
@@ -70,7 +72,7 @@ class Shape(ABC):
     @property
     def blocks(self):
         return [o.block for o in self.operations]
-    
+
     ### Patches
     def set_patch(self, side, patch_name):
         for b in self.blocks:
@@ -81,7 +83,7 @@ class Shape(ABC):
 
     def set_top_patch(self, patch_name):
         self.set_patch(self.top_patch, patch_name)
-    
+
     def set_outer_patch(self, patch_name):
         for s in self.shell:
             s.block.set_patch(self.outer_patch, patch_name)
@@ -104,10 +106,11 @@ class Shape(ABC):
     def chop_tangential(self, **kwargs):
         for s in self.shell:
             s.chop(self.tangential_axis, **kwargs)
-    
+
     def set_cell_zone(self, cell_zone):
         for b in self.blocks:
             b.cell_zone = cell_zone
+
 
 class Elbow(Shape):
     """ A curved round shape of varying cross-section """
@@ -118,15 +121,15 @@ class Elbow(Shape):
             .rotate(**kwargs) \
             .scale(**kwargs)
 
-    def __init__(self, center_point_1:List, radius_point_1:List, normal_1:List,
-        sweep_angle:float, arc_center:List, rotation_axis:List, radius_2:float):
+    def __init__(self, center_point_1: List, radius_point_1: List, normal_1: List,
+                 sweep_angle: float, arc_center: List, rotation_axis: List, radius_2: float):
         self.arguments = locals()
 
         radius_1 = f.norm(np.asarray(radius_point_1) - np.asarray(center_point_1))
 
         super().__init__(
-            [center_point_1, radius_point_1, normal_1], # arguments for this cross-section
-            { # transformation parameters for sketch_2
+            [center_point_1, radius_point_1, normal_1],  # arguments for this cross-section
+            {  # transformation parameters for sketch_2
                 # parameters for .rotate
                 'axis': rotation_axis,
                 'angle': sweep_angle,
@@ -134,11 +137,11 @@ class Elbow(Shape):
                 # parameters for .scale
                 'radius': radius_2
             },
-            { # transform parameters for mid sketch
+            {  # transform parameters for mid sketch
                 'axis': rotation_axis,
-                'angle': sweep_angle/2,
+                'angle': sweep_angle / 2,
                 'origin': arc_center,
-                'radius': (radius_1 + radius_2)/2
+                'radius': (radius_1 + radius_2) / 2
             }
         )
 
@@ -146,7 +149,8 @@ class Elbow(Shape):
         self.shell = self.operations[4:]
 
     @classmethod
-    def chain(cls, source, sweep_angle:float, arc_center:List, rotation_axis:List, radius_2:float, start_face=False):
+    def chain(cls, source, sweep_angle: float, arc_center: List, rotation_axis: List, radius_2: float,
+              start_face=False):
         # TODO: TEST
         """ Use another round Shape's end face as a starting point for this Elbow;
         Returns a new Elbow object. To start from the other side, use start_face = True """
@@ -157,7 +161,7 @@ class Elbow(Shape):
             s = source.sketch_1
         else:
             s = source.sketch_2
-        
+
         return cls(
             s.center_point,
             s.radius_point,
@@ -176,7 +180,7 @@ class Frustum(Shape):
             .translate(**kwargs) \
             .scale(**kwargs)
 
-    def __init__(self, axis_point_1:List, axis_point_2:List, radius_point_1:List, radius_2:float, radius_mid=None):
+    def __init__(self, axis_point_1: List, axis_point_2: List, radius_point_1: List, radius_2: float, radius_mid=None):
         """ Creates a cone frustum (truncated cylinder) with axis between points
         'axis_point_1' and 'axis_point_2'.
         'radius_point_1' defines starting point for blocks and radius_2 defines end radius
@@ -192,7 +196,7 @@ class Frustum(Shape):
             mid_params = None
         else:
             mid_params = {
-                'vector': self.axis/2,
+                'vector': self.axis / 2,
                 'radius': radius_mid
             }
 
@@ -207,7 +211,7 @@ class Frustum(Shape):
 
         self.core = self.operations[:4]
         self.shell = self.operations[4:]
-    
+
     @classmethod
     def chain(cls, source, length, radius_2, radius_mid=None):
         """ Chain this Frustum to an existing Shape;
@@ -220,12 +224,13 @@ class Frustum(Shape):
         else:
             sketch = source.sketch_2
 
-        axis_point_2 = sketch.center_point + f.unit_vector(sketch.normal)*length
-        
+        axis_point_2 = sketch.center_point + f.unit_vector(sketch.normal) * length
+
         return cls(sketch.center_point, axis_point_2, sketch.radius_point, radius_2, radius_mid)
 
+
 class Cylinder(Frustum):
-    def __init__(self, axis_point_1:List, axis_point_2:List, radius_point_1:List):
+    def __init__(self, axis_point_1: List, axis_point_2: List, radius_point_1: List):
         self.arguments = locals()
         """ a Frustum with constant radius """
         radius_1 = f.norm(np.array(radius_point_1) - np.array(axis_point_1))
@@ -247,9 +252,10 @@ class Cylinder(Frustum):
         radius_point_1 = sketch.radius_point
         normal = sketch.normal
 
-        axis_point_2 = axis_point_1 + f.unit_vector(normal)*length
+        axis_point_2 = axis_point_1 + f.unit_vector(normal) * length
 
         return cls(axis_point_1, axis_point_2, radius_point_1)
+
 
 class RevolvedRing(Shape):
     """ A ring specified by its cross-section; can be of arbitrary shape.
@@ -258,7 +264,7 @@ class RevolvedRing(Shape):
            /        ---p2
           /              \\
          p0---------------p1
-           
+
     0---- -- ----- -- ----- -- ----- -- --->> axis
 
     In this case, chop_*() will work as intended, otherwise
@@ -276,14 +282,14 @@ class RevolvedRing(Shape):
     inner_patch = 'front'
     outer_patch = 'back'
 
-    def __init__(self, axis_point_1, axis_point_2, points, edges=[None]*4, n_segments=4):
+    def __init__(self, axis_point_1, axis_point_2, points, edges=[None] * 4, n_segments=4):
         self.arguments = locals()
 
         assert len(points) == 4
         assert len(edges) == 4
 
         self.axis_point_1 = np.asarray(axis_point_1)
-        self.axis_point_2 = np.asarray(axis_point_2) 
+        self.axis_point_2 = np.asarray(axis_point_2)
         self.axis = self.axis_point_2 - self.axis_point_1
         self.center_point = self.axis_point_1
 
@@ -293,11 +299,11 @@ class RevolvedRing(Shape):
         self.edges = edges
 
         face = Face(self.points, self.edges)
-        angle = 2*np.pi/self.n_segments
+        angle = 2 * np.pi / self.n_segments
 
         self.operations = [
             Revolve(
-                face.rotate(self.axis, angle*i, self.center_point),
+                face.rotate(self.axis, angle * i, self.center_point),
                 angle, self.axis, self.axis_point_1
             ) for i in range(self.n_segments)
         ]
@@ -309,6 +315,7 @@ class RevolvedRing(Shape):
         for s in self.shell:
             s.block.set_patch(self.inner_patch, patch_name)
 
+
 class ExtrudedRing(Shape):
     sketch_class = Annulus
 
@@ -317,10 +324,11 @@ class ExtrudedRing(Shape):
     def transform_function(self, **kwargs):
         return self.sketch_1 \
             .translate(**kwargs)
-    
+
     """ A revolved ring but specified like a Cylinder """
-    def __init__(self, axis_point_1:List, axis_point_2:List,
-        outer_radius_point_1:List, inner_radius:float, n_segments=8):
+
+    def __init__(self, axis_point_1: List, axis_point_2: List,
+                 outer_radius_point_1: List, inner_radius: float, n_segments=8):
         self.arguments = locals()
         self.axis = np.asarray(axis_point_2) - np.asarray(axis_point_1)
 
@@ -334,7 +342,7 @@ class ExtrudedRing(Shape):
 
         self.core = []
         self.shell = self.operations
-    
+
     @classmethod
     def chain(cls, source, length):
         """ Creates a new cylinder on start or end face of a round source Shape;
@@ -348,14 +356,14 @@ class ExtrudedRing(Shape):
 
         return cls(
             s.center_point,
-            s.center_point + f.unit_vector(s.normal)*length,
-            s.outer_radius_point, 
+            s.center_point + f.unit_vector(s.normal) * length,
+            s.outer_radius_point,
             s.inner_radius,
             n_segments=s.n_segments
         )
 
     @classmethod
-    def expand(cls, source, thickness:float):
+    def expand(cls, source, thickness: float):
         """ Create a new concentric Ring with radius, enlarged by 'thickness';
         Can be used on Cylinder or ExtrudedRing """
         # TODO: TEST
@@ -363,8 +371,8 @@ class ExtrudedRing(Shape):
         s2 = source.sketch_2
 
         new_radius_point = s1.center_point + \
-            f.unit_vector(s1.radius_point - s1.center_point)* \
-            (s1.radius + thickness)
+                           f.unit_vector(s1.radius_point - s1.center_point) * \
+                           (s1.radius + thickness)
 
         return cls(
             s1.center_point,
@@ -372,12 +380,12 @@ class ExtrudedRing(Shape):
             new_radius_point,
             s1.radius,
             n_segments=s1.n_segments)
-    
+
     @classmethod
-    def contract(cls, source, inner_radius:float):
+    def contract(cls, source, inner_radius: float):
         # TODO: TEST
         assert source.__class__ == cls
-        
+
         s1 = source.sketch_1
         s2 = source.sketch_2
         assert inner_radius < s1.inner_radius
@@ -393,8 +401,9 @@ class ExtrudedRing(Shape):
         for s in self.shell:
             s.block.set_patch(self.inner_patch, patch_name)
 
+
 class Hemisphere(Shape):
-    sketch_class = None # this is a special-ish case
+    sketch_class = None  # this is a special-ish case
 
     def __init__(self, center_point, radius_point, normal):
         self.arguments = locals()
@@ -423,14 +432,14 @@ class Hemisphere(Shape):
             # point lies on circle plane; rotate it upwards, away from it
             radius_vector = f.unit_vector(point - self.center_point)
             dome_rev_axis = np.cross(radius_vector, self.normal)
-    
+
             dome_point = f.arbitrary_rotation(
                 point, dome_rev_axis, angle, self.center_point)
 
             return dome_point
 
-        self.shell = [None]*12
-        self.core = [None]*4
+        self.shell = [None] * 12
+        self.core = [None] * 4
 
         # circle uses constants.circle_core_diagonal and circle_core_side
         # to calculate core-to-shell ratios;
@@ -460,11 +469,11 @@ class Hemisphere(Shape):
             outer_upper_point_2 = rotate_dome(outer_bottom_point_2, end_angle)
 
             lower_face = Face(
-                [ # points
+                [  # points
                     inner_bottom_point_1, outer_bottom_point_1,
                     outer_bottom_point_2, inner_bottom_point_2
                 ],
-                [ # edges: project rather than calculate points
+                [  # edges: project rather than calculate points
                     None, geometry_name, None, None
                 ]
             )
@@ -482,32 +491,32 @@ class Hemisphere(Shape):
             loft = Loft(
                 lower_face,
                 upper_face,
-                [None, geometry_name, geometry_name, None] # projected lofted edges
+                [None, geometry_name, geometry_name, None]  # projected lofted edges
             )
-            loft.block.project_face('right', geometry_name) # and projected block face
+            loft.block.project_face('right', geometry_name)  # and projected block face
             self.shell[i] = loft
 
         # top and core blocks
-        top_point = self.center_point + self.normal*self.radius
-        mid_point = self.center_point + self.normal*self.radius*0.5
+        top_point = self.center_point + self.normal * self.radius
+        mid_point = self.center_point + self.normal * self.radius * 0.5
 
         for i in range(4):
             # two shell faces in a quarter of shell circle
-            face_1 = self.shell[2*i].top_face
-            face_2 = self.shell[(2*i)+1].top_face
+            face_1 = self.shell[2 * i].top_face
+            face_2 = self.shell[(2 * i) + 1].top_face
 
             bottom_face = Face([
                 mid_point, face_1.points[0], face_1.points[3], face_2.points[3]
             ])
             top_face = Face(
                 [top_point, face_1.points[1], face_1.points[2], face_2.points[2]],
-                [geometry_name]*4 # project all edges of this face
+                [geometry_name] * 4  # project all edges of this face
             )
 
             roof_loft = Loft(bottom_face, top_face)
             roof_loft.block.project_face('top', geometry_name)
 
-            self.shell[8+i] = roof_loft
+            self.shell[8 + i] = roof_loft
 
             core_loft = Loft(self.circle_1.core_faces[i], bottom_face)
             self.core[i] = core_loft
@@ -519,26 +528,26 @@ class Hemisphere(Shape):
         # only the 'bottom' shell blocks
         for s in self.shell[:8]:
             s.block.set_patch('bottom', patch_name)
-        
+
         for c in self.core:
             c.block.set_patch('bottom', patch_name)
 
     def set_top_patch(self, patch_name):
         for s in self.shell[:8]:
             s.block.set_patch('right', patch_name)
-        
+
         for s in self.shell[8:]:
             s.block.set_patch('top', patch_name)
 
     def set_outer_patch(self, patch_name):
         self.set_top_patch(patch_name)
 
-    ### Chopping    
+    ### Chopping
     def chop_tangential(self, **kwargs):
         # only chop outer shell blocks; 'roof' blocks are oriented differently
         for s in self.shell[:8]:
             s.chop(1, **kwargs)
-            
+
     @classmethod
     def chain(cls, source, start_face=False):
         assert source.sketch_class == Circle
