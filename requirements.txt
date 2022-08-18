@@ -3,4 +3,4 @@ pip==22.1.2
 pytest==7.1.2
 setuptools==61.2.0
 numpy==1.23.2
-
+scipy==1.9.0
