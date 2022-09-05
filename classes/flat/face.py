@@ -65,14 +65,17 @@ class Face:
 
     def translate(self, vector:List):
         """ move points by 'vector' """
-        vector = np.array(vector)
+        vector = np.asarray(vector)
         return self._transform(lambda point: point + vector)
 
-    def rotate(self, axis:List, angle:float, origin:List=[0, 0, 0]):
+    def rotate(self, axis:List, angle:float, origin:List=None):
         """ copies the object and rotates all block-points by 'angle'
         around 'axis' going through 'origin' """
-        axis = np.array(axis)
-        origin = np.array(origin)
+        axis = np.asarray(axis)
+        if origin is None:
+            origin = self.center
+        origin = np.asarray(origin)
+
 
         r = lambda point: f.arbitrary_rotation(point, axis, angle, origin)
 

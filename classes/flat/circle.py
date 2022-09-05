@@ -104,3 +104,14 @@ class Circle:
             r(self.radius_point),
             self.normal,
             self.diagonal_ratio, self.side_ratio)
+
+class Semicircle(Circle):
+    def __init__(self, center_point, radius_point, normal, diagonal_ratio=None, side_ratio=None):
+        super().__init__(center_point, radius_point, normal, diagonal_ratio, side_ratio)
+
+        # remove half of the faces
+        self.shell_faces = self.shell_faces[4:]
+        self.core_faces = self.core_faces[2:]
+        self.faces = self.core_faces + self.shell_faces
+
+    
