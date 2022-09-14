@@ -1,8 +1,9 @@
 import numpy as np
 
-from typing import List
+from typing import List, Literal, NoReturn, Union
 
 from ..util import functions as f
+from .flat.face import Face
 from .primitives import Vertex, Edge
 from .grading import Grading
 
@@ -66,11 +67,12 @@ class Block:
     ### Information
     ###
     @property
-    def is_grading_defined(self):
-        return all([g.is_defined for g in self.grading])
+    def is_grading_defined(self) -> bool:
+        """ Returns True if grading is defined in all dimensions """
+        return all(g.is_defined for g in self.grading)
 
-    def get_face(self, side, internal=False):
-        # returns vertex indexes for this face;
+    def get_face(self, side:str, internal:bool=False) -> List[int]:
+        """ Returns vertex indexes for a given face """
         indexes = self.face_map[side]
         if internal:
             return indexes
@@ -79,24 +81,25 @@ class Block:
 
         return [v.mesh_index for v in vertices]
 
-    def get_faces(self, patch, internal=False):
+    def get_faces(self, patch:str, internal:bool=False) -> List[Face]:
+        """ Returns faces in this block that belong to a given patch """
         if patch not in self.patches:
             return []
 
         sides = self.patches[patch]
-        faces = [self.get_face(s, internal=internal) for s in sides]
-        
-        return faces
+        return [self.get_face(s, internal=internal) for s in sides]
 
-    def find_edge(self, index_1, index_2) -> Edge:
-        # index_1 and index_2 are internal block indexes
+    def find_edge(self, index_1:int, index_2:int) -> Edge:
+        """ Returns edges between given vertex indexes;
+        the indexes in parameters refer to internal block numbering """
         for e in self.edges:
             if {e.block_index_1, e.block_index_2} == {index_1, index_2}:
                 return e
+        
         return None
 
-    def get_size(self, axis, take='avg'):
-        # returns block dimensions:
+    def get_size(self, axis:int, take: Literal['min', 'max', 'avg']='avg') -> float:
+        """ Returns block dimensions in given axis """
         # if an edge is defined, use the edge.get_length(),
         # otherwise simply distance between two points
         def vertex_distance(index_1, index_2):
@@ -126,7 +129,7 @@ class Block:
 
         raise ValueError(f"Unknown sizing specification: {take}. Available: min, max, avg")
 
-    def get_axis_vertex_pairs(self, axis):
+    def get_axis_vertex_pairs(self, axis:int) -> List[int]:
         """ returns 4 pairs of Vertex.mesh_indexes along given axis """
         pairs = []
 
@@ -149,7 +152,7 @@ class Block:
         
         return pairs
 
-    def get_axis_from_pair(self, pair):
+    def get_axis_from_pair(self, pair:List[int]) -> tuple[int, bool]:
         """ returns axis index and orientation from a given pair of vertices;
         orientation is True if blocks are aligned or false when inverted """
         riap = [pair[1], pair[0]]
@@ -166,14 +169,29 @@ class Block:
         return None, None
 
     ###
+    ### Modification
+    ###
+    def join(self, axis:int, block:'Block') -> NoReturn:
+        """ Extend the edges along 'axis' of this and the other 'block'
+        so that they meet in the middle, creating a joint.
+        
+        This is currently only supported for straight edges. """
+        
+        # collect this block's edges
+        this_edges = self.get_axis_vertex_pairs(axis)
+        other_edges = block.get_axis_vertex_pairs(axis)
+
+        print(this_edges, other_edges)
+
+    ###
     ### Manipulation
     ###    
-    def set_patch(self, sides, patch_name):
+    def set_patch(self, sides:Union[str, List[str]], patch_name:str) -> NoReturn:
         """ assign one or more block faces (self.face_map)
         to a chosen patch name """
         # see patches: an example in __init__()
 
-        if type(sides) == str:
+        if isinstance(sides, str):
             sides = [sides]
 
         if patch_name not in self.patches:
@@ -181,22 +199,31 @@ class Block:
         
         self.patches[patch_name] += sides
 
-    def chop(self, axis, **kwargs):
+    def chop(self, axis:int, **kwargs:float) -> NoReturn:
         """ Set block's cell count/size and grading for a given direction/axis.
         Exactly two of the following keyword arguments must be provided:
+        
+        :Keyword Arguments:
+        * *start_size:
+            size of the first cell (last if invert==True)
+        * *end_size:
+            size of the last cell
+        * *c2c_expansion:
+            cell-to-cell expansion ratio
+        * *count:
+            number of cells
+        * *total_expansion:
+            ratio between first and last cell size
 
-        start_size: size of the first cell (last if invert==True)
-        end_size: size of the last cell
-        c2c_expansion: cell-to-cell expansion ratio
-        count: number of cells
-        total_expansion: ratio between first and last cell size
-
-        Optional:
-        invert: reverses grading if True
-        take: must be 'min', 'max', or 'avg'; takes minimum or maximum edge
+        :Optional keyword arguments:
+        * *invert:
+            reverses grading if True
+        * *take:
+            must be 'min', 'max', or 'avg'; takes minimum or maximum edge
             length for block size calculation, or average of all edges in given direction.
             With multigrading only the first 'take' argument is used, others are copied.
-        length_ratio: in case the block is graded using multiple gradings, specify
+        * *length_ratio:
+            in case the block is graded using multiple gradings, specify
             length of current division; see
             https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
         """
@@ -205,7 +232,8 @@ class Block:
         # and call the actual Grading.chop() function later with these params
         self.chops[axis].append(kwargs)
     
-    def grade(self):
+    def grade(self) -> NoReturn:
+        """ Sets block size and grading; not to be used manually! """
         for i in range(3):
             grading = self.grading[i]
             params = self.chops[i]
@@ -221,17 +249,22 @@ class Block:
         
         self.chops = [[], [], []]
 
-    def project_edge(self, index_1, index_2, geometry):
+    def project_edge(self, index_1:int, index_2:int, geometry:str) -> NoReturn:
+        """ Project a block edge between index_1 and index_2 to geometry (specified in Mesh)
+        Indexes refer to refer to internal block numbering (0...7). """
         # index_N are vertices relative to block (0...7)
         if self.find_edge(index_1, index_2):
             return
         
         self.edges.append(Edge(index_1, index_2, geometry))
 
-    def project_face(self, side, geometry, edges=False):
-        """ assign one or more block faces (self.face_map)
-        to be projected to a geometry (defined in blockMeshDict) """
-        assert side in self.face_map.keys()
+    def project_face(self,
+            side:Literal['top', 'bottom', 'left', 'right', 'front', 'back'],
+            geometry:str,
+            edges:bool=False) -> NoReturn:
+        """ Assign one or more block faces (self.face_map)
+        to be projected to a geometry (defined in Mesh) """
+        assert side in self.face_map
         
         self.faces.append([side, geometry])
 
@@ -246,7 +279,8 @@ class Block:
     ###
     ### Output/formatting
     ###
-    def format_face(self, side):
+    def format_face(self, side:int) -> str:
+        """ Returns a string to be inserted into blockMesh """
         indexes = self.face_map[side]
         vertices = np.take(self.vertices, indexes)
 
@@ -258,7 +292,8 @@ class Block:
         )
 
     @property
-    def n_cells(self):
+    def n_cells(self) -> List[int]:
+        """ Returns number of cells for each axis """
         return [g.count for g in self.grading]
     
     def __repr__(self):
@@ -285,15 +320,16 @@ class Block:
     ### class methods
     ###
     @classmethod
-    def create_from_points(cls, points, edges=[]):
+    def create_from_points(cls, points, edges=None) -> 'Block':
         """ create a block from a raw list of 8 points;
         edges are optional; edge's 2 vertex indexes refer to
         block.vertices list (0 - 7) """
+        if edges is None:
+            edges = []
+
         block = cls(
             [Vertex(p) for p in points],
             edges
         )
-
-        block.feature = 'From points'
 
         return block

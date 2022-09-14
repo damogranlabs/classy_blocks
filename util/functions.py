@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import math
+
 import numpy as np
 
 import scipy
@@ -144,6 +146,8 @@ def arc_length_3point(A, B, C):
     """ Returns length of arc defined by 3 points, A, B and C; B is the point in between """
     ### Meticulously transcribed from 
     # https://develop.openfoam.com/Development/openfoam/-/blob/master/src/mesh/blockMesh/blockEdges/arcEdge/arcEdge.C
+
+    # TODO: handle 'invalid values encountered'
     p1 = np.asarray(A)
     p2 = np.asarray(B)
     p3 = np.asarray(C)
@@ -188,6 +192,42 @@ def distance_from_line(line_point_1, line_point_2, p):
     """ Returns distance from point p from line, defined by two points """
     # TODO: TEST
     axis = line_point_2 - line_point_1
-    vector = p - line_point_1
+    vec = p - line_point_1
 
-    return norm(np.cross(axis, vector))/norm(axis)
+    return norm(np.cross(axis, vec))/norm(axis)
+
+def vectors_collinear(vector_1, vector_2):
+    """ Returns True if vector_1 and vector_2 are collinear """
+    return norm(np.cross(vector_1, vector_2)) < c.tol
+
+def vector_intersection(point_1, direction_1, point_2, direction_2):
+    """ Returns a point on intersection between two lines, defined by
+    a point and a vector; returns None if they don't intersect """
+
+    # kudos: https://math.stackexchange.com/questions/270767/find-intersection-of-two-3d-lines
+
+    point_c = point_1
+    point_d = point_2
+
+    if norm(point_d - point_c) < c.tol:
+        return point_c
+
+    vector_e = direction_1
+    vector_f = direction_2
+
+    vector_g = point_d - point_c
+
+    xprod_h = np.cross(vector_f, vector_g)
+    xprod_k = np.cross(vector_f, vector_e)
+
+    # lines do not intersect if the cross-products aren't collinear
+    if not vectors_collinear(xprod_h, xprod_k):
+        return None
+
+    vector_l = norm(xprod_h)/norm(xprod_k) * vector_e
+
+    if np.dot(xprod_h, xprod_k) > 0:
+        # the vectors point in the same direction
+        return point_c + vector_l
+
+    return point_c - vector_l
