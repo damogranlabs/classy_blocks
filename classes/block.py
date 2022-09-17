@@ -31,9 +31,9 @@ class Block:
 
     def __init__(self, vertices:List[Vertex], edges:List[Edge]):
         # a list of 8 Vertex and Edge objects for each corner/edge of the block
-        self.vertices = vertices
-        self.edges = edges
-        self.faces = [] # a list of projected faces;
+        self.vertices:List[Vertex] = vertices
+        self.edges:List[Edge] = edges
+        self.faces:List[List[str]] = [] # a list of projected faces;
         # [['bottom', 'terrain'], ['right', 'building'], ['back', 'building'],]
 
         # block grading;
@@ -61,7 +61,7 @@ class Block:
 
         # a list of blocks that share an edge with this block;
         # will be assigned by Mesh().prepare_data()
-        self.neighbours = set()
+        self.neighbours:set['Block'] = set()
 
     ###
     ### Information
@@ -72,7 +72,11 @@ class Block:
         return all(g.is_defined for g in self.grading)
 
     def get_face(self, side:str, internal:bool=False) -> List[int]:
-        """ Returns vertex indexes for a given face """
+        """ Returns vertex indexes for a given face.
+
+        If internal=True, it returns block-based internal indexes (0...7);
+        if internal=False, it returns indexes of vertices in Mesh object so it
+        can only be called after mesh.prepare_data() """
         indexes = self.face_map[side]
         if internal:
             return indexes
@@ -130,7 +134,8 @@ class Block:
         raise ValueError(f"Unknown sizing specification: {take}. Available: min, max, avg")
 
     def get_axis_vertex_pairs(self, axis:int) -> List[int]:
-        """ returns 4 pairs of Vertex.mesh_indexes along given axis """
+        """ returns 4 pairs of Vertex.mesh_indexes along given axis;
+        can only be called after Mesh.prepare_data() """
         pairs = []
 
         for pair in self.axis_pair_indexes[axis]:
@@ -154,7 +159,9 @@ class Block:
 
     def get_axis_from_pair(self, pair:List[int]) -> tuple[int, bool]:
         """ returns axis index and orientation from a given pair of vertices;
-        orientation is True if blocks are aligned or false when inverted """
+        orientation is True if blocks are aligned or false when inverted.
+
+        This can only be called after Mesh.prepare_data() """
         riap = [pair[1], pair[0]]
 
         for i in range(3):
@@ -166,22 +173,7 @@ class Block:
             if riap in pairs:
                 return i, False
         
-        return None, None
-
-    ###
-    ### Modification
-    ###
-    def join(self, axis:int, block:'Block') -> NoReturn:
-        """ Extend the edges along 'axis' of this and the other 'block'
-        so that they meet in the middle, creating a joint.
-        
-        This is currently only supported for straight edges. """
-        
-        # collect this block's edges
-        this_edges = self.get_axis_vertex_pairs(axis)
-        other_edges = block.get_axis_vertex_pairs(axis)
-
-        print(this_edges, other_edges)
+        return None, None        
 
     ###
     ### Manipulation

@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List
 
+from ..classes.shapes import Shape
 from ..classes.flat.circle import Semicircle
 from ..classes.shapes import Cylinder
 
@@ -42,3 +43,47 @@ class SharpSemicylinder(Semicylinder):
                 face.edges[j] += move(edge)
 
         return sketch_2
+
+class Joint:
+    """ Connects a list of Shapes:
+     - [Elbow/Frustum/Cylinder] or
+     - [ElbowWall/FrustumWall/CylinderWall]
+    """
+    class Component:
+        def __init__(self, shape:Shape, center_point:List[float]):
+            self.shape = shape
+            self.center_point = center_point
+
+            self.near_point = None
+            self.far_point = None
+
+            # TODO: test
+            # see which sketch is closer to specified center and assign
+            # near and far points
+            if f.norm(self.shape.sketch_1.center_point - self.center_point) > \
+                f.norm(self.shape.sketch_2.center_point - self.center_point):
+                # sketch_2 is closer to center
+                self.near_point = self.shape.sketch_2.center_point
+                self.far_point = self.shape.sketch_1.center_point
+            else:
+                self.near_point = self.shape.sketch_1.center_point
+                self.far_point = self.shape.sketch_2.center_point
+
+        @property
+        def direction(self):
+            return self.center_point - self.near_point
+
+
+    def __init__(self, shapes:List[Shape], center_point:List[float]=None):
+        assert len(shapes) >= 3, "At least 3 Shapes are needed to form a Joint"
+
+        self.center_point = np.asarray(center_point)
+        self.components = [Joint.Component(s, self.center_point) for s in shapes]
+
+
+        
+
+
+
+
+

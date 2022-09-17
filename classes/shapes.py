@@ -1,6 +1,15 @@
-import numpy as np
+""" Shapes, consisting of multiple blocks.
+
+Analogous to an Operation where the 'sketch' is a single Face,
+the sketches here consist of multiple faces.
+
+Shape.sketch_class defines the appropriate 2D layout,
+Shape.transform_function() defines how it transforms to
+create a 3D collection of blocks."""
 from abc import ABC
 from typing import List
+
+import numpy as np
 
 from ..classes.operations import Loft, Revolve, Extrude
 from ..classes.flat.face import Face
@@ -11,8 +20,8 @@ from ..util import constants as c
 from ..util import functions as f
 
 class Box(Extrude):
+    """ A box, aligned with coordinate system """
     def __init__(self, point_min:List, point_max:List):
-        """ A box, aligned with coordinate system """
         base = Face([
             [point_min[0], point_min[1], point_min[2]],
             [point_max[0], point_min[1], point_min[2]],

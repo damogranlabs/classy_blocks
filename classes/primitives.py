@@ -1,61 +1,75 @@
-# -*- coding: utf-8 -*-
+""" Vertex and Edge objects and the machinery belonging to them """
+from typing import List, Callable, Union, Tuple
+
 import numpy as np
 
 from ..util import functions as f
 from ..util import constants
 
 class WrongEdgeTypeException(Exception):
+    """ Raised when using an unsupported edge type """
     def __init__(self, edge_type, *args, **kwargs):
         raise Exception(f"Wrong edge type: {edge_type}", *args, **kwargs)
 
-def transform_points(points, function):
+def transform_points(points:List[List[float]], function:Callable) -> List[List[float]]:
+    """ A comprehensive shortcut """
     return [function(p) for p in points]
 
-def transform_edges(edges, function):
+def transform_edges(edges:List['Edge'], function:Callable):
+    """ Same as transform_points but deals with multiple points in an edge, if applicable """
     if edges is not None:
         new_edges = [None]*4
         for i, edge_points in enumerate(edges):
             edge_type, edge_points = Edge.get_type(edge_points)
 
+            # spline edge is defined with multiple points,
+            # a single point defines an arc;
+            # 'project' and 'line' don't require any
             if edge_type == 'spline':
                 new_edges[i] = [function(e) for e in edge_points]
             elif edge_type == 'arc':
                 new_edges[i] = function(edge_points)
 
         return new_edges
-    
+
     return None
 
 class Vertex():
     """ point with an index that's used in block and face definition
-    and can output in OpenFOAM format """
-    def __init__(self, point):
+    and can be output in OpenFOAM format """
+    def __init__(self, point:List[float]):
         self.point = np.asarray(point)
         self.mesh_index = None # will be changed in Mesh.prepare_data()
-        
-    def rotate(self, angle, axis=[1, 0, 0], origin=[0, 0, 0]):
-        """ returns a new, rotated Vertex """
+
+    def rotate(self, angle:float, axis:List[float]=None, origin:List[float]=None) -> 'Vertex':
+        """ Rotate this vertex around an arbitrary axis and origin """
+        if axis is None:
+            axis = [1, 0, 0]
+
+        if origin is None:
+            origin = [0, 0, 0]
+
+        # returns a new, rotated Vertex
         point = f.arbitrary_rotation(self.point, axis, angle, origin)
         return Vertex(point)
 
     def __repr__(self):
         s = constants.vector_format(self.point)
-        
+
         if self.mesh_index is not None:
-            s += " // {}".format(self.mesh_index)
-        
+            s += f" // {self.mesh_index}"
+
         return s
 
 class Edge():
-    def __init__(self, index_1, index_2, points):
-        """ an edge is defined by two vertices and points in between;
-        a single point edge is treated as 'arc', more points are
-        treated as 'spline'.
+    """ An Edge, defined by two vertices and points in between;
+    a single point edge is treated as 'arc', more points are
+    treated as 'spline'.
 
-        passed indexes refer to position in Block.edges[] list; Mesh.prepare_data()
-        will assign actual Vertex objects.
-        """
+    passed indexes refer to position in Block.edges[] list; Mesh.prepare_data()
+    will assign actual Vertex objects. """
 
+    def __init__(self, index_1:int, index_2:int, points:Union[List[float], List[List[float]]]):
         # indexes in block.edges[] list
         self.block_index_1 = index_1
         self.block_index_2 = index_2
@@ -67,18 +81,18 @@ class Edge():
         self.type, self.points = self.get_type(points)
 
     @staticmethod
-    def get_type(points):
+    def get_type(points:Union[List[float], List[List[float]]]) -> Tuple[str, Union[List[float], List[List[float]]]]:
         """ returns edge type and a list of points:
-        'None' for a straight line,
-        'project' for projection to geometry,
-        'arc' for a circular arc,
-        'spline' for a spline """
+         - None for a straight line,
+         - 'project' for projection to geometry,
+         - 'arc' for a circular arc,
+         - 'spline' for a spline """
 
         if points is None:
             return 'line', None
 
         # it 'points' is a string, this is a projected edge;
-        if type(points) == str:
+        if isinstance(points, str):
             return 'project', points
 
         # if multiple points are given check that they are of correct length
@@ -86,41 +100,44 @@ class Edge():
         shape = np.shape(points)
 
         if len(shape) == 1:
-            t = 'arc'
+            edge_type = 'arc'
         else:
             assert len(shape) == 2
-            for p in points:
-                assert len(p) == 3
-            
-            t = 'spline'
+            for point in points:
+                assert len(point) == 3
 
-        return t, points
+            edge_type = 'spline'
+
+        return edge_type, points
 
     @property
-    def point_list(self):
+    def point_list(self) -> str:
+        """ Returns a list of points (if applicable), readily
+        formatted to be inserted into blockMeshDict """
         if self.type == 'line':
             return None
-            
+
         if self.type == 'project':
             return f"({self.points})"
 
         if self.type == 'arc':
             return constants.vector_format(self.points)
-        
+
         if self.type == 'spline':
             return "(" +  \
                 " ".join([constants.vector_format(p) for p in self.points]) + \
                 ")"
-        
+
         raise WrongEdgeTypeException(self.type)
-    
+
     @property
-    def is_valid(self):
-        # wedge geometries produce coincident 
+    def is_valid(self) -> bool:
+        """ Returns True if this edge can be used in blockMeshDict """
+        # wedge geometries produce coincident
         # edges and vertices; drop those
         if f.norm(self.vertex_1.point - self.vertex_2.point) < constants.tol:
             return False
-        
+
         # 'all' spline and projected edges are 'valid'
         if self.type in ('line', 'spline', 'project'):
             return True
@@ -145,7 +162,8 @@ class Edge():
 
         return d > constants.tol
 
-    def get_length(self):
+    def get_length(self) -> float:
+        """ Returns an approximate length of this Edge """
         if self.type in('line', 'project'):
             return f.norm(self.vertex_1.point - self.vertex_2.point)
 
@@ -162,17 +180,25 @@ class Edge():
                 l += f.norm(points[i+1] - points[i])
 
             return l
-        
+
         if self.type == 'spline':
             edge_points = np.concatenate((
                 [self.vertex_1.point],
                 self.points,
                 [self.vertex_2.point]), axis=0)
             return curve_length(edge_points)
-        
+
         raise WrongEdgeTypeException(self.type)
 
-    def rotate(self, angle, axis=[1, 0, 0], origin=[0, 0, 0]):
+    def rotate(self, angle:List[float], axis:List[float]=None, origin:List[float]=None) -> 'Vertex':
+        """ Rotates all points in this edge (except start and end Vertex) around an
+        arbitrary axis and origin (be careful with projected edges, geometry isn't rotated!)"""
+        if axis is None:
+            axis = [1, 0, 0]
+
+        if origin is None:
+            origin = [0, 0, 0]
+
         # TODO: include/exclude projected edges?
         if self.type == 'line':
             points = None
@@ -184,13 +210,8 @@ class Edge():
             points = [f.arbitrary_rotation(p, axis, angle, origin) for p in self.points]
         else:
             raise WrongEdgeTypeException(self.type)
-        
+
         return Edge(self.block_index_1, self.block_index_2, points)
-        
+
     def __repr__(self):
-        return "{} {} {} {}".format(
-            self.type,
-            self.vertex_1.mesh_index,
-            self.vertex_2.mesh_index,
-            self.point_list
-        )
+        return f"{self.type} {self.vertex_1.mesh_index} {self.vertex_2.mesh_index} {self.point_list}"
