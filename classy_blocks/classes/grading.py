@@ -1,5 +1,5 @@
 import os
-
+"""
 In theory, combination of three of these 6 values can be specified:
  - Total length
  - Number of cells
