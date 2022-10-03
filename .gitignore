@@ -1,6 +1,13 @@
 .vscode
 *.code-workspace
 
+# openfoam case files and results from testing
+polyMesh/
+cellToRegion
+blockMeshDict
+log.*
+*.vtk
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
