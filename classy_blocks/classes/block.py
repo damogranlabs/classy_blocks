@@ -1,6 +1,7 @@
-import numpy as np
-
+"""Contains all data to place a block into mesh."""
 from typing import List, Literal, NoReturn, Union
+
+import numpy as np
 
 from ..util import functions as f
 from .flat.face import Face

@@ -1,14 +1,11 @@
-import os
-
 from .primitives import Vertex
 from ..util import constants, tools
 from ..util import functions as g
 
 
 class Mesh():
-    output_path = 'debug.vtk'
-
     """ contains blocks, edges and all necessary methods for assembling blockMeshDict """
+    output_path = 'debug.vtk'
 
     def __init__(self):
         self.vertices = []  # list of vertices

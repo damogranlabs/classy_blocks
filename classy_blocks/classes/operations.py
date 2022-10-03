@@ -8,12 +8,11 @@ from typing import List, Union, NoReturn, TypeVar
 
 import numpy as np
 
-from ..util import functions as f
 
 from .block import Block
 from .primitives import Edge, transform_edges
 from .flat.face import Face
-from .primitives import Edge, transform_edges
+
 from ..util import functions as f
 
 
@@ -208,4 +207,3 @@ class Wedge(Revolve):
         """ Sets the patch, encountered last when rotating in a positive sense
         (see sketch in class definition) """
         super().set_patch('right', patch_name)
-    
