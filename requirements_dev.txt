@@ -2,6 +2,7 @@ pytest
 coverage
 black
 flake8
+pyproject-flake8
 
 tox
 
