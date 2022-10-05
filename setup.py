@@ -2,7 +2,6 @@
 
 """The setup script."""
 
-from pip._internal.req import parse_requirements
 from setuptools import setup, find_packages
 
 with open('README.md') as readme_file:
@@ -10,11 +9,6 @@ with open('README.md') as readme_file:
 
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
-
-install_reqs = parse_requirements("requirements.txt", session="hack")
-requirements = [ir.requirement for ir in install_reqs]
-
-test_requirements = ['pytest>=3', ]
 
 setup(
     author="Nejc Jurkovic",
@@ -31,16 +25,18 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
     description="Python classes for easier creation of openFoam's blockMesh dictionaries.",
-    install_requires=requirements,
     license="MIT license",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
     keywords='classy_blocks',
     name='classy_blocks',
     packages=find_packages(include=['classy_blocks', 'classy_blocks.*']),
-    test_suite='tests',
-    tests_require=test_requirements,
     url='https://github.com/FranzBangar/classy_blocks',
     version='0.1.0',
     zip_safe=False,
+    install_requires=[
+        "numpy",
+        "scipy",
+        "Jinja2"
+    ],
 )

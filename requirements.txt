@@ -1,6 +1,0 @@
-pip
-setuptools==61.2.0
-pytest==7.1.2
-Jinja2==3.1.2
-numpy==1.23.2
-scipy==1.9.0

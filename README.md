@@ -200,11 +200,10 @@ happily show anything.
 This can be disabled by using `mesh.write(..., debug=False, ...)`.
 
 # Prerequisites
-
-- numpy
-- scipy
-- jinja2
+Package (python) dependencies can be found in *setup.py* file.   
+Other dependencies that must be installed:
 - blockMesh
+- OpenFoam
 
 # Technical Information
 
