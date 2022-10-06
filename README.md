@@ -2,7 +2,7 @@
 
 ![Flywheel](https://raw.githubusercontent.com/damogranlabs/classy_examples/main/showcase/flywheel.png "Flywheel")
 
-Python classes for easier creation of openFoam's blockMesh dictionaries.
+Python classes for easier creation of OpenFOAM's blockMesh dictionaries.
 
 > Warning! This project is currently under development and is not yet very user-friendly. It still lacks some important
 > features and probably features a lot of bugs. However, you're welcome to suggest features, improvements, and point out
@@ -11,42 +11,99 @@ Python classes for easier creation of openFoam's blockMesh dictionaries.
 > tl;dr: install the package with `pip install git+https://github.com/damogranlabs/classy_blocks.git`, 
 > clone the [classy_examples](https://github.com/damogranlabs/classy_examples) repository and run `run.py`.
 
-# What Is It
+> For those that still want the submodule, clone [this commit (7e8e7bcd85b5bac40bcffabcddef6a220a4c6f9f)](https://github.com/damogranlabs/classy_blocks/tree/7e8e7bcd85b5bac40bcffabcddef6a220a4c6f9f).
 
-This is a collection of Python classes for creation of blockMeshDict files for OpenFOAM's blockMesh tool. Its purpose is
-to avoid manual entering of numbers into blockMeshDict and also avoid the dreadful `m4` or `#calc`.
+# About
 
-Since it is easier to crunch numbers and vectors and everything else with `numpy` it is a better idea to do that there
-and then just throw everything into blockMeshDicts. This tool is a link between these two steps.
+_blockMesh_ is a very powerful mesher but the amount of manual labour it requires to make even the simplest
+meshes makes it mostly useless. Even attempts to simplify or parametrize _blockMeshDict_s with `#calc` or even
+the dreadful `m4` quickly become unmanageable and cryptic.
 
-# When To Use It
+classy_blocks' aim is to ease the burden of meticulous work by providing a
+more intuitive workflow, off-the-shelf parts and some automatic helpers for building and optimization of block-structured hexahedral meshes.
+Still it is not an automatic mesher and therefore some kinds of geometry are more suited than others.
 
-- If your brain hurts during meticulous tasks such as manual copying of numbers from excel or even paper
-- If you don't want to waste energy on low-level stuff such as numbering vertices
-- If you have a rather simplish parametric model and would like to make a bunch of simulations with changing geometry (
-  optimizations etc.)
+## Useful For
+### Fields
+- Turbomachinery (impellers, propellers)
+- Microfluidics
+- Flow around buildings
+- Heat transfer (PCB models, heatsinks)
+- Airfoils (2D)
+- Solids (heat transfer, mechanical stresses)
+
+### Cases
+- Simpler rotational geometry (immersed rotors, mixers)
+- Pipes/channels
+- Tanks/plenums/containers
+- External aerodynamics of blunt bodies
+- Modeling thin geometry (seals, labyrinths)
+- Parametric studies
+- Background meshes for snappy (cylindrical, custom)
+- 2D and axisymmetric cases
+- Overset meshes
+
+## Not Good For
+- External aerodynamics of vehicles (too complex to mesh manually, without refinement generates too many cells)
+- Complex geometry in general
+- One-off simulations (use automatic meshers)
 
 # Features
 
-- Write your parametric model's geometry with a short Python script and translate it directly to `blockMeshDict`
-- Predefined shapes like `Cylinder` or operations like `Extrude` and `Revolve`
-- Simple specification of edges: a single point for circular or a list of points for a spline edge
-- Automatic calculation of cell count and grading by specifying any of a number of parameters (cell-to-cell expansion
-  ratio, start cell width, end cell width, total expansion ratio)
-- Automatic propagation of grading and cell count from block to block as required by blockMesh
-- projections of edges and block faces to `geometry` (STL meshes and searchable surfaces)
+## Workflow
+As opposed to blockMesh, where the user is expected to manually enter pre-calculated vertices, edges, blocks and whatnot, classy_blocks tries to mimic procedural modeling of modern 3D CAD programs. Here, a Python script contains steps that describe geometry of blocks, their cell count, grading, patches and so on. At the end, the procedure is translated directly to blockMeshDict and no manual editing of the latter should be required.
 
-## Predefined Shapes
+## Building Elements
+_Unchecked items are not implemented yet_
 
-- Cone Frustum (truncated cone)
-- Cylinder
-- Ring (annulus)
-- Elbow (bent pipe)
-- Hemisphere
-- Elbow wall (thickened elbow shell)
-- Frustum wall
+- [x] Manual definition of a Block with Vertices, Edges and Faces
+- [x] Operations (Loft, Extrude, Revolve)
+    - [x] Loft
+    - [x] Extrude
+    - [x] Revolve
+    - [x] Wedge (a shortcut to Revolve for 2D axisymmetric cases)
+- [x] Predefined Shapes
+    - [x] Box (shortcut to Block aligned with coordinate system)
+    - [x] Elbow (bent pipe of various diameters/cross-sections)
+    - [x] Cone Frustum (truncated cone)
+    - [x] Cylinder
+    - [x] Ring (annulus)
+    - [x] Hemisphere
+    - [x] Elbow wall (thickened shell of an Elbow)
+    - [x] Frustum wall
+    - [ ] Hemisphere wall
+- [ ] Predefined parametric Objects
+    - [ ] T-joint (round pipes)
+    - [ ] X-joint
+    - [ ] N-joint (multiple pipes)
+    - [ ] Box with hole
 
-A simple example:
+## Modifiers
+After blocks have been placed, it is possible to create new geometry based on placed blocks or to modify them.
+
+- [ ] Move Block's Vertex/Edge/Face
+- [ ] Delete a Block created by a Shape or Object
+- [x] Project Block's Vertex/Edge/Face*
+- [ ] Chain Block's face to generate a new block
+- [x] Chain Shape's surface (top/bottom/outer) to generate a new Shape
+- [ ] Join two Blocks by extending their Edges
+- [ ] Offset Block's faces to form new Blocks for easier creation of layouts with boundary layers that don't propagate into domain
+- [ ] Optimize Vertex positions
+
+## Meshing specification
+- [x] Simple definition of edges: a single point for circular, a list of points for a spline edge, name of geometry for projecting
+- [x] Automatic calculation of cell count and grading by specifying any of a number of parameters (cell-to-cell expansionr atio, start cell width, end cell width, total expansion ratio)
+- [ ] [Edge grading](https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-450004.3.1.3) (separate specification for each edge)
+- [x] Automatic propagation of grading and cell count from a single block to all connected blocks as required by blockMesh
+- [x] Projections of vertices, edges and block faces to geometry (triangulated and [searchable surfaces](https://www.openfoam.com/documentation/guides/latest/doc/guide-meshing-snappyhexmesh-geometry.html#meshing-snappyhexmesh-searchable-objects))*
+- [x] Face merging as described by [blockMesh user guide](https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-470004.3.2). Breaks the pure-hexahedral-mesh rule but can often save the day for trickier geometries.
+
+* Not implemented: projected Vertex
+
+# Examples
+
+## Shapes
+A simple Cylinder:
 
 ```python
 inlet = Cylinder([x_start, 0, 0], [x_end, 0, 0], [0, 0, radius])
@@ -65,16 +122,8 @@ mesh.add(inlet)
 
 ## Operations
 
-Analogous to a sketch in 3D CAD software, a `Face` is a collection of 4 vertices and 4 edges.
-An _operation_ is a 3D shape obtained by swiping a Face into 3rd dimension following one of the rules below.
-
-### Extrude
-
-A block, created from a Face translated by an extrude vector.
-
-### Revolve
-
-A Face is revolved around a given axis so that a circular block with a constant cross-section is created.
+Analogous to a sketch in 3D CAD software, a Face is a set of 4 vertices and 4 edges.
+An _Operation_ is a 3D shape obtained by swiping a Face into 3rd dimension by a specified rule; an example of Revolve:
 
 ```python
 # a quadrangle with one curved side
@@ -106,15 +155,6 @@ revolve.chop(2, start_size=0.05) # revolve direction
 mesh.add(revolve)
 ```
 
-### Wedge
-
-A special case of revolve for 2D axisymmetric meshes. A list of `(x,y)` points is revolved symetrically around x-axis as
-required by a `wedge` boundary condition in OpenFOAM.
-
-### Loft
-
-A block between two Faces. Edges in lofted direction can also be specified.
-
 > See [examples/operations](https://github.com/damogranlabs/classy_examples) for an example of each operation.
 
 ## Projection To Geometry
@@ -127,11 +167,12 @@ Simply provide geometry definition as documentation specifies, then call a `proj
 ```python
 geometry = {
     'terrain': [
-        'type triSurfaceMesh;',
-        'name terrain;',
-        'file "terrain.stl";',
+        'type triSurfaceMesh',
+        'name terrain',
+        'file "terrain.stl"',
     ]
 }
+
 base = Face([
     [-1, -1, -1],
     [ 1, -1, -1],
@@ -186,24 +227,21 @@ For instance, an `Elbow` can be _chained_ to a `Cylinder` just like joining pipe
 Moreover, most shapes* can be expanded to form a _wall_ version of the same shape. For instance, expanding a `Cylinder`
 creates an `ExtrudedRing`.
 
-`.contract()` is only possible* on `ExtrudedRing` and produces another, smaller `ExtrudedRing`.
-
 > See [examples/chaining](https://github.com/damogranlabs/classy_examples) for an example of each operation.
 
 ## Debugging
 
-By default, `mesh.write(...)` creates a `debug.vtk` file where each block represents a hexahedral cell.
-By showing `block_ids` with a proper color scale the blocking is clearly visible.
-This is most useful when blockMesh fails with errors reporting invalid/inside-out blocks but VTK will
+By default, a `debug.vtk` file is created where each block represents a hexahedral cell.
+By showing `block_ids` with a proper color scale the blocking can be visualized.
+This is useful when blockMesh fails with errors reporting invalid/inside-out blocks but VTK will
 happily show anything.
 
-This can be disabled by using `mesh.write(..., debug=False, ...)`.
-
 # Prerequisites
-Package (python) dependencies can be found in *setup.py* file.   
-Other dependencies that must be installed:
-- blockMesh
-- OpenFoam
+
+- numpy
+- scipy
+- jinja2
+- blockMesh (OpenFOAM)
 
 # Technical Information
 
@@ -249,32 +287,21 @@ will translate all individual blocks' data to format blockMesh will understand:
   an `Exception` is raised
 - gather a list of projected faces and edges
 
-## Bonus:
-
-### Geometry functions
-
-Check out `util/geometry.py` for bonus functions. More about that is written in my blog
-post, [https://damogranlabs.com/2019/11/points-and-vectors/].
-There are also a couple of functions used in the example.
-Of course you are free to use your own :)
-
 # TODO
-
-- New Shapes:
-    - T-joint
-    - X-joint
-    - Hemisphere with given angle (a.k.a. cone cap)
-- Wall versions of Shapes:
-    - HemisphereWall
+- Unchecked list items from [Features](#features)
 - Chaining:
     - *FrustumWall.expand()
     - *FrustumWall.contract()
     - *ElbowWall.contract()
     - Box.chain()
     - Block.chain() (low-level), or Block.get_face() -> Face
+- Optimization
 - Examples
     - Ramjet engine
 - Technical stuff:
-    - Debugging: connection between block and Shapes
+    - Redefine classes to support modification
+    - Simplify imports (direct import from classy_blocks instead of specifying complete module paths)
+    - Package to pypi
+    - Debugging: connection between block and Shapes, naming
     - More tests
     - Documentation
