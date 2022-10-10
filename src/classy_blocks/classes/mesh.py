@@ -1,11 +1,12 @@
-from .primitives import Vertex
-from ..util import constants, tools
-from ..util import functions as g
+from classy_blocks.classes.primitives import Vertex
+from classy_blocks.util import constants, tools
+from classy_blocks.util import functions as g
 
 
-class Mesh():
-    """ contains blocks, edges and all necessary methods for assembling blockMeshDict """
-    output_path = 'debug.vtk'
+class Mesh:
+    """contains blocks, edges and all necessary methods for assembling blockMeshDict"""
+
+    output_path = "debug.vtk"
 
     def __init__(self):
         self.vertices = []  # list of vertices
@@ -19,9 +20,9 @@ class Mesh():
         self.geometry = {}
 
     def find_vertex(self, new_vertex):
-        """ checks if any of existing vertices in self.vertices are
+        """checks if any of existing vertices in self.vertices are
         in the same location as the passed one; if so, returns
-        the existing vertex """
+        the existing vertex"""
 
         for mesh_vertex in self.vertices:
             if g.norm(mesh_vertex.point - new_vertex.point) < constants.tol:
@@ -30,8 +31,8 @@ class Mesh():
         return None
 
     def find_edge(self, vertex_1, vertex_2):
-        """ checks if an edge with the same pair of vertices
-        exists in self.edges already """
+        """checks if an edge with the same pair of vertices
+        exists in self.edges already"""
         for e in self.edges:
             mesh_set = set([vertex_1.mesh_index, vertex_2.mesh_index])
             edge_set = set([e.vertex_1.mesh_index, e.vertex_2.mesh_index])
@@ -46,16 +47,16 @@ class Mesh():
         self.blocks.append(block)
 
     def add(self, item):
-        if hasattr(item, 'block'):
+        if hasattr(item, "block"):
             self.add_block(item.block)
-        elif hasattr(item, 'blocks'):
+        elif hasattr(item, "blocks"):
             for block in item.blocks:
                 self.add_block(block)
         else:
             self.add_block(item)
 
         # TODO: TEST
-        if hasattr(item, 'geometry'):
+        if hasattr(item, "geometry"):
             self.add_geometry(item.geometry)
 
     def get_patches(self):
@@ -98,8 +99,8 @@ class Mesh():
                         block.neighbours.add(mb)
 
     def copy_grading(self, block, axis):
-        """ finds a block that shares an edge with given block
-        and copies its grading along that axis """
+        """finds a block that shares an edge with given block
+        and copies its grading along that axis"""
         # there are 4 pairs of vertices on specified axis:
         match_pairs = block.get_axis_vertex_pairs(axis)
 
@@ -173,7 +174,7 @@ class Mesh():
                 block.edges[i].vertex_1 = v_1
                 block.edges[i].vertex_2 = v_2
 
-                if block_edge.type == 'line':
+                if block_edge.type == "line":
                     continue
 
                 if block_edge.is_valid:
@@ -227,7 +228,7 @@ class Mesh():
             message = "Blocks with non-defined counts: \n"
             for i in list(undefined_blocks):
                 message += f"\t{i}: {str(self.blocks[i].n_cells)}\n"
-            message += '\n'
+            message += "\n"
 
             raise Exception(message)
 
@@ -237,10 +238,7 @@ class Mesh():
         for b in self.blocks:
             # TODO: check for existing faces
             for f in b.faces:
-                self.faces.append([
-                    b.get_face(f[0]),  # face, like (8 12 15 11)
-                    f[1]  # the geometry to project to
-                ])
+                self.faces.append([b.get_face(f[0]), f[1]])  # face, like (8 12 15 11)  # the geometry to project to
 
     def prepare_data(self, debug=False):
         self.collect_vertices()
@@ -259,12 +257,9 @@ class Mesh():
         self.merged_patches.append([master, slave])
 
     def set_default_patch(self, name, type):
-        assert type in ('patch', 'wall', 'empty', 'wedge')
+        assert type in ("patch", "wall", "empty", "wedge")
 
-        self.default_patch = {
-            'name': name,
-            'type': type
-        }
+        self.default_patch = {"name": name, "type": type}
 
     def add_geometry(self, g):
         # TODO: TEST
@@ -278,25 +273,25 @@ class Mesh():
         self.prepare_data(debug)
 
         context = {
-            'vertices': self.vertices,
-            'edges': self.edges,
-            'blocks': self.blocks,
-            'patches': self.patches,
-            'faces': self.faces,
-            'default_patch': self.default_patch,
-            'merged_patches': self.merged_patches,
-            'geometry': self.geometry,
+            "vertices": self.vertices,
+            "edges": self.edges,
+            "blocks": self.blocks,
+            "patches": self.patches,
+            "faces": self.faces,
+            "default_patch": self.default_patch,
+            "merged_patches": self.merged_patches,
+            "geometry": self.geometry,
         }
 
-        tools.template_to_dict('blockMeshDict.template', output_path, context)
+        tools.template_to_dict("blockMeshDict.template", output_path, context)
 
     def to_vtk(self):
-        """ Creates a VTK file with each mesh.block represented as a hexahedron,
+        """Creates a VTK file with each mesh.block represented as a hexahedron,
         useful for debugging when Mesh.write() succeeds but blockMesh fails.
-        Can only be called after Mesh.write() has been successfully finished! """
+        Can only be called after Mesh.write() has been successfully finished!"""
         context = {
-            'points': [v.point for v in self.vertices],
-            'cells': [[v.mesh_index for v in b.vertices] for b in self.blocks]
+            "points": [v.point for v in self.vertices],
+            "cells": [[v.mesh_index for v in b.vertices] for b in self.blocks],
         }
 
-        tools.template_to_dict('vtk.template', self.output_path, context)
+        tools.template_to_dict("vtk.template", self.output_path, context)

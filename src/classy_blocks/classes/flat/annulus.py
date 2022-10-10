@@ -1,7 +1,7 @@
 import numpy as np
 
-from ..flat.face import Face
-from ...util import functions as f
+from classy_blocks.classes.flat.face import Face
+from classy_blocks.util import functions as f
 
 
 class Annulus:
@@ -20,8 +20,9 @@ class Annulus:
 
         self.inner_radius = inner_radius
 
-        self.inner_radius_point = self.center_point + \
-                                  f.unit_vector(self.outer_radius_point - self.center_point) * self.inner_radius
+        self.inner_radius_point = (
+            self.center_point + f.unit_vector(self.outer_radius_point - self.center_point) * self.inner_radius
+        )
 
         # TODO: TEST
         if n_segments is None:
@@ -34,22 +35,18 @@ class Annulus:
 
         face = Face(
             [  # points
-                self.inner_radius_point, self.outer_radius_point,
-                rot(self.outer_radius_point, angle), rot(self.inner_radius_point, angle)
+                self.inner_radius_point,
+                self.outer_radius_point,
+                rot(self.outer_radius_point, angle),
+                rot(self.inner_radius_point, angle),
             ],
-            [  # edges
-                None, rot(self.outer_radius_point, angle / 2),
-                None, rot(self.inner_radius_point, angle / 2)
-            ]
+            [None, rot(self.outer_radius_point, angle / 2), None, rot(self.inner_radius_point, angle / 2)],  # edges
         )
 
         # unlike with Circle, there's no core
         self.core_faces = None
 
-        self.shell_faces = [
-            face.rotate(self.normal, i * angle, self.center_point)
-            for i in range(self.n_segments)
-        ]
+        self.shell_faces = [face.rotate(self.normal, i * angle, self.center_point) for i in range(self.n_segments)]
 
         # required by Shapes
         # TODO: is it?
@@ -59,10 +56,8 @@ class Annulus:
     def translate(self, vector, **kwargs):
         # TODO: TEST
         return self.__class__(
-            self.center_point + vector,
-            self.radius_point + vector,
-            self.normal,
-            self.inner_radius, self.n_segments)
+            self.center_point + vector, self.radius_point + vector, self.normal, self.inner_radius, self.n_segments
+        )
 
     def rotate(self, axis, angle, origin, **kwargs):
         # TODO: TEST
@@ -72,7 +67,9 @@ class Annulus:
             r(self.center_point),
             r(self.radius_point),
             f.arbitrary_rotation(self.normal, axis, angle, [0, 0, 0]),
-            self.inner_radius, self.n_segments)
+            self.inner_radius,
+            self.n_segments,
+        )
 
     def scale(self, outer_radius, inner_radius, **kwargs):
         # TODO: TEST
@@ -80,4 +77,6 @@ class Annulus:
             self.center_point,
             self.center_point + f.unit_vector(self.radius_point - self.center_point) * outer_radius,
             self.normal,
-            inner_radius, self.n_segments)
+            inner_radius,
+            self.n_segments,
+        )

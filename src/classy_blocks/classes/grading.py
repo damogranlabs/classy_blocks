@@ -44,23 +44,22 @@ import warnings
 
 from typing import NoReturn, Tuple
 
-from ..util import grading_calculator as gc
+from classy_blocks.util import grading_calculator as gc
 
 # gather available functions for calculation of grading parameters
-functions = [] # list [ [return_value, {parameters}, function], ... ]
+functions = []  # list [ [return_value, {parameters}, function], ... ]
 
 for m in inspect.getmembers(gc):
     if inspect.isfunction(m[1]):
         # function name is assembled as
         # get_<result>__<param1>__<param2>
-        data = m[0].split(sep='__')
-        functions.append(
-            [data[0][4:], [data[1], data[2]], m[1]]
-        )
+        data = m[0].split(sep="__")
+        functions.append([data[0][4:], [data[1], data[2]], m[1]])
 
-def calculate(length:float, parameters:dict) -> Tuple[float, float]:
-    """ Calculates cell count and total expansion ratio for a block
-    by calling functions that take known variables and return new values """
+
+def calculate(length: float, parameters: dict) -> Tuple[float, float]:
+    """Calculates cell count and total expansion ratio for a block
+    by calling functions that take known variables and return new values"""
     keys = parameters.keys()
     calculated = set()
 
@@ -81,27 +80,37 @@ def calculate(length:float, parameters:dict) -> Tuple[float, float]:
                 parameters[freturn] = ffunction(length, parameters[fparams[0]], parameters[fparams[1]])
                 calculated.add(freturn)
 
-        if {'count', 'total_expansion'}.issubset(calculated):
-            return parameters['count'], parameters['total_expansion']
+        if {"count", "total_expansion"}.issubset(calculated):
+            return parameters["count"], parameters["total_expansion"]
 
     raise ValueError(f"Could not calculate count and grading for given parameters: {parameters}")
 
+
 class Grading:
-    """ Grading specification for a single block direction """
+    """Grading specification for a single block direction"""
+
     def __init__(self):
         # must be set before any calculation is performed
         self.length = None
 
         # "multi-grading" specification according to:
         # https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
-        self.divisions = [] # a list of lists [length ratio, count ratio, total expansion]
-    
+        self.divisions = []  # a list of lists [length ratio, count ratio, total expansion]
+
     def set_block_size(self, size):
         self.length = size
 
-    def add_division(self, length_ratio=1,
-        start_size=None, c2c_expansion=None, count=None, end_size=None, total_expansion=None, invert=False):
-        """ Add a grading division to block specification.
+    def add_division(
+        self,
+        length_ratio=1,
+        start_size=None,
+        c2c_expansion=None,
+        count=None,
+        end_size=None,
+        total_expansion=None,
+        invert=False,
+    ):
+        """Add a grading division to block specification.
         Use length_ratio for multigrading (see documentation).
         Available grading parameters are:
          - start_size: width of start cell
@@ -117,7 +126,7 @@ class Grading:
         To reverse grading, use invert=True.
 
         Documentation:
-        https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading """
+        https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading"""
         assert self.length is not None
         assert 0 < length_ratio <= 1
 
@@ -130,43 +139,46 @@ class Grading:
         if count is not None:
             count = int(count)
 
-        length = self.length*length_ratio
+        length = self.length * length_ratio
 
         # blockMesh needs two numbers regardless of user's input:
         # number of cells and total expansion ratio.
         # those two can be calculated from count and c2c_expansion
         # so calculate those first
-        count, total_expansion = calculate(length, {
-            'start_size': start_size,
-            'end_size': end_size,
-            'c2c_expansion': c2c_expansion,
-            'count': count,
-            'total_expansion': total_expansion
-        })
+        count, total_expansion = calculate(
+            length,
+            {
+                "start_size": start_size,
+                "end_size": end_size,
+                "c2c_expansion": c2c_expansion,
+                "count": count,
+                "total_expansion": total_expansion,
+            },
+        )
 
         if invert:
-            total_expansion = 1/total_expansion
+            total_expansion = 1 / total_expansion
 
         self.divisions.append([length_ratio, count, total_expansion])
 
     def invert(self) -> NoReturn:
-        """ Inverts gradings and stuff in case neighbuors are defined upside-down """
+        """Inverts gradings and stuff in case neighbuors are defined upside-down"""
         if len(self.divisions) == 0:
-            return # nothing to invert 
-        
+            return  # nothing to invert
+
         if len(self.divisions) == 1:
-            self.divisions[0][2] = 1/self.divisions[0][2]
+            self.divisions[0][2] = 1 / self.divisions[0][2]
         else:
             # divisions: a list of lists [length ratio, count ratio, total expansion]
             d_inverted = []
 
             for d in reversed(self.divisions):
-                d[2] = 1/d[2]
+                d[2] = 1 / d[2]
                 d_inverted.append(d)
                 self.divisions = d_inverted
 
-    def copy(self, invert:bool=False) -> 'Grading':
-        """ Copies grading from one block to another;
+    def copy(self, invert: bool = False) -> "Grading":
+        """Copies grading from one block to another;
         use invert=True when neighbours are defined "upside-down" """
         g = copy.deepcopy(self)
         if invert:
@@ -176,19 +188,19 @@ class Grading:
 
     @property
     def count(self) -> int:
-        """ Return number of cells, summer over all sub-divisions """
+        """Return number of cells, summer over all sub-divisions"""
         return sum([d[1] for d in self.divisions])
 
     @property
     def is_defined(self) -> bool:
-        """ Return True is grading is defined;
-        It is if there's at least one division added """
+        """Return True is grading is defined;
+        It is if there's at least one division added"""
         return len(self.divisions) > 0
 
     def __repr__(self):
         if len(self.divisions) == 0:
             # no grading specified: default to 1
-            return 'Undefined'
+            return "Undefined"
 
         if len(self.divisions) == 1:
             # its a one-number simpleGrading:
@@ -209,4 +221,3 @@ class Grading:
             warnings.warn(f"Length ratio doesn't add up to 1: {length_ratio_sum}")
 
         return s
-    

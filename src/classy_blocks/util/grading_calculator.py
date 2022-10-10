@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.optimize
 
-from . import constants
+from classy_blocks.util import constants
 
 # here's a list of available calculation functions
 # transcribed from the blockmesh grading calculator:
@@ -21,7 +21,7 @@ def get_start_size__count__c2c_expansion(length, count, c2c_expansion):
 
     h = c2c_expansion - 1
     if abs(h) > constants.tol:
-        return length * (1 - c2c_expansion) / (1 - c2c_expansion ** count)
+        return length * (1 - c2c_expansion) / (1 - c2c_expansion**count)
     else:
         return length / count
 
@@ -46,9 +46,7 @@ def get_count__start_size__c2c_expansion(length, start_size, c2c_expansion):
     assert start_size > 0
 
     if abs(c2c_expansion - 1) > constants.tol:
-        count = np.log(
-            1 - length / start_size * (1 - c2c_expansion)) / \
-                np.log(c2c_expansion)
+        count = np.log(1 - length / start_size * (1 - c2c_expansion)) / np.log(c2c_expansion)
     else:
         count = length / start_size
 
@@ -59,9 +57,7 @@ def get_count__end_size__c2c_expansion(length, end_size, c2c_expansion):
     assert length > 0
 
     if abs(c2c_expansion - 1) > constants.tol:
-        count = np.log(
-            1 / (1 + length / end_size * (1 - c2c_expansion) / c2c_expansion)
-        ) / np.log(c2c_expansion)
+        count = np.log(1 / (1 + length / end_size * (1 - c2c_expansion) / c2c_expansion)) / np.log(c2c_expansion)
     else:
         count = length / end_size
 
@@ -89,8 +85,7 @@ def get_count__total_expansion__start_size(length, total_expansion, start_size):
     if abs(total_expansion - 1) < constants.tol:
         return int(length / d_min)
 
-    fc = lambda n: (1 - total_expansion ** (n / (n - 1))) / \
-                   (1 - total_expansion ** (1 / (n - 1))) - length / start_size
+    fc = lambda n: (1 - total_expansion ** (n / (n - 1))) / (1 - total_expansion ** (1 / (n - 1))) - length / start_size
 
     return int(scipy.optimize.brentq(fc, 0, length / d_min)) + 1
 
@@ -114,11 +109,10 @@ def get_c2c_expansion__count__start_size(length, count, start_size):
         c_max = (1 - constants.tol) ** (1 / (count - 1))
         c_min = (1 / r_max) ** (1 / (count - 1))
 
-    fexp = lambda c: (1 - c ** count) / (1 - c) - length / start_size
+    fexp = lambda c: (1 - c**count) / (1 - c) - length / start_size
 
     if fexp(c_min) * fexp(c_max) >= 0:
-        message = "Invalid grading parameters: " + \
-                  f" length {length}, count {count}, start_size {start_size}"
+        message = "Invalid grading parameters: " + f" length {length}, count {count}, start_size {start_size}"
         raise ValueError(message)
 
     return scipy.optimize.brentq(fexp, c_min, c_max)
@@ -139,11 +133,10 @@ def get_c2c_expansion__count__end_size(length, count, end_size):
             c_max = (1 - constants.tol) ** (1 / (count - 1))
             c_min = (1 / r_max) ** (1 / (count - 1))
 
-        fexp = lambda c: (1 / c ** (count - 1)) * (1 - c ** count) / (1 - c) - length / end_size
+        fexp = lambda c: (1 / c ** (count - 1)) * (1 - c**count) / (1 - c) - length / end_size
 
         if fexp(c_min) * fexp(c_max) >= 0:
-            message = "Invalid grading parameters: " + \
-                      f" length {length}, count {count}, end_size {end_size}"
+            message = "Invalid grading parameters: " + f" length {length}, count {count}, end_size {end_size}"
             raise ValueError(message)
 
         return scipy.optimize.brentq(fexp, c_min, c_max)

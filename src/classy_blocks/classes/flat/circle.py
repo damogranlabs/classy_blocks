@@ -1,8 +1,8 @@
 import numpy as np
 
-from .face import Face
-from ...util import constants as c
-from ...util import functions as f
+from classy_blocks.classes.flat.face import Face
+from classy_blocks.util import constants as c
+from classy_blocks.util import functions as f
 
 
 class Circle:
@@ -35,34 +35,32 @@ class Circle:
         core_diagonal_point = center_point + self.radius_vector * self.diagonal_ratio
         core_side_point = center_point + self.radius_vector * self.side_ratio
 
-        core_face = Face([
-            self.center_point,
-            core_side_point,
-            rot(core_diagonal_point, np.pi / 4),
-            rot(core_side_point, 2 * np.pi / 4)
-        ])
+        core_face = Face(
+            [
+                self.center_point,
+                core_side_point,
+                rot(core_diagonal_point, np.pi / 4),
+                rot(core_side_point, 2 * np.pi / 4),
+            ]
+        )
 
-        self.core_faces = [
-            core_face.rotate(self.normal, a, self.center_point)
-            for a in core_angles
-        ]
+        self.core_faces = [core_face.rotate(self.normal, a, self.center_point) for a in core_angles]
 
         # shell faces around core
         shell_angles = np.linspace(0, 2 * np.pi, num=4, endpoint=False)
 
         shell_face_1 = Face(
-            [  # points
-                core_face.points[1], self.radius_point,
-                rot(self.radius_point, np.pi / 4), core_face.points[2]
-            ],
-            [None, rot(self.radius_point, np.pi / 8), None, None]
+            [core_face.points[1], self.radius_point, rot(self.radius_point, np.pi / 4), core_face.points[2]],  # points
+            [None, rot(self.radius_point, np.pi / 8), None, None],
         )
         shell_face_2 = Face(
             [
-                core_face.points[2], rot(self.radius_point, np.pi / 4),
-                rot(self.radius_point, np.pi / 2), core_face.points[3]
+                core_face.points[2],
+                rot(self.radius_point, np.pi / 4),
+                rot(self.radius_point, np.pi / 2),
+                core_face.points[3],
             ],
-            [None, rot(self.radius_point, 3 * np.pi / 8), None, None]
+            [None, rot(self.radius_point, 3 * np.pi / 8), None, None],
         )
 
         shell_faces_1 = [shell_face_1.rotate(self.normal, a, self.center_point) for a in shell_angles]
@@ -80,10 +78,8 @@ class Circle:
     def translate(self, vector, **kwargs):
         # TODO: TEST
         return self.__class__(
-            self.center_point + vector,
-            self.radius_point + vector,
-            self.normal,
-            self.diagonal_ratio, self.side_ratio)
+            self.center_point + vector, self.radius_point + vector, self.normal, self.diagonal_ratio, self.side_ratio
+        )
 
     def rotate(self, axis, angle, origin, **kwargs):
         # TODO: TEST
@@ -93,17 +89,18 @@ class Circle:
             r(self.center_point),
             r(self.radius_point),
             f.arbitrary_rotation(self.normal, axis, angle, [0, 0, 0]),
-            self.diagonal_ratio, self.side_ratio)
+            self.diagonal_ratio,
+            self.side_ratio,
+        )
 
     def scale(self, radius, **kwargs):
         # TODO: TEST
         r = lambda p: self.center_point + f.unit_vector(p - self.center_point) * radius
 
         return self.__class__(
-            self.center_point,
-            r(self.radius_point),
-            self.normal,
-            self.diagonal_ratio, self.side_ratio)
+            self.center_point, r(self.radius_point), self.normal, self.diagonal_ratio, self.side_ratio
+        )
+
 
 class Semicircle(Circle):
     def __init__(self, center_point, radius_point, normal, diagonal_ratio=None, side_ratio=None):
@@ -113,5 +110,3 @@ class Semicircle(Circle):
         self.shell_faces = self.shell_faces[4:]
         self.core_faces = self.core_faces[2:]
         self.faces = self.core_faces + self.shell_faces
-
-    

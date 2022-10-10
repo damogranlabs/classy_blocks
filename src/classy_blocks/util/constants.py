@@ -7,11 +7,7 @@ tol = 1e-7
 # number formatting
 def vector_format(vector):
     # output for edge definitions
-    return "({:.8f} {:.8f} {:.8f})".format(
-        vector[0],
-        vector[1],
-        vector[2]
-    )
+    return "({:.8f} {:.8f} {:.8f})".format(vector[0], vector[1], vector[2])
 
 
 # Circle H-grid parameters
