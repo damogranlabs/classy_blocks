@@ -7,10 +7,5 @@ testpaths = [
 [tool.black]
 line-length = 120
 
-[tool.flake8]
+[tool.pylint]
 max-line-length = 120
-exclude = [
-    "docs",
-    "venv",
-    ".github"
-]

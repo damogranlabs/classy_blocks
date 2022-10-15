@@ -1,11 +1,9 @@
 pytest
 coverage
 black
-flake8
-pyproject-flake8
+pylint
 
 tox
-
 sphinx
 
 # can be removed?
