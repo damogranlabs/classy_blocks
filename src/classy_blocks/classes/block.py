@@ -1,5 +1,5 @@
 """Contains all data to place a block into mesh."""
-from typing import List, Literal, NoReturn, Union
+from typing import List, Literal, NoReturn, Union, Tuple
 
 import numpy as np
 
@@ -153,7 +153,7 @@ class Block:
 
         return pairs
 
-    def get_axis_from_pair(self, pair: List[int]) -> tuple[int, bool]:
+    def get_axis_from_pair(self, pair: List[int]) -> Tuple[int, bool]:
         """returns axis index and orientation from a given pair of vertices;
         orientation is True if blocks are aligned or false when inverted.
 
