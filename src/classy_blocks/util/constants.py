@@ -1,4 +1,4 @@
-from numpy import pi
+import numpy as np
 
 # geometric tolerance
 tol = 1e-7
@@ -7,7 +7,7 @@ tol = 1e-7
 # number formatting
 def vector_format(vector):
     # output for edge definitions
-    return "({:.8f} {:.8f} {:.8f})".format(vector[0], vector[1], vector[2])
+    return f"({vector[0]:.8f} {vector[1]:.8f} {vector[2]:.8f})"
 
 
 # Circle H-grid parameters
@@ -32,5 +32,5 @@ circle_core_side = 0.62
 # Sphere parameters:
 # The same sketch as above but it represents sphere cross-section.
 # Vector O-S is circle normal; there are two different angles DOS;
-sphere_diagonal_angle = pi / 4
-sphere_side_angle = pi / 6
+sphere_diagonal_angle = np.pi / 4
+sphere_side_angle = np.pi / 6
