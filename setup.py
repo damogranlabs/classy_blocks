@@ -1,14 +1,29 @@
 #!/usr/bin/env python
-
-"""The setup script."""
-
+import os
 from setuptools import setup, find_packages
+
+
+def read_file(rel_path: str) -> str:
+    here = os.path.abspath(os.path.dirname(__file__))
+    with open(os.path.join(here, rel_path), "r") as f:
+        return f.read()
+
 
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
 with open("HISTORY.rst") as history_file:
     history = history_file.read()
+
+
+def get_version(rel_path: str) -> str:
+    for line in read_file(rel_path).splitlines():
+        if line.startswith("__version__"):
+            delim = '"' if '"' in line else "'"
+            return line.split(delim)[1]
+    else:
+        raise RuntimeError("Unable to find version string.")
+
 
 setup(
     author="Nejc Jurkovic",
@@ -26,14 +41,14 @@ setup(
     ],
     description="Python classes for easier creation of openFoam's blockMesh dictionaries.",
     license="MIT license",
-    long_description=readme + "\n\n" + history,
+    long_description=read_file("README.md"),
     include_package_data=True,
     keywords=["classy_blocks", "openFoam", "blockMesh"],
     name="classy_blocks",
+    version=get_version("src/classy_blocks/__init__.py"),
     packages=["classy_blocks"],
     package_dir={"classy_blocks": "src/classy_blocks"},
     url="https://github.com/damogranlabs/classy_blocks",
-    version="0.1.0",
     zip_safe=False,
     install_requires=["numpy", "scipy", "Jinja2"],
 )
