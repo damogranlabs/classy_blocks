@@ -19,8 +19,14 @@ def get_version(rel_path: str) -> str:
 
 
 setup(
+    name="classy_blocks",
+    url="https://github.com/damogranlabs/classy_blocks",
     author="Nejc Jurkovic",
     author_email="kandelabr@gmail.com",
+    description="Python classes for easier creation of openFoam's blockMesh dictionaries.",
+    long_description=read_file("README.md"),
+    keywords=["classy_blocks", "openFoam", "blockMesh"],
+    version=get_version("src/classy_blocks/__init__.py"),
     python_requires=">=3.6",
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
@@ -32,16 +38,10 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
-    description="Python classes for easier creation of openFoam's blockMesh dictionaries.",
     license="MIT license",
-    long_description=read_file("README.md"),
-    include_package_data=True,
-    keywords=["classy_blocks", "openFoam", "blockMesh"],
-    name="classy_blocks",
-    version=get_version("src/classy_blocks/__init__.py"),
     packages=find_packages("src"),
     package_dir={"": "src"},
-    url="https://github.com/damogranlabs/classy_blocks",
-    zip_safe=False,
     install_requires=["numpy", "scipy", "Jinja2"],
+    include_package_data=True,
+    zip_safe=False,
 )
