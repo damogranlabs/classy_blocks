@@ -2,6 +2,7 @@ pytest
 coverage
 black
 pylint
+mypy
 
 tox
 sphinx
