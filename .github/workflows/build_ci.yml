@@ -3,7 +3,7 @@ name: Test and analyze
 on: [ push ]
 
 jobs:
-    test_unix:
+    pytests:
         strategy:
             matrix:
                 os: [ubuntu-latest, macos-latest, windows-latest]
