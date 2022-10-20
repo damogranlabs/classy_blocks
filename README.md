@@ -8,24 +8,23 @@ Python classes for easier creation of openFoam's blockMesh dictionaries.
 > features and probably features a lot of bugs. However, you're welcome to suggest features, improvements, and point out
 > bugs.
 
-> tl;dr: install the package with `pip install git+https://github.com/damogranlabs/classy_blocks.git`, 
-> clone the [classy_examples](https://github.com/damogranlabs/classy_examples) repository and run `run.py`.
-
-# What Is It
-
+## What Is It
 This is a collection of Python classes for creation of blockMeshDict files for OpenFOAM's blockMesh tool. Its purpose is
 to avoid manual entering of numbers into blockMeshDict and also avoid the dreadful `m4` or `#calc`.
 
 Since it is easier to crunch numbers and vectors and everything else with `numpy` it is a better idea to do that there
 and then just throw everything into blockMeshDicts. This tool is a link between these two steps.
 
-# When To Use It
-
+## When To Use It
 - If your brain hurts during meticulous tasks such as manual copying of numbers from excel or even paper
 - If you don't want to waste energy on low-level stuff such as numbering vertices
 - If you have a rather simplish parametric model and would like to make a bunch of simulations with changing geometry (
   optimizations etc.)
 
+## How To Use It
+- If you just need the `classy_blocks`, install them with: `pip install git+https://github.com/damogranlabs/classy_blocks.git`
+- If you want to run examples, follow instructions in [EXAMPLES_README.md](EXAMPLES_README.md)
+- If you want to contribute, follow instructions in [CONTRIBUTING.md](CONTRIBUTING.md)
 # Features
 
 - Write your parametric model's geometry with a short Python script and translate it directly to `blockMeshDict`
@@ -200,10 +199,11 @@ happily show anything.
 This can be disabled by using `mesh.write(..., debug=False, ...)`.
 
 # Prerequisites
-Package (python) dependencies can be found in *setup.py* file.   
+Package (python) dependencies can be found in *setup.py* file.
 Other dependencies that must be installed:
 - blockMesh
 - OpenFoam
+- python
 
 # Technical Information
 
