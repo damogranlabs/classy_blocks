@@ -80,16 +80,17 @@ Ready to contribute? Here's how to set up `classy_blocks` for local development.
 - Small fixes like documentation, typo or similar: no need to install anything. Do your change and submit PR.
 - Code/test/examples fixes: install local classy_block pkg and development requirements::
 
-    $ python -m pip install -e .
     $ python -m pip install -r requirements_dev.txt
+    $ python -m pip install -e .
 
-6. If code changes were made: check that your changes pass tests, format and lint rules::
+6. If code changes were made: check that your changes pass tests, typing, format and lint rules::
 
-    $ flake8 classy_blocks tests
-    $ python setup.py test or pytest
-    $ tox
+    $ pytest tests
+    $ mypy typing
+    $ black src
+    $ pylint src
 
-    Note, make sure you test on all python versions. 
+    Note, make sure you test on all python versions. Help yourself with `tox` configurations.
 
 7. Commit your changes and push your branch to GitHub::
 
