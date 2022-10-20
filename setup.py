@@ -9,13 +9,6 @@ def read_file(rel_path: str) -> str:
         return f.read()
 
 
-with open("README.md") as readme_file:
-    readme = readme_file.read()
-
-with open("HISTORY.rst") as history_file:
-    history = history_file.read()
-
-
 def get_version(rel_path: str) -> str:
     for line in read_file(rel_path).splitlines():
         if line.startswith("__version__"):
