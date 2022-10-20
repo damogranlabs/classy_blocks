@@ -33,7 +33,7 @@ jobs:
             -   name: Install dependencies
                 run: |
                     python -m pip install -U pip tox
-            -   name: pytest
+            -   name: Analyze
                 run: |
                     tox -e analysis
 
