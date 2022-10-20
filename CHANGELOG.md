@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.0] - 2022-10-20
 ### Added
-
+- examples and showcases from `classy_examples` repo
+- static type analysis, formatting, linting
 ### Changed
 - Major package layout refactor
 - Major CI refactor
