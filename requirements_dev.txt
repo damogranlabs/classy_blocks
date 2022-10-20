@@ -1,8 +1,6 @@
 pytest
-coverage
+mypy
 black
 pylint
-mypy
 
 tox
-sphinx
