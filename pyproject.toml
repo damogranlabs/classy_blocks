@@ -1,11 +1,10 @@
 [tool.pytest.ini_options]
-addopts = "-ra -q"
-testpaths = [
-    "tests"
-]
+addopts = "-ra -q --color=auto --tb=short --durations=5 -v"
 
 [tool.black]
 line-length = 120
 
 [tool.pylint]
 max-line-length = 120
+
+[tool.mypy]
