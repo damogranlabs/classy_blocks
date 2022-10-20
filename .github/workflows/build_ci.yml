@@ -6,10 +6,9 @@ jobs:
     pytests:
         strategy:
             matrix:
-                os: [ubuntu-latest, macos-latest, windows-latest]
                 python-version: ["3.6", "3.10"]
             fail-fast: false
-        runs-on: ${{ matrix.os }}
+        runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v3
             -   name: Set up Python ${{ matrix.python-version }}
