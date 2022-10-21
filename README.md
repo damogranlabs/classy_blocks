@@ -8,13 +8,7 @@ Python classes for easier creation of OpenFOAM's blockMesh dictionaries.
 > features and probably features a lot of bugs. However, you're welcome to suggest features, improvements, and point out
 > bugs.
 
-> tl;dr: install the package with `pip install git+https://github.com/damogranlabs/classy_blocks.git`, 
-> clone the [classy_examples](https://github.com/damogranlabs/classy_examples) repository and run `run.py`.
-
-> For those that still want the submodule, clone [this commit (7e8e7bcd85b5bac40bcffabcddef6a220a4c6f9f)](https://github.com/damogranlabs/classy_blocks/tree/7e8e7bcd85b5bac40bcffabcddef6a220a4c6f9f).
-
 # About
-
 _blockMesh_ is a very powerful mesher but the amount of manual labour it requires to make even the simplest
 meshes makes it mostly useless. Even attempts to simplify or parametrize _blockMeshDict_s with `#calc` or even
 the dreadful `m4` quickly become unmanageable and cryptic.
@@ -47,6 +41,11 @@ Still it is not an automatic mesher and therefore some kinds of geometry are mor
 - External aerodynamics of vehicles (too complex to mesh manually, without refinement generates too many cells)
 - Complex geometry in general
 - One-off simulations (use automatic meshers)
+
+# How To Use It
+- If you just need the `classy_blocks`, install them with: `pip install git+https://github.com/damogranlabs/classy_blocks.git`
+- If you want to run examples, follow instructions in [EXAMPLES_README.md](EXAMPLES_README.md)
+- If you want to contribute, follow instructions in [CONTRIBUTING.md](CONTRIBUTING.md)
 
 # Features
 
@@ -238,10 +237,11 @@ happily show anything.
 
 # Prerequisites
 
-- numpy
-- scipy
-- jinja2
+Package (python) dependencies can be found in *setup.py* file.
+Other dependencies that must be installed:
 - blockMesh (OpenFOAM)
+- OpenFoam
+- python
 
 # Technical Information
 

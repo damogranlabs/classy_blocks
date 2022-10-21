@@ -1,11 +1,6 @@
 pytest
-coverage
+mypy
 black
-flake8
+pylint
 
 tox
-
-sphinx
-
-# can be removed?
-bump2version==0.5.11

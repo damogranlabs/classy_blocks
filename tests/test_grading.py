@@ -26,10 +26,10 @@ class TestGradingCalculator(unittest.TestCase):
 
     def test_get_start_size__end_size__total_expansion(self):
         self.assertEqual(gc.get_start_size__end_size__total_expansion(1, 0.1, 1), 0.1)
-        
+
         with self.assertRaises(AssertionError):
             gc.get_start_size__end_size__total_expansion(0, 0.1, 1)
-        
+
         with self.assertRaises(AssertionError):
             gc.get_start_size__end_size__total_expansion(1, 0.1, 0)
 
@@ -51,13 +51,13 @@ class TestGradingCalculator(unittest.TestCase):
 
         # invalid cases
         with self.assertRaises(AssertionError):
-            gc.get_count__start_size__c2c_expansion(0, 0.1, 1.1) # length < 0
+            gc.get_count__start_size__c2c_expansion(0, 0.1, 1.1)  # length < 0
 
         with self.assertRaises(AssertionError):
-            gc.get_count__start_size__c2c_expansion(1, 0, 1.1) # start_size = 0
-        
+            gc.get_count__start_size__c2c_expansion(1, 0, 1.1)  # start_size = 0
+
         with self.assertRaises(ValueError):
-            gc.get_count__start_size__c2c_expansion(1, 0.95, 0) # c2c_expansion < 1
+            gc.get_count__start_size__c2c_expansion(1, 0.95, 0)  # c2c_expansion < 1
 
     def test_get_count__end_size__c2c_expansion(self):
         # valid cases
@@ -79,11 +79,11 @@ class TestGradingCalculator(unittest.TestCase):
 
         # border cases
         self.assertEqual(gc.get_count__total_expansion__c2c_expansion(1, 1, 1.1), 1)
-        
+
         # invalid cases
         with self.assertRaises(AssertionError):
             gc.get_count__total_expansion__c2c_expansion(1, 1, 1)
-        
+
         with self.assertRaises(AssertionError):
             gc.get_count__total_expansion__c2c_expansion(1, -1, 1.1)
 
@@ -111,20 +111,20 @@ class TestGradingCalculator(unittest.TestCase):
 
         # invalid cases
         with self.assertRaises(AssertionError):
-            gc.get_c2c_expansion__count__start_size(0, 1, 0.1) # length = 0
+            gc.get_c2c_expansion__count__start_size(0, 1, 0.1)  # length = 0
 
         with self.assertRaises(AssertionError):
-            gc.get_c2c_expansion__count__start_size(1, 0, 0.1) # count < 1
-        
-        with self.assertRaises(AssertionError):
-            gc.get_c2c_expansion__count__start_size(1, 10, 1.1) # start_size > length
+            gc.get_c2c_expansion__count__start_size(1, 0, 0.1)  # count < 1
 
         with self.assertRaises(AssertionError):
-            gc.get_c2c_expansion__count__start_size(1, 10, 0) # start_size = 0
-        
+            gc.get_c2c_expansion__count__start_size(1, 10, 1.1)  # start_size > length
+
+        with self.assertRaises(AssertionError):
+            gc.get_c2c_expansion__count__start_size(1, 10, 0)  # start_size = 0
+
         with self.assertRaises(ValueError):
             gc.get_c2c_expansion__count__start_size(1, 10, 0.9)
-        
+
     def test_get_c2c_expansion__count__end_size(self):
         # valid cases
         self.assertEqual(gc.get_c2c_expansion__count__end_size(1, 10, 0.1), 1)
@@ -143,7 +143,7 @@ class TestGradingCalculator(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             gc.get_c2c_expansion__count__end_size(1, 10, 1)
-        
+
     def test_get_c2c_expansion__count__total_expansion(self):
         # valid cases
         self.assertAlmostEqual(gc.get_c2c_expansion__count__total_expansion(1, 10, 5), 1.195813175, places=5)
@@ -155,13 +155,13 @@ class TestGradingCalculator(unittest.TestCase):
         # invalid cases
         with self.assertRaises(AssertionError):
             gc.get_c2c_expansion__count__total_expansion(1, 1, 1)
-        
+
     def test_get_total_expansion__count__c2c_expansion(self):
         # valid cases
         self.assertEqual(gc.get_total_expansion__count__c2c_expansion(1, 10, 1), 1)
         self.assertEqual(gc.get_total_expansion__count__c2c_expansion(1, 1, 1), 1)
         self.assertAlmostEqual(gc.get_total_expansion__count__c2c_expansion(1, 10, 1.1), 2.3579476, places=5)
-        
+
         # border cases
         self.assertEqual(gc.get_total_expansion__count__c2c_expansion(1, 1, 1), 1)
 
@@ -177,6 +177,7 @@ class TestGradingCalculator(unittest.TestCase):
         with self.assertRaises(AssertionError):
             gc.get_total_expansion__start_size__end_size(1, 0, 0.1)
 
+
 class TestGrading(unittest.TestCase):
     def setUp(self):
         self.g = Grading()
@@ -184,46 +185,43 @@ class TestGrading(unittest.TestCase):
     def test_calculator_functions(self):
         expected_functions = [
             # return_value | param1 | param2 (param0 = length)
-            ['c2c_expansion', ['count', 'end_size'], gc.get_c2c_expansion__count__end_size],
-            ['c2c_expansion', ['count', 'start_size'], gc.get_c2c_expansion__count__start_size],
-            ['c2c_expansion', ['count', 'total_expansion'], gc.get_c2c_expansion__count__total_expansion],
-            ['count', ['end_size', 'c2c_expansion'], gc.get_count__end_size__c2c_expansion],
-            ['count', ['start_size', 'c2c_expansion'], gc.get_count__start_size__c2c_expansion],
-            ['count', ['total_expansion', 'c2c_expansion'], gc.get_count__total_expansion__c2c_expansion],
-            ['count', ['total_expansion', 'start_size'], gc.get_count__total_expansion__start_size],
-            ['end_size', ['start_size', 'total_expansion'], gc.get_end_size__start_size__total_expansion],
-            ['start_size', ['count', 'c2c_expansion'], gc.get_start_size__count__c2c_expansion],
-            ['start_size', ['end_size', 'total_expansion'], gc.get_start_size__end_size__total_expansion],
-            ['total_expansion', ['count', 'c2c_expansion'], gc.get_total_expansion__count__c2c_expansion],
-            ['total_expansion', ['start_size', 'end_size'], gc.get_total_expansion__start_size__end_size]
+            ["c2c_expansion", ["count", "end_size"], gc.get_c2c_expansion__count__end_size],
+            ["c2c_expansion", ["count", "start_size"], gc.get_c2c_expansion__count__start_size],
+            ["c2c_expansion", ["count", "total_expansion"], gc.get_c2c_expansion__count__total_expansion],
+            ["count", ["end_size", "c2c_expansion"], gc.get_count__end_size__c2c_expansion],
+            ["count", ["start_size", "c2c_expansion"], gc.get_count__start_size__c2c_expansion],
+            ["count", ["total_expansion", "c2c_expansion"], gc.get_count__total_expansion__c2c_expansion],
+            ["count", ["total_expansion", "start_size"], gc.get_count__total_expansion__start_size],
+            ["end_size", ["start_size", "total_expansion"], gc.get_end_size__start_size__total_expansion],
+            ["start_size", ["count", "c2c_expansion"], gc.get_start_size__count__c2c_expansion],
+            ["start_size", ["end_size", "total_expansion"], gc.get_start_size__end_size__total_expansion],
+            ["total_expansion", ["count", "c2c_expansion"], gc.get_total_expansion__count__c2c_expansion],
+            ["total_expansion", ["start_size", "end_size"], gc.get_total_expansion__start_size__end_size],
         ]
 
         self.assertListEqual(expected_functions, grading.functions)
 
-    def test_calculate(self):        
+    def test_calculate(self):
         test_cases = [
             # [{keys}, count, total_expansion]; length=1 for all cases
-            [{'count': 10, 'total_expansion': 5}, 10, 5],
-            [{'count': 10, 'c2c_expansion': 1.1}, 10, 2.357947691],
-            [{'count': 10, 'c2c_expansion': 0.9}, 10, 0.387420489],
-            [{'count': 10, 'start_size': 0.2}, 10, 0.1903283012],
-            [{'count': 10, 'end_size': 0.2}, 10, 5.254123465509412],
-            [{'count': 10, 'end_size': 0.05}, 10, 0.2912203517],
-
-            [{'total_expansion': 5, 'c2c_expansion': 1.1}, 17, 5],
-            [{'total_expansion': 0.2, 'c2c_expansion': 0.9}, 16, 0.2],
-            [{'total_expansion': 0.2, 'start_size': 0.1}, 20, 0.2],
-            [{'total_expansion': 5, 'start_size': 0.1}, 4, 5],
-            [{'total_expansion': 5, 'end_size': 0.5}, 4, 5],
-            [{'total_expansion': 0.2, 'end_size': 0.1}, 4, 0.2],
-
-            [{'c2c_expansion': 1.1, 'start_size': 0.1}, 8, 1.9487171],
-            [{'c2c_expansion': 0.95, 'start_size': 0.1}, 14, 0.5133420832],
-            [{'c2c_expansion': 1.1, 'end_size': 0.1}, 26, 10.8347059433],
-            [{'c2c_expansion': 0.95, 'end_size': 0.1}, 9, 0.66342043128],
-
-            [{'start_size': 0.1, 'end_size': 0.05}, 14, 0.5],
-            [{'start_size': 0.05, 'end_size': 0.1}, 14, 2],
+            [{"count": 10, "total_expansion": 5}, 10, 5],
+            [{"count": 10, "c2c_expansion": 1.1}, 10, 2.357947691],
+            [{"count": 10, "c2c_expansion": 0.9}, 10, 0.387420489],
+            [{"count": 10, "start_size": 0.2}, 10, 0.1903283012],
+            [{"count": 10, "end_size": 0.2}, 10, 5.254123465509412],
+            [{"count": 10, "end_size": 0.05}, 10, 0.2912203517],
+            [{"total_expansion": 5, "c2c_expansion": 1.1}, 17, 5],
+            [{"total_expansion": 0.2, "c2c_expansion": 0.9}, 16, 0.2],
+            [{"total_expansion": 0.2, "start_size": 0.1}, 20, 0.2],
+            [{"total_expansion": 5, "start_size": 0.1}, 4, 5],
+            [{"total_expansion": 5, "end_size": 0.5}, 4, 5],
+            [{"total_expansion": 0.2, "end_size": 0.1}, 4, 0.2],
+            [{"c2c_expansion": 1.1, "start_size": 0.1}, 8, 1.9487171],
+            [{"c2c_expansion": 0.95, "start_size": 0.1}, 14, 0.5133420832],
+            [{"c2c_expansion": 1.1, "end_size": 0.1}, 26, 10.8347059433],
+            [{"c2c_expansion": 0.95, "end_size": 0.1}, 9, 0.66342043128],
+            [{"start_size": 0.1, "end_size": 0.05}, 14, 0.5],
+            [{"start_size": 0.05, "end_size": 0.1}, 14, 2],
         ]
 
         for t in test_cases:
@@ -232,32 +230,36 @@ class TestGrading(unittest.TestCase):
             self.assertAlmostEqual(results[1], t[2], places=5)
 
     def add_division(self, length_ratio, count_ratio, total_expansion):
-        self.g.divisions.append([
-            length_ratio, count_ratio, total_expansion
-        ])
+        self.g.divisions.append([length_ratio, count_ratio, total_expansion])
 
     def test_output_empty(self):
-        self.assertEqual(str(self.g), 'Undefined')
+        self.assertEqual(str(self.g), "Undefined")
 
     def test_output_single(self):
         self.add_division(1, 1, 3)
-        self.assertEqual(str(self.g), '3')
+        self.assertEqual(str(self.g), "3")
 
     def test_output_multi(self):
         self.add_division(0.25, 0.4, 2)
-        self.add_division(0.5,  0.2, 1)
+        self.add_division(0.5, 0.2, 1)
         self.add_division(0.25, 0.4, 0.5)
 
-        expected_output = "(" + os.linesep + \
-	        "\t(0.25 0.4 2)" + os.linesep + \
-	        "\t(0.5 0.2 1)" + os.linesep + \
-	        "\t(0.25 0.4 0.5)" + os.linesep + \
-            ")"
+        expected_output = (
+            "("
+            + os.linesep
+            + "\t(0.25 0.4 2)"
+            + os.linesep
+            + "\t(0.5 0.2 1)"
+            + os.linesep
+            + "\t(0.25 0.4 0.5)"
+            + os.linesep
+            + ")"
+        )
 
         self.assertEqual(str(self.g), expected_output)
 
     def test_copy(self):
-        """ check that copy doesn't spoil the original """
+        """check that copy doesn't spoil the original"""
         self.add_division(1, 1, 3)
         h = self.g.copy()
 
@@ -288,37 +290,25 @@ class TestGrading(unittest.TestCase):
             self.g.add_division(total_expansion=5)
 
     def test_add_division_1(self):
-        """ double grading, set start_size and c2c_expansion """
+        """double grading, set start_size and c2c_expansion"""
         self.g.set_block_size(2)
 
         self.g.add_division(length_ratio=0.5, start_size=0.1, c2c_expansion=1.1)
         self.g.add_division(length_ratio=0.5, start_size=0.1, c2c_expansion=1.1, invert=True)
 
-        self.assertListEqual(
-            self.g.divisions,
-            [
-                [0.5, 8, 1.9487171000000012],
-                [0.5, 8, 0.5131581182307065]
-            ]
-        )
+        self.assertListEqual(self.g.divisions, [[0.5, 8, 1.9487171000000012], [0.5, 8, 0.5131581182307065]])
 
     def test_add_division_2(self):
-        """ single grading, set c2c_expansion and count """
+        """single grading, set c2c_expansion and count"""
         self.g.set_block_size(1)
 
         self.g.add_division(1, c2c_expansion=1.1, count=10)
-        self.assertListEqual(
-            self.g.divisions,
-            [[1, 10, 2.357947691000002]]
-        )
+        self.assertListEqual(self.g.divisions, [[1, 10, 2.357947691000002]])
 
     def test_add_division_3(self):
-        """ single grading, set count and start_size """
+        """single grading, set count and start_size"""
         self.g.set_block_size(1)
 
         self.g.add_division(1, count=10, start_size=0.05)
 
-        self.assertListEqual(
-            self.g.divisions,
-            [[1, 10, 3.433788027752166]]
-        )
+        self.assertListEqual(self.g.divisions, [[1, 10, 3.433788027752166]])

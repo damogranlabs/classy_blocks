@@ -1,5 +1,8 @@
-.vscode
-*.code-workspace
+# Why not include workspace and its settings/tasks/cfgs in git so others can benefit?
+#.vscode
+#*.code-workspace
+
+tmp
 
 # openfoam case files and results from testing
 polyMesh/
