@@ -1,11 +1,11 @@
-from classy_blocks.classes.mesh import Mesh
-from classy_blocks.classes.operations import Face, Extrude
+from classy_blocks.process.mesh import Mesh
+from classy_blocks.construct.operations import Face, Extrude
 
 geometry = {
     'terrain': [
-        'type triSurfaceMesh;',
-        'name terrain;',
-        'file "terrain.stl";',
+        'type triSurfaceMesh',
+        'name terrain',
+        'file "terrain.stl"',
     ]
 }
 
@@ -36,5 +36,6 @@ def get_mesh():
     mesh = Mesh()
     mesh.add(extrude)
     mesh.set_default_patch('atmosphere', 'patch')
+    mesh.add_geometry(geometry)
 
     return mesh

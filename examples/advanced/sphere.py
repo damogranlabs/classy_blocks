@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-import os
-
 import numpy as np
 
-from classy_blocks.classes import operations
-from classy_blocks.classes.mesh import Mesh
+from classy_blocks.construct import operations
+from classy_blocks.process.mesh import Mesh
+from classy_blocks.util import constants
 
 # sphere radius
 r = 0.5
@@ -20,13 +19,15 @@ expansion_ratio = 1.2
 
 geometry = {
     'inner_sphere': [
-        'type   sphere',
+        'type   searchableSphere',
         'origin (0 0 0)',
+        'centre (0 0 0)',
         f'radius {r}',
     ],
     'outer_sphere': [
-        'type   sphere',
+        'type   searchableSphere',
         'origin (0 0 0)',
+        'centre (0 0 0)',
         f'radius {r_prism}',
     ]
 }
@@ -98,7 +99,7 @@ def get_mesh():
     for i in projected_faces:
         block = oplist[i].block
         side = projected_faces[i]
-        indexes = block.face_map[side]
+        indexes = constants.FACE_MAP[side]
         
         bottom_points = np.array([block.vertices[ip].point for ip in indexes])
         bottom_face = operations.Face(bottom_points)
@@ -135,5 +136,6 @@ def get_mesh():
         oplist[i].chop(2, start_size=domain_cell_size)
 
     m.set_default_patch('sides', 'wall')
+    m.add_geometry(geometry)
 
     return m

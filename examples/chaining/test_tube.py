@@ -1,5 +1,5 @@
-from classy_blocks.classes.mesh import Mesh
-from classy_blocks.classes.shapes import Cylinder, Frustum, Hemisphere, ExtrudedRing
+from classy_blocks.process.mesh import Mesh
+from classy_blocks.construct.shapes import Cylinder, Frustum, Hemisphere, ExtrudedRing
 
 def get_mesh():
     # a test tube as a reactor with a part of atmosphere above and below it

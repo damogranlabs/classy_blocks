@@ -1,5 +1,5 @@
-from classy_blocks.classes.mesh import Mesh
-from classy_blocks.classes.shapes import ExtrudedRing, Box
+from classy_blocks.process.mesh import Mesh
+from classy_blocks.construct.shapes import ExtrudedRing, Box
 
 def get_mesh():
     cylinder_diameter = 20e-3 # [m]

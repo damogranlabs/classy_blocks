@@ -1,5 +1,5 @@
-from classy_blocks.classes.mesh import Mesh
-from classy_blocks.classes.operations import Face, Loft
+from classy_blocks.process.mesh import Mesh
+from classy_blocks.construct.operations import Face, Loft
 
 def get_mesh():
     # Example geometry using Loft:

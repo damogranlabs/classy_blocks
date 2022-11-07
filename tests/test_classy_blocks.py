@@ -22,8 +22,8 @@ def test_content(response):
 
 
 def test_get_mesh():
-    from classy_blocks.classes.mesh import Mesh
-    from classy_blocks.classes.shapes import Cylinder
+    from classy_blocks.process.mesh import Mesh
+    from classy_blocks.construct.shapes import Cylinder
 
     axis_point_1 = [0, 0, 0]
     axis_point_2 = [5, 5, 0]

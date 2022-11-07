@@ -1,5 +1,5 @@
-from classy_blocks.classes.mesh import Mesh
-from classy_blocks.classes.shapes import Cylinder, Frustum, ExtrudedRing
+from classy_blocks.process.mesh import Mesh
+from classy_blocks.construct.shapes import Cylinder, Frustum, ExtrudedRing
 
 def get_mesh():
     # see orifice_plate.svg for sketch

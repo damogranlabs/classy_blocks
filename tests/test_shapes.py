@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from classy_blocks.classes.shapes import Elbow, ExtrudedRing
+from classy_blocks.construct.shapes import Elbow, ExtrudedRing
 
 
 class TestElbow(unittest.TestCase):

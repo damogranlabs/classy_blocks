@@ -1,6 +1,6 @@
-from classy_blocks.classes.primitives import Edge
-from classy_blocks.classes.block import Block
-from classy_blocks.classes.mesh import Mesh
+from classy_blocks.define.primitives import Edge
+from classy_blocks.define.block import Block
+from classy_blocks.process.mesh import Mesh
 
 def get_mesh():
     mesh = Mesh()

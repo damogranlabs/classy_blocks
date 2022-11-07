@@ -1,8 +1,8 @@
 import unittest
 
-from classy_blocks.classes.primitives import Vertex, Edge
-from classy_blocks.classes.grading import Grading
-from classy_blocks.classes.mesh import Mesh
+from classy_blocks.define.primitives import Vertex, Edge
+from classy_blocks.define.grading import Grading
+from classy_blocks.process.mesh import Mesh
 
 from tests.test_block import FixturedTestCase
 

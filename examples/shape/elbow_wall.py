@@ -1,7 +1,7 @@
 import numpy as np
 
-from classy_blocks.classes.mesh import Mesh
-from classy_blocks.classes.walls import ElbowWall
+from classy_blocks.process.mesh import Mesh
+from classy_blocks.construct.walls import ElbowWall
 
 def get_mesh():
     mesh = Mesh()

@@ -52,14 +52,6 @@ class Vertex:
         point = f.arbitrary_rotation(self.point, axis, angle, origin)
         return Vertex(point)
 
-    def __repr__(self):
-        s = constants.vector_format(self.point)
-
-        if self.mesh_index is not None:
-            s += " // {}".format(self.mesh_index)
-
-        return s
-
 
 class Edge:
     """An Edge, defined by two vertices and points in between;
@@ -111,24 +103,6 @@ class Edge:
             edge_type = "spline"
 
         return edge_type, points
-
-    @property
-    def point_list(self) -> str:
-        """Returns a list of points (if applicable), readily
-        formatted to be inserted into blockMeshDict"""
-        if self.type == "line":
-            return None
-
-        if self.type == "project":
-            return f"({self.points})"
-
-        if self.type == "arc":
-            return constants.vector_format(self.points)
-
-        if self.type == "spline":
-            return "(" + " ".join([constants.vector_format(p) for p in self.points]) + ")"
-
-        raise WrongEdgeTypeException(self.type)
 
     @property
     def is_valid(self):
@@ -206,5 +180,3 @@ class Edge:
 
         return Edge(self.block_index_1, self.block_index_2, points)
 
-    def __repr__(self):
-        return f"{self.type} {self.vertex_1.mesh_index} {self.vertex_2.mesh_index} {self.point_list}"

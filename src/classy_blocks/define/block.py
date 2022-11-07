@@ -1,49 +1,38 @@
 """Contains all data to place a block into mesh."""
-from typing import List, Literal, NoReturn, Union, Tuple
+from typing import List, Literal, Union, Tuple, Optional, Dict
 
-import numpy as np
+import warnings
 
 from classy_blocks.util import functions as f
-from classy_blocks.classes.flat.face import Face
-from classy_blocks.classes.primitives import Vertex, Edge
-from classy_blocks.classes.grading import Grading
+from classy_blocks.util import constants as c
+from classy_blocks.construct.flat.face import Face
+from classy_blocks.define.primitives import Vertex, Edge
 
+class Side:
+    """Data about one of block's sides"""
+    def __init__(self, orient:Literal['left', 'right', 'front', 'back', 'top', 'bottom']):
+        self.orient = orient
+
+        # whether this block side belongs to a patch
+        self.patch:Optional[str] = None
+        # project to a named searchable surface?
+        self.project:Optional[str] = None
 
 class Block:
     """a direct representation of a blockMesh block;
     contains all necessary data to create it."""
-
-    # a more intuitive and quicker way to set patches,
-    # according to this sketch: https://www.openfoam.com/documentation/user-guide/blockMesh.php
-    # the same for all blocks
-    face_map = {
-        "bottom": (0, 1, 2, 3),
-        "top": (4, 5, 6, 7),
-        "left": (4, 0, 3, 7),
-        "right": (5, 1, 2, 6),
-        "front": (4, 5, 1, 0),
-        "back": (7, 6, 2, 3),
-    }
-
-    # pairs of vertices (index in block.vertices) along axes
-    axis_pair_indexes = (
-        ((0, 1), (3, 2), (4, 5), (7, 6)),  # x
-        ((0, 3), (1, 2), (5, 6), (4, 7)),  # y
-        ((0, 4), (1, 5), (2, 6), (3, 7)),  # z
-    )
-
     def __init__(self, vertices: List[Vertex], edges: List[Edge]):
         # a list of 8 Vertex and Edge objects for each corner/edge of the block
         self.vertices: List[Vertex] = vertices
         self.edges: List[Edge] = edges
-        self.faces: List[List[str]] = []  # a list of projected faces;
-        # [['bottom', 'terrain'], ['right', 'building'], ['back', 'building'],]
+
+        # generate Side objects:
+        self.sides:Dict[Side] = {o:Side(o) for o in c.FACE_MAP}
 
         # block grading;
         # when adding blocks, store chop() parameters;
         # use them in mesh.prepare_data()
         self.chops = [[], [], []]
-        self.grading = [Grading(), Grading(), Grading()]
 
         # cellZone to which the block belongs to
         self.cell_zone = ""
@@ -52,49 +41,37 @@ class Block:
         # (visible in blockMeshDict, useful for debugging)
         self.description = ""
 
-        # patches: an example
-        # self.patches = {
-        #     'volute_rotating': ['left', 'top' ],
-        #     'volute_walls': ['bottom'],
-        # }
-        self.patches = {}
-
-        # set in Mesh.prepare_data()
-        self.mesh_index = None
-
-        # a list of blocks that share an edge with this block;
-        # will be assigned by Mesh().prepare_data()
-        self.neighbours: set["Block"] = set()
+        # index of this block in mesh.blocks;
+        # does not really belong to this object but
+        # debugging without it is quite impossible
+        self.index = None
 
     ###
     ### Information
     ###
-    @property
-    def is_grading_defined(self) -> bool:
-        """Returns True if grading is defined in all dimensions"""
-        return all(g.is_defined for g in self.grading)
+    def get_side_vertices(self, orient:str) -> List[Vertex]:
+        """Returns Vertices that define the given side"""
+        return [self.vertices[i] for i in self.get_side_indexes(orient, local=True)]
 
-    def get_face(self, side: str, internal: bool = False) -> List[int]:
-        """Returns vertex indexes for a given face.
+    def get_side_indexes(self, orient:str, local:bool=False) -> List[int]:
+        """Returns block-local indexes of vertices that define this side"""
+        if local:
+            return c.FACE_MAP[orient]
 
-        If internal=True, it returns block-based internal indexes (0...7);
-        if internal=False, it returns indexes of vertices in Mesh object so it
-        can only be called after mesh.prepare_data()"""
-        indexes = self.face_map[side]
-        if internal:
-            return indexes
+        return [v.mesh_index for v in self.vertices]
 
-        vertices = np.take(self.vertices, indexes)
-
-        return [v.mesh_index for v in vertices]
-
-    def get_faces(self, patch: str, internal: bool = False) -> List[Face]:
-        """Returns faces in this block that belong to a given patch"""
+    def get_patch_sides(self, patch: str) -> List[str]:
+        """Returns sides in this block that belong to a given patch"""
         if patch not in self.patches:
             return []
 
-        sides = self.patches[patch]
-        return [self.get_face(s, internal=internal) for s in sides]
+        orients = []
+
+        for orient in c.FACE_MAP:
+            if self.sides[orient].patch == patch:
+                orients.append(orient)
+
+        return orients
 
     def find_edge(self, index_1: int, index_2: int) -> Edge:
         """Returns edges between given vertex indexes;
@@ -119,7 +96,7 @@ class Block:
 
             return vertex_distance(index_1, index_2)
 
-        edge_lengths = [block_size(pair[0], pair[1]) for pair in self.axis_pair_indexes[axis]]
+        edge_lengths = [block_size(pair[0], pair[1]) for pair in c.AXIS_PAIRS[axis]]
 
         if take == "avg":
             return sum(edge_lengths) / len(edge_lengths)
@@ -132,17 +109,16 @@ class Block:
 
         raise ValueError(f"Unknown sizing specification: {take}. Available: min, max, avg")
 
-    def get_axis_vertex_pairs(self, axis: int) -> List[int]:
-        """returns 4 pairs of Vertex.mesh_indexes along given axis;
-        can only be called after Mesh.prepare_data()"""
+    def get_axis_vertex_pairs(self, axis: int) -> List[List[Vertex]]:
+        """Returns 4 pairs of Vertex objects along given axis"""
         pairs = []
 
-        for pair in self.axis_pair_indexes[axis]:
-            pair = [self.vertices[pair[0]].mesh_index, self.vertices[pair[1]].mesh_index]
+        for pair in c.AXIS_PAIRS[axis]:
+            pair = [self.vertices[pair[0]], self.vertices[pair[1]]]
 
             if pair[0] == pair[1]:
                 # omit vertices in the same spot; there is no edge anyway
-                # (wedges and pyramids)
+                # (prisms/wedges/pyramids)
                 continue
 
             if pair in pairs:
@@ -153,7 +129,7 @@ class Block:
 
         return pairs
 
-    def get_axis_from_pair(self, pair: List[int]) -> Tuple[int, bool]:
+    def get_axis_from_pair(self, pair: List[Vertex]) -> Tuple[int, bool]:
         """returns axis index and orientation from a given pair of vertices;
         orientation is True if blocks are aligned or false when inverted.
 
@@ -174,20 +150,43 @@ class Block:
     ###
     ### Manipulation
     ###
-    def set_patch(self, sides: Union[str, List[str]], patch_name: str) -> NoReturn:
-        """assign one or more block faces (self.face_map)
+    def set_patch(self, orients: Union[str, List[str]], patch_name: str) -> None:
+        """assign one or more block faces (constants.FACE_MAP)
         to a chosen patch name"""
         # see patches: an example in __init__()
 
-        if isinstance(sides, str):
-            sides = [sides]
+        if isinstance(orients, str):
+            orients = [orients]
 
-        if patch_name not in self.patches:
-            self.patches[patch_name] = []
+        for orient in orients:
+            if self.sides[orient].patch is not None:
+                warnings.warn(f"Replacing patch {self.sides[orient].patch} with {patch_name}")
 
-        self.patches[patch_name] += sides
+            self.sides[orient].patch = patch_name
 
-    def chop(self, axis: int, **kwargs: float) -> NoReturn:
+    @property
+    def patches(self) -> Dict[str, List[str]]:
+        """Returns a dict of patches, for example:
+
+        patches = {
+             'volute_rotating': ['left', 'top' ],
+             'volute_walls': ['bottom'],
+        }"""
+        # TODO: set type and other patch properties in mesh.boundary
+        # TODO: test
+        pdict = {}
+
+        for orient, side in self.sides.items():
+            if side.patch is not None:
+                if side.patch not in pdict:
+                    pdict[side.patch] = []
+
+                pdict[side.patch].append(orient)
+
+        return pdict
+
+
+    def chop(self, axis: int, **kwargs: float) -> None:
         """Set block's cell count/size and grading for a given direction/axis.
         Exactly two of the following keyword arguments must be provided:
 
@@ -220,24 +219,7 @@ class Block:
         # and call the actual Grading.chop() function later with these params
         self.chops[axis].append(kwargs)
 
-    def grade(self) -> NoReturn:
-        """Sets block size and grading; not to be used manually!"""
-        for i in range(3):
-            grading = self.grading[i]
-            params = self.chops[i]
-
-            if len(params) < 1:
-                continue
-
-            block_size = self.get_size(i, take=params[0].pop("take", "avg"))
-            grading.set_block_size(block_size)
-
-            for p in params:
-                grading.add_division(**p)
-
-        self.chops = [[], [], []]
-
-    def project_edge(self, index_1: int, index_2: int, geometry: str) -> NoReturn:
+    def project_edge(self, index_1: int, index_2: int, geometry: str) -> None:
         """Project a block edge between index_1 and index_2 to geometry (specified in Mesh)
         Indexes refer to refer to internal block numbering (0...7)."""
         # index_N are vertices relative to block (0...7)
@@ -247,55 +229,18 @@ class Block:
         self.edges.append(Edge(index_1, index_2, geometry))
 
     def project_face(
-        self, side: Literal["top", "bottom", "left", "right", "front", "back"], geometry: str, edges: bool = False
-    ) -> NoReturn:
+        self, orient: Literal["top", "bottom", "left", "right", "front", "back"], geometry: str, edges: bool = False
+    ) -> None:
         """Assign one or more block faces (self.face_map)
         to be projected to a geometry (defined in Mesh)"""
-        assert side in self.face_map
+        assert orient in c.FACE_MAP
 
-        self.faces.append([side, geometry])
+        self.sides[orient].project = geometry
 
         if edges:
-            vertices = self.face_map[side]
+            vertices = c.FACE_MAP[orient]
             for i in range(4):
                 self.project_edge(vertices[i], vertices[(i + 1) % 4], geometry)
-
-    ###
-    ### Output/formatting
-    ###
-    def format_face(self, side: int) -> str:
-        """Returns a string to be inserted into blockMesh"""
-        indexes = self.face_map[side]
-        vertices = np.take(self.vertices, indexes)
-
-        return "({} {} {} {})".format(
-            vertices[0].mesh_index, vertices[1].mesh_index, vertices[2].mesh_index, vertices[3].mesh_index
-        )
-
-    @property
-    def n_cells(self) -> List[int]:
-        """Returns number of cells for each axis"""
-        return [g.count for g in self.grading]
-
-    def __repr__(self):
-        """outputs block's definition for blockMeshDict file"""
-        # hex definition
-        output = "hex "
-        # vertices
-        output += " ( " + " ".join(str(v.mesh_index) for v in self.vertices) + " ) "
-
-        # cellZone
-        output += self.cell_zone
-        # number of cells
-        output += f" ({self.n_cells[0]} {self.n_cells[1]} {self.n_cells[2]}) "
-        # grading: use 1 if not defined
-        grading = [self.grading[i] if self.grading[i] is not None else 1 for i in range(3)]
-        output += f" simpleGrading ({grading[0]} {grading[1]} {grading[2]})"
-
-        # add a comment with block index
-        output += f" // {self.mesh_index} {self.description}"
-
-        return output
 
     ###
     ### class methods

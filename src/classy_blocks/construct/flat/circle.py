@@ -1,6 +1,6 @@
 import numpy as np
 
-from classy_blocks.classes.flat.face import Face
+from classy_blocks.construct.flat.face import Face
 from classy_blocks.util import constants as c
 from classy_blocks.util import functions as f
 

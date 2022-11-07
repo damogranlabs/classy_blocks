@@ -1,5 +1,5 @@
-from classy_blocks.classes.mesh import Mesh
-from classy_blocks.classes.shapes import Cylinder, ExtrudedRing
+from classy_blocks.process.mesh import Mesh
+from classy_blocks.construct.shapes import Cylinder, ExtrudedRing
 
 # A mesh for calculation of friction losses of a rotating rotor in a fluid.
 # See flywheel.svg for explanation of dimensions and block numbers;

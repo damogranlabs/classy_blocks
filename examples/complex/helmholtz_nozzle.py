@@ -1,6 +1,6 @@
-from classy_blocks.classes.mesh import Mesh
-from classy_blocks.classes.operations import Face
-from classy_blocks.classes.shapes import Cylinder, Frustum, RevolvedRing
+from classy_blocks.process.mesh import Mesh
+from classy_blocks.construct.operations import Face
+from classy_blocks.construct.shapes import Cylinder, Frustum, RevolvedRing
 
 def get_mesh():
     # A nozzle with a chamber that produces self-induced oscillations.

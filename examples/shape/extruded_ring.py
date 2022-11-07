@@ -1,5 +1,5 @@
-from classy_blocks.classes.mesh import Mesh
-from classy_blocks.classes.shapes import ExtrudedRing
+from classy_blocks.process.mesh import Mesh
+from classy_blocks.construct.shapes import ExtrudedRing
 
 def get_mesh():
     mesh = Mesh()

@@ -2,9 +2,9 @@ import unittest
 
 import os
 
-from classy_blocks.classes.primitives import Edge
-from classy_blocks.classes.block import Block
-from classy_blocks.classes.mesh import Mesh
+from classy_blocks.define.primitives import Edge
+from classy_blocks.define.block import Block
+from classy_blocks.process.mesh import Mesh
 
 write_mesh = False
 
@@ -18,7 +18,7 @@ class ExecutedTestsBase(unittest.TestCase):
         os.system("tests/case/Allrun.mesh")
 
         with open("tests/case/log.blockMesh") as f:
-            self.assertFalse("--> FOAM FATAL ERROR" in f.read())
+            self.assertFalse("ERROR" in f.read())
 
 
 class FixturedTestCase(unittest.TestCase):
@@ -27,8 +27,8 @@ class FixturedTestCase(unittest.TestCase):
     def setUp(self):
         # a test mesh:
         # 3 blocks, extruded in z-direction
-        #
-        # Run tests.test_util to generate mesh to view
+        # (these indexes refer to 'fl' and 'cl' variables,
+        # not vertex.mesh_index)
         #
         #  ^ y-axis
         #  |
@@ -37,6 +37,29 @@ class FixturedTestCase(unittest.TestCase):
         #  3---2---5
         #  | 0 | 1 |
         #  0---1---4   ---> x-axis
+        #
+        # After adding the blocks, the following mesh indexes are
+        # in mesh.vertices:
+        # 
+        # Bottom 'floor':
+        #
+        #  ^ y-axis
+        #  |
+        #  |  13--12
+        #      | 2 |
+        #  3---2---9
+        #  | 0 | 1 |
+        #  0---1---8   ---> x-axis
+        #
+        # Top 'floor':
+        #
+        #  ^ y-axis
+        #  |
+        #  |  15--14
+        #      | 2 |
+        #  7---6--11
+        #  | 0 | 1 |
+        #  4---5--10   ---> x-axis
 
         fl = [  # points on the 'floor'; z=0
             [0, 0, 0],  # 0
@@ -121,9 +144,9 @@ class FixturedTestCase(unittest.TestCase):
         self.block_2.set_patch(["bottom", "top", "left", "right"], "walls")
 
         self.mesh = Mesh()
-        self.mesh.add_block(self.block_0)
-        self.mesh.add_block(self.block_1)
-        self.mesh.add_block(self.block_2)
+        self.mesh.add(self.block_0)
+        self.mesh.add(self.block_1)
+        self.mesh.add(self.block_2)
 
 
 if __name__ == "__main__":

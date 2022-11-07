@@ -3,7 +3,7 @@ import copy
 
 import numpy as np
 
-from classy_blocks.classes.primitives import Edge, transform_edges, transform_points
+from classy_blocks.define.primitives import Edge, transform_edges, transform_points
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 

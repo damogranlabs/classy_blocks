@@ -3,8 +3,8 @@ import unittest
 import os
 
 from classy_blocks.util import grading_calculator as gc
-from classy_blocks.classes import grading
-from classy_blocks.classes.grading import Grading
+from classy_blocks.define import grading
+from classy_blocks.define.grading import Grading
 
 # numbers are calculated with the calculator all this is 'borrowed' from
 # https://openfoamwiki.net/index.php/Scripts/blockMesh_grading_calculation
@@ -233,7 +233,8 @@ class TestGrading(unittest.TestCase):
         self.g.divisions.append([length_ratio, count_ratio, total_expansion])
 
     def test_output_empty(self):
-        self.assertEqual(str(self.g), "Undefined")
+        with self.assertRaises(ValueError):
+            str(self.g)
 
     def test_output_single(self):
         self.add_division(1, 1, 3)
@@ -312,3 +313,14 @@ class TestGrading(unittest.TestCase):
         self.g.add_division(1, count=10, start_size=0.05)
 
         self.assertListEqual(self.g.divisions, [[1, 10, 3.433788027752166]])
+
+    def test_is_defined(self):
+        self.g.set_block_size(1)
+        self.g.add_division(1, count=10, start_size=0.05)
+
+        self.assertTrue(self.g.is_defined)
+
+    def test_is_not_defined(self):
+        self.g.set_block_size(1)
+
+        self.assertFalse(self.g.is_defined)

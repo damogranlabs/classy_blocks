@@ -37,37 +37,13 @@ geometry
 }
 {% endif %}
 
-vertices
-(
-    {% for v in vertices %}
-    {{ v }}{% endfor %}
-);
+{{ vertices }}
 
-blocks
-(
-    {% for b in blocks %}
-    {{ b }}{% endfor %}
-);
+{{ blocks }}
 
-edges
-(
-    {% for e in edges %}
-    {{ e }}{% endfor %}
-);
+{{ edges }}
 
-boundary
-({% for patch, faces in patches.items() %}
-    {{ patch }}
-    {
-        type patch;
-        faces
-        (
-            {% for f in faces %}({{f.0}} {{f.1}} {{f.2}} {{f.3}})
-            {% endfor %}
-        );
-
-    }
-{% endfor %});
+{{ boundary }}
 
 mergePatchPairs
 ({% for patch in merged_patches %}
@@ -82,10 +58,7 @@ defaultPatch
 };
 {% endif %}
 
-faces
-({% for f in faces %}
-    project ({{f.0.0}} {{f.0.1}} {{f.0.2}} {{f.0.3}}) {{ f.1 }}
-{% endfor %});
+{{ faces }}
 
 
 // ************************************************************************* //

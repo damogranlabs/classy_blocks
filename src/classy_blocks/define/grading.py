@@ -37,12 +37,11 @@ division: an entry in simpleGrading specification in blockMeshDict
 calculations meticulously transcribed from the blockmesh grading calculator:
 https://gitlab.com/herpes-free-engineer-hpe/blockmeshgradingweb/-/blob/master/calcBlockMeshGrading.coffee
 (since block length is always known, there's less wrestling but the calculation principle is similar) """
-import os
 import copy
 import inspect
 import warnings
 
-from typing import NoReturn, Tuple
+from typing import Tuple
 
 from classy_blocks.util import grading_calculator as gc
 
@@ -161,7 +160,7 @@ class Grading:
 
         self.divisions.append([length_ratio, count, total_expansion])
 
-    def invert(self) -> NoReturn:
+    def invert(self) -> None:
         """Inverts gradings and stuff in case neighbuors are defined upside-down"""
         if len(self.divisions) == 0:
             return  # nothing to invert
@@ -188,7 +187,7 @@ class Grading:
 
     @property
     def count(self) -> int:
-        """Return number of cells, summer over all sub-divisions"""
+        """Return number of cells, summed over all sub-divisions"""
         return sum([d[1] for d in self.divisions])
 
     @property
@@ -197,22 +196,22 @@ class Grading:
         It is if there's at least one division added"""
         return len(self.divisions) > 0
 
-    def __repr__(self):
+    @property
+    def grading(self):
         if len(self.divisions) == 0:
-            # no grading specified: default to 1
-            return "Undefined"
+            raise ValueError(f"Grading not defined: {self}")
 
         if len(self.divisions) == 1:
             # its a one-number simpleGrading:
             return str(self.divisions[0][2])
 
+        # multi-grading: make a nice list
+        # TODO: make a nicer list
         length_ratio_sum = 0
-        s = "(" + os.linesep
+        s = "(\n"
 
         for d in self.divisions:
-            s += f"\t({d[0]} {d[1]} {d[2]})"
-            s += os.linesep
-
+            s += f"\t({d[0]} {d[1]} {d[2]})\n"
             length_ratio_sum += d[0]
 
         s += ")"

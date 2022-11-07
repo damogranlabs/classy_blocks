@@ -1,4 +1,4 @@
-from classy_blocks.classes.mesh import Mesh
+from classy_blocks.process.mesh import Mesh
 from classy_blocks.classes.objects import Semicylinder, SharpSemicylinder
 
 import numpy as np

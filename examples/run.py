@@ -44,12 +44,7 @@ from examples.chaining import tank as example
 # objects
 #from examples.objects import t_pipe as example
 
-try:
-    geometry = example.geometry
-except:
-    geometry = None
-
 mesh = example.get_mesh()
 
-mesh.write(output_path=os.path.join('case', 'system', 'blockMeshDict'), geometry=geometry, debug=False)
+mesh.write(output_path=os.path.join('case', 'system', 'blockMeshDict'))
 os.system("case/Allrun.mesh")

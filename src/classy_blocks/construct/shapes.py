@@ -2,10 +2,10 @@ import numpy as np
 from abc import ABC
 from typing import List
 
-from classy_blocks.classes.operations import Loft, Revolve, Extrude
-from classy_blocks.classes.flat.face import Face
-from classy_blocks.classes.flat.circle import Circle
-from classy_blocks.classes.flat.annulus import Annulus
+from classy_blocks.construct.operations import Loft, Revolve, Extrude
+from classy_blocks.construct.flat.face import Face
+from classy_blocks.construct.flat.circle import Circle
+from classy_blocks.construct.flat.annulus import Annulus
 
 from classy_blocks.util import constants as c
 from classy_blocks.util import functions as f
@@ -201,9 +201,8 @@ class Frustum(Shape):
             [axis_point_1, radius_point_1, self.axis], {"vector": self.axis, "radius": radius_2}, mid_params
         )
 
-        n_op = len(self.operations)
-        self.core = self.operations[: n_op // 2]
-        self.shell = self.operations[n_op // 2 :]
+        self.core = self.operations[:4]
+        self.shell = self.operations[4:]
 
     @classmethod
     def chain(cls, source, length, radius_2, radius_mid=None):
@@ -397,8 +396,9 @@ class Hemisphere(Shape):
         geometry_name = f"sphere_{str(uuid.uuid1())[:8]}"
         self.geometry = {
             geometry_name: [
-                "type sphere",
+                "type searchableSphere",
                 f"origin ({self.center_point[0]} {self.center_point[1]} {self.center_point[2]})",
+                f"centre ({self.center_point[0]} {self.center_point[1]} {self.center_point[2]})",
                 f"radius {self.radius}",
             ]
         }

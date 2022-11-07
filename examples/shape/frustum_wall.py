@@ -1,5 +1,5 @@
-from classy_blocks.classes.mesh import Mesh
-from classy_blocks.classes.walls import FrustumWall
+from classy_blocks.process.mesh import Mesh
+from classy_blocks.construct.walls import FrustumWall
 
 def get_mesh():
     axis_point_1 = [0, 0, 0]

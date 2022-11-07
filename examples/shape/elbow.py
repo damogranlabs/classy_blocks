@@ -1,8 +1,8 @@
 import os
 import numpy as np
 
-from classy_blocks.classes.mesh import Mesh
-from classy_blocks.classes.shapes import Elbow
+from classy_blocks.process.mesh import Mesh
+from classy_blocks.construct.shapes import Elbow
 
 def get_mesh():
     mesh = Mesh()
