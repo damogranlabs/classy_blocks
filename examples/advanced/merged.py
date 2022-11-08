@@ -1,5 +1,4 @@
-from classy_blocks.process.mesh import Mesh
-from classy_blocks.construct.shapes import Box, Cylinder
+from classy_blocks import Box, Cylinder, Mesh
 
 def get_mesh():
     mesh = Mesh()

@@ -1,5 +1,4 @@
-from classy_blocks.process.mesh import Mesh
-from classy_blocks.construct.operations import Face, Extrude
+from classy_blocks import Face, Extrude, Mesh
 
 geometry = {
     'terrain': [
@@ -11,10 +10,10 @@ geometry = {
 
 def get_mesh():
     base = Face([
-            [-1, -1, -1],
-            [1, -1,  -1],
-            [1,  1,  -1],
-            [-1, 1,  -1]
+        [-1, -1, -1],
+        [1, -1,  -1],
+        [1,  1,  -1],
+        [-1, 1,  -1]
     ])
 
     extrude = Extrude(base, [0, 0, 2])

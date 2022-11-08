@@ -1,5 +1,4 @@
-from classy_blocks.process.mesh import Mesh
-from classy_blocks.construct.operations import Face, Revolve
+from classy_blocks import Face, Revolve, Mesh
 
 from classy_blocks.util import functions as f
 

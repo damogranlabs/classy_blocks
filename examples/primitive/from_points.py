@@ -1,6 +1,4 @@
-from classy_blocks.define.primitives import Edge
-from classy_blocks.define.block import Block
-from classy_blocks.process.mesh import Mesh
+from classy_blocks import Edge, Block, Mesh
 
 def get_mesh():
     mesh = Mesh()
@@ -34,7 +32,7 @@ def get_mesh():
     block.chop(1, start_size=0.01, c2c_expansion=1.2)
     block.chop(2, start_size=0.1, c2c_expansion=1)
 
-    mesh.add_block(block)
+    mesh.add(block)
 
     # another block!
     block_points = block_points[4:] + [
@@ -50,6 +48,6 @@ def get_mesh():
     block.chop(2, length_ratio=0.5, start_size=0.02, c2c_expansion=1.2, invert=False)
     block.chop(2, length_ratio=0.5, start_size=0.02, c2c_expansion=1.2, invert=True)
 
-    mesh.add_block(block)
+    mesh.add(block)
 
     return mesh

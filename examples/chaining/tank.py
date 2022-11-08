@@ -1,7 +1,4 @@
-import os
-
-from classy_blocks.process.mesh import Mesh
-from classy_blocks.construct.shapes import Cylinder, Hemisphere
+from classy_blocks import Cylinder, Hemisphere, Mesh
 
 def get_mesh():
     # a cylindrical tank with round end caps

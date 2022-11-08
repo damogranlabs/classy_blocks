@@ -1,7 +1,6 @@
 import numpy as np
 
-from classy_blocks.process.mesh import Mesh
-from classy_blocks.construct.shapes import Cylinder, Frustum
+from classy_blocks import Cylinder, Frustum, Mesh
 from classy_blocks.util import functions as f
 
 def calculate_fillet(r_pipe, r_fillet, a_cone):

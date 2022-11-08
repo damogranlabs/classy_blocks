@@ -1,8 +1,6 @@
 import numpy as np
 
-from classy_blocks.process.mesh import Mesh
-from classy_blocks.construct.shapes import Cylinder, Elbow, ExtrudedRing
-from classy_blocks.construct.walls import ElbowWall
+from classy_blocks import Cylinder, Elbow, ExtrudedRing, ElbowWall, Mesh
 from classy_blocks.util import functions as f
 
 def get_mesh():

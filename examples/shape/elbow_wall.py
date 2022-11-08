@@ -1,11 +1,9 @@
 import numpy as np
 
-from classy_blocks.process.mesh import Mesh
-from classy_blocks.construct.walls import ElbowWall
+from classy_blocks import ElbowWall, Mesh
 
 def get_mesh():
     mesh = Mesh()
-
 
     radius_1 = 1
     center_point_1 = [0, 0, 0]

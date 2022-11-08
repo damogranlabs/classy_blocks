@@ -1,5 +1,4 @@
-from classy_blocks.construct.operations import Face, Extrude
-from classy_blocks.process.mesh import Mesh
+from classy_blocks import Face, Extrude, Mesh
 
 def get_mesh():
     base = Face(

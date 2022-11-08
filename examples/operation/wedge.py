@@ -1,5 +1,4 @@
-from classy_blocks.process.mesh import Mesh
-from classy_blocks.construct.operations import Face, Wedge
+from classy_blocks import Face, Wedge, Mesh
 
 def get_mesh():
     mesh = Mesh()

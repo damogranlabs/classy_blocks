@@ -1,9 +1,7 @@
 import os
-
-from classy_blocks.process.mesh import Mesh
-from classy_blocks.construct.operations import Face, Extrude
-
 import numpy as np
+
+from classy_blocks import Face, Extrude, Mesh
 
 def load_airfoil_file(filename, chord=1):
     points_upper = []

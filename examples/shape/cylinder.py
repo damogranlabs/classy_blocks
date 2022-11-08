@@ -1,5 +1,4 @@
-from classy_blocks.process.mesh import Mesh
-from classy_blocks.construct.shapes import Cylinder
+from classy_blocks import Cylinder, Mesh
 
 axis_point_1 = [0, 0, 0]
 axis_point_2 = [5, 5, 0]

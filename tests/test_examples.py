@@ -1,5 +1,15 @@
-from tests.fixtures import ExecutedTestsBase
+import unittest
 
+class ExampleBase(unittest.TestCase):
+    def run_and_check(self, module=None):
+        if module is not None:
+            self.mesh = module.get_mesh()
+
+        self.mesh.write("tests/case/system/blockMeshDict", debug=False)
+        os.system("tests/case/Allrun.mesh")
+
+        with open("tests/case/log.blockMesh") as f:
+            self.assertFalse("ERROR" in f.read())
 
 class PrimitiveTests(ExecutedTestsBase):
     def test_from_points(self):

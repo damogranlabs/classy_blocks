@@ -1,7 +1,4 @@
-import os
-
-from classy_blocks.process.mesh import Mesh
-from classy_blocks.construct.shapes import Hemisphere
+from classy_blocks import Hemisphere, Mesh
 
 def get_mesh():
     center_point = [0, 0, 0]

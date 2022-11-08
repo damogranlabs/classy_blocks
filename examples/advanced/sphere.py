@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 
-from classy_blocks.construct import operations
-from classy_blocks.process.mesh import Mesh
+from classy_blocks import Face, Loft, Mesh
 from classy_blocks.util import constants
 
 # sphere radius
@@ -65,21 +64,21 @@ def get_mesh():
 
                 n = len(oplist)
 
-                bottom_face = operations.Face([
+                bottom_face = Face([
                     [xc[k],   yc[j],   zc[i]],
                     [xc[k+1], yc[j],   zc[i]],
                     [xc[k+1], yc[j+1], zc[i]],
                     [xc[k],   yc[j+1], zc[i]]
                 ])
 
-                top_face = operations.Face([
+                top_face = Face([
                     [xc[k],   yc[j],   zc[i+1]],
                     [xc[k+1], yc[j],   zc[i+1]],
                     [xc[k+1], yc[j+1], zc[i+1]],
                     [xc[k],   yc[j+1], zc[i+1]],
                 ])
 
-                o = operations.Loft(bottom_face, top_face)
+                o = Loft(bottom_face, top_face)
 
                 if n in projected_faces: # blocks around the center
                     o.block.project_face(projected_faces[n], 'outer_sphere', edges=True)
@@ -96,22 +95,21 @@ def get_mesh():
     # add inner blocks
     ci = r / 3**0.5
 
-    for i in projected_faces:
-        block = oplist[i].block
-        side = projected_faces[i]
+    for i, side in projected_faces.items():
         indexes = constants.FACE_MAP[side]
+        block = oplist[i].block
         
         bottom_points = np.array([block.vertices[ip].point for ip in indexes])
-        bottom_face = operations.Face(bottom_points)
+        bottom_face = Face(bottom_points)
 
         if i in (14, 16, 22):
             # starting from block's "other side"
             bottom_face.invert()
 
         top_points = bottom_face.points*(ci/co)
-        top_face = operations.Face(top_points)
+        top_face = Face(top_points)
 
-        o = operations.Loft(bottom_face, top_face)
+        o = Loft(bottom_face, top_face)
         o.block.project_face('top', 'inner_sphere', edges=True)
 
         o.chop(0, start_size=ball_cell_size)

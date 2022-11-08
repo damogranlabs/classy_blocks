@@ -1,7 +1,4 @@
-import os
-
-from classy_blocks.process.mesh import Mesh
-from classy_blocks.construct.shapes import Frustum
+from classy_blocks import Frustum, Mesh
 
 def get_mesh():
     axis_point_1 = [0, 0, 0]
