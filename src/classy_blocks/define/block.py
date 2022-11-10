@@ -31,7 +31,7 @@ class Block:
 
         # block grading;
         # when adding blocks, store chop() parameters;
-        # use them in mesh.prepare_data()
+        # use them in mesh.write()
         self.chops = [[], [], []]
 
         # cellZone to which the block belongs to
@@ -133,7 +133,7 @@ class Block:
         """returns axis index and orientation from a given pair of vertices;
         orientation is True if blocks are aligned or false when inverted.
 
-        This can only be called after Mesh.prepare_data()"""
+        This can only be called after Mesh.write()"""
         riap = [pair[1], pair[0]]
 
         for i in range(3):

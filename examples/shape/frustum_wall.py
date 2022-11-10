@@ -28,6 +28,7 @@ def get_mesh():
 
     frustum.set_bottom_patch('inlet')
     frustum.set_top_patch('outlet')
+    frustum.set_inner_patch('walls')
     frustum.set_outer_patch('walls')
 
     frustum.chop_axial(count=30)

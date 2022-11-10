@@ -1,4 +1,4 @@
-from classy_blocks.process.mesh import Face, Loft, Mesh
+from classy_blocks import Face, Loft, Mesh
 
 def get_mesh():
     # Example geometry using Loft:
@@ -46,5 +46,6 @@ def get_mesh():
 
     mesh = Mesh()
     mesh.add(loft)
+    mesh.set_default_patch('walls', 'wall')
     
     return mesh

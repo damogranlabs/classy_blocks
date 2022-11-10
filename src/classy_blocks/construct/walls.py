@@ -129,6 +129,11 @@ class FrustumWall(Shape):
         self.shell = self.operations
         self.core = []
 
+    def set_inner_patch(self, patch_name):
+        # TODO: inherit from ElbowWall?
+        for s in self.shell:
+            s.block.set_patch(self.inner_patch, patch_name)
+
     @classmethod
     def expand(cls, thickness_1, thickness_2=None, thickness_mid=None):
         # TODO

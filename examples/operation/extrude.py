@@ -21,5 +21,6 @@ def get_mesh():
 
     mesh = Mesh()
     mesh.add(extrude)
+    mesh.set_default_patch('walls', 'wall')
 
     return mesh

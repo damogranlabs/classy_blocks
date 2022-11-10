@@ -48,7 +48,7 @@ class TestMesh(FixturedTestCase):
         self.assertIsNone(mesh.find_edge(v1, v3))
 
     def test_prepare_data(self):
-        """a functional test on mesh.prepare_data()"""
+        """a functional test on mesh.write()"""
         self.mesh.prepare_data()
 
         # 8 out of 24 vertices are shared between blocks and must not be duplicated

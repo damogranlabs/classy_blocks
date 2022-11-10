@@ -17,5 +17,6 @@ def get_mesh():
 
     mesh = Mesh()
     mesh.add(revolve)
+    mesh.set_default_patch('walls', 'wall')
 
     return mesh

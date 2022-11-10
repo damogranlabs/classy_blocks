@@ -277,7 +277,7 @@ template.
 ## Data Preparation
 
 After all blocks have been added, an instance of `Mesh` class only contains a list of blocks. Each block self-contains
-its own data. Since blocks share vertices and edges and blockMesh needs separate lists of both, `Mesh.prepare_data()`
+its own data. Since blocks share vertices and edges and blockMesh needs separate lists of both, `Mesh.write()`
 will translate all individual blocks' data to format blockMesh will understand:
 
 - collect new vertices and re-use existing ones

@@ -45,7 +45,7 @@ class Vertex:
 
     def __init__(self, point):
         self.point = np.asarray(point)
-        self.mesh_index = None  # will be changed in Mesh.prepare_data()
+        self.mesh_index = None  # will be changed in Mesh.write()
 
     def rotate(self, angle, axis=[1, 0, 0], origin=[0, 0, 0]):
         """returns a new, rotated Vertex"""
@@ -58,7 +58,7 @@ class Edge:
     a single point edge is treated as 'arc', more points are
     treated as 'spline'.
 
-    passed indexes refer to position in Block.edges[] list; Mesh.prepare_data()
+    passed indexes refer to position in Block.edges[] list; Mesh.write()
     will assign actual Vertex objects."""
 
     def __init__(self, index_1: int, index_2: int, points: Union[List[float], List[List[float]]]):
@@ -66,7 +66,7 @@ class Edge:
         self.block_index_1 = index_1
         self.block_index_2 = index_2
 
-        # these will refer to actual Vertex objects after Mesh.prepare_data()
+        # these will refer to actual Vertex objects after Mesh.write()
         self.vertex_1 = None
         self.vertex_2 = None
 

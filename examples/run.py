@@ -4,7 +4,7 @@ import os
 # uncomment the example you wish to run
 
 # primitive
-from examples.primitive import from_points as example
+# from examples.primitive import from_points as example
 
 # operations
 # from examples.operation import extrude as example
@@ -25,7 +25,7 @@ from examples.primitive import from_points as example
 # from examples.shape import frustum_wall as example
 
 # chaining
-# from examples.chaining import tank as example
+from examples.chaining import tank as example
 # from examples.chaining import test_tube as example
 # from examples.chaining import venturi_tube as example
 # from examples.chaining import orifice_plate as example

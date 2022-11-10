@@ -25,6 +25,7 @@ def get_mesh():
 
     elbow.set_bottom_patch('inlet')
     elbow.set_outer_patch('walls')
+    elbow.set_top_patch('outlet')
 
     # counts and gradings
     elbow.chop_tangential(start_size=core_size)

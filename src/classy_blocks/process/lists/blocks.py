@@ -10,11 +10,11 @@ class BlockList:
         self.blocks:List[Block] = []
 
         # a list, parallel to self.blocks, containing each block's neighbours (also a list of indexes)
-        # will be assigned by Mesh().prepare_data()
+        # will be assigned by Mesh.write()
         self.neighbours:List[Set[int]] = []
 
         # grading for each block, translated from 'chops'
-        # will be assigned by mesh.prepare_data()
+        # will be assigned by Mesh.write()
         self.gradings:List[List[Grading]] = []
 
     def add(self, block:Block) -> None:

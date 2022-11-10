@@ -179,4 +179,6 @@ def get_mesh():
     mesh.add(extrude_bottom_2)
     mesh.add(extrude_bottom_3)
 
+    mesh.set_default_patch('walls', 'wall')
+
     return mesh
