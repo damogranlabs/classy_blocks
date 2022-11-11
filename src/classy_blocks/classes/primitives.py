@@ -4,7 +4,7 @@ from typing import List, Callable, Union, Tuple
 import numpy as np
 
 from classy_blocks.util import functions as f
-from classy_blocks.util import constants
+from classy_blocks.util import constants as c
 
 
 class WrongEdgeTypeException(Exception):
@@ -53,7 +53,7 @@ class Vertex:
         return Vertex(point)
 
     def __repr__(self):
-        s = constants.vector_format(self.point)
+        s = c.vector_format(self.point)
 
         if self.mesh_index is not None:
             s += " // {}".format(self.mesh_index)
@@ -123,10 +123,10 @@ class Edge:
             return f"({self.points})"
 
         if self.type == "arc":
-            return constants.vector_format(self.points)
+            return c.vector_format(self.points)
 
         if self.type == "spline":
-            return "(" + " ".join([constants.vector_format(p) for p in self.points]) + ")"
+            return "(" + " ".join([c.vector_format(p) for p in self.points]) + ")"
 
         raise WrongEdgeTypeException(self.type)
 
@@ -134,7 +134,7 @@ class Edge:
     def is_valid(self):
         # wedge geometries produce coincident
         # edges and vertices; drop those
-        if f.norm(self.vertex_1.point - self.vertex_2.point) < constants.tol:
+        if f.norm(self.vertex_1.point - self.vertex_2.point) < c.tol:
             return False
 
         # 'all' spline and projected edges are 'valid'
@@ -159,7 +159,7 @@ class Edge:
         k = f.norm(AC) / f.norm(AB)
         d = f.norm((OA + AC) - (OA + k * AB))
 
-        return d > constants.tol
+        return d > c.tol
 
     def get_length(self) -> float:
         """Returns an approximate length of this Edge"""
