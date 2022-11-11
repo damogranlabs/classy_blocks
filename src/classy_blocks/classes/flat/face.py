@@ -1,5 +1,5 @@
-from typing import List
 import copy
+from typing import List, Optional, Tuple
 
 import numpy as np
 
@@ -9,7 +9,9 @@ from classy_blocks.util import functions as f
 
 
 class Face:
-    def __init__(self, points: List[List[float]], edges: List[Edge] = None, check_coplanar: bool = False):
+    def __init__(
+        self, points: List[List[float]], edges: Optional[List[Edge]] = None, check_coplanar: bool = False
+    ) -> None:
         """a Face is a collection of 4 points and optionally 4 edge points;"""
         if len(points) != 4:
             raise Exception("Provide exactly 4 points")
@@ -55,8 +57,8 @@ class Face:
 
         return r
 
-    def _transform(self, function):
-        """copis this object and transforms all block-defining points
+    def _transform(self, function) -> "Face":
+        """copies this object and transforms all block-defining points
         with given function. used for translation, rotating, etc."""
         t = copy.copy(self)
         t.points = transform_points(self.points, function)
@@ -64,12 +66,12 @@ class Face:
 
         return t
 
-    def translate(self, vector: List):
+    def translate(self, vector: List) -> "Face":
         """move points by 'vector'"""
         vector = np.asarray(vector)
         return self._transform(lambda point: point + vector)
 
-    def rotate(self, axis: List, angle: float, origin: List = [0, 0, 0]):
+    def rotate(self, axis: List, angle: float, origin: List = [0, 0, 0]) -> "Face":
         """copies the object and rotates all block-points by 'angle'
         around 'axis' going through 'origin'"""
         axis = np.asarray(axis)
@@ -81,7 +83,7 @@ class Face:
 
         return self._transform(r)
 
-    def scale(self, ratio: float, origin: List = None):
+    def scale(self, ratio: float, origin: Optional[List] = None) -> "Face":
         """Scale with respect to given origin"""
         if origin is None:
             origin = self.center
@@ -90,12 +92,12 @@ class Face:
 
         return self._transform(r)
 
-    def invert(self):
+    def invert(self) -> None:
         """reverses the order of points"""
         self.points = np.flip(self.points, axis=0)
 
     @staticmethod
-    def get_normal(points):
+    def get_normal(points) -> Tuple[float, float]:
         # calculate face normal; OpenFOAM divides a quadrangle into 4 triangles,
         # each joining at face center; a normal is an average of normals of those
         # triangles

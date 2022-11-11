@@ -1,5 +1,5 @@
 """ Vertex and Edge objects and the machinery belonging to them """
-from typing import List, Callable, Union, Tuple
+from typing import List, Callable, Optional, Union, Tuple
 
 import numpy as np
 
@@ -10,7 +10,7 @@ from classy_blocks.util import constants as c
 class WrongEdgeTypeException(Exception):
     """Raised when using an unsupported edge type"""
 
-    def __init__(self, edge_type, *args, **kwargs):
+    def __init__(self, edge_type, *args, **kwargs) -> None:
         raise Exception(f"Wrong edge type: {edge_type}", *args, **kwargs)
 
 
@@ -19,10 +19,10 @@ def transform_points(points: List[List[float]], function: Callable) -> List[List
     return [function(p) for p in points]
 
 
-def transform_edges(edges: List["Edge"], function: Callable):
+def transform_edges(edges: List["Edge"], function: Callable) -> Optional[List["Edge"]]:
     """Same as transform_points but deals with multiple points in an edge, if applicable"""
     if edges is not None:
-        new_edges = [None] * 4
+        new_edges: List["Edge"] = []
         for i, edge_points in enumerate(edges):
             edge_type, edge_points = Edge.get_type(edge_points)
 
@@ -30,9 +30,9 @@ def transform_edges(edges: List["Edge"], function: Callable):
             # a single point defines an arc;
             # 'project' and 'line' don't require any
             if edge_type == "spline":
-                new_edges[i] = [function(e) for e in edge_points]
+                new_edges.append([function(e) for e in edge_points])
             elif edge_type == "arc":
-                new_edges[i] = function(edge_points)
+                new_edges.append(function(edge_points))
 
         return new_edges
 

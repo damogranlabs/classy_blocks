@@ -89,7 +89,7 @@ def calculate(length: float, parameters: dict) -> Tuple[float, float]:
 class Grading:
     """Grading specification for a single block direction"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         # must be set before any calculation is performed
         self.length = None
 
@@ -97,7 +97,7 @@ class Grading:
         # https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
         self.divisions = []  # a list of lists [length ratio, count ratio, total expansion]
 
-    def set_block_size(self, size):
+    def set_block_size(self, size) -> None:
         self.length = size
 
     def add_division(
@@ -109,7 +109,7 @@ class Grading:
         end_size=None,
         total_expansion=None,
         invert=False,
-    ):
+    ) -> None:
         """Add a grading division to block specification.
         Use length_ratio for multigrading (see documentation).
         Available grading parameters are:
@@ -197,7 +197,7 @@ class Grading:
         It is if there's at least one division added"""
         return len(self.divisions) > 0
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if len(self.divisions) == 0:
             # no grading specified: default to 1
             return "Undefined"
