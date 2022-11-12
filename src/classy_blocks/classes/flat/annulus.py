@@ -8,7 +8,7 @@ class Annulus:
     # In real-life, Annulus and Ring are the same 2D objects.
     # Here, however, Annulus is a 2D collection of faces whereas
     # Ring is an annulus that has been extruded to 3D.
-    def __init__(self, center_point, outer_radius_point, normal, inner_radius, n_segments=None) -> None:
+    def __init__(self, center_point, outer_radius_point, normal, inner_radius, n_segments=None):
         self.center_point = np.asarray(center_point)
         self.normal = f.unit_vector(np.asarray(normal))
         self.outer_radius_point = np.asarray(outer_radius_point)

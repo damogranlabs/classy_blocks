@@ -1,5 +1,5 @@
 """Contains all data to place a block into mesh."""
-from typing import Dict, List, Literal, Optional, Set, Union, Tuple, cast
+from typing import List, Literal, NoReturn, Union, Tuple
 
 import numpy as np
 
@@ -16,7 +16,7 @@ class Block:
     # a more intuitive and quicker way to set patches,
     # according to this sketch: https://www.openfoam.com/documentation/user-guide/blockMesh.php
     # the same for all blocks
-    face_map: Dict[str, Tuple[int, int, int, int]] = {
+    face_map = {
         "bottom": (0, 1, 2, 3),
         "top": (4, 5, 6, 7),
         "left": (4, 0, 3, 7),
@@ -32,7 +32,7 @@ class Block:
         ((0, 4), (1, 5), (2, 6), (3, 7)),  # z
     )
 
-    def __init__(self, vertices: List[Vertex], edges: List[Edge]) -> None:
+    def __init__(self, vertices: List[Vertex], edges: List[Edge]):
         # a list of 8 Vertex and Edge objects for each corner/edge of the block
         self.vertices: List[Vertex] = vertices
         self.edges: List[Edge] = edges
@@ -57,14 +57,14 @@ class Block:
         #     'volute_rotating': ['left', 'top' ],
         #     'volute_walls': ['bottom'],
         # }
-        self.patches: Dict[str, List[str]] = {}
+        self.patches = {}
 
         # set in Mesh.prepare_data()
-        self.mesh_index: Optional[int] = None
+        self.mesh_index = None
 
         # a list of blocks that share an edge with this block;
         # will be assigned by Mesh().prepare_data()
-        self.neighbours: Set["Block"] = set()
+        self.neighbours: set["Block"] = set()
 
     ###
     ### Information
@@ -96,7 +96,7 @@ class Block:
         sides = self.patches[patch]
         return [self.get_face(s, internal=internal) for s in sides]
 
-    def find_edge(self, index_1: int, index_2: int) -> Optional[Edge]:
+    def find_edge(self, index_1: int, index_2: int) -> Edge:
         """Returns edges between given vertex indexes;
         the indexes in parameters refer to internal block numbering"""
         for e in self.edges:
@@ -109,10 +109,10 @@ class Block:
         """Returns block dimensions in given axis"""
         # if an edge is defined, use the edge.get_length(),
         # otherwise simply distance between two points
-        def vertex_distance(index_1: int, index_2: int) -> float:
+        def vertex_distance(index_1, index_2):
             return f.norm(self.vertices[index_1].point - self.vertices[index_2].point)
 
-        def block_size(index_1: int, index_2: int) -> float:
+        def block_size(index_1, index_2):
             edge = self.find_edge(index_1, index_2)
             if edge:
                 return edge.get_length()
@@ -153,7 +153,7 @@ class Block:
 
         return pairs
 
-    def get_axis_from_pair(self, pair: List[int]) -> Tuple[Optional[int], Optional[bool]]:
+    def get_axis_from_pair(self, pair: List[int]) -> Tuple[int, bool]:
         """returns axis index and orientation from a given pair of vertices;
         orientation is True if blocks are aligned or false when inverted.
 
@@ -181,13 +181,13 @@ class Block:
 
         if isinstance(sides, str):
             sides = [sides]
-        sides = cast(List, sides)
+
         if patch_name not in self.patches:
             self.patches[patch_name] = []
 
         self.patches[patch_name] += sides
 
-    def chop(self, axis: int, **kwargs) -> None:
+    def chop(self, axis: int, **kwargs: float) -> None:
         """Set block's cell count/size and grading for a given direction/axis.
         Exactly two of the following keyword arguments must be provided:
 
@@ -263,19 +263,21 @@ class Block:
     ###
     ### Output/formatting
     ###
-    def format_face(self, side: str) -> str:
+    def format_face(self, side: int) -> str:
         """Returns a string to be inserted into blockMesh"""
         indexes = self.face_map[side]
         vertices = np.take(self.vertices, indexes)
 
-        return f"({vertices[0].mesh_index} {vertices[1].mesh_index} {vertices[2].mesh_index} {vertices[3].mesh_index})"
+        return "({} {} {} {})".format(
+            vertices[0].mesh_index, vertices[1].mesh_index, vertices[2].mesh_index, vertices[3].mesh_index
+        )
 
     @property
     def n_cells(self) -> List[int]:
         """Returns number of cells for each axis"""
         return [g.count for g in self.grading]
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         """outputs block's definition for blockMeshDict file"""
         # hex definition
         output = "hex "

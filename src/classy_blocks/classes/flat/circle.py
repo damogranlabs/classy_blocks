@@ -103,7 +103,7 @@ class Circle:
 
 
 class Semicircle(Circle):
-    def __init__(self, center_point, radius_point, normal, diagonal_ratio=None, side_ratio=None) -> None:
+    def __init__(self, center_point, radius_point, normal, diagonal_ratio=None, side_ratio=None):
         super().__init__(center_point, radius_point, normal, diagonal_ratio, side_ratio)
 
         # remove half of the faces

@@ -4,7 +4,7 @@ Analogous to a sketch in 3D CAD software,
 a Face is a collection of 4 vertices and 4 edges.
 An operation is a 3D shape obtained by swiping a Face
 into 3rd dimension depending on the Operation. """
-from typing import List, Optional, Union, TypeVar
+from typing import List, Union, TypeVar
 
 import numpy as np
 
@@ -20,7 +20,7 @@ Op = TypeVar("Op", bound="Operation")
 class Operation:
     """Base of all other operations"""
 
-    def __init__(self, bottom_face: Face, top_face: Face, side_edges: Optional[List[Edge]] = None) -> None:
+    def __init__(self, bottom_face: Face, top_face: Face, side_edges: List[Edge] = None):
         self.bottom_face = bottom_face
         self.top_face = top_face
 
@@ -73,7 +73,7 @@ class Operation:
 
         return Operation(bottom_face, top_face, side_edges)
 
-    def rotate(self: Op, axis: List[int], angle: float, origin: Optional[List[int]] = None) -> Op:
+    def rotate(self: Op, axis: List, angle: float, origin: List = None) -> Op:
         """Copies this Operation and rotates it around an arbitrary axis and origin.
         The original Operation stays in place."""
         if origin is None:
@@ -105,7 +105,7 @@ class Loft(Operation):
 class Extrude(Loft):
     """Takes a Face and extrudes it in given extrude_direction"""
 
-    def __init__(self, base: Face, extrude_vector: list) -> None:
+    def __init__(self, base: Face, extrude_vector: list):
         self.base = base
         self.extrude_vector = extrude_vector
 
@@ -121,7 +121,7 @@ class Revolve(Loft):
     Angle is given in radians,
     revolve is in positive sense (counter-clockwise)"""
 
-    def __init__(self, base: Face, angle: list, axis: list, origin: list) -> None:
+    def __init__(self, base: Face, angle: list, axis: list, origin: list):
         self.base = base
         self.angle = angle
         self.axis = axis
@@ -162,7 +162,7 @@ class Wedge(Revolve):
                         inner
     __  _____  __  _____  __  _____  __  __ axis of symmetry (x)"""
 
-    def __init__(self, face: Face, angle=f.deg2rad(2)) -> None:
+    def __init__(self, face: Face, angle=f.deg2rad(2)):
         # default axis
         axis = [1, 0, 0]
         # default origin
@@ -181,7 +181,7 @@ class Wedge(Revolve):
         # there's also only 1 cell in z-direction
         self.chop(2, count=1)
 
-    def set_patch(self, *args, **kwargs) -> None:
+    def set_patch(self, *args, **kwargs):
         raise NotImplementedError("Use set_[outer|inner|left|right]_patch methods for wedges")
 
     def set_outer_patch(self, patch_name: str) -> None:
