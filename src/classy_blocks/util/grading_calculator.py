@@ -1,13 +1,13 @@
 import numpy as np
 import scipy.optimize
 
-from classy_blocks.util import constants as c
+from classy_blocks.util import constants
 
 # here's a list of available calculation functions
 # transcribed from the blockmesh grading calculator:
 # https://gitlab.com/herpes-free-engineer-hpe/blockmeshgradingweb/-/blob/master/calcBlockMeshGrading.coffee
 # (not all are needed in for classy_blocks because length is always a known parameter)
-r_max = 1 / c.tol
+r_max = 1 / constants.tol
 
 
 # these functions are introspected and used for calculation according to their
@@ -20,7 +20,7 @@ def get_start_size__count__c2c_expansion(length, count, c2c_expansion):
     assert count >= 1
 
     h = c2c_expansion - 1
-    if abs(h) > c.tol:
+    if abs(h) > constants.tol:
         return length * (1 - c2c_expansion) / (1 - c2c_expansion**count)
     else:
         return length / count
@@ -45,7 +45,7 @@ def get_count__start_size__c2c_expansion(length, start_size, c2c_expansion):
     assert length > 0
     assert start_size > 0
 
-    if abs(c2c_expansion - 1) > c.tol:
+    if abs(c2c_expansion - 1) > constants.tol:
         count = np.log(1 - length / start_size * (1 - c2c_expansion)) / np.log(c2c_expansion)
     else:
         count = length / start_size
@@ -56,7 +56,7 @@ def get_count__start_size__c2c_expansion(length, start_size, c2c_expansion):
 def get_count__end_size__c2c_expansion(length, end_size, c2c_expansion):
     assert length > 0
 
-    if abs(c2c_expansion - 1) > c.tol:
+    if abs(c2c_expansion - 1) > constants.tol:
         count = np.log(1 / (1 + length / end_size * (1 - c2c_expansion) / c2c_expansion)) / np.log(c2c_expansion)
     else:
         count = length / end_size
@@ -66,7 +66,7 @@ def get_count__end_size__c2c_expansion(length, end_size, c2c_expansion):
 
 def get_count__total_expansion__c2c_expansion(length, total_expansion, c2c_expansion):
     assert length > 0
-    assert abs(c2c_expansion - 1) > c.tol
+    assert abs(c2c_expansion - 1) > constants.tol
     assert total_expansion > 0
 
     return int(np.log(total_expansion) / np.log(c2c_expansion)) + 1
@@ -82,7 +82,7 @@ def get_count__total_expansion__start_size(length, total_expansion, start_size):
     else:
         d_min = start_size * total_expansion
 
-    if abs(total_expansion - 1) < c.tol:
+    if abs(total_expansion - 1) < constants.tol:
         return int(length / d_min)
 
     fc = lambda n: (1 - total_expansion ** (n / (n - 1))) / (1 - total_expansion ** (1 / (n - 1))) - length / start_size
@@ -99,14 +99,14 @@ def get_c2c_expansion__count__start_size(length, count, start_size):
     if count == 1:
         return 1
 
-    if abs(count * start_size - length) / length < c.tol:
+    if abs(count * start_size - length) / length < constants.tol:
         return 1
 
     if count * start_size < length:
         c_max = r_max ** (1 / (count - 1))
-        c_min = (1 + c.tol) ** (1 / (count - 1))
+        c_min = (1 + constants.tol) ** (1 / (count - 1))
     else:
-        c_max = (1 - c.tol) ** (1 / (count - 1))
+        c_max = (1 - constants.tol) ** (1 / (count - 1))
         c_min = (1 / r_max) ** (1 / (count - 1))
 
     fexp = lambda c: (1 - c**count) / (1 - c) - length / start_size
@@ -123,14 +123,14 @@ def get_c2c_expansion__count__end_size(length, count, end_size):
     assert count >= 1
     assert end_size > 0
 
-    if abs(count * end_size - length) / length < c.tol:
+    if abs(count * end_size - length) / length < constants.tol:
         return 1
     else:
         if count * end_size > length:
             c_max = r_max ** (1 / (count - 1))
-            c_min = (1 + c.tol) ** (1 / (count - 1))
+            c_min = (1 + constants.tol) ** (1 / (count - 1))
         else:
-            c_max = (1 - c.tol) ** (1 / (count - 1))
+            c_max = (1 - constants.tol) ** (1 / (count - 1))
             c_min = (1 / r_max) ** (1 / (count - 1))
 
         fexp = lambda c: (1 / c ** (count - 1)) * (1 - c**count) / (1 - c) - length / end_size

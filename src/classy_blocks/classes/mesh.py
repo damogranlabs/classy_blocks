@@ -1,7 +1,6 @@
 from classy_blocks.classes.primitives import Vertex
-from classy_blocks.util import tools
-from classy_blocks.util import constants as c
-from classy_blocks.util import functions as f
+from classy_blocks.util import constants, tools
+from classy_blocks.util import functions as g
 
 
 class Mesh:
@@ -26,7 +25,7 @@ class Mesh:
         the existing vertex"""
 
         for mesh_vertex in self.vertices:
-            if f.norm(mesh_vertex.point - new_vertex.point) < c.tol:
+            if g.norm(mesh_vertex.point - new_vertex.point) < constants.tol:
                 return mesh_vertex
 
         return None

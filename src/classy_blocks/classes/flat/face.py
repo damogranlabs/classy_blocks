@@ -4,7 +4,7 @@ import copy
 import numpy as np
 
 from classy_blocks.classes.primitives import Edge, transform_edges, transform_points
-from classy_blocks.util import constants as c
+from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
 
@@ -24,7 +24,7 @@ class Face:
 
         if check_coplanar:
             x = self.points
-            if abs(np.dot((x[1] - x[0]), np.cross(x[3] - x[0], x[2] - x[0]))) > c.tol:
+            if abs(np.dot((x[1] - x[0]), np.cross(x[3] - x[0], x[2] - x[0]))) > constants.tol:
                 raise Exception("Points are not coplanar!")
 
             # TODO: coplanar edges?

@@ -9,8 +9,7 @@ from typing import List, Union, NoReturn, TypeVar
 import numpy as np
 
 from classy_blocks.classes.block import Block
-from classy_blocks.classes.primitives import Edge
-from classy_blocks.classes.primitives import transform_edges
+from classy_blocks.classes.primitives import Edge, transform_edges
 from classy_blocks.classes.flat.face import Face
 from classy_blocks.util import functions as f
 

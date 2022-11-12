@@ -3,8 +3,7 @@ from typing import List
 import numpy as np
 
 from classy_blocks.classes.flat.annulus import Annulus
-from classy_blocks.classes.shapes import Elbow
-from classy_blocks.classes.shapes import Shape
+from classy_blocks.classes.shapes import Elbow, Shape
 from classy_blocks.util import functions as f
 
 
