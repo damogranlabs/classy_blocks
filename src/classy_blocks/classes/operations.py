@@ -4,7 +4,7 @@ Analogous to a sketch in 3D CAD software,
 a Face is a collection of 4 vertices and 4 edges.
 An operation is a 3D shape obtained by swiping a Face
 into 3rd dimension depending on the Operation. """
-from typing import List, Union, TypeVar
+from typing import List, Union, NoReturn, TypeVar
 
 import numpy as np
 
@@ -43,7 +43,7 @@ class Operation:
         # create a block and edges
         self.block = Block.create_from_points(np.concatenate((bottom_face.points, top_face.points)), self.edges)
 
-    def chop(self, axis: int, **kwargs) -> None:
+    def chop(self, axis: int, **kwargs) -> NoReturn:
         """Chop the operation (count/grading) in given axis:
         0: along first edge of a face
         1: along second edge of a face
@@ -51,7 +51,7 @@ class Operation:
         """
         self.block.chop(axis, **kwargs)
 
-    def set_patch(self, sides: Union[str, List[str]], patch_name: str) -> None:
+    def set_patch(self, sides: Union[str, List[str]], patch_name: str) -> NoReturn:
         """bottom: bottom face
         top: top face
 
@@ -89,7 +89,7 @@ class Operation:
 
         return Operation(bottom_face, top_face, side_edges)
 
-    def set_cell_zone(self, cell_zone: str) -> None:
+    def set_cell_zone(self, cell_zone: str) -> NoReturn:
         """Assign a cellZone to this block."""
         self.block.cell_zone = cell_zone
 
@@ -184,20 +184,20 @@ class Wedge(Revolve):
     def set_patch(self, *args, **kwargs):
         raise NotImplementedError("Use set_[outer|inner|left|right]_patch methods for wedges")
 
-    def set_outer_patch(self, patch_name: str) -> None:
+    def set_outer_patch(self, patch_name: str) -> NoReturn:
         """Sets the patch away from the wall (see sketch in class definition)"""
         super().set_patch("back", patch_name)
 
-    def set_inner_patch(self, patch_name: str) -> None:
+    def set_inner_patch(self, patch_name: str) -> NoReturn:
         """Sets the patch closest to the wall (see sketch in class definition)"""
         super().set_patch("front", patch_name)
 
-    def set_left_patch(self, patch_name: str) -> None:
+    def set_left_patch(self, patch_name: str) -> NoReturn:
         """Sets the patch, encountered first when rotating in a positive sense
         (see sketch in class definition)"""
         super().set_patch("left", patch_name)
 
-    def set_right_patch(self, patch_name: str) -> None:
+    def set_right_patch(self, patch_name: str) -> NoReturn:
         """Sets the patch, encountered last when rotating in a positive sense
         (see sketch in class definition)"""
         super().set_patch("right", patch_name)

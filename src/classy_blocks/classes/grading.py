@@ -42,7 +42,7 @@ import copy
 import inspect
 import warnings
 
-from typing import Tuple
+from typing import NoReturn, Tuple
 
 from classy_blocks.util import grading_calculator as gc
 
@@ -161,7 +161,7 @@ class Grading:
 
         self.divisions.append([length_ratio, count, total_expansion])
 
-    def invert(self) -> None:
+    def invert(self) -> NoReturn:
         """Inverts gradings and stuff in case neighbuors are defined upside-down"""
         if len(self.divisions) == 0:
             return  # nothing to invert

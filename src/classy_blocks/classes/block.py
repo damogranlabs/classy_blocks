@@ -174,7 +174,7 @@ class Block:
     ###
     ### Manipulation
     ###
-    def set_patch(self, sides: Union[str, List[str]], patch_name: str) -> None:
+    def set_patch(self, sides: Union[str, List[str]], patch_name: str) -> NoReturn:
         """assign one or more block faces (self.face_map)
         to a chosen patch name"""
         # see patches: an example in __init__()
@@ -187,7 +187,7 @@ class Block:
 
         self.patches[patch_name] += sides
 
-    def chop(self, axis: int, **kwargs: float) -> None:
+    def chop(self, axis: int, **kwargs: float) -> NoReturn:
         """Set block's cell count/size and grading for a given direction/axis.
         Exactly two of the following keyword arguments must be provided:
 
@@ -220,7 +220,7 @@ class Block:
         # and call the actual Grading.chop() function later with these params
         self.chops[axis].append(kwargs)
 
-    def grade(self) -> None:
+    def grade(self) -> NoReturn:
         """Sets block size and grading; not to be used manually!"""
         for i in range(3):
             grading = self.grading[i]
@@ -237,7 +237,7 @@ class Block:
 
         self.chops = [[], [], []]
 
-    def project_edge(self, index_1: int, index_2: int, geometry: str) -> None:
+    def project_edge(self, index_1: int, index_2: int, geometry: str) -> NoReturn:
         """Project a block edge between index_1 and index_2 to geometry (specified in Mesh)
         Indexes refer to refer to internal block numbering (0...7)."""
         # index_N are vertices relative to block (0...7)
@@ -248,7 +248,7 @@ class Block:
 
     def project_face(
         self, side: Literal["top", "bottom", "left", "right", "front", "back"], geometry: str, edges: bool = False
-    ) -> None:
+    ) -> NoReturn:
         """Assign one or more block faces (self.face_map)
         to be projected to a geometry (defined in Mesh)"""
         assert side in self.face_map
