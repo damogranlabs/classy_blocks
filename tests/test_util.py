@@ -6,13 +6,6 @@ from classy_blocks.util import curves as c
 
 from tests import fixtures
 
-
-class TestFixtures(fixtures.FixturedTestCase, fixtures.ExecutedTestsBase):
-    def test_create_mesh(self):
-        self.mesh.prepare_data()
-        self.run_and_check()
-
-
 class TestUtils(unittest.TestCase):
     def assert_np_equal(self, a, b, msg=None):
         return np.testing.assert_array_equal(a, b, err_msg=msg)

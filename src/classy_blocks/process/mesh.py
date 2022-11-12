@@ -71,10 +71,9 @@ class Mesh:
         See examples/advanced/project for an example."""
         self.geometry.add(geometry)
 
-    def write(self, output_path:str, debug_path:Optional[str]=None) -> None:
-        """Writes a blockMeshDict to specified location. If debug_path is specified,
-        a VTK file is created first where each block is a single cell, to see simplified
-        blocking in case blockMesh fails with an unfriendly error message."""
+    def prepare(self, debug_path=None):
+        """Collect all objects and prepare them to write to blockMeshDict;
+        but don't write them out yet"""
         self.vertices.collect(self.blocks, self.patches['merged'])
 
         if debug_path is not None:
@@ -84,8 +83,14 @@ class Mesh:
         self.blocks.assemble()
 
         self.boundary.collect(self.blocks)
+        self.faces.collect(self.blocks)
 
-        # TODO: move all this writing to a better place
+    def write(self, output_path:str, debug_path:Optional[str]=None) -> None:
+        """Writes a blockMeshDict to specified location. If debug_path is specified,
+        a VTK file is created first where each block is a single cell, to see simplified
+        blocking in case blockMesh fails with an unfriendly error message."""
+        self.prepare(debug_path)
+
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(constants.MESH_HEADER)
 
@@ -100,7 +105,7 @@ class Mesh:
             f.write(self.blocks.output())
             f.write(self.edges.output())
             f.write(self.boundary.output())
-            f.write(self.faces.output(self.blocks))
+            f.write(self.faces.output())
 
             # patches: output manually
             if len(self.patches['merged']) > 0:
@@ -114,8 +119,7 @@ class Mesh:
                 f.write("defaultPatch\n{\n")
                 f.write(f"\tname {self.patches['default']['name']};\n")
                 f.write(f"\ttype {self.patches['default']['type']};")
-                f.write("\n}\n\n");
-
+                f.write("\n}\n\n")
 
     def to_vtk(self, output_path):
         """Creates a VTK file with each mesh.block represented as a hexahedron,

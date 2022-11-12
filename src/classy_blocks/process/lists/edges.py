@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from classy_blocks.define.block import Block
-from classy_blocks.define.primitives import Vertex, Edge, WrongEdgeTypeException
+from classy_blocks.define.primitives import Edge, WrongEdgeTypeException
 
 from classy_blocks.util import constants
 
@@ -55,7 +55,8 @@ class EdgeList:
         for edge in self.edges:
             if edge.type == "line":
                 continue
-            elif edge.type == "project":
+
+            if edge.type == "project":
                 point_list =  f"({edge.points})"
             elif edge.type == "arc":
                 point_list = constants.vector_format(edge.points)
@@ -69,3 +70,6 @@ class EdgeList:
         s += ");\n\n"
 
         return s
+
+    def __getitem__(self, index):
+        return self.edges[index]

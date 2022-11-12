@@ -98,8 +98,6 @@ class Edge:
             for p in points:
                 assert len(p) == 3
 
-            t = "spline"
-
             edge_type = "spline"
 
         return edge_type, points

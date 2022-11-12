@@ -58,7 +58,8 @@ class Block:
         if local:
             return c.FACE_MAP[orient]
 
-        return [v.mesh_index for v in self.vertices]
+        side_vertices = [self.vertices[i] for i in c.FACE_MAP[orient]]
+        return [v.mesh_index for v in side_vertices]
 
     def get_patch_sides(self, patch: str) -> List[str]:
         """Returns sides in this block that belong to a given patch"""

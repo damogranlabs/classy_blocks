@@ -234,11 +234,11 @@ class TestGrading(unittest.TestCase):
 
     def test_output_empty(self):
         with self.assertRaises(ValueError):
-            str(self.g)
+            str(self.g.grading)
 
     def test_output_single(self):
         self.add_division(1, 1, 3)
-        self.assertEqual(str(self.g), "3")
+        self.assertEqual(str(self.g.grading), "3")
 
     def test_output_multi(self):
         self.add_division(0.25, 0.4, 2)
@@ -257,7 +257,7 @@ class TestGrading(unittest.TestCase):
             + ")"
         )
 
-        self.assertEqual(str(self.g), expected_output)
+        self.assertEqual(str(self.g.grading), expected_output)
 
     def test_copy(self):
         """check that copy doesn't spoil the original"""

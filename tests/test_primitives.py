@@ -27,66 +27,7 @@ class TestPrimitives(unittest.TestCase):
 
         return e
 
-    def test_vertex_output(self):
-        """check Vertex() output"""
-        v = Vertex([1.2, 2.05, 2 / 3])
-
-        expected_output = "(1.20000000 2.05000000 0.66666667)"
-
-        # a vertex without mesh_index is just a point
-        self.assertEqual(str(v), expected_output)
-
-        # add a mesh index and expect it along expected_output
-        v.mesh_index = 2
-        self.assertEqual(str(v), expected_output + " // 2")
-
-    def test_straight_edge_format(self):
-        e = self.make_edge(None, check_valid=False)
-        self.assertIsNone(e.point_list)
-        self.assertEqual(str(e), "line 0 1 None")
-
-    def test_project_edge_point_list(self):
-        e = self.make_edge("projected_face", check_valid=False)
-        self.assertEqual(e.point_list, "(projected_face)")
-        self.assertEqual(str(e), "project 0 1 (projected_face)")
-
-    def test_arc_edge_format(self):
-        """an Edge with a single given point is an arc edge and should be formatted as such"""
-        p = [0, 0.25, 0]
-
-        e = self.make_edge(p)
-
-        self.assertEqual(e.type, "arc")
-        self.assertListEqual(list(e.points), list(np.array(p)))
-        self.assertEqual(str(e), "arc 0 1 (0.00000000 0.25000000 0.00000000)")
-
-    def test_spline_edge_format(self):
-        """if an edge is given with a list of points, it is a spline edge and should be
-        formatted as such"""
-        p = [
-            [0.3, 0.1, 0],
-            [0.5, 0.2, 0],
-            [0.7, 0.1, 0],
-        ]
-
-        e = self.make_edge(p)
-
-        self.assertEqual(e.type, "spline")
-        self.assertEqual(
-            str(e),
-            "spline 0 1 ("
-            "(0.30000000 0.10000000 0.00000000) "
-            "(0.50000000 0.20000000 0.00000000) "
-            "(0.70000000 0.10000000 0.00000000)"
-            ")",
-        )
-
-    def test_wrong_edge_format(self):
-        e = self.make_edge(None)
-        e.type = "wront"
-
-        with self.assertRaises(Exception):
-            str(e)
+    
 
     def test_edge_validity(self):
         """arc edges must always be checked for validity, spline edges never"""
