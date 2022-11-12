@@ -6,5 +6,8 @@ line-length = 120
 
 [tool.pylint]
 max-line-length = 120
+load-plugins = [
+    "pylint-pytest"
+]
 
 [tool.mypy]
