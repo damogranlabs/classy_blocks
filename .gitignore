@@ -31,7 +31,6 @@ postProcessing
 *polyMesh
 */constant/cellToRegion
 *.obj
-*.stl
 
 # C extensions
 *.so

@@ -1,3 +1,0 @@
-include src/classy_blocks/util/blockMeshDict.template
-include src/classy_blocks/util/vtk.sample
-include src/classy_blocks/util/vtk.template
