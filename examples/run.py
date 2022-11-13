@@ -46,5 +46,5 @@ from examples.chaining import tank as example
 
 mesh = example.get_mesh()
 
-mesh.write(output_path=os.path.join('case', 'system', 'blockMeshDict'))
+mesh.write(output_path=os.path.join('case', 'system', 'blockMeshDict'), debug_path='test.vtk')
 os.system("case/Allrun.mesh")

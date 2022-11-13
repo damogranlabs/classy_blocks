@@ -25,7 +25,7 @@ setup(
     author_email="kandelabr@gmail.com",
     description="Python classes for easier creation of openFoam's blockMesh dictionaries.",
     long_description=read_file("README.md"),
-    keywords=["classy_blocks", "openFoam", "blockMesh"],
+    keywords=["classy_blocks", "OpenFOAM", "blockMesh"],
     version=get_version("src/classy_blocks/__init__.py"),
     python_requires=">=3.6",
     classifiers=[
@@ -41,7 +41,7 @@ setup(
     license="MIT license",
     packages=find_packages("src"),
     package_dir={"": "src"},
-    install_requires=["numpy", "scipy", "Jinja2"],
+    install_requires=["numpy", "scipy"],
     include_package_data=True,
     zip_safe=False,
 )

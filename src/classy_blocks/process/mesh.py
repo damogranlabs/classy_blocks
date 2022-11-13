@@ -73,11 +73,11 @@ class Mesh:
 
     def prepare(self, debug_path=None):
         """Collect all objects and prepare them to write to blockMeshDict;
-        but don't write them out yet"""
+        but don't write them out yet;"""
         self.vertices.collect(self.blocks, self.patches['merged'])
 
         if debug_path is not None:
-            self.to_vtk(debug_path)
+            tools.write_vtk(debug_path, self.vertices, self.blocks)
 
         self.edges.collect(self.blocks)
         self.blocks.assemble()
@@ -120,14 +120,3 @@ class Mesh:
                 f.write(f"\tname {self.patches['default']['name']};\n")
                 f.write(f"\ttype {self.patches['default']['type']};")
                 f.write("\n}\n\n")
-
-    def to_vtk(self, output_path):
-        """Creates a VTK file with each mesh.block represented as a hexahedron,
-        useful for debugging when Mesh.write() succeeds but blockMesh fails.
-        Can only be called after Mesh.write() has been successfully finished!"""
-        context = {
-            "points": [v.point for v in self.vertices],
-            "cells": [[v.mesh_index for v in b.vertices] for b in self.blocks],
-        }
-
-        tools.template_to_dict("vtk.template", output_path, context)
