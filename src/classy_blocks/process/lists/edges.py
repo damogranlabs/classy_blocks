@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from classy_blocks.define.block import Block
-from classy_blocks.define.primitives import Edge, WrongEdgeTypeException
+from classy_blocks.define.primitives import Vertex, Edge, WrongEdgeTypeException
 
 from classy_blocks.util import constants
 
@@ -9,7 +9,7 @@ class EdgeList:
     def __init__(self):
         self.edges:List[Edge] = []
     
-    def find(self, vertex_1, vertex_2) -> Optional[Edge]:
+    def find(self, vertex_1:Vertex, vertex_2:Vertex) -> Optional[Edge]:
         """checks if an edge with the same pair of vertices
         exists in self.edges already"""
         for e in self.edges:
@@ -73,3 +73,6 @@ class EdgeList:
 
     def __getitem__(self, index):
         return self.edges[index]
+
+    def __len__(self):
+        return len(self.edges)

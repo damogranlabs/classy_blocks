@@ -1,7 +1,9 @@
-from typing import List, Set
+from typing import List, Set, Union
 
 from classy_blocks.define.grading import Grading
 from classy_blocks.define.block import Block
+from classy_blocks.construct.operations import Operation
+from classy_blocks.construct.shapes import Shape
 
 class BlockList:
     """ Handling of the 'blocks' part of blockMeshDict, along with
@@ -17,7 +19,7 @@ class BlockList:
         # will be assigned by Mesh.write()
         self.gradings:List[List[Grading]] = []
 
-    def add(self, block:Block) -> None:
+    def add(self, block:Union[Block, Operation, Shape]) -> None:
         """ Adds a block to this list """
         block.index = len(self.blocks)
 

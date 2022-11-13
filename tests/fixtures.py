@@ -8,23 +8,10 @@ from classy_blocks.process.mesh import Mesh
 
 write_mesh = False
 
-
-class ExecutedTestsBase(unittest.TestCase):
-    def run_and_check(self, module=None):
-        if module is not None:
-            self.mesh = module.get_mesh()
-
-        self.mesh.write("tests/case/system/blockMeshDict", debug=False)
-        os.system("tests/case/Allrun.mesh")
-
-        with open("tests/case/log.blockMesh") as f:
-            self.assertFalse("ERROR" in f.read())
-
-
 class FixturedTestCase(unittest.TestCase):
     """common setUp for block and mesh tests"""
-
     def setUp(self):
+        """Create blocks but don't add them to the mesh yet"""
         # a test mesh:
         # 3 blocks, extruded in z-direction
         # (these indexes refer to 'fl' and 'cl' variables,
@@ -144,10 +131,17 @@ class FixturedTestCase(unittest.TestCase):
         self.block_2.set_patch(["bottom", "top", "left", "right"], "walls")
 
         self.mesh = Mesh()
+
+    def add(self):
+        """Only add blocks to the mesh, no additional processing"""
         self.mesh.add(self.block_0)
         self.mesh.add(self.block_1)
         self.mesh.add(self.block_2)
-
+        
+    def prepare(self):
+        """Prepare the mesh for writing"""
+        self.add()
+        self.mesh.prepare()
 
 if __name__ == "__main__":
     unittest.main()

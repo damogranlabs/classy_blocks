@@ -2,6 +2,10 @@ from tests.fixtures import FixturedTestCase
 
 class FaceListTests(FixturedTestCase):
     def test_block_project_face(self):
+        self.block_0.chop(1, count=10)
+        self.block_0.chop(2, count=10)
+        self.mesh.add(self.block_0)
+
         self.mesh.blocks[0].project_face("bottom", "terrain")
         self.mesh.blocks[0].project_face("left", "building")
 
