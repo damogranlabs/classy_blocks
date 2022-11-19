@@ -1,4 +1,5 @@
 import os
+import pathlib
 import numpy as np
 
 from classy_blocks import Face, Extrude, Mesh
@@ -14,7 +15,10 @@ def load_airfoil_file(filename, chord=1):
         # add a z-coordinate
         return [p2d[0], p2d[1], 0]
 
-    with open(filename, 'r') as f:
+    
+    path = os.path.join(pathlib.Path(__file__).parent.resolve(), filename)
+
+    with open(path, 'r') as f:
         # reads Lednicer airfoil file from airfoiltools.com
         # sample: http://airfoiltools.com/airfoil/details?airfoil=tempest1-il
 
@@ -67,7 +71,7 @@ def get_mesh():
     ###
     ### point preparation
     ###
-    p_upper, p_lower = load_airfoil_file(os.path.join('examples', 'operation', 'airfoil_1.dat'), chord=chord)
+    p_upper, p_lower = load_airfoil_file('airfoil_1.dat', chord=chord)
 
     ###
     ### block creation
@@ -84,15 +88,14 @@ def get_mesh():
         [max_x_1, y, 0],
         [max_x_1, domain_radius, 0],
     ]
-    face_top_1_edges = [
-        None,
-        p_upper[0:i-1],
-        None,
-        [-radius_edge + chord*radius_center, radius_edge, 0]
-    ]
 
-    # create a face from points and edges
-    face_top_1 = Face(face_top_1_vertices, face_top_1_edges)
+
+    # create a face from points
+    face_top_1 = Face(face_top_1_vertices)
+    # add edges
+    face_top_1.add_edge(1, p_upper[0:i-1])
+    face_top_1.add_edge(3, [-radius_edge + chord*radius_center, radius_edge, 0])
+
     # create an Extrude operation from face and extrude vector
     extrude_top_1 = Extrude(face_top_1, thickness)
 
@@ -108,10 +111,9 @@ def get_mesh():
         [chord, domain_radius, 0],
         [max_x_1, domain_radius, 0]
     ]
+    face_top_2 = Face(face_top_2_vertices)
+    face_top_2.add_edge(0, p_upper[i:])
 
-    face_top_2_edges = [p_upper[i:], None, None, None]
-
-    face_top_2 = Face(face_top_2_vertices, face_top_2_edges)
     extrude_top_2 = Extrude(face_top_2, thickness)
     extrude_top_2.chop(0, start_size=cell_size)
     # other cell counts must match other blocks' so they need not be set
@@ -135,14 +137,10 @@ def get_mesh():
         [max_x_1, y, 0],
         [0, 0, 0],
     ]
-    face_bottom_1_edges = [
-        [-radius_edge + chord*radius_center, -radius_edge, 0],
-        None,
-        np.flip(p_lower[0:i-1], axis=0), # this block is defined in reverse so edge points must be reversed as well
-        None
-    ]
+    face_bottom_1 = Face(face_bottom_1_vertices)
+    face_bottom_1.add_edge(0, [-radius_edge + chord*radius_center, -radius_edge, 0])
+    face_bottom_1.add_edge(2, np.flip(p_lower[0:i-1], axis=0))
 
-    face_bottom_1 = Face(face_bottom_1_vertices, face_bottom_1_edges)
     extrude_bottom_1 = Extrude(face_bottom_1, thickness)
     extrude_bottom_1.chop(0, count=30)
 
@@ -153,10 +151,9 @@ def get_mesh():
         [chord, -domain_radius, 0],
         [chord, 0, 0]
     ]
+    face_bottom_2 = Face(face_bottom_2_vertices)
+    face_bottom_2.add_edge(3, np.flip(p_lower[i:], axis=0))
 
-    face_bottom_2_edges = [None, None, None, np.flip(p_lower[i:], axis=0)]
-
-    face_bottom_2 = Face(face_bottom_2_vertices, face_bottom_2_edges)
     extrude_bottom_2 = Extrude(face_bottom_2, thickness)
     extrude_bottom_2.chop(1, start_size=cell_size)
 

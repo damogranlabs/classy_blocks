@@ -1,11 +1,9 @@
 from classy_blocks import Face, Extrude, Mesh
 
 def get_mesh():
-    base = Face(
-        [ [0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0] ],
-        [ [0.5, -0.2, 0], None, None, None]
-    )
-
+    base = Face([ [0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0] ])
+    base.add_edge(0, [0.5, -0.2, 0])
+    
     extrude = Extrude(base, [0.5, 0.5, 3])
 
     # direction 1

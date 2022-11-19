@@ -61,14 +61,24 @@ class Shape(ABC):
         # TODO: TEST
         if transform_mid_args is not None:
             self.sketch_mid = self.transform_function(**transform_mid_args)
-            loft_edges = [face.points for face in self.sketch_mid.faces]
         else:
             self.sketch_mid = None
-            loft_edges = [None] * len(self.sketch_1.faces)
 
-        self.operations = [
-            Loft(self.sketch_1.faces[i], self.sketch_2.faces[i], loft_edges[i]) for i in range(len(self.sketch_1.faces))
-        ]
+        self.operations = []
+
+        for i, face_1 in enumerate(self.sketch_1.faces):
+            face_2 = self.sketch_2.faces[i]
+            
+            loft = Loft(face_1, face_2)
+            
+            # add edges, if applicable
+            if self.sketch_mid:
+                face_mid = self.sketch_mid.faces[i]
+                
+                for i, point in enumerate(face_mid.points):
+                    loft.add_side_edge(i, point)
+
+            self.operations.append(loft)
 
     @property
     def blocks(self):
@@ -444,18 +454,27 @@ class Hemisphere(Shape):
             inner_upper_point_2 = rotate_dome(inner_bottom_point_2, end_angle)
             outer_upper_point_2 = rotate_dome(outer_bottom_point_2, end_angle)
 
-            lower_face = Face(
-                [inner_bottom_point_1, outer_bottom_point_1, outer_bottom_point_2, inner_bottom_point_2],  # points
-                [None, geometry_name, None, None],  # edges: project rather than calculate points
-            )
+            lower_face = Face([
+                inner_bottom_point_1,
+                outer_bottom_point_1,
+                outer_bottom_point_2,
+                inner_bottom_point_2
+            ])
+            lower_face.add_edge(1, geometry_name)  # edges: project rather than calculate points
 
-            upper_face = Face(
-                [inner_upper_point_1, outer_upper_point_1, outer_upper_point_2, inner_upper_point_2],
-                [None, geometry_name, None, None],
-            )
+            upper_face = Face([
+                inner_upper_point_1,
+                outer_upper_point_1,
+                outer_upper_point_2,
+                inner_upper_point_2
+            ])
+            upper_face.add_edge(1, geometry_name)
 
-            loft = Loft(lower_face, upper_face, [None, geometry_name, geometry_name, None])  # projected lofted edges
+            loft = Loft(lower_face, upper_face)
+            loft.add_side_edge(1, geometry_name) # projected lofted edges
+            loft.add_side_edge(2, geometry_name)
             loft.block.project_face("right", geometry_name)  # and projected block face
+            
             self.shell[i] = loft
 
         # top and core blocks
@@ -468,10 +487,13 @@ class Hemisphere(Shape):
             face_2 = self.shell[(2 * i) + 1].top_face
 
             bottom_face = Face([mid_point, face_1.points[0], face_1.points[3], face_2.points[3]])
-            top_face = Face(
-                [top_point, face_1.points[1], face_1.points[2], face_2.points[2]],
-                [geometry_name] * 4,  # project all edges of this face
-            )
+            top_face = Face([top_point, face_1.points[1], face_1.points[2], face_2.points[2]])
+
+            # project all edges of this face
+            top_face.add_edge(0, geometry_name)
+            top_face.add_edge(1, geometry_name)
+            top_face.add_edge(2, geometry_name)
+            top_face.add_edge(3, geometry_name)
 
             roof_loft = Loft(bottom_face, top_face)
             roof_loft.block.project_face("top", geometry_name)

@@ -33,15 +33,14 @@ class Annulus:
         rot = lambda p, a: f.arbitrary_rotation(p, self.normal, a, self.center_point)
         angle = 2 * np.pi / n_segments
 
-        face = Face(
-            [  # points
-                self.inner_radius_point,
-                self.outer_radius_point,
-                rot(self.outer_radius_point, angle),
-                rot(self.inner_radius_point, angle),
-            ],
-            [None, rot(self.outer_radius_point, angle / 2), None, rot(self.inner_radius_point, angle / 2)],  # edges
-        )
+        face = Face([
+            self.inner_radius_point,
+            self.outer_radius_point,
+            rot(self.outer_radius_point, angle),
+            rot(self.inner_radius_point, angle),
+        ])
+        face.add_edge(1, rot(self.outer_radius_point, angle / 2))
+        face.add_edge(3, rot(self.inner_radius_point, angle / 2))
 
         # unlike with Circle, there's no core
         self.core_faces = None

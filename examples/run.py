@@ -25,7 +25,7 @@ import os
 # from examples.shape import frustum_wall as example
 
 # chaining
-from examples.chaining import tank as example
+# from examples.chaining import tank as example
 # from examples.chaining import test_tube as example
 # from examples.chaining import venturi_tube as example
 # from examples.chaining import orifice_plate as example
@@ -39,7 +39,7 @@ from examples.chaining import tank as example
 # advanced
 # from examples.advanced import project as example # projection to STL surface
 # from examples.advanced import sphere as example # flow around sphere
-# from examples.advanced import merged as example
+from examples.advanced import merged as example
 
 # objects
 #from examples.objects import t_pipe as example

@@ -1,9 +1,9 @@
 import unittest
 
 import numpy as np
-from classy_blocks.define.primitives import Vertex, Edge, WrongEdgeTypeException
+from classy_blocks.define.vertex import Vertex
+from classy_blocks.define.edge import Edge
 from classy_blocks.util import functions as f
-from classy_blocks.util import constants
 
 
 class TestPrimitives(unittest.TestCase):
@@ -26,8 +26,6 @@ class TestPrimitives(unittest.TestCase):
             self.assertTrue(e.is_valid)
 
         return e
-
-    
 
     def test_edge_validity(self):
         """arc edges must always be checked for validity, spline edges never"""

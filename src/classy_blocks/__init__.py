@@ -1,6 +1,8 @@
 __version__ = "0.1.0"
 
-from classy_blocks.define.block import Edge, Block
+from classy_blocks.define.vertex import Vertex
+from classy_blocks.define.block import Block
+
 
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations import Loft, Extrude, Revolve, Wedge

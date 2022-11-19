@@ -3,10 +3,8 @@ from classy_blocks import Face, Revolve, Mesh
 from classy_blocks.util import functions as f
 
 def get_mesh():
-    base = Face(
-        [ [0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0] ],
-        [ [0.5, -0.2, 0], None, None, None]
-    )
+    base = Face([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]])
+    base.add_edge(0, [0.5, -0.2, 0])
 
     revolve = Revolve(base, f.deg2rad(60), [0, -1, 0], [-2, 0, 0])
 

@@ -4,15 +4,12 @@ def get_mesh():
     mesh = Mesh()
 
     # a face with a single bump;
-    base = Face(
-        [ [0, 0, 0], [1, 0, 0], [1, 0.2, 0], [0, 0.2, 0] ],
-        [ None, None, [
-            [0.75, 0.15, 0], # a spline edge
-            [0.50, 0.20, 0], # with 3
-            [0.25, 0.25, 0], # points
-        ],
-        None]
-    )
+    base = Face([[0, 0, 0], [1, 0, 0], [1, 0.2, 0], [0, 0.2, 0]])
+    base.add_edge(2, [
+        [0.75, 0.15, 0], # a spline edge
+        [0.50, 0.20, 0], # with 3
+        [0.25, 0.25, 0], # points
+    ], kind='spline')
 
     # move it away from the axis of rotation
     # x axis = [1, 0, 0]

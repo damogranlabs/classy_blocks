@@ -49,19 +49,21 @@ class Circle:
         # shell faces around core
         shell_angles = np.linspace(0, 2 * np.pi, num=4, endpoint=False)
 
-        shell_face_1 = Face(
-            [core_face.points[1], self.radius_point, rot(self.radius_point, np.pi / 4), core_face.points[2]],  # points
-            [None, rot(self.radius_point, np.pi / 8), None, None],
-        )
-        shell_face_2 = Face(
-            [
-                core_face.points[2],
-                rot(self.radius_point, np.pi / 4),
-                rot(self.radius_point, np.pi / 2),
-                core_face.points[3],
-            ],
-            [None, rot(self.radius_point, 3 * np.pi / 8), None, None],
-        )
+        shell_face_1 = Face([
+            core_face.points[1],
+            self.radius_point,
+            rot(self.radius_point, np.pi / 4),
+            core_face.points[2]
+        ])
+        shell_face_1.add_edge(1, rot(self.radius_point, np.pi / 8))
+
+        shell_face_2 = Face([
+            core_face.points[2],
+            rot(self.radius_point, np.pi / 4),
+            rot(self.radius_point, np.pi / 2),
+            core_face.points[3],
+        ])
+        shell_face_2.add_edge(1, rot(self.radius_point, 3 * np.pi / 8))
 
         shell_faces_1 = [shell_face_1.rotate(self.normal, a, self.center_point) for a in shell_angles]
         shell_faces_2 = [shell_face_2.rotate(self.normal, a, self.center_point) for a in shell_angles]

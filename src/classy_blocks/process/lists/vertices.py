@@ -3,7 +3,7 @@ from typing import Optional, List
 
 from numpy.typing import ArrayLike
 
-from classy_blocks.define.primitives import Vertex
+from classy_blocks.define.vertex import Vertex
 from classy_blocks.define.block import Block
 
 from classy_blocks.util import constants

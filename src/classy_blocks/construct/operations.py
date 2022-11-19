@@ -4,12 +4,15 @@ Analogous to a sketch in 3D CAD software,
 a Face is a collection of 4 vertices and 4 edges.
 An operation is a 3D shape obtained by swiping a Face
 into 3rd dimension depending on the Operation. """
-from typing import List, Union, TypeVar
+from typing import List, Union, Optional, TypeVar
 
 import numpy as np
 
+from classy_blocks import types
+
+from classy_blocks.define.edge import Edge
 from classy_blocks.define.block import Block
-from classy_blocks.define.primitives import Edge, transform_edges
+from classy_blocks.define.edge import transform_edges
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.util import functions as f
 
@@ -19,28 +22,26 @@ Op = TypeVar("Op", bound="Operation")
 class Operation:
     """Base of all other operations"""
 
-    def __init__(self, bottom_face: Face, top_face: Face, side_edges: List[Edge] = None):
+    def __init__(self, bottom_face: Face, top_face: Face):
         self.bottom_face = bottom_face
         self.top_face = top_face
 
-        # edges between vertices on same face
-        self.edges = self.bottom_face.get_edges() + self.top_face.get_edges(top_face=True)
+        # create a block and assign edges to it
+        self.block = Block.create_from_points(np.concatenate((bottom_face.points, top_face.points)))
+        self.block.edges += bottom_face.get_edges(False)
+        self.block.edges += top_face.get_edges(True)
 
-        # edges between same vertices between faces
-        self.side_edges = side_edges
+        self.side_edges = []
 
-        if self.side_edges is not None:
-            if len(self.side_edges) != 4:
-                raise Exception("Provide 4 edges for sides; use None for straight lines")
+    def add_side_edge(self, index:int, points:types.EdgePointsType, kind:Optional[types.EdgeKindType]=None):
+        """Add an edge between two vertices at the same
+        corner of the lower and upper face (index and index+4 or vice versa)."""
+        index = index % 4
+        self.side_edges.append(self.block.add_edge(index, index+4, points, kind=kind))
 
-            for i in range(4):
-                e = self.side_edges[i]
-
-                if e is not None:
-                    self.edges.append(Edge(i, i + 4, e))
-
-        # create a block and edges
-        self.block = Block.create_from_points(np.concatenate((bottom_face.points, top_face.points)), self.edges)
+    @property
+    def edges(self):
+        return self.block.edges
 
     def chop(self, axis: int, **kwargs) -> None:
         """Chop the operation (count/grading) in given axis:
@@ -63,14 +64,16 @@ class Operation:
 
     def translate(self: Op, vector: List) -> Op:
         """returns a translated copy of this Operation"""
-        vector = np.array(vector)
+        vector = np.asarray(vector)
 
         bottom_face = self.bottom_face.translate(vector)
         top_face = self.top_face.translate(vector)
 
-        side_edges = transform_edges(self.side_edges, lambda v: v + vector)
+        new_op = Operation(bottom_face, top_face)
+        for edge in self.side_edges:
+            new_op.add_side_edge(edge.translate(vector))
 
-        return Operation(bottom_face, top_face, side_edges)
+        return new_op
 
     def rotate(self: Op, axis: List, angle: float, origin: List = None) -> Op:
         """Copies this Operation and rotates it around an arbitrary axis and origin.
@@ -78,15 +81,19 @@ class Operation:
         if origin is None:
             origin = [0, 0, 0]
 
-        axis = np.array(axis)
-        origin = np.array(origin)
+        axis = np.asarray(axis)
+        origin = np.asarray(origin)
 
         bottom_face = self.bottom_face.rotate(axis, angle, origin)
         top_face = self.top_face.rotate(axis, angle, origin)
 
-        side_edges = transform_edges(self.side_edges, lambda point: f.arbitrary_rotation(point, axis, angle, origin))
+        new_op = Operation(bottom_face, top_face)
+        for edge in self.side_edges:
+            new_op.add_side_edge(edge.rotate(axis, angle, origin))
 
-        return Operation(bottom_face, top_face, side_edges)
+        return new_op
+
+    # TODO: operation.scale?
 
     def set_cell_zone(self, cell_zone: str) -> None:
         """Assign a cellZone to this block."""
@@ -129,12 +136,13 @@ class Revolve(Loft):
         bottom_face = base
         top_face = base.rotate(axis, angle, origin)
 
+        super().__init__(bottom_face, top_face)
+
         # there are 4 side edges: rotate each vertex of bottom_face
         # by angle/2
-        side_edges = [f.arbitrary_rotation(p, self.axis, self.angle / 2, self.origin) for p in self.base.points]
-
-        super().__init__(bottom_face, top_face, side_edges)
-
+        side_points = [f.arbitrary_rotation(p, self.axis, self.angle / 2, self.origin) for p in self.base.points]
+        for i, point in enumerate(side_points):
+            self.block.add_edge(i, i+4, point, kind='arc')
 
 class Wedge(Revolve):
     """Revolves 'face' around x-axis symetrically by +/- angle/2.

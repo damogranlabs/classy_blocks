@@ -1,7 +1,8 @@
 from typing import List, Optional
 
 from classy_blocks.define.block import Block
-from classy_blocks.define.primitives import Vertex, Edge, WrongEdgeTypeException
+from classy_blocks.define.vertex import Vertex
+from classy_blocks.define.edge import Edge
 
 from classy_blocks.util import constants
 
@@ -37,7 +38,7 @@ class EdgeList:
                 block.edges[i].vertex_1 = v_1
                 block.edges[i].vertex_2 = v_2
 
-                if block_edge.type == "line":
+                if block_edge.kind == "line":
                     continue
 
                 if block_edge.is_valid:
@@ -53,19 +54,18 @@ class EdgeList:
         s = "edges\n(\n"
 
         for edge in self.edges:
-            if edge.type == "line":
+            if edge.kind == "line":
                 continue
 
-            if edge.type == "project":
+            if edge.kind == "project":
                 point_list =  f"({edge.points})"
-            elif edge.type == "arc":
+            elif edge.kind == "arc":
                 point_list = constants.vector_format(edge.points)
-            elif edge.type == "spline":
-                point_list = "(" + " ".join([constants.vector_format(p) for p in edge.points]) + ")"
             else:
-                raise WrongEdgeTypeException(edge.type)
+                point_list = "(" + " ".join([constants.vector_format(p) for p in edge.points]) + ")"
 
-            s += f"\t{edge.type} {edge.vertex_1.mesh_index} {edge.vertex_2.mesh_index} {point_list}\n"
+
+            s += f"\t{edge.kind} {edge.vertex_1.mesh_index} {edge.vertex_2.mesh_index} {point_list}\n"
 
         s += ");\n\n"
 

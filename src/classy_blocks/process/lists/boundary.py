@@ -1,6 +1,6 @@
 from typing import List
 
-from classy_blocks.define.primitives import Vertex
+from classy_blocks.define.vertex import Vertex
 from classy_blocks.define.block import Block
 
 

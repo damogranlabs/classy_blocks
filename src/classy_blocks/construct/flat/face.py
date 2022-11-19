@@ -1,110 +1,122 @@
-from typing import List
-import copy
+from typing import List, Optional
+from classy_blocks import types
+from numpy.typing import ArrayLike
 
 import numpy as np
 
-from classy_blocks.define.primitives import Edge, transform_edges, transform_points
+from classy_blocks.define.vertex import Vertex
+from classy_blocks.define.edge import Edge
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
-
+from classy_blocks.util import constants
 
 class Face:
-    def __init__(self, points: List[List[float]], edges: List[Edge] = None, check_coplanar: bool = False):
-        """a Face is a collection of 4 points and optionally 4 edge points;"""
-        if len(points) != 4:
-            raise Exception("Provide exactly 4 points")
-
-        self.points = np.asarray(points)
-
-        if edges is not None:
-            if len(edges) != 4:
-                raise Exception("Exactly four Edges must be supplied - use None for straight lines")
-
-        self.edges = edges
-
+    def __init__(self, points: types.PointListType, check_coplanar: bool = False):
+        """A Face is a collection of 4 Vertices and optionally 4 Edges,
+        creating an arbitrary quadrangle. A Block can be made from 2 faces,
+        connected with straight lines or, again, (optionally) curved edges."""
+        points = np.asarray(points)
+        if np.shape(points) != (4, 3):
+            # TODO: TEST
+            raise Exception("Provide exactly 4 points in 3D space")
+        
         if check_coplanar:
-            x = self.points
-            if abs(np.dot((x[1] - x[0]), np.cross(x[3] - x[0], x[2] - x[0]))) > constants.tol:
+            if abs(
+                np.dot(
+                    points[1] - points[0],
+                    np.cross(points[3] - points[0], points[2] - points[0])
+                )) > constants.tol:
                 raise Exception("Points are not coplanar!")
 
             # TODO: coplanar edges?
 
-        # center and normal
-        self.normal, self.center = self.get_normal(self.points)
+        self.vertices:List[Vertex] = [Vertex(p) for p in points]
+
+        self.edges:List[Edge] = [] # add with self.add_edge()
+
+    def add_edge(self, index_1:int, points:types.EdgePointsType, kind:Optional[types.EdgeKindType]=None):
+        """Specifies a non-line edge between a vertex specified by index_1 and the next one"""
+        assert index_1 in (0, 1, 2, 3), f"Cannot assign index {index_1}; Face vertices only have indexes 0...3"
+
+        self.edges.append(Edge(index_1, (index_1 + 1)%4, points, kind))
 
     def get_edges(self, top_face: bool = False) -> List[Edge]:
-        if not self.edges:
-            return []
+        if not top_face:
+            return self.edges
 
-        r = []  # a list of Edge objects will be returned
+        # if these edges refer to top face, correct the indexes
+        return [Edge(
+            e.block_index_1 + 4,
+            e.block_index_2 + 4,
+            e.points, e.kind) for e in self.edges]
 
-        # correct vertex index so that it refers to block numbering
-        # (bottom face vertices 0...3, top face 4...7)
-        for i in range(4):
-            if self.edges[i] is not None:
-                # bottom face indexes: 0 1 2 3
-                i_1 = i
-                i_2 = (i + 1) % 4
+    def translate(self, displacement:List):
+        """Move this face by displacement vector.
+        Returns the same face to enable chaining of transformations."""
+        new_points = [v.translate(displacement).point for v in self.vertices]
+        new_edges = [e.translate(displacement) for e in self.edges]
+        
+        new_face = Face(new_points)
+        new_face.edges = new_edges
 
-                if top_face:
-                    # top face indexes: 4 5 6 7
-                    i_1 += 4
-                    i_2 = (i_1 + 1) % 4 + 4
+        return new_face
 
-                r.append(Edge(i_1, i_2, self.edges[i % 4]))
-
-        return r
-
-    def _transform(self, function):
-        """copis this object and transforms all block-defining points
-        with given function. used for translation, rotating, etc."""
-        t = copy.copy(self)
-        t.points = transform_points(self.points, function)
-        t.edges = transform_edges(self.edges, function)
-
-        return t
-
-    def translate(self, vector: List):
-        """move points by 'vector'"""
-        vector = np.asarray(vector)
-        return self._transform(lambda point: point + vector)
-
-    def rotate(self, axis: List, angle: float, origin: List = [0, 0, 0]):
-        """copies the object and rotates all block-points by 'angle'
-        around 'axis' going through 'origin'"""
+    def rotate(self, axis:List, angle:float, origin:List=None):
+        """Rotate this face 'angle' around 'axis' going through 'origin'."""
         axis = np.asarray(axis)
+
+        if origin is None:
+            origin = self.center
+
+        origin = np.asarray(origin)
+
+        new_face = self.__class__([v.rotate(angle, axis, origin).point for v in self.vertices])
+        new_face.edges = [e.rotate(angle, axis, origin) for e in self.edges]
+        
+        return new_face
+
+    def scale(self, ratio:float, origin:List=None):
+        """Scale with respect to given origin."""
         if origin is None:
             origin = self.center
         origin = np.asarray(origin)
 
-        r = lambda point: f.arbitrary_rotation(point, axis, angle, origin)
+        new_face = self.__class__([v.scale(ratio, origin).point for v in self.vertices])
+        new_face.edges = [e.scale(ratio, origin) for e in self.edges]
 
-        return self._transform(r)
-
-    def scale(self, ratio: float, origin: List = None):
-        """Scale with respect to given origin"""
-        if origin is None:
-            origin = self.center
-
-        r = lambda point: origin + (point - origin) * ratio
-
-        return self._transform(r)
+        return new_face
 
     def invert(self):
-        """reverses the order of points"""
-        self.points = np.flip(self.points, axis=0)
+        """Reverses the order of points in this face."""
+        points = np.flip(self.points, axis=0)
+        for i in range(len(self.vertices)):
+            self.vertices[i].point = points[i]
 
-    @staticmethod
-    def get_normal(points):
-        # calculate face normal; OpenFOAM divides a quadrangle into 4 triangles,
-        # each joining at face center; a normal is an average of normals of those
-        # triangles
+    @property
+    def points(self) -> ArrayLike:
+        """Returns a list of points, extracted from vertices"""
+        # TODO: cache?
+        return np.array([v.point for v in self.vertices])
+
+    @property
+    def center(self) -> ArrayLike:
+        """Returns the center point of this face."""
+        # TODO: cache?
+        return np.average(self.points, axis=0)
+
+    @property
+    def normal(self) -> ArrayLike:
+        """Returns a vector normal to this face.
+        For non-planar faces the same rule as in OpenFOAM is followed:
+        divide a quadrangle into 4 triangles, each joining at face center;
+        a normal is the average of normals of those triangles."""
         # TODO: TEST
-        points = np.asarray(points)
-        center = np.average(points, axis=0)
+        # TODO: cache?
+        points = self.points
+        center = self.center
+        
         side_1 = points - center
         side_2 = np.roll(points, -1, axis=0) - center
         normals = np.cross(side_1, side_2)
-        normal = np.average(normals, axis=0)
-
-        return normal, center
+        
+        return np.average(normals, axis=0)

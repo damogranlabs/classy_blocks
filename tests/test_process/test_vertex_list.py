@@ -1,11 +1,7 @@
-import unittest
-
-from classy_blocks.define.primitives import Vertex, Edge
 from classy_blocks.util import functions as f
 from classy_blocks.util import constants
 
 from classy_blocks.process.lists.vertices import VertexList
-from classy_blocks.process.lists.edges import EdgeList
 
 from tests.fixtures import FixturedTestCase
 

@@ -1,12 +1,13 @@
 """Contains all data to place a block into mesh."""
 from typing import List, Literal, Union, Tuple, Optional, Dict
+from classy_blocks import types
 
 import warnings
 
 from classy_blocks.util import functions as f
 from classy_blocks.util import constants as c
-from classy_blocks.construct.flat.face import Face
-from classy_blocks.define.primitives import Vertex, Edge
+from classy_blocks.define.vertex import Vertex
+from classy_blocks.define.edge import Edge
 
 class Side:
     """Data about one of block's sides"""
@@ -21,13 +22,13 @@ class Side:
 class Block:
     """a direct representation of a blockMesh block;
     contains all necessary data to create it."""
-    def __init__(self, vertices: List[Vertex], edges: List[Edge]):
+    def __init__(self, vertices: List[Vertex]):
         # a list of 8 Vertex and Edge objects for each corner/edge of the block
         self.vertices: List[Vertex] = vertices
-        self.edges: List[Edge] = edges
+        self.edges: List[Edge] = []
 
         # generate Side objects:
-        self.sides:Dict[Side] = {o:Side(o) for o in c.FACE_MAP}
+        self.sides:Dict[OrientType, Side] = {o:Side(o) for o in c.FACE_MAP}
 
         # block grading;
         # when adding blocks, store chop() parameters;
@@ -73,6 +74,12 @@ class Block:
                 orients.append(orient)
 
         return orients
+
+    def add_edge(self, index_1:int, index_2:int, points, kind:Optional[types.EdgeKindType]=None) -> None:
+        """Adds an edge between specified vertices"""
+        edge = Edge(index_1, index_2, points, kind)
+        self.edges.append(edge)
+        return edge
 
     def find_edge(self, index_1: int, index_2: int) -> Edge:
         """Returns edges between given vertex indexes;
@@ -247,13 +254,7 @@ class Block:
     ### class methods
     ###
     @classmethod
-    def create_from_points(cls, points, edges=None) -> "Block":
-        """create a block from a raw list of 8 points;
-        edges are optional; edge's 2 vertex indexes refer to
-        block.vertices list (0 - 7)"""
-        if edges is None:
-            edges = []
-
-        block = cls([Vertex(p) for p in points], edges)
-
-        return block
+    def create_from_points(cls, points) -> "Block":
+        """Create a block from a raw list of 8 points;
+        edges can be added later using Block.add_edge()"""
+        return cls([Vertex(p) for p in points])

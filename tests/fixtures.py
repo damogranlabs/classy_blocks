@@ -1,8 +1,6 @@
 import unittest
 
-import os
-
-from classy_blocks.define.primitives import Edge
+from classy_blocks.define.edge import Edge
 from classy_blocks.define.block import Block
 from classy_blocks.process.mesh import Mesh
 
