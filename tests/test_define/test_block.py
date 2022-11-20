@@ -137,7 +137,7 @@ class BlockTests(FixturedTestCase):
         n_project = 0
 
         for e in self.mesh.edges:
-            if e.type == "project":
+            if e.kind == "project":
                 n_project += 1
 
         self.assertEqual(n_project, 4)
@@ -191,14 +191,14 @@ class BlockTests(FixturedTestCase):
         self.block_0.project_edge(2, 3, "test")
 
         self.prepare()
-        self.assertEqual(self.mesh.edges[-1].type, "project")
+        self.assertEqual(self.mesh.edges[-1].kind, "project")
 
     def test_block_project_edge_double(self):
         # projecting an existing edge should not work
         self.block_0.project_edge(0, 1, "test")
         self.prepare()
 
-        self.assertNotEqual(self.mesh.edges[-1].type, "project")
+        self.assertNotEqual(self.mesh.edges[-1].kind, "project")
 
     def test_patches(self):
         """patch naming/positions"""

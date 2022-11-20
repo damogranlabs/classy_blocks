@@ -21,18 +21,10 @@ class EdgeListTests(unittest.TestCase):
 
         return edge_list
 
-    def test_straight_edge_format(self):
-        edge_list = self.get_list(None)
-
-        # do not include straight edges
-        expected_output = "edges\n(\n);\n\n"
-
-        self.assertEqual(expected_output, edge_list.output())
-
     def test_project_edge_point_list(self):
         edge_list = self.get_list("projected_face")
 
-        self.assertEqual(edge_list.edges[0].type, 'project')
+        self.assertEqual(edge_list.edges[0].kind, 'project')
         self.assertTrue("0 1 (projected_face)" in edge_list.output())
 
     def test_arc_edge_format(self):
@@ -42,7 +34,7 @@ class EdgeListTests(unittest.TestCase):
 
         e = edge_list.edges[0]
 
-        self.assertEqual(e.type, "arc")
+        self.assertEqual(e.kind, "arc")
         self.assertListEqual(list(e.points), point)
         self.assertTrue("arc 0 1 (0.00000000 0.25000000 0.00000000)" in edge_list.output())
 
@@ -58,17 +50,10 @@ class EdgeListTests(unittest.TestCase):
         edge_list = self.get_list(points)
         e = edge_list.edges[0]
 
-        self.assertEqual(e.type, "spline")
+        self.assertEqual(e.kind, "spline")
         self.assertTrue("spline 0 1 (" +\
             "(0.30000000 0.10000000 0.00000000) " + \
             "(0.50000000 0.20000000 0.00000000) " + \
             "(0.70000000 0.10000000 0.00000000))"
             in edge_list.output()
         )
-
-    def test_wrong_edge_format(self):
-        edge_list = self.get_list(None)
-        edge_list.edges[0].type = "wrong"
-
-        with self.assertRaises(Exception):
-            edge_list.output()
