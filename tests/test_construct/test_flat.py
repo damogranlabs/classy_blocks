@@ -50,7 +50,7 @@ class FaceTests(unittest.TestCase):
 
     def test_rotate_face(self):
         # only test that the Face.rotate function works properly;
-        # other machinery (translate, transform_points, transform_edges) are tested in
+        # other machinery (translate, transform...) are tested in
         # test_translate_face above
         origin = np.random.rand(3)
         angle = np.pi / 3

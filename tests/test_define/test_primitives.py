@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 from classy_blocks.define.vertex import Vertex
 from classy_blocks.define.edge import Edge
+from classy_blocks.define.edge import arc_mid, arc_from_theta, arc_from_origin
 from classy_blocks.util import functions as f
 
 
@@ -121,6 +122,57 @@ class TestPrimitives(unittest.TestCase):
         r = e.rotate(angle, axis=[1, 0, 0])
 
         np.testing.assert_array_almost_equal(r.points, [f.rotate(p, angle, axis="x") for p in points])
+
+class AlternativeArcTests(unittest.TestCase):
+    unit_sq_corner = f.vector(2**0.5/2, 2**0.5/2, 0)
+
+    def test_arc_mid(self):
+        axis = f.vector(0, 0, 1)
+        center = f.vector(0, 0, 0)
+        radius = 1
+        edge_point_0 = f.vector(1, 0, 0)
+        edge_point_1 = f.vector(0, 1, 0)
+
+        np.testing.assert_array_almost_equal(
+            arc_mid(axis, center, radius, edge_point_0, edge_point_1),
+            self.unit_sq_corner
+        )
+
+    def test_arc_from_theta(self):
+        edge_point_0 = f.vector(0, 1, 0)
+        edge_point_1 = f.vector(1, 0, 0)
+        angle = np.pi/2
+        axis = f.vector(0, 0, -1)
+
+        np.testing.assert_array_almost_equal(
+            arc_from_theta(edge_point_0, edge_point_1, angle, axis),
+            self.unit_sq_corner
+        )
+
+    def test_arc_from_origin(self):
+        edge_point_0 = f.vector(0, 1, 0)
+        edge_point_1 = f.vector(1, 0, 0)
+        center = f.vector(0, 0, 0)
+
+        np.testing.assert_array_almost_equal(
+            arc_from_origin(edge_point_0, edge_point_1, center),
+            self.unit_sq_corner
+        )
+
+    def test_arc_from_origin_warn(self):
+        edge_point_0 = f.vector(0, 1, 0)
+        edge_point_1 = f.vector(1.1, 0, 0)
+        center = f.vector(0, 0, 0)
+
+        with self.assertWarns(Warning):
+            adjusted_point = arc_from_origin(edge_point_0, edge_point_1, center)
+        
+        expected_point = f.vector(0.75743894, 0.72818283, 0)
+        
+        np.testing.assert_array_almost_equal(
+            adjusted_point,
+            expected_point
+        )
 
 if __name__ == "__main__":
     unittest.main()

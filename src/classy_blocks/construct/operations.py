@@ -12,7 +12,6 @@ from classy_blocks import types
 
 from classy_blocks.define.edge import Edge
 from classy_blocks.define.block import Block
-from classy_blocks.define.edge import transform_edges
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.util import functions as f
 
