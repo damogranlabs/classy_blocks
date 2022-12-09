@@ -247,6 +247,40 @@ Other dependencies that must be installed:
 
 There's no official documentation yet so here are some tips for easier navigation through source.
 
+## The Process, Roughly
+
+1. User writes a script that defines blocks, edges, shapes, whatever is needed.
+1. All the stuff is added to mesh.
+1. Mesh converts user entered blocks/points/edges/whatever into new objects that
+are aware of their neighbours (blocks use the same vertices, edges) and can write output and handle later modification.
+1. The mesh can be written at that point; or,
+1. Modification of placed geometry, either by manually moving vertices or by utilizing some sort of optimization algorithm.
+1. Output of optimized/modified mesh.
+
+There is a distinct difference between user-entered, unaware data and processed/optimized stuff. Because of that, it is necessary to separate underlying objects or things get messy very quickly. With different objects come different names - the user doesn't have to know that but for the programmer it is vital to distinguish between entities described below.
+
+## Classy Lingo (Terminology)
+
+User-provided data and object that's created from it:
+- `Points` are simply lists of floats or numpy arrays
+- `Block` is defined by points
+- `Block.add_edge()` generates `Curve*` objects
+- `Side` refers to block faces - left, right, front, back, top, bottom
+- `Face` is a collection of 4 Points with optional Curves between them. It is used as a base for Operations and Shapes.
+
+After everything has been added, `Mesh.prepare()` generates new objects:
+- Points become `Vertex` objects
+- Blocks become `Hex` objects and share Vertices from above
+- Curves become `Edge*` objects and are distributed throughout Hexes that share them
+- Sides still refer to faces of Hexes
+- A Face isn't an object but a plain entry in blockMeshDict - projected block sides.
+
+To sum up:
+- Users enter `Point` - `Curve` - `Block`
+- classy_blocks prepares `Vertex` - `Edge` - `Hex`
+
+To keep things simple for users, the Curve is refered to as 'edge' when defining blocks, everything else remains as-is.
+
 ## Classes
 
 These contain data to be written to blockMeshDict and also methods for point manipulation and output formatting.

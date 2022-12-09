@@ -4,8 +4,7 @@ from numpy.typing import ArrayLike
 
 import numpy as np
 
-from classy_blocks.define.vertex import Vertex
-from classy_blocks.define.edge import Edge
+from classy_blocks.process.items.vertex import Vertex
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 from classy_blocks.util import constants
@@ -34,20 +33,20 @@ class Face:
 
         self.edges:List[Edge] = [] # add with self.add_edge()
 
-    def add_edge(self, index_1:int, points:types.EdgePointsType, kind:Optional[types.EdgeKindType]=None):
+    def add_edge(self, index_1:int, points, kind:Optional[types.EdgeKindType]=None):
         """Specifies a non-line edge between a vertex specified by index_1 and the next one"""
         assert index_1 in (0, 1, 2, 3), f"Cannot assign index {index_1}; Face vertices only have indexes 0...3"
 
         self.edges.append(Edge(index_1, (index_1 + 1)%4, points, kind))
 
-    def get_edges(self, top_face: bool = False) -> List[Edge]:
+    def get_edges(self, top_face: bool = False):
         if not top_face:
             return self.edges
 
         # if these edges refer to top face, correct the indexes
         return [Edge(
-            e.block_index_1 + 4,
-            e.block_index_2 + 4,
+            e.index_1 + 4,
+            e.index_2 + 4,
             e.points, e.kind) for e in self.edges]
 
     def translate(self, displacement:List):

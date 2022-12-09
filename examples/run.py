@@ -4,7 +4,7 @@ import os
 # uncomment the example you wish to run
 
 # primitive
-# from examples.primitive import from_points as example
+from examples.primitive import from_points as example
 
 # operations
 # from examples.operation import extrude as example
@@ -39,12 +39,12 @@ import os
 # advanced
 # from examples.advanced import project as example # projection to STL surface
 # from examples.advanced import sphere as example # flow around sphere
-from examples.advanced import merged as example
+# from examples.advanced import merged as example
 
 # objects
 #from examples.objects import t_pipe as example
 
 mesh = example.get_mesh()
 
-mesh.write(output_path=os.path.join('case', 'system', 'blockMeshDict'), debug_path='debug.vtk')
-os.system("case/Allrun.mesh")
+#mesh.write(output_path=os.path.join('case', 'system', 'blockMeshDict'), debug_path='debug.vtk')
+#os.system("case/Allrun.mesh")

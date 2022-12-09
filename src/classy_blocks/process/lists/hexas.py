@@ -1,15 +1,17 @@
 from typing import List, Set, Union
 
-from classy_blocks.define.grading import Grading
+from classy_blocks.process.items.hexa import Hexa
+
+from classy_blocks.process.grading import Grading
 from classy_blocks.define.block import Block
 from classy_blocks.construct.operations import Operation
 from classy_blocks.construct.shapes import Shape
 
-class BlockList:
+class HexaList:
     """ Handling of the 'blocks' part of blockMeshDict, along with
     count/grading propagation and whatnot """
     def __init__(self):
-        self.blocks:List[Block] = []
+        self.hexas:List[Hexa] = []
 
         # a list, parallel to self.blocks, containing each block's neighbours (also a list of indexes)
         # will be assigned by Mesh.write()
@@ -19,13 +21,14 @@ class BlockList:
         # will be assigned by Mesh.write()
         self.gradings:List[List[Grading]] = []
 
-    def add(self, block:Union[Block, Operation, Shape]) -> None:
+    def add(self, block:Block) -> None:
         """ Adds a block to this list """
-        block.index = len(self.blocks)
+        hexa = Hexa(block, len(self.hexas))
+        self.hexas.append(hexa)
 
+        # add an entry for later
         self.neighbours.append(set())
         self.gradings.append([Grading(), Grading(), Grading()])
-        self.blocks.append(block)
 
     def collect_neighbours(self) -> None:
         """ Generates a list that defines neighbours for each blocks;
@@ -163,7 +166,7 @@ class BlockList:
         return blist
 
     def __getitem__(self, index):
-        return self.blocks[index]
+        return self.hexas[index]
 
     def __len__(self):
-        return len(self.blocks)
+        return len(self.hexas)

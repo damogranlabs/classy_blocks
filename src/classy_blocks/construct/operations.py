@@ -10,7 +10,6 @@ import numpy as np
 
 from classy_blocks import types
 
-from classy_blocks.define.edge import Edge
 from classy_blocks.define.block import Block
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.util import functions as f
@@ -32,7 +31,7 @@ class Operation:
 
         self.side_edges = []
 
-    def add_side_edge(self, index:int, points:types.EdgePointsType, kind:Optional[types.EdgeKindType]=None):
+    def add_side_edge(self, index:int, points, kind:Optional[types.EdgeKindType]=None):
         """Add an edge between two vertices at the same
         corner of the lower and upper face (index and index+4 or vice versa)."""
         index = index % 4

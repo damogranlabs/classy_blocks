@@ -1,7 +1,7 @@
 import unittest
 
-from classy_blocks.define.vertex import Vertex
-from classy_blocks.define.edge import Edge
+from classy_blocks.process.items.vertex import Vertex
+from classy_blocks.define.curve import Edge
 from classy_blocks.process.lists.edges import EdgeList
 
 class EdgeListTests(unittest.TestCase):

@@ -10,9 +10,9 @@ PointListType = Union[List[PointType], ArrayLike]
 VectorType = PointType
 
 # edge kinds as per blockMesh's definition
-EdgeKindType = Literal['arc', 'spline', 'simpleSpline', 'polyLine'] #, 'polySpline', 'line']
+EdgeKindType = Literal['arc', 'origin', 'angle', 'spline', 'polyLine', 'project']
 # edges: arc: 1 point, projected: string, everything else: a list of points
-EdgePointsType = Union[PointType, PointListType, str]
+EdgeDataType = Union[PointType, PointListType, str]
 
 # block sides
 OrientType = Literal['left, right', 'front', 'back', 'top', 'bottom']

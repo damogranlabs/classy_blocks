@@ -2,23 +2,21 @@ from classy_blocks import Face, Loft, Mesh
 
 def get_mesh():
     # Example geometry using Loft:
-    bottom_face = Face(
-        [ # vertices
-            [0, 0, 0], # 0
-            [1, 0, 0], # 1
-            [1, 1, 0], # 2
-            [0, 1, 0]  # 3
-        ])
+    bottom_face = Face([
+        [0, 0, 0], # 0
+        [1, 0, 0], # 1
+        [1, 1, 0], # 2
+        [0, 1, 0]  # 3
+    ])
     bottom_face.add_edge(0, [0.5, -0.25, 0]) # edge between 0 and 1
     bottom_face.add_edge(2, [0.5, 1.25, 0])
 
-    top_face = Face(
-        [ #
-            [0, 0, 2], # 4
-            [1, 0, 2], # 5
-            [1, 1, 2], # 6
-            [0, 1, 2]  # 7
-        ])
+    top_face = Face([
+        [0, 0, 2], # 4
+        [1, 0, 2], # 5
+        [1, 1, 2], # 6
+        [0, 1, 2]  # 7
+    ])
     top_face.add_edge(1, [1.25, 0.5, 2])
     top_face.add_edge(3, [-0.25, 0.5, 2])
 

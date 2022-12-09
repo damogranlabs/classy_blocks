@@ -1,24 +1,33 @@
-from typing import Optional
+from typing import Optional, List
 
+from classy_blocks.define.block import Block
 from classy_blocks.util import constants, tools
-from classy_blocks.util import functions as g
 
+
+from classy_blocks.process.items.hexa import Hexa
+
+from classy_blocks.process.lists.hexas import HexaList
 from classy_blocks.process.lists.vertices import VertexList
-from classy_blocks.process.lists.blocks import BlockList
 from classy_blocks.process.lists.edges import EdgeList
 from classy_blocks.process.lists.boundary import Boundary
 from classy_blocks.process.lists.faces import FaceList
 from classy_blocks.process.lists.geometry import GeometryList
 
+
+
 class Mesh:
     """contains blocks, edges and all necessary methods for assembling blockMeshDict"""
     def __init__(self):
+        self.hexas = HexaList()
+
         self.vertices = VertexList()
         self.edges = EdgeList()
-        self.blocks = BlockList()
-        self.boundary = Boundary()
-        self.faces = FaceList()
-        self.geometry = GeometryList()
+        
+        #self.boundary = Boundary()
+
+
+        #self.faces = FaceList()
+        #self.geometry = GeometryList()
 
         self.settings = {
             # TODO: test output
@@ -39,17 +48,18 @@ class Mesh:
         """Add a classy_blocks entity to the mesh;
         can be a block, created from points (Block.create_from_points()),
         Operation, Shape or Object."""
+        # TODO: make this more pythonic
         if hasattr(item, "block"):
-            self.blocks.add(item.block)
+            self.hexas.add_block(item.block)
         elif hasattr(item, "blocks"):
             for block in item.blocks:
-                self.blocks.add(block)
+                self.hexas.add_block(block)
         else:
-            self.blocks.add(item)
+            self.hexas.add_block(item)
 
         # TODO: TEST
-        if hasattr(item, "geometry"):
-            self.add_geometry(item.geometry)
+        #if hasattr(item, "geometry"):
+        #    self.add_geometry(item.geometry)
 
     def merge_patches(self, master:str, slave:str) -> None:
         """Merges two non-conforming named patches using face merging;
@@ -74,22 +84,24 @@ class Mesh:
     def prepare(self, debug_path=None):
         """Collect all objects and prepare them to write to blockMeshDict;
         but don't write them out yet;"""
-        self.vertices.collect(self.blocks, self.patches['merged'])
+        self.vertices.collect(self.hexas, self.patches['merged'])
 
-        if debug_path is not None:
-            tools.write_vtk(debug_path, self.vertices, self.blocks)
+        #if debug_path is not None:
+        #    tools.write_vtk(debug_path, self.vertices, self.blocks)
 
-        self.edges.collect(self.blocks)
-        self.blocks.assemble()
+        #self.edges.collect(self.blocks)
+        #self.blocks.assemble()
 
-        self.boundary.collect(self.blocks)
-        self.faces.collect(self.blocks)
+        #self.boundary.collect(self.blocks)
+        #self.faces.collect(self.blocks)
 
     def write(self, output_path:str, debug_path:Optional[str]=None) -> None:
         """Writes a blockMeshDict to specified location. If debug_path is specified,
         a VTK file is created first where each block is a single cell, to see simplified
         blocking in case blockMesh fails with an unfriendly error message."""
         self.prepare(debug_path)
+
+        return
 
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(constants.MESH_HEADER)
