@@ -11,7 +11,7 @@ from classy_blocks.util import constants
 
 import numpy as np
 
-from classy_blocks.process.items.vertex import Vertex
+from classy_blocks.define.point import Point
 
 from classy_blocks.util import functions as f
 from classy_blocks.util import constants
@@ -118,27 +118,9 @@ def arc_from_origin(edge_point_1:PointType, edge_point_2:PointType, center:Point
     # done, return the calculated point
     return arc_mid(axis, center, radius, edge_point_1, edge_point_2)
 
-# def verify_local_indexes(index_1:int, index_2:int) -> bool:
-#     lower_face = [0, 1, 2, 3, 0]
-
-#     if index_1 < 4 and index_2 < 4:
-#         check = lower_face
-#     elif index_1 > 3 and index_2 > 3:
-#         check = upper_face
-#     else:
-#         assert abs(index_1 - index_2) == 4
-
-#     location_1 = check.index(index_1)
-#     location_2 = check.index(index_2)
-
-#     return abs(location_1 - location_2) == 1
-
 @dataclasses.dataclass
-class Curve(abc.ABC):
+class Edge(abc.ABC):
     """Stores information about an edge before it's processed"""
-    index_1: int # block-local indexes
-    index_2: int
-
     point_1: PointType # points at given indexes, informational only
     point_2: PointType
 
@@ -168,7 +150,7 @@ class Curve(abc.ABC):
 
     def scale(self, ratio:float, origin):
         """Scales the edge points around given origin"""
-        return self.transform(lambda p: Vertex.scale_point(p, ratio, origin))
+        return self.transform(lambda p: Point.scale_point(p, ratio, origin))
 
     @property
     def is_valid(self):
@@ -183,7 +165,7 @@ class Curve(abc.ABC):
         return True
 
 @dataclasses.dataclass
-class ArcCurve(Curve):
+class ArcEdge(Edge):
     """Stores information about an arc edge before it's processed"""
     kind: ClassVar[str] = 'arc'
     arc_point: PointType
@@ -195,7 +177,7 @@ class ArcCurve(Curve):
         return self
 
 @dataclasses.dataclass
-class OriginCurve(Curve):
+class OriginEdge(Edge):
     """Alternative arc edge specification: origin and radius multiplier"""
     kind: ClassVar[str] = 'origin'
 
@@ -209,7 +191,7 @@ class OriginCurve(Curve):
         return self
 
 @dataclasses.dataclass
-class AngleCurve(Curve):
+class AngleEdge(Edge):
     """Alternative arc edge specification: sector angle and axis"""
     kind: ClassVar[str] = 'angle'
 
@@ -225,7 +207,7 @@ class AngleCurve(Curve):
         return self
 
 @dataclasses.dataclass
-class SplineCurve(Curve):
+class SplineEdge(Edge):
     """Stores information about an arc edge before it's processed"""
     kind: ClassVar[str] = 'spline'
 
@@ -238,41 +220,39 @@ class SplineCurve(Curve):
         return self
 
 @dataclasses.dataclass
-class PolyLineCurve(SplineCurve):
+class PolyLineEdge(SplineEdge):
     """Stores information about an arc edge before it's processed"""
     kind: ClassVar[str] = 'polyLine'
 
 @dataclasses.dataclass
-class ProjectedCurve(Curve):
+class ProjectedEdge(Edge):
     """Stores information about an edge, projected to specified geometry"""
     kind: ClassVar[str] = 'project'
 
     geometry: str
 
-class CurveFactory:
+class EdgeFactory:
     """Creating different edges"""
     def __init__(self):
         self.kinds = {}
 
-    def register_kind(self, creator:Type[Curve]) -> None:
+    def register_kind(self, creator:Type[Edge]) -> None:
         """Introduces a new edge kind to this factory"""
         self.kinds[creator.kind] = creator
 
     def create(self, *args):
         """Creates an Edge of the desired kind and returns it"""
         # all definitions begin with
-        # index_1: int
-        # index_2: int
         # point_1: PointType
         # point_2: PointType
         args = list(args)
-        kind = self.kinds[args.pop(4)]
+        kind = self.kinds[args.pop(2)]
         return kind(*args)
 
-factory = CurveFactory()
-factory.register_kind(ArcCurve)
-factory.register_kind(OriginCurve)
-factory.register_kind(AngleCurve)
-factory.register_kind(SplineCurve)
-factory.register_kind(PolyLineCurve)
-factory.register_kind(ProjectedCurve)
+factory = EdgeFactory()
+factory.register_kind(ArcEdge)
+factory.register_kind(OriginEdge)
+factory.register_kind(AngleEdge)
+factory.register_kind(SplineEdge)
+factory.register_kind(PolyLineEdge)
+factory.register_kind(ProjectedEdge)

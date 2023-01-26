@@ -8,13 +8,12 @@ tol = 1e-7
 # according to this sketch: https://www.openfoam.com/documentation/user-guide/blockMesh.php
 # the same for all blocks
 FACE_MAP = {
-    # orient: (local indexes)
-    "bottom": (0, 1, 2, 3),
-    "top": (4, 5, 6, 7),
-    "left": (4, 0, 3, 7),
-    "right": (5, 1, 2, 6),
-    "front": (4, 5, 1, 0),
-    "back": (7, 6, 2, 3),
+    'bottom': (0, 1, 2, 3),
+    'top': (4, 5, 6, 7),
+    'left': (4, 0, 3, 7),
+    'right': (5, 1, 2, 6),
+    'front': (4, 5, 1, 0),
+    'back': (7, 6, 2, 3),
 }
 
 # pairs of vertices (index in block.vertices) along axes
@@ -25,7 +24,7 @@ AXIS_PAIRS = (
 )
 
 # number formatting
-def vector_format(vector):
+def vector_format(vector) -> str:
     # output for edge definitions
     return f"({vector[0]:.8f} {vector[1]:.8f} {vector[2]:.8f})"
 

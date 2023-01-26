@@ -1,5 +1,5 @@
 """Predefined types"""
-from typing import List, Union, Literal
+from typing import List, Union, Literal, Tuple, TypedDict
 from numpy.typing import ArrayLike
 
 # A single point can be specified as a list of floats or as a numpy array
@@ -15,4 +15,4 @@ EdgeKindType = Literal['arc', 'origin', 'angle', 'spline', 'polyLine', 'project'
 EdgeDataType = Union[PointType, PointListType, str]
 
 # block sides
-OrientType = Literal['left, right', 'front', 'back', 'top', 'bottom']
+OrientType = Literal['left', 'right', 'front', 'back', 'top', 'bottom']

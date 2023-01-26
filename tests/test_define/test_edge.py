@@ -1,16 +1,14 @@
-
 import unittest
 
 import numpy as np
-#from classy_blocks.define.vertex import Vertex
-from classy_blocks.define import curve
-#from classy_blocks.define.edge import arc_mid, arc_from_theta, arc_from_origin
-#from classy_blocks.util import functions as f
 
-class CurveTest(unittest.TestCase):
+from classy_blocks.define import edge
+from classy_blocks.define.edge import arc_mid, arc_from_theta, arc_from_origin
+from classy_blocks.util import functions as f
+
+class EdgeTests(unittest.TestCase):
     def test_arc_edge_translate(self):
-        arc_curve = curve.ArcCurve(
-            0, 1,
+        arc_curve = edge.ArcEdge(
             [0, 0, 0], [1, 0, 0],
             [0.5, 0, 0]
         )
@@ -24,12 +22,8 @@ class CurveTest(unittest.TestCase):
         np.testing.assert_array_equal(
             arc_curve.arc_point, [1.5, 1, 1])
 
-        self.assertEqual(arc_curve.index_1, 0)
-        self.assertEqual(arc_curve.index_2, 1)
-
     def test_angle_edge_translate(self):
-        angle_curve = curve.AngleCurve(
-            0, 1,
+        angle_curve = edge.AngleEdge(
             [0, 0, 0], [1, 0, 0],
             np.pi/2, [0, 0, 1]
         )
@@ -46,12 +40,8 @@ class CurveTest(unittest.TestCase):
 
         self.assertEqual(angle_curve.angle, np.pi/2)
 
-        self.assertEqual(angle_curve.index_1, 0)
-        self.assertEqual(angle_curve.index_2, 1)
-
     def test_angle_edge_rotate_1(self):
-        angle_curve = curve.AngleCurve(
-            0, 1,
+        angle_curve = edge.AngleEdge(
             [0, 0, 0], [1, 0, 0],
             np.pi/2, [0, 0, 1]
         )
@@ -66,13 +56,9 @@ class CurveTest(unittest.TestCase):
             angle_curve.axis, [0, 0, 1])
 
         self.assertEqual(angle_curve.angle, np.pi/2)
-        
-        self.assertEqual(angle_curve.index_1, 0)
-        self.assertEqual(angle_curve.index_2, 1)
 
     def test_angle_edge_rotate_2(self):
-        angle_curve = curve.AngleCurve(
-            0, 1,
+        angle_curve = edge.AngleEdge(
             [0, 0, 0], [1, 0, 0],
             np.pi/2, [0, 0, 1]
         )
@@ -88,12 +74,8 @@ class CurveTest(unittest.TestCase):
 
         self.assertEqual(angle_curve.angle, np.pi/2)
 
-        self.assertEqual(angle_curve.index_1, 0)
-        self.assertEqual(angle_curve.index_2, 1)
-
     def test_spline_edge_translate(self):
-        spline_curve = curve.SplineCurve(
-            0, 1,
+        spline_curve = edge.SplineEdge(
             [0, 0, 0], [1, 0, 0],
             [
                 [0.25, 0.1, 0],
@@ -117,70 +99,70 @@ class CurveTest(unittest.TestCase):
             ]
         )
 
-class CurveFactoryTests(unittest.TestCase):
+class EdgeFactoryTests(unittest.TestCase):
     """Factory tests; examples from BlockDef.add_edge docstring"""
     def test_arc(self):
         arc_point = [0.5, 0.2, 0]
 
-        crv = curve.factory.create(0, 1, [0, 0, 0], [1, 0, 0],
+        crv = edge.factory.create([0, 0, 0], [1, 0, 0],
             'arc', arc_point)
 
-        self.assertIsInstance(crv, curve.ArcCurve)
+        self.assertIsInstance(crv, edge.ArcEdge)
         self.assertListEqual(arc_point, crv.arc_point)
 
     def test_default_origin(self):
         origin = [0.5, -0.5, 0]
         flatness = 2
-        crv = curve.factory.create(0, 1, [0, 0, 0], [1, 0, 0],
+        crv = edge.factory.create([0, 0, 0], [1, 0, 0],
             'origin', origin, flatness)
 
-        self.assertIsInstance(crv, curve.OriginCurve)
+        self.assertIsInstance(crv, edge.OriginEdge)
         self.assertListEqual(origin, crv.origin)
         self.assertEqual(flatness, crv.flatness)
 
     def test_flat_origin(self):
         origin = [0.5, -0.5, 0]
-        crv = curve.factory.create(0, 1, [0, 0, 0], [1, 0, 0],
+        crv = edge.factory.create([0, 0, 0], [1, 0, 0],
             'origin', origin)
 
-        self.assertIsInstance(crv, curve.OriginCurve)
+        self.assertIsInstance(crv, edge.OriginEdge)
         self.assertListEqual(origin, crv.origin)
         self.assertEqual(1, crv.flatness)
 
     def test_angle(self):
         angle = np.pi/6
         axis = [0, 0, 1]
-        crv = curve.factory.create(0, 1, [0, 0, 0], [1, 0, 0],
+        crv = edge.factory.create([0, 0, 0], [1, 0, 0],
             'angle', angle, axis)
 
-        self.assertIsInstance(crv, curve.AngleCurve)
+        self.assertIsInstance(crv, edge.AngleEdge)
         self.assertEqual(angle, crv.angle)
         self.assertListEqual(axis, crv.axis)
 
     def test_spline(self):
         points = [[0.3, 0.25, 0], [0.6, 0.1, 0], [0.3, 0.25, 0]]
-        crv = curve.factory.create(0, 1, [0, 0, 0], [1, 0, 0],
+        crv = edge.factory.create([0, 0, 0], [1, 0, 0],
             'spline', points)
 
-        self.assertIsInstance(crv, curve.SplineCurve)
+        self.assertIsInstance(crv, edge.SplineEdge)
         self.assertListEqual(points, crv.points)
 
     def test_polyline_edge(self):
         points = [[0.3, 0.25, 0], [0.6, 0.1, 0], [0.3, 0.25, 0]]
 
-        crv = curve.factory.create(0, 1, [0, 0, 0], [1, 0, 0],
+        crv = edge.factory.create([0, 0, 0], [1, 0, 0],
             'polyLine', points)
 
-        self.assertIsInstance(crv, curve.PolyLineCurve)
-        self.assertIsInstance(crv, curve.SplineCurve)
+        self.assertIsInstance(crv, edge.PolyLineEdge)
+        self.assertIsInstance(crv, edge.SplineEdge)
         self.assertListEqual(points, crv.points)
 
     def test_projected_edge(self):
         geometry = 'terrain'
-        crv = curve.factory.create(0, 1, [0, 0, 0], [1, 0, 0],
+        crv = edge.factory.create([0, 0, 0], [1, 0, 0],
             'project', geometry)
         
-        self.assertIsInstance(crv, curve.ProjectedCurve)
+        self.assertIsInstance(crv, edge.ProjectedEdge)
         self.assertEqual(crv.geometry, geometry)
 
 
@@ -300,56 +282,53 @@ class CurveFactoryTests(unittest.TestCase):
 
 #         np.testing.assert_array_almost_equal(r.points, [f.rotate(p, angle, axis="x") for p in points])
 
-# class AlternativeArcTests(unittest.TestCase):
-#     unit_sq_corner = f.vector(2**0.5/2, 2**0.5/2, 0)
+class AlternativeArcTests(unittest.TestCase):
+    unit_sq_corner = f.vector(2**0.5/2, 2**0.5/2, 0)
 
-#     def test_arc_mid(self):
-#         axis = f.vector(0, 0, 1)
-#         center = f.vector(0, 0, 0)
-#         radius = 1
-#         edge_point_1 = f.vector(1, 0, 0)
-#         edge_point_2 = f.vector(0, 1, 0)
+    def test_arc_mid(self):
+        axis = f.vector(0, 0, 1)
+        center = f.vector(0, 0, 0)
+        radius = 1
+        edge_point_1 = f.vector(1, 0, 0)
+        edge_point_2 = f.vector(0, 1, 0)
 
-#         np.testing.assert_array_almost_equal(
-#             arc_mid(axis, center, radius, edge_point_1, edge_point_2),
-#             self.unit_sq_corner
-#         )
+        np.testing.assert_array_almost_equal(
+            arc_mid(axis, center, radius, edge_point_1, edge_point_2),
+            self.unit_sq_corner
+        )
 
-#     def test_arc_from_theta(self):
-#         edge_point_1 = f.vector(0, 1, 0)
-#         edge_point_2 = f.vector(1, 0, 0)
-#         angle = np.pi/2
-#         axis = f.vector(0, 0, -1)
+    def test_arc_from_theta(self):
+        edge_point_1 = f.vector(0, 1, 0)
+        edge_point_2 = f.vector(1, 0, 0)
+        angle = np.pi/2
+        axis = f.vector(0, 0, -1)
 
-#         np.testing.assert_array_almost_equal(
-#             arc_from_theta(edge_point_1, edge_point_2, angle, axis),
-#             self.unit_sq_corner
-#         )
+        np.testing.assert_array_almost_equal(
+            arc_from_theta(edge_point_1, edge_point_2, angle, axis),
+            self.unit_sq_corner
+        )
 
-#     def test_arc_from_origin(self):
-#         edge_point_1 = f.vector(0, 1, 0)
-#         edge_point_2 = f.vector(1, 0, 0)
-#         center = f.vector(0, 0, 0)
+    def test_arc_from_origin(self):
+        edge_point_1 = f.vector(0, 1, 0)
+        edge_point_2 = f.vector(1, 0, 0)
+        center = f.vector(0, 0, 0)
 
-#         np.testing.assert_array_almost_equal(
-#             arc_from_origin(edge_point_1, edge_point_2, center),
-#             self.unit_sq_corner
-#         )
+        np.testing.assert_array_almost_equal(
+            arc_from_origin(edge_point_1, edge_point_2, center),
+            self.unit_sq_corner
+        )
 
-#     def test_arc_from_origin_warn(self):
-#         edge_point_1 = f.vector(0, 1, 0)
-#         edge_point_2 = f.vector(1.1, 0, 0)
-#         center = f.vector(0, 0, 0)
+    def test_arc_from_origin_warn(self):
+        edge_point_1 = f.vector(0, 1, 0)
+        edge_point_2 = f.vector(1.1, 0, 0)
+        center = f.vector(0, 0, 0)
 
-#         with self.assertWarns(Warning):
-#             adjusted_point = arc_from_origin(edge_point_1, edge_point_2, center)
+        with self.assertWarns(Warning):
+            adjusted_point = arc_from_origin(edge_point_1, edge_point_2, center)
         
-#         expected_point = f.vector(0.75743894, 0.72818283, 0)
+        expected_point = f.vector(0.75743894, 0.72818283, 0)
         
-#         np.testing.assert_array_almost_equal(
-#             adjusted_point,
-#             expected_point
-#         )
-
-# if __name__ == "__main__":
-#     unittest.main()
+        np.testing.assert_array_almost_equal(
+            adjusted_point,
+            expected_point
+        )

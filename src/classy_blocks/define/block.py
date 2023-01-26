@@ -1,34 +1,23 @@
 """Contains all data to place a block into mesh."""
-from typing import List, Literal, Union, Tuple, Optional, Dict
-from classy_blocks.types import \
-    OrientType, \
-    PointListType, PointType, VectorType, EdgeKindType, EdgeDataType
+from typing import List, Union, Dict
 
 import warnings
 
-from classy_blocks.process.items.vertex import Vertex
-from classy_blocks.define import curve
+from classy_blocks.types import OrientType, EdgeKindType
 
-from classy_blocks.util import functions as f
+from classy_blocks.define.point import Point
+from classy_blocks.define.side import Side
+from classy_blocks.define import edge
+
 from classy_blocks.util import constants as c
-
-class Side:
-    """Data about one of block's sides"""
-    def __init__(self, orient:Literal['left', 'right', 'front', 'back', 'top', 'bottom']):
-        self.orient = orient
-
-        # whether this block side belongs to a patch
-        self.patch:Optional[str] = None
-        # project to a named searchable surface?
-        self.project:Optional[str] = None
 
 class Block:
     """a direct representation of a blockMesh block;
     contains all necessary data to create it."""
-    def __init__(self, points: PointListType):
+    def __init__(self, points: List[Point]):
         # a list of 8 Vertex and Edge objects for each corner/edge of the block
         self.points = points
-        self.curves: List[curve.Curve] = []
+        self.edges: List[edge.Edge] = []
 
         # generate Side objects:
         self.sides:Dict[OrientType, Side] = {o:Side(o) for o in c.FACE_MAP}
@@ -96,16 +85,14 @@ class Block:
 
         # add points for definition
         args = [
-            index_1,
-            index_2,
             self.points[index_1],
             self.points[index_2],
             kind
         ] + list(args)
 
-        self.curves.append(curve.factory.create(*args))
+        self.edges.append(edge.factory.create(*args))
 
-    def set_patch(self, orients: Union[str, List[str]], patch_name: str) -> None:
+    def set_patch(self, orients: Union[OrientType, List[OrientType]], patch_name: str) -> None:
         """assign one or more block faces (constants.FACE_MAP)
         to a chosen patch name"""
         # see patches: an example in __init__()

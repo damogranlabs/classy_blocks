@@ -1,8 +1,8 @@
 from typing import List, Optional
 
-from classy_blocks.define.curve import Curve
+from classy_blocks.define.edge import Edge
 
-from classy_blocks.process.items.vertex import Vertex
+from classy_blocks.define.point import Point
 from classy_blocks.process.items.hexa import Hexa
 from classy_blocks.process.items.edge import Edge, factory
 
@@ -12,7 +12,7 @@ class EdgeList:
     def __init__(self):
         self.edges = []
     
-    def find(self, vertex_1:Vertex, vertex_2:Vertex):
+    def find(self, vertex_1:Point, vertex_2:Point):
         """checks if an edge with the same pair of vertices
         exists in self.edges already"""
         for e in self.edges:
@@ -23,7 +23,7 @@ class EdgeList:
 
         return None
 
-    def add(self, vertex_1:Vertex, vertex_2:Vertex, curve:Curve):
+    def add(self, vertex_1:Point, vertex_2:Point, curve:Edge):
         if self.find(vertex_1, vertex_2) is not None:
             # don't overwrite an existing edge
             return

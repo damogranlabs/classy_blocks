@@ -2,16 +2,16 @@ import abc
 
 from typing import Type, ClassVar
 
-from classy_blocks.process.items.vertex import Vertex
-from classy_blocks.define.curve import Curve
+from classy_blocks.define.point import Point
+from classy_blocks.define.edge import Edge
 
 import dataclasses
 
 @dataclasses.dataclass
 class Edge(abc.ABC):
-    vertex_1:Vertex
-    vertex_2:Vertex
-    curve:Curve
+    vertex_1:Point
+    vertex_2:Point
+    curve:Edge
 
     kind: ClassVar[str] = ''
 
@@ -270,7 +270,7 @@ class EdgeFactory:
         """Introduces a new edge kind to this factory"""
         self.kinds[creator.curve.kind] = creator
 
-    def create(self, vertex_1:Vertex, vertex_2:Vertex, curve:Curve):
+    def create(self, vertex_1:Point, vertex_2:Point, curve:Edge):
         kind = self.kinds[curve.kind]
         return kind(vertex_1, vertex_2, curve)
 

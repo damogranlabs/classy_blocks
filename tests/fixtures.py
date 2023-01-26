@@ -40,8 +40,6 @@ import dataclasses
 
 from classy_blocks.define.block import Block
 
-from classy_blocks.process.mesh import Mesh
-
 fl:List[List[float]] = [  # points on the 'floor'; z=0
     [0, 0, 0],  # 0
     [1, 0, 0],  # 1
@@ -140,16 +138,3 @@ class FixturedTestCase(unittest.TestCase):
     
     def setUp(self):
         self.blocks = self.get_blocks()
-        self.mesh = Mesh()
-
-    # def add(self):
-    #     """Only add blocks to the mesh, no additional processing"""
-    #     self.mesh.add(self.block_0)
-    #     self.mesh.add(self.block_1)
-    #     self.mesh.add(self.block_2)
-        
-    #def prepare(self):
-    #    """Prepare the mesh for writing"""
-    #    self.add()
-    #    self.mesh.prepare()
-

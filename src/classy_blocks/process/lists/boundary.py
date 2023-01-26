@@ -1,6 +1,6 @@
 from typing import List
 
-from classy_blocks.process.items.vertex import Vertex
+from classy_blocks.define.point import Point
 from classy_blocks.define.block import Block
 
 
@@ -50,7 +50,7 @@ class Boundary:
         return bnd
 
     @staticmethod
-    def format_face(vertices:list[Vertex]) -> str:
+    def format_face(vertices:list[Point]) -> str:
         """Outputs a string that represents a block face in blockMeshDict"""
         assert len(vertices) == 4
 

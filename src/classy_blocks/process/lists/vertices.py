@@ -5,7 +5,7 @@ from classy_blocks.define.block import Block
 
 from classy_blocks.process.items.hexa import Hexa
 
-from classy_blocks.process.items.vertex import Vertex
+from classy_blocks.define.point import Point
 
 from classy_blocks.process.lists.hexas import HexaList
 
@@ -15,9 +15,9 @@ from classy_blocks.util import functions as f
 class VertexList:
     """ Handling of the 'vertices' part of blockMeshDict """
     def __init__(self):
-        self.vertices:List[Vertex] = []
+        self.vertices:List[Point] = []
 
-    def find(self, position:ArrayLike) -> Optional[Vertex]:
+    def find(self, position:ArrayLike) -> Optional[Point]:
         """checks if any of existing vertices in self.vertices are
         in the same location as the passed one; if so, returns
         the existing vertex"""
@@ -37,7 +37,7 @@ class VertexList:
 
                 if found_vertex is None:
                     # add a new vertex
-                    vertex = Vertex(point, len(self.vertices))
+                    vertex = Point(point, len(self.vertices))
 
                     hexa.vertices.append(vertex)
                     self.vertices.append(vertex)

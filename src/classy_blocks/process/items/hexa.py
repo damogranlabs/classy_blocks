@@ -2,9 +2,9 @@ import dataclasses
 
 from typing import List
 
-from classy_blocks.define import curve
+from classy_blocks.define import edge
 from classy_blocks.define.block import Block
-from classy_blocks.process.items import vertex
+from classy_blocks.define import point
 
 class Hexa:
     """Actual entry in blockMeshDict.blocks, generated from Block"""
@@ -12,7 +12,7 @@ class Hexa:
         self.block = block
         self.index = index # position of this hex in the list
 
-        self.vertices:List[vertex.Vertex] = []
+        self.vertices:List[point.Point] = []
 
     ###
     ### Information

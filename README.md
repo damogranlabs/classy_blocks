@@ -257,42 +257,20 @@ are aware of their neighbours (blocks use the same vertices, edges) and can writ
 1. Modification of placed geometry, either by manually moving vertices or by utilizing some sort of optimization algorithm.
 1. Output of optimized/modified mesh.
 
-There is a distinct difference between user-entered, unaware data and processed/optimized stuff. Because of that, it is necessary to separate underlying objects or things get messy very quickly. With different objects come different names - the user doesn't have to know that but for the programmer it is vital to distinguish between entities described below.
-
 ## Classy Lingo (Terminology)
 
 User-provided data and object that's created from it:
-- `Points` are simply lists of floats or numpy arrays
-- `Block` is defined by points
-- `Block.add_edge()` generates `Curve*` objects
+- `Point` define a point in 3d space and provide transformations (translate, rotate, scale)
+- `Block` is a collection of points, patch names and chopping information
+- `Edge` defines geometry of block curves
 - `Side` refers to block faces - left, right, front, back, top, bottom
 - `Face` is a collection of 4 Points with optional Curves between them. It is used as a base for Operations and Shapes.
+- `Patch` defines patches - name, type, locations
 
-After everything has been added, `Mesh.prepare()` generates new objects:
-- Points become `Vertex` objects
-- Blocks become `Hex` objects and share Vertices from above
-- Curves become `Edge*` objects and are distributed throughout Hexes that share them
-- Sides still refer to faces of Hexes
-- A Face isn't an object but a plain entry in blockMeshDict - projected block sides.
+The original objects are referred to after they are added to mesh but new ones are created:
+- `Vertex` connects a Point with an index in blockMeshDict
+- `BlockOps` can now tell block size and move vertices and edges
 
-To sum up:
-- Users enter `Point` - `Curve` - `Block`
-- classy_blocks prepares `Vertex` - `Edge` - `Hex`
-
-To keep things simple for users, the Curve is refered to as 'edge' when defining blocks, everything else remains as-is.
-
-## Classes
-
-These contain data to be written to blockMeshDict and also methods for point manipulation and output formatting.
-
-- `Vertex`: an object containing (x, y, z) point and its index in blockMesh. Also formats output so OpenFOAM can read
-  it.
-- `Edge`: a collection of two `Vertex` indexes and a number of `Point`s in between
-- `Face`: a collection of exactly 4 `Vertex`es and optionally 4 `Edge`s. If only some of the 4 edges are curved a `None`
-  can be passed instead of a list of edge points.
-- `Block`: contains `Vertex` and `Edge` objects and other block data: patches, number of cells, grading, cell zone,
-  description.
-- `Mesh`: holds lists of all blockMeshDict data: `Vertex`, `Edge`, `Block`.
 
 ## Block Creation
 
@@ -307,19 +285,6 @@ intricate calculations of points and edges.
 Once blocks are created, additional data must/may be added (number of cells, grading, patches, projections).
 Finally, all blocks must be added to Mesh. That will prepare data for blockMesh and create a blockMeshDict from a
 template.
-
-## Data Preparation
-
-After all blocks have been added, an instance of `Mesh` class only contains a list of blocks. Each block self-contains
-its own data. Since blocks share vertices and edges and blockMesh needs separate lists of both, `Mesh.write()`
-will translate all individual blocks' data to format blockMesh will understand:
-
-- collect new vertices and re-use existing ones
-- collect block edges, skipping duplicates
-- run count and grading calculations on blocks where those are set
-- assign neighbours of each block, then try to propagate cell counts and gradings through the whole mesh; if that fails,
-  an `Exception` is raised
-- gather a list of projected faces and edges
 
 # TODO
 - Unchecked list items from [Features](#features)
