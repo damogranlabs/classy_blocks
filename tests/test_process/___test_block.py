@@ -1,7 +1,7 @@
 import unittest
 
-from classy_blocks.define.block import Block
-from classy_blocks.process.mesh import Mesh
+from classy_blocks.data.block import BlockData
+from classy_blocks.mesh import Mesh
 
 from tests.fixtures import FixturedTestCase
 
@@ -65,7 +65,7 @@ class BlockTests(FixturedTestCase):
             [0.5, 1, 1],  # 7
         ]
 
-        block = Block.create_from_points(block_points)
+        block = BlockData.create_from_points(block_points)
         for i in range(3):
             block.chop(i, count=10)
 
@@ -95,13 +95,13 @@ class BlockTests(FixturedTestCase):
         # ceiling
         cl = [[p[0], p[1], 1] for p in fl]
 
-        block_0 = Block.create_from_points([fl[0], fl[1], fl[2], fl[3], cl[0], cl[1], cl[2], cl[3]])
+        block_0 = BlockData.create_from_points([fl[0], fl[1], fl[2], fl[3], cl[0], cl[1], cl[2], cl[3]])
         block_0.chop(0, count=10)
         block_0.chop(1, count=10)
         block_0.chop(2, start_size=0.02, end_size=0.1)
 
         # block_1 is created upside-down
-        block_1 = Block.create_from_points(
+        block_1 = BlockData.create_from_points(
             [
                 cl[2],
                 cl[5],
@@ -118,7 +118,7 @@ class BlockTests(FixturedTestCase):
         self.mesh = Mesh()
         self.mesh.add(block_0)
         self.mesh.add(block_1)
-        self.mesh.prepare()
+        self.mesh.compile()
 
         # TODO: also check in real life that calculations are good enough for blockMesh
         self.assertAlmostEqual(
@@ -242,14 +242,14 @@ class BlockSizingTests(unittest.TestCase):
             [1, 1, 1],
             [0, 1, 1],
         ]
-        self.block = Block.create_from_points(points)
+        self.block = BlockData.create_from_points(points)
 
         for i in range(3):
             self.block.chop(i, count=1)
 
         self.mesh = Mesh()
         self.mesh.add(self.block)
-        self.mesh.prepare()
+        self.mesh.compile()
 
     def test_min_block_size(self):
         self.assertAlmostEqual(self.block.get_size(0, take="min"), 1)

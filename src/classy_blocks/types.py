@@ -1,5 +1,5 @@
 """Predefined types"""
-from typing import List, Union, Literal, Tuple, TypedDict
+from typing import List, Union, Literal
 from numpy.typing import ArrayLike
 
 # A single point can be specified as a list of floats or as a numpy array

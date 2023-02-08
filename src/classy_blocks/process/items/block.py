@@ -1,25 +1,40 @@
-import dataclasses
-
 from typing import List
 
-from classy_blocks.define import edge
-from classy_blocks.define.block import Block
-from classy_blocks.define import point
+from classy_blocks.data.block import BlockData
+from classy_blocks.process.items.vertex import Vertex
+from classy_blocks.process.items.edge_ops import EdgeOps
+from classy_blocks.process.grading import Grading
 
-class Hexa:
-    """Actual entry in blockMeshDict.blocks, generated from Block"""
-    def __init__(self, block:Block, index:int):
+class Block:
+    """Further operations on blocks"""
+    def __init__(self, block:BlockData, vertices:List[Vertex], index:int):
         self.block = block
-        self.index = index # position of this hex in the list
+        self.index = index
 
-        self.vertices:List[point.Point] = []
+        self.vertices = vertices
+        self.edges:List[EdgeOps] = []
 
-    ###
-    ### Information
-    ###
-    @property
-    def points(self):
-        return self.block.points
+        # defined later
+        self.neighbours:List[Block] = []
+        self.gradings:List[Grading] = []
+
+    # def convert_gradings(self) -> None:
+    #     """Feeds block.chops to Grading objects"""
+    #     # A list of 3 gradings for each block
+    #     # now is the time to set counts
+    #     for i_block, block in enumerate(self.blocks):
+    #         for i_axis in range(3):
+    #             params = block.chops[i_axis]
+    #             grading = self.gradings[i_block][i_axis]
+
+    #             if len(params) < 1:
+    #                 continue
+
+    #             block_size = block.get_size(i_axis, take=params[0].pop("take", "avg"))
+    #             grading.set_block_size(block_size)
+
+    #             for p in params:
+    #                 grading.add_division(**p)
 
     # def get_side_vertices(self, orient:str) -> List[Vertex]:
     #     """Returns Vertices that define the given side"""

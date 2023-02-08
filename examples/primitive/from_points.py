@@ -1,5 +1,5 @@
 #from classy_blocks import Block, Mesh
-from classy_blocks.define.block import Block
+from classy_blocks.data.block import BlockData
 
 from classy_blocks.types import PointListType
 
@@ -7,7 +7,7 @@ def get_mesh():
     mesh = Mesh()
 
     # the most low-level way of creating a block is from 'raw' points
-    block = Block([
+    block = BlockData([
         [0, 0, 0],
         [1, 0, 0],
         [1, 1, 0],

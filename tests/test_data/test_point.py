@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from classy_blocks.define.point import Point
+from classy_blocks.data.point import Point
 
 class PointTests(unittest.TestCase):
     def setUp(self):
@@ -14,7 +14,7 @@ class PointTests(unittest.TestCase):
     
     def test_init_float(self):
         """Accept a list of floats and convert it to numpy array"""
-        self.assertTrue(type(self.point.point) == type(np.array([0, 0, 0])))
+        self.assertTrue(type(self.point.pos) == type(np.array([0, 0, 0])))
     
     def test_assert_3d(self):
         """Raise an exception if the point is not in 3D space"""
@@ -27,7 +27,7 @@ class PointTests(unittest.TestCase):
         delta = [1, 0, 0]
 
         np.testing.assert_array_almost_equal(
-            self.point.translate(delta).point, delta
+            self.point.translate(delta).pos, delta
         )
     
     def test_translate_float(self):
@@ -36,7 +36,7 @@ class PointTests(unittest.TestCase):
         delta = [1.0, 0.0, 0.0]
 
         np.testing.assert_array_almost_equal(
-            self.point.translate(delta).point, delta
+            self.point.translate(delta).pos, delta
         )
     
     def test_rotate(self):
@@ -44,7 +44,7 @@ class PointTests(unittest.TestCase):
         self.coords = [1, 0, 0]
 
         np.testing.assert_array_almost_equal(
-            self.point.rotate(np.pi/2, [0, 0, 1], [0, 0, 0]).point,
+            self.point.rotate(np.pi/2, [0, 0, 1], [0, 0, 0]).pos,
             [0, 1, 0]
         )
 
@@ -53,6 +53,6 @@ class PointTests(unittest.TestCase):
         self.coords = [1, 0, 0]
 
         np.testing.assert_array_almost_equal(
-            self.point.scale(2, [0, 0, 0]).point,
+            self.point.scale(2, [0, 0, 0]).pos,
             [2, 0, 0]
         )

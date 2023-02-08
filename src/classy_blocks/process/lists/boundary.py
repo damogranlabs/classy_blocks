@@ -1,7 +1,7 @@
 from typing import List
 
-from classy_blocks.define.point import Point
-from classy_blocks.define.block import Block
+from classy_blocks.process.items.vertex import Vertex
+from classy_blocks.data.block import BlockData
 
 
 class Boundary:
@@ -10,7 +10,7 @@ class Boundary:
         # A collection {'patch_name': [lists of [list of 4 Vertex objects]]}
         self.patches:dict = {}
 
-    def collect(self, blocks:List[Block]) -> None:
+    def collect(self, blocks:List[BlockData]) -> None:
         """Collects all faces for a patch name from all blocks;
         Block contains patches according to the example in __init__()"""
 
@@ -50,7 +50,7 @@ class Boundary:
         return bnd
 
     @staticmethod
-    def format_face(vertices:list[Point]) -> str:
+    def format_face(vertices:list[Vertex]) -> str:
         """Outputs a string that represents a block face in blockMeshDict"""
         assert len(vertices) == 4
 

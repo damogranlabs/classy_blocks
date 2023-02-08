@@ -4,7 +4,7 @@ from numpy.typing import ArrayLike
 
 import numpy as np
 
-from classy_blocks.define.point import Point
+from classy_blocks.process.items.vertex import Vertex
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 from classy_blocks.util import constants
@@ -29,7 +29,7 @@ class Face:
 
             # TODO: coplanar edges?
 
-        self.vertices:List[Point] = [Point(p) for p in points]
+        self.vertices:List[Vertex] = [Vertex(p) for p in points]
 
         self.edges:List[Edge] = [] # add with self.add_edge()
 

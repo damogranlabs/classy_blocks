@@ -1,15 +1,20 @@
 from tests.fixtures import FixturedTestCase
 
-class HexaListTests(FixturedTestCase):
-    def test_add_hexa(self):
-        """Add a single hexa"""
-        self.mesh.add(self.blocks[0])
-        self.mesh.add(self.blocks[1])
-        self.mesh.add(self.blocks[2])
+from classy_blocks.process.lists.block_list import BlockList
 
-        self.assertEqual(len(self.mesh.hexas), 3)
-        self.assertEqual(len(self.mesh.hexas.gradings), 3)
-        self.assertEqual(len(self.mesh.hexas.neighbours), 3)
+class BlockListTests(FixturedTestCase):
+    def setUp(self):
+        self.blocks = self.get_blocks()
+        self.bl = BlockList()
+
+    def test_add(self):
+        """Add a block and check the results"""
+        self.bl.add(self.blocks[0])
+        self.assertEqual(self.bl.blocks[0].index, 0)
+
+        self.bl.add(self.blocks[1])
+        self.assertEqual(self.bl.blocks[1].index, 1)
+
 
     # def test_find_neighbour_success(self):
     #     """hexa_2 must copy hexa_1's cell count and grading on axis 0 and 2"""

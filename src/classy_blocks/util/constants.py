@@ -23,6 +23,13 @@ AXIS_PAIRS = (
     ((0, 4), (1, 5), (2, 6), (3, 7)),  # z
 )
 
+# pairs of vertices between which edges can be defined
+EDGE_PAIRS = tuple(
+    list(AXIS_PAIRS[0]) + \
+    list(AXIS_PAIRS[1]) + \
+    list(AXIS_PAIRS[2])
+)
+
 # number formatting
 def vector_format(vector) -> str:
     # output for edge definitions

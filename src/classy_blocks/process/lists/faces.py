@@ -1,6 +1,6 @@
 from typing import List
 
-from classy_blocks.define.block import Block
+from classy_blocks.data.block import BlockData
 from classy_blocks.process.lists.boundary import Boundary
 
 class FaceList:
@@ -9,7 +9,7 @@ class FaceList:
         # a list of [[4 vertices], 'projected geometry']
         self.faces:List = []
 
-    def collect(self, blocks:List[Block]) -> None:
+    def collect(self, blocks:List[BlockData]) -> None:
         """Gathers projected faces from blocks"""
         for block in blocks:
             # TODO: check for existing faces

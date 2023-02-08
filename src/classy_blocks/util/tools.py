@@ -1,9 +1,9 @@
 from typing import List
 
-from classy_blocks.define.point import Point
-from classy_blocks.define.block import Block
+from classy_blocks.process.items.vertex import Vertex
+from classy_blocks.data.block import BlockData
 
-def write_vtk(path:str, vertices:List[Point], blocks:List[Block]) -> None:
+def write_vtk(path:str, vertices:List[Vertex], blocks:List[BlockData]) -> None:
     """Generates a simple VTK file where each block is a hexahedral cell;
     useful for debugging blockMesh's FATAL_ERRORs"""
     # A sample VTK file with all cell types; only hexahedrons are used (cell type 12)

@@ -1,15 +1,15 @@
 import unittest
 
-from classy_blocks.define.point import Point
-from classy_blocks.define.edge import Edge
-from classy_blocks.process.lists.edges import EdgeList
+from classy_blocks.process.items.vertex import Vertex
+from classy_blocks.process.items.edge_ops import Edge
+from classy_blocks.process.lists.edge_list import EdgeList
 
 class EdgeListTests(unittest.TestCase):
     def get_list(self, points):
-        vertex_1 = Point([0, 0, 0])
+        vertex_1 = Vertex([0, 0, 0])
         vertex_1.mesh_index = 0
 
-        vertex_2 = Point([1, 0, 0])
+        vertex_2 = Vertex([1, 0, 0])
         vertex_2.mesh_index = 1
 
         edge = Edge(0, 1, points)

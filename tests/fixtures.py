@@ -38,7 +38,7 @@ import unittest
 from typing import List, Optional
 import dataclasses
 
-from classy_blocks.define.block import Block
+from classy_blocks.data.block import BlockData
 
 fl:List[List[float]] = [  # points on the 'floor'; z=0
     [0, 0, 0],  # 0
@@ -58,12 +58,17 @@ class TestBlockData:
     """to store predefined data for test block creation"""
     # points from which to create the block
     points:List[List[float]]
+
     # edges; parameters correspond to block.add_edge() args
     edges:List = dataclasses.field(default_factory=list)
+
     # chop counts (for each axis, use None to not chop)
     counts:List[Optional[int]] = dataclasses.field(default_factory=lambda: [None, None, None])
-    patches:List = dataclasses.field(default_factory=list) # calls to set_patch()
 
+    # calls to set_patch()
+    patches:List = dataclasses.field(default_factory=list) 
+
+    # other thingamabobs
     description:str = ""
     cell_zone:str = ""
 
@@ -112,12 +117,14 @@ block_data = [
 ]
 
 class FixturedTestCase(unittest.TestCase):
+    """Test case with ready-made blocks"""
     @staticmethod
-    def get_blocks():
+    def get_blocks() -> List[BlockData]:
+        """Returns a list of predefined blocks for testing"""
         blocks = []
 
         for data in block_data:
-            block = Block(data.points)
+            block = BlockData(data.points)
         
             for edge in data.edges:
                 block.add_edge(*edge)
@@ -126,8 +133,8 @@ class FixturedTestCase(unittest.TestCase):
                 if count is not None:
                     block.chop(axis, count=count)
 
-            for patch in data.patches:
-                block.set_patch(patch[0], patch[1])
+            # for patch in data.patches:
+            #     block.set_patch(patch[0], patch[1])
             
             block.description = data.description
             block.cell_zone = data.cell_zone

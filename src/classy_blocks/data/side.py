@@ -5,7 +5,7 @@ from typing import Optional
 from classy_blocks.types import OrientType
 
 @dataclasses.dataclass
-class Side:
+class SideData:
     """Data about one of block's sides"""
     orient:OrientType
 

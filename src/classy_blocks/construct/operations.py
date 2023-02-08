@@ -10,36 +10,33 @@ import numpy as np
 
 from classy_blocks import types
 
-from classy_blocks.define.block import Block
+from classy_blocks.base import ObjectBase
+
+from classy_blocks.data.block import BlockData
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.util import functions as f
 
 Op = TypeVar("Op", bound="Operation")
 
 
-class Operation:
+class Operation(ObjectBase):
     """Base of all other operations"""
-
     def __init__(self, bottom_face: Face, top_face: Face):
         self.bottom_face = bottom_face
         self.top_face = top_face
 
         # create a block and assign edges to it
-        self.block = Block.create_from_points(np.concatenate((bottom_face.points, top_face.points)))
-        self.block.edges += bottom_face.get_edges(False)
-        self.block.edges += top_face.get_edges(True)
+        self.block = BlockData(np.concatenate((bottom_face.points, top_face.points)))
+        #self.block.edges += bottom_face.get_edges(False)
+        #self.block.edges += top_face.get_edges(True)
 
-        self.side_edges = []
+        #self.side_edges = []
 
     def add_side_edge(self, index:int, points, kind:Optional[types.EdgeKindType]=None):
         """Add an edge between two vertices at the same
         corner of the lower and upper face (index and index+4 or vice versa)."""
         index = index % 4
         self.side_edges.append(self.block.add_edge(index, index+4, points, kind=kind))
-
-    @property
-    def edges(self):
-        return self.block.edges
 
     def chop(self, axis: int, **kwargs) -> None:
         """Chop the operation (count/grading) in given axis:
@@ -96,6 +93,14 @@ class Operation:
     def set_cell_zone(self, cell_zone: str) -> None:
         """Assign a cellZone to this block."""
         self.block.cell_zone = cell_zone
+
+    @property
+    def blocks(self) -> List[BlockData]:
+        return [self.block]
+
+    @property
+    def edges(self):
+        return self.block.edges
 
 
 class Loft(Operation):

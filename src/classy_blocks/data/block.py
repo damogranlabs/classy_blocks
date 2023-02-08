@@ -1,30 +1,28 @@
-"""Contains all data to place a block into mesh."""
-from typing import List, Union, Dict
+"""Contains all data that user can specify about a Block."""
+from typing import List, Dict
 
-import warnings
+from classy_blocks.types import PointListType, OrientType, EdgeKindType
 
-from classy_blocks.types import OrientType, EdgeKindType
-
-from classy_blocks.define.point import Point
-from classy_blocks.define.side import Side
-from classy_blocks.define import edge
+from classy_blocks.data.side import SideData
+from classy_blocks.data.edge import EdgeData
 
 from classy_blocks.util import constants as c
 
-class Block:
-    """a direct representation of a blockMesh block;
-    contains all necessary data to create it."""
-    def __init__(self, points: List[Point]):
-        # a list of 8 Vertex and Edge objects for each corner/edge of the block
+class BlockData:
+    """User-provided data for a block"""
+    def __init__(self, points: PointListType):
+        # a list of 8 Vertex objects for each corner of the block
         self.points = points
-        self.edges: List[edge.Edge] = []
 
-        # generate Side objects:
-        self.sides:Dict[OrientType, Side] = {o:Side(o) for o in c.FACE_MAP}
+        # a list of *args for Edges
+        self.edges:List[EdgeData] = []
+
+        # Side objects define patch names and projections
+        self.sides:Dict[OrientType, SideData] = {o:SideData(o) for o in c.FACE_MAP}
 
         # block grading;
         # when adding blocks, store chop() parameters;
-        # use them in mesh.write()
+        # BlockOps will use them to create Gradings()
         self.chops = [[], [], []]
 
         # cellZone to which the block belongs to
@@ -84,27 +82,21 @@ class Block:
         # here in Block, Curve objects are created; they are converted to Edges later
 
         # add points for definition
-        args = [
-            self.points[index_1],
-            self.points[index_2],
-            kind
-        ] + list(args)
+        self.edges.append(EdgeData(index_1, index_2, kind, list(args)))
 
-        self.edges.append(edge.factory.create(*args))
+    # def set_patch(self, orients: Union[OrientType, List[OrientType]], patch_name: str) -> None:
+    #     """assign one or more block faces (constants.FACE_MAP)
+    #     to a chosen patch name"""
+    #     # see patches: an example in __init__()
 
-    def set_patch(self, orients: Union[OrientType, List[OrientType]], patch_name: str) -> None:
-        """assign one or more block faces (constants.FACE_MAP)
-        to a chosen patch name"""
-        # see patches: an example in __init__()
+    #     if isinstance(orients, str):
+    #         orients = [orients]
 
-        if isinstance(orients, str):
-            orients = [orients]
+    #     for orient in orients:
+    #         if self.sides[orient].patch is not None:
+    #             warnings.warn(f"Replacing patch {self.sides[orient].patch} with {patch_name}")
 
-        for orient in orients:
-            if self.sides[orient].patch is not None:
-                warnings.warn(f"Replacing patch {self.sides[orient].patch} with {patch_name}")
-
-            self.sides[orient].patch = patch_name
+    #         self.sides[orient].patch = patch_name
 
     def chop(self, axis: int, **kwargs: float) -> None:
         """Set block's cell count/size and grading for a given direction/axis.
@@ -134,16 +126,19 @@ class Block:
             length of current division; see
             https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
         """
-        # Actual Grading will be calculated within mesh.prepare() > process.lists.blocks
         self.chops[axis].append(kwargs)
 
-    def project_face(self, orient:OrientType, geometry: str, edges: bool = False) -> None:
-        """Assign one or more block faces (self.face_map)
-        to be projected to a geometry (defined in Mesh)"""
-        assert orient in c.FACE_MAP
+    # def project_face(self, orient:OrientType, geometry: str, edges: bool = False) -> None:
+    #     """Assign one or more block faces (self.face_map)
+    #     to be projected to a geometry (defined in Mesh)"""
+    #     assert orient in c.FACE_MAP
 
-        self.sides[orient].project = geometry
+    #     self.sides[orient].project = geometry
 
-        if edges:
-            for i in range(4):
-                self.add_edge(i, (i + 1) % 4, 'project', geometry)
+    #     if edges:
+    #         for i in range(4):
+    #             self.add_edge(i, (i + 1) % 4, 'project', geometry)
+
+    @property
+    def blocks(self):
+        return [self]

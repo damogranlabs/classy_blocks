@@ -1,63 +1,67 @@
+import numpy as np
+
 from classy_blocks.util import functions as f
 from classy_blocks.util import constants
 
-from classy_blocks.process.items.hexa import Hexa
-from classy_blocks.process.lists.vertices import VertexList
+from classy_blocks.data.block import BlockData
+from classy_blocks.process.lists.vertex_list import VertexList
 
 from tests.fixtures import FixturedTestCase
 
 class VertexListTests(FixturedTestCase):
     def setUp(self):
         super().setUp()
-        self.hexas = [Hexa(self.blocks[i], i) for i in range(len(self.blocks))]
+        self.blocks = self.get_blocks()
+        self.vlist = VertexList()
 
     def test_collect_vertices_single(self):
         """Collect vertices from a single block"""
-        vertices = VertexList()
-        vertices.collect(self.hexas[:1], [])
+        self.vlist.collect([self.blocks[0]])
 
-        self.assertEqual(len(vertices), 8)
+        self.assertEqual(len(self.vlist.vertices), 8)
 
     def test_collect_vertices_multiple(self):
         """Collect vertices from two touching blocks"""
-        vertices = VertexList()
-        vertices.collect(self.hexas[:2], [])
+        self.vlist.collect(self.blocks[:2])
 
-        self.assertEqual(len(vertices), 12)
+        self.assertEqual(len(self.vlist.vertices), 12)
         
     def test_collect_vertices_indexes(self):
         """Check that the correct vertices are assigned to block
         on collect()"""
-        vertices = VertexList()
-        vertices.collect(self.hexas[:2], [])
+        self.vlist.collect(self.blocks[:2])
 
         # the second block should reuse some vertices
         first_indexes = [0, 1, 2, 3, 4, 5, 6, 7]
         second_indexes = [1, 8, 9, 2, 5, 10, 11, 6]
 
-        self.assertListEqual([v.index for v in self.hexas[0].vertices], first_indexes)
-        self.assertListEqual([v.index for v in self.hexas[1].vertices], second_indexes)
+        # compare collected vertices by position
+        all_points = np.array([v.point for v in self.vlist.vertices])
+        first_points = np.take(all_points, first_indexes, axis=0)
+        second_points = np.take(all_points, second_indexes, axis=0)
+
+        np.testing.assert_array_equal(first_points, self.blocks[0].points)
+        np.testing.assert_array_equal(second_points, self.blocks[1].points)
 
     def test_find(self):
-        vertices = VertexList()
-        vertices.collect(self.hexas[:2], [])
+        self.vlist.collect(self.blocks[:2])
 
         displacement = constants.tol/10
 
-        for i, vertex in enumerate(vertices):
+        for i, vertex in enumerate(self.vlist.vertices):
             # we're searching for this point
             point = vertex.point
 
             # but slightly displaced (well within tolerances)
             point = point + f.vector(displacement, displacement, displacement)
 
-            self.assertEqual(vertices.find(point).index, i)
+            self.assertEqual(self.vlist.find(point).index, i)
 
     def test_find_fail(self):
-        vertices = VertexList()
-        vertices.collect(self.hexas[:1], [])
+        self.vlist.collect([self.blocks[0]])
 
-        self.assertIsNone(vertices.find(f.vector(999, 999, 999)))
+        with self.assertRaises(RuntimeError):
+            self.vlist.find(f.vector(999, 999, 999))
 
     # def test_output(self):
     #     vertices = VertexList()

@@ -1,48 +1,39 @@
-from typing import Optional, List
-from numpy.typing import ArrayLike
+from typing import List
 
-from classy_blocks.define.block import Block
-
-from classy_blocks.process.items.hexa import Hexa
-
-from classy_blocks.define.point import Point
-
-from classy_blocks.process.lists.hexas import HexaList
-
+from classy_blocks.types import PointType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
+
+from classy_blocks.data.block import BlockData
+from classy_blocks.process.items.vertex import Vertex
 
 class VertexList:
     """ Handling of the 'vertices' part of blockMeshDict """
     def __init__(self):
-        self.vertices:List[Point] = []
+        self.vertices:List[Vertex] = []
 
-    def find(self, position:ArrayLike) -> Optional[Point]:
+    def find(self, position:PointType) -> Vertex:
         """checks if any of existing vertices in self.vertices are
         in the same location as the passed one; if so, returns
         the existing vertex"""
-        # TODO: optimize (octree/kdtree from scipy)
+        # TODO: optimize (octree/kdtree from scipy) (?)
         for vertex in self.vertices:
             if f.norm(vertex.point - position) < constants.tol:
                 return vertex
 
-        return None
+        raise RuntimeError(f"Vertex not found: {str(position)}")
 
-    def collect(self, hexas:List[Hexa], merged_patches:List[List[str]]) -> None:
+    def collect(self, blocks:List[BlockData]) -> None:
         """ Collects all vertices from all given blocks,
         checks for duplicates and gives them indexes """
-        for hexa in hexas:
-            for point in hexa.points:
-                found_vertex = self.find(point)
-
-                if found_vertex is None:
-                    # add a new vertex
-                    vertex = Point(point, len(self.vertices))
-
-                    hexa.vertices.append(vertex)
-                    self.vertices.append(vertex)
-                else:
-                    hexa.vertices.append(found_vertex)
+        for block in blocks:
+            for point in block.points:
+                try:
+                    _ = self.find(point)
+                    # TODO: check for face-merged stuff
+                except RuntimeError:
+                    # no vertex was found, add a new one;
+                    self.vertices.append(Vertex(point, len(self.vertices)))
 
         # merged patches: duplicate all points that define slave patches
         # duplicated_points = {}  # { original_index:new_vertex }
@@ -69,26 +60,3 @@ class VertexList:
         #                     else:
         #                         block.vertices[i] = duplicated_points[vertex.mesh_index]
 
-    def __getitem__(self, index):
-        return self.vertices[index]
-
-    def __len__(self):
-        return len(self.vertices)
-
-    def __iter__(self):
-        return iter(self.vertices)
-
-    def output(self):
-        """ Returns a string of vertices to be written to blockMeshDict """
-        vlist = "vertices\n"
-        vlist += "(\n"
-
-        for vertex in self.vertices:
-            vlist += "\t{} // {}\n".format(
-                constants.vector_format(vertex.point),
-                vertex.index
-        )
-
-        vlist += ");\n\n"
-
-        return vlist
