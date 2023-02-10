@@ -96,7 +96,7 @@ block_data = [
         ],
         edges=[
             [3, 0, 'arc', [0.5, -0.1, 1]], # duplicated edge in block 2 that must not be included
-            [0, 1, 'arc', [1.5, 0, 0]]  # collinear point; invalid edge must be dropped
+            [0, 1, 'arc', [0.5, 0, 0]]  # collinear point; invalid edge must be dropped
         ],
         counts=[5, 6, None],
         patches=[

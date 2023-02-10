@@ -3,8 +3,8 @@ import unittest
 import os
 
 from classy_blocks.util import grading_calculator as gc
-from classy_blocks.process import grading
-from classy_blocks.process.grading import Grading
+from classy_blocks import grading
+from classy_blocks.grading import Grading
 
 # numbers are calculated with the calculator all this is 'borrowed' from
 # https://openfoamwiki.net/index.php/Scripts/blockMesh_grading_calculation

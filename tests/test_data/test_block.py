@@ -17,6 +17,13 @@ class BlockTests(unittest.TestCase):
         for i, data in enumerate(block_data):
             self.assertEqual(len(data.counts), len(self.blocks[i].chops))
 
+    def test_get_edge_success(self):
+        self.assertEqual(self.blocks[0].get_edge(0, 1).kind, 'arc')
+    
+    def test_get_edge_fail(self):
+        with self.assertRaises(RuntimeError):
+            self.blocks[0].get_edge(2, 3)
+
     def test_patches(self):
         for i, data in enumerate(block_data):
             for patch in data.patches:

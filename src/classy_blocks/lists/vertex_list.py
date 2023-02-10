@@ -1,11 +1,13 @@
 from typing import List
 
+import numpy as np
+
 from classy_blocks.types import PointType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
-from classy_blocks.data.block import BlockData
-from classy_blocks.process.items.vertex import Vertex
+from classy_blocks.data.point import Point
+from classy_blocks.items.vertex import Vertex
 
 class VertexList:
     """ Handling of the 'vertices' part of blockMeshDict """
@@ -18,22 +20,27 @@ class VertexList:
         the existing vertex"""
         # TODO: optimize (octree/kdtree from scipy) (?)
         for vertex in self.vertices:
-            if f.norm(vertex.point - position) < constants.tol:
+            if f.norm(vertex - np.asarray(position)) < constants.tol:
                 return vertex
 
         raise RuntimeError(f"Vertex not found: {str(position)}")
 
-    def collect(self, blocks:List[BlockData]) -> None:
-        """ Collects all vertices from all given blocks,
-        checks for duplicates and gives them indexes """
-        for block in blocks:
-            for point in block.points:
-                try:
-                    _ = self.find(point)
-                    # TODO: check for face-merged stuff
-                except RuntimeError:
-                    # no vertex was found, add a new one;
-                    self.vertices.append(Vertex(point, len(self.vertices)))
+    def add(self, points:List[Point]) -> List[Vertex]:
+        """Re-use existing vertices when there's already one at the position;"""
+        vertices:List[Vertex] = []
+
+        for point in points:
+            try:
+                vertex = self.find(point)
+                # TODO: check for face-merged stuff
+            except RuntimeError:
+                # no vertex was found, add a new one;
+                vertex = Vertex(point, len(self.vertices))
+                self.vertices.append(vertex)
+            
+            vertices.append(vertex)
+        
+        return vertices
 
         # merged patches: duplicate all points that define slave patches
         # duplicated_points = {}  # { original_index:new_vertex }

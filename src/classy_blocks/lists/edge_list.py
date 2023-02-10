@@ -1,20 +1,23 @@
 from typing import List
 
-from classy_blocks.process.items.vertex import Vertex
-from classy_blocks.process.lists.vertex_list import VertexList
-from classy_blocks.process.lists.block_list import BlockList
+from classy_blocks.util.constants import EDGE_PAIRS
 
-from classy_blocks.process.items.edge_ops import EdgeOps, factory
+from classy_blocks.data.block import BlockData
+from classy_blocks.data.edge import EdgeData
+
+from classy_blocks.items.vertex import Vertex
+
+from classy_blocks.items.edge import Edge, factory
 
 class EdgeList:
     """Handling of the 'edges' part of blockMeshDict"""
     def __init__(self):
-        self.ops:List[EdgeOps] = []
+        self.edges:List[Edge] = []
 
-    def find(self, vertex_1:Vertex, vertex_2:Vertex) -> EdgeOps:
+    def find(self, vertex_1:Vertex, vertex_2:Vertex) -> Edge:
         """checks if an edge with the same pair of vertices
         exists in self.edges already"""
-        for edge in self.ops:
+        for edge in self.edges:
             mesh_set = set([vertex_1.index, vertex_2.index])
             edge_set = set([edge.vertex_1.index, edge.vertex_2.index])
             if mesh_set == edge_set:
@@ -22,24 +25,27 @@ class EdgeList:
 
         raise RuntimeError(f"Edge not found: {str(vertex_1)}, {str(vertex_2)}")
 
-    def collect(self, block_list:BlockList, vertex_list:VertexList) -> None:
+    def add(self, block_data:BlockData, vertices:List[Vertex]) -> List[Edge]:
         """Collect edges from this block;
         check for duplicates (same vertex pairs) and
         validity (no lines or straight-line arcs);
         remove edges that don't pass those tests"""
-        for block in block_list.blocks:
-            for edge_data in block.edges:
-                point_1 = block.points[edge_data.index_1]
-                vertex_1 = vertex_list.find(point_1)
+        edges = []
 
-                point_2 = block.points[edge_data.index_2]
-                vertex_2 = vertex_list.find(point_2)
+        for pair in EDGE_PAIRS:
+            vertex_1 = vertices[pair[0]]
+            vertex_2 = vertices[pair[1]]
 
+            try:
+                # if this edge exists in the list, return it regardless of what's
+                # in block_data; re-definitions of the same edges are ignored
+                edges.append(self.find(vertex_1, vertex_2))
+            except RuntimeError:
+                # this edge doesn't exist yet;
+                # see if there's a new definition available in block_data
                 try:
-                    self.find(vertex_1, vertex_2)
-                except RuntimeError:
-                    # this edge doesn't exist yet;
-                    # generate a new one and add it to the list
+                    edge_data = block_data.get_edge(pair[0], pair[1])
+
                     args = [
                         vertex_1,
                         vertex_2,
@@ -49,7 +55,14 @@ class EdgeList:
                     edge = factory.create(*args)
 
                     if edge.is_valid:
-                        self.ops.append(edge)
+                        self.edges.append(edge)
+                        edges.append(edge)
+
+                except RuntimeError:
+                    # no new edges in the block definition
+                    continue
+
+        return edges
 
     def output(self) -> str:
         """Outputs a list of edges to be inserted into blockMeshDict"""

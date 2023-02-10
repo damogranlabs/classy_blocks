@@ -2,9 +2,9 @@ import unittest
 
 import numpy as np
 
-from classy_blocks.process.items.edge
-from classy_blocks.process.items.edge_ops import arc_mid, arc_from_theta, arc_from_origin
-from classy_blocks.process.items.vertex import Vertex
+from classy_blocks.items.edge
+from classy_blocks.items.edge_ops import arc_mid, arc_from_theta, arc_from_origin
+from classy_blocks.items.vertex import Vertex
 from classy_blocks.util import functions as f
 
 class EdgeTests(unittest.TestCase):

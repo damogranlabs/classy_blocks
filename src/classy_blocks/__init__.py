@@ -9,4 +9,4 @@ __version__ = "0.1.0"
 # from classy_blocks.construct.shapes import Box, Elbow, Frustum, Cylinder, RevolvedRing, ExtrudedRing, Hemisphere
 # from classy_blocks.construct.walls import ElbowWall, FrustumWall
 
-# from classy_blocks.process.mesh import Mesh
+# from classy_blocks.mesh import Mesh

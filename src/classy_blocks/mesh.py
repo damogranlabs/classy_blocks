@@ -1,12 +1,14 @@
 """The Mesh object ties everything together and writes the blockMeshDict in the end."""
 from typing import Union
 
-from classy_blocks.process.items.vertex import Vertex
 from classy_blocks.data.block import BlockData
 
-from classy_blocks.process.lists.block_list import BlockList
-from classy_blocks.process.lists.vertex_list import VertexList
-from classy_blocks.process.lists.edge_list import EdgeList
+from classy_blocks.items.vertex import Vertex
+from classy_blocks.items.block import Block
+
+from classy_blocks.lists.block_list import BlockList
+from classy_blocks.lists.vertex_list import VertexList
+from classy_blocks.lists.edge_list import EdgeList
 
 from classy_blocks.construct.operations import Operation
 from classy_blocks.construct.shapes import Shape
@@ -34,15 +36,29 @@ class Mesh:
             'merged': [],
         }
 
-    def add(self, item:Union[BlockData, Operation]) -> None:
+    def add(self, item:BlockData) -> None:
         """Add a classy_blocks entity to the mesh;
         can be a plain Block, created from points, Operation, Shape or Object."""
-        self.block_list.add(item.blocks)
+        # add blocks to block list
+        for data in item.data:
+            # generate Vertices from all block's points or find existing ones
+            vertices = self.vertex_list.add(data.points)
+            # generate new edges or find existing ones
+            edges = self.edge_list.add(data, vertices)
 
-        # TODO: TEST
-        #if hasattr(item, "geometry"):
-        #    raise NotImplementedError
-        #   # self.add_geometry(item.geometry)
+            # generate a Block from collected/created objects
+            block = Block(data, len(self.block_list.blocks), vertices, edges)
+            self.block_list.add(block)
+
+            #if debug_path is not None:
+            #    tools.write_vtk(debug_path, self.vertices, self.blocks)
+
+            #self.boundary.collect(self.blocks)
+            #self.faces.collect(self.blocks)
+            # TODO: TEST
+            #if hasattr(item, "geometry"):
+            #    raise NotImplementedError
+            #   # self.add_geometry(item.geometry)
 
     # def merge_patches(self, master:str, slave:str) -> None:
     #     """Merges two non-conforming named patches using face merging;
@@ -63,21 +79,6 @@ class Mesh:
     #     properties are as specified by searchable* class in documentation.
     #     See examples/advanced/project for an example."""
     #     self.geometry.add(geometry)
-
-    def compile(self) -> None:
-        """Assemble vertices/blocks/etc., create Ops* objects,
-        assign vertices, propagate gradings etc."""
-        # generate Vertices from all block's points
-        self.vertex_list.collect(self.block_list.blocks)
-
-        #if debug_path is not None:
-        #    tools.write_vtk(debug_path, self.vertices, self.blocks)
-
-        self.edge_list.collect(self.block_list, self.vertex_list)
-        self.block_list.assemble(self.vertex_list, self.edge_list)
-
-        #self.boundary.collect(self.blocks)
-        #self.faces.collect(self.blocks)
 
     # def write(self, output_path:str, debug_path:Optional[str]=None) -> None:
     #     """Writes a blockMeshDict to specified location. If debug_path is specified,

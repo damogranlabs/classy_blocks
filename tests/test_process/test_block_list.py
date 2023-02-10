@@ -1,6 +1,6 @@
 from tests.fixtures import FixturedTestCase
 
-from classy_blocks.process.lists.block_list import BlockList
+from classy_blocks.lists.block_list import BlockList
 
 class BlockListTests(FixturedTestCase):
     def setUp(self):
@@ -10,10 +10,10 @@ class BlockListTests(FixturedTestCase):
     def test_add(self):
         """Add a block and check the results"""
         self.bl.add(self.blocks[0])
-        self.assertEqual(self.bl.blocks[0].index, 0)
+        self.assertEqual(self.bl.data[0].index, 0)
 
         self.bl.add(self.blocks[1])
-        self.assertEqual(self.bl.blocks[1].index, 1)
+        self.assertEqual(self.bl.data[1].index, 1)
 
 
     # def test_find_neighbour_success(self):

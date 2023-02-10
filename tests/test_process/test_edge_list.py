@@ -1,59 +1,50 @@
-import unittest
+from tests.fixtures import FixturedTestCase
 
-from classy_blocks.process.items.vertex import Vertex
-from classy_blocks.process.items.edge_ops import Edge
-from classy_blocks.process.lists.edge_list import EdgeList
+from classy_blocks.lists.vertex_list import VertexList
+from classy_blocks.lists.edge_list import EdgeList
 
-class EdgeListTests(unittest.TestCase):
-    def get_list(self, points):
-        vertex_1 = Vertex([0, 0, 0])
-        vertex_1.mesh_index = 0
+class EdgeListTests(FixturedTestCase):
+    def setUp(self):
+        self.blocks = self.get_blocks()
+        self.vl = VertexList()
+        self.el = EdgeList()
 
-        vertex_2 = Vertex([1, 0, 0])
-        vertex_2.mesh_index = 1
+    def test_add_new(self):
+        """Add an edge when no such thing exists"""
+        vertices = self.vl.add(self.blocks[0].points)
+        edges = self.el.add(self.blocks[0], vertices)
 
-        edge = Edge(0, 1, points)
-        edge.vertex_1 = vertex_1
-        edge.vertex_2 = vertex_2
+        self.assertEqual(len(edges), len(self.blocks[0].edges))
+        self.assertEqual(len(self.el.edges), len(self.blocks[0].edges))
+    
+    def test_add_existing(self):
+        """Add the same edges twice"""
+        vertices = self.vl.add(self.blocks[0].points)
+        edges_first = self.el.add(self.blocks[0], vertices)
+        edges_second = self.el.add(self.blocks[0], vertices)
 
-        edge_list = EdgeList()
-        edge_list.edges = [edge]
+        self.assertEqual(len(edges_first), len(edges_second))
 
-        return edge_list
+        for i, edge in enumerate(edges_first):
+            self.assertEqual(id(edge), id(edges_second[i]))
 
-    def test_project_edge_point_list(self):
-        edge_list = self.get_list("projected_face")
+    def test_add_invalid(self):
+        """Add a circular edge that's actually a line"""
+        vertices = self.vl.add(self.blocks[1].points)
+        edges = self.el.add(self.blocks[1], vertices)
 
-        self.assertEqual(edge_list.edges[0].kind, 'project')
-        self.assertTrue("0 1 (projected_face)" in edge_list.output())
+        # there's one duplicated edge in the definition but we
+        # didn't add block 1
+        self.assertEqual(len(edges), 1)
 
-    def test_arc_edge_format(self):
-        """an Edge with a single given point is an arc edge and should be formatted as such"""
-        point = [0, 0.25, 0]
-        edge_list = self.get_list(point)
+    def test_add_duplicate(self):
+        """Do not add a duplicate edge"""
+        vertices = self.vl.add(self.blocks[0].points)
+        self.el.add(self.blocks[0], vertices)
 
-        e = edge_list.edges[0]
+        # this block has one duplicate and one invalid edge
+        vertices = self.vl.add(self.blocks[1].points)
+        self.el.add(self.blocks[1], vertices)
 
-        self.assertEqual(e.kind, "arc")
-        self.assertListEqual(list(e.points), point)
-        self.assertTrue("arc 0 1 (0.00000000 0.25000000 0.00000000)" in edge_list.output())
+        self.assertEqual(len(self.el.edges), len(self.blocks[0].edges))
 
-    def test_spline_edge_format(self):
-        """if an edge is given with a list of points, it is a spline edge and should be
-        formatted as such"""
-        points = [
-            [0.3, 0.1, 0],
-            [0.5, 0.2, 0],
-            [0.7, 0.1, 0],
-        ]
-
-        edge_list = self.get_list(points)
-        e = edge_list.edges[0]
-
-        self.assertEqual(e.kind, "spline")
-        self.assertTrue("spline 0 1 (" +\
-            "(0.30000000 0.10000000 0.00000000) " + \
-            "(0.50000000 0.20000000 0.00000000) " + \
-            "(0.70000000 0.10000000 0.00000000))"
-            in edge_list.output()
-        )

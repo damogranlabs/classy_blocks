@@ -1,10 +1,6 @@
 from typing import List
 
-from classy_blocks.data.block import BlockData
-from classy_blocks.process.items.block_ops import BlockOps
-from classy_blocks.process.lists.vertex_list import VertexList
-from classy_blocks.process.items.edge_ops import EdgeOps
-from classy_blocks.process.lists.edge_list import EdgeList
+from classy_blocks.items.block import Block
 
 from classy_blocks.util import constants
 
@@ -12,38 +8,11 @@ class BlockList:
     """ Handling of the 'blocks' part of blockMeshDict, along with
     count/grading propagation and whatnot """
     def __init__(self):
-        # added during mesh building
-        self.blocks:List[BlockData] = []
-        # generated during compilation
-        self.ops:List[BlockOps] = []
+        self.blocks:List[Block] = []
 
-    def add(self, blocks:List[BlockData]) -> None:
+    def add(self, block:Block) -> None:
         """Add blocks"""
-        self.blocks += blocks
-
-    def generate_ops(self, vertex_list:VertexList) -> None:
-        """Creates BlockOps objects with proper Vertex objects
-        and everything else that belongs to them"""
-        for block in self.blocks:
-            vertices = [vertex_list.find(point) for point in block.points]
-            self.ops.append(BlockOps(block, vertices, len(self.ops)))
-
-    def collect_edges(self, edge_list:EdgeList) -> None:
-        """Collects and assigns edges for each op"""
-        for op in self.ops:
-            for pair in constants.EDGE_PAIRS:
-                vertex_1 = op.vertices[pair[0]]
-                vertex_2 = op.vertices[pair[1]]
-
-                try:
-                    # find an edgebetween the vertices
-                    # and add it to this op
-                    edge = edge_list.find(vertex_1, vertex_2)
-                    op.edges.append(edge)
-                except RuntimeError:
-                    # there's no such edge in the mesh;
-                    # no biggie
-                    continue
+        self.blocks.append(block)
 
     # def get_neighbours(self, block) -> List[BlockEntry]:
     #     """Find and assign neighbours of a given block entry"""
@@ -129,14 +98,6 @@ class BlockList:
     #         message += "\n"
 
     #         raise Exception(message)
-
-    def assemble(self, vertex_list:VertexList, edge_list:EdgeList) -> None:
-        """Collects all data needed to assemble the blocks() list in blockMeshDict."""
-        self.generate_ops(vertex_list)
-        self.collect_edges(edge_list)
-        #self.convert_gradings()
-        #self.collect_neighbours()
-        #self.propagate_gradings()
 
     # def is_grading_defined(self, i) -> bool:
     #     """Returns True if grading is defined in all dimensions"""

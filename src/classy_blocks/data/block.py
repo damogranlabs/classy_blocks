@@ -84,6 +84,16 @@ class BlockData:
         # add points for definition
         self.edges.append(EdgeData(index_1, index_2, kind, list(args)))
 
+    def get_edge(self, index_1:int, index_2:int) -> EdgeData:
+        """Returns an existing edge if it's defined
+        between points at index_1 and index_2
+        or raises an exception if it doesn't exist"""
+        for edge in self.edges:
+            if {edge.index_1, edge.index_2} == {index_1, index_2}:
+                return edge
+            
+        raise RuntimeError(f"Edge not found: {index_1}, {index_2}")
+
     # def set_patch(self, orients: Union[OrientType, List[OrientType]], patch_name: str) -> None:
     #     """assign one or more block faces (constants.FACE_MAP)
     #     to a chosen patch name"""
@@ -140,5 +150,5 @@ class BlockData:
     #             self.add_edge(i, (i + 1) % 4, 'project', geometry)
 
     @property
-    def blocks(self):
+    def data(self) -> List['BlockData']:
         return [self]

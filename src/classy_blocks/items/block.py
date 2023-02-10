@@ -1,22 +1,24 @@
 from typing import List
 
 from classy_blocks.data.block import BlockData
-from classy_blocks.process.items.vertex import Vertex
-from classy_blocks.process.items.edge_ops import EdgeOps
-from classy_blocks.process.grading import Grading
+from classy_blocks.items.vertex import Vertex
+from classy_blocks.items.edge import Edge
+from classy_blocks.grading import Grading
 
 class Block:
     """Further operations on blocks"""
-    def __init__(self, block:BlockData, vertices:List[Vertex], index:int):
-        self.block = block
+    def __init__(self, data:BlockData, index:int, vertices:List[Vertex], edges:List[Edge]):
+        self.data = data
         self.index = index
 
         self.vertices = vertices
-        self.edges:List[EdgeOps] = []
+        self.edges = edges
 
-        # defined later
-        self.neighbours:List[Block] = []
+        # TODO: convert
         self.gradings:List[Grading] = []
+
+        # TODO: a separate list/object/something
+        # self.neighbours:List[Block] = []
 
     # def convert_gradings(self) -> None:
     #     """Feeds block.chops to Grading objects"""

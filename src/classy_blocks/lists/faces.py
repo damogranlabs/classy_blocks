@@ -1,7 +1,7 @@
 from typing import List
 
 from classy_blocks.data.block import BlockData
-from classy_blocks.process.lists.boundary import Boundary
+from classy_blocks.lists.boundary import Boundary
 
 class FaceList:
     """Handling of the 'faces' part of blockMeshDict (projected faces)"""

@@ -4,7 +4,7 @@ from numpy.typing import ArrayLike
 
 import numpy as np
 
-from classy_blocks.process.items.vertex import Vertex
+from classy_blocks.items.vertex import Vertex
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 from classy_blocks.util import constants
