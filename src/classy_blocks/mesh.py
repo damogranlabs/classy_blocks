@@ -1,5 +1,5 @@
 """The Mesh object ties everything together and writes the blockMeshDict in the end."""
-from typing import Union
+from typing import Union, Optional
 
 from classy_blocks.data.block import BlockData
 
@@ -12,6 +12,8 @@ from classy_blocks.lists.edge_list import EdgeList
 
 from classy_blocks.construct.operations import Operation
 from classy_blocks.construct.shapes import Shape
+
+from classy_blocks.util import constants
 
 class Mesh:
     """contains blocks, edges and all necessary methods for assembling blockMeshDict"""
@@ -80,41 +82,41 @@ class Mesh:
     #     See examples/advanced/project for an example."""
     #     self.geometry.add(geometry)
 
-    # def write(self, output_path:str, debug_path:Optional[str]=None) -> None:
-    #     """Writes a blockMeshDict to specified location. If debug_path is specified,
-    #     a VTK file is created first where each block is a single cell, to see simplified
-    #     blocking in case blockMesh fails with an unfriendly error message."""
-    #     self.prepare(debug_path)
+    def write(self, output_path:str, debug_path:Optional[str]=None) -> None:
+        """Writes a blockMeshDict to specified location. If debug_path is specified,
+        a VTK file is created first where each block is a single cell, to see simplified
+        blocking in case blockMesh fails with an unfriendly error message."""
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(constants.MESH_HEADER)
 
-    #     return
-
-    #     with open(output_path, 'w', encoding='utf-8') as f:
-    #         f.write(constants.MESH_HEADER)
-
-    #         for key, value in self.settings.items():
-    #             if value is not None:
-    #                 f.write(f"{key} {value};\n")
-    #         f.write('\n')
+            for key, value in self.settings.items():
+                if value is not None:
+                    f.write(f"{key} {value};\n")
+            f.write('\n')
             
-    #         f.write(self.geometry.output())
+            #f.write(self.geometry.output())
 
-    #         f.write(self.vertices.output())
-    #         f.write(self.blocks.output())
-    #         f.write(self.edges.output())
-    #         f.write(self.boundary.output())
-    #         f.write(self.faces.output())
+            f.write(self.vertex_list.description)
+            f.write(self.block_list.description)
+            f.write(self.edge_list.description)
+            #f.write("edges\n();\n\n")
 
-    #         # patches: output manually
-    #         if len(self.patches['merged']) > 0:
-    #             f.write("mergePatchPairs\n(\n")
-    #             for pair in self.patches['merged']:
-    #                 f.write(f"\t({pair[0]} {pair[1]})\n")
+            #f.write(self.boundary.output())
+            f.write("boundary\n();\n\n")
+            #f.write(self.faces.output())
+            f.write("faces\n();\n\n")
+
+            # patches: output manually
+            # if len(self.patches['merged']) > 0:
+            #     f.write("mergePatchPairs\n(\n")
+            #     for pair in self.patches['merged']:
+            #         f.write(f"\t({pair[0]} {pair[1]})\n")
                 
-    #             f.write(");\n\n")
+            #     f.write(");\n\n")
 
-    #         if self.patches['default'] is not None:
-    #             f.write("defaultPatch\n{\n")
-    #             f.write(f"\tname {self.patches['default']['name']};\n")
-    #             f.write(f"\ttype {self.patches['default']['type']};")
-    #             f.write("\n}\n\n")
+            # if self.patches['default'] is not None:
+            #     f.write("defaultPatch\n{\n")
+            #     f.write(f"\tname {self.patches['default']['name']};\n")
+            #     f.write(f"\ttype {self.patches['default']['type']};")
+            #     f.write("\n}\n\n")
 

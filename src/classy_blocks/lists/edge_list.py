@@ -3,11 +3,9 @@ from typing import List
 from classy_blocks.util.constants import EDGE_PAIRS
 
 from classy_blocks.data.block import BlockData
-from classy_blocks.data.edge import EdgeData
-
 from classy_blocks.items.vertex import Vertex
-
-from classy_blocks.items.edge import Edge, factory
+from classy_blocks.items.edge.base import Edge
+from classy_blocks.items.edge.factory import factory
 
 class EdgeList:
     """Handling of the 'edges' part of blockMeshDict"""
@@ -47,8 +45,8 @@ class EdgeList:
                     edge_data = block_data.get_edge(pair[0], pair[1])
 
                     args = [
-                        vertex_1,
-                        vertex_2,
+                        vertices[edge_data.index_1],
+                        vertices[edge_data.index_2],
                         edge_data.kind
                     ] + edge_data.args
 
@@ -64,24 +62,14 @@ class EdgeList:
 
         return edges
 
-    def output(self) -> str:
+    @property
+    def description(self) -> str:
         """Outputs a list of edges to be inserted into blockMeshDict"""
-        # s = "edges\n(\n"
+        out = "edges\n(\n"
 
-        # for edge in self.edges:
-        #     if edge.kind == "line":
-        #         continue
+        for edge in self.edges:
+            out += f"\t{edge.description}\n"
 
-        #     if edge.kind == "project":
-        #         point_list =  f"({edge.points})"
-        #     elif edge.kind == "arc":
-        #         point_list = constants.vector_format(edge.points)
-        #     else:
-        #         point_list = "(" + " ".join([constants.vector_format(p) for p in edge.points]) + ")"
+        out += ");\n\n"
 
-
-        #     s += f"\t{edge.kind} {edge.vertex_1.mesh_index} {edge.vertex_2.mesh_index} {point_list}\n"
-
-        # s += ");\n\n"
-
-        # return s
+        return out

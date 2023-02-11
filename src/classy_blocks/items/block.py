@@ -2,7 +2,7 @@ from typing import List
 
 from classy_blocks.data.block import BlockData
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.items.edge import Edge
+from classy_blocks.items.edge.base import Edge
 from classy_blocks.grading import Grading
 
 class Block:
@@ -159,3 +159,29 @@ class Block:
     #             pdict[side.patch].append(orient)
 
     #     return pdict
+
+    @property
+    def description(self) -> str:
+        """hex definition for blockMesh"""
+        # TODO: test
+        out = "\thex "
+
+        # vertices
+        out += " ( " + " ".join(str(v.index) for v in self.vertices) + " ) "
+
+        # cellZone
+        #out += block.cell_zone
+
+        # number of cells
+        #grading = self.gradings[i]
+            
+        #out += f" ({grading[0].count} {grading[1].count} {grading[2].count}) "
+        # grading
+        #out += f" ({grading[0].grading} {grading[1].grading} {grading[2].grading})"
+
+        out += ' (10 10 10) simpleGrading (1 1 1) // description'
+
+            # add a comment with block index
+            #out += f" // {i} {block.description}\n"
+
+        return out

@@ -103,35 +103,15 @@ class BlockList:
     #     """Returns True if grading is defined in all dimensions"""
     #     return all(g.is_defined for g in self.gradings[i])
 
-    # def output(self) -> str:
-    #     """ Outputs a list of blocks to be inserted directly into blockMeshDict """
-    #     blist = "blocks\n(\n"
+    @property
+    def description(self) -> str:
+        """ Outputs a list of blocks to be inserted directly into blockMeshDict """
+        out = "blocks\n(\n"
 
-    #     for i, block in enumerate(self.blocks):
-    #         # hex definition
-    #         blist += "\thex "
-    #         # vertices
-    #         blist += " ( " + " ".join(str(v.mesh_index) for v in block.vertices) + " ) "
+        for block in self.blocks:
+            out += block.description
+            out += '\n'
 
-    #         # cellZone
-    #         blist += block.cell_zone
+        out += ");\n\n"
 
-    #         # number of cells
-    #         grading = self.gradings[i]
-
-    #         blist += f" ({grading[0].count} {grading[1].count} {grading[2].count}) "
-    #         # grading
-    #         blist += f" ({grading[0].grading} {grading[1].grading} {grading[2].grading})"
-
-    #         # add a comment with block index
-    #         blist += f" // {i} {block.description}\n"
-
-    #     blist += ");\n\n"
-
-    #     return blist
-
-    # def __getitem__(self, index):
-    #     return self.hexas[index]
-
-    # def __len__(self):
-    #     return len(self.hexas)
+        return out

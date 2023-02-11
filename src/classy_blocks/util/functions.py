@@ -8,8 +8,8 @@ import scipy.linalg
 import scipy.optimize
 import scipy.spatial
 
+from classy_blocks.types import PointType, VectorType
 from classy_blocks.util import constants as c
-
 
 def vector(x, y, z):
     """A shortcut for creating 3D-space vectors;
@@ -208,3 +208,20 @@ def distance_from_line(line_point_1, line_point_2, p):
     vec = p - line_point_1
 
     return norm(np.cross(axis, vector)) / norm(axis)
+
+def arc_mid(
+    axis: VectorType,
+    center: PointType,
+    radius: float,
+    point_1: PointType, point_2: PointType) -> PointType:
+    """Returns the midpoint of the specified arc in 3D space"""
+    # Kudos to this guy for his shrewd solution
+    # https://math.stackexchange.com/questions/3717427
+    axis = np.asarray(axis)
+    point_1 = np.asarray(point_1)
+    point_2 = np.asarray(point_2)
+
+    sec = point_2 - point_1
+    sec_ort = np.cross(sec, axis)
+
+    return center + unit_vector(sec_ort) * radius

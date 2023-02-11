@@ -9,6 +9,7 @@ class Vertex(Point):
         super().__init__(position)
         self.index = index
 
-    def output(self) -> str:
+    @property
+    def description(self) -> str:
         """ Returns a string representation to be written to blockMeshDict"""
-        return f"\t{vector_format(self.pos)} // {self.index}\n"
+        return f"{vector_format(self.pos)} // {self.index}"

@@ -67,3 +67,14 @@ class VertexList:
         #                     else:
         #                         block.vertices[i] = duplicated_points[vertex.mesh_index]
 
+    @property
+    def description(self) -> str:
+        """Output for blockMeshDict"""
+        out = 'vertices\n(\n'
+
+        for vertex in self.vertices:
+            out += f"\t{vertex.description}\n"
+
+        out += ");\n\n"
+
+        return out
