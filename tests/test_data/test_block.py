@@ -34,9 +34,9 @@ class BlockTests(unittest.TestCase):
                     orients = [orients]
 
                 for orient in orients:
-                    self.assertEqual(self.blocks[i].sides[orient].patch, name)
+                    self.assertEqual(self.blocks[i].sides[orient].patch_name, name)
 
     def test_description(self):
         for i, data in enumerate(block_data):
-            self.assertEqual(self.blocks[i].description, data.description)
+            self.assertEqual(self.blocks[i].comment, data.description)
             self.assertEqual(self.blocks[i].cell_zone, data.cell_zone)

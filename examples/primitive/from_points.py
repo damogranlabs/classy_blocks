@@ -24,8 +24,8 @@ block.add_edge(4, 5, 'arc', [0.5, -0.1, 1])
 block.add_edge(2, 3, 'spline', [[0.7, 1.3, 0], [0.3, 1.3, 0]]) # spline edge
 block.add_edge(6, 7, 'polyLine', [[0.7, 1.1, 1], [0.3, 1.1, 1]]) # weird edge
 
-#block.set_patch(['left', 'right', 'front', 'back'], 'walls')
-#block.set_patch('bottom', 'inlet')
+block.set_patch(['left', 'right', 'front', 'back'], 'walls', 'wall')
+block.set_patch('bottom', 'inlet')
 
 #block.project_face('bottom', 'terrain', edges=True)
 
@@ -43,8 +43,8 @@ block_points = block_points[4:] + [
     [0, 1, 2],
 ]
 block = BlockData(block_points)
-# block.set_patch(['left', 'right', 'front', 'back'], 'walls')
-# block.set_patch('top', 'outlet')
+block.set_patch(['left', 'right', 'front', 'back'], 'walls', 'wall')
+block.set_patch('top', 'outlet')
 
 # block.chop(2, length_ratio=0.5, start_size=0.02, c2c_expansion=1.2, invert=False)
 # block.chop(2, length_ratio=0.5, start_size=0.02, c2c_expansion=1.2, invert=True)

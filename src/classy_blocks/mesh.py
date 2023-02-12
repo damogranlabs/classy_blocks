@@ -3,12 +3,12 @@ from typing import Union, Optional
 
 from classy_blocks.data.block import BlockData
 
-from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.block import Block
 
 from classy_blocks.lists.block_list import BlockList
 from classy_blocks.lists.vertex_list import VertexList
 from classy_blocks.lists.edge_list import EdgeList
+from classy_blocks.lists.boundary import Boundary
 
 from classy_blocks.construct.operations import Operation
 from classy_blocks.construct.shapes import Shape
@@ -22,6 +22,7 @@ class Mesh:
 
         self.vertex_list = VertexList()
         self.edge_list = EdgeList()
+        self.boundary = Boundary()
 
         self.settings = {
             # TODO: test output
@@ -52,10 +53,12 @@ class Mesh:
             block = Block(data, len(self.block_list.blocks), vertices, edges)
             self.block_list.add(block)
 
+            # generate patches from block's faces
+            self.boundary.add(block)
+
             #if debug_path is not None:
             #    tools.write_vtk(debug_path, self.vertices, self.blocks)
 
-            #self.boundary.collect(self.blocks)
             #self.faces.collect(self.blocks)
             # TODO: TEST
             #if hasattr(item, "geometry"):
@@ -99,10 +102,9 @@ class Mesh:
             f.write(self.vertex_list.description)
             f.write(self.block_list.description)
             f.write(self.edge_list.description)
-            #f.write("edges\n();\n\n")
 
-            #f.write(self.boundary.output())
-            f.write("boundary\n();\n\n")
+            f.write(self.boundary.description)
+
             #f.write(self.faces.output())
             f.write("faces\n();\n\n")
 

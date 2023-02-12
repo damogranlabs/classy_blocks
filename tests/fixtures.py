@@ -136,7 +136,7 @@ class FixturedTestCase(unittest.TestCase):
             # for patch in data.patches:
             #     block.set_patch(patch[0], patch[1])
             
-            block.description = data.description
+            block.comment = data.description
             block.cell_zone = data.cell_zone
         
             blocks.append(block)

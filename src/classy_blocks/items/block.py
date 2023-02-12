@@ -1,9 +1,14 @@
-from typing import List
+from typing import List, Dict
+
+from classy_blocks.types import OrientType
 
 from classy_blocks.data.block import BlockData
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edge.base import Edge
+from classy_blocks.items.face import Face
 from classy_blocks.grading import Grading
+
+from classy_blocks.util import constants as c
 
 class Block:
     """Further operations on blocks"""
@@ -13,6 +18,12 @@ class Block:
 
         self.vertices = vertices
         self.edges = edges
+
+        # create Face objects
+        self.faces = {
+            orient:Face.from_side(self.data.sides[orient], self.vertices)
+            for orient in c.FACE_MAP
+        }
 
         # TODO: convert
         self.gradings:List[Grading] = []
@@ -38,17 +49,18 @@ class Block:
     #             for p in params:
     #                 grading.add_division(**p)
 
-    # def get_side_vertices(self, orient:str) -> List[Vertex]:
-    #     """Returns Vertices that define the given side"""
-    #     return [self.vertices[i] for i in self.get_side_indexes(orient, local=True)]
 
-    # def get_side_indexes(self, orient:str, local:bool=False) -> List[int]:
-    #     """Returns block-local indexes of vertices that define this side"""
-    #     if local:
-    #         return c.FACE_MAP[orient]
+    def get_side_indexes(self, orient:OrientType) -> List[int]:
+        """Returns block-local indexes of vertices that define this side"""
+        if local:
+            return c.FACE_MAP[orient]
 
-    #     side_vertices = [self.vertices[i] for i in c.FACE_MAP[orient]]
-    #     return [v.mesh_index for v in side_vertices]
+        side_vertices = [self.vertices[i] for i in c.FACE_MAP[orient]]
+        return [v.mesh_index for v in side_vertices]
+
+    def get_side_vertices(self, orient:str) -> List[Vertex]:
+        """Returns Vertices that define the given side"""
+        return [self.vertices[i] for i in self.get_side_indexes(orient, local=True)]
 
     # def get_patch_sides(self, patch: str) -> List[str]:
     #     """Returns sides in this block that belong to a given patch"""
@@ -139,26 +151,26 @@ class Block:
 
     #     return None, None
 
-    # @property
-    # def patches(self) -> Dict[str, List[str]]:
-    #     """Returns a dict of patches, for example:
+    @property
+    def patches(self) -> Dict[str, List[str]]:
+        """Returns a dict of patches, for example:
 
-    #     patches = {
-    #          'volute_rotating': ['left', 'top' ],
-    #          'volute_walls': ['bottom'],
-    #     }"""
-    #     # TODO: set type and other patch properties in mesh.boundary
-    #     # TODO: test
-    #     pdict = {}
+        patches = {
+             'volute_rotating': ['left', 'top' ],
+             'volute_walls': ['bottom'],
+        }"""
+        # TODO: set type and other patch properties in mesh.boundary
+        # TODO: test
+        pdict = {}
 
-    #     for orient, side in self.sides.items():
-    #         if side.patch is not None:
-    #             if side.patch not in pdict:
-    #                 pdict[side.patch] = []
+        for orient, side in self.data.sides.items():
+            if side.patch_name is not None:
+                if side.patch_name not in pdict:
+                    pdict[side.patch_name] = []
 
-    #             pdict[side.patch].append(orient)
+                pdict[side.patch_name].append(orient)
 
-    #     return pdict
+        return pdict
 
     @property
     def description(self) -> str:

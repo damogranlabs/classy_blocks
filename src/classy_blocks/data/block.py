@@ -1,9 +1,11 @@
 """Contains all data that user can specify about a Block."""
-from typing import List, Dict
+import warnings
+
+from typing import List, Union, Optional
 
 from classy_blocks.types import PointListType, OrientType, EdgeKindType
 
-from classy_blocks.data.side import SideData
+from classy_blocks.data.side import Side
 from classy_blocks.data.edge import EdgeData
 
 from classy_blocks.util import constants as c
@@ -18,7 +20,7 @@ class BlockData:
         self.edges:List[EdgeData] = []
 
         # Side objects define patch names and projections
-        self.sides:Dict[OrientType, SideData] = {o:SideData(o) for o in c.FACE_MAP}
+        self.sides = {o:Side(o) for o in c.FACE_MAP}
 
         # block grading;
         # when adding blocks, store chop() parameters;
@@ -30,7 +32,7 @@ class BlockData:
 
         # written as a comment after block definition
         # (visible in blockMeshDict, useful for debugging)
-        self.description = ""
+        self.comment = ""
 
     def add_edge(self, index_1:int, index_2:int,
         kind:EdgeKindType, *args):
@@ -94,20 +96,6 @@ class BlockData:
             
         raise RuntimeError(f"Edge not found: {index_1}, {index_2}")
 
-    # def set_patch(self, orients: Union[OrientType, List[OrientType]], patch_name: str) -> None:
-    #     """assign one or more block faces (constants.FACE_MAP)
-    #     to a chosen patch name"""
-    #     # see patches: an example in __init__()
-
-    #     if isinstance(orients, str):
-    #         orients = [orients]
-
-    #     for orient in orients:
-    #         if self.sides[orient].patch is not None:
-    #             warnings.warn(f"Replacing patch {self.sides[orient].patch} with {patch_name}")
-
-    #         self.sides[orient].patch = patch_name
-
     def chop(self, axis: int, **kwargs: float) -> None:
         """Set block's cell count/size and grading for a given direction/axis.
         Exactly two of the following keyword arguments must be provided:
@@ -137,6 +125,23 @@ class BlockData:
             https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
         """
         self.chops[axis].append(kwargs)
+
+    def set_patch(self,
+        orients: Union[OrientType, List[OrientType]],
+        patch_name: str,
+        patch_type:str='patch'
+    ) -> None:
+        """assign one or more block faces (constants.FACE_MAP) to a chosen patch name;
+        if type is not specified, it will becom 'patch'"""
+        if isinstance(orients, str):
+            orients = [orients]
+
+        for orient in orients:
+            if self.sides[orient].patch_name is not None:
+                warnings.warn(f"Replacing patch {self.sides[orient].patch_name} with {patch_name}")
+
+            self.sides[orient].patch_name = patch_name
+            self.sides[orient].patch_type = patch_type
 
     # def project_face(self, orient:OrientType, geometry: str, edges: bool = False) -> None:
     #     """Assign one or more block faces (self.face_map)

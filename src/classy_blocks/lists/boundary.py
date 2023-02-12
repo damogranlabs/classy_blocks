@@ -1,59 +1,49 @@
-from typing import List
+from typing import Dict, List
 
+from classy_blocks.data.side import Side
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.data.block import BlockData
+from classy_blocks.items.block import Block
+from classy_blocks.items.face import Face
 
+from classy_blocks.items.patch import Patch
 
 class Boundary:
     """Handling of the 'boundary' part of blockMeshDict"""
     def __init__(self):
-        # A collection {'patch_name': [lists of [list of 4 Vertex objects]]}
-        self.patches:dict = {}
+        # A collection {'patch_name': [list of Faces]}
+        self.patches:List[Patch] = []
 
-    def collect(self, blocks:List[BlockData]) -> None:
-        """Collects all faces for a patch name from all blocks;
-        Block contains patches according to the example in __init__()"""
+    def find(self, name:str) -> Patch:
+        """Find a patch in the list by name"""
+        for patch in self.patches:
+            if patch.name == name:
+                return patch
 
-        # collect all different patch names
-        patch_names = set()
-        for block in blocks:
-            patch_names = patch_names.union(set(block.patches.keys()))
+        raise RuntimeError(f"Patch {name} not found")
 
-        # create a dict with all patches
-        self.patches = {name: [] for name in patch_names}
+    def add(self, block:Block) -> None:
+        """Add patches from block to list"""
+        for face in block.faces.values():
 
-        # gather all faces of all blocks
-        for block in blocks:
-            for patch_name in patch_names:
-                orients = block.get_patch_sides(patch_name)
-                self.patches[patch_name] += [block.get_side_vertices(o) for o in orients]
+            if face.side.patch_name is not None:
+                # this side specifies a patch;
+                # find an existing and add this face or create a new one
+                try:
+                    patch = self.find(face.side.patch_name)
+                    patch.faces.append(face)
+                except RuntimeError:
+                    # create a new patch and add a face to it
+                    patch = Patch(face.side.patch_name, [face], face.side.patch_type)
+                    self.patches.append(patch)
 
-    def output(self) -> str:
+    @property
+    def description(self) -> str:
         """Outputs a 'boundary' dict to be inserted directly into blockMeshDict"""
-        bnd = "boundary\n(\n"
+        out = "boundary\n(\n"
 
-        for name, faces in self.patches.items():
-            bnd += f"\t{name}\n"
-            bnd += "\t{\n"
-            bnd += "\t\ttype patch;\n" # TODO: different patch types & other properties
-            bnd += "\t\tfaces\n"
-            bnd += "\t\t(\n"
+        for patch in self.patches:
+            out += patch.description
 
-            for face in faces:
-                bnd += f"\t\t\t{self.format_face(face)}\n"
+        out += ");\n\n"
+        return out
 
-            bnd += "\t\t);\n"
-            bnd += "\t}\n"
-
-        bnd += ");\n\n"
-
-        return bnd
-
-    @staticmethod
-    def format_face(vertices:list[Vertex]) -> str:
-        """Outputs a string that represents a block face in blockMeshDict"""
-        assert len(vertices) == 4
-
-        indexes = [str(v.mesh_index) for v in vertices]
-
-        return f"({' '.join(indexes)})"
