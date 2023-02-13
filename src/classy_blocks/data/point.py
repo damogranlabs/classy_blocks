@@ -10,6 +10,7 @@ class Point:
     """A 3D point in space with all transformations"""
 
     def __init__(self, position:PointType):
+        # TODO: project
         self.pos = np.asarray(position)
         assert np.shape(self.pos) == (3, ), "Provide a point in 3D space"
 

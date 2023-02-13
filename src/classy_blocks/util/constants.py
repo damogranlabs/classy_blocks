@@ -77,4 +77,8 @@ MESH_HEADER =  ("/*-------------------------------------------------------------
                 "}\n"
                 "// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n\n")
 
-MESH_FOOTER = "// Created with classy_blocks: https://github.com/damogranlabs/classy_blocks //"
+MESH_FOOTER = (
+    "// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n"
+    "// Created with classy_blocks: https://github.com/damogranlabs/classy_blocks //\n"
+    "// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n"
+)

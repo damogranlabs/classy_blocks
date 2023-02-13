@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
-import math
+"""Mathematical functions for general everyday household use"""
+from typing import Union
 
 import numpy as np
+from numpy.typing import ArrayLike
 
 import scipy
 import scipy.linalg
@@ -27,9 +28,9 @@ def rad2deg(rad):
     return rad * 180.0 / np.pi
 
 
-def norm(vector):
-    """a shortcut to scipy.linalg.norm()"""
-    return scipy.linalg.norm(vector)
+def norm(matrix:Union[list, ArrayLike]) -> Union[float, ArrayLike]:
+    """ a shortcut to scipy.linalg.norm() """
+    return scipy.linalg.norm(matrix, axis=len(np.shape(matrix))-1)
 
 
 def unit_vector(vector):

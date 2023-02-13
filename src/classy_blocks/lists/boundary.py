@@ -1,9 +1,6 @@
-from typing import Dict, List
+from typing import List
 
-from classy_blocks.data.side import Side
-from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.block import Block
-from classy_blocks.items.face import Face
 
 from classy_blocks.items.patch import Patch
 
@@ -24,7 +21,6 @@ class Boundary:
     def add(self, block:Block) -> None:
         """Add patches from block to list"""
         for face in block.faces.values():
-
             if face.side.patch_name is not None:
                 # this side specifies a patch;
                 # find an existing and add this face or create a new one
@@ -38,12 +34,21 @@ class Boundary:
 
     @property
     def description(self) -> str:
-        """Outputs a 'boundary' dict to be inserted directly into blockMeshDict"""
+        """Outputs a 'boundary' and 'faces' dict to be inserted directly into blockMeshDict"""
         out = "boundary\n(\n"
 
         for patch in self.patches:
             out += patch.description
 
         out += ");\n\n"
+
+        out += "faces\n(\n"
+
+        for patch in self.patches:
+            for face in patch.faces:
+                if face.side.project_to is not None:
+                    out += f"\tproject {face.description}\n"
+        out += ");\n\n"
+                    
         return out
 

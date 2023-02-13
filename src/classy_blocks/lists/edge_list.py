@@ -4,8 +4,8 @@ from classy_blocks.util.constants import EDGE_PAIRS
 
 from classy_blocks.data.block import BlockData
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.items.edge.base import Edge
-from classy_blocks.items.edge.factory import factory
+from classy_blocks.items.edges.edge import Edge
+from classy_blocks.items.edges.factory import factory
 
 class EdgeList:
     """Handling of the 'edges' part of blockMeshDict"""

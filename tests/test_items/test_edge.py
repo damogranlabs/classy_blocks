@@ -4,12 +4,12 @@ import numpy as np
 
 from classy_blocks.items.vertex import Vertex
 
-from classy_blocks.items.edge.arc import ArcEdge
-from classy_blocks.items.edge.origin import OriginEdge, arc_from_origin
-from classy_blocks.items.edge.angle import AngleEdge, arc_from_theta
-from classy_blocks.items.edge.spline import SplineEdge, PolyLineEdge
-from classy_blocks.items.edge.project import ProjectEdge
-from classy_blocks.items.edge.factory import factory
+from classy_blocks.items.edges.arcs.arc import ArcEdge
+from classy_blocks.items.edges.arcs.origin import OriginEdge, arc_from_origin
+from classy_blocks.items.edges.arcs.angle import AngleEdge, arc_from_theta
+from classy_blocks.items.edges.spline import SplineEdge, PolyLineEdge
+from classy_blocks.items.edges.project import ProjectEdge
+from classy_blocks.items.edges.factory import factory
 
 from classy_blocks.util import functions as f
 
@@ -139,7 +139,7 @@ class EdgeFactoryTests(unittest.TestCase):
         geometry = 'terrain'
         edg = factory.create([0, 0, 0], [1, 0, 0],
             'project', geometry)
-        
+
         self.assertIsInstance(edg, ProjectEdge)
         self.assertEqual(edg.geometry, geometry)
 

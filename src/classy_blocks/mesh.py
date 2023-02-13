@@ -14,13 +14,13 @@ from classy_blocks.construct.operations import Operation
 from classy_blocks.construct.shapes import Shape
 
 from classy_blocks.util import constants
+from classy_blocks.util.tools import write_vtk
 
 class Mesh:
     """contains blocks, edges and all necessary methods for assembling blockMeshDict"""
     def __init__(self):
-        self.block_list = BlockList()
-
         self.vertex_list = VertexList()
+        self.block_list = BlockList()
         self.edge_list = EdgeList()
         self.boundary = Boundary()
 
@@ -56,10 +56,6 @@ class Mesh:
             # generate patches from block's faces
             self.boundary.add(block)
 
-            #if debug_path is not None:
-            #    tools.write_vtk(debug_path, self.vertices, self.blocks)
-
-            #self.faces.collect(self.blocks)
             # TODO: TEST
             #if hasattr(item, "geometry"):
             #    raise NotImplementedError
@@ -89,24 +85,24 @@ class Mesh:
         """Writes a blockMeshDict to specified location. If debug_path is specified,
         a VTK file is created first where each block is a single cell, to see simplified
         blocking in case blockMesh fails with an unfriendly error message."""
-        with open(output_path, 'w', encoding='utf-8') as f:
-            f.write(constants.MESH_HEADER)
+        if debug_path is not None:
+           write_vtk(debug_path, self.vertex_list.vertices, self.block_list.blocks)
+
+        with open(output_path, 'w', encoding='utf-8') as output:
+            output.write(constants.MESH_HEADER)
 
             for key, value in self.settings.items():
                 if value is not None:
-                    f.write(f"{key} {value};\n")
-            f.write('\n')
-            
+                    output.write(f"{key} {value};\n")
+            output.write('\n')
+
             #f.write(self.geometry.output())
 
-            f.write(self.vertex_list.description)
-            f.write(self.block_list.description)
-            f.write(self.edge_list.description)
+            output.write(self.vertex_list.description)
+            output.write(self.block_list.description)
+            output.write(self.edge_list.description)
 
-            f.write(self.boundary.description)
-
-            #f.write(self.faces.output())
-            f.write("faces\n();\n\n")
+            output.write(self.boundary.description)
 
             # patches: output manually
             # if len(self.patches['merged']) > 0:
@@ -121,4 +117,6 @@ class Mesh:
             #     f.write(f"\tname {self.patches['default']['name']};\n")
             #     f.write(f"\ttype {self.patches['default']['type']};")
             #     f.write("\n}\n\n")
+
+            output.write(constants.MESH_FOOTER)
 

@@ -1,9 +1,9 @@
 from typing import List
 
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.data.block import BlockData
+from classy_blocks.items.block import Block
 
-def write_vtk(path:str, vertices:List[Vertex], blocks:List[BlockData]) -> None:
+def write_vtk(path:str, vertices:List[Vertex], blocks:List[Block]) -> None:
     """Generates a simple VTK file where each block is a hexahedral cell;
     useful for debugging blockMesh's FATAL_ERRORs"""
     # A sample VTK file with all cell types; only hexahedrons are used (cell type 12)
@@ -75,7 +75,7 @@ def write_vtk(path:str, vertices:List[Vertex], blocks:List[BlockData]) -> None:
         output.write(f"POINTS {len(vertices)} float\n")
 
         for vertex in vertices:
-            output.write(f"{vertex.point[0]} {vertex.point[1]} {vertex.point[2]}\n")
+            output.write(f"{vertex.pos[0]} {vertex.pos[1]} {vertex.pos[2]}\n")
 
         # cells
         output.write(f"\nCELLS {n_blocks} {9*n_blocks}\n")
@@ -83,7 +83,7 @@ def write_vtk(path:str, vertices:List[Vertex], blocks:List[BlockData]) -> None:
         for block in blocks:
             output.write('8')
             for vertex in block.vertices:
-                output.write(f" {vertex.mesh_index}")
+                output.write(f" {vertex.index}")
             output.write('\n')
 
         # cell types

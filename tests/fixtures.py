@@ -85,7 +85,7 @@ block_data = [
         counts=[6, None, None], # chops
         patches=[
             ["left", "inlet"],
-            [["bottom", "top", "front", "back"], "walls"]
+            [["bottom", "top", "front", "back"], "walls", "wall"]
         ],
         description="Test"
     ),
@@ -100,7 +100,7 @@ block_data = [
         ],
         counts=[5, 6, None],
         patches=[
-            [["bottom", "top", "right", "front"], "walls"],
+            [["bottom", "top", "right", "front"], "walls", "wall"],
         ]
     ),
     TestBlockData(
@@ -133,8 +133,8 @@ class FixturedTestCase(unittest.TestCase):
                 if count is not None:
                     block.chop(axis, count=count)
 
-            # for patch in data.patches:
-            #     block.set_patch(patch[0], patch[1])
+            for patch in data.patches:
+                block.set_patch(*patch)
             
             block.comment = data.description
             block.cell_zone = data.cell_zone

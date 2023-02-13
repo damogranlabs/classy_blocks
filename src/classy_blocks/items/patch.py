@@ -1,6 +1,6 @@
 import dataclasses
 
-from typing import List, Optional
+from typing import List
 
 from classy_blocks.items.face import Face
 

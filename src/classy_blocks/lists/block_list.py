@@ -14,28 +14,23 @@ class BlockList:
         """Add blocks"""
         self.blocks.append(block)
 
-    # def get_neighbours(self, block) -> List[BlockEntry]:
-    #     """Find and assign neighbours of a given block entry"""
-    #     for axis in range(3):
-    #         axis_pairs = block.get_axis_vertex_pairs(axis)
+    def update_neighbours(self, block):
+        """Find and assign neighbours of a given block entry"""
+        for axis in range(3):
+            try:
+                axis_pairs = block.get_axis_vertex_pairs(axis)
 
-    #         for i_cnd, candidate in enumerate(self.blocks):
-    #             if candidate == block:
-    #                 continue
+                for candidate in self.blocks:
+                    if candidate == block:
+                        continue
 
-    #             for p in axis_pairs:
-    #                 cnd_axis, _ = candidate.get_axis_from_pair(p)
-    #                 if cnd_axis is not None:
-    #                     # the 'candidate' shares the same edge or face
-    #                     self.neighbours[i].add(i_cnd)
-
-
-
-    # def collect_neighbours(self) -> None:
-    #     """ Generates a list that defines neighbours for each blocks;
-    #     speeds up count/grading propagation since only this 'neighbours' list
-    #     has to be traversed """
-    #     for i, block in enumerate(self.blocks):
+                    for pair in axis_pairs:
+                        cnd_axis, _ = candidate.get_axis_from_pair(pair)
+                        if cnd_axis is not None:
+                            # the 'candidate' shares the same edge or face
+                            block.neighbours.add(candidate)
+            except RuntimeError:
+                continue
     
     # def copy_grading(self, block_index, axis) -> bool:
     #     """Finds a block that shares an edge with given block
