@@ -4,9 +4,7 @@ import numpy as np
 from classy_blocks.util import functions as f
 from classy_blocks.util import curves as c
 
-from tests import fixtures
-
-class TestUtils(unittest.TestCase):
+class TestFunctions(unittest.TestCase):
     def assert_np_equal(self, a, b, msg=None):
         return np.testing.assert_array_equal(a, b, err_msg=msg)
 

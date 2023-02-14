@@ -13,24 +13,16 @@ class BlockList:
     def add(self, block:Block) -> None:
         """Add blocks"""
         self.blocks.append(block)
+        self.update_neighbours(block)
 
-    def update_neighbours(self, block):
+    def update_neighbours(self, new_block):
         """Find and assign neighbours of a given block entry"""
-        for axis in range(3):
-            try:
-                axis_pairs = block.get_axis_vertex_pairs(axis)
-
-                for candidate in self.blocks:
-                    if candidate == block:
-                        continue
-
-                    for pair in axis_pairs:
-                        cnd_axis, _ = candidate.get_axis_from_pair(pair)
-                        if cnd_axis is not None:
-                            # the 'candidate' shares the same edge or face
-                            block.neighbours.add(candidate)
-            except RuntimeError:
+        for block in self.blocks:
+            if block == new_block:
                 continue
+
+            block.add_neighbour(new_block)
+            new_block.add_neighbour(block)
     
     # def copy_grading(self, block_index, axis) -> bool:
     #     """Finds a block that shares an edge with given block

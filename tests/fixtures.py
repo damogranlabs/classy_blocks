@@ -117,7 +117,7 @@ block_data = [
 ]
 
 class FixturedTestCase(unittest.TestCase):
-    """Test case with ready-made blocks"""
+    """Test case with ready-made block data"""
     @staticmethod
     def get_blocks() -> List[BlockData]:
         """Returns a list of predefined blocks for testing"""
@@ -125,7 +125,7 @@ class FixturedTestCase(unittest.TestCase):
 
         for data in block_data:
             block = BlockData(data.points)
-        
+
             for edge in data.edges:
                 block.add_edge(*edge)
 
@@ -135,13 +135,13 @@ class FixturedTestCase(unittest.TestCase):
 
             for patch in data.patches:
                 block.set_patch(*patch)
-            
+
             block.comment = data.description
             block.cell_zone = data.cell_zone
-        
+
             blocks.append(block)
-        
+
         return blocks
-    
+
     def setUp(self):
         self.blocks = self.get_blocks()

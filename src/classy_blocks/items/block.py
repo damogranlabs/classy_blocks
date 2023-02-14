@@ -1,3 +1,5 @@
+import functools
+
 from typing import List, Dict, Set, Literal, Tuple
 
 from classy_blocks.types import OrientType
@@ -8,6 +10,7 @@ from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.face import Face
 from classy_blocks.grading import Grading
 
+from classy_blocks.util.pair import Pair
 from classy_blocks.util import constants as c
 from classy_blocks.util import functions as f
 
@@ -63,6 +66,16 @@ class Block:
 
         raise RuntimeError(f"Edge not found: {index_1} {index_2}")
 
+    def add_neighbour(self, block:'Block') -> None:
+        """Add a block to neighbours, if applicable"""
+        # TODO: test
+        if block == self:
+            return
+
+        for pair in self.vertex_pairs:
+            if pair in block.vertex_pairs:
+                self.neighbours.add(block)
+
     def get_size(self, axis: int, take: Literal["min", "max", "avg"] = "avg") -> float:
         """Returns block dimensions in given axis"""
         # if an edge is defined, use the edge.get_length(),
@@ -78,8 +91,6 @@ class Block:
 
         edge_lengths = [block_size(pair[0], pair[1]) for pair in c.AXIS_PAIRS[axis]]
 
-        print(edge_lengths)
-
         if take == "avg":
             return sum(edge_lengths) / len(edge_lengths)
 
@@ -91,44 +102,25 @@ class Block:
 
         raise ValueError(f"Unknown sizing specification: {take}. Available: min, max, avg")
 
-    def get_axis_vertex_pairs(self, axis: int) -> List[List[Vertex]]:
-        """Returns 4 pairs of Vertex objects along given axis"""
+    @functools.cached_property
+    def vertex_pairs(self) -> List[Pair]:
+        """Returns 12 Pair objects for each 'edge' of each axis"""
         pairs = []
 
-        for pair in c.AXIS_PAIRS[axis]:
-            pair = [self.vertices[pair[0]], self.vertices[pair[1]]]
-
-            if pair[0] == pair[1]:
-                # omit vertices in the same spot; there is no edge anyway
-                # (prisms/wedges/pyramids)
-                continue
-
-            if pair in pairs:
-                # also omit duplicates
-                continue
-
-            pairs.append(pair)
+        for axis in range(3):
+            for index in range(4):
+                pairs.append(Pair(self.vertices, axis, index))
 
         return pairs
 
-    def get_axis_from_pair(self, pair: List[Vertex]) -> Tuple[int, bool]:
+    def get_axis_from_pair(self, other_pair: Pair) -> Tuple[int, bool]:
         """returns axis index and orientation from a given pair of vertices;
-        orientation is True if blocks are aligned or false when inverted.
-
-        This can only be called after Mesh.write()"""
-        indexes = [pair[0].index, pair[1].index]
-        sexedni = [pair[1].index, pair[0].index] # pardon my french
-
-        for i in range(3):
-            pairs = self.get_axis_vertex_pairs(i)
-
-            if indexes in pairs:
-                return i, True
-
-            if sexedni in pairs:
-                return i, False
-
-        raise RuntimeError(f"No such pair of vertices in this block: {indexes[0]} {indexes[1]}")
+        orientation is True if blocks are aligned or false when inverted."""
+        for this_pair in self.vertex_pairs:
+            if this_pair == other_pair:
+                return this_pair.axis, this_pair.is_aligned(other_pair)
+        
+        raise RuntimeError(f"No such pair of vertices in this block: {other_pair}")
 
     @property
     def description(self) -> str:
@@ -155,3 +147,5 @@ class Block:
         out += f" // {self.index} {self.data.comment}\n"
 
         return out
+
+        print(edge_lengths)
