@@ -1,4 +1,4 @@
-import functools
+import dataclasses
 
 from typing import List, Dict, Set, Literal, Tuple
 
@@ -8,88 +8,81 @@ from classy_blocks.data.block import BlockData
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.face import Face
-from classy_blocks.grading import Grading
+from classy_blocks.items.wireframe import Wireframe
 
-from classy_blocks.util.pair import Pair
+
+from classy_blocks.grading import Grading
 from classy_blocks.util import constants as c
 from classy_blocks.util import functions as f
+
+@dataclasses.dataclass
+class Neighbour:
+    """Stores reference to a neighbour block (the 'original' one
+    is the holder of this object) and provides
+    means of copying counts and gradings"""
+    block:'Block'
+    wire:'Wire'
 
 class Block:
     """Further operations on blocks"""
     def __init__(self, data:BlockData, index:int, vertices:List[Vertex], edges:List[Edge]):
-        self.data = data
-        self.index = index
+        self.data = data # user-supplied data
+        self.index = index # index in blockMeshDict
 
+        # contains vertices, edges, counts and gradings, and tools for manipulation
         self.vertices = vertices
-        self.edges = edges
+        self.frame = Wireframe(vertices, edges)
 
-        # create Face and Grading objects
-        self.faces = self._generate_faces()
-        self.gradings = self._generate_gradings()
+        # # create Face and Grading objects
+        # self.faces = self._generate_faces()
+        # self.gradings = self._generate_gradings()
 
-        self.neighbours:Set[Block] = set()
+        # # Neighbours are specified for each axis for 
+        # # easier and quicker grading/count propagation
+        self.neighbours:Set[Neighbour] = set()
 
-    def _generate_faces(self) -> Dict[OrientType, Face]:
-        """Generate Face objects from data.sides"""
-        return {
-            orient:Face.from_side(self.data.sides[orient], self.vertices)
-            for orient in c.FACE_MAP
-        }
+    # def _generate_faces(self) -> Dict[OrientType, Face]:
+    #     """Generate Face objects from data.sides"""
+    #     return {
+    #         orient:Face.from_side(self.data.sides[orient], self.vertices)
+    #         for orient in c.FACE_MAP
+    #     }
 
-    def _generate_gradings(self) -> List[Grading]:
-        """Generates Grading() objects from data.chops"""
-        gradings = [Grading(), Grading(), Grading()]
+    # def _generate_gradings(self) -> List[Grading]:
+    #     """Generates Grading() objects from data.chops"""
+    #     gradings = [Grading(), Grading(), Grading()]
 
-        for i in range(3):
-            grading = gradings[i]
-            params = self.data.chops[i]
+    #     for i in range(3):
+    #         grading = gradings[i]
+    #         params = self.data.chops[i]
 
-            if len(params) < 1:
-                # leave the grading empty
-                continue
+    #         if len(params) < 1:
+    #             # leave the grading empty
+    #             continue
 
-            block_size = self.get_size(i, take=params[0].pop("take", "avg"))
-            grading.set_block_size(block_size)
+    #         block_size = self.get_size(i, take=params[0].pop("take", "avg"))
+    #         grading.set_block_size(block_size)
 
-            for p in params:
-                grading.add_division(**p)
+    #         for p in params:
+    #             grading.add_division(**p)
         
-        return gradings
+    #     return gradings
 
-    def find_edge(self, index_1: int, index_2: int) -> Edge:
-        """Returns edges between given vertex indexes;
-        the indexes in parameters refer to internal block numbering"""
-        for edge in self.edges:
-            if {edge.vertex_1.index, edge.vertex_2.index} == \
-                {index_1, index_2}:
-                return edge
-
-        raise RuntimeError(f"Edge not found: {index_1} {index_2}")
-
-    def add_neighbour(self, block:'Block') -> None:
+    def add_neighbour(self, candidate:'Block') -> None:
         """Add a block to neighbours, if applicable"""
         # TODO: test
-        if block == self:
+        if candidate == self:
             return
 
-        for pair in self.vertex_pairs:
-            if pair in block.vertex_pairs:
-                self.neighbours.add(block)
+        for this_wire in self.frame.wires:
+            for cnd_wire in candidate.frame.wires:
+                if this_wire == cnd_wire:
+                    # that's the neighbour
+                    self.neighbours.add(Neighbour(candidate, this_wire))
 
     def get_size(self, axis: int, take: Literal["min", "max", "avg"] = "avg") -> float:
         """Returns block dimensions in given axis"""
-        # if an edge is defined, use the edge.get_length(),
-        # otherwise simply distance between two points
-        def vertex_distance(index_1:int, index_2:int) -> float:
-            return f.norm(self.vertices[index_1].pos - self.vertices[index_2].pos)
-
-        def block_size(index_1:int, index_2:int) -> float:
-            try:
-                return self.find_edge(index_1, index_2).length
-            except RuntimeError:
-                return vertex_distance(index_1, index_2)
-
-        edge_lengths = [block_size(pair[0], pair[1]) for pair in c.AXIS_PAIRS[axis]]
+        edge_lengths = [w.edge.length for w in self.frame.get_axis_wires(axis)]
 
         if take == "avg":
             return sum(edge_lengths) / len(edge_lengths)
@@ -101,26 +94,6 @@ class Block:
             return max(edge_lengths)
 
         raise ValueError(f"Unknown sizing specification: {take}. Available: min, max, avg")
-
-    @functools.cached_property
-    def vertex_pairs(self) -> List[Pair]:
-        """Returns 12 Pair objects for each 'edge' of each axis"""
-        pairs = []
-
-        for axis in range(3):
-            for index in range(4):
-                pairs.append(Pair(self.vertices, axis, index))
-
-        return pairs
-
-    def get_axis_from_pair(self, other_pair: Pair) -> Tuple[int, bool]:
-        """returns axis index and orientation from a given pair of vertices;
-        orientation is True if blocks are aligned or false when inverted."""
-        for this_pair in self.vertex_pairs:
-            if this_pair == other_pair:
-                return this_pair.axis, this_pair.is_aligned(other_pair)
-        
-        raise RuntimeError(f"No such pair of vertices in this block: {other_pair}")
 
     @property
     def description(self) -> str:
@@ -147,5 +120,3 @@ class Block:
         out += f" // {self.index} {self.data.comment}\n"
 
         return out
-
-        print(edge_lengths)

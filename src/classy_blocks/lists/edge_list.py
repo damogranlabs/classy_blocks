@@ -1,11 +1,11 @@
 from typing import List
 
-from classy_blocks.util.constants import EDGE_PAIRS
-
 from classy_blocks.data.block import BlockData
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
+
+from classy_blocks.util import constants
 
 class EdgeList:
     """Handling of the 'edges' part of blockMeshDict"""
@@ -30,7 +30,7 @@ class EdgeList:
         remove edges that don't pass those tests"""
         edges = []
 
-        for pair in EDGE_PAIRS:
+        for pair in constants.EDGE_PAIRS: # TODO: use Pair
             vertex_1 = vertices[pair[0]]
             vertex_2 = vertices[pair[1]]
 
@@ -45,8 +45,8 @@ class EdgeList:
                     edge_data = block_data.get_edge(pair[0], pair[1])
 
                     args = [
-                        vertices[edge_data.index_1],
-                        vertices[edge_data.index_2],
+                        vertices[edge_data.corner_1],
+                        vertices[edge_data.corner_2],
                         edge_data.kind
                     ] + edge_data.args
 

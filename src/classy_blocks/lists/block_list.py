@@ -14,8 +14,9 @@ class BlockList:
         """Add blocks"""
         self.blocks.append(block)
         self.update_neighbours(block)
+        self.update_gradings()
 
-    def update_neighbours(self, new_block):
+    def update_neighbours(self, new_block:Block) -> None:
         """Find and assign neighbours of a given block entry"""
         for block in self.blocks:
             if block == new_block:
@@ -24,11 +25,10 @@ class BlockList:
             block.add_neighbour(new_block)
             new_block.add_neighbour(block)
     
-    # def copy_grading(self, block_index, axis) -> bool:
-    #     """Finds a block that shares an edge with given block
-    #     and copies its grading along that axis"""
-    #     # there are 4 pairs of vertices on specified axis:
-    #     match_pairs = self.blocks[block_index].get_axis_vertex_pairs(axis)
+    def update_gradings(self) -> None:
+        """Updates gradings on all blocks"""
+        #for block in self.blocks:
+
 
     #     # first, find a block in mesh that shares one of the
     #     # edges in match_pairs:

@@ -16,15 +16,15 @@ FACE_MAP = {
     'back': (7, 6, 2, 3),
 }
 
-# pairs of vertices (index in block.vertices) along axes
+# pairs of corner indexes along axes
 AXIS_PAIRS = (
-    ((0, 1), (3, 2), (4, 5), (7, 6)),  # x
+    ((0, 1), (3, 2), (7, 6), (4, 5)),  # x
     ((0, 3), (1, 2), (5, 6), (4, 7)),  # y
     ((0, 4), (1, 5), (2, 6), (3, 7)),  # z
 )
 
-# pairs of vertices between which edges can be defined
-EDGE_PAIRS = tuple(
+# pairs of corner indexes that define edges (and not diagonals)
+EDGE_PAIRS = (
     list(AXIS_PAIRS[0]) + \
     list(AXIS_PAIRS[1]) + \
     list(AXIS_PAIRS[2])
@@ -35,8 +35,8 @@ def vector_format(vector) -> str:
     # output for edge definitions
     return f"({vector[0]:.8f} {vector[1]:.8f} {vector[2]:.8f})"
 
-
 # Circle H-grid parameters
+# TODO: move this to Shape or something
 # A quarter of a circle is created from 3 blocks;
 # Central 'square' (0) and two curved 'rectangles' (1 and 2)
 #

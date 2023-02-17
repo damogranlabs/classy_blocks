@@ -86,18 +86,14 @@ def calculate(length: float, parameters: dict) -> Tuple[float, float]:
 
 
 class Grading:
-    """Grading specification for a single block direction"""
-
-    def __init__(self):
+    """Grading specification for a single edge"""
+    def __init__(self, length:float):
         # must be set before any calculation is performed
-        self.length = None
+        self.length = length
 
         # "multi-grading" specification according to:
         # https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
         self.divisions = []  # a list of lists [length ratio, count ratio, total expansion]
-
-    def set_block_size(self, size):
-        self.length = size
 
     def add_division(
         self,

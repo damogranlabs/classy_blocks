@@ -54,7 +54,7 @@ class Mesh:
             self.block_list.add(block)
 
             # generate patches from block's faces
-            self.boundary.add(block)
+            #self.boundary.add(block)
 
             # TODO: TEST
             #if hasattr(item, "geometry"):
@@ -85,6 +85,11 @@ class Mesh:
         """Writes a blockMeshDict to specified location. If debug_path is specified,
         a VTK file is created first where each block is a single cell, to see simplified
         blocking in case blockMesh fails with an unfriendly error message."""
+
+        for block in self.block_list.blocks:
+            print(block.neighbours)
+
+
         if debug_path is not None:
            write_vtk(debug_path, self.vertex_list.vertices, self.block_list.blocks)
 

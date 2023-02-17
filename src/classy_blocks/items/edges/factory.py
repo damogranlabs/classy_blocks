@@ -3,6 +3,7 @@ from typing import Type
 from classy_blocks.items.edges.edge import Edge
 
 # TODO: make this automatic
+from classy_blocks.items.edges.line import LineEdge
 from classy_blocks.items.edges.arcs.arc import ArcEdge
 from classy_blocks.items.edges.arcs.origin import OriginEdge
 from classy_blocks.items.edges.arcs.angle import AngleEdge
@@ -29,6 +30,7 @@ class EdgeFactory:
         return kind(*args)
 
 factory = EdgeFactory()
+factory.register_kind(LineEdge)
 factory.register_kind(ArcEdge)
 factory.register_kind(OriginEdge)
 factory.register_kind(AngleEdge)

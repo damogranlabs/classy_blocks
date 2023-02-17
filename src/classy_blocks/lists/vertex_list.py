@@ -20,7 +20,7 @@ class VertexList:
         the existing vertex"""
         # TODO: optimize (octree/kdtree from scipy) (?)
         for vertex in self.vertices:
-            if f.norm(vertex - np.asarray(position)) < constants.tol:
+            if f.norm(vertex.pos - np.asarray(position)) < constants.tol:
                 return vertex
 
         raise RuntimeError(f"Vertex not found: {str(position)}")

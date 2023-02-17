@@ -1,6 +1,6 @@
-pytest
 mypy
 black
 pylint
+parameterized
 
 tox

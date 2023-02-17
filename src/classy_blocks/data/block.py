@@ -1,14 +1,15 @@
 """Contains all data that user can specify about a Block."""
 import warnings
 
-from typing import List, Union, Optional
+from typing import List, Union
 
 from classy_blocks.types import PointListType, OrientType, EdgeKindType
 
 from classy_blocks.data.side import Side
 from classy_blocks.data.edge import EdgeData
+from classy_blocks.data.chop import Chop
 
-from classy_blocks.util import constants as c
+from classy_blocks.util import constants
 
 class BlockData:
     """User-provided data for a block"""
@@ -20,12 +21,12 @@ class BlockData:
         self.edges:List[EdgeData] = []
 
         # Side objects define patch names and projections
-        self.sides = {o:Side(o) for o in c.FACE_MAP}
+        self.sides = {o:Side(o) for o in constants.FACE_MAP}
 
         # block grading;
         # when adding blocks, store chop() parameters;
         # BlockOps will use them to create Gradings()
-        self.chops = [[], [], []]
+        self.chops = [Chop(c[0], c[1]) for c in constants.EDGE_PAIRS]
 
         # cellZone to which the block belongs to
         self.cell_zone = ""
@@ -34,12 +35,12 @@ class BlockData:
         # (visible in blockMeshDict, useful for debugging)
         self.comment = ""
 
-    def add_edge(self, index_1:int, index_2:int,
+    def add_edge(self, corner_1:int, corner_2:int,
         kind:EdgeKindType, *args):
         """Adds an edge between vertices at specified indexes.
 
         Args:
-            index_1, index_2: local Block/Face indexes of vertices between which the edge is placed
+            corner_1, corner_2: local Block/Face indexes of vertices between which the edge is placed
             kind: edge type that will be written to blockMeshDict.
             *args: provide the following information for edge creation, depending on specified 'kind':
                 - Classic OpenFOAM arc definition: kind, arc_point;
@@ -81,20 +82,29 @@ class BlockData:
                 block.add_edge(0, 1, 'origin', [0.5, -0.5, 0], 2)
             An arc, defined using OF Foundation's 'angle and axis' style:
                 block.add_edge(0, 1, 'angle', np.pi/6, [0, 0, 1])"""
-        # here in Block, Curve objects are created; they are converted to Edges later
+        assert 0 <= corner_1 < 8 and 0 <= corner_2 < 8, "Use block-local indexing (0...7)"
 
-        # add points for definition
-        self.edges.append(EdgeData(index_1, index_2, kind, list(args)))
+        self.edges.append(EdgeData(corner_1, corner_2, kind, list(args)))
 
-    def get_edge(self, index_1:int, index_2:int) -> EdgeData:
+    def get_edge(self, corner_1:int, corner_2:int) -> EdgeData:
         """Returns an existing edge if it's defined
-        between points at index_1 and index_2
+        between points at corner_1 and corner_2
         or raises an exception if it doesn't exist"""
         for edge in self.edges:
-            if {edge.index_1, edge.index_2} == {index_1, index_2}:
+            if {edge.corner_1, edge.corner_2} == {corner_1, corner_2}:
                 return edge
-            
-        raise RuntimeError(f"Edge not found: {index_1}, {index_2}")
+
+        raise RuntimeError(f"Edge not found: {corner_1}, {corner_2}, is it defined already?")
+
+    def get_chop(self, corner_1:int, corner_2:int) -> Chop:
+        """Returns the appropriate Chop object"""
+        for chop in self.chops:
+            if {chop.corner_1, chop.corner_2} == {corner_1, corner_2}:
+                return chop
+
+        raise RuntimeError(
+            f"Chop not found: {corner_1}, {corner_2}, is this a valid pair (not a diagonal)?"
+        )
 
     def chop(self, axis: int, **kwargs: float) -> None:
         """Set block's cell count/size and grading for a given direction/axis.
@@ -122,16 +132,27 @@ class BlockData:
         * *length_ratio:
             in case the block is graded using multiple gradings, specify
             length of current division; see
-            https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
-        """
-        self.chops[axis].append(kwargs)
+            https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading;
+            Multiple gradings are specified by multiple calls to .chop() with
+            the same 'axis' parameter."""
+        # do the chop_edge 4 times
+        for pair in constants.AXIS_PAIRS[axis]:
+            chop = self.get_chop(pair[0], pair[1])
+            chop.add_division(**kwargs)
+
+    def chop_edge(self, corner_1:int, corner_2:int, **kwargs:float) -> None:
+        """Employs an edgeGrading on a given edge (defined by block-local indexes)
+        according to https://doc.cfd.direct/openfoam/user-guide-v6/blockmesh#dx25-185011.
+        Chopping parameters are the same as passed to .chop() method."""
+        chop = self.get_chop(corner_1, corner_2)
+        chop.add_division(**kwargs)
 
     def set_patch(self,
         orients: Union[OrientType, List[OrientType]],
         patch_name: str,
         patch_type:str='patch'
     ) -> None:
-        """assign one or more block faces (constants.FACE_MAP) to a chosen patch name;
+        """assign one or more block sides (constants.FACE_MAP) to a chosen patch name;
         if type is not specified, it will becom 'patch'"""
         if isinstance(orients, str):
             orients = [orients]
@@ -146,7 +167,7 @@ class BlockData:
     # def project_face(self, orient:OrientType, geometry: str, edges: bool = False) -> None:
     #     """Assign one or more block faces (self.face_map)
     #     to be projected to a geometry (defined in Mesh)"""
-    #     assert orient in c.FACE_MAP
+    #     assert orient in constants.FACE_MAP
 
     #     self.sides[orient].project = geometry
 

@@ -55,7 +55,7 @@ class VertexListTests(FixturedTestCase):
         for i, vertex in enumerate(self.vlist.vertices):
             # we're searching for this point
             # but slightly displaced (well within tolerances)
-            point = vertex + f.vector(displacement, displacement, displacement)
+            point = vertex.pos + f.vector(displacement, displacement, displacement)
 
             self.assertEqual(self.vlist.find(point).index, i)
 

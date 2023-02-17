@@ -1,31 +1,33 @@
 from typing import List
 
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.util import constants
+from classy_blocks.items.edges.edge import Edge
+from classy_blocks.items.edges.line import LineEdge
 
-class Pair:
+class Wire:
     """Represents two vertices that define an edge;
     supplies tools to create and compare, etc"""
-    def __init__(self, vertices:List[Vertex], axis:int, index:int):
-        assert len(vertices) == 8, "Provide 8 vertices that define a block"
-        assert 0 <= axis < 3, "Axis must be between 0 and 3 (x, y, z)"
-        assert 0 <= index < 4, "Index must be between 0 and 4 (side corners)"
+    def __init__(self, vertices:List[Vertex], axis:int, corner_1:int, corner_2:int):
+        self.corner_1 = corner_1
+        self.corner_2 = corner_2
+
+        self.vertex_1 = vertices[corner_1]
+        self.vertex_2 = vertices[corner_2]
 
         self.axis = axis
-        self.index = index
 
-        index_1 = constants.AXIS_PAIRS[axis][index][0]
-        index_2 = constants.AXIS_PAIRS[axis][index][1]
+        # the default edge is 'line' but will be replaced if the user wishes so
+        self.edge:Edge = LineEdge(self.vertex_1, self.vertex_2)
 
-        self.vertex_1 = vertices[index_1]
-        self.vertex_2 = vertices[index_2]
+        # a wire can have up to 3 neighbours but is added with self.add_neighbour()
+        self.neighbours:List['Wire'] = []
 
     @property
     def is_valid(self) -> bool:
         """A pair with two equal vertices is useless"""
         return self.vertex_1 != self.vertex_2
 
-    def is_aligned(self, pair:'Pair') -> bool:
+    def is_aligned(self, pair:'Wire') -> bool:
         """Returns true is this pair has the same alignment
         as the pair in the argument"""
         if self != pair:
@@ -39,4 +41,4 @@ class Pair:
             (self.vertex_1 == obj.vertex_2) and (self.vertex_2 == obj.vertex_1)
 
     def __str__(self):
-        return f"Pair #{self.index} on axis {self.axis}"
+        return f"Wire<{self.corner_1}-{self.corner_2}>"

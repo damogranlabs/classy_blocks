@@ -4,6 +4,7 @@ import numpy as np
 
 from classy_blocks.types import PointType, VectorType
 from classy_blocks.util import functions as f
+from classy_blocks.util import constants
 
 
 class Point:
@@ -34,7 +35,5 @@ class Point:
         self.pos = origin + (self.pos - origin)*ratio
         return self
 
-    def __array__(self, dtype=None):
-        # Enables numpy operations directly on this object
-        # https://numpy.org/doc/stable/user/basics.dispatch.html#basics-dispatch
-        return np.asarray(self.pos, dtype=dtype)
+    def __eq__(self, other):
+        return f.norm(self.pos - other.pos) < constants.tol
