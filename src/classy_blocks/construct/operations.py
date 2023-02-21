@@ -12,7 +12,7 @@ from classy_blocks import types
 
 from classy_blocks.base import ObjectBase
 
-from classy_blocks.data.block import BlockData
+from classy_blocks.data.block_data import BlockData
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.util import functions as f
 

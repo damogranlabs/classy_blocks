@@ -10,8 +10,9 @@ class EdgeData:
     :param corner_1: block-local index to block.points
     :param corner_2: block-local index to block.points
     :param kind: edge type
-    :param data: optional additional arguments for given edge"""
+    :param args: optional additional arguments for given edge"""
     corner_1:int
     corner_2:int
     kind:EdgeKindType
     args:list
+

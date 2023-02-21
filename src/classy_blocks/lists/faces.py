@@ -1,6 +1,6 @@
 from typing import List
 
-from classy_blocks.data.block import BlockData
+from classy_blocks.data.block_data import BlockData
 from classy_blocks.lists.boundary import Boundary
 
 class FaceList:

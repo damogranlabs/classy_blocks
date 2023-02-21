@@ -3,15 +3,13 @@ that can be applied to it."""
 import numpy as np
 
 from classy_blocks.types import PointType, VectorType
-from classy_blocks.util import functions as f
 from classy_blocks.util import constants
+from classy_blocks.util import functions as f
 
 
 class Point:
     """A 3D point in space with all transformations"""
-
     def __init__(self, position:PointType):
-        # TODO: project
         self.pos = np.asarray(position)
         assert np.shape(self.pos) == (3, ), "Provide a point in 3D space"
 

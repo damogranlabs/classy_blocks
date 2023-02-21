@@ -1,5 +1,5 @@
 from classy_blocks.mesh import Mesh
-from classy_blocks.data.block import BlockData
+from classy_blocks.data.block_data import BlockData
 
 mesh = Mesh()
 

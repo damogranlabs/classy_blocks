@@ -38,7 +38,7 @@ import unittest
 from typing import List, Optional
 import dataclasses
 
-from classy_blocks.data.block import BlockData
+from classy_blocks.data.block_data import BlockData
 
 fl:List[List[float]] = [  # points on the 'floor'; z=0
     [0, 0, 0],  # 0
@@ -57,7 +57,7 @@ cl = [[p[0], p[1], 1] for p in fl]  # points on ceiling; z = 1
 class TestBlockData:
     """to store predefined data for test block creation"""
     # points from which to create the block
-    points:List[List[float]]
+    indexes:List[int]
 
     # edges; parameters correspond to block.add_edge() args
     edges:List = dataclasses.field(default_factory=list)
@@ -74,10 +74,7 @@ class TestBlockData:
 
 block_data = [
     TestBlockData(
-        points=[ # points
-            fl[0], fl[1], fl[2], fl[3],
-            cl[0], cl[1], cl[2], cl[3]
-        ],
+        indexes=[0, 1, 2, 3],
         edges=[ # edges
             [0, 1, 'arc', [0.5, -0.25, 0]],
             [1, 2, 'spline', [[1.1, 0.25, 0], [1.05, 0.5, 0], [1.1, 0.75, 0]]]
@@ -90,10 +87,7 @@ block_data = [
         description="Test"
     ),
     TestBlockData(
-        points=[
-            fl[1], fl[4], fl[5], fl[2],
-            cl[1], cl[4], cl[5], cl[2]
-        ],
+        indexes=[1, 4, 5, 2],
         edges=[
             [3, 0, 'arc', [0.5, -0.1, 1]], # duplicated edge in block 2 that must not be included
             [0, 1, 'arc', [0.5, 0, 0]]  # collinear point; invalid edge must be dropped
@@ -104,10 +98,7 @@ block_data = [
         ]
     ),
     TestBlockData(
-        points=[
-            fl[2], fl[5], fl[6], fl[7],
-            cl[2], cl[5], cl[6], cl[7]
-        ],
+        indexes=[2, 5, 6, 7],
         counts=[None, 8, 7],
         patches=[
             ["back", "outlet"],
@@ -119,29 +110,36 @@ block_data = [
 class FixturedTestCase(unittest.TestCase):
     """Test case with ready-made block data"""
     @staticmethod
-    def get_blocks() -> List[BlockData]:
+    def get_block(index:int) -> BlockData:
         """Returns a list of predefined blocks for testing"""
-        blocks = []
+        data = block_data[index]
 
-        for data in block_data:
-            block = BlockData(data.points)
+    
+        points = [fl[i] for i in data.indexes] + [cl[i] for i in data.indexes]
+        block = BlockData(points)
 
-            for edge in data.edges:
-                block.add_edge(*edge)
+        for edge in data.edges:
+            block.add_edge(*edge)
 
-            for axis, count in enumerate(data.counts):
-                if count is not None:
-                    block.chop(axis, count=count)
+        for axis, count in enumerate(data.counts):
+            if count is not None:
+                block.chop(axis, count=count)
 
-            for patch in data.patches:
-                block.set_patch(*patch)
+        for patch in data.patches:
+            block.set_patch(*patch)
 
-            block.comment = data.description
-            block.cell_zone = data.cell_zone
+        block.comment = data.description
+        block.cell_zone = data.cell_zone
 
-            blocks.append(block)
+        return block
 
-        return blocks
+    @staticmethod
+    def get_blocks() -> List[BlockData]:
+        """Returns all prepared block data"""
+        return [FixturedTestCase.get_block(i) for i in range(len(block_data))]
 
-    def setUp(self):
-        self.blocks = self.get_blocks()
+    @staticmethod
+    def get_vertex_indexes(index:int) -> List[int]:
+        """Indexes of the points used for block creation;
+        will be used in tests to create Vertices manually"""
+        return block_data[index].indexes

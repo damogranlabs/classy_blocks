@@ -1,6 +1,6 @@
 from typing import List
 
-from classy_blocks.data.block import BlockData
+from classy_blocks.data.block_data import BlockData
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory

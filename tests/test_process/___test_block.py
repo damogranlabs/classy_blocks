@@ -1,6 +1,6 @@
 import unittest
 
-from classy_blocks.data.block import BlockData
+from classy_blocks.data.block_data import BlockData
 from classy_blocks.mesh import Mesh
 
 from tests.fixtures import FixturedTestCase

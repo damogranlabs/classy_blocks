@@ -27,68 +27,18 @@ class BlockList:
     
     def update_gradings(self) -> None:
         """Updates gradings on all blocks"""
-        #for block in self.blocks:
+        # first, pull in all neighbours' gradings at coincident wires;
+        # then, distribute gradings within blocks;
+        # repeat the procedure until it makes no more changes
+        changed = False
 
-
-    #     # first, find a block in mesh that shares one of the
-    #     # edges in match_pairs:
-    #     for nei_index in self.neighbours[block_index]:
-    #         nei_block = self.blocks[nei_index]
-
-    #         for p in match_pairs:
-    #             b_axis, direction = nei_block.get_axis_from_pair(p)
-    #             if b_axis is not None:
-    #                 # b.get_axis_from_pair() returns axis index in
-    #                 # the block we want to copy from;
-    #                 if self.gradings[nei_index][b_axis].is_defined:
-    #                     # this block's count/grading is defined on this axis
-    #                     # so we can (must) copy it
-    #                     self.gradings[block_index][axis] = self.gradings[nei_index][b_axis].copy(invert=not direction)
-
-    #                     return True
-
-    #     return False
-
-    # def propagate_gradings(self) -> None:
-    #     """ Propagates cell count and grading from connected blocks """
-    #     # a riddle similar to sudoku, keep traversing
-    #     # and copying counts until there's no undefined blocks left
-    #     undefined_blocks = list(range(len(self.blocks)))
-    #     updated = False
-
-    #     while len(undefined_blocks) > 0:
-    #         for i in undefined_blocks:
-    #             for axis in range(3):
-    #                 if not self.gradings[i][axis].is_defined:
-    #                     updated = self.copy_grading(i, axis) or updated
-
-    #             if self.is_grading_defined(i):
-    #                 undefined_blocks.remove(i)
-    #                 updated = True
-    #                 break
-
-    #         if not updated:
-    #             # a whole iteration went around without an update;
-    #             # next iterations won't get any better
-    #             break
-
-    #         updated = False
-
-    #     if len(undefined_blocks) > 0:
-    #         # gather more detailed information about non-defined blocks:
-    #         message = "Blocks with non-defined counts: \n"
-    #         for i in list(undefined_blocks):
-    #             message += f"\t{i}:"
-    #             for axis in range(3):
-    #                 message += f" {self.gradings[i][axis].count}"
-    #             message += "\n"
-    #         message += "\n"
-
-    #         raise Exception(message)
-
-    # def is_grading_defined(self, i) -> bool:
-    #     """Returns True if grading is defined in all dimensions"""
-    #     return all(g.is_defined for g in self.gradings[i])
+        while changed:
+            for block in self.blocks:
+                changed = block.frame.pull_gradings() or changed
+            
+            for block in self.blocks:
+                for i in (0, 1, 2):
+                    changed = block.frame.broadcast_grading(i) or changed
 
     @property
     def description(self) -> str:
