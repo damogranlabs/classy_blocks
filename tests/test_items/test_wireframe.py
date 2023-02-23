@@ -50,7 +50,7 @@ class WireframeTests(unittest.TestCase):
     def test_axis_count(self):
         """Check that each axis has exactly 4 wires"""
         for axis in range(3):
-            self.assertEqual(len(self.wf.axes[axis]), 4)
+            self.assertEqual(len(self.wf.axes[axis].wires), 4)
 
     @parameterized.expand(((0, 2), (1, 3), (0, 6), (1, 7)))
     def test_find_wire_fail(self, corner_1, corner_2):

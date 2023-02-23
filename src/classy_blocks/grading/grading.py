@@ -44,8 +44,8 @@ import math
 
 from typing import Tuple, List
 
-from classy_blocks.grading.division import Division
-from classy_blocks.util import grading_calculator as gc
+from classy_blocks.data.chop import Chop
+from classy_blocks.grading import calculator as gc
 from classy_blocks.util import constants
 
 # gather available functions for calculation of grading parameters
@@ -99,7 +99,7 @@ class Grading:
         # https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
         self.specification:List[List] = []  # a list of lists [length ratio, count ratio, total expansion]
 
-    def add_division(self, div:Division) -> None:
+    def add_chop(self, chop:Chop) -> None:
         """Add a grading division to block specification.
         Use length_ratio for multigrading (see documentation).
         Available grading parameters are:
@@ -118,38 +118,38 @@ class Grading:
         Documentation:
         https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading"""
         assert self.length is not None
-        assert 0 < div.length_ratio <= 1
+        assert 0 < chop.length_ratio <= 1
 
         # default: take c2c_expansion=1 if there's less than 2 parameters given
-        grading_params = [div.start_size, div.end_size, div.c2c_expansion, div.count]
+        grading_params = [chop.start_size, chop.end_size, chop.c2c_expansion, chop.count]
         if grading_params.count(None) > len(grading_params) - 2:
-            div.c2c_expansion = 1
+            chop.c2c_expansion = 1
 
         # also: count can only be an integer
-        if div.count is not None:
-            div.count = int(div.count)
+        if chop.count is not None:
+            chop.count = int(chop.count)
 
-        length = self.length * div.length_ratio
+        length = self.length * chop.length_ratio
 
         # blockMesh needs two numbers regardless of user's input:
         # number of cells and total expansion ratio.
         # those two can be calculated from count and c2c_expansion
         # so calculate those first
-        div.count, div.total_expansion = calculate(
+        chop.count, chop.total_expansion = calculate(
             length,
             {
-                "start_size": div.start_size,
-                "end_size": div.end_size,
-                "c2c_expansion": div.c2c_expansion,
-                "count": div.count,
-                "total_expansion": div.total_expansion,
+                "start_size": chop.start_size,
+                "end_size": chop.end_size,
+                "c2c_expansion": chop.c2c_expansion,
+                "count": chop.count,
+                "total_expansion": chop.total_expansion,
             },
         )
 
-        if div.invert:
-            div.total_expansion = 1 / div.total_expansion
+        if chop.invert:
+            chop.total_expansion = 1 / chop.total_expansion
 
-        self.specification.append([div.length_ratio, div.count, div.total_expansion])
+        self.specification.append([chop.length_ratio, chop.count, chop.total_expansion])
 
     def invert(self) -> None:
         """Inverts gradings and stuff in case neighbuors are defined upside-down"""
@@ -190,7 +190,7 @@ class Grading:
     @property
     def description(self) -> str:
         """Output string for blockMeshDict"""
-        if len(self.specification) == 0:
+        if not self.is_defined:
             raise ValueError(f"Grading not defined: {self}")
 
         if len(self.specification) == 1:

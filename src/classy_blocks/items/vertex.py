@@ -20,3 +20,6 @@ class Vertex(Point):
 
     def __eq__(self, other):
         return self.index == other.index
+
+    def __repr__(self):
+        return f"Vertex {self.index}"

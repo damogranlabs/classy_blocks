@@ -1,4 +1,4 @@
-from typing import List, Set
+from typing import List, Set, Optional
 
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edges.edge import Edge
@@ -18,8 +18,8 @@ class Wire:
         # the default edge is 'line' but will be replaced if the user wishes so
         self.edge:Edge = LineEdge(*self.vertices)
 
-        # grading/counts of this wire
-        self.grading = Grading(self.edge.length)
+        # grading/counts of this wire (edgeGrading only)
+        self.grading:Optional[Grading] = None
 
         # up to 4 wires can be at the same spot; this list holds other
         # coincident wires
@@ -50,5 +50,5 @@ class Wire:
             self.coincidents.add(wire)
 
     def __repr__(self):
-        return f"Wire between {self.vertices} (corners {self.corners})"
+        return f"Wire {self.vertices} (corners {self.corners})"
 

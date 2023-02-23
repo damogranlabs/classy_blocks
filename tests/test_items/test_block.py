@@ -2,14 +2,12 @@ from tests import fixtures
 
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.block import Block
-from classy_blocks.items.edges.factory import EdgeFactory
-
 
 class BlockTests(fixtures.FixturedTestCase):
     """Block item tests"""
     def make_block(self, index:int) -> Block:
         """The test subject"""
-        data = self.get_block(index)
+        data = self.get_single_data(index)
         indexes = self.get_vertex_indexes(index)
         vertices = [Vertex(fixtures.fl[i], i) for i in indexes] + \
             [Vertex(fixtures.cl[i], i+len(fixtures.fl)) for i in indexes]

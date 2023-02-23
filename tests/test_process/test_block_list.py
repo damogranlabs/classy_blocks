@@ -1,20 +1,41 @@
+from tests import fixtures
 from tests.fixtures import FixturedTestCase
 
 from classy_blocks.lists.block_list import BlockList
+from classy_blocks.items.vertex import Vertex
+from classy_blocks.items.block import Block
 
 class BlockListTests(FixturedTestCase):
     def setUp(self):
-        self.blocks = self.get_blocks()
         self.bl = BlockList()
+
+    def make_block(self, index:int) -> Block:
+        """The test subject"""
+        data = self.get_single_data(index)
+        indexes = self.get_vertex_indexes(index)
+        vertices = [Vertex(fixtures.fl[i], i) for i in indexes] + \
+            [Vertex(fixtures.cl[i], i+len(fixtures.fl)) for i in indexes]
+
+        return Block(data, index, vertices, [])
+
 
     def test_add(self):
         """Add a block and check the results"""
-        self.bl.add(self.blocks[0])
-        self.assertEqual(self.bl.data[0].index, 0)
+        self.bl.add(self.make_block(0))
+        self.assertEqual(self.bl.blocks[0].index, 0)
 
-        self.bl.add(self.blocks[1])
-        self.assertEqual(self.bl.data[1].index, 1)
+        self.bl.add(self.make_block(1))
+        self.assertEqual(self.bl.blocks[1].index, 1)
 
+    def test_update_gradings(self):
+        """Confirm that grading from one block is copied to its neighbour"""
+        self.bl.add(self.make_block(0))
+        self.bl.add(self.make_block(1))
+
+        block_0 = self.bl.blocks[0]
+        block_1 = self.bl.blocks[1]
+
+        self.assertTrue(block_0.frame.get_axis_wires(1)[0].grading.is_defined)
 
     # def test_find_neighbour_success(self):
     #     """hexa_2 must copy hexa_1's cell count and grading on axis 0 and 2"""

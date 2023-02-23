@@ -6,7 +6,7 @@ from classy_blocks.lists.edge_list import EdgeList
 
 class EdgeListTests(FixturedTestCase):
     def setUp(self):
-        self.blocks = self.get_blocks()
+        self.blocks = self.get_all_data()
         self.vl = VertexList()
         self.el = EdgeList()
 

@@ -110,33 +110,32 @@ block_data = [
 class FixturedTestCase(unittest.TestCase):
     """Test case with ready-made block data"""
     @staticmethod
-    def get_block(index:int) -> BlockData:
+    def get_single_data(index:int) -> BlockData:
         """Returns a list of predefined blocks for testing"""
         data = block_data[index]
 
-    
         points = [fl[i] for i in data.indexes] + [cl[i] for i in data.indexes]
-        block = BlockData(points)
+        data_object = BlockData(points)
 
         for edge in data.edges:
-            block.add_edge(*edge)
+            data_object.add_edge(*edge)
 
         for axis, count in enumerate(data.counts):
             if count is not None:
-                block.chop(axis, count=count)
+                data_object.chop(axis, count=count)
 
         for patch in data.patches:
-            block.set_patch(*patch)
+            data_object.set_patch(*patch)
 
-        block.comment = data.description
-        block.cell_zone = data.cell_zone
+        data_object.comment = data.description
+        data_object.cell_zone = data.cell_zone
 
-        return block
+        return data_object
 
     @staticmethod
-    def get_blocks() -> List[BlockData]:
+    def get_all_data() -> List[BlockData]:
         """Returns all prepared block data"""
-        return [FixturedTestCase.get_block(i) for i in range(len(block_data))]
+        return [FixturedTestCase.get_single_data(i) for i in range(len(block_data))]
 
     @staticmethod
     def get_vertex_indexes(index:int) -> List[int]:

@@ -1,10 +1,13 @@
-from typing import List, Dict, Tuple
+from typing import List, Dict
 
-from classy_blocks.data.chop import AxisType, AxisChop, EdgeChop
+from classy_blocks.types import AxisType
+
+from classy_blocks.data.chop import Chop
 
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.wire import Wire
+from classy_blocks.items.axis import Axis
 
 from classy_blocks.util import constants
 
@@ -20,7 +23,7 @@ class Wireframe:
         # the opposite side of each vertex
         self.couples:List[Dict[int, Wire]] = [{} for _ in range(8)]
         # wires of each axis
-        self.axes:List[List[Wire]] = [[] for _ in range(3)]
+        self.axes = [Axis(i, 0, []) for i in (0, 1, 2)]
 
         # create wires and connections for quicker addressing
         for axis in range(3):
@@ -30,7 +33,7 @@ class Wireframe:
                 self.couples[pair[0]][pair[1]] = wire
                 self.couples[pair[1]][pair[0]] = wire
 
-                self.axes[axis].append(wire)
+                self.axes[axis].wires.append(wire)
 
                 self.wires.append(wire)
 
@@ -53,14 +56,16 @@ class Wireframe:
 
     def get_axis_wires(self, axis:AxisType) -> List[Wire]:
         """Returns a list of wires that run in the given axis"""
-        return self.axes[axis]
+        return self.axes[axis].wires
 
-    def chop_axis(self, axis:AxisType, chops:List[AxisChop]) -> None:
+    def chop_axis(self, axis:AxisType, chops:List[Chop]) -> None:
         """Creates Gradings from specified Axis chops"""
-        for wire in self.get_axis_wires(axis):
+        wires = self.get_axis_wires(axis)
+        for wire in wires:
             for chop in chops:
-                for div in chop.divisions:
-                    wire.grading.add_division(div)
+                wire.grading.add_chop(chop)
+        
+        self.axes[axis].count = wires[0].grading.count
 
     def broadcast_grading(self, axis:AxisType) -> bool:
         """Takes one wire with grading and copies it to all other wires
@@ -73,31 +78,30 @@ class Wireframe:
         Raises:
         - RuntimeError if there is more than one grading and they are not the same"""
         wires = self.get_axis_wires(axis)
-        defined = [wire.grading.is_defined for wire in wires]
-        defined_count = sum(defined)
+        defined = [wire for wire in wires if wire.grading.is_defined]
+        defined_total = len(defined)
 
-        if defined_count == 0:
+        if defined_total == 0:
             # there's nothing to copy
             return False
 
-        if defined_count > 1:
-            # check that counts match (but gradings can be different, eh?)
-            if not all(w.grading.count == wires[0].grading.count for w in wires):
-                message = f"Multiple different gradings are defined between vertices {wires}"
-                raise RuntimeError(message)
+        self.axes[axis].count = defined[0].grading.count
 
-        if defined_count == 4:
+        if defined_total > 1:
+            # check that counts match (but gradings can be different)
+            if not all(w.grading.count == defined[0].grading.count for w in defined):
+                message = f"Multiple different gradings are defined between vertices {defined}"
+                raise RuntimeError(message)
+            # TODO: other scenario: just use axis' count
+
+        if defined_total == 4:
             # everything is defined already, also checked for consistency
             return False
 
         # choose the first defined grading and copy it to all other wires
-        defined_index = defined.index(True)
-        grading = wires[defined_index].grading
+        grading = defined[0].grading
 
-        for i, wire in enumerate(wires):
-            if i == defined_index:
-                continue
-
+        for wire in wires:
             wire.grading = grading.copy(invert=False)
 
         return True
@@ -122,6 +126,18 @@ class Wireframe:
                     break
 
         return changed
+
+    @property
+    def edges(self) -> List[Edge]:
+        """A list of edges from all wires"""
+        all_edges = []
+
+        for wire in self.wires:
+            if wire.edge.kind != 'line':
+                all_edges.append(wire.edge)
+        
+        return all_edges
+
 
     def __getitem__(self, index) -> Dict[int, Wire]:
         return self.couples[index]

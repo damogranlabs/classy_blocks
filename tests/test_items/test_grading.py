@@ -3,7 +3,8 @@ from parameterized import parameterized
 
 import os
 
-from classy_blocks.util import grading_calculator as gc
+from classy_blocks.data.chop import Chop
+from classy_blocks.grading import calculator as gc
 from classy_blocks.grading import grading
 from classy_blocks.grading.grading import Grading
 
@@ -233,11 +234,11 @@ class TestGrading(unittest.TestCase):
 
     def test_output_empty(self):
         with self.assertRaises(ValueError):
-            str(self.g.grading)
+            _ = self.g.description
 
     def test_output_single(self):
         self.add_division(1, 1, 3)
-        self.assertEqual(str(self.g.grading), "3")
+        self.assertEqual(str(self.g.description), "3")
 
     def test_output_multi(self):
         self.add_division(0.25, 0.4, 2)
@@ -256,7 +257,7 @@ class TestGrading(unittest.TestCase):
             + ")"
         )
 
-        self.assertEqual(str(self.g.grading), expected_output)
+        self.assertEqual(str(self.g.description), expected_output)
 
     def test_copy(self):
         """check that copy doesn't spoil the original"""
@@ -277,40 +278,40 @@ class TestGrading(unittest.TestCase):
     def test_add_division_fail(self):
         with self.assertRaises(AssertionError):
             self.g.length = 0
-            self.g.add_division(count=10)
+            self.g.add_chop(Chop(count=10))
 
         self.g.length = 1
         with self.assertRaises(ValueError):
             # when using only 1 parameter, c2c_expansion is assumed 1;
             # when specifying that as well, another parameter must be provided
-            self.g.add_division(c2c_expansion=1.1)
+            self.g.add_chop(Chop(c2c_expansion=1.1))
 
         with self.assertRaises(AssertionError):
             # specified total_expansion and c2c_expansion=1 aren't compatible
-            self.g.add_division(total_expansion=5)
+            self.g.add_chop(Chop(total_expansion=5))
 
     def test_add_division_1(self):
         """double grading, set start_size and c2c_expansion"""
         self.g.length = 2
 
-        self.g.add_division(length_ratio=0.5, start_size=0.1, c2c_expansion=1.1)
-        self.g.add_division(length_ratio=0.5, start_size=0.1, c2c_expansion=1.1, invert=True)
+        self.g.add_chop(Chop(length_ratio=0.5, start_size=0.1, c2c_expansion=1.1))
+        self.g.add_chop(Chop(length_ratio=0.5, start_size=0.1, c2c_expansion=1.1, invert=True))
 
         self.assertListEqual(self.g.specification, [[0.5, 8, 1.9487171000000012], [0.5, 8, 0.5131581182307065]])
 
     def test_add_division_2(self):
         """single grading, set c2c_expansion and count"""
-        self.g.add_division(1, c2c_expansion=1.1, count=10)
+        self.g.add_chop(Chop(1, c2c_expansion=1.1, count=10))
         self.assertListEqual(self.g.specification, [[1, 10, 2.357947691000002]])
 
     def test_add_division_3(self):
         """single grading, set count and start_size"""
-        self.g.add_division(1, count=10, start_size=0.05)
+        self.g.add_chop(Chop(1, count=10, start_size=0.05))
 
         self.assertListEqual(self.g.specification, [[1, 10, 3.433788027752166]])
 
     def test_is_defined(self):
-        self.g.add_division(1, count=10, start_size=0.05)
+        self.g.add_chop(Chop(1, count=10, start_size=0.05))
 
         self.assertTrue(self.g.is_defined)
 

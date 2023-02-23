@@ -7,7 +7,7 @@ from classy_blocks.types import PointListType, AxisType, EdgeKindType, OrientTyp
 
 from classy_blocks.data.side import Side
 from classy_blocks.data.edge import EdgeData
-from classy_blocks.data.chop import AxisChop, EdgeChop
+from classy_blocks.data.chop import Chop
 
 from classy_blocks.util import constants
 
@@ -20,13 +20,14 @@ class BlockData:
         # a list of *args for Edges
         self.edges:List[EdgeData] = []
 
-        # Side objects define patch names and projections
-        self.sides = {o:Side(o) for o in constants.FACE_MAP}
 
         # cell counts and grading
-        self.axis_chops:Dict[AxisType, List[AxisChop]] = { 0: [], 1:[], 2:[] }
+        self.axis_chops:Dict[AxisType, List[Chop]] = { 0: [], 1: [], 2: [] }
         # TODO: edge chops
         #self.edge_chops:List[EdgeChop] = []
+
+        # Side objects define patch names and projections
+        self.sides = {o:Side(o) for o in constants.FACE_MAP}
 
         # cellZone to which the block belongs to
         self.cell_zone = ""
@@ -35,8 +36,7 @@ class BlockData:
         # (visible in blockMeshDict, useful for debugging)
         self.comment = ""
 
-    def add_edge(self, corner_1:int, corner_2:int,
-        kind:EdgeKindType, *args):
+    def add_edge(self, corner_1:int, corner_2:int, kind:EdgeKindType, *args):
         """Adds an edge between vertices at specified indexes.
 
         Args:
@@ -97,7 +97,7 @@ class BlockData:
 
         raise RuntimeError(f"Edge not found: {corner_1}, {corner_2}, is it defined already?")
 
-    def chop(self, axis: AxisType, **kwargs:dict) -> None:
+    def chop(self, axis: AxisType, **kwargs:Union[str, float, int]) -> None:
         """Set block's cell count/size and grading for a given direction/axis.
         Exactly two of the following keyword arguments must be provided:
 
@@ -126,20 +126,7 @@ class BlockData:
             https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading;
             Multiple gradings are specified by multiple calls to .chop() with
             the same 'axis' parameter."""
-        # add the 'axis' chop
-        chop = AxisChop(axis=axis, take=kwargs.pop('take', 'avg'))
-        chop.add_division(**kwargs)
-
-        self.axis_chops[axis].append(chop)
-
-    # def chop_edge(self, corner_1:int, corner_2:int, **kwargs:float) -> None:
-    #     """Employs an edgeGrading on a given edge (defined by block-local indexes)
-    #     according to https://doc.cfd.direct/openfoam/user-guide-v6/blockmesh#dx25-185011.
-    #     Chopping parameters are the same as passed to .chop() method."""
-    #     chop = EdgeChop(corner_1=corner_1, corner_2=corner_2)
-    #     chop.add_division(**kwargs)
-
-    #     self.edge_chops.append(chop)
+        self.axis_chops[axis].append(Chop(**kwargs))
 
     def set_patch(self,
         orients: Union[OrientType, List[OrientType]],

@@ -4,7 +4,7 @@ from tests.fixtures import block_data, FixturedTestCase
 
 class BlockTests(unittest.TestCase):
     def setUp(self):
-        self.blocks = FixturedTestCase.get_blocks()
+        self.blocks = FixturedTestCase.get_all_data()
 
     def test_create(self):
         self.assertEqual(len(self.blocks), 3)

@@ -5,31 +5,23 @@ from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.wireframe import Wireframe
 
-from classy_blocks.types import AxisType
-
 class Block:
     """Further operations on blocks"""
     def __init__(self, data:BlockData, index:int, vertices:List[Vertex], edges:List[Edge]):
         self.data = data # user-supplied data
         self.index = index # index in blockMeshDict
 
-        # contains vertices, edges, counts and gradings, and tools for manipulation
+        # vertices, edges, counts and gradings
         self.vertices = vertices
         self.frame = Wireframe(vertices, edges)
 
         # set gradings according to data.axis_chops
-        for axis in (0, 1, 2):
-            self.frame.chop_axis(axis, self.data.axis_chops[axis])
+        for i_axis, chops in self.data.axis_chops.items():
+            self.frame.chop_axis(i_axis, chops)
+
 
         # set gradings of specific edges
         #for chop in self.data.
-
-    # def _generate_faces(self) -> Dict[OrientType, Face]:
-    #     """Generate Face objects from data.sides"""
-    #     return {
-    #         orient:Face.from_side(self.data.sides[orient], self.vertices)
-    #         for orient in c.FACE_MAP
-    #     }
 
     def add_neighbour(self, candidate:'Block') -> None:
         """Add a block to neighbours, if applicable"""
@@ -70,9 +62,13 @@ class Block:
         out += self.data.cell_zone
 
         # number of cells
-        out += (f" ({self.frame.axes[0][0].grading.count}"
-            f" {self.frame.axes[1][0].grading.count}"
-            f" {self.frame.axes[2][0].grading.count})")
+        out += " (" + " ".join([str(axis.count) for axis in self.frame.axes]) + " ) "
+
+        # grading
+        out += " simpleGrading (" + \
+            self.frame.axes[0].grading.description + " " + \
+            self.frame.axes[1].grading.description + " " + \
+            self.frame.axes[2].grading.description + ") "
 
         # add a comment with block index
         out += f" // {self.index} {self.data.comment}\n"

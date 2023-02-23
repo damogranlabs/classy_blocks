@@ -51,7 +51,7 @@ block.set_patch('top', 'outlet')
 block.chop(2, length_ratio=0.5, start_size=0.02, c2c_expansion=1.2, invert=False)
 block.chop(2, length_ratio=0.5, start_size=0.02, c2c_expansion=1.2, invert=True)
 
-#mesh.add(block)
+mesh.add(block)
 
 
 mesh.write('../case/system/blockMeshDict')

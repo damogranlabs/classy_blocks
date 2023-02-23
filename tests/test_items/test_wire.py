@@ -8,7 +8,7 @@ from tests.fixtures import FixturedTestCase
 class WireTests(FixturedTestCase):
     """Tests of Pair object"""
     def setUp(self):
-        block = self.get_block(0)
+        block = self.get_single_data(0)
 
         self.vertices = [Vertex(block.points[i], i) for i in range(8)]
 

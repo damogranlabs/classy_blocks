@@ -11,7 +11,7 @@ from tests.fixtures import block_data, FixturedTestCase
 class VertexListTests(FixturedTestCase):
     def setUp(self):
         super().setUp()
-        self.blocks = self.get_blocks()
+        self.blocks = self.get_all_data()
         self.vlist = VertexList()
 
     def test_collect_vertices_single(self):
