@@ -15,9 +15,6 @@ class BlockList:
         self.blocks.append(block)
         self.update_neighbours(block)
 
-        while self.update_gradings():
-            pass
-
     def update_neighbours(self, new_block:Block) -> None:
         """Find and assign neighbours of a given block entry"""
         for block in self.blocks:
@@ -26,22 +23,6 @@ class BlockList:
 
             block.add_neighbour(new_block)
             new_block.add_neighbour(block)
-
-    def update_gradings(self) -> bool:
-        """Updates gradings on all blocks"""
-        # first, pull in all neighbours' gradings at coincident wires;
-        # then, distribute gradings within blocks;
-        # repeat the procedure until it makes no more changes
-        changed = False
-
-        for block in self.blocks:
-            changed = block.frame.pull_gradings() or changed
-
-        for block in self.blocks:
-            for i in (0, 1, 2):
-                changed = block.frame.broadcast_grading(i) or changed
-
-        return changed
 
     @property
     def description(self) -> str:

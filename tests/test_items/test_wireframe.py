@@ -22,12 +22,12 @@ class WireframeTests(unittest.TestCase):
         """Generate 8 Wire objects"""
         self.assertEqual(len(self.wf.wires), 12)
     
-    def test_neighbour_count(self):
+    def test_couples_count(self):
         """Each corner has exactly 3 couples"""
         for couples in self.wf.couples:
             self.assertEqual(len(couples), 3)
 
-    def test_neighbour_indexes(self):
+    def test_couples_indexes(self):
         """Check that indexes are generated exactly as the sketch dictates"""
         # hand-typed
         expected_indexes = (

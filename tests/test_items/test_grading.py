@@ -259,21 +259,11 @@ class TestGrading(unittest.TestCase):
 
         self.assertEqual(str(self.g.description), expected_output)
 
-    def test_copy(self):
-        """check that copy doesn't spoil the original"""
-        self.add_division(1, 1, 3)
-        h = self.g.copy()
-
-        h.specification[0][2] = 5
-
-        self.assertEqual(self.g.specification[0][2], 3)
-
     def test_copy_invert_simple(self):
         self.add_division(1, 1, 5)
-        h = self.g.copy(invert=True)
 
         self.assertEqual(self.g.specification[0][2], 5)
-        self.assertEqual(h.specification[0][2], 0.2)
+        self.assertEqual(self.g.inverted.specification[0][2], 0.2)
 
     def test_add_division_fail(self):
         with self.assertRaises(AssertionError):
@@ -309,6 +299,16 @@ class TestGrading(unittest.TestCase):
         self.g.add_chop(Chop(1, count=10, start_size=0.05))
 
         self.assertListEqual(self.g.specification, [[1, 10, 3.433788027752166]])
+
+    def test_add_division_inverted(self):
+        """Inverted chop, different result"""
+        self.g.add_chop(Chop(0.5, count=10, start_size=0.05, invert=False))
+        self.g.add_chop(Chop(0.5, count=10, start_size=0.05, invert=True))
+
+        self.assertEqual(
+            self.g.specification[0][2],
+            1/self.g.specification[1][2]
+        )
 
     def test_is_defined(self):
         self.g.add_chop(Chop(1, count=10, start_size=0.05))

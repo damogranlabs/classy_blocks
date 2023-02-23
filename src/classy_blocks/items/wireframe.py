@@ -23,7 +23,7 @@ class Wireframe:
         # the opposite side of each vertex
         self.couples:List[Dict[int, Wire]] = [{} for _ in range(8)]
         # wires of each axis
-        self.axes = [Axis(i, 0, []) for i in (0, 1, 2)]
+        self.axes = [Axis(i) for i in (0, 1, 2)]
 
         # create wires and connections for quicker addressing
         for axis in range(3):
@@ -60,72 +60,19 @@ class Wireframe:
 
     def chop_axis(self, axis:AxisType, chops:List[Chop]) -> None:
         """Creates Gradings from specified Axis chops"""
-        wires = self.get_axis_wires(axis)
-        for wire in wires:
-            for chop in chops:
-                wire.grading.add_chop(chop)
+        self.axes[axis].chops += chops
+
+    def add_neighbour(self, candidate:'Wireframe') -> None:
+        """Add the frame as a neighbour to axes and wires, if it's coincident"""
+        # axes
+        for this_axis in self.axes:
+            for cnd_axis in candidate.axes:
+                this_axis.add_neighbour(cnd_axis)
         
-        self.axes[axis].count = wires[0].grading.count
-
-    def broadcast_grading(self, axis:AxisType) -> bool:
-        """Takes one wire with grading and copies it to all other wires
-        in given axis;
-
-        Returns:
-        - False if nothing was done (no defined gradings/all already defined)
-        - True if the method succeeded
-
-        Raises:
-        - RuntimeError if there is more than one grading and they are not the same"""
-        wires = self.get_axis_wires(axis)
-        defined = [wire for wire in wires if wire.grading.is_defined]
-        defined_total = len(defined)
-
-        if defined_total == 0:
-            # there's nothing to copy
-            return False
-
-        self.axes[axis].count = defined[0].grading.count
-
-        if defined_total > 1:
-            # check that counts match (but gradings can be different)
-            if not all(w.grading.count == defined[0].grading.count for w in defined):
-                message = f"Multiple different gradings are defined between vertices {defined}"
-                raise RuntimeError(message)
-            # TODO: other scenario: just use axis' count
-
-        if defined_total == 4:
-            # everything is defined already, also checked for consistency
-            return False
-
-        # choose the first defined grading and copy it to all other wires
-        grading = defined[0].grading
-
-        for wire in wires:
-            wire.grading = grading.copy(invert=False)
-
-        return True
-
-    def pull_gradings(self) -> bool:
-        """Traverses all wires and copies gradings from neighbours;
-        Returns True when something has been copied and False when
-        nothing changed"""
-        changed = False
-
-        for wire in self.wires:
-            if wire.grading.is_defined:
-                # no need to copy anything
-                continue
-
-            for coincident in wire.coincidents:
-                # TODO: add checking for inconsistent counts
-                if coincident.grading.is_defined:
-                    wire.grading = coincident.grading.copy(wire.is_aligned(coincident))
-                    changed = True
-                    # continue with another wire
-                    break
-
-        return changed
+        # wires
+        for this_wire in self.wires:
+            for cnd_wire in candidate.wires:
+                this_wire.add_coincident(cnd_wire)
 
     @property
     def edges(self) -> List[Edge]:

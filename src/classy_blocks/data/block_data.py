@@ -90,26 +90,28 @@ class BlockData:
         """Returns an existing edge if it's defined
         between points at corner_1 and corner_2
         or raises an exception if it doesn't exist"""
-        # TODO: subclass Wireframe of some sorts
+        # TODO: subclass Wireframe of some sorts?
         for edge in self.edges:
             if {edge.corner_1, edge.corner_2} == {corner_1, corner_2}:
                 return edge
 
         raise RuntimeError(f"Edge not found: {corner_1}, {corner_2}, is it defined already?")
 
-    def chop(self, axis: AxisType, **kwargs:Union[str, float, int]) -> None:
+    def chop(self, axis: AxisType, **kwargs:Union[str, float, int, bool]) -> None:
         """Set block's cell count/size and grading for a given direction/axis.
         Exactly two of the following keyword arguments must be provided:
 
         :Keyword Arguments:
+        * *count:
+            number of cells;
+            Optionally, this can be the only provided argument;
+            in that case c2c_expansion will be set to 1.
         * *start_size:
             size of the first cell (last if invert==True)
         * *end_size:
             size of the last cell
         * *c2c_expansion:
             cell-to-cell expansion ratio
-        * *count:
-            number of cells
         * *total_expansion:
             ratio between first and last cell size
 

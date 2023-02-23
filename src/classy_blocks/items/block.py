@@ -29,25 +29,7 @@ class Block:
         if candidate == self:
             return
 
-        for this_wire in self.frame.wires:
-            for cnd_wire in candidate.frame.wires:
-                this_wire.add_coincident(cnd_wire)
-                cnd_wire.add_coincident(this_wire)
-
-    def get_size(self, axis: int, take: Literal["min", "max", "avg"] = "avg") -> float:
-        """Returns block dimensions in given axis"""
-        edge_lengths = [w.edge.length for w in self.frame.get_axis_wires(axis)]
-
-        if take == "avg":
-            return sum(edge_lengths) / len(edge_lengths)
-
-        if take == "min":
-            return min(edge_lengths)
-
-        if take == "max":
-            return max(edge_lengths)
-
-        raise ValueError(f"Unknown sizing specification: {take}. Available: min, max, avg")
+        self.frame.add_neighbour(candidate.frame)
 
     @property
     def description(self) -> str:
@@ -62,7 +44,7 @@ class Block:
         out += self.data.cell_zone
 
         # number of cells
-        out += " (" + " ".join([str(axis.count) for axis in self.frame.axes]) + " ) "
+        out += " (" + " ".join([str(axis.grading.count) for axis in self.frame.axes]) + " ) "
 
         # grading
         out += " simpleGrading (" + \

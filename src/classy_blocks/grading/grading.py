@@ -135,7 +135,7 @@ class Grading:
         # number of cells and total expansion ratio.
         # those two can be calculated from count and c2c_expansion
         # so calculate those first
-        chop.count, chop.total_expansion = calculate(
+        count, total_expansion = calculate(
             length,
             {
                 "start_size": chop.start_size,
@@ -147,34 +147,30 @@ class Grading:
         )
 
         if chop.invert:
-            chop.total_expansion = 1 / chop.total_expansion
+            total_expansion = 1 / total_expansion
 
-        self.specification.append([chop.length_ratio, chop.count, chop.total_expansion])
+        self.specification.append([chop.length_ratio, count, total_expansion])
 
-    def invert(self) -> None:
-        """Inverts gradings and stuff in case neighbuors are defined upside-down"""
+    @property
+    def inverted(self) -> 'Grading':
+        """Returns this grading but inverted
+        in case neighbours are defined upside-down"""
         if len(self.specification) == 0:
-            return  # nothing to invert
+            return  self # nothing to invert
 
-        if len(self.specification) == 1:
-            self.specification[0][2] = 1 / self.specification[0][2]
-        else:
-            # divisions: a list of lists [length ratio, count ratio, total expansion]
-            d_inverted = []
+        g_inv = copy.deepcopy(self)
 
-            for d in reversed(self.specification):
-                d[2] = 1 / d[2]
-                d_inverted.append(d)
-                self.specification = d_inverted
+        # divisions:
+        # a list of lists [length ratio, count ratio, total expansion]
 
-    def copy(self, invert: bool = False) -> "Grading":
-        """Copies grading from one block to another;
-        use invert=True when neighbours are defined "upside-down" """
-        g = copy.deepcopy(self)
-        if invert:
-            g.invert()
+        # reverse the list first
+        g_inv.specification.reverse()
 
-        return g
+        # then do 1/total_expansion
+        for i, div in enumerate(g_inv.specification):
+            g_inv.specification[i][2] = 1/div[2]
+
+        return g_inv
 
     @property
     def count(self) -> int:
