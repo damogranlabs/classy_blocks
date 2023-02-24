@@ -3,9 +3,9 @@ import copy
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wire import Wire
 
-from tests.fixtures import FixturedTestCase
+from tests.fixtures.data import DataTestCase
 
-class WireTests(FixturedTestCase):
+class WireTests(DataTestCase):
     """Tests of Pair object"""
     def setUp(self):
         block = self.get_single_data(0)

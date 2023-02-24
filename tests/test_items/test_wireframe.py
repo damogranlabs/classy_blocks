@@ -5,11 +5,11 @@ from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wireframe import Wireframe
 from classy_blocks.items.wire import Wire
 
-from tests import fixtures
+from tests.fixtures import data
 
 class WireframeTests(unittest.TestCase):
     def setUp(self):
-        points = fixtures.fl[:4] + fixtures.cl[:4]
+        points = data.fl[:4] + data.cl[:4]
 
         self.vertices = [Vertex(p, i) for i, p in enumerate(points)]
 

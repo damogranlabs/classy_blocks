@@ -1,20 +1,8 @@
 from parameterized import parameterized
-from tests import fixtures
+from tests.fixtures.block import BlockTestCase
 
-from classy_blocks.items.vertex import Vertex
-from classy_blocks.items.block import Block
-
-class BlockTests(fixtures.FixturedTestCase):
+class BlockTests(BlockTestCase):
     """Block item tests"""
-    def make_block(self, index:int) -> Block:
-        """The test subject"""
-        data = self.get_single_data(index)
-        indexes = self.get_vertex_indexes(index)
-        vertices = [Vertex(fixtures.fl[i], i) for i in indexes] + \
-            [Vertex(fixtures.cl[i], i+len(fixtures.fl)) for i in indexes]
-
-        return Block(data, index, vertices, [])
-
     @parameterized.expand((
         ((1, 2), (0, 3)), # corner_1, corner_2 of block_0 and corner_1, corner_2 of block_1
         ((5, 6), (4, 7)),
@@ -103,3 +91,12 @@ class BlockTests(fixtures.FixturedTestCase):
         block_0.add_neighbour(block_0)
 
         self.assertEqual(len(block_0.frame.axes[0].neighbours), 0)
+    
+    def test_add_neighbour_inverted(self):
+        """Add a neighbour with an inverted axis"""
+        # TODO
+    
+    def test_add_foreign(self):
+        """Try to add a block that is not in contact
+        as a neighbour"""
+        # TODO

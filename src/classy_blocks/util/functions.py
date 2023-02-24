@@ -206,7 +206,6 @@ def distance_from_line(line_point_1, line_point_2, p):
     """Returns distance from point p from line, defined by two points"""
     # TODO: TEST
     axis = line_point_2 - line_point_1
-    vec = p - line_point_1
 
     return norm(np.cross(axis, vector)) / norm(axis)
 

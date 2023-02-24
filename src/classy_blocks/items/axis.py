@@ -1,4 +1,5 @@
 import dataclasses
+import functools
 
 from typing import List
 
@@ -8,7 +9,6 @@ from classy_blocks.data.chop import Chop
 from classy_blocks.items.wire import Wire
 from classy_blocks.grading.grading import Grading
 
-# TODO: test
 @dataclasses.dataclass
 class Axis:
     """One of block axes, numbered 0, 1, 2, and the relevant data"""
@@ -35,7 +35,7 @@ class Axis:
                 if this_wire.is_coincident(other_wire):
                     return this_wire.is_aligned(other_wire)
         
-        raise RuntimeError("The axes are not neighbours")
+        raise RuntimeError("Axes are not neighbours")
 
     @property
     def lengths(self) -> List[float]:
@@ -63,7 +63,7 @@ class Axis:
 
         return sum(lengths)/len(lengths)
 
-    @property
+    @functools.cached_property
     def grading(self) -> Grading:
         """The grading specification according to current list of chops"""
         if len(self.chops) > 0:

@@ -25,7 +25,6 @@ class Block:
 
     def add_neighbour(self, candidate:'Block') -> None:
         """Add a block to neighbours, if applicable"""
-        # TODO: test
         if candidate == self:
             return
 

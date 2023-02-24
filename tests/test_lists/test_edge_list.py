@@ -1,12 +1,12 @@
-from tests.fixtures import FixturedTestCase
+from tests.fixtures.data import DataTestCase
 
 from classy_blocks.lists.vertex_list import VertexList
 from classy_blocks.lists.edge_list import EdgeList
 
 
-class EdgeListTests(FixturedTestCase):
+class EdgeListTests(DataTestCase):
     def setUp(self):
-        self.blocks = self.get_all_data()
+        self.blocks = DataTestCase.get_all_data()
         self.vl = VertexList()
         self.el = EdgeList()
 

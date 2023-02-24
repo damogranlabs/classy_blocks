@@ -72,7 +72,7 @@ class TestBlockData:
     description:str = ""
     cell_zone:str = ""
 
-block_data = [
+test_data = [
     TestBlockData(
         indexes=[0, 1, 2, 3],
         edges=[ # edges
@@ -107,38 +107,38 @@ block_data = [
     )
 ]
 
-class FixturedTestCase(unittest.TestCase):
+class DataTestCase(unittest.TestCase):
     """Test case with ready-made block data"""
     @staticmethod
     def get_single_data(index:int) -> BlockData:
         """Returns a list of predefined blocks for testing"""
-        data = block_data[index]
+        data = test_data[index]
 
         points = [fl[i] for i in data.indexes] + [cl[i] for i in data.indexes]
-        data_object = BlockData(points)
+        block_data = BlockData(points)
 
         for edge in data.edges:
-            data_object.add_edge(*edge)
+            block_data.add_edge(*edge)
 
         for axis, count in enumerate(data.counts):
             if count is not None:
-                data_object.chop(axis, count=count)
+                block_data.chop(axis, count=count)
 
         for patch in data.patches:
-            data_object.set_patch(*patch)
+            block_data.set_patch(*patch)
 
-        data_object.comment = data.description
-        data_object.cell_zone = data.cell_zone
+        block_data.comment = data.description
+        block_data.cell_zone = data.cell_zone
 
-        return data_object
+        return block_data
 
     @staticmethod
     def get_all_data() -> List[BlockData]:
         """Returns all prepared block data"""
-        return [FixturedTestCase.get_single_data(i) for i in range(len(block_data))]
+        return [DataTestCase.get_single_data(i) for i in range(len(test_data))]
 
     @staticmethod
     def get_vertex_indexes(index:int) -> List[int]:
         """Indexes of the points used for block creation;
         will be used in tests to create Vertices manually"""
-        return block_data[index].indexes
+        return test_data[index].indexes

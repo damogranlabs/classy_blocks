@@ -3,12 +3,11 @@ import numpy as np
 from classy_blocks.util import functions as f
 from classy_blocks.util import constants
 
-from classy_blocks.data.block_data import BlockData
 from classy_blocks.lists.vertex_list import VertexList
 
-from tests.fixtures import block_data, FixturedTestCase
+from tests.fixtures.data import DataTestCase
 
-class VertexListTests(FixturedTestCase):
+class VertexListTests(DataTestCase):
     def setUp(self):
         super().setUp()
         self.blocks = self.get_all_data()

@@ -1,9 +1,9 @@
-from tests.fixtures import FixturedTestCase
+from tests.fixtures.data import DataTestCase
 
 from classy_blocks.mesh import Mesh
 
 
-class TestMesh(FixturedTestCase):
+class TestMesh(DataTestCase):
     """Mesh() object tests"""
     def setUp(self):
         super().setUp()
