@@ -3,6 +3,7 @@ import numpy as np
 from classy_blocks.util import functions as f
 from classy_blocks.util import constants
 
+from classy_blocks.data.point import Point
 from classy_blocks.lists.vertex_list import VertexList
 
 from tests.fixtures.data import DataTestCase
@@ -40,10 +41,13 @@ class VertexListTests(DataTestCase):
         # compare collected vertices by position
         all_points = np.array([v.pos for v in self.vlist.vertices])
         first_points = np.take(all_points, first_indexes, axis=0)
-        second_points = np.take(all_points, second_indexes, axis=0)
+        first_points = [Point(p) for p in first_points]
 
-        np.testing.assert_array_equal(first_points, self.blocks[0].points)
-        np.testing.assert_array_equal(second_points, self.blocks[1].points)
+        second_points = np.take(all_points, second_indexes, axis=0)
+        second_points = [Point(p) for p in second_points]
+
+        self.assertListEqual(first_points, self.blocks[0].points)
+        self.assertListEqual(second_points, self.blocks[1].points)
 
     def test_find(self):
         self.vlist.add(self.blocks[0].points)

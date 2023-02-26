@@ -10,8 +10,8 @@ from classy_blocks.lists.vertex_list import VertexList
 from classy_blocks.lists.edge_list import EdgeList
 from classy_blocks.lists.boundary import Boundary
 
-from classy_blocks.construct.operations import Operation
-from classy_blocks.construct.shapes import Shape
+#from classy_blocks.construct.operations import Operation
+#from classy_blocks.construct.shapes import Shape
 
 from classy_blocks.util import constants
 from classy_blocks.util.tools import write_vtk
@@ -43,7 +43,7 @@ class Mesh:
         """Add a classy_blocks entity to the mesh;
         can be a plain Block, created from points, Operation, Shape or Object."""
         # add blocks to block list
-        for data in item.data:
+        for data in item.blocks:
             # generate Vertices from all block's points or find existing ones
             vertices = self.vertex_list.add(data.points)
             # generate new edges or find existing ones

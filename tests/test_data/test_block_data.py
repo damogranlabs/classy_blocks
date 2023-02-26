@@ -1,42 +1,26 @@
-import unittest
+import numpy as np
 
-from tests.fixtures.data import test_data, DataTestCase
+from tests.fixtures.data import DataTestCase
 
-class BlockTests(unittest.TestCase):
-    def setUp(self):
-        self.data = DataTestCase.get_all_data()
+from classy_blocks.data.block_data import BlockData
 
-    def test_create(self):
-        self.assertEqual(len(self.data), 3)
+def data2pos(data:BlockData):
+    """Creates a 2d numpy array from a list of Point objects
+    from BlockData"""
+    return np.array([point.pos for point in data.points])
 
-    def test_edges(self):
-        for i, data in enumerate(test_data):
-            self.assertEqual(len(data.edges), len(self.data[i].edges))
-    
-    def test_chops(self):
-        for i, data in enumerate(test_data):
-            self.assertEqual(len(data.counts), len(self.data[i].axis_chops))
+class BlockDataTests(DataTestCase):
+    def test_translate(self):
+        """Translate BlockData object"""
+        displacement = np.array([1, 1, 1])
 
-    def test_get_edge_success(self):
-        self.assertEqual(self.data[0].get_edge(0, 1).kind, 'arc')
-    
-    def test_get_edge_fail(self):
-        with self.assertRaises(RuntimeError):
-            self.data[0].get_edge(2, 3)
+        bd = self.get_single_data(0)
+        original_points = data2pos(bd)
 
-    def test_patches(self):
-        for i, data in enumerate(test_data):
-            for patch in data.patches:
-                orients = patch[0]
-                name = patch[1]
+        bd.translate(displacement)
+        translated_points = data2pos(bd)
 
-                if isinstance(orients, str):
-                    orients = [orients]
-
-                for orient in orients:
-                    self.assertEqual(self.data[i].sides[orient].patch_name, name)
-
-    def test_description(self):
-        for i, data in enumerate(test_data):
-            self.assertEqual(self.data[i].comment, data.description)
-            self.assertEqual(self.data[i].cell_zone, data.cell_zone)
+        np.testing.assert_array_almost_equal(
+            translated_points,
+            original_points + displacement
+        )

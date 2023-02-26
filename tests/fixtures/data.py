@@ -34,9 +34,9 @@ Top 'floor':
  | 0 | 1 |
  4---5--10   ---> x-axis"""
 import unittest
+import dataclasses
 
 from typing import List, Optional
-import dataclasses
 
 from classy_blocks.data.block_data import BlockData
 
@@ -115,14 +115,15 @@ class DataTestCase(unittest.TestCase):
         data = test_data[index]
 
         points = [fl[i] for i in data.indexes] + [cl[i] for i in data.indexes]
+
         block_data = BlockData(points)
 
         for edge in data.edges:
             block_data.add_edge(*edge)
 
-        for axis, count in enumerate(data.counts):
-            if count is not None:
-                block_data.chop(axis, count=count)
+        for axis in (0, 1, 2):
+            if data.counts[axis] is not None:
+                block_data.chop(axis, count=data.counts[axis])
 
         for patch in data.patches:
             block_data.set_patch(*patch)

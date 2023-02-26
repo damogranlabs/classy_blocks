@@ -20,7 +20,7 @@ class VertexList:
         the existing vertex"""
         # TODO: optimize (octree/kdtree from scipy) (?)
         for vertex in self.vertices:
-            if f.norm(vertex.pos - np.asarray(position)) < constants.tol:
+            if f.norm(vertex.pos - position) < constants.tol:
                 return vertex
 
         raise RuntimeError(f"Vertex not found: {str(position)}")
@@ -31,7 +31,7 @@ class VertexList:
 
         for point in points:
             try:
-                vertex = self.find(point)
+                vertex = self.find(point.pos)
                 # TODO: check for face-merged stuff
             except RuntimeError:
                 # no vertex was found, add a new one;

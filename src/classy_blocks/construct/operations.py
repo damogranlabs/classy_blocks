@@ -10,16 +10,13 @@ import numpy as np
 
 from classy_blocks import types
 
-from classy_blocks.base import ObjectBase
+from classy_blocks.data.data_object_base import DataObjectBase
 
 from classy_blocks.data.block_data import BlockData
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.util import functions as f
 
-Op = TypeVar("Op", bound="Operation")
-
-
-class Operation(ObjectBase):
+class Operation(DataObjectBase):
     """Base of all other operations"""
     def __init__(self, bottom_face: Face, top_face: Face):
         self.bottom_face = bottom_face
