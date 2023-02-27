@@ -201,9 +201,8 @@ class Frustum(Shape):
             [axis_point_1, radius_point_1, self.axis], {"vector": self.axis, "radius": radius_2}, mid_params
         )
 
-        n_op = len(self.operations)
-        self.core = self.operations[: n_op // 2]
-        self.shell = self.operations[n_op // 2 :]
+        self.core = self.operations[:4]
+        self.shell = self.operations[4:]
 
     @classmethod
     def chain(cls, source, length, radius_2, radius_mid=None):
