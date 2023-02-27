@@ -2,7 +2,7 @@ import dataclasses
 from typing import List
 
 
-from classy_blocks.data.side import Side
+from classy_blocks.items.side import Side
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.util import constants
 

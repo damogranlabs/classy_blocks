@@ -3,7 +3,7 @@ from parameterized import parameterized
 
 import os
 
-from classy_blocks.data.chop import Chop
+from classy_blocks.grading.chop import Chop
 from classy_blocks.grading import calculator as gc
 from classy_blocks.grading import grading
 from classy_blocks.grading.grading import Grading

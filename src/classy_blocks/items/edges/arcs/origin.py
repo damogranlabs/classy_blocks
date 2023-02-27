@@ -1,7 +1,7 @@
 import dataclasses
 import warnings
 
-from typing import Callable, ClassVar
+from typing import ClassVar
 
 import numpy as np
 
@@ -81,11 +81,6 @@ class OriginEdge(ArcEdgeBase):
 
     origin: PointType
     flatness: float = 1.0
-
-    def transform(self, function: Callable):
-        self.origin = function(self.origin)
-
-        return self
 
     @property
     def third_point(self) -> PointType:

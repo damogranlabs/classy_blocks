@@ -5,7 +5,7 @@ from typing import List
 
 from classy_blocks.types import AxisType
 
-from classy_blocks.data.chop import Chop
+from classy_blocks.grading.chop import Chop
 from classy_blocks.items.wire import Wire
 from classy_blocks.grading.grading import Grading
 

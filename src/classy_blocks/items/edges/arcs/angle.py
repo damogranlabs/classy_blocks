@@ -49,13 +49,6 @@ class AngleEdge(ArcEdgeBase):
     def third_point(self):
         return arc_from_theta(self.vertex_1.pos, self.vertex_2.pos, self.angle, self.axis)
 
-    def rotate(self, angle: float, axis: VectorType, origin: Optional[PointType] = None):
-        # this edge definition only needs to transform when rotating,
-        # and that only for the axis
-        self.axis = f.arbitrary_rotation(self.axis, axis, angle, origin)
-
-        return self
-
     @property
     def description(self):
         # produce two lines

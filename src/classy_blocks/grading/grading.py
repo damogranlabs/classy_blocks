@@ -44,7 +44,7 @@ import math
 
 from typing import Tuple, List
 
-from classy_blocks.data.chop import Chop
+from classy_blocks.grading.chop import Chop
 from classy_blocks.grading import calculator as gc
 from classy_blocks.util import constants
 

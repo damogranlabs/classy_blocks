@@ -1,7 +1,5 @@
 """The Mesh object ties everything together and writes the blockMeshDict in the end."""
-from typing import Union, Optional
-
-from classy_blocks.data.block_data import BlockData
+from typing import Union, Optional, List
 
 from classy_blocks.items.block import Block
 
@@ -39,18 +37,20 @@ class Mesh:
             'merged': [],
         }
 
-    def add(self, item:BlockData) -> None:
+    def add(self):
         """Add a classy_blocks entity to the mesh;
         can be a plain Block, created from points, Operation, Shape or Object."""
-        # add blocks to block list
-        for data in item.blocks:
-            # generate Vertices from all block's points or find existing ones
-            vertices = self.vertex_list.add(data.points)
+        # TODO:
+        pass
+
+    def add_block(self, block:Block) -> None:
+            # create new vertices from block data or reassign existing ones
+            block.vertices = self.vertex_list.add(block.vertices)
+
             # generate new edges or find existing ones
             edges = self.edge_list.add(data, vertices)
 
             # generate a Block from collected/created objects
-            block = Block(data, len(self.block_list.blocks), vertices, edges)
             self.block_list.add(block)
 
             # generate patches from block's faces

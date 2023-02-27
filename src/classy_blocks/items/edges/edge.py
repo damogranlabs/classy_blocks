@@ -21,31 +21,13 @@ class Edge(abc.ABC):
     def kind(self) -> str:
         """Edge kind as it is put into blockMeshDict"""
 
-    def transform(self, function: Callable):
-        """An arbitrary transform of this edge by a specified function"""
-
-    def translate(self, displacement: VectorType):
-        """Move all points in the edge (but not start and end)
-        by a displacement vector."""
-        displacement = np.asarray(displacement)
-
-        return self.transform(lambda p: p + displacement)
-
-    def rotate(self, angle: float, axis: VectorType, origin: Optional[PointType] = None):
-        """Rotates all points in this edge (except start and end Vertex) around an
-        arbitrary axis and origin (be careful with projected edges, geometry isn't rotated!)"""
-        if origin is None:
-            origin = [0, 0, 0]
-
-        return self.transform(lambda p: f.arbitrary_rotation(p, axis, angle, origin))
-
-    def scale(self, ratio: float, origin):
-        """Scales the edge points around given origin"""
-        return self.transform(lambda p: Vertex.scale_point(p, ratio, origin))
-
     @property
     def is_valid(self) -> bool:
         """Returns True if this edge is elligible to be put into blockMeshDict"""
+        if self.kind == 'line':
+            # no need to specify lines
+            return False
+
         # wedge geometries produce coincident
         # edges and vertices; drop those
         if f.norm(self.vertex_1.pos - self.vertex_2.pos) < constants.tol:

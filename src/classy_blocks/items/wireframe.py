@@ -2,7 +2,7 @@ from typing import List, Dict
 
 from classy_blocks.types import AxisType
 
-from classy_blocks.data.chop import Chop
+from classy_blocks.grading.chop import Chop
 
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edges.edge import Edge
