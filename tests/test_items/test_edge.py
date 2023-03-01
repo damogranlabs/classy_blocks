@@ -18,15 +18,17 @@ class EdgeTests(unittest.TestCase):
         Vertex.registry = []
         factory.registry = []
 
+        self.vertex_1 = Vertex([0, 0, 0])
+        self.vertex_2 = Vertex([1, 0, 0])
+
     def test_assert_vertices(self):
         """Make sure vertices aren't passed as numpy points or whatever"""
         with self.assertRaises(AssertionError):
-            _ = ArcEdge([0, 0, 0], [1, 0, 0], [0.5, 0.2, 0])
+            _ = ArcEdge(self.vertex_1, [1, 0, 0], [0.5, 0.2, 0])
 
     def test_arc_edge_translate(self):
         arc_edge = ArcEdge(
-            Vertex([0, 0, 0]),
-            Vertex([1, 0, 0]),
+            self.vertex_1, self.vertex_2,
             [0.5, 0, 0]
         )
         arc_edge.translate([1, 1, 1])
@@ -34,7 +36,7 @@ class EdgeTests(unittest.TestCase):
 
     def test_angle_edge_rotate_1(self):
         angle_edge = AngleEdge(
-            [0, 0, 0], [1, 0, 0],
+            self.vertex_1, self.vertex_2,
             np.pi/2, [0, 0, 1]
         )
 
@@ -47,7 +49,7 @@ class EdgeTests(unittest.TestCase):
 
     def test_angle_edge_rotate_2(self):
         angle_edge = AngleEdge(
-            [0, 0, 0], [1, 0, 0],
+            self.vertex_1, self.vertex_2,
             np.pi/2, [0, 0, 1]
         )
 
@@ -60,7 +62,7 @@ class EdgeTests(unittest.TestCase):
 
     def test_spline_edge_translate(self):
         spline_edge = SplineEdge(
-            [0, 0, 0], [1, 0, 0],
+            self.vertex_1, self.vertex_2,
             [
                 [0.25, 0.1, 0],
                 [0.5, 0.5, 0],

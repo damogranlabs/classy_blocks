@@ -1,6 +1,6 @@
 import dataclasses
 
-from typing import ClassVar, Optional
+from typing import ClassVar, Callable
 
 import numpy as np
 
@@ -48,6 +48,11 @@ class AngleEdge(ArcEdgeBase):
     @property
     def third_point(self):
         return arc_from_theta(self.vertex_1.pos, self.vertex_2.pos, self.angle, self.axis)
+
+    def transform(self, function: Callable) -> 'AngleEdge':
+        self.axis = function(self.axis)
+
+        return self
 
     @property
     def description(self):

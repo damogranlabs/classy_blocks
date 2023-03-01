@@ -1,17 +1,18 @@
 import dataclasses
 import abc
 
-from typing import ClassVar, Callable, Optional
+from typing import Callable, Optional
 
 import numpy as np
 
 from classy_blocks.items.vertex import Vertex
+from classy_blocks.base.transformable import TransformableBase
 from classy_blocks.types import PointType, VectorType
 from classy_blocks.util import functions as f
 from classy_blocks.util import constants
 
 @dataclasses.dataclass
-class Edge(abc.ABC):
+class Edge(TransformableBase):
     """Common stuff for all edge objects"""
     vertex_1: Vertex
     vertex_2: Vertex
@@ -24,6 +25,28 @@ class Edge(abc.ABC):
     @abc.abstractmethod
     def kind(self) -> str:
         """Edge kind as it is put into blockMeshDict"""
+
+    def transform(self, function: Callable) -> None:
+        """An arbitrary transform of this edge by a specified function"""
+
+    def translate(self, displacement: VectorType):
+        """Move all points in the edge (but not start and end)
+        by a displacement vector."""
+        displacement = np.asarray(displacement)
+
+        return self.transform(lambda p: p + displacement)
+
+    def rotate(self, angle: float, axis: VectorType, origin: Optional[PointType] = None):
+        """Rotates all points in this edge (except start and end Vertex) around an
+        arbitrary axis and origin (be careful with projected edges, geometry isn't rotated!)"""
+        if origin is None:
+            origin = [0, 0, 0]
+
+        return self.transform(lambda p: f.arbitrary_rotation(p, axis, angle, origin))
+
+    def scale(self, ratio: float, origin):
+        """Scales the edge points around given origin"""
+        return self.transform(lambda p: Vertex.scale_point(p, ratio, origin))
 
     @property
     def is_valid(self) -> bool:

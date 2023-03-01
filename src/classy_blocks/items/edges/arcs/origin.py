@@ -1,7 +1,7 @@
 import dataclasses
 import warnings
 
-from typing import ClassVar
+from typing import ClassVar, Callable
 
 import numpy as np
 
@@ -88,6 +88,11 @@ class OriginEdge(ArcEdgeBase):
         return arc_from_origin(
             self.vertex_1.pos, self.vertex_2.pos,
             self.origin, self.adjust_center, self.flatness)
+
+    def transform(self, function: Callable):
+        self.origin = function(self.origin)
+
+        return self
 
     @property
     def length(self):

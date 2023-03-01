@@ -1,17 +1,18 @@
 """Defines a numbered vertex in 3D space and all operations
 that can be applied to it."""
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 
 from classy_blocks.base.exceptions import VertexNotFoundError
+from classy_blocks.base.transformable import TransformableBase
 from classy_blocks.types import PointType, VectorType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
 from classy_blocks.util.constants import vector_format
 
-class Vertex:
+class Vertex(TransformableBase):
     """A 3D point in space with all transformations and an assigned index"""
     # keep the list as a class variable
     registry:List['Vertex'] = []
@@ -58,19 +59,24 @@ class Vertex:
         self.pos = f.arbitrary_rotation(self.pos, f.unit_vector(axis), angle, origin)
         return self
 
-    def scale(self, ratio, origin=None) -> 'Vertex':
+    def scale(self, ratio:float, origin:Optional[PointType]=None) -> 'Vertex':
         """Scale point's position around origin."""
+        self.pos = self.scale_point(self.pos, ratio, origin)
+        return self
+
+    @staticmethod
+    def scale_point(
+        point:PointType,
+        ratio:float,
+        origin:Optional[PointType]=None) -> PointType:
+        """Scales a point around origin by specified ratio;
+        if not specified, origin is taken as [0, 0, 0]."""
         if origin is None:
             origin = f.vector(0, 0, 0)
 
         origin = np.asarray(origin)
 
-        self.pos = origin + (self.pos - origin)*ratio
-        return self
-
-    # @property
-    # def movable_entities(self) -> List['Vertex']:
-    #     return [self]
+        return origin + (point - origin)*ratio
 
     def __eq__(self, other):
         return self.index == other.index

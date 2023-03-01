@@ -4,6 +4,3 @@ class VertexNotFoundError(Exception):
 
 class EdgeNotFoundError(Exception):
     pass
-
-class GradingNotFoundError(Exception):
-    pass

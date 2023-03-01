@@ -1,5 +1,6 @@
 import numpy as np
 
+from classy_blocks.base.exceptions import VertexNotFoundError
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
@@ -134,5 +135,5 @@ class VertexTests(DataTestCase):
         """Raise a RuntimeError when no Vertex exists at a given position"""
         _ = [Vertex(p) for p in self.get_single_data(0).points]
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(VertexNotFoundError):
             Vertex.find(f.vector(999, 999, 999))
