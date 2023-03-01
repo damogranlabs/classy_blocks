@@ -37,6 +37,10 @@ class Axis:
         
         raise RuntimeError("Axes are not neighbours")
 
+    def chop(self, chop:Chop) -> None:
+        """Add a chop to this axis' grading"""
+        self.chops.append(chop)
+
     @property
     def lengths(self) -> List[float]:
         """Returns length for each wire of this axis; to be used

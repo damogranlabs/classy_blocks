@@ -1,5 +1,5 @@
+from classy_blocks.items.block import Block
 from classy_blocks.mesh import Mesh
-from classy_blocks.data.block_data import BlockData
 
 mesh = Mesh()
 
@@ -16,7 +16,7 @@ block_0_points = [
     [0, 1, 1],
 ]
 
-block_0 = BlockData(block_0_points)
+block_0 = Block(block_0_points)
 
 # add edges
 block_0.add_edge(0, 1, 'arc', [0.5, -0.25, 0]) # arc edge
@@ -35,7 +35,8 @@ block_0.chop(0, start_size=0.02, c2c_expansion=1.1)
 block_0.chop(1, start_size=0.01, c2c_expansion=1.2)
 block_0.chop(2, start_size=0.1, c2c_expansion=1)
 
-mesh.add(block_0)
+# TODO: replace with mesh.add()
+mesh.add_block(block_0)
 
 # another block!
 block_1_points = block_0_points[4:] + [
@@ -44,15 +45,15 @@ block_1_points = block_0_points[4:] + [
     [1, 1, 1.9],
     [0, 1, 2],
 ]
-block_1 = BlockData(block_1_points)
+block_1 = Block(block_1_points)
 block_1.set_patch(['left', 'right', 'front', 'back'], 'walls', 'wall')
 block_1.set_patch('top', 'outlet')
 
 block_1.chop(2, length_ratio=0.5, start_size=0.02, c2c_expansion=1.2, invert=False)
 block_1.chop(2, length_ratio=0.5, start_size=0.02, c2c_expansion=1.2, invert=True)
-print(block_1.axis_chops)
 
-mesh.add(block_1)
+# TODO: replace with mesh.add()
+mesh.add_block(block_1)
 
 
 mesh.write('../case/system/blockMeshDict')

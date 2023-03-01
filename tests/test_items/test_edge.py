@@ -194,6 +194,12 @@ class EdgeFactoryTests(unittest.TestCase):
         self.assertEqual(id(edge_1), id(edge_2))
         self.assertEqual(edge_1.kind, 'arc')
 
+    def test_line_edge(self):
+        """Creating a 'line' edge does not add it to the registry"""
+        _ = factory.create(Vertex([0, 0, 0]), Vertex([1, 0, 0]), 'line')
+
+        self.assertEqual(len(factory.registry), 0)
+
 # class TestPrimitives(unittest.TestCase):
 #     def setUp(self):
 #         v1 = Vertex([0, 0, 0])

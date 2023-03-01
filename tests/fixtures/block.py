@@ -1,4 +1,4 @@
-from tests.fixtures import data
+import dataclasses
 from tests.fixtures.data import DataTestCase
 
 from classy_blocks.items.vertex import Vertex
@@ -10,19 +10,15 @@ class BlockTestCase(DataTestCase):
     def make_block(self, index:int) -> Block:
         """The test subject"""
         block_data = self.get_single_data(index)
-        indexes = self.get_vertex_indexes(index)
-        vertices = [Vertex(data.fl[i], i) for i in indexes] + \
-            [Vertex(data.cl[i], i+len(data.fl)) for i in indexes]
-        
-        edges = []
+
+        block = Block(block_data.points)
+        block.index = index
 
         for edge_data in block_data.edges:
-            args = [
-                vertices[edge_data.corner_1], # vertex_1
-                vertices[edge_data.corner_2], # vertex_2
-                edge_data.kind,
-                *edge_data.args
-            ]
-            edges.append(factory.create(*args))
+            block.add_edge(*edge_data)
+        
+        for axis in (0, 1, 2):
+            for chop in block_data.chops[axis]:
+                block.chop(axis, **dataclasses.asdict(chop))
 
-        return Block(block_data, index, vertices, edges)
+        return block

@@ -44,13 +44,8 @@ class Mesh:
         pass
 
     def add_block(self, block:Block) -> None:
-        # create new vertices from block data or reassign existing ones
-        block.vertices = self.vertex_list.add(block.vertices)
-
-        # generate new edges or find existing ones
-        edges = self.edge_list.add(data, vertices)
-
-        # generate a Block from collected/created objects
+        # vertices and edges handle themselves;
+        # when adding a block, handle its neighbours and whatnot
         self.block_list.add(block)
 
         # generate patches from block's faces

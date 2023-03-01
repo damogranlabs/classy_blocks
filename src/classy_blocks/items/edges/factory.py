@@ -44,9 +44,14 @@ class EdgeFactory:
             edge = self.find(vertex_1, vertex_2)
         except EdgeNotFoundError:
             args = list(args)
-            kind = self.kinds[args.pop(2)]
-            edge = kind(*args)
-            self.registry.append(edge)
+            kind = args.pop(2)
+            edge_class = self.kinds[kind]
+            edge = edge_class(*args)
+
+            if kind != 'line':
+                # do not include line edges;
+                # they're here only for convenience (.length() and whatnot)
+                self.registry.append(edge)
         
         return edge
 

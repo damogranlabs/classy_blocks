@@ -12,6 +12,8 @@ class BlockList:
 
     def add(self, block:Block) -> None:
         """Add blocks"""
+        block.index = len(self.blocks)
+        
         self.blocks.append(block)
         self.update_neighbours(block)
 

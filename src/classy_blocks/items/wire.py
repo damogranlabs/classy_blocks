@@ -16,6 +16,7 @@ class Wire:
         self.axis = axis
 
         # the default edge is 'line' but will be replaced if the user wishes so
+        # (that is, not included in edge.factory.registry)
         self.edge:Edge = LineEdge(*self.vertices)
 
         # grading/counts of this wire (edgeGrading only)

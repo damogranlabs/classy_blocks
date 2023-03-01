@@ -40,7 +40,7 @@ from typing import List, Optional
 
 import numpy as np
 
-from classy_blocks.types import PointListType
+from classy_blocks.grading.chop import Chop
 
 fl:List[List[float]] = [  # points on the 'floor'; z=0
     [0, 0, 0],  # 0
@@ -65,7 +65,7 @@ class TestBlockData:
     edges:List = dataclasses.field(default_factory=list)
 
     # chop counts (for each axis, use None to not chop)
-    counts:List[Optional[int]] = dataclasses.field(default_factory=lambda: [None, None, None])
+    chops:List[List[Chop]] = dataclasses.field(default_factory=lambda: [[], [], []])
 
     # calls to set_patch()
     patches:List = dataclasses.field(default_factory=list)
@@ -87,7 +87,11 @@ test_data = [
             [0, 1, 'arc', [0.5, -0.25, 0]],
             [1, 2, 'spline', [[1.1, 0.25, 0], [1.05, 0.5, 0], [1.1, 0.75, 0]]]
         ],
-        counts=[6, None, None], # chops
+        chops=[ # chops
+            [Chop(count=6)],
+            [],
+            [],
+        ],
         patches=[
             ["left", "inlet"],
             [["bottom", "top", "front", "back"], "walls", "wall"]
@@ -100,14 +104,22 @@ test_data = [
             [3, 0, 'arc', [0.5, -0.1, 1]], # duplicated edge in block 2 that must not be included
             [0, 1, 'arc', [0.5, 0, 0]]  # collinear point; invalid edge must be dropped
         ],
-        counts=[5, 6, None],
+        chops=[
+            [Chop(count=5)],
+            [Chop(count=6)],
+            [],
+        ],
         patches=[
             [["bottom", "top", "right", "front"], "walls", "wall"],
         ]
     ),
     TestBlockData(
         indexes=[2, 5, 6, 7],
-        counts=[None, 8, 7],
+        chops=[
+            [],
+            [Chop(count=8)],
+            [Chop(count=7)],
+        ],
         patches=[
             ["back", "outlet"],
             [["bottom", "top", "left", "right"], "walls"]

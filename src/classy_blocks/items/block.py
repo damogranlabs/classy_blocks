@@ -1,12 +1,13 @@
 import warnings
-from typing import List, Literal, Union
+from typing import List, Literal, Union, Dict
 
 from classy_blocks.types import PointListType, AxisType, OrientType, EdgeKindType
 
-from classy_blocks.data.block_data import BlockData
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edges.edge import Edge
-from classy_blocks.items.wireframe import Wireframe
+from classy_blocks.items.edges.factory import factory
+from classy_blocks.items.wire import Wire
+from classy_blocks.items.axis import Axis
 
 from classy_blocks.items.side import Side
 from classy_blocks.grading.chop import Chop
@@ -22,12 +23,29 @@ class Block:
 
         # vertices, edges, counts and gradings
         self.vertices = [Vertex(point) for point in points]
-        self.edges:List[Edge] = []
+        
+        # Storing and retrieving pairs of vertices a.k.a. 'wires';
+        # Block object can be indexed so that the desired Wire can be accessed directly;
+        # for instance, an edge between vertices 2 and 6 is obtained with
+        # self.wires[2][6].edge"""
 
-        self.frame = Wireframe(self.vertices, self.edges)
+        # the opposite side of each vertex
+        self.wires:List[Dict[int, Wire]] = [{} for _ in range(8)]
+        # wires of each axis
+        self.axes = [Axis(i) for i in (0, 1, 2)]
+
+        # create wires and connections for quicker addressing
+        for axis in range(3):
+            for pair in constants.AXIS_PAIRS[axis]:
+                wire = Wire(self.vertices, axis, pair[0], pair[1])
+
+                self.wires[pair[0]][pair[1]] = wire
+                self.wires[pair[1]][pair[0]] = wire
+
+                self.axes[axis].wires.append(wire)
 
         # Side objects define patch names and projections
-        #self.sides = {o:Side(o) for o in constants.FACE_MAP}
+        self.sides = None #{o:Side(o) for o in constants.FACE_MAP}
 
         # cellZone to which the block belongs to
         self.cell_zone = ""
@@ -79,7 +97,8 @@ class Block:
                 block.add_edge(0, 1, 'angle', np.pi/6, [0, 0, 1])"""
         assert 0 <= corner_1 < 8 and 0 <= corner_2 < 8, "Use block-local indexing (0...7)"
 
-        #self.edges.append('edge')
+        factory_args = [self.vertices[corner_1], self.vertices[corner_2], kind] + list(args)
+        self.wires[corner_1][corner_2].edge = factory.create(*factory_args)
 
     def chop(self, axis: AxisType, **kwargs:Union[str, float, int, bool]) -> None:
         """Set block's cell count/size and grading for a given direction/axis.
@@ -112,16 +131,42 @@ class Block:
             https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading;
             Multiple gradings are specified by multiple calls to .chop() with
             the same 'axis' parameter."""
-                # set gradings according to data.axis_chops
-        #self.frame.chop_axis(axis, chop)
+        self.axes[axis].chop(Chop(**kwargs))
 
+    def get_axis_wires(self, axis:AxisType) -> List[Wire]:
+        """Returns a list of wires that run in the given axis"""
+        return self.axes[axis].wires
 
-    # def add_neighbour(self, candidate:'Block') -> None:
-    #     """Add a block to neighbours, if applicable"""
-    #     if candidate == self:
-    #         return
+    def add_neighbour(self, candidate:'Block') -> None:
+        """Add a block to neighbours, if applicable"""
+        if candidate == self:
+            return
 
-    #     self.frame.add_neighbour(candidate.frame)
+        # axes
+        for this_axis in self.axes:
+            for cnd_axis in candidate.axes:
+                this_axis.add_neighbour(cnd_axis)
+        
+        # wires
+        for this_wire in self.wire_list:
+            for cnd_wire in candidate.wire_list:
+                this_wire.add_coincident(cnd_wire)
+
+    @property
+    def edges(self) -> List[Edge]:
+        """A list of edges from all wires"""
+        all_edges = []
+
+        for wire in self.wires:
+            if wire.edge.kind != 'line':
+                all_edges.append(wire.edge)
+        
+        return all_edges
+
+    @property
+    def wire_list(self) -> List[Wire]:
+        """A flat list of all wires"""
+        return self.axes[0].wires + self.axes[1].wires + self.axes[2].wires
 
     def set_patch(self,
         orients: Union[OrientType, List[OrientType]],
@@ -161,18 +206,18 @@ class Block:
         out += " ( " + " ".join(str(v.index) for v in self.vertices) + " ) "
 
         # cellZone
-        out += self.data.cell_zone
+        out += self.cell_zone
 
         # number of cells
-        out += " (" + " ".join([str(axis.grading.count) for axis in self.frame.axes]) + " ) "
+        out += " (" + " ".join([str(axis.grading.count) for axis in self.axes]) + " ) "
 
         # grading
         out += " simpleGrading (" + \
-            self.frame.axes[0].grading.description + " " + \
-            self.frame.axes[1].grading.description + " " + \
-            self.frame.axes[2].grading.description + ") "
+            self.axes[0].grading.description + " " + \
+            self.axes[1].grading.description + " " + \
+            self.axes[2].grading.description + ") "
 
         # add a comment with block index
-        out += f" // {self.index} {self.data.comment}\n"
+        out += f" // {self.index} {self.comment}\n"
 
         return out

@@ -19,8 +19,8 @@ class BlockTests(BlockTestCase):
         # these two blocks share the whole face (1 2 6 5)
         # 4 wires altogether
         self.assertEqual(
-            block_0.frame[this_corners[0]][this_corners[1]].coincidents,
-            {block_1.frame[nei_corners[0]][nei_corners[1]]}
+            block_0.wires[this_corners[0]][this_corners[1]].coincidents,
+            {block_1.wires[nei_corners[0]][nei_corners[1]]}
         )
 
     def test_add_neighbour_1_axes(self):
@@ -31,9 +31,9 @@ class BlockTests(BlockTestCase):
         block_0.add_neighbour(block_1)
 
         # block_1 is block_0's neighbour in axes 1 and 2
-        self.assertListEqual(block_0.frame.axes[0].neighbours, [])
-        self.assertListEqual(block_0.frame.axes[1].neighbours, [block_1.frame.axes[1]])
-        self.assertListEqual(block_0.frame.axes[2].neighbours, [block_1.frame.axes[2]])
+        self.assertListEqual(block_0.axes[0].neighbours, [])
+        self.assertListEqual(block_0.axes[1].neighbours, [block_1.axes[1]])
+        self.assertListEqual(block_0.axes[2].neighbours, [block_1.axes[2]])
 
     def test_add_neighbour_2_wires(self):
         """Two blocks that share an edge only"""
@@ -44,8 +44,8 @@ class BlockTests(BlockTestCase):
 
         # there must be only 1 wire that only has 1 neighbour
         self.assertEqual(
-            block_0.frame[2][6].coincidents,
-            {block_2.frame[0][4]}
+            block_0.wires[2][6].coincidents,
+            {block_2.wires[0][4]}
         )
 
     def test_add_neighbour_2_axes(self):
@@ -55,9 +55,9 @@ class BlockTests(BlockTestCase):
 
         block_0.add_neighbour(block_2)
         # block_2 is block_0'2 neighbour only on axis 2
-        self.assertListEqual(block_0.frame.axes[0].neighbours, [])
-        self.assertListEqual(block_0.frame.axes[1].neighbours, [])
-        self.assertListEqual(block_0.frame.axes[2].neighbours, [block_2.frame.axes[2]])
+        self.assertListEqual(block_0.axes[0].neighbours, [])
+        self.assertListEqual(block_0.axes[1].neighbours, [])
+        self.assertListEqual(block_0.axes[2].neighbours, [block_2.axes[2]])
 
 
     def test_add_neighbour_3(self):
@@ -70,8 +70,8 @@ class BlockTests(BlockTestCase):
         block_0.add_neighbour(block_2)
 
         self.assertEqual(
-            block_0.frame[2][6].coincidents,
-            {block_1.frame[3][7], block_2.frame[0][4]}
+            block_0.wires[2][6].coincidents,
+            {block_1.wires[3][7], block_2.wires[0][4]}
         )
     
     def test_add_neighbour_twice(self):
@@ -82,7 +82,7 @@ class BlockTests(BlockTestCase):
         block_0.add_neighbour(block_1)
         block_0.add_neighbour(block_1)
 
-        self.assertEqual(len(block_0.frame.axes[1].neighbours), 1)
+        self.assertEqual(len(block_0.axes[1].neighbours), 1)
     
     def test_add_self(self):
         """Add the same block as a neighbour"""
@@ -90,7 +90,7 @@ class BlockTests(BlockTestCase):
 
         block_0.add_neighbour(block_0)
 
-        self.assertEqual(len(block_0.frame.axes[0].neighbours), 0)
+        self.assertEqual(len(block_0.axes[0].neighbours), 0)
     
     def test_add_neighbour_inverted(self):
         """Add a neighbour with an inverted axis"""
