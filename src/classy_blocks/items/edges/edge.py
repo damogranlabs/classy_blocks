@@ -16,6 +16,10 @@ class Edge(abc.ABC):
     vertex_1: Vertex
     vertex_2: Vertex
 
+    def __post_init__(self):
+        assert isinstance(self.vertex_1, Vertex)
+        assert isinstance(self.vertex_2, Vertex)
+
     @property
     @abc.abstractmethod
     def kind(self) -> str:
@@ -24,6 +28,7 @@ class Edge(abc.ABC):
     @property
     def is_valid(self) -> bool:
         """Returns True if this edge is elligible to be put into blockMeshDict"""
+        # TODO: TEST
         if self.kind == 'line':
             # no need to specify lines
             return False
@@ -49,3 +54,9 @@ class Edge(abc.ABC):
         """string description of the edge to be put in blockMeshDict"""
         # subclasses continue from here
         return f"{self.kind} {self.vertex_1.index} {self.vertex_2.index} "
+
+    def __eq__(self, other):
+        # An Edge is defined between two vertices regardless of
+        # its orientation
+        return {self.vertex_1.index, self.vertex_2.index} == \
+            {other.vertex_1.index, other.vertex_2.index}

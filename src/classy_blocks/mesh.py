@@ -44,22 +44,22 @@ class Mesh:
         pass
 
     def add_block(self, block:Block) -> None:
-            # create new vertices from block data or reassign existing ones
-            block.vertices = self.vertex_list.add(block.vertices)
+        # create new vertices from block data or reassign existing ones
+        block.vertices = self.vertex_list.add(block.vertices)
 
-            # generate new edges or find existing ones
-            edges = self.edge_list.add(data, vertices)
+        # generate new edges or find existing ones
+        edges = self.edge_list.add(data, vertices)
 
-            # generate a Block from collected/created objects
-            self.block_list.add(block)
+        # generate a Block from collected/created objects
+        self.block_list.add(block)
 
-            # generate patches from block's faces
-            #self.boundary.add(block)
+        # generate patches from block's faces
+        #self.boundary.add(block)
 
-            # TODO: TEST
-            #if hasattr(item, "geometry"):
-            #    raise NotImplementedError
-            #   # self.add_geometry(item.geometry)
+        # TODO: TEST
+        #if hasattr(item, "geometry"):
+        #    raise NotImplementedError
+        #   # self.add_geometry(item.geometry)
 
     # def merge_patches(self, master:str, slave:str) -> None:
     #     """Merges two non-conforming named patches using face merging;

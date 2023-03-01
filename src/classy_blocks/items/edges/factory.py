@@ -1,5 +1,6 @@
 from typing import Type
 
+from classy_blocks.base.exceptions import EdgeNotFoundError
 from classy_blocks.items.edges.edge import Edge
 
 # TODO: make this automatic
@@ -11,10 +12,20 @@ from classy_blocks.items.edges.spline import SplineEdge, PolyLineEdge
 from classy_blocks.items.edges.project import ProjectEdge
 
 class EdgeFactory:
-    """Kind of a pattern"""
-
+    """Generates edges as requested by the user or returns existing ones
+    if they are defined already"""
     def __init__(self):
         self.kinds = {}
+        self.registry = []
+
+    def find(self, vertex_1, vertex_2) -> Edge:
+        indexes = {vertex_1.index, vertex_2.index}
+
+        for edge in self.registry:
+            if indexes == {edge.vertex_1.index, edge.vertex_2.index}:
+                return edge
+        
+        raise EdgeNotFoundError(f"Edge between vertices not found: {indexes}")
 
     def register_kind(self, creator: Type[Edge]) -> None:
         """Introduces a new edge kind to this factory"""
@@ -25,9 +36,19 @@ class EdgeFactory:
         # all definitions begin with
         # vertex_1: Vertex
         # vertex_2: Vertex
-        args = list(args)
-        kind = self.kinds[args.pop(2)]
-        return kind(*args)
+
+        vertex_1 = args[0]
+        vertex_2 = args[1]
+
+        try:
+            edge = self.find(vertex_1, vertex_2)
+        except EdgeNotFoundError:
+            args = list(args)
+            kind = self.kinds[args.pop(2)]
+            edge = kind(*args)
+            self.registry.append(edge)
+        
+        return edge
 
 factory = EdgeFactory()
 factory.register_kind(LineEdge)

@@ -38,7 +38,9 @@ import dataclasses
 
 from typing import List, Optional
 
-from classy_blocks.data.block_data import BlockData
+import numpy as np
+
+from classy_blocks.types import PointListType
 
 fl:List[List[float]] = [  # points on the 'floor'; z=0
     [0, 0, 0],  # 0
@@ -66,11 +68,17 @@ class TestBlockData:
     counts:List[Optional[int]] = dataclasses.field(default_factory=lambda: [None, None, None])
 
     # calls to set_patch()
-    patches:List = dataclasses.field(default_factory=list) 
+    patches:List = dataclasses.field(default_factory=list)
 
     # other thingamabobs
     description:str = ""
     cell_zone:str = ""
+
+    def __post_init__(self):
+        self.points = np.array(
+            [fl[i] for i in self.indexes] + \
+            [cl[i] for i in self.indexes]
+        )
 
 test_data = [
     TestBlockData(
@@ -110,33 +118,14 @@ test_data = [
 class DataTestCase(unittest.TestCase):
     """Test case with ready-made block data"""
     @staticmethod
-    def get_single_data(index:int) -> BlockData:
+    def get_single_data(index:int) -> TestBlockData:
         """Returns a list of predefined blocks for testing"""
-        data = test_data[index]
-
-        points = [fl[i] for i in data.indexes] + [cl[i] for i in data.indexes]
-
-        block_data = BlockData(points)
-
-        for edge in data.edges:
-            block_data.add_edge(*edge)
-
-        for axis in (0, 1, 2):
-            if data.counts[axis] is not None:
-                block_data.chop(axis, count=data.counts[axis])
-
-        for patch in data.patches:
-            block_data.set_patch(*patch)
-
-        block_data.comment = data.description
-        block_data.cell_zone = data.cell_zone
-
-        return block_data
+        return test_data[index]
 
     @staticmethod
-    def get_all_data() -> List[BlockData]:
+    def get_all_data() -> List[TestBlockData]:
         """Returns all prepared block data"""
-        return [DataTestCase.get_single_data(i) for i in range(len(test_data))]
+        return test_data
 
     @staticmethod
     def get_vertex_indexes(index:int) -> List[int]:
