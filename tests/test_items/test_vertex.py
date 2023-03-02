@@ -137,3 +137,19 @@ class VertexTests(DataTestCase):
 
         with self.assertRaises(VertexNotFoundError):
             Vertex.find(f.vector(999, 999, 999))
+
+    def test_duplicate_new(self):
+        """Run a Vertex.copy() on a non-existing position"""
+        vertex_1 = Vertex([0, 0, 0])
+        vertex_2 = Vertex([1, 1, 1], duplicate=True)
+
+        self.assertEqual(len(Vertex.registry), 2)
+        self.assertFalse(id(vertex_1) == id(vertex_2))
+    
+    def test_duplicate_existing(self):
+        """Run a Vertex.copy() on an existing position"""
+        vertex_1 = Vertex([0, 0, 0])
+        vertex_2 = Vertex([0, 0, 0], duplicate=True)
+
+        self.assertEqual(len(Vertex.registry), 2)
+        self.assertFalse(id(vertex_1) == id(vertex_2))

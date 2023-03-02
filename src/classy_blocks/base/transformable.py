@@ -1,5 +1,5 @@
 import abc
-from typing import Optional
+from typing import Optional, List
 
 from classy_blocks.types import PointType, VectorType
 
@@ -20,4 +20,3 @@ class TransformableBase(abc.ABC):
     def scale(self, ratio:float, origin:Optional[PointType]=None) -> 'TransformableBase':
         """Scale with respect to given origin; returns the same instance
         to enable chaining of transformations."""
-        

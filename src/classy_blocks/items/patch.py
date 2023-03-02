@@ -2,14 +2,14 @@ import dataclasses
 
 from typing import List
 
-from classy_blocks.items.face import Face
+from classy_blocks.items.face import ___Face
 
 @dataclasses.dataclass
 class Patch:
     """Definition of a patch, including type, 
     belonging faces and other settings"""
     name:str
-    faces:List[Face]
+    faces:List[___Face]
     type:str
     settings:dict = dataclasses.field(default_factory=dict)
 

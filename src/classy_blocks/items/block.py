@@ -153,20 +153,20 @@ class Block:
                 this_wire.add_coincident(cnd_wire)
 
     @property
-    def edges(self) -> List[Edge]:
+    def wire_list(self) -> List[Wire]:
+        """A flat list of all wires"""
+        return self.axes[0].wires + self.axes[1].wires + self.axes[2].wires
+
+    @property
+    def edge_list(self) -> List[Edge]:
         """A list of edges from all wires"""
         all_edges = []
 
-        for wire in self.wires:
+        for wire in self.wire_list:
             if wire.edge.kind != 'line':
                 all_edges.append(wire.edge)
         
         return all_edges
-
-    @property
-    def wire_list(self) -> List[Wire]:
-        """A flat list of all wires"""
-        return self.axes[0].wires + self.axes[1].wires + self.axes[2].wires
 
     def set_patch(self,
         orients: Union[OrientType, List[OrientType]],

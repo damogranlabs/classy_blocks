@@ -17,30 +17,35 @@ class Vertex(TransformableBase):
     # keep the list as a class variable
     registry:List['Vertex'] = []
 
-    def __new__(cls, position:PointType, *args, **kwargs):
+    pos:PointType
+    index:int
+
+    def __new__(cls, position:PointType, *args, duplicate:bool=False, **kwargs):
         """Before adding a new vertex to the list,
-        check if there is already an existing one and return that instead"""
+        check if there is already an existing one and return that instead;
+        if 'copy' is True, add a new one regardless"""
         # this is some kind of a 'singleton' pattern but stores 'globals' in a list;
         # "multipleton"
-        try:
-            vertex = Vertex.find(position)
-            # TODO: check for face-merged stuff
-        except VertexNotFoundError:
-            # no vertex was found, add a new one;
-            vertex = super().__new__(cls, *args, **kwargs)
-            Vertex.registry.append(vertex)
-        
-        return vertex
+        position = np.asarray(position, dtype='float')
+        assert np.shape(position) == (3, ), "Provide a point in 3D space"
 
-    def __init__(self, position:PointType):
-        if not hasattr(self, 'pos'):
-            # only initialize the same Vertex once
-            self.pos = np.asarray(position)
-            assert np.shape(self.pos) == (3, ), "Provide a point in 3D space"
-
-            self.index = len(self.registry) - 1
+        def create_new():
+            new_vertex = super(Vertex, cls).__new__(cls, *args, **kwargs)
+            new_vertex.pos = position
+            new_vertex.index = len(Vertex.registry)
 
             # TODO: project
+            Vertex.registry.append(new_vertex)
+            return new_vertex
+
+        if duplicate:
+            return create_new()
+        try:
+            return Vertex.find(position)
+            # TODO: check for face-merged stuff            
+        except VertexNotFoundError:
+            # no vertex was found, add a new one;
+            return create_new()
 
     def translate(self, displacement:VectorType) -> 'Vertex':
         """Move this point by 'displacement' vector"""
@@ -100,3 +105,17 @@ class Vertex(TransformableBase):
                 return vertex
 
         raise VertexNotFoundError(f"Vertex not found: {str(position)}")
+
+    # @staticmethod
+    # def copy(position:PointType) -> 'Vertex':
+    #     """Returns a new Vertex regardless of whether
+    #     an existing one is already at given position"""
+    #     try:
+    #         existing_vertex = Vertex.find(position)
+    #         new_vertex = copy.copy(existing_vertex)
+    #         new_vertex.index = len(Vertex.registry)
+    #         Vertex.registry.append(new_vertex)
+    #         return new_vertex
+    #     except VertexNotFoundError:
+    #         # make a new one
+    #         return Vertex(position)

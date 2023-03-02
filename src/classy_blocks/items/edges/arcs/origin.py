@@ -1,7 +1,7 @@
 import dataclasses
 import warnings
 
-from typing import ClassVar, Callable
+from typing import ClassVar, Callable, List
 
 import numpy as np
 
@@ -93,6 +93,10 @@ class OriginEdge(ArcEdgeBase):
         self.origin = function(self.origin)
 
         return self
+
+    @property
+    def args(self) -> List:
+        return super().args + [self.origin, self.flatness]
 
     @property
     def length(self):

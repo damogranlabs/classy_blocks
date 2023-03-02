@@ -1,6 +1,6 @@
 import dataclasses
 
-from typing import ClassVar, Callable
+from typing import ClassVar, Callable, List
 
 import numpy as np
 
@@ -53,6 +53,10 @@ class AngleEdge(ArcEdgeBase):
         self.axis = function(self.axis)
 
         return self
+
+    @property
+    def args(self) -> List:
+        return super().args + [self.angle, self.axis]
 
     @property
     def description(self):

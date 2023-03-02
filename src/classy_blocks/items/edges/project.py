@@ -1,6 +1,6 @@
 import dataclasses
 
-from typing import Callable, ClassVar
+from typing import Callable, ClassVar, List
 
 import numpy as np
 
@@ -16,6 +16,10 @@ class ProjectEdge(Edge):
     kind: ClassVar[str] = "project"
 
     geometry: str # TODO: a list of 2 strings! to project to an intersection of 2 surfaces
+
+    @property
+    def args(self) -> List:
+        return super().args
 
     @property
     def length(self):

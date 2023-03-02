@@ -1,6 +1,6 @@
 import dataclasses
 
-from typing import Callable, ClassVar
+from typing import Callable, ClassVar, List
 
 import numpy as np
 
@@ -23,6 +23,10 @@ class ArcEdge(ArcEdgeBase):
         self.arc_point = function(self.arc_point)
 
         return self
+
+    @property
+    def args(self) -> List:
+        return super().args + [self.arc_point]
 
     @property
     def is_valid(self):

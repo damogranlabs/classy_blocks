@@ -1,7 +1,7 @@
 import dataclasses
 import abc
 
-from typing import Callable, Optional
+from typing import Callable, Optional, List
 
 import numpy as np
 
@@ -26,13 +26,16 @@ class Edge(TransformableBase):
     def kind(self) -> str:
         """Edge kind as it is put into blockMeshDict"""
 
-    def transform(self, function: Callable) -> None:
+    def transform(self, function: Callable) -> 'Edge':
         """An arbitrary transform of this edge by a specified function"""
+        # (only transforms additional points, not vertices;
+        # they transform themselves with their own methods)
+        return self
 
     def translate(self, displacement: VectorType):
         """Move all points in the edge (but not start and end)
         by a displacement vector."""
-        displacement = np.asarray(displacement)
+        displacement = np.asarray(displacement, dtype=float)
 
         return self.transform(lambda p: p + displacement)
 
@@ -44,9 +47,17 @@ class Edge(TransformableBase):
 
         return self.transform(lambda p: f.arbitrary_rotation(p, axis, angle, origin))
 
-    def scale(self, ratio: float, origin):
+    def scale(self, ratio: float, origin: Optional[PointType] = None) -> 'Edge':
         """Scales the edge points around given origin"""
         return self.transform(lambda p: Vertex.scale_point(p, ratio, origin))
+
+    @property
+    @abc.abstractmethod
+    def args(self) -> List:
+        """Returns arguments that can be used to re-create this
+        edge using the factory method"""
+        # TODO: test for every edge kind
+        return [self.kind]
 
     @property
     def is_valid(self) -> bool:

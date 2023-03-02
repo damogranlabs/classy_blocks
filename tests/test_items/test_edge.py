@@ -21,11 +21,6 @@ class EdgeTests(unittest.TestCase):
         self.vertex_1 = Vertex([0, 0, 0])
         self.vertex_2 = Vertex([1, 0, 0])
 
-    def test_assert_vertices(self):
-        """Make sure vertices aren't passed as numpy points or whatever"""
-        with self.assertRaises(AssertionError):
-            _ = ArcEdge(self.vertex_1, [1, 0, 0], [0.5, 0.2, 0])
-
     def test_arc_edge_translate(self):
         arc_edge = ArcEdge(
             self.vertex_1, self.vertex_2,
@@ -199,6 +194,34 @@ class EdgeFactoryTests(unittest.TestCase):
         _ = factory.create(Vertex([0, 0, 0]), Vertex([1, 0, 0]), 'line')
 
         self.assertEqual(len(factory.registry), 0)
+
+    def test_duplicate_existing(self):
+        """Call a create(copy=True) function with copy=True on a new edge"""
+        _ = factory.create(
+            Vertex([0, 0, 0]),
+            Vertex([0, 0, 1]),
+            'project', 'terrain')
+
+        _ = factory.create(
+            Vertex([0, 0, 0]),
+            Vertex([0, 0, 1]),
+            'arc', [0.5, 0.2, 0], duplicate=True)
+    
+        self.assertEqual(len(factory.registry), 2)
+    
+    def test_duplicate_new(self):
+        """Call a create(copy=True) with a new edge"""
+        _ = factory.create(
+            Vertex([0, 0, 0]),
+            Vertex([0, 0, 1]),
+            'project', 'terrain')
+    
+        _ = factory.create(
+            Vertex([1, 1, 1]),
+            Vertex([1, 1, 2]),
+            'arc', [0.5, 0.2, 0], duplicate=True)
+    
+        self.assertEqual(len(factory.registry), 2)
 
 # class TestPrimitives(unittest.TestCase):
 #     def setUp(self):

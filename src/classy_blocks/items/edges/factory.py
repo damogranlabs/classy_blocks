@@ -1,6 +1,7 @@
 from typing import Type
 
 from classy_blocks.base.exceptions import EdgeNotFoundError
+from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edges.edge import Edge
 
 # TODO: make this automatic
@@ -18,7 +19,9 @@ class EdgeFactory:
         self.kinds = {}
         self.registry = []
 
-    def find(self, vertex_1, vertex_2) -> Edge:
+    def find(self, vertex_1:Vertex, vertex_2:Vertex) -> Edge:
+        """Returns an existing edge between given vertices
+        or raises an EdgeNotFoundError otherwise"""
         indexes = {vertex_1.index, vertex_2.index}
 
         for edge in self.registry:
@@ -31,7 +34,7 @@ class EdgeFactory:
         """Introduces a new edge kind to this factory"""
         self.kinds[creator.kind] = creator
 
-    def create(self, *args):
+    def create(self, *args, duplicate=False):
         """Creates an EdgeOps of the desired kind and returns it"""
         # all definitions begin with
         # vertex_1: Vertex
@@ -40,20 +43,26 @@ class EdgeFactory:
         vertex_1 = args[0]
         vertex_2 = args[1]
 
-        try:
-            edge = self.find(vertex_1, vertex_2)
-        except EdgeNotFoundError:
-            args = list(args)
-            kind = args.pop(2)
+        def create_new() -> Edge:
+            arg = list(args)
+            kind = arg.pop(2)
             edge_class = self.kinds[kind]
-            edge = edge_class(*args)
+            edge = edge_class(*arg)
 
             if kind != 'line':
                 # do not include line edges;
                 # they're here only for convenience (.length() and whatnot)
                 self.registry.append(edge)
         
-        return edge
+            return edge
+            
+        if duplicate:
+            return create_new()
+
+        try:
+            return self.find(vertex_1, vertex_2)
+        except EdgeNotFoundError:
+            return create_new()
 
 factory = EdgeFactory()
 factory.register_kind(LineEdge)

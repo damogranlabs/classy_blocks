@@ -1,22 +1,22 @@
 import unittest
 import numpy as np
 
+from classy_blocks.items.vertex import Vertex
+from classy_blocks.items.edges.factory import factory
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.util import functions as f
 
 
 class FaceTests(unittest.TestCase):
     def setUp(self):
+        Vertex.registry = []
+        
         self.points = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]]
 
     def test_face_points(self):
         # provide less than 4 points
         with self.assertRaises(Exception):
-            Face(self.points[:3])
-
-    def test_face_edges(self):
-        with self.assertRaises(Exception):
-            Face(self.points, [None, None, None])
+            _ = Face(self.points[:3])
 
     def test_coplanar_points_fail(self):
         with self.assertRaises(Exception):
@@ -27,12 +27,15 @@ class FaceTests(unittest.TestCase):
         Face(self.points, check_coplanar=True)
 
     def test_translate_face(self):
-        face_edges = [[0.5, -0.25, 0], [[1.1, 0.25, 0], [1.2, 0.5, 0], [1.1, 0.75, 0]], None, None]  # arc edge
+        face_edges = [
+            [0, 1, 'arc', [0.5, -0.25, 0]],
+            [1, 2, 'spline', [[1.1, 0.25, 0], [1.2, 0.5, 0], [1.1, 0.75, 0]]],
+        ]
 
         translate_vector = np.random.rand(3)
 
         original_face = Face(self.points, face_edges)
-        translated_face = original_face.translate(translate_vector)
+        translated_face = original_face.copy().translate(translate_vector)
 
         # check points
         for i in range(4):

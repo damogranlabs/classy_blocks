@@ -7,7 +7,7 @@ from classy_blocks.items.vertex import Vertex
 from classy_blocks.util import constants
 
 @dataclasses.dataclass
-class Face:
+class ___Face: # TODO: change name
     """Block 'side' is defined by orient but a Face is defined by actual
     Vertex indexes; it also contains patch/project and formatting information"""
     vertices:List[Vertex]
@@ -24,7 +24,7 @@ class Face:
         return '(' + indexes + ')'
 
     @classmethod
-    def from_side(cls, side:Side, vertices:List[Vertex]) -> 'Face':
+    def from_side(cls, side:Side, vertices:List[Vertex]) -> '___Face':
         """Create a face from given Side object"""
         vertices = [vertices[i] for i in constants.FACE_MAP[side.orient]]
 

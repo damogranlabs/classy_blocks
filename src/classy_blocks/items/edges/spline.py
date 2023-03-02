@@ -1,6 +1,6 @@
 import dataclasses
 
-from typing import Callable, ClassVar
+from typing import Callable, ClassVar, List
 
 import numpy as np
 
@@ -21,6 +21,10 @@ class SplineEdge(Edge):
         self.points = np.array([function(p) for p in self.points])
 
         return self
+    
+    @property
+    def args(self) -> List:
+        return super().args + [self.points]
 
     @property
     def length(self):
