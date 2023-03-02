@@ -4,6 +4,7 @@ import numpy as np
 
 from classy_blocks.items.vertex import Vertex
 
+from classy_blocks.data import edges
 from classy_blocks.items.edges.arcs.arc import ArcEdge
 from classy_blocks.items.edges.arcs.origin import OriginEdge, arc_from_origin
 from classy_blocks.items.edges.arcs.angle import AngleEdge, arc_from_theta
@@ -22,53 +23,51 @@ class EdgeTests(unittest.TestCase):
         self.vertex_2 = Vertex([1, 0, 0])
 
     def test_arc_edge_translate(self):
-        arc_edge = ArcEdge(
-            self.vertex_1, self.vertex_2,
-            [0.5, 0, 0]
-        )
+        arc_edge = ArcEdge(self.vertex_1, self.vertex_2, edges.Arc([0.5, 0, 0]))
+        
         arc_edge.translate([1, 1, 1])
-        np.testing.assert_array_equal(arc_edge.arc_point, [1.5, 1, 1])
+        np.testing.assert_array_equal(arc_edge.data.point, [1.5, 1, 1])
 
     def test_angle_edge_rotate_1(self):
         angle_edge = AngleEdge(
             self.vertex_1, self.vertex_2,
-            np.pi/2, [0, 0, 1]
+            edges.Angle(np.pi/2, [0, 0, 1])
         )
 
         angle_edge.rotate(np.pi/2, [0, 0, 1], [0, 0, 0])
 
         np.testing.assert_array_equal(
-            angle_edge.axis, [0, 0, 1])
+            angle_edge.data.axis, [0, 0, 1])
 
-        self.assertEqual(angle_edge.angle, np.pi/2)
+        self.assertEqual(angle_edge.data.angle, np.pi/2)
 
     def test_angle_edge_rotate_2(self):
         angle_edge = AngleEdge(
             self.vertex_1, self.vertex_2,
-            np.pi/2, [0, 0, 1]
+            edges.Angle(np.pi/2, [0, 0, 1])
         )
 
         angle_edge.rotate(np.pi/2, [1, 0, 0], [0, 0, 0])
 
         np.testing.assert_array_equal(
-            angle_edge.axis, [0, -1, 0])
+            angle_edge.data.axis, [0, -1, 0])
 
-        self.assertEqual(angle_edge.angle, np.pi/2)
+        self.assertEqual(angle_edge.data.angle, np.pi/2)
 
     def test_spline_edge_translate(self):
         spline_edge = SplineEdge(
             self.vertex_1, self.vertex_2,
-            [
+            edges.Spline([
                 [0.25, 0.1, 0],
                 [0.5, 0.5, 0],
                 [0.75, 0.1, 0],
-            ]
+            ])
         )
 
         spline_edge.translate([1, 1, 1])
     
         np.testing.assert_array_equal(
-            spline_edge.points, [
+            spline_edge.data.points, [
                 [1.25, 1.1, 1],
                 [1.5, 1.5, 1],
                 [1.75, 1.1, 1],
@@ -81,95 +80,93 @@ class EdgeFactoryTests(unittest.TestCase):
         Vertex.registry = []
         factory.registry = []
 
+        self.vertex_1 = Vertex([0, 0, 0])
+        self.vertex_2 = Vertex([1, 0, 0])
+
     def test_arc(self):
         arc_point = [0.5, 0.2, 0]
 
-        edg = factory.create(
-            Vertex([0, 0, 0]),
-            Vertex([1, 0, 0]),
-            'arc', arc_point)
+        edg = factory.create(self.vertex_1, self.vertex_2, edges.Arc(arc_point))
 
         self.assertIsInstance(edg, ArcEdge)
-        self.assertListEqual(arc_point, edg.arc_point)
+        np.testing.assert_array_almost_equal(arc_point, edg.data.point)
 
     def test_default_origin(self):
         origin = [0.5, -0.5, 0]
         flatness = 2
         edg = factory.create(
-            Vertex([0, 0, 0]),
-            Vertex([1, 0, 0]),
-            'origin', origin, flatness)
+            self.vertex_1, self.vertex_2,
+            edges.Origin(origin, flatness)
+        )
 
         self.assertIsInstance(edg, OriginEdge)
-        self.assertListEqual(origin, edg.origin)
-        self.assertEqual(flatness, edg.flatness)
+        np.testing.assert_array_almost_equal(origin, edg.data.origin)
+        self.assertEqual(flatness, edg.data.flatness)
 
     def test_flat_origin(self):
         origin = [0.5, -0.5, 0]
-        edg = factory.create(
-            Vertex([0, 0, 0]),
-            Vertex([1, 0, 0]),
-            'origin', origin)
+        edg = factory.create(self.vertex_1, self.vertex_2, edges.Origin(origin))
 
         self.assertIsInstance(edg, OriginEdge)
-        self.assertListEqual(origin, edg.origin)
-        self.assertEqual(1, edg.flatness)
+        np.testing.assert_array_almost_equal(origin, edg.data.origin)
+        self.assertEqual(1, edg.data.flatness)
 
     def test_angle(self):
         angle = np.pi/6
         axis = [0, 0, 1]
-        edg = factory.create(
-            Vertex([0, 0, 0]),
-            Vertex([1, 0, 0]),
-            'angle', angle, axis)
+        edge = factory.create(self.vertex_1, self.vertex_2,
+                              edges.Angle(angle, axis))
 
-        self.assertIsInstance(edg, AngleEdge)
-        self.assertEqual(angle, edg.angle)
-        self.assertListEqual(axis, edg.axis)
+        self.assertIsInstance(edge, AngleEdge)
+        self.assertEqual(angle, edge.data.angle)
+        np.testing.assert_array_equal(axis, edge.data.axis)
 
     def test_spline(self):
         points = [[0.3, 0.25, 0], [0.6, 0.1, 0], [0.3, 0.25, 0]]
-        edg = factory.create(
-            Vertex([0, 0, 0]),
-            Vertex([1, 0, 0]),
-            'spline', points)
+        edg = factory.create(self.vertex_1, self.vertex_2,
+            edges.Spline(points))
 
         self.assertIsInstance(edg, SplineEdge)
-        self.assertListEqual(points, edg.points)
+        np.testing.assert_array_equal(points, edg.data.points)
 
-    def test_polyline_edge(self):
+    def test_polyline(self):
         points = [[0.3, 0.25, 0], [0.6, 0.1, 0], [0.3, 0.25, 0]]
+        edg = factory.create(self.vertex_1, self.vertex_2,
+            edges.PolyLine(points))
 
-        edg = factory.create(
-            Vertex([0, 0, 0]),
-            Vertex([1, 0, 0]),
-            'polyLine', points)
-
-        self.assertIsInstance(edg, PolyLineEdge)
         self.assertIsInstance(edg, SplineEdge)
-        self.assertListEqual(points, edg.points)
+        np.testing.assert_array_equal(points, edg.data.points)
 
-    def test_projected_edge(self):
+    def test_project_edge_single(self):
         geometry = 'terrain'
         edg = factory.create(
-            Vertex([0, 0, 0]),
-            Vertex([1, 0, 0]),
-            'project', geometry)
+            self.vertex_1, self.vertex_2,
+            edges.Project(geometry))
 
         self.assertIsInstance(edg, ProjectEdge)
-        self.assertEqual(edg.geometry, geometry)
+        self.assertListEqual(edg.data.geometry, [geometry])
+    
+    def test_project_edge_multi(self):
+        geometry = ['terrain', 'walls']
+        edg = factory.create(
+            self.vertex_1, self.vertex_2,
+            edges.Project(geometry))
+
+        self.assertIsInstance(edg, ProjectEdge)
+        self.assertListEqual(edg.data.geometry, geometry)
+
 
     def test_create_duplicate(self):
         """Create two edges between the same pair of vertices"""
         edge_1 = factory.create(
-            Vertex([0, 0, 0]),
-            Vertex([1, 0, 0]),
-            'arc', [0.5, 0.2, 0])
+            self.vertex_1,
+            self.vertex_2,
+            edges.Arc([0.5, 0.2, 0]))
     
         edge_2 = factory.create(
-            Vertex([0, 0, 0]),
-            Vertex([1, 0, 0]),
-            'project', 'terrain')
+            self.vertex_1,
+            self.vertex_2,
+            edges.Project('terrain'))
         
         self.assertEqual(id(edge_1), id(edge_2))
         self.assertEqual(edge_1.kind, 'arc')
@@ -177,58 +174,58 @@ class EdgeFactoryTests(unittest.TestCase):
     def test_create_duplicate_inverted(self):
         """Create two edges between the same pair of vertices, inverted"""
         edge_1 = factory.create(
-            Vertex([0, 0, 0]),
-            Vertex([1, 0, 0]),
-            'arc', [0.5, 0.2, 0])
+            self.vertex_1,
+            self.vertex_2,
+            edges.Arc([0.5, 0.2, 0]))
     
         edge_2 = factory.create(
-            Vertex([1, 0, 0]),
-            Vertex([0, 0, 0]),
-            'project', 'terrain')
+            self.vertex_2,
+            self.vertex_1,
+            edges.Project('terrain'))
         
         self.assertEqual(id(edge_1), id(edge_2))
         self.assertEqual(edge_1.kind, 'arc')
 
     def test_line_edge(self):
         """Creating a 'line' edge does not add it to the registry"""
-        _ = factory.create(Vertex([0, 0, 0]), Vertex([1, 0, 0]), 'line')
+        _ = factory.create(self.vertex_1, self.vertex_2, edges.Line())
 
         self.assertEqual(len(factory.registry), 0)
 
     def test_duplicate_existing(self):
         """Call a create(copy=True) function with copy=True on a new edge"""
         _ = factory.create(
-            Vertex([0, 0, 0]),
+            self.vertex_1,
             Vertex([0, 0, 1]),
-            'project', 'terrain')
+            edges.Project(['project', 'terrain']))
 
         _ = factory.create(
-            Vertex([0, 0, 0]),
+            self.vertex_1,
             Vertex([0, 0, 1]),
-            'arc', [0.5, 0.2, 0], duplicate=True)
+            edges.Arc([0.5, 0.2, 0]), duplicate=True)
     
         self.assertEqual(len(factory.registry), 2)
     
     def test_duplicate_new(self):
         """Call a create(copy=True) with a new edge"""
         _ = factory.create(
-            Vertex([0, 0, 0]),
+            self.vertex_1,
             Vertex([0, 0, 1]),
-            'project', 'terrain')
+            edges.Project('terrain'))
     
         _ = factory.create(
             Vertex([1, 1, 1]),
             Vertex([1, 1, 2]),
-            'arc', [0.5, 0.2, 0], duplicate=True)
+            edges.Arc([0.5, 0.2, 0]), duplicate=True)
     
         self.assertEqual(len(factory.registry), 2)
 
 # class TestPrimitives(unittest.TestCase):
 #     def setUp(self):
-#         v1 = Vertex([0, 0, 0])
+#         v1 = self.vertex_1
 #         v1.mesh_index = 0
 
-#         v2 = Vertex([1, 0, 0])
+#         v2 = self.vertex_2
 #         v2.mesh_index = 1
 
 #         self.v1 = v1
@@ -338,6 +335,7 @@ class EdgeFactoryTests(unittest.TestCase):
 #         r = e.rotate(angle, axis=[1, 0, 0])
 
 #         np.testing.assert_array_almost_equal(r.points, [f.rotate(p, angle, axis="x") for p in points])
+
 
 class AlternativeArcTests(unittest.TestCase):
     unit_sq_corner = f.vector(2**0.5/2, 2**0.5/2, 0)

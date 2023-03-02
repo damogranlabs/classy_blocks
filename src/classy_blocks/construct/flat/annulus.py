@@ -30,7 +30,7 @@ class Annulus:
             n_segments = 4
         self.n_segments = n_segments
 
-        rot = lambda p, a: f.arbitrary_rotation(p, self.normal, a, self.center_point)
+        rot = lambda p, a: f.rotate(p, self.normal, a, self.center_point)
         angle = 2 * np.pi / n_segments
 
         face = Face([
@@ -60,12 +60,12 @@ class Annulus:
 
     def rotate(self, axis, angle, origin, **kwargs):
         # TODO: TEST
-        r = lambda p: f.arbitrary_rotation(p, axis, angle, origin)
+        r = lambda p: f.rotate(p, axis, angle, origin)
 
         return self.__class__(
             r(self.center_point),
             r(self.radius_point),
-            f.arbitrary_rotation(self.normal, axis, angle, [0, 0, 0]),
+            f.rotate(self.normal, axis, angle, [0, 0, 0]),
             self.inner_radius,
             self.n_segments,
         )

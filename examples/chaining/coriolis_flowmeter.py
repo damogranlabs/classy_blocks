@@ -49,8 +49,8 @@ def get_mesh():
     # assemble an elbow from smaller elbows with smaller swipe angles
     # to gain precision if that's important.
     # 90 or 120 degree is too much so we'll make the turns in 2 steps
-    center_1 = f.rotate(f.vector(elbow_radius, 0, 0), elbow_angle, axis='z')
-    axis_1 = f.rotate(center_1, np.pi/2, axis='z')
+    center_1 = f._rotate(f.vector(elbow_radius, 0, 0), elbow_angle, axis='z')
+    axis_1 = f._rotate(center_1, np.pi/2, axis='z')
     fluid_shapes.append(Elbow.chain(fluid_shapes[-1], np.pi/4, center_1, axis_1, r_mid))
     fluid_shapes.append(Elbow.chain(fluid_shapes[-1], np.pi/4, center_1, axis_1, r_c))
 
@@ -78,7 +78,7 @@ def get_mesh():
     # expanding elbows back to d_pipe
     s = fluid_shapes[-1].sketch_2
     center_4 = s.center_point + f.vector(0, 0, -elbow_radius)
-    axis_4 = f.rotate(f.vector(0, 1, 0), -elbow_angle, axis='z')
+    axis_4 = f._rotate(f.vector(0, 1, 0), -elbow_angle, axis='z')
     fluid_shapes.append(Elbow.chain(fluid_shapes[-1], np.pi/4, center_4, axis_4, r_mid))
     fluid_shapes.append(Elbow.chain(fluid_shapes[-1], np.pi/4, center_4, axis_4, r_pipe))
 

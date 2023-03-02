@@ -220,7 +220,7 @@ class Grading:
             for j, this_value in enumerate(this_spec):
                 other_value = other_spec[j]
 
-                if not math.isclose(this_value, other_value, rel_tol=constants.tol):
+                if not math.isclose(this_value, other_value, rel_tol=constants.TOL):
                     return False
 
         return True

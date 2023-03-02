@@ -1,32 +1,20 @@
 import dataclasses
 
-from typing import Callable, ClassVar, List
-
 import numpy as np
 
+from classy_blocks.data import edges
 from classy_blocks.items.edges.arcs.arc_base import ArcEdgeBase
-from classy_blocks.types import PointType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
 @dataclasses.dataclass
 class ArcEdge(ArcEdgeBase):
     """Arc edge: defined by a single point"""
-    kind: ClassVar[str] = "arc"
-    arc_point: PointType
+    data: edges.Arc
 
     @property
     def third_point(self):
-        return self.arc_point
-
-    def transform(self, function: Callable):
-        self.arc_point = function(self.arc_point)
-
-        return self
-
-    @property
-    def args(self) -> List:
-        return super().args + [self.arc_point]
+        return self.data.point
 
     @property
     def is_valid(self):
@@ -40,9 +28,9 @@ class ArcEdge(ArcEdgeBase):
             # silently dropped
 
             # cross-product of three collinear vertices must be zero
-            arm_1 = self.vertex_1.pos - self.third_point
-            arm_2 = self.vertex_2.pos - self.third_point
+            arm_1 = self.vertex_1.pos - self.data.point.pos
+            arm_2 = self.vertex_2.pos - self.data.point.pos
 
-            return abs(f.norm(np.cross(arm_1, arm_2))) > constants.tol
+            return abs(f.norm(np.cross(arm_1, arm_2))) > constants.TOL
 
         return False

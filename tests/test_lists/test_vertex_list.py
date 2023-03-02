@@ -53,7 +53,7 @@ class VertexListTests(DataTestCase):
         self.vlist.add(self.blocks[0].points)
         self.vlist.add(self.blocks[1].points)
 
-        displacement = constants.tol/10
+        displacement = constants.TOL/10
 
         for i, vertex in enumerate(self.vlist.vertices):
             # we're searching for this point

@@ -54,7 +54,7 @@ class VertexTests(DataTestCase):
     def test_inequal(self):
         """The __eq__ method returns False"""
         point_1 = Vertex([0, 0, 0])
-        point_2 = Vertex([0, 0, 0 + 2*constants.tol])
+        point_2 = Vertex([0, 0, 0 + 2*constants.TOL])
 
         self.assertFalse(point_1 == point_2)
 
@@ -78,7 +78,7 @@ class VertexTests(DataTestCase):
     def test_almost_equal(self):
         """Same as test_equal but with a slight (numerical) offset"""
         vertex_1 = Vertex([0, 0, 0])
-        vertex_2 = Vertex([0, 0, constants.tol/2])
+        vertex_2 = Vertex([0, 0, constants.TOL/2])
 
         self.assertEqual(id(vertex_1), id(vertex_2))
 
@@ -122,7 +122,7 @@ class VertexTests(DataTestCase):
 
         self.assertEqual(len(Vertex.registry), 12)
 
-        displacement = constants.tol/10
+        displacement = constants.TOL/10
 
         for i, vertex in enumerate(Vertex.registry):
             # we're searching for this point

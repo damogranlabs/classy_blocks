@@ -26,13 +26,12 @@ class Vertex(TransformableBase):
         if 'copy' is True, add a new one regardless"""
         # this is some kind of a 'singleton' pattern but stores 'globals' in a list;
         # "multipleton"
-        position = np.asarray(position, dtype='float')
-        assert np.shape(position) == (3, ), "Provide a point in 3D space"
-
         def create_new():
             new_vertex = super(Vertex, cls).__new__(cls, *args, **kwargs)
-            new_vertex.pos = position
             new_vertex.index = len(Vertex.registry)
+
+            assert np.shape(position) == (3, ), "Provide a point in 3D space"
+            new_vertex.pos = np.asarray(position, dtype=constants.DTYPE)
 
             # TODO: project
             Vertex.registry.append(new_vertex)
@@ -49,39 +48,18 @@ class Vertex(TransformableBase):
 
     def translate(self, displacement:VectorType) -> 'Vertex':
         """Move this point by 'displacement' vector"""
-        self.pos += np.asarray(displacement)
+        self.pos += np.asarray(displacement, dtype=constants.DTYPE)
         return self
 
     def rotate(self, angle, axis, origin=None) -> 'Vertex':
         """ Rotate this point around an arbitrary axis and origin """
-        axis = np.asarray(axis)
-
-        if origin is None:
-            origin = f.vector(0, 0, 0)
-
-        origin = np.asarray(origin)
-
-        self.pos = f.arbitrary_rotation(self.pos, f.unit_vector(axis), angle, origin)
+        self.pos = f.rotate(self.pos, f.unit_vector(axis), angle, origin)
         return self
 
     def scale(self, ratio:float, origin:Optional[PointType]=None) -> 'Vertex':
         """Scale point's position around origin."""
-        self.pos = self.scale_point(self.pos, ratio, origin)
+        self.pos = f.scale(self.pos, ratio, origin)
         return self
-
-    @staticmethod
-    def scale_point(
-        point:PointType,
-        ratio:float,
-        origin:Optional[PointType]=None) -> PointType:
-        """Scales a point around origin by specified ratio;
-        if not specified, origin is taken as [0, 0, 0]."""
-        if origin is None:
-            origin = f.vector(0, 0, 0)
-
-        origin = np.asarray(origin)
-
-        return origin + (point - origin)*ratio
 
     def __eq__(self, other):
         return self.index == other.index
@@ -100,8 +78,10 @@ class Vertex(TransformableBase):
         in the same location as the passed one; if so, returns
         the existing vertex"""
         # TODO: optimize (octree/kdtree from scipy) (?)
+        position = np.asarray(position, dtype=constants.DTYPE)
+
         for vertex in Vertex.registry:
-            if f.norm(vertex.pos - position) < constants.tol:
+            if f.norm(vertex.pos - position) < constants.TOL:
                 return vertex
 
         raise VertexNotFoundError(f"Vertex not found: {str(position)}")

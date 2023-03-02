@@ -1,13 +1,12 @@
 import dataclasses
 import abc
 
-from typing import Callable, Optional, List
+from typing import Optional
 
-import numpy as np
-
+from classy_blocks.data.edges import EdgeData
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.base.transformable import TransformableBase
-from classy_blocks.types import PointType, VectorType
+from classy_blocks.types import PointType, VectorType, EdgeKindType
 from classy_blocks.util import functions as f
 from classy_blocks.util import constants
 
@@ -16,60 +15,45 @@ class Edge(TransformableBase):
     """Common stuff for all edge objects"""
     vertex_1: Vertex
     vertex_2: Vertex
+    data: EdgeData
 
     def __post_init__(self):
         assert isinstance(self.vertex_1, Vertex)
         assert isinstance(self.vertex_2, Vertex)
 
-    @property
-    @abc.abstractmethod
-    def kind(self) -> str:
-        """Edge kind as it is put into blockMeshDict"""
-
-    def transform(self, function: Callable) -> 'Edge':
-        """An arbitrary transform of this edge by a specified function"""
-        # (only transforms additional points, not vertices;
-        # they transform themselves with their own methods)
-        return self
-
-    def translate(self, displacement: VectorType):
+    def translate(self, displacement: VectorType) -> 'Edge':
         """Move all points in the edge (but not start and end)
         by a displacement vector."""
-        displacement = np.asarray(displacement, dtype=float)
-
-        return self.transform(lambda p: p + displacement)
+        self.data.translate(displacement)
+        return self
 
     def rotate(self, angle: float, axis: VectorType, origin: Optional[PointType] = None):
         """Rotates all points in this edge (except start and end Vertex) around an
         arbitrary axis and origin (be careful with projected edges, geometry isn't rotated!)"""
-        if origin is None:
-            origin = [0, 0, 0]
-
-        return self.transform(lambda p: f.arbitrary_rotation(p, axis, angle, origin))
+        self.data.rotate(angle, axis, origin)
+        return self
 
     def scale(self, ratio: float, origin: Optional[PointType] = None) -> 'Edge':
         """Scales the edge points around given origin"""
-        return self.transform(lambda p: Vertex.scale_point(p, ratio, origin))
+        self.data.scale(ratio, origin)
+        return self
 
     @property
-    @abc.abstractmethod
-    def args(self) -> List:
-        """Returns arguments that can be used to re-create this
-        edge using the factory method"""
-        # TODO: test for every edge kind
-        return [self.kind]
+    def kind(self) -> EdgeKindType:
+        """A shorthand for edge.data.kind"""
+        return self.data.kind
 
     @property
     def is_valid(self) -> bool:
         """Returns True if this edge is elligible to be put into blockMeshDict"""
         # TODO: TEST
-        if self.kind == 'line':
+        if self.data.kind == 'line':
             # no need to specify lines
             return False
 
         # wedge geometries produce coincident
         # edges and vertices; drop those
-        if f.norm(self.vertex_1.pos - self.vertex_2.pos) < constants.tol:
+        if f.norm(self.vertex_1.pos - self.vertex_2.pos) < constants.TOL:
             return False
 
         # only arc edges need additional checking (blow-up 1/0 protection)
@@ -87,7 +71,7 @@ class Edge(TransformableBase):
     def description(self) -> str:
         """string description of the edge to be put in blockMeshDict"""
         # subclasses continue from here
-        return f"{self.kind} {self.vertex_1.index} {self.vertex_2.index} "
+        return f"{self.data.kind} {self.vertex_1.index} {self.vertex_2.index} "
 
     def __eq__(self, other):
         # An Edge is defined between two vertices regardless of

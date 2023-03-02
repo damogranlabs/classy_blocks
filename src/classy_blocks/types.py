@@ -1,11 +1,11 @@
 """Predefined types"""
 from typing import TypeAlias, List, Union, Literal
-from numpy.typing import ArrayLike
+from nptyping import NDArray, Shape, Float
 
 # A single point can be specified as a list of floats or as a numpy array
-PointType:TypeAlias = Union[List[float], ArrayLike]
+PointType:TypeAlias = Union[List[float], NDArray[Shape["3, 1"], Float]]
 # Similar: a list of points 
-PointListType:TypeAlias = Union[List[PointType], ArrayLike]
+PointListType:TypeAlias = Union[List[PointType], NDArray[Shape["*, 3"], Float]]
 # same as PointType but with a different name to avoid confusion
 VectorType:TypeAlias = PointType
 

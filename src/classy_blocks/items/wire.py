@@ -1,8 +1,9 @@
 from typing import List, Set, Optional
 
 from classy_blocks.items.vertex import Vertex
+from classy_blocks.data.edges import Line
 from classy_blocks.items.edges.edge import Edge
-from classy_blocks.items.edges.line import LineEdge
+from classy_blocks.items.edges.factory import factory
 
 from classy_blocks.grading.grading import Grading
 
@@ -17,7 +18,7 @@ class Wire:
 
         # the default edge is 'line' but will be replaced if the user wishes so
         # (that is, not included in edge.factory.registry)
-        self.edge:Edge = LineEdge(*self.vertices)
+        self.edge:Edge = factory.create(self.vertices[0], self.vertices[1], Line())
 
         # grading/counts of this wire (edgeGrading only)
         self.grading:Optional[Grading] = None
@@ -52,4 +53,3 @@ class Wire:
 
     def __repr__(self):
         return f"Wire {self.vertices} (corners {self.corners})"
-

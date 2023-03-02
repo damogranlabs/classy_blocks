@@ -420,7 +420,7 @@ class Hemisphere(Shape):
             radius_vector = f.unit_vector(point - self.center_point)
             dome_rev_axis = np.cross(radius_vector, self.normal)
 
-            dome_point = f.arbitrary_rotation(point, dome_rev_axis, angle, self.center_point)
+            dome_point = f.rotate(point, dome_rev_axis, angle, self.center_point)
 
             return dome_point
 

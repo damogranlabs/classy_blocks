@@ -66,7 +66,7 @@ class FaceTests(unittest.TestCase):
             original_point = original_face.points[i]
             rotated_point = rotated_face.points[i]
 
-            np.testing.assert_almost_equal(rotated_point, f.arbitrary_rotation(original_point, axis, angle, origin))
+            np.testing.assert_almost_equal(rotated_point, f.rotate(original_point, axis, angle, origin))
 
     def test_scale_face_default_origin(self):
         original_face = Face(self.points)

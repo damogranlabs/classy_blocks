@@ -3,6 +3,7 @@ from typing import List, Literal, Union, Dict
 
 from classy_blocks.types import PointListType, AxisType, OrientType, EdgeKindType
 
+from classy_blocks.data.edges import EdgeData
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
@@ -54,24 +55,18 @@ class Block:
         # (visible in blockMeshDict, useful for debugging)
         self.comment = ""
 
-    def add_edge(self, corner_1:int, corner_2:int, kind:EdgeKindType, *args):
+    def add_edge(self, corner_1:int, corner_2:int, data:EdgeData):
         """Adds an edge between vertices at specified indexes.
         Args:
             corner_1, corner_2: local Block/Face indexes of vertices between which the edge is placed
-            kind: edge type that will be written to blockMeshDict.
-            *args: provide the following information for edge creation, depending on specified 'kind':
-                - Classic OpenFOAM arc definition: kind, arc_point;
-                    ..., 'arc', <types.PointType>
-                - Origin arc definition (ESI-CFD version*): kind, origin, flatness (optional, default 1)
-                    ..., 'origin', <types.PointType>, flatness
-                - Angle-and-axis (Foundation version**):
-                    ..., kind='angle', angle=<float (in radians)>, axis=<types.VectorType>
-                - Spline:
-                    ..., kind='spline', points=<types.PointListType>
-                - PolyLine:
-                    ..., kind='polyLine', points=<types.PointListType>
-                - Projected edges (provide geometry with mesh.add_geometry()):
-                    ..., kind='project', geometry=str
+            data: an EdgeData object from cb.edges.* containing required info for edge creation:
+            - Arc: classic OpenFOAM arc definition with arc_point
+            - Origin: ESI-CFD version* of arc with origin point and optional flatness (default 1)
+            - Angle: Foundation version** with sector angle and axis
+            - Spline: spline passing through a list of points
+            - PolyLine: a series of lines between a list of points
+            - Project: project to one surface or to an intersection of two
+
         Definition of arc edges:
             * ESI-CFD version
             https://www.openfoam.com/news/main-news/openfoam-v20-12/pre-processing#x3-22000
@@ -84,21 +79,23 @@ class Block:
             to that edge definition.
         Examples:
             Add an arc edge:
-                block.add_edge(0, 1, 'arc', [0.5, 0.25, 0])
+                block.add_edge(0, 1, Arc([0.5, 0.25, 0]))
             A spline edge with single or multiple points:
-                block.add_edge(0, 1, 'spline', [[0.3, 0.25, 0], [0.6, 0.1, 0], [0.3, 0.25, 0]])
+                block.add_edge(0, 1, Spline([[0.3, 0.25, 0], [0.6, 0.1, 0], [0.3, 0.25, 0]]))
             Same points as above but specified as polyLine:
-                block.add_edge(0, 1, 'polyLine', [[0.3, 0.25, 0], [0.6, 0.1, 0], [0.3, 0.25, 0]])
+                block.add_edge(0, 1, PolyLine([[0.3, 0.25, 0], [0.6, 0.1, 0], [0.3, 0.25, 0]]))
             An edge, projected to geometry defined as 'terrain':
-                block.add_edge(0, 1, 'project', 'terrain')
+                block.add_edge(0, 1, Project('terrain'))
+            An edge, projected to intersection of 'terrain' and 'wall'
+                block.add_edge(0, 1, Project(['terrain', 'wall']))
             An arc, defined using ESI-CFD's 'origin' style:
-                block.add_edge(0, 1, 'origin', [0.5, -0.5, 0], 2)
+                block.add_edge(0, 1, Origin([0.5, -0.5, 0]))
             An arc, defined using OF Foundation's 'angle and axis' style:
-                block.add_edge(0, 1, 'angle', np.pi/6, [0, 0, 1])"""
+                block.add_edge(0, 1, Angle(np.pi/6, [0, 0, 1]))"""
         assert 0 <= corner_1 < 8 and 0 <= corner_2 < 8, "Use block-local indexing (0...7)"
 
-        factory_args = [self.vertices[corner_1], self.vertices[corner_2], kind] + list(args)
-        self.wires[corner_1][corner_2].edge = factory.create(*factory_args)
+        edge = factory.create(self.vertices[corner_1], self.vertices[corner_2], data)
+        self.wires[corner_1][corner_2].edge = edge
 
     def chop(self, axis: AxisType, **kwargs:Union[str, float, int, bool]) -> None:
         """Set block's cell count/size and grading for a given direction/axis.

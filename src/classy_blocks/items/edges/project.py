@@ -1,25 +1,12 @@
 import dataclasses
 
-from typing import Callable, ClassVar, List
-
-import numpy as np
-
+from classy_blocks.data import edges
 from classy_blocks.items.edges.edge import Edge
-from classy_blocks.types import PointType
-from classy_blocks.util import constants
-from classy_blocks.util import functions as f
 
 @dataclasses.dataclass
 class ProjectEdge(Edge):
     """Edge, projected to a specified geometry"""
-
-    kind: ClassVar[str] = "project"
-
-    geometry: str # TODO: a list of 2 strings! to project to an intersection of 2 surfaces
-
-    @property
-    def args(self) -> List:
-        return super().args
+    data: edges.Project
 
     @property
     def length(self):
@@ -28,4 +15,5 @@ class ProjectEdge(Edge):
     
     @property
     def description(self):
-        return f"project {self.vertex_1.index} {self.vertex_2.index} ({self.geometry})"
+        # TODO: handle a single string or a list
+        return f"project {self.vertex_1.index} {self.vertex_2.index} ({self.data.geometry})"

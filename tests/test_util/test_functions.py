@@ -55,17 +55,17 @@ class TestFunctions(unittest.TestCase):
     def test_rotate(self):
         """simple rotation around a coordinate system axis"""
         v = f.vector(1, 0, 0)
-        r = f.rotate(v, np.pi / 2, axis="x")
+        r = f._rotate(v, np.pi / 2, axis="x")
 
         self.assertAlmostEqual(f.angle_between(r, v), 0)
 
-        r = f.rotate(v, np.pi / 4, axis="y")
+        r = f._rotate(v, np.pi / 4, axis="y")
         self.assertAlmostEqual(f.angle_between(r, v), np.pi / 4)
 
     def test_rotate_exception(self):
         """an exception must be raised if axis is anything but x, y, or z"""
         with self.assertRaises(ValueError):
-            f.rotate(f.vector(0, 0, 1), np.pi / 2, "a")
+            f._rotate(f.vector(0, 0, 1), np.pi / 2, "a")
 
     def test_arbitrary_rotation_point(self):
         """rotation of a point from another origin"""
@@ -73,7 +73,7 @@ class TestFunctions(unittest.TestCase):
         origin = f.vector(0, 1, 0)
         axis = f.vector(0, 0, 1)
 
-        self.assert_np_equal(f.arbitrary_rotation(point, axis, -np.pi / 2, origin), f.vector(1, 1, 0))
+        self.assert_np_equal(f.rotate(point, axis, -np.pi / 2, origin), f.vector(1, 1, 0))
 
     def test_arbitrary_rotation_axis(self):
         """rotation of a point around arbitrary axis"""
@@ -81,7 +81,7 @@ class TestFunctions(unittest.TestCase):
         origin = f.vector(0, 0, 0)
         axis = f.vector(1, 1, 0)
 
-        self.assert_np_almost_equal(f.arbitrary_rotation(point, axis, np.pi, origin), f.vector(0, 1, 0))
+        self.assert_np_almost_equal(f.rotate(point, axis, np.pi, origin), f.vector(0, 1, 0))
 
     def test_to_polar_z_axis(self):
         """cartesian coordinate system to polar c.s., rotation around z-axis"""

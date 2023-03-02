@@ -1,9 +1,8 @@
 import dataclasses
 
-from typing import ClassVar, Callable, List
-
 import numpy as np
 
+from classy_blocks.data import edges
 from classy_blocks.items.edges.arcs.arc_base import ArcEdgeBase
 from classy_blocks.types import PointType, VectorType
 from classy_blocks.util import functions as f
@@ -41,22 +40,11 @@ def arc_from_theta(edge_point_1: PointType, edge_point_2: PointType, angle: floa
 @dataclasses.dataclass
 class AngleEdge(ArcEdgeBase):
     """Alternative arc edge specification: sector angle and axis"""
-    kind: ClassVar[str] = "angle"
-    angle: float
-    axis: VectorType
+    data:edges.Angle
 
     @property
     def third_point(self):
-        return arc_from_theta(self.vertex_1.pos, self.vertex_2.pos, self.angle, self.axis)
-
-    def transform(self, function: Callable) -> 'AngleEdge':
-        self.axis = function(self.axis)
-
-        return self
-
-    @property
-    def args(self) -> List:
-        return super().args + [self.angle, self.axis]
+        return arc_from_theta(self.vertex_1.pos, self.vertex_2.pos, self.data.angle, self.data.axis)
 
     @property
     def description(self):
@@ -64,7 +52,7 @@ class AngleEdge(ArcEdgeBase):
         # one with this edge's specification
         # arc <vertex-1> <vertex-2> <angle> (axis) alternative edge specification:
         out = f"// arc {self.vertex_1.index} {self.vertex_2.index} "
-        out += f"{self.angle} {constants.vector_format(self.axis)}\n"
+        out += f"{self.data.angle} {constants.vector_format(self.data.axis)}\n"
 
         # the other is a classic three-point arc definition
         return out + super().description

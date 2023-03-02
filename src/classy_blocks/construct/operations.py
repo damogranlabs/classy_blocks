@@ -140,7 +140,7 @@ class Revolve(Loft):
 
         # there are 4 side edges: rotate each vertex of bottom_face
         # by angle/2
-        side_points = [f.arbitrary_rotation(p, self.axis, self.angle / 2, self.origin) for p in self.base.points]
+        side_points = [f.rotate(p, self.axis, self.angle / 2, self.origin) for p in self.base.points]
         for i, point in enumerate(side_points):
             self.block.add_edge(i, i+4, point, kind='arc')
 

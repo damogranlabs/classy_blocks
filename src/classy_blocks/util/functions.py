@@ -1,44 +1,42 @@
 """Mathematical functions for general everyday household use"""
-from typing import Union
+from typing import Union, Optional, Literal
 
 import numpy as np
-from numpy.typing import ArrayLike
 
 import scipy
 import scipy.linalg
 import scipy.optimize
 import scipy.spatial
 
-from classy_blocks.types import PointType, VectorType
-from classy_blocks.util import constants as c
+from classy_blocks.types import PointType, VectorType, PointListType
+from classy_blocks.util import constants
 
-def vector(x, y, z):
+def vector(x:float, y:float, z:float) -> VectorType:
     """A shortcut for creating 3D-space vectors;
     in case you need a lot of manual np.array([...])"""
     return np.array([x, y, z])
 
 
-def deg2rad(deg):
+def deg2rad(deg:float) -> float:
     """Convert degrees (input) to radians"""
     return deg * np.pi / 180.0
 
-
-def rad2deg(rad):
+def rad2deg(rad:float) -> float:
     """convert radians (input) to degrees"""
     return rad * 180.0 / np.pi
 
-
-def norm(matrix:Union[list, ArrayLike]) -> Union[float, ArrayLike]:
+def norm(matrix:Union[PointType, PointListType]):
     """ a shortcut to scipy.linalg.norm() """
+    matrix = np.asarray(matrix)
+
     return scipy.linalg.norm(matrix, axis=len(np.shape(matrix))-1)
 
-
-def unit_vector(vector):
+def unit_vector(vect:VectorType) -> VectorType:
     """Returns a vector of magnitude 1 with the same direction"""
-    return vector / norm(vector)
+    vect = np.asarray(vect, dtype=constants.DTYPE)
+    return  vect / norm(vect)
 
-
-def angle_between(v1, v2):
+def angle_between(v1:VectorType, v2:VectorType) -> float:
     """Returns the angle between vectors 'v1' and 'v2', in radians:
 
     >>> angle_between((1, 0, 0), (0, 1, 0))
@@ -55,8 +53,7 @@ def angle_between(v1, v2):
 
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
-
-def arbitrary_rotation_matrix(axis, theta):
+def rotation_matrix(axis:VectorType, theta:float):
     """
     Return the rotation matrix associated with counterclockwise rotation about
     the given axis by theta radians.
@@ -75,34 +72,34 @@ def arbitrary_rotation_matrix(axis, theta):
     #                  [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]])
 
     # Also Kudos to the guy with another answer for the same question (used here):"""
+    axis = np.asarray(axis)
     return scipy.linalg.expm(np.cross(np.eye(3), axis / norm(axis) * theta))
 
 
-def arbitrary_rotation(point, axis, theta, origin):
+def rotate(point:PointType, axis:VectorType, theta:float, origin:Optional[PointType]=None) -> PointType:
     """Rotate a point around any axis given by axis by angle theta [radians]"""
     point = np.asarray(point)
     axis = np.asarray(axis)
+
+    if origin is None:
+        origin = [0, 0, 0]
+
     origin = np.asarray(origin)
 
-    rotated_point = np.dot(arbitrary_rotation_matrix(axis, theta), point - origin)
+    rotated_point = np.dot(rotation_matrix(axis, theta), point - origin)
     return rotated_point + origin
 
+def scale(point:PointType, ratio:float, origin:Optional[PointType]=None) -> PointType:
+        """Scales a point around origin by specified ratio;
+        if not specified, origin is taken as [0, 0, 0]."""
+        if origin is None:
+            origin = vector(0, 0, 0)
 
-def rotate(point, angle, axis="x"):
-    """Rotate a point around a given axis by specified angle"""
-    if axis == "y":
-        axis = vector(0, 1, 0)
-    elif axis == "z":
-        axis = vector(0, 0, 1)
-    elif axis == "x":
-        axis = vector(1, 0, 0)
-    else:
-        raise ValueError("Rotation axis should be either 'x', 'y', or 'z' ")
+        origin = np.asarray(origin, dtype=constants.DTYPE)
 
-    return arbitrary_rotation(point, axis, angle, vector(0, 0, 0))
+        return origin + (point - origin)*ratio
 
-
-def to_polar(point, axis="z"):
+def to_polar(point:PointType, axis:Literal['x', 'y', 'z']='z') -> VectorType:
     """Convert (x, y, z) point to (radius, angle, height);
     the axis of the new polar coordinate system can be chosen ('x' or 'z')"""
 
@@ -119,8 +116,10 @@ def to_polar(point, axis="z"):
 
     return vector(radius, angle, height)
 
-
-def to_cartesian(p, direction=1, axis="z"):
+def to_cartesian(
+        point:PointType,
+        direction:Literal[1, -1]=1,
+        axis:Literal['x', 'z']='z') -> PointType:
     """Converts a point given in (r, theta, z) coordinates to
     cartesian coordinate system.
 
@@ -133,9 +132,9 @@ def to_cartesian(p, direction=1, axis="z"):
     assert direction in [-1, 1]
     assert axis in ["x", "z"]
 
-    radius = p[0]
-    angle = direction * p[1]
-    height = p[2]
+    radius = point[0]
+    angle = direction * point[1]
+    height = point[2]
 
     if axis == "z":
         return vector(radius * np.cos(angle), radius * np.sin(angle), height)
@@ -144,7 +143,7 @@ def to_cartesian(p, direction=1, axis="z"):
     return vector(height, radius * np.cos(angle), radius * np.sin(angle))
 
 
-def lin_map(x, x_min, x_max, out_min, out_max, limit=False):
+def lin_map(x:float, x_min:float, x_max:float, out_min:float, out_max:float, limit:bool=False) -> float:
     """map x that should take values from x_min to x_max
     to values out_min to out_max"""
     r = float(x - x_min) * float(out_max - out_min) / float(x_max - x_min) + float(out_min)
@@ -154,16 +153,15 @@ def lin_map(x, x_min, x_max, out_min, out_max, limit=False):
     else:
         return r
 
-
-def arc_length_3point(A, B, C):
+def arc_length_3point(A:PointType, B:PointType, C:PointType) -> float:
     """Returns length of arc defined by 3 points, A, B and C; B is the point in between"""
     ### Meticulously transcribed from
     # https://develop.openfoam.com/Development/openfoam/-/blob/master/src/mesh/blockMesh/blockEdges/arcEdge/arcEdge.C
 
     # TODO: handle 'invalid values encountered'
-    p1 = np.asarray(A)
-    p2 = np.asarray(B)
-    p3 = np.asarray(C)
+    p1 = np.asarray(A, dtype=constants.DTYPE)
+    p2 = np.asarray(B, dtype=constants.DTYPE)
+    p3 = np.asarray(C, dtype=constants.DTYPE)
 
     a = p2 - p1
     b = p3 - p1
@@ -201,14 +199,6 @@ def arc_length_3point(A, B, C):
 
     return angle * norm(radius)
 
-
-def distance_from_line(line_point_1, line_point_2, p):
-    """Returns distance from point p from line, defined by two points"""
-    # TODO: TEST
-    axis = line_point_2 - line_point_1
-
-    return norm(np.cross(axis, vector)) / norm(axis)
-
 def arc_mid(
     axis: VectorType,
     center: PointType,
@@ -217,9 +207,10 @@ def arc_mid(
     """Returns the midpoint of the specified arc in 3D space"""
     # Kudos to this guy for his shrewd solution
     # https://math.stackexchange.com/questions/3717427
-    axis = np.asarray(axis)
-    point_1 = np.asarray(point_1)
-    point_2 = np.asarray(point_2)
+    axis = np.asarray(axis, dtype=constants.DTYPE)
+    center = np.asarray(center, dtype=constants.DTYPE)
+    point_1 = np.asarray(point_1, dtype=constants.DTYPE)
+    point_2 = np.asarray(point_2, dtype=constants.DTYPE)
 
     sec = point_2 - point_1
     sec_ort = np.cross(sec, axis)

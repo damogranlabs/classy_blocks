@@ -1,7 +1,11 @@
 import numpy as np
 
+# data type
+DTYPE = 'float' # dtype as taken by np.array()
+
 # geometric tolerance
-tol = 1e-7
+TOL = 1e-7
+
 
 # Block definition:
 # a more intuitive and quicker way to set patches,

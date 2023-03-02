@@ -1,10 +1,11 @@
 import dataclasses
 import warnings
 
-from typing import ClassVar, Callable, List
+from typing import ClassVar
 
 import numpy as np
 
+from classy_blocks.data import edges
 from classy_blocks.items.edges.arcs.arc_base import ArcEdgeBase
 from classy_blocks.types import PointType
 from classy_blocks.util import constants
@@ -48,7 +49,7 @@ def arc_from_origin(
     needs_adjust = False
 
     if adjust_center:
-        needs_adjust = abs(mag1 - mag3) > constants.tol
+        needs_adjust = abs(mag1 - mag3) > constants.TOL
 
         if r_multiplier != 1:
             # The min radius is constrained by the chord,
@@ -76,27 +77,16 @@ def arc_from_origin(
 @dataclasses.dataclass
 class OriginEdge(ArcEdgeBase):
     """Alternative arc edge specification: origin and radius multiplier"""
-    kind: ClassVar[str] = "origin"
-    adjust_center: ClassVar[bool] = True
+    data: edges.Origin
 
-    origin: PointType
-    flatness: float = 1.0
+    adjust_center: ClassVar[bool] = True
 
     @property
     def third_point(self) -> PointType:
         """Calculated arc point from origin and flatness"""
         return arc_from_origin(
             self.vertex_1.pos, self.vertex_2.pos,
-            self.origin, self.adjust_center, self.flatness)
-
-    def transform(self, function: Callable):
-        self.origin = function(self.origin)
-
-        return self
-
-    @property
-    def args(self) -> List:
-        return super().args + [self.origin, self.flatness]
+            self.data.origin, self.adjust_center, self.data.flatness)
 
     @property
     def length(self):
@@ -110,6 +100,6 @@ class OriginEdge(ArcEdgeBase):
         # one commented out with user-provided description
         # arc 0 1 origin 1.1 (0 0 0)
         out = f"// arc {self.vertex_1.index} {self.vertex_2.index} origin"
-        out += f" {self.flatness} {constants.vector_format(self.origin)}\n"
+        out += f" {self.data.flatness} {constants.vector_format(self.data.origin)}\n"
         # the other one with a default three-point arc description
         return out + super().description

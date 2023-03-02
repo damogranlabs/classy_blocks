@@ -16,7 +16,7 @@ class Circle:
 
         self.n_segments = 8  # for expanding cylinders and stuff
 
-        rot = lambda p, angle: f.arbitrary_rotation(p, self.normal, angle, center_point)
+        rot = lambda p, angle: f.rotate(p, self.normal, angle, center_point)
 
         # create faces
         # core: 4 faces
@@ -85,12 +85,12 @@ class Circle:
 
     def rotate(self, axis, angle, origin, **kwargs):
         # TODO: TEST
-        r = lambda p: f.arbitrary_rotation(p, axis, angle, origin)
+        r = lambda p: f.rotate(p, axis, angle, origin)
 
         return self.__class__(
             r(self.center_point),
             r(self.radius_point),
-            f.arbitrary_rotation(self.normal, axis, angle, [0, 0, 0]),
+            f.rotate(self.normal, axis, angle, [0, 0, 0]),
             self.diagonal_ratio,
             self.side_ratio,
         )
