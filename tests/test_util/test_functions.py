@@ -52,21 +52,6 @@ class TestFunctions(unittest.TestCase):
         v2 = f.vector(1, 1, 0)
         self.assertAlmostEqual(f.angle_between(v1, v2), np.pi / 4)
 
-    def test_rotate(self):
-        """simple rotation around a coordinate system axis"""
-        v = f.vector(1, 0, 0)
-        r = f._rotate(v, np.pi / 2, axis="x")
-
-        self.assertAlmostEqual(f.angle_between(r, v), 0)
-
-        r = f._rotate(v, np.pi / 4, axis="y")
-        self.assertAlmostEqual(f.angle_between(r, v), np.pi / 4)
-
-    def test_rotate_exception(self):
-        """an exception must be raised if axis is anything but x, y, or z"""
-        with self.assertRaises(ValueError):
-            f._rotate(f.vector(0, 0, 1), np.pi / 2, "a")
-
     def test_arbitrary_rotation_point(self):
         """rotation of a point from another origin"""
         point = f.vector(0, 2, 0)

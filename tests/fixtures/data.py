@@ -36,10 +36,11 @@ Top 'floor':
 import unittest
 import dataclasses
 
-from typing import List, Optional
+from typing import List
 
 import numpy as np
 
+from classy_blocks.data import edges
 from classy_blocks.grading.chop import Chop
 
 fl:List[List[float]] = [  # points on the 'floor'; z=0
@@ -84,8 +85,8 @@ test_data = [
     TestBlockData(
         indexes=[0, 1, 2, 3],
         edges=[ # edges
-            [0, 1, 'arc', [0.5, -0.25, 0]],
-            [1, 2, 'spline', [[1.1, 0.25, 0], [1.05, 0.5, 0], [1.1, 0.75, 0]]]
+            [0, 1, edges.Arc([0.5, -0.25, 0])],
+            [1, 2, edges.Spline([[1.1, 0.25, 0], [1.05, 0.5, 0], [1.1, 0.75, 0]])]
         ],
         chops=[ # chops
             [Chop(count=6)],
@@ -101,8 +102,8 @@ test_data = [
     TestBlockData(
         indexes=[1, 4, 5, 2],
         edges=[
-            [3, 0, 'arc', [0.5, -0.1, 1]], # duplicated edge in block 2 that must not be included
-            [0, 1, 'arc', [0.5, 0, 0]]  # collinear point; invalid edge must be dropped
+            [3, 0, edges.Arc([0.5, -0.1, 1])], # duplicated edge in block 2 that must not be included
+            [0, 1, edges.Arc([0.5, 0, 0])]  # collinear point; invalid edge must be dropped
         ],
         chops=[
             [Chop(count=5)],

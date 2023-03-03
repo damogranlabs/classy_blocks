@@ -2,7 +2,7 @@ import numpy as np
 from abc import ABC
 from typing import List
 
-from classy_blocks.construct.operations import Loft, Revolve, Extrude
+from classy_blocks.construct.operations.___operations import Loft, Revolve, Extrude
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.circle import Circle
 from classy_blocks.construct.flat.annulus import Annulus

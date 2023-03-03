@@ -4,9 +4,8 @@ import copy
 
 import numpy as np
 
-from classy_blocks.types import VectorType, PointType, PointListType
+from classy_blocks.types import VectorType, PointType, NPPointType PointListType
 from classy_blocks.base.transformable import TransformableBase
-from classy_blocks.items.vertex import Vertex
 from classy_blocks.data.edges import EdgeData
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
@@ -30,8 +29,8 @@ class Face(TransformableBase):
         
         check_coplanar: if True, a ValueError will be raised given non-coplanar points
     """
-    def __init__(self, points:PointListType, edges:Optional[List[Optional[EdgeData]]], check_coplanar:bool=False):
-        points = np.asarray(points)
+    def __init__(self, points:PointListType, edges:Optional[List[Optional[EdgeData]]]=None, check_coplanar:bool=False):
+        points = np.asarray(points, dtype=constants.DTYPE)
         if np.shape(points) != (4, 3):
             raise ValueError("Provide exactly 4 points in 3D space")
 
@@ -46,54 +45,68 @@ class Face(TransformableBase):
             # TODO: coplanar edges?
 
         self.points = points
-        self.edges = edges
+
+        if edges is None:
+            self.edges = [None]*4
+        else:
+            self.edges = edges
+
+        assert len(self.edges) == 4, "Provide exactly 4 edges; use None for straight lines"
 
     def translate(self, displacement: VectorType) -> 'Face':
-        for point in self.points:
-            point.translate(displacement)
+        # TODO: do something with repetition all over translate/rotate/scale
+        displacement = np.asarray(displacement, dtype=constants.DTYPE)
+
+        self.points = np.array([
+            p + displacement for p in self.points
+        ], dtype=constants.DTYPE)
 
         for edge in self.edges:
-            edge.translate(displacement)
+            if edge is not None:
+                edge.translate(displacement)
 
         return self
 
     def rotate(self, angle: float, axis: VectorType, origin: Optional[PointType] = None) -> 'Face':
-        for vertex in self.vertices:
-            vertex.rotate(angle, axis, origin)
-        
+        self.points = np.array([
+            f.rotate(p, axis, angle, origin) for p in self.points
+        ], dtype=constants.DTYPE)
+
         for edge in self.edges:
-            edge.rotate(angle, axis, origin)
+            if edge is not None:
+                edge.rotate(angle, axis, origin)
 
         return self
     
     def scale(self, ratio: float, origin: Optional[PointType] = None) -> 'Face':
-        for vertex in self.vertices:
-            vertex.scale(ratio, origin)
+        if origin is None:
+            origin = self.center
+
+        self.points = np.array([
+            f.scale(p, ratio, origin) for p in self.points
+        ], dtype=constants.DTYPE)
         
         for edge in self.edges:
-            edge.scale(ratio, origin)
+            if edge is not None:
+                edge.scale(ratio, origin)
         
         return self
 
-    def invert(self):
+    def invert(self) -> None:
         """Reverses the order of points in this face."""
-        self.vertices.reverse()
+        self.points = np.flip(self.points, axis=0)
     
-    def copy(self):
+    def copy(self) -> 'Face':
         """Returns a copy of this Face"""
-        new_face = copy.copy(self)
-        new_face.vertices = [Vertex(v.pos, duplicate=True) for v in self.vertices]
-        new_face.edges = new_face.create_edges(duplicate=True)
-
-        return new_face
+        return copy.deepcopy(self)
 
     @property
-    def center(self) -> PointType:
+    def center(self) -> NPPointType:
         """Center point of this face"""
         return np.average(self.points, axis=0)
 
     @property
-    def normal(self) -> VectorType:
+    def normal(self) -> NPVectorType:
         """Returns a vector normal to this face.
         For non-planar faces the same rule as in OpenFOAM is followed:
         divide a quadrangle into 4 triangles, each joining at face center;

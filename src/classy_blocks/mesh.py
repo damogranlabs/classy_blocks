@@ -8,7 +8,7 @@ from classy_blocks.lists.vertex_list import VertexList
 from classy_blocks.lists.edge_list import EdgeList
 from classy_blocks.lists.boundary import Boundary
 
-#from classy_blocks.construct.operations import Operation
+from classy_blocks.construct.operations.operation import Operation
 #from classy_blocks.construct.shapes import Shape
 
 from classy_blocks.util import constants
@@ -43,7 +43,7 @@ class Mesh:
         # TODO:
         pass
 
-    def add_block(self, block:Block) -> None:
+    def add_operation(self, operation:Operation) -> None:
         # vertices and edges handle themselves;
         # when adding a block, handle its neighbours and whatnot
         self.block_list.add(block)

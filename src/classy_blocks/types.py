@@ -3,10 +3,13 @@ from typing import TypeAlias, List, Union, Literal
 from nptyping import NDArray, Shape, Float
 
 # A single point can be specified as a list of floats or as a numpy array
-PointType:TypeAlias = Union[List[float], NDArray[Shape["3, 1"], Float]]
-# Similar: a list of points 
-PointListType:TypeAlias = Union[List[PointType], NDArray[Shape["*, 3"], Float]]
+NPPointType = NDArray[Shape["3, 1"], Float]
+PointType:TypeAlias = Union[List[float], NPPointType]
+# Similar: a list of points
+NPPointListType = NDArray[Shape["*, 3"], Float]
+PointListType:TypeAlias = Union[List[List[float]], NPPointListType]
 # same as PointType but with a different name to avoid confusion
+NPVectorType = NPPointType
 VectorType:TypeAlias = PointType
 
 # edge kinds as per blockMesh's definition

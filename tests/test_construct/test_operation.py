@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from classy_blocks.construct.operations import Face, Extrude
+from classy_blocks.construct.operations.___operations import Face, Extrude
 from classy_blocks.util import functions as f
 
 
