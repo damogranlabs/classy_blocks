@@ -3,9 +3,8 @@ import numpy as np
 # data type
 DTYPE = 'float' # dtype as taken by np.array()
 
-# geometric tolerance
+# geometric tolerance for searching/merging points
 TOL = 1e-7
-
 
 # Block definition:
 # a more intuitive and quicker way to set patches,
@@ -36,7 +35,8 @@ EDGE_PAIRS = (
 
 # number formatting
 def vector_format(vector) -> str:
-    # output for edge definitions
+    """Output for point/vertex definitions"""
+    # ACHTUNG, keep about the same order of magnitude than TOL
     return f"({vector[0]:.8f} {vector[1]:.8f} {vector[2]:.8f})"
 
 # Circle H-grid parameters

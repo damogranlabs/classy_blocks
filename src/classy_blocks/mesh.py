@@ -1,8 +1,10 @@
 """The Mesh object ties everything together and writes the blockMeshDict in the end."""
+import dataclasses
+
 from typing import Union, Optional, List
 
+from classy_blocks.items.edges.factory import factory
 from classy_blocks.items.block import Block
-
 from classy_blocks.lists.block_list import BlockList
 from classy_blocks.lists.vertex_list import VertexList
 from classy_blocks.lists.edge_list import EdgeList
@@ -18,8 +20,8 @@ class Mesh:
     """contains blocks, edges and all necessary methods for assembling blockMeshDict"""
     def __init__(self):
         self.vertex_list = VertexList()
-        self.block_list = BlockList()
         self.edge_list = EdgeList()
+        self.block_list = BlockList()
         self.boundary = Boundary()
 
         self.settings = {
@@ -44,8 +46,24 @@ class Mesh:
         pass
 
     def add_operation(self, operation:Operation) -> None:
-        # vertices and edges handle themselves;
-        # when adding a block, handle its neighbours and whatnot
+        """Takes an operation, converts it to Block and adds that to the mesh"""
+        vertices = [self.vertex_list.add(p) for p in operation.bottom_face.points] + \
+            [self.vertex_list.add(p) for p in operation.top_face.points]
+
+        block = Block(len(self.block_list.blocks), vertices)
+
+        # add edges: from faces
+        edges = self.edge_list.add(vertices, operation.bottom_face.edges, 'bottom') + \
+            self.edge_list.add(vertices, operation.top_face.edges, 'top') + \
+            self.edge_list.add(vertices, operation.side_edges, 'side')
+
+        for edge in edges:
+            block.add_edge(*edge)
+
+        for axis in (0, 1, 2):
+            for chop in operation.chops[axis]:
+                block.chop(axis, **dataclasses.asdict(chop))
+
         self.block_list.add(block)
 
         # generate patches from block's faces

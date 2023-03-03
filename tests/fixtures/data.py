@@ -40,7 +40,7 @@ from typing import List
 
 import numpy as np
 
-from classy_blocks.data import edges
+from classy_blocks.construct import edges
 from classy_blocks.grading.chop import Chop
 
 fl:List[List[float]] = [  # points on the 'floor'; z=0

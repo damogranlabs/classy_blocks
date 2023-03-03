@@ -35,12 +35,13 @@ class EdgeData(TransformableBase, abc.ABC):
         return self.transform(lambda p: f.scale(p, ratio, origin))
 
 class Line(EdgeData):
-    """A 'line' edge needs no parameters"""
+    """A 'line' edge is created by default and needs no extra parameters"""
     kind = 'line'
 
 
 class Arc(EdgeData):
-    """Parameters for an 'arc' edge"""
+    """Parameters for an arc edge: classic OpenFOAM circular arc
+    definition with a single point lying anywhere on the arc"""
     kind = 'arc'
 
     def __init__(self, arc_point:PointType):
@@ -51,7 +52,16 @@ class Arc(EdgeData):
         return self
 
 class Origin(EdgeData):
-    """Parameters for an 'origin' edge"""
+    """Parameters for an arc edge, alternative ESI-CFD version;
+    defined with an origin point and optional flatness (default 1)
+
+    https://www.openfoam.com/news/main-news/openfoam-v20-12/pre-processing#x3-22000
+    https://develop.openfoam.com/Development/openfoam/-/blob/master/src/mesh/blockMesh/blockEdges/arcEdge/arcEdge.H
+
+    All arc variants are supported by classy_blocks;
+    however, only the first (classic) one will be written to blockMeshDict for compatibility.
+    If an edge was specified by 'angle' or 'origin', the definition will be output as a comment
+    next to that edge definition."""
     kind = 'origin'
 
     def __init__(self, origin:PointType, flatness:float=1):
@@ -63,7 +73,15 @@ class Origin(EdgeData):
         return self
 
 class Angle(EdgeData):
-    """Parameters for an angle-and-axis edge"""
+    """Parameters for an arc edge, alternative definition
+    by Foundation (.org); defined with sector angle and axis
+    
+    https://github.com/OpenFOAM/OpenFOAM-10/commit/73d253c34b3e184802efb316f996f244cc795ec6
+
+    All arc variants are supported by classy_blocks;
+    however, only the first (classic) one will be written to blockMeshDict for compatibility.
+    If an edge was specified by 'angle' or 'origin', the definition will be output as a comment
+    next to that edge definition."""
     kind = 'angle'
 
     def __init__(self, angle:float, axis:VectorType):

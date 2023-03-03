@@ -4,9 +4,10 @@ import copy
 
 import numpy as np
 
-from classy_blocks.types import VectorType, PointType, NPPointType PointListType
+from classy_blocks.types import VectorType, PointType, PointListType, \
+    NPPointType, NPVectorType
 from classy_blocks.base.transformable import TransformableBase
-from classy_blocks.data.edges import EdgeData
+from classy_blocks.construct.edges import EdgeData
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
@@ -46,9 +47,8 @@ class Face(TransformableBase):
 
         self.points = points
 
-        if edges is None:
-            self.edges = [None]*4
-        else:
+        self.edges:List[Optional[EdgeData]] = [None]*4
+        if edges is not None:
             self.edges = edges
 
         assert len(self.edges) == 4, "Provide exactly 4 edges; use None for straight lines"

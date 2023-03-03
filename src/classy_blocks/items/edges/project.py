@@ -1,6 +1,6 @@
 import dataclasses
 
-from classy_blocks.data import edges
+from classy_blocks.construct import edges
 from classy_blocks.items.edges.edge import Edge
 
 @dataclasses.dataclass

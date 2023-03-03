@@ -2,7 +2,7 @@ import dataclasses
 
 import numpy as np
 
-from classy_blocks.data import edges
+from classy_blocks.construct import edges
 from classy_blocks.items.edges.arcs.arc_base import ArcEdgeBase
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
@@ -28,8 +28,8 @@ class ArcEdge(ArcEdgeBase):
             # silently dropped
 
             # cross-product of three collinear vertices must be zero
-            arm_1 = self.vertex_1.pos - self.data.point.pos
-            arm_2 = self.vertex_2.pos - self.data.point.pos
+            arm_1 = self.vertex_1.pos - self.data.point
+            arm_2 = self.vertex_2.pos - self.data.point
 
             return abs(f.norm(np.cross(arm_1, arm_2))) > constants.TOL
 

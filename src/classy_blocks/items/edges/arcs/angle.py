@@ -2,7 +2,7 @@ import dataclasses
 
 import numpy as np
 
-from classy_blocks.data import edges
+from classy_blocks.construct import edges
 from classy_blocks.items.edges.arcs.arc_base import ArcEdgeBase
 from classy_blocks.types import PointType, VectorType
 from classy_blocks.util import functions as f

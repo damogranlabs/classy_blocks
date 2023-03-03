@@ -4,7 +4,7 @@ import numpy as np
 
 from classy_blocks.items.vertex import Vertex
 
-from classy_blocks.data import edges
+from classy_blocks.construct import edges
 from classy_blocks.items.edges.arcs.arc import ArcEdge
 from classy_blocks.items.edges.arcs.origin import OriginEdge, arc_from_origin
 from classy_blocks.items.edges.arcs.angle import AngleEdge, arc_from_theta

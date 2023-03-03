@@ -1,7 +1,7 @@
 from typing import List, Set, Optional
 
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.data.edges import Line
+from classy_blocks.construct.edges import Line
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
 

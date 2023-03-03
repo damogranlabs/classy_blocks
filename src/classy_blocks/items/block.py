@@ -1,9 +1,7 @@
-import warnings
 from typing import List, Literal, Union, Dict
 
 from classy_blocks.types import PointListType, AxisType, OrientType, EdgeKindType
 
-from classy_blocks.data.edges import EdgeData
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
@@ -17,13 +15,12 @@ from classy_blocks.util import constants
 
 class Block:
     """A Block and everything that belongs to it"""
-    def __init__(self, points:PointListType):
-        # index in blockMeshDict; a proper value
-        # will be assigned when the this block is added to mesh
-        self.index = -1
+    def __init__(self, index:int, vertices:List[Vertex]):
+        # index in blockMeshDict
+        self.index = index
 
         # vertices, edges, counts and gradings
-        self.vertices = [Vertex(point) for point in points]
+        self.vertices = vertices
         
         # Storing and retrieving pairs of vertices a.k.a. 'wires';
         # Block object can be indexed so that the desired Wire can be accessed directly;
@@ -55,53 +52,16 @@ class Block:
         # (visible in blockMeshDict, useful for debugging)
         self.comment = ""
 
-    def add_edge(self, corner_1:int, corner_2:int, data:EdgeData):
-        """Adds an edge between vertices at specified indexes.
-        Args:
-            corner_1, corner_2: local Block/Face indexes of vertices between which the edge is placed
-            data: an EdgeData object from cb.edges.* containing required info for edge creation:
-            - Arc: classic OpenFOAM arc definition with arc_point
-            - Origin: ESI-CFD version* of arc with origin point and optional flatness (default 1)
-            - Angle: Foundation version** with sector angle and axis
-            - Spline: spline passing through a list of points
-            - PolyLine: a series of lines between a list of points
-            - Project: project to one surface or to an intersection of two
-
-        Definition of arc edges:
-            * ESI-CFD version
-            https://www.openfoam.com/news/main-news/openfoam-v20-12/pre-processing#x3-22000
-            https://develop.openfoam.com/Development/openfoam/-/blob/master/src/mesh/blockMesh/blockEdges/arcEdge/arcEdge.H
-            ** Foundation version:
-            https://github.com/OpenFOAM/OpenFOAM-10/commit/73d253c34b3e184802efb316f996f244cc795ec6
-            All arc variants are supported by classy_blocks;
-            however, only the first one will be written to blockMeshDict for compatibility.
-            If an edge was specified by #2 or #3, the definition will be output as a comment next
-            to that edge definition.
-        Examples:
-            Add an arc edge:
-                block.add_edge(0, 1, Arc([0.5, 0.25, 0]))
-            A spline edge with single or multiple points:
-                block.add_edge(0, 1, Spline([[0.3, 0.25, 0], [0.6, 0.1, 0], [0.3, 0.25, 0]]))
-            Same points as above but specified as polyLine:
-                block.add_edge(0, 1, PolyLine([[0.3, 0.25, 0], [0.6, 0.1, 0], [0.3, 0.25, 0]]))
-            An edge, projected to geometry defined as 'terrain':
-                block.add_edge(0, 1, Project('terrain'))
-            An edge, projected to intersection of 'terrain' and 'wall'
-                block.add_edge(0, 1, Project(['terrain', 'wall']))
-            An arc, defined using ESI-CFD's 'origin' style:
-                block.add_edge(0, 1, Origin([0.5, -0.5, 0]))
-            An arc, defined using OF Foundation's 'angle and axis' style:
-                block.add_edge(0, 1, Angle(np.pi/6, [0, 0, 1]))"""
+    def add_edge(self, corner_1:int, corner_2:int, edge:Edge):
+        """Adds an edge between vertices at specified indexes."""
         assert 0 <= corner_1 < 8 and 0 <= corner_2 < 8, "Use block-local indexing (0...7)"
-
-        edge = factory.create(self.vertices[corner_1], self.vertices[corner_2], data)
         self.wires[corner_1][corner_2].edge = edge
 
     def chop(self, axis: AxisType, **kwargs:Union[str, float, int, bool]) -> None:
         """Set block's cell count/size and grading for a given direction/axis.
         Exactly two of the following keyword arguments must be provided:
 
-        :Keyword Arguments:
+        :Keyword Arguments (see Chop object):
         * *count:
             number of cells;
             Optionally, this can be the only provided argument;

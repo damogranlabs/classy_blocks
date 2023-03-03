@@ -5,15 +5,15 @@ from typing import List, Optional, Dict
 
 import numpy as np
 
-from classy_blocks.types import AxisType, NPPointType, PointType, VectorType
+from classy_blocks.types import AxisType, NPPointType, PointType, VectorType, NPPointListType
 from classy_blocks.base.transformable import TransformableBase
 from classy_blocks.base.additive import AdditiveBase
 
-from classy_blocks.data.edges import EdgeData
+from classy_blocks.construct.edges import EdgeData
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.grading.chop import Chop
 
-class Operation(TransformableBase):
+class Operation(TransformableBase, abc.ABC):
     """A user-friendly way to create a Block, as a 2-point Box,
     extruded/revolved from a single Face or Lofted between two faces
     with optional side edges."""
@@ -40,13 +40,15 @@ class Operation(TransformableBase):
         assert corner_1 < 4, "corner_1 must be an index to a bottom Vertex (0...3)"
         self.side_edges[corner_1] = edge_data
 
-    def chop(self, axis:AxisType, chop:Chop) -> None:
+    def chop(self, axis:AxisType, **kwargs) -> None:
         """Chop the operation (count/grading) in given axis:
         0: along first edge of a face
         1: along second edge of a face
         2: between faces / along operation path
+
+        Kwargs: see arguments for Chop object
         """
-        self.chops[axis].append(chop)
+        self.chops[axis].append(Chop(**kwargs))
 
     # def set_patch(self, sides: Union[str, List[str]], patch_name: str) -> None:
     #     """bottom: bottom face

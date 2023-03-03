@@ -1,4 +1,4 @@
-from classy_blocks.data import edges
+from classy_blocks.construct import edges
 from classy_blocks.items.block import Block
 from classy_blocks.mesh import Mesh
 

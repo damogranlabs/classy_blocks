@@ -3,7 +3,7 @@ import abc
 
 from typing import Optional
 
-from classy_blocks.data.edges import EdgeData
+from classy_blocks.construct.edges import EdgeData
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.base.transformable import TransformableBase
 from classy_blocks.types import PointType, VectorType, EdgeKindType
