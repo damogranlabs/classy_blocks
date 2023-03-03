@@ -1,24 +1,28 @@
-from classy_blocks import Face, Extrude, Mesh
+import os
 
-def get_mesh():
-    base = Face([ [0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0] ])
-    base.add_edge(0, [0.5, -0.2, 0])
-    
-    extrude = Extrude(base, [0.5, 0.5, 3])
+from classy_blocks import Arc, Face, Extrude, Mesh
 
-    # direction 1
-    extrude.chop(0, start_size=0.02, c2c_expansion=1.2, length_ratio=0.5, invert=False)
-    extrude.chop(0, start_size=0.02, c2c_expansion=1.2, length_ratio=0.5, invert=True)
+base = Face(
+    [ [0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0] ],
+    [Arc([0.5, -0.2, 0]), None, None, None]
+)
 
-    # direction 2
-    extrude.chop(1, start_size=0.02, c2c_expansion=1.2, length_ratio=0.5, invert=False)
-    extrude.chop(1, start_size=0.02, c2c_expansion=1.2, length_ratio=0.5, invert=True)
+extrude = Extrude(base, [0.5, 0.5, 3])
 
-    # extrude direction
-    extrude.chop(2, c2c_expansion=1, count=20)
+# direction of corners 0-1
+extrude.chop(0, start_size=0.02, c2c_expansion=1.2, length_ratio=0.5, invert=False)
+extrude.chop(0, start_size=0.02, c2c_expansion=1.2, length_ratio=0.5, invert=True)
 
-    mesh = Mesh()
-    mesh.add(extrude)
-    mesh.set_default_patch('walls', 'wall')
+# direction of corners 1-2
+extrude.chop(1, start_size=0.02, c2c_expansion=1.2, length_ratio=0.5, invert=False)
+extrude.chop(1, start_size=0.02, c2c_expansion=1.2, length_ratio=0.5, invert=True)
 
-    return mesh
+# extrude direction
+extrude.chop(2, c2c_expansion=1, count=20)
+
+mesh = Mesh()
+mesh.add_operation(extrude)
+#mesh.set_default_patch('walls', 'wall')
+
+mesh.write(os.path.join('..', 'case', 'system', 'blockMeshDict'))
+

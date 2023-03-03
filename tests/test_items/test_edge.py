@@ -16,11 +16,8 @@ from classy_blocks.util import functions as f
 
 class EdgeTests(unittest.TestCase):
     def setUp(self):
-        Vertex.registry = []
-        factory.registry = []
-
-        self.vertex_1 = Vertex([0, 0, 0])
-        self.vertex_2 = Vertex([1, 0, 0])
+        self.vertex_1 = Vertex([0, 0, 0], 0)
+        self.vertex_2 = Vertex([1, 0, 0], 1)
 
     def test_arc_edge_translate(self):
         arc_edge = ArcEdge(self.vertex_1, self.vertex_2, edges.Arc([0.5, 0, 0]))
@@ -77,11 +74,8 @@ class EdgeTests(unittest.TestCase):
 class EdgeFactoryTests(unittest.TestCase):
     """Factory tests; examples from BlockDef.add_edge docstring"""
     def setUp(self):
-        Vertex.registry = []
-        factory.registry = []
-
-        self.vertex_1 = Vertex([0, 0, 0])
-        self.vertex_2 = Vertex([1, 0, 0])
+        self.vertex_1 = Vertex([0, 0, 0], 0)
+        self.vertex_2 = Vertex([1, 0, 0], 1)
 
     def test_arc(self):
         arc_point = [0.5, 0.2, 0]
@@ -113,7 +107,7 @@ class EdgeFactoryTests(unittest.TestCase):
 
     def test_angle(self):
         angle = np.pi/6
-        axis = [0, 0, 1]
+        axis = [0., 0., 1.]
         edge = factory.create(self.vertex_1, self.vertex_2,
                               edges.Angle(angle, axis))
 
@@ -154,71 +148,6 @@ class EdgeFactoryTests(unittest.TestCase):
 
         self.assertIsInstance(edg, ProjectEdge)
         self.assertListEqual(edg.data.geometry, geometry)
-
-
-    def test_create_duplicate(self):
-        """Create two edges between the same pair of vertices"""
-        edge_1 = factory.create(
-            self.vertex_1,
-            self.vertex_2,
-            edges.Arc([0.5, 0.2, 0]))
-    
-        edge_2 = factory.create(
-            self.vertex_1,
-            self.vertex_2,
-            edges.Project('terrain'))
-        
-        self.assertEqual(id(edge_1), id(edge_2))
-        self.assertEqual(edge_1.kind, 'arc')
-    
-    def test_create_duplicate_inverted(self):
-        """Create two edges between the same pair of vertices, inverted"""
-        edge_1 = factory.create(
-            self.vertex_1,
-            self.vertex_2,
-            edges.Arc([0.5, 0.2, 0]))
-    
-        edge_2 = factory.create(
-            self.vertex_2,
-            self.vertex_1,
-            edges.Project('terrain'))
-        
-        self.assertEqual(id(edge_1), id(edge_2))
-        self.assertEqual(edge_1.kind, 'arc')
-
-    def test_line_edge(self):
-        """Creating a 'line' edge does not add it to the registry"""
-        _ = factory.create(self.vertex_1, self.vertex_2, edges.Line())
-
-        self.assertEqual(len(factory.registry), 0)
-
-    def test_duplicate_existing(self):
-        """Call a create(copy=True) function with copy=True on a new edge"""
-        _ = factory.create(
-            self.vertex_1,
-            Vertex([0, 0, 1]),
-            edges.Project(['project', 'terrain']))
-
-        _ = factory.create(
-            self.vertex_1,
-            Vertex([0, 0, 1]),
-            edges.Arc([0.5, 0.2, 0]), duplicate=True)
-    
-        self.assertEqual(len(factory.registry), 2)
-    
-    def test_duplicate_new(self):
-        """Call a create(copy=True) with a new edge"""
-        _ = factory.create(
-            self.vertex_1,
-            Vertex([0, 0, 1]),
-            edges.Project('terrain'))
-    
-        _ = factory.create(
-            Vertex([1, 1, 1]),
-            Vertex([1, 1, 2]),
-            edges.Arc([0.5, 0.2, 0]), duplicate=True)
-    
-        self.assertEqual(len(factory.registry), 2)
 
 # class TestPrimitives(unittest.TestCase):
 #     def setUp(self):

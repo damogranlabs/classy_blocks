@@ -1,5 +1,9 @@
+from typing import List
+from parameterized import parameterized
+
 from tests.fixtures.data import DataTestCase
 
+from classy_blocks.items.vertex import Vertex
 from classy_blocks.lists.vertex_list import VertexList
 from classy_blocks.lists.edge_list import EdgeList
 
@@ -10,10 +14,38 @@ class EdgeListTests(DataTestCase):
         self.vl = VertexList()
         self.el = EdgeList()
 
+    def get_vertices(self, index:int) -> List[Vertex]:
+        vertices = []
+
+        for point in self.get_single_data(index).points:
+            vertices.append(self.vl.add(point))
+    
+        return vertices
+
+
+    @parameterized.expand(((0, 1), (1, 2), (2, 3), (3, 0)))
+    def test_get_corners_bottom(self, corner_1, corner_2):
+        """get_corners for a bottom face"""
+        output = (corner_1, corner_2)
+        self.assertTupleEqual(EdgeList.get_corners(corner_1, 'bottom'), output)
+
+    @parameterized.expand(((0, 4, 5), (1, 5, 6), (2, 6, 7), (3, 7, 4)))
+    def test_get_corners_top(self, index, corner_1, corner_2):
+        """get_corners for a bottom face"""
+        output = (corner_1, corner_2)
+        self.assertTupleEqual(EdgeList.get_corners(index, 'top'), output)
+
+    @parameterized.expand(((0, 4), (1, 5), (2, 6), (3, 7)))
+    def test_get_corners_side(self, corner_1, corner_2):
+        """get_corners for a side corners"""
+        output = (corner_1, corner_2)
+        self.assertTupleEqual(EdgeList.get_corners(corner_1, 'side'), output)
+
     def test_add_new(self):
         """Add an edge when no such thing exists"""
-        vertices = self.vl.add(self.blocks[0].points)
-        edges = self.el.add(self.blocks[0], vertices)
+        vertices = self.get_vertices(0)
+        self.el.add(vertices, self.blocks[0].edges)
+        data = self.blocks[0].edges
 
         self.assertEqual(len(edges), len(self.blocks[0].edges))
         self.assertEqual(len(self.el.edges), len(self.blocks[0].edges))

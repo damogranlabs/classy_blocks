@@ -62,6 +62,7 @@ for m in inspect.getmembers(gc):
 def calculate(length: float, parameters: dict) -> Tuple[int, float]:
     """Calculates cell count and total expansion ratio for a block
     by calling functions that take known variables and return new values"""
+    print(length, parameters)
     # TODO: move all this yada yada into Division class or something
     keys = parameters.keys()
     calculated = set()

@@ -16,29 +16,6 @@ from classy_blocks.data.block_data import BlockData
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.util import functions as f
 
-
-
-
-class Loft(Operation):
-    """since any possible block shape can be created with Loft operation,
-    Loft is the most low-level of all operations. Anything included in Loft
-    must also be included in Operation."""
-
-    pass
-
-
-class Extrude(Loft):
-    """Takes a Face and extrudes it in given extrude_direction"""
-
-    def __init__(self, base: Face, extrude_vector: list):
-        self.base = base
-        self.extrude_vector = extrude_vector
-
-        top_face = base.translate(self.extrude_vector)
-
-        super().__init__(base, top_face)
-
-
 class Revolve(Loft):
     """Takes a Face and revolves it by angle around axis;
     axis can be translated so that it goes through desired origin.

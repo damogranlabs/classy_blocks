@@ -34,8 +34,7 @@ class VertexList:
             # no vertex was found, add a new one;
             vertex = Vertex(point, len(self.vertices))
             self.vertices.append(vertex)
-        
-        self.vertices.append(vertex)
+
         return vertex
 
         # merged patches: duplicate all points that define slave patches

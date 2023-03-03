@@ -57,7 +57,7 @@ class Block:
         assert 0 <= corner_1 < 8 and 0 <= corner_2 < 8, "Use block-local indexing (0...7)"
         self.wires[corner_1][corner_2].edge = edge
 
-    def chop(self, axis: AxisType, **kwargs:Union[str, float, int, bool]) -> None:
+    def chop(self, axis: AxisType, chop:Chop) -> None:
         """Set block's cell count/size and grading for a given direction/axis.
         Exactly two of the following keyword arguments must be provided:
 
@@ -88,7 +88,7 @@ class Block:
             https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading;
             Multiple gradings are specified by multiple calls to .chop() with
             the same 'axis' parameter."""
-        self.axes[axis].chop(Chop(**kwargs))
+        self.axes[axis].chop(chop)
 
     def get_axis_wires(self, axis:AxisType) -> List[Wire]:
         """Returns a list of wires that run in the given axis"""

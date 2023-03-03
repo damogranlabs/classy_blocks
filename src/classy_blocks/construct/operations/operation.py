@@ -46,8 +46,8 @@ class Operation(TransformableBase, abc.ABC):
         1: along second edge of a face
         2: between faces / along operation path
 
-        Kwargs: see arguments for Chop object
-        """
+        Kwargs: see arguments for Chop object"""
+        print("New chop!", Chop(**kwargs))
         self.chops[axis].append(Chop(**kwargs))
 
     # def set_patch(self, sides: Union[str, List[str]], patch_name: str) -> None:

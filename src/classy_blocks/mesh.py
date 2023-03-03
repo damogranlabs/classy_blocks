@@ -62,7 +62,7 @@ class Mesh:
 
         for axis in (0, 1, 2):
             for chop in operation.chops[axis]:
-                block.chop(axis, **dataclasses.asdict(chop))
+                block.chop(axis, chop)
 
         self.block_list.add(block)
 

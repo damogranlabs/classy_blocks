@@ -8,10 +8,9 @@ from tests.fixtures.data import DataTestCase
 class WireTests(DataTestCase):
     """Tests of Pair object"""
     def setUp(self):
-        Vertex.registry = []
         block = self.get_single_data(0)
 
-        self.vertices = [Vertex(block.points[i]) for i in range(8)]
+        self.vertices = [Vertex(block.points[i], i) for i in range(8)]
 
         self.corner_1 = 1
         self.corner_2 = 2

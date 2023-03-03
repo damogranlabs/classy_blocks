@@ -40,13 +40,7 @@ class EdgeList:
             if edge_data is None:
                 continue
 
-            if direction == 'bottom':
-                corner_2 = (corner_1+1)%4
-            elif direction == 'top':
-                corner_1 = 4 + corner_1
-                corner_2 = 4 + (corner_1+1)%4
-            else:
-                corner_2 = 4 + corner_1
+            corner_1, corner_2 = self.get_corners(corner_1, direction)
 
             vertex_1 = vertices[corner_1]
             vertex_2 = vertices[corner_2]
@@ -76,3 +70,32 @@ class EdgeList:
         out += ");\n\n"
 
         return out
+
+    @staticmethod
+    def get_corners(corner_1, direction:Literal['bottom', 'top', 'side']) -> Tuple[int, int]:
+        """returns indexes of the first and second corner
+        with respect to given direction:
+        bottom: 0-1, 1-2, 2-3, 3-0
+        top: 4-5, 5-6, 6-7, 7-4
+        side: 0-4, 1-5, 2-6, 3-7"""
+        # match direction: # once in the future
+        #     case 'bottom':
+        #         corner_2 = (corner_1+1)%4
+        #     case 'top':
+        #         corner_1 = 4 + corner_1
+        #         corner_2 = 4 + (corner_1+1)%4
+        #     case 'side':
+        #         corner_2 = 4 + corner_1
+        #     case other:
+        #         raise ValueError(f"No defined direction: {direction}")
+
+        if direction ==  'bottom':
+            return corner_1, (corner_1+1)%4
+        
+        if direction == 'top':
+            return corner_1 + 4, (corner_1+1)%4 + 4
+    
+        if direction == 'side':
+            return corner_1, corner_1 + 4
+        
+        raise ValueError(f"No defined direction: {direction}")

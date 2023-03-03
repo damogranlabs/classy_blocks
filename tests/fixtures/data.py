@@ -57,7 +57,7 @@ fl:List[List[float]] = [  # points on the 'floor'; z=0
 cl = [[p[0], p[1], 1] for p in fl]  # points on ceiling; z = 1
 
 @dataclasses.dataclass
-class TestBlockData:
+class TestOperationData:
     """to store predefined data for test block creation"""
     # points from which to create the block
     indexes:List[int]
@@ -82,7 +82,7 @@ class TestBlockData:
         )
 
 test_data = [
-    TestBlockData(
+    TestOperationData(
         indexes=[0, 1, 2, 3],
         edges=[ # edges
             [0, 1, edges.Arc([0.5, -0.25, 0])],
@@ -99,7 +99,7 @@ test_data = [
         ],
         description="Test"
     ),
-    TestBlockData(
+    TestOperationData(
         indexes=[1, 4, 5, 2],
         edges=[
             [3, 0, edges.Arc([0.5, -0.1, 1])], # duplicated edge in block 2 that must not be included
@@ -114,7 +114,7 @@ test_data = [
             [["bottom", "top", "right", "front"], "walls", "wall"],
         ]
     ),
-    TestBlockData(
+    TestOperationData(
         indexes=[2, 5, 6, 7],
         chops=[
             [],
@@ -131,12 +131,12 @@ test_data = [
 class DataTestCase(unittest.TestCase):
     """Test case with ready-made block data"""
     @staticmethod
-    def get_single_data(index:int) -> TestBlockData:
+    def get_single_data(index:int) -> TestOperationData:
         """Returns a list of predefined blocks for testing"""
         return test_data[index]
 
     @staticmethod
-    def get_all_data() -> List[TestBlockData]:
+    def get_all_data() -> List[TestOperationData]:
         """Returns all prepared block data"""
         return test_data
 

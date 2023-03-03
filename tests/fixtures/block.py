@@ -1,4 +1,7 @@
 import dataclasses
+
+from typing import List
+
 from tests.fixtures.data import DataTestCase
 
 from classy_blocks.items.vertex import Vertex
@@ -7,6 +10,9 @@ from classy_blocks.items.edges.factory import factory
 
 class BlockTestCase(DataTestCase):
     """Block item tests"""
+    def make_vertices(self, index:int) -> List[Vertex]:
+
+
     def make_block(self, index:int) -> Block:
         """The test subject"""
         block_data = self.get_single_data(index)
