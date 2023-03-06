@@ -8,9 +8,7 @@ from classy_blocks.util import functions as f
 
 
 class FaceTests(unittest.TestCase):
-    def setUp(self):
-        Vertex.registry = []
-        
+    def setUp(self):        
         self.points = [[0., 0., 0.], [1., 0., 0.], [1., 1., 0.], [0., 1., 0.]]
 
     def test_face_points(self):

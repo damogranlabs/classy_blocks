@@ -3,10 +3,10 @@ from parameterized import parameterized
 
 from tests.fixtures.data import DataTestCase
 
+from classy_blocks.construct.edges import Arc, PolyLine, Spline
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.lists.vertex_list import VertexList
 from classy_blocks.lists.edge_list import EdgeList
-
 
 class EdgeListTests(DataTestCase):
     def setUp(self):
@@ -21,7 +21,6 @@ class EdgeListTests(DataTestCase):
             vertices.append(self.vl.add(point))
     
         return vertices
-
 
     @parameterized.expand(((0, 1), (1, 2), (2, 3), (3, 0)))
     def test_get_corners_bottom(self, corner_1, corner_2):
@@ -44,57 +43,43 @@ class EdgeListTests(DataTestCase):
     def test_add_new(self):
         """Add an edge when no such thing exists"""
         vertices = self.get_vertices(0)
-        self.el.add(vertices, self.blocks[0].edges)
-        data = self.blocks[0].edges
+        face_edges = [Arc([0.5, 0.5, 0])]
 
-        self.assertEqual(len(edges), len(self.blocks[0].edges))
-        self.assertEqual(len(self.el.edges), len(self.blocks[0].edges))
+        edges = self.el.add(vertices, face_edges, 'bottom')
+
+        self.assertEqual(len(edges), 1)
+        self.assertEqual(len(self.el.edges), 1)
     
     def test_add_existing(self):
         """Add the same edges twice"""
-        vertices = self.vl.add(self.blocks[0].points)
-        edges_first = self.el.add(self.blocks[0], vertices)
-        edges_second = self.el.add(self.blocks[0], vertices)
+        vertices = self.get_vertices(0)
+        face_edges = [Arc([0.5, 0.5, 0])]
 
-        self.assertEqual(len(edges_first), len(edges_second))
+        self.el.add(vertices, face_edges, 'bottom')
+        self.el.add(vertices, face_edges, 'bottom')
 
-        for i, edge in enumerate(edges_first):
-            self.assertEqual(id(edge), id(edges_second[i]))
+        self.assertEqual(len(self.el.edges), 1)
 
     def test_add_invalid(self):
         """Add a circular edge that's actually a line"""
-        vertices = self.vl.add(self.blocks[1].points)
-        edges = self.el.add(self.blocks[1], vertices)
+        vertices = self.get_vertices(0)
+        face_edges = [Arc([0.5, 0, 0])]
 
-        # there's one duplicated edge in the definition but we
-        # didn't add block 1
-        self.assertEqual(len(edges), 1)
+        self.el.add(vertices, face_edges, 'bottom')
 
-    def test_add_duplicate(self):
-        """Do not add a duplicate edge"""
-        vertices = self.vl.add(self.blocks[0].points)
-        self.el.add(self.blocks[0], vertices)
-
-        # this block has one duplicate and one invalid edge
-        vertices = self.vl.add(self.blocks[1].points)
-        self.el.add(self.blocks[1], vertices)
-
-        self.assertEqual(len(self.el.edges), len(self.blocks[0].edges))
+        self.assertEqual(len(self.el.edges), 0)
 
     def test_vertex_order(self):
         """Assure vertices maintain consistent order"""
-        # (as provided by the user, that is)
-        # the most low-level way of creating a block is from 'raw' points
-        block = self.blocks[0]
+        vertices = self.get_vertices(0)
 
         # add some custom edges
-        block.edges = []
-        block.add_edge(2, 3, 'spline', [[0.7, 1.3, 0], [0.3, 1.3, 0]]) # spline edge
-        block.add_edge(6, 7, 'polyLine', [[0.7, 1.1, 1], [0.3, 1.1, 1]]) # weird edge
-
-        vertices = self.vl.add(block.points)
-        self.el.add(block, vertices)
-
+        bottom_face_edges = [None, None, Spline([[0.7, 1.3, 0], [0.3, 1.3, 0]]), None]
+        top_face_edges = [None, None, PolyLine([[0.7, 1.1, 1], [0.3, 1.1, 1]]), None]
+        
+        self.el.add(vertices, bottom_face_edges, 'bottom')
+        self.el.add(vertices, top_face_edges, 'top')
+        
         self.assertEqual(len(self.el.edges), 2)
 
         self.assertEqual(self.el.edges[0].vertex_1.index, 2)

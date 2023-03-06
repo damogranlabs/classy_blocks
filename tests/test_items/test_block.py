@@ -1,6 +1,8 @@
 from parameterized import parameterized
 from tests.fixtures.block import BlockTestCase
 
+from classy_blocks.items.wire import Wire
+
 class BlockTests(BlockTestCase):
     """Block item tests"""
     @parameterized.expand((
@@ -100,3 +102,49 @@ class BlockTests(BlockTestCase):
         """Try to add a block that is not in contact
         as a neighbour"""
         # TODO
+
+class WireframeTests(BlockTestCase):
+    def setUp(self):
+        self.vertices = self.make_vertices(0)
+        self.block = self.make_block(0)
+    
+    def test_wires_count(self):
+        """Each corner has exactly 3 couples"""
+        for wires in self.block.wires:
+            self.assertEqual(len(wires), 3)
+
+    def test_wire_indexes(self):
+        """Check that indexes are generated exactly as the sketch dictates"""
+        # hand-typed
+        expected_indexes = (
+            (1, 3, 4), # 0
+            (0, 2, 5), # 1
+            (1, 3, 6), # 2
+            (0, 2, 7), # 3
+            (0, 5, 7), # 4
+            (1, 4, 6), # 5
+            (2, 5, 7), # 6
+            (3, 4, 6), # 7
+        )
+
+        for i, wires in enumerate(self.block.wires):
+            generated = set(wires.keys())
+            expected = set(expected_indexes[i])
+
+            self.assertSetEqual(generated, expected)
+
+    def test_axis_count(self):
+        """Check that each axis has exactly 4 wires"""
+        for axis in range(3):
+            self.assertEqual(len(self.block.axes[axis].wires), 4)
+
+    @parameterized.expand(((0, 2), (1, 3), (0, 6), (1, 7)))
+    def test_find_wire_fail(self, corner_1, corner_2):
+        """There are no wires in face or volume diagonals"""
+        with self.assertRaises(KeyError):
+            _ = self.block.wires[corner_1][corner_2]
+
+    @parameterized.expand(((0, 1), (1, 0), (0, 4), (4, 0)))
+    def test_find_wire_success(self, corner_1, corner_2):
+        """Find wire by __getitem__"""
+        self.assertEqual(type(self.block.wires[corner_1][corner_2]), Wire)

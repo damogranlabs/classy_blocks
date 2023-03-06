@@ -53,14 +53,16 @@ fl:List[List[float]] = [  # points on the 'floor'; z=0
     [2, 2, 0],  # 6
     [1, 2, 0],  # 7
 ]
+fl_indexes = [0, 1, 2, 3, 8, 9, 12, 13]
 
 cl = [[p[0], p[1], 1] for p in fl]  # points on ceiling; z = 1
+cl_indexes = [4, 5, 6, 7, 10, 11, 14, 15]
 
 @dataclasses.dataclass
 class TestOperationData:
     """to store predefined data for test block creation"""
     # points from which to create the block
-    indexes:List[int]
+    point_indexes:List[int]
 
     # edges; parameters correspond to block.add_edge() args
     edges:List = dataclasses.field(default_factory=list)
@@ -75,15 +77,23 @@ class TestOperationData:
     description:str = ""
     cell_zone:str = ""
 
-    def __post_init__(self):
-        self.points = np.array(
-            [fl[i] for i in self.indexes] + \
-            [cl[i] for i in self.indexes]
+    @property
+    def points(self):
+        # to create vertices
+        return np.array(
+            [fl[i] for i in self.point_indexes] + \
+            [cl[i] for i in self.point_indexes]
         )
+
+    @property
+    def indexes(self):
+        # to create vertices
+        return [fl_indexes[i] for i in self.point_indexes] + \
+            [cl_indexes[i] for i in self.point_indexes]
 
 test_data = [
     TestOperationData(
-        indexes=[0, 1, 2, 3],
+        point_indexes=[0, 1, 2, 3],
         edges=[ # edges
             [0, 1, edges.Arc([0.5, -0.25, 0])],
             [1, 2, edges.Spline([[1.1, 0.25, 0], [1.05, 0.5, 0], [1.1, 0.75, 0]])]
@@ -100,7 +110,7 @@ test_data = [
         description="Test"
     ),
     TestOperationData(
-        indexes=[1, 4, 5, 2],
+        point_indexes=[1, 4, 5, 2],
         edges=[
             [3, 0, edges.Arc([0.5, -0.1, 1])], # duplicated edge in block 2 that must not be included
             [0, 1, edges.Arc([0.5, 0, 0])]  # collinear point; invalid edge must be dropped
@@ -115,7 +125,7 @@ test_data = [
         ]
     ),
     TestOperationData(
-        indexes=[2, 5, 6, 7],
+        point_indexes=[2, 5, 6, 7],
         chops=[
             [],
             [Chop(count=8)],
@@ -144,4 +154,4 @@ class DataTestCase(unittest.TestCase):
     def get_vertex_indexes(index:int) -> List[int]:
         """Indexes of the points used for block creation;
         will be used in tests to create Vertices manually"""
-        return test_data[index].indexes
+        return test_data[index].point_indexes

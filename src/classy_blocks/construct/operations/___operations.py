@@ -16,29 +16,6 @@ from classy_blocks.data.block_data import BlockData
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.util import functions as f
 
-class Revolve(Loft):
-    """Takes a Face and revolves it by angle around axis;
-    axis can be translated so that it goes through desired origin.
-
-    Angle is given in radians,
-    revolve is in positive sense (counter-clockwise)"""
-
-    def __init__(self, base: Face, angle: list, axis: list, origin: list):
-        self.base = base
-        self.angle = angle
-        self.axis = axis
-        self.origin = origin
-
-        bottom_face = base
-        top_face = base.rotate(axis, angle, origin)
-
-        super().__init__(bottom_face, top_face)
-
-        # there are 4 side edges: rotate each vertex of bottom_face
-        # by angle/2
-        side_points = [f.rotate(p, self.axis, self.angle / 2, self.origin) for p in self.base.points]
-        for i, point in enumerate(side_points):
-            self.block.add_edge(i, i+4, point, kind='arc')
 
 class Wedge(Revolve):
     """Revolves 'face' around x-axis symetrically by +/- angle/2.

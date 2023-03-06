@@ -3,7 +3,6 @@ from parameterized import parameterized
 from tests.fixtures.block import BlockTestCase
 
 class AxisTests(BlockTestCase):
-
     def test_lengths(self):
         """Block dimensions"""
         # Not all wires on this axis are of the same length

@@ -4,6 +4,7 @@ from classy_blocks.construct.edges import Arc, Origin, Angle, Spline, PolyLine, 
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.operations.extrude import Extrude
+from classy_blocks.construct.operations.revolve import Revolve
 
 # from classy_blocks.construct.shapes import Box, Elbow, Frustum, Cylinder, RevolvedRing, ExtrudedRing, Hemisphere
 # from classy_blocks.construct.walls import ElbowWall, FrustumWall

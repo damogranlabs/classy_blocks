@@ -9,7 +9,7 @@ class TestMesh(DataTestCase):
         super().setUp()
         self.mesh = Mesh()
 
-    def test_add_single_block(self):
+    def test_add_operation(self):
         """Add a block to the Mesh()"""
         self.mesh.add(self.get_single_data(0))
 

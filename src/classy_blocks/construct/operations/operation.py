@@ -5,9 +5,8 @@ from typing import List, Optional, Dict
 
 import numpy as np
 
-from classy_blocks.types import AxisType, NPPointType, PointType, VectorType, NPPointListType
+from classy_blocks.types import AxisType, NPPointType, PointType, VectorType
 from classy_blocks.base.transformable import TransformableBase
-from classy_blocks.base.additive import AdditiveBase
 
 from classy_blocks.construct.edges import EdgeData
 from classy_blocks.construct.flat.face import Face
@@ -18,21 +17,12 @@ class Operation(TransformableBase, abc.ABC):
     extruded/revolved from a single Face or Lofted between two faces
     with optional side edges."""
     def __init__(self, bottom_face: Face, top_face: Face):
+        # An Operation only holds data to create the block;
+        # actual object is created by Mesh when it is added.
         self.bottom_face = bottom_face
         self.top_face = top_face
         self.side_edges:List[Optional[EdgeData]] = [None]*4
         self.chops:Dict[AxisType, List[Chop]] = {0: [], 1: [], 2: []}
-
-        # create a block and assign edges to it
-        #self.block = Block(np.concatenate((bottom_face.points, top_face.points)))
-
-        #for i, edge_data in enumerate(bottom_face.edges):
-        #    if edge_data is not None:
-        #        self.block.add_edge(i, (i+1)%4, edge_data)
-
-        #for i, edge_data in enumerate(top_face.edges):
-        #    if edge_data is not None:
-        #        self.block.add_edge(4+ i, 4 + (i+1)%4, edge_data)
 
     def add_side_edge(self, corner_1:int, edge_data:EdgeData) -> None:
         """Add an edge between two vertices at the same
