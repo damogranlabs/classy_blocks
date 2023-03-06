@@ -9,7 +9,7 @@ class Revolve(Loft):
     axis can be translated so that it goes through desired origin.
 
     Angle is given in radians,
-    revolve is in positive sense (counter-clockwise)"""
+    revolve is in positive sense (counter-clockwise - right hand rule)"""
 
     def __init__(self, base:Face, angle:float, axis:VectorType, origin:VectorType):
         self.base = base
