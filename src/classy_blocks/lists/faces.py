@@ -1,7 +1,7 @@
 from typing import List
 
 from classy_blocks.data.block_data import BlockData
-from classy_blocks.lists.boundary import Boundary
+from classy_blocks.lists.boundary import PatchList
 
 class FaceList:
     """Handling of the 'faces' part of blockMeshDict (projected faces)"""
@@ -23,7 +23,7 @@ class FaceList:
         flist = "faces\n(\n"
 
         for data in self.faces:
-            flist += f"\tproject {Boundary.format_face(data[0])} {data[1]}\n"
+            flist += f"\tproject {PatchList.format_face(data[0])} {data[1]}\n"
 
         flist += ");\n\n"
 

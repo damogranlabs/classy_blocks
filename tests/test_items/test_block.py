@@ -97,11 +97,52 @@ class BlockTests(BlockTestCase):
     def test_add_neighbour_inverted(self):
         """Add a neighbour with an inverted axis"""
         # TODO
+        a = 1/0
     
     def test_add_foreign(self):
         """Try to add a block that is not in contact
         as a neighbour"""
         # TODO
+        a = 1/0
+    
+    def test_project_face_side(self):
+        """Project a face and check if appropriate Side contains geometry"""
+        block = self.make_block(0)
+
+        block.project_face('bottom', 'terrain', edges=False)
+
+        self.assertListEqual(block.sides['bottom'].project_to, ['terrain'])
+    
+    def test_project_face_edges(self):
+        """Project a face and check if there are projected edges in edge_list"""
+        block = self.make_block(0)
+
+        block.project_face('bottom', 'terrain', edges=True)
+
+        n_project_edges = 0
+        for edge in block.edge_list:
+            if edge.kind == 'project':
+                n_project_edges += 1
+            
+        self.assertEqual(n_project_edges, 4)
+
+    def test_set_patch_single(self):
+        """Set a patch on a single side"""
+        block = self.make_block(0)
+        block.set_patch('bottom', 'terrain')
+
+        self.assertEqual(block.sides['bottom'].patch_name, 'terrain')
+    
+    def test_set_patch_multiple(self):
+        """Set a patch to multiple sides at once"""
+        block = self.make_block(0)
+
+        sides = ['front', 'left', 'right']
+
+        block.set_patch(sides, 'walls')
+
+        for side in sides:
+            self.assertEqual(block.sides[side].patch_name, 'walls')
 
 class WireframeTests(BlockTestCase):
     def setUp(self):
