@@ -1,5 +1,8 @@
 import numpy as np
 
+from typing import Dict, Tuple
+from classy_blocks.types import OrientType
+
 # data type
 DTYPE = 'float' # dtype as taken by np.array()
 
@@ -10,7 +13,7 @@ TOL = 1e-7
 # a more intuitive and quicker way to set patches,
 # according to this sketch: https://www.openfoam.com/documentation/user-guide/blockMesh.php
 # the same for all blocks
-FACE_MAP = {
+FACE_MAP:Dict[OrientType, Tuple[int, int, int, int]] = {
     'bottom': (0, 1, 2, 3),
     'top': (4, 5, 6, 7),
     'left': (4, 0, 3, 7),

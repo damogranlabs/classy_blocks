@@ -4,7 +4,7 @@ from classy_blocks.items.block import Block
 
 from classy_blocks.items.patch import Patch
 
-class Boundary:
+class PatchList:
     """Handling of the 'boundary' part of blockMeshDict"""
     def __init__(self):
         # A collection {'patch_name': [list of Faces]}

@@ -8,7 +8,7 @@ from classy_blocks.items.block import Block
 from classy_blocks.lists.block_list import BlockList
 from classy_blocks.lists.vertex_list import VertexList
 from classy_blocks.lists.edge_list import EdgeList
-from classy_blocks.lists.boundary import Boundary
+from classy_blocks.lists.boundary import PatchList
 
 from classy_blocks.construct.operations.operation import Operation
 #from classy_blocks.construct.shapes import Shape
@@ -22,7 +22,7 @@ class Mesh:
         self.vertex_list = VertexList()
         self.edge_list = EdgeList()
         self.block_list = BlockList()
-        self.boundary = Boundary()
+        self.patch_list = PatchList()
 
         self.settings = {
             # TODO: test output
@@ -115,7 +115,7 @@ class Mesh:
             output.write(self.block_list.description)
             output.write(self.edge_list.description)
 
-            output.write(self.boundary.description)
+            output.write(self.patch_list.description)
 
             # patches: output manually
             # if len(self.patches['merged']) > 0:

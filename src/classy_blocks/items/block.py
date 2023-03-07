@@ -1,7 +1,9 @@
+import warnings
 from typing import List, Literal, Union, Dict
 
 from classy_blocks.types import PointListType, AxisType, OrientType, EdgeKindType
 
+from classy_blocks.construct.edges import Project
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
@@ -23,11 +25,9 @@ class Block:
         self.vertices = vertices
         
         # Storing and retrieving pairs of vertices a.k.a. 'wires';
-        # Block object can be indexed so that the desired Wire can be accessed directly;
+        # self.wires can be indexed so that the desired Wire can be accessed directly;
         # for instance, an edge between vertices 2 and 6 is obtained with
-        # self.wires[2][6].edge"""
-
-        # the opposite side of each vertex
+        # self.wires[2][6].edge
         self.wires:List[Dict[int, Wire]] = [{} for _ in range(8)]
         # wires of each axis
         self.axes = [Axis(i) for i in (0, 1, 2)]
@@ -43,7 +43,7 @@ class Block:
                 self.axes[axis].wires.append(wire)
 
         # Side objects define patch names and projections
-        self.sides = None #{o:Side(o) for o in constants.FACE_MAP}
+        self.sides = {o:Side(self.vertices, o) for o in constants.FACE_MAP}
 
         # cellZone to which the block belongs to
         self.cell_zone = ""
@@ -122,36 +122,50 @@ class Block:
         for wire in self.wire_list:
             if wire.edge.kind != 'line':
                 all_edges.append(wire.edge)
-        
+
         return all_edges
 
     def set_patch(self,
-        orients: Union[OrientType, List[OrientType]],
-        patch_name: str,
-        patch_type:str='patch'
-    ) -> None:
+                  orients: Union[OrientType, List[OrientType]],
+                  patch_name: str,
+                  patch_type:str='patch') -> None:
         """assign one or more block sides (constants.FACE_MAP) to a chosen patch name;
         if type is not specified, it will becom 'patch'"""
-        # if isinstance(orients, str):
-        #     orients = [orients]
+        if isinstance(orients, str):
+            orients = [orients]
 
-        # for orient in orients:
-        #     if self.sides[orient].patch_name is not None:
-        #         warnings.warn(f"Replacing patch {self.sides[orient].patch_name} with {patch_name}")
+        for orient in orients:
+            if self.sides[orient].patch_name is not None:
+                warnings.warn(f"Replacing patch {self.sides[orient].patch_name} with {patch_name}")
 
-        #     self.sides[orient].patch_name = patch_name
-        #     self.sides[orient].patch_type = patch_type
+            self.sides[orient].patch_name = patch_name
+            self.sides[orient].patch_type = patch_type
 
-    # def project_face(self, orient:OrientType, geometry: str, edges: bool = False) -> None:
-    #     """Assign one or more block faces (self.face_map)
-    #     to be projected to a geometry (defined in Mesh)"""
-    #     assert orient in constants.FACE_MAP
+    def project_face(self,
+                     orient:OrientType,
+                     geometry:Union[List[str], str],
+                     edges:bool=True) -> None:
+        """Assign one or more block faces (self.face_map)
+        to be projected to a geometry (defined in Mesh)"""
+        assert orient in constants.FACE_MAP
 
-    #     self.sides[orient].project = geometry
+        if isinstance(geometry, str):
+            geometry = [geometry]
 
-    #     if edges:
-    #         for i in range(4):
-    #             self.add_edge(i, (i + 1) % 4, 'project', geometry)
+        self.sides[orient].project_to = geometry
+
+        if edges:
+            corners = self.sides[orient].corners
+
+            for i, corner_1 in enumerate(corners):
+                corner_2 = corners[(i+1) % 4]
+
+                edge = factory.create(
+                    self.vertices[corner_1],
+                    self.vertices[corner_2],
+                    Project(geometry)
+                )
+                self.add_edge(corner_1, corner_2, edge)
 
     @property
     def description(self) -> str:
