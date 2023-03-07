@@ -3,8 +3,6 @@ import copy
 
 from typing import List, Optional, Dict
 
-import numpy as np
-
 from classy_blocks.types import AxisType, NPPointType, PointType, VectorType
 from classy_blocks.base.transformable import TransformableBase
 
@@ -23,6 +21,8 @@ class Operation(TransformableBase, abc.ABC):
         self.top_face = top_face
         self.side_edges:List[Optional[EdgeData]] = [None]*4
         self.chops:Dict[AxisType, List[Chop]] = {0: [], 1: [], 2: []}
+
+        self.cell_zone = "" # set with self.cell_zone
 
     def add_side_edge(self, corner_1:int, edge_data:EdgeData) -> None:
         """Add an edge between two vertices at the same
@@ -95,9 +95,9 @@ class Operation(TransformableBase, abc.ABC):
         
         return self
 
-    # def set_cell_zone(self, cell_zone: str) -> None:
-    #     """Assign a cellZone to this block."""
-    #     self.block.cell_zone = cell_zone
+    def set_cell_zone(self, cell_zone: str) -> None:
+        """Assign a cellZone to this block."""
+        self.cell_zone = cell_zone
 
     @property
     def center(self) -> NPPointType:

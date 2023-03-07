@@ -1,114 +1,122 @@
+import copy
+from typing import List, Dict
+
 import numpy as np
 
+from classy_blocks.types import PointType, VectorType, NPPointType, NPVectorType
 from classy_blocks.construct.flat.face import Face
-from classy_blocks.util import constants as c
+from classy_blocks.construct.flat.sketch import Sketch
+from classy_blocks.construct.edges import Origin
 from classy_blocks.util import functions as f
 
-
-class Circle:
-    def __init__(self, center_point, radius_point, normal, diagonal_ratio=None, side_ratio=None):
+class QuarterCircle(Sketch):
+    """A base for shapes with quarter-circular
+    cross-sections; also helper for creating SemiCircle and Circle;
+    see description of Circle object for more details"""
+    # TODO: TEST
+    def __init__(self,
+                center_point:PointType,
+                radius_point:PointType,
+                normal:VectorType,
+                diagonal_ratio:float=0.7,
+                side_ratio:float=0.62):
         self.center_point = np.asarray(center_point)
         self.radius_point = np.asarray(radius_point)
         self.normal = f.unit_vector(np.asarray(normal))
 
-        self.radius_vector = self.radius_point - center_point
-        self.radius = f.norm(self.radius_vector)
-
-        self.n_segments = 8  # for expanding cylinders and stuff
-
-        rot = lambda p, angle: f.rotate(p, self.normal, angle, center_point)
-
-        # create faces
-        # core: 4 faces
-        core_angles = np.linspace(0, 2 * np.pi, num=4, endpoint=False)
-
-        # see constants for explanation of these ratios
-        if diagonal_ratio is None:
-            diagonal_ratio = c.circle_core_diagonal
         self.diagonal_ratio = diagonal_ratio
-
-        if side_ratio is None:
-            side_ratio = c.circle_core_side
         self.side_ratio = side_ratio
 
-        # core points, 'D' and 'S'
-        core_diagonal_point = center_point + self.radius_vector * self.diagonal_ratio
-        core_side_point = center_point + self.radius_vector * self.side_ratio
+        # calculate points needed to construct faces:
+        points:Dict[str, NPPointType] = {
+            'O': self.center_point,
+            'S1': self.center_point + self.radius_vector * self.side_ratio,
+            'D': self.center_point + self.radius_vector * self.diagonal_ratio,
+            'P1': self.center_point + self.radius_vector
+        }
+        points['S2'] = f.rotate(points['S1'], self.normal, np.pi/2)
+        points['P2'] = f.rotate(points['P1'], self.normal, np.pi/4)
 
-        core_face = Face(
-            [
-                self.center_point,
-                core_side_point,
-                rot(core_diagonal_point, np.pi / 4),
-                rot(core_side_point, 2 * np.pi / 4),
-            ]
+        def make_face(keys, edges):
+            return Face([points[k] for k in keys], edges)
+
+        # core: 0-S-D-S
+        self.core = [make_face(['O', 'S1', 'D', 'S2'], None)]
+
+        # shell 1: S1-P1-P2-D
+        shell_face_1 = make_face(
+            ['S1', 'P1', 'P2', 'D'],
+            [Origin(self.center_point), None, None, None]
         )
 
-        self.core_faces = [core_face.rotate(self.normal, a, self.center_point) for a in core_angles]
+        # shell 2: D-P2-P3-S
+        shell_face_2 = shell_face_1.copy().rotate(np.pi/4, self.normal, self.center_point)
 
-        # shell faces around core
-        shell_angles = np.linspace(0, 2 * np.pi, num=4, endpoint=False)
+        self.shell = [shell_face_1, shell_face_2]
 
-        shell_face_1 = Face([
-            core_face.points[1],
-            self.radius_point,
-            rot(self.radius_point, np.pi / 4),
-            core_face.points[2]
-        ])
-        shell_face_1.add_edge(1, rot(self.radius_point, np.pi / 8))
+    @property
+    def faces(self) -> List[Face]:
+        return self.core + self.shell
 
-        shell_face_2 = Face([
-            core_face.points[2],
-            rot(self.radius_point, np.pi / 4),
-            rot(self.radius_point, np.pi / 2),
-            core_face.points[3],
-        ])
-        shell_face_2.add_edge(1, rot(self.radius_point, 3 * np.pi / 8))
+    @property
+    def radius_vector(self) -> NPVectorType:
+        """Vector that points from center of this
+        *Circle to its (first) radius point"""
+        return self.radius_point - self.center_point
 
-        shell_faces_1 = [shell_face_1.rotate(self.normal, a, self.center_point) for a in shell_angles]
-        shell_faces_2 = [shell_face_2.rotate(self.normal, a, self.center_point) for a in shell_angles]
+    @property
+    def radius(self) -> float:
+        """Radius of this *circle, length of self.radius_vector"""
+        return float(f.norm(self.radius_vector))
 
-        # combine shell_face_1 and shell_faces_2 in an alternating fashion
-        # so that when traversing that list, faces are encountered in an orderly manner
-        self.shell_faces = [None] * 8
-        self.shell_faces[::2] = shell_faces_1
-        self.shell_faces[1::2] = shell_faces_2
-
-        # required by all Shapes
-        self.faces = self.core_faces + self.shell_faces
-
-    def translate(self, vector, **kwargs):
-        # TODO: TEST
-        return self.__class__(
-            self.center_point + vector, self.radius_point + vector, self.normal, self.diagonal_ratio, self.side_ratio
-        )
-
-    def rotate(self, axis, angle, origin, **kwargs):
-        # TODO: TEST
-        r = lambda p: f.rotate(p, axis, angle, origin)
-
-        return self.__class__(
-            r(self.center_point),
-            r(self.radius_point),
-            f.rotate(self.normal, axis, angle, [0, 0, 0]),
-            self.diagonal_ratio,
-            self.side_ratio,
-        )
-
-    def scale(self, radius, **kwargs):
-        # TODO: TEST
-        r = lambda p: self.center_point + f.unit_vector(p - self.center_point) * radius
-
-        return self.__class__(
-            self.center_point, r(self.radius_point), self.normal, self.diagonal_ratio, self.side_ratio
-        )
-
-
-class Semicircle(Circle):
-    def __init__(self, center_point, radius_point, normal, diagonal_ratio=None, side_ratio=None):
+class Semicircle(QuarterCircle):
+    """A base for shapes with semi-circular
+    cross-sections; also helper for creating Circle;
+    see description of Circle object for more details"""
+    def __init__(self,
+                 center_point:PointType,
+                 radius_point:PointType,
+                 normal:VectorType,
+                 diagonal_ratio:float = 0.7,
+                 side_ratio: float = 0.62):
         super().__init__(center_point, radius_point, normal, diagonal_ratio, side_ratio)
+        # rotate core and shell faces
+        other_quarter = self.copy().rotate(np.pi/2, self.normal, self.center_point)
 
-        # remove half of the faces
-        self.shell_faces = self.shell_faces[4:]
-        self.core_faces = self.core_faces[2:]
-        self.faces = self.core_faces + self.shell_faces
+        self.core = [self.core, other_quarter.core]
+        self.shell = self.shell + other_quarter.shell
+
+class Circle(Semicircle):
+    """A 2D sketch of an H-grid circle; to be used for
+    all solid round shapes (cylinder, frustum, elbow, ...
+    
+    H-grid parameters:
+    A quarter of a circle is created from 3 blocks;
+    Central 'square' (0) and two curved 'rectangles' (1 and 2)
+
+    P3
+    |******* P2
+    |  2    /**
+    |      /    *
+    S2----D      *
+    |  0  |   1   *
+    |_____S1______*
+    O              P1
+
+    Relative size of the inner square (O-D), diagonal_ratio:
+    - too small will cause unnecessary high number of small cells in the square;
+    - too large will prevent creating large numbers of boundary layers
+    Orthogonality of the inner square (O-S), side_ratio:
+    """
+    def __init__(self,
+                 center_point:PointType,
+                 radius_point:PointType,
+                 normal:VectorType,
+                 diagonal_ratio:float = 0.7,
+                 side_ratio: float = 0.62):
+        super().__init__(center_point, radius_point, normal, diagonal_ratio, side_ratio)
+        # rotate core and shell faces
+        other_half = self.copy().rotate(np.pi/2, self.normal, self.center_point)
+
+        self.core = [self.core, other_half.core]
+        self.shell = self.shell + other_half.shell

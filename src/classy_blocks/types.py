@@ -7,7 +7,7 @@ NPPointType = NDArray[Shape["3, 1"], Float]
 PointType:TypeAlias = Union[List[float], NPPointType]
 # Similar: a list of points
 NPPointListType = NDArray[Shape["*, 3"], Float]
-PointListType:TypeAlias = Union[List[List[float]], NPPointListType]
+PointListType:TypeAlias = Union[List[List[float]], NPPointListType, List[NPPointType]]
 # same as PointType but with a different name to avoid confusion
 NPVectorType = NPPointType
 VectorType:TypeAlias = PointType

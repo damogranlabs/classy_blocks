@@ -28,7 +28,7 @@ def rad2deg(rad:float) -> float:
 
 def norm(matrix:Union[PointType, PointListType]):
     """ a shortcut to scipy.linalg.norm() """
-    matrix = np.asarray(matrix)
+    matrix = np.asarray(matrix, dtype=constants.DTYPE)
 
     return scipy.linalg.norm(matrix, axis=len(np.shape(matrix))-1)
 
