@@ -13,6 +13,8 @@ from classy_blocks.lists.boundary import PatchList
 from classy_blocks.construct.operations.operation import Operation
 #from classy_blocks.construct.shapes import Shape
 
+from classy_blocks.base.additive import AdditiveBase
+
 from classy_blocks.util import constants
 from classy_blocks.util.tools import write_vtk
 
@@ -39,11 +41,11 @@ class Mesh:
             'merged': [],
         }
 
-    def add(self):
+    def add(self, shape:AdditiveBase) -> None:
         """Add a classy_blocks entity to the mesh;
         can be a plain Block, created from points, Operation, Shape or Object."""
-        # TODO:
-        pass
+        for op in shape.operations:
+            self.add_operation(op)
 
     def add_operation(self, operation:Operation) -> None:
         """Takes an operation, converts it to Block and adds that to the mesh"""

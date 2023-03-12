@@ -1,7 +1,5 @@
-import dataclasses
 import functools
-
-from typing import List
+from typing import List, Optional
 
 from classy_blocks.types import AxisType
 
@@ -9,13 +7,15 @@ from classy_blocks.grading.chop import Chop
 from classy_blocks.items.wire import Wire
 from classy_blocks.grading.grading import Grading
 
-@dataclasses.dataclass
 class Axis:
     """One of block axes, numbered 0, 1, 2, and the relevant data"""
-    index:AxisType
-    wires:List[Wire] = dataclasses.field(default_factory=list) # will be added in Wireframe.__init__
-    neighbours:List['Axis'] = dataclasses.field(default_factory=list)
-    chops:List[Chop] = dataclasses.field(default_factory=list)
+    def __init__(self, index:AxisType, wires:List[Wire]):
+        self.index = index
+        self.wires = wires
+
+        # will be added as blocks are added to mesh
+        self.neighbours:List['Axis'] = []
+        self.chops:List[Chop] = []
 
     def add_neighbour(self, axis:'Axis') -> None:
         """Adds an 'axis' from another block if it shares at least one wire"""
@@ -34,7 +34,7 @@ class Axis:
             for other_wire in other.wires:
                 if this_wire.is_coincident(other_wire):
                     return this_wire.is_aligned(other_wire)
-        
+
         raise RuntimeError("Axes are not neighbours")
 
     def chop(self, chop:Chop) -> None:
@@ -67,13 +67,15 @@ class Axis:
 
         return sum(lengths)/len(lengths)
 
-    @functools.cached_property
+    @property
     def grading(self) -> Grading:
         """The grading specification according to current list of chops"""
         if len(self.chops) > 0:
             # the user specified something, create a new grading object
             # according to user's commands
-            grd = Grading(self.length)
+            grd = Grading()
+            grd.set_length(self.length)
+
             for chop in self.chops:
                 grd.add_chop(chop)
 
@@ -86,7 +88,7 @@ class Axis:
                 # check if the blocks are placed upside-down
                 if not self.is_aligned(neighbour):
                     return neighbour.grading.inverted
-                
-                return neighbour.grading
+                else:
+                    return neighbour.grading
 
         raise RuntimeError("No defined gradings found!")

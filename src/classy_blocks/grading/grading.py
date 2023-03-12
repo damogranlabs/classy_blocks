@@ -91,13 +91,16 @@ def calculate(length: float, parameters: dict) -> Tuple[int, float]:
 
 class Grading:
     """Grading specification for a single edge"""
-    def __init__(self, length:float):
-        # must be set before any calculation is performed
-        self.length = length
-
+    def __init__(self):
         # "multi-grading" specification according to:
         # https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
         self.specification:List[List] = []  # a list of lists [length ratio, count ratio, total expansion]
+
+        self._length = 0
+
+    def set_length(self, length:float) -> None:
+        """Sets the length for grading calculation"""
+        self._length = length
 
     def add_chop(self, chop:Chop) -> None:
         """Add a grading division to block specification.
@@ -117,7 +120,6 @@ class Grading:
 
         Documentation:
         https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading"""
-        assert self.length is not None
         assert 0 < chop.length_ratio <= 1
 
         # default: take c2c_expansion=1 if there's less than 2 parameters given
@@ -129,7 +131,7 @@ class Grading:
         if chop.count is not None:
             chop.count = int(chop.count)
 
-        length = self.length * chop.length_ratio
+        length = self._length * chop.length_ratio
 
         # blockMesh needs two numbers regardless of user's input:
         # number of cells and total expansion ratio.

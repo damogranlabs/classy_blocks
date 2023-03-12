@@ -30,7 +30,7 @@ class Block:
         # self.wires[2][6].edge
         self.wires:List[Dict[int, Wire]] = [{} for _ in range(8)]
         # wires of each axis
-        self.axes = [Axis(i) for i in (0, 1, 2)]
+        axis_wires = [[], [], []]
 
         # create wires and connections for quicker addressing
         for axis in range(3):
@@ -40,7 +40,9 @@ class Block:
                 self.wires[pair[0]][pair[1]] = wire
                 self.wires[pair[1]][pair[0]] = wire
 
-                self.axes[axis].wires.append(wire)
+                axis_wires[axis].append(wire)
+
+        self.axes = [Axis(i, axis_wires[i]) for i in (0, 1, 2)]
 
         # Side objects define patch names and projections
         self.sides = {o:Side(self.vertices, o) for o in constants.FACE_MAP}

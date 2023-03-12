@@ -1,37 +1,38 @@
 import numpy as np
 
-from classy_blocks import Elbow, Mesh
+import os
 
-def get_mesh():
-    mesh = Mesh()
+from classy_blocks import Mesh
+from classy_blocks.construct.shapes.elbow import Elbow
 
-    radius_1 = 1
-    center_point_1 = [0, 0, 0]
-    radius_point_1 = [radius_1, 0, 0]
-    normal_1 = [0, 1, 0]
+mesh = Mesh()
 
-    sweep_angle = -np.pi/3
-    arc_center = [2, 0, 0]
-    rotation_axis = [0, 0, 1]
+radius_1 = 1
+center_point_1 = [0., 0., 0.]
+radius_point_1 = [radius_1, 0., 0.]
+normal_1 = [0., 1., 0.]
 
-    radius_2 = 0.4
-    boundary_size = 0.01
-    core_size = 0.08
+sweep_angle = -np.pi/3
+arc_center = [2., 0., 0.]
+rotation_axis = [0., 0., 1.]
 
-    elbow = Elbow(
-        center_point_1, radius_point_1, normal_1,
-        sweep_angle, arc_center, rotation_axis, radius_2
-    )
+radius_2 = 0.4
+boundary_size = 0.01
+core_size = 0.08
 
-    elbow.set_bottom_patch('inlet')
-    elbow.set_outer_patch('walls')
-    elbow.set_top_patch('outlet')
+elbow = Elbow(
+    center_point_1, radius_point_1, normal_1,
+    sweep_angle, arc_center, rotation_axis, radius_2
+)
 
-    # counts and gradings
-    elbow.chop_tangential(start_size=core_size)
-    elbow.chop_radial(start_size=core_size, end_size=boundary_size)
-    elbow.chop_axial(start_size=2*core_size)
+# elbow.set_start_patch('inlet')
+# elbow.set_outer_patch('walls')
+# elbow.set_end_patch('outlet')
 
-    mesh.add(elbow)
+# counts and gradings
+elbow.chop_tangential(start_size=core_size)
+elbow.chop_radial(start_size=core_size, end_size=boundary_size)
+elbow.chop_axial(start_size=2*core_size)
 
-    return mesh
+mesh.add(elbow)
+mesh.write(os.path.join('..', 'case', 'system', 'blockMeshDict'), debug_path='debug.vtk')

@@ -8,7 +8,6 @@ from classy_blocks.util import functions as f
 from tests.fixtures.data import DataTestCase
 
 class VertexTests(DataTestCase):
-    def setUp(self):    
     def test_assert_3d(self):
         """Raise an exception if the point is not in 3D space"""
         with self.assertRaises(AssertionError):

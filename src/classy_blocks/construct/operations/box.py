@@ -17,6 +17,7 @@ class Box(Loft):
     Args:
     - point_0: 'bottom-left' corner position
     - sizes: a list of 3 floats for box sizes in x1, x2, x3 directions."""
+    # TODO: change to corner+diagonal and auto-calculate coordinates
     def __init__(self, point_0: PointType, sizes:List[float]):
         point_0 = np.asarray(point_0)
         

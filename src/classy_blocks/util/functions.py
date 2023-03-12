@@ -26,11 +26,13 @@ def rad2deg(rad:float) -> float:
     """convert radians (input) to degrees"""
     return rad * 180.0 / np.pi
 
-def norm(matrix:Union[PointType, PointListType]):
+def norm(matrix:Union[PointType, PointListType]) -> float:
     """ a shortcut to scipy.linalg.norm() """
-    matrix = np.asarray(matrix, dtype=constants.DTYPE)
+    # for arrays of vectors:
+    #matrix = np.asarray(matrix, dtype=constants.DTYPE)
+    #return scipy.linalg.norm(matrix, axis=len(np.shape(matrix))-1)
 
-    return scipy.linalg.norm(matrix, axis=len(np.shape(matrix))-1)
+    return float(scipy.linalg.norm(matrix))
 
 def unit_vector(vect:VectorType) -> NPVectorType:
     """Returns a vector of magnitude 1 with the same direction"""
