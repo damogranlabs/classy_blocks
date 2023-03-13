@@ -35,8 +35,7 @@ class Wire:
     def is_coincident(self, wire:'Wire') -> bool:
         """Returns True if this wire is in the same spot than the argument,
         regardless of alignment"""
-        return self.vertices == wire.vertices or \
-            self.vertices == wire.vertices[::-1]
+        return self.vertices in [wire.vertices, wire.vertices[::-1]]
 
     def is_aligned(self, wire:'Wire') -> bool:
         """Returns true is this pair has the same alignment

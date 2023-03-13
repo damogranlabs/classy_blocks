@@ -126,7 +126,7 @@ class Circle(SemiCircle):
                  side_ratio: float=CORE_SIDE_RATIO):
         super().__init__(center_point, radius_point, normal, diagonal_ratio, side_ratio)
         # rotate core and shell faces
-        other_half = self.copy().rotate(np.pi/2, self.normal, self.center_point)
+        other_half = self.copy().rotate(np.pi, self.normal, self.center_point)
 
         self.core = self.core + other_half.core
         self.shell = self.shell + other_half.shell

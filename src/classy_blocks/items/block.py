@@ -23,7 +23,7 @@ class Block:
 
         # vertices, edges, counts and gradings
         self.vertices = vertices
-        
+
         # Storing and retrieving pairs of vertices a.k.a. 'wires';
         # self.wires can be indexed so that the desired Wire can be accessed directly;
         # for instance, an edge between vertices 2 and 6 is obtained with
@@ -105,7 +105,7 @@ class Block:
         for this_axis in self.axes:
             for cnd_axis in candidate.axes:
                 this_axis.add_neighbour(cnd_axis)
-        
+
         # wires
         for this_wire in self.wire_list:
             for cnd_wire in candidate.wire_list:

@@ -68,9 +68,14 @@ class Axis:
         return sum(lengths)/len(lengths)
 
     @property
+    def is_defined(self) -> bool:
+        """Returns True if this axis's counts and gradings are defined"""
+        return len(self.chops) > 0
+
+    @property
     def grading(self) -> Grading:
         """The grading specification according to current list of chops"""
-        if len(self.chops) > 0:
+        if self.is_defined:
             # the user specified something, create a new grading object
             # according to user's commands
             grd = Grading()
@@ -81,14 +86,25 @@ class Axis:
 
             return grd
 
-        # if there's a neighbour that has a defined grading,
-        # return that
-        for neighbour in self.neighbours:
-            if neighbour.grading.is_defined:
-                # check if the blocks are placed upside-down
-                if not self.is_aligned(neighbour):
-                    return neighbour.grading.inverted
-                else:
-                    return neighbour.grading
+        return self.find_grading([])
 
-        raise RuntimeError("No defined gradings found!")
+    def find_grading(self, traversed:List['Axis']) -> Grading:
+        """Traverses axes' neighbours and finds a grading for 'target' """
+        traversed.append(self)
+
+        for neighbour in self.neighbours:
+            if neighbour in traversed:
+                continue
+
+            if neighbour.is_defined:
+                print(f"DEFINED: {self.index}")
+                if neighbour.is_aligned:
+                    return neighbour.grading
+                return neighbour.grading.inverted
+
+            try:
+                return neighbour.find_grading(traversed)
+            except ValueError:
+                pass
+
+        raise ValueError(f"No grading found")

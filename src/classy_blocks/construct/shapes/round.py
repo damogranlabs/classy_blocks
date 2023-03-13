@@ -94,5 +94,5 @@ class RoundShape(Shape, abc.ABC):
 
     def chop_tangential(self, **kwargs):
         """Circumferential chop"""
-        for s in self.shell:
-            s.chop(self.tangential_axis, **kwargs)
+        for operation in self.shell:
+            operation.chop(self.tangential_axis, **kwargs)
