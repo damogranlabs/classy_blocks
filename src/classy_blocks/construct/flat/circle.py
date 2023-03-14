@@ -18,7 +18,6 @@ class QuarterCircle(Sketch):
     """A base for shapes with quarter-circular
     cross-sections; a helper for creating SemiCircle and Circle;
     see description of Circle object for more details"""
-    # TODO: TEST
     def __init__(self,
                 center_point:PointType,
                 radius_point:PointType,

@@ -7,8 +7,9 @@ from classy_blocks.construct.operations.extrude import Extrude
 from classy_blocks.construct.operations.revolve import Revolve
 from classy_blocks.construct.operations.box import Box
 
-# from classy_blocks.construct.shapes import Box, Elbow, Frustum, Cylinder, RevolvedRing, ExtrudedRing, Hemisphere
-# from classy_blocks.construct.walls import ElbowWall, FrustumWall
+from classy_blocks.construct.shapes.elbow import Elbow
+from classy_blocks.construct.shapes.frustum import Frustum
+from classy_blocks.construct.shapes.cylinder import Cylinder
 
 from classy_blocks.mesh import Mesh
 

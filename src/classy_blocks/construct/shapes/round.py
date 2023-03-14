@@ -21,7 +21,7 @@ class RoundShape(Shape, abc.ABC):
     Solid round shapes: Elbow, Frustum, Cylinder;
     they are created using an OH-grid (see Circle), have a
     'start' and 'end' sketch and an 'outer' surface."""
-    sketch_class:Type[Circle] # Sketch class to be used for construction of the Shape
+    sketch_class = Circle # Sketch class to be used for construction of the Shape
 
     axial_axis:AxisType = 2 # Axis along which 'outer sides' run
     radial_axis:AxisType = 0 # Axis that goes from center to 'outer side'

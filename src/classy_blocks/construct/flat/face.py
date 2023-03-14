@@ -111,8 +111,6 @@ class Face(TransformableBase):
         For non-planar faces the same rule as in OpenFOAM is followed:
         divide a quadrangle into 4 triangles, each joining at face center;
         a normal is the average of normals of those triangles."""
-        # TODO: TEST
-        # TODO: cache?
         points = self.points
         center = self.center
 

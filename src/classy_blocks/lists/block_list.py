@@ -33,18 +33,14 @@ class BlockList:
         # and copying counts until there's no undefined blocks left
         undefined_blocks = set(range(len(self.blocks)))
 
-        counter = 0
-
         while len(undefined_blocks) > 0:
             updated = False
-            counter += 1
 
             for i in undefined_blocks:
                 block = self.blocks[i]
 
                 if block.is_defined:
                     undefined_blocks.remove(i)
-                    print(f"Removed: {i}")
                     updated = True
                     break
 
@@ -54,8 +50,6 @@ class BlockList:
                 # All of the blocks were traversed and none was updated;
                 # it won't get any better with next iterations
                 break
-
-        print(counter)
 
         if len(undefined_blocks) > 0:
             # gather more detailed information about non-defined blocks:
