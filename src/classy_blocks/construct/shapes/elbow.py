@@ -47,13 +47,3 @@ class Elbow(RoundShape):
                 "radius": (radius_1 + radius_2) / 2,
             },
         )
-
-    @property
-    def core(self):
-        """Operations in the center of the shape"""
-        return self.operations[:1]
-
-    @property
-    def shell(self):
-        """Operations on the outside of the shape"""
-        return self.operations[1:]

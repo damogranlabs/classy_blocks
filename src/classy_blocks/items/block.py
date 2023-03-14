@@ -170,6 +170,28 @@ class Block:
                 self.add_edge(corner_1, corner_2, edge)
 
     @property
+    def is_defined(self) -> bool:
+        """Returns True if counts and gradings are defined for all axes"""
+        # TODO: TEST
+        return all(axis.is_defined for axis in self.axes)
+
+    def copy_grading(self) -> bool:
+        """Attempts to copy grading from a neighbouring block;
+        Returns True if the block is/has been defined, False
+        if the block still has missing data"""
+        # TODO: TEST
+        if self.is_defined:
+            return False
+        
+        updated = False
+
+        if not self.is_defined:
+            for axis in self.axes:
+                updated = axis.copy_grading() or updated
+
+        return updated
+
+    @property
     def description(self) -> str:
         """hex definition for blockMesh"""
         # TODO: test
@@ -185,6 +207,7 @@ class Block:
         out += " (" + " ".join([str(axis.grading.count) for axis in self.axes]) + " ) "
 
         # grading
+        # TODO: no daisy.object.chaining
         out += " simpleGrading (" + \
             self.axes[0].grading.description + " " + \
             self.axes[1].grading.description + " " + \

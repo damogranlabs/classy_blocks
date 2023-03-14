@@ -1,5 +1,5 @@
 import functools
-from typing import List, Optional
+from typing import List, Optional, Set
 
 from classy_blocks.types import AxisType
 
@@ -14,17 +14,17 @@ class Axis:
         self.wires = wires
 
         # will be added as blocks are added to mesh
-        self.neighbours:List['Axis'] = []
+        self.neighbours:Set['Axis'] = set()
         self.chops:List[Chop] = []
+
+        self._grading:Optional[Grading] = None
 
     def add_neighbour(self, axis:'Axis') -> None:
         """Adds an 'axis' from another block if it shares at least one wire"""
         for this_wire in self.wires:
             for nei_wire in axis.wires:
                 if this_wire.is_coincident(nei_wire):
-                    if axis not in self.neighbours:
-                        self.neighbours.append(axis)
-                        break
+                    self.neighbours.add(axis)
 
     def is_aligned(self, other:'Axis') -> bool:
         """Returns True if wires of the other axis are aligned
@@ -70,41 +70,32 @@ class Axis:
     @property
     def is_defined(self) -> bool:
         """Returns True if this axis's counts and gradings are defined"""
-        return len(self.chops) > 0
+        return self.grading.is_defined
 
     @property
     def grading(self) -> Grading:
         """The grading specification according to current list of chops"""
-        if self.is_defined:
-            # the user specified something, create a new grading object
-            # according to user's commands
-            grd = Grading()
-            grd.set_length(self.length)
+        if self._grading is None:
+            # grading was specified but not yet created;
+            # do it now and remember the object
+            self._grading = Grading()
+            self._grading.set_length(self.length)
 
             for chop in self.chops:
-                grd.add_chop(chop)
+                self._grading.add_chop(chop)
 
-            return grd
+        return self._grading
 
-        return self.find_grading([])
-
-    def find_grading(self, traversed:List['Axis']) -> Grading:
-        """Traverses axes' neighbours and finds a grading for 'target' """
-        traversed.append(self)
+    def copy_grading(self) -> bool:
+        """Attempts to copy grading from one of the neighbours;
+        returns True if grading has been copied"""
+        if self.is_defined:
+            # no need to change anything
+            return False
 
         for neighbour in self.neighbours:
-            if neighbour in traversed:
-                continue
-
             if neighbour.is_defined:
-                print(f"DEFINED: {self.index}")
-                if neighbour.is_aligned:
-                    return neighbour.grading
-                return neighbour.grading.inverted
+                self._grading = neighbour.grading
+                return True
 
-            try:
-                return neighbour.find_grading(traversed)
-            except ValueError:
-                pass
-
-        raise ValueError(f"No grading found")
+        return False

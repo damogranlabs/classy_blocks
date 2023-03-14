@@ -1,5 +1,6 @@
 from typing import List
 
+from classy_blocks.types import AxisType
 from classy_blocks.items.block import Block
 
 from classy_blocks.util import constants
@@ -25,6 +26,47 @@ class BlockList:
 
             block.add_neighbour(new_block)
             new_block.add_neighbour(block)
+
+    def propagate_gradings(self):
+        """Copy references to gradings from defined blocks to their neighbours"""
+        # a riddle similar to sudoku, keep traversing
+        # and copying counts until there's no undefined blocks left
+        undefined_blocks = set(range(len(self.blocks)))
+
+        counter = 0
+
+        while len(undefined_blocks) > 0:
+            updated = False
+            counter += 1
+
+            for i in undefined_blocks:
+                block = self.blocks[i]
+
+                if block.is_defined:
+                    undefined_blocks.remove(i)
+                    print(f"Removed: {i}")
+                    updated = True
+                    break
+
+                updated = block.copy_grading() or updated
+
+            if not updated:
+                # All of the blocks were traversed and none was updated;
+                # it won't get any better with next iterations
+                break
+
+        print(counter)
+
+        if len(undefined_blocks) > 0:
+            # gather more detailed information about non-defined blocks:
+            message = "Blocks with non-defined counts: \n"
+            for i in list(undefined_blocks):
+                message += f"{i}: "
+                for n in (0, 1, 2):
+                    message += str(self.blocks[i].axes[n].grading.count) + " "
+                message += "\n"
+
+            raise Exception(message)
 
     @property
     def description(self) -> str:

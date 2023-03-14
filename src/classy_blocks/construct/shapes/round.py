@@ -81,7 +81,8 @@ class RoundShape(Shape, abc.ABC):
         self.operations[0].chop(self.axial_axis, **kwargs)
 
     def chop_radial(self, **kwargs):
-        """Chop the shape between center and outer surface"""
+        """Chop the outer 'ring', or 'shell';
+        core blocks will be defined by tangential chops"""
         # scale all radial sizes to this ratio or core cells will be
         # smaller than shell's
         c2s_ratio = max(circle.CORE_DIAGONAL_RATIO, circle.CORE_SIDE_RATIO)
@@ -93,6 +94,6 @@ class RoundShape(Shape, abc.ABC):
         self.shell[0].chop(self.radial_axis, **kwargs)
 
     def chop_tangential(self, **kwargs):
-        """Circumferential chop"""
-        for operation in self.shell:
-            operation.chop(self.tangential_axis, **kwargs)
+        """Circumferential chop; also defines core sizes"""
+        for i in (0, 1, 2, -1): # minimal number of blocks that need to be set
+            self.shell[i].chop(self.tangential_axis, **kwargs)

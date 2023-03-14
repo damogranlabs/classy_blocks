@@ -103,6 +103,8 @@ class Mesh:
         if debug_path is not None:
            write_vtk(debug_path, self.vertex_list.vertices, self.block_list.blocks)
 
+        self.block_list.propagate_gradings()
+
         with open(output_path, 'w', encoding='utf-8') as output:
             output.write(constants.MESH_HEADER)
 
