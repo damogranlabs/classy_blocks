@@ -1,9 +1,7 @@
 from typing import List
 
-from classy_blocks.types import AxisType
 from classy_blocks.items.block import Block
 
-from classy_blocks.util import constants
 
 class BlockList:
     """ Handling of the 'blocks' part of blockMeshDict, along with

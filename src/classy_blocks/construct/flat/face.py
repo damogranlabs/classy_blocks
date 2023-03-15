@@ -31,6 +31,7 @@ class Face(TransformableBase):
         check_coplanar: if True, a ValueError will be raised given non-coplanar points
     """
     def __init__(self, points:PointListType, edges:Optional[List[Optional[EdgeData]]]=None, check_coplanar:bool=False):
+        # Points
         points = np.asarray(points, dtype=constants.DTYPE)
         if np.shape(points) != (4, 3):
             raise ValueError("Provide exactly 4 points in 3D space")
@@ -47,6 +48,7 @@ class Face(TransformableBase):
 
         self.points = points
 
+        # Edges
         self.edges:List[Optional[EdgeData]] = [None]*4
         if edges is not None:
             self.edges = edges

@@ -97,3 +97,18 @@ class RoundShape(Shape, abc.ABC):
         """Circumferential chop; also defines core sizes"""
         for i in (0, 1, 2, -1): # minimal number of blocks that need to be set
             self.shell[i].chop(self.tangential_axis, **kwargs)
+
+    def set_start_patch(self, name:str) -> None:
+        """Assign the faces of start sketch to a named patch"""
+        for operation in self.operations:
+            operation.set_patch(self.start_patch, name)
+
+    def set_end_patch(self, name:str) -> None:
+        """Assign the faces of end sketch to a named patch"""
+        for operation in self.operations:
+            operation.set_patch(self.end_patch, name)
+    
+    def set_outer_patch(self, name:str) -> None:
+        """Assign the faces of end sketch to a named patch"""
+        for operation in self.shell:
+            operation.set_patch(self.outer_patch, name)

@@ -1,14 +1,13 @@
 """The Mesh object ties everything together and writes the blockMeshDict in the end."""
-import dataclasses
-
 from typing import Union, Optional, List
 
-from classy_blocks.items.edges.factory import factory
+from classy_blocks.items.vertex import Vertex
+from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.block import Block
 from classy_blocks.lists.block_list import BlockList
 from classy_blocks.lists.vertex_list import VertexList
 from classy_blocks.lists.edge_list import EdgeList
-from classy_blocks.lists.boundary import PatchList
+from classy_blocks.lists.patch_list import PatchList
 
 from classy_blocks.construct.operations.operation import Operation
 #from classy_blocks.construct.shapes import Shape
@@ -49,24 +48,14 @@ class Mesh:
 
     def add_operation(self, operation:Operation) -> None:
         """Takes an operation, converts it to Block and adds that to the mesh"""
-        vertices = [self.vertex_list.add(p) for p in operation.bottom_face.points] + \
-            [self.vertex_list.add(p) for p in operation.top_face.points]
+        vertices = self.add_vertices(operation)
 
         block = Block(len(self.block_list.blocks), vertices)
-
-        # add edges: from faces
-        edges = self.edge_list.add(vertices, operation.bottom_face.edges, 'bottom') + \
-            self.edge_list.add(vertices, operation.top_face.edges, 'top') + \
-            self.edge_list.add(vertices, operation.side_edges, 'side')
-
-        for edge in edges:
-            block.add_edge(*edge)
-
-        for axis in (0, 1, 2):
-            for chop in operation.chops[axis]:
-                block.chop(axis, chop)
-
+        self.add_edges(operation, vertices, block)
+        self.chop_block(operation, block)
         self.block_list.add(block)
+
+        self.add_patches(vertices, operation)
 
         # generate patches from block's faces
         #self.boundary.add(block)
@@ -76,6 +65,30 @@ class Mesh:
         #    raise NotImplementedError
         #   # self.add_geometry(item.geometry)
 
+    def add_vertices(self, operation:Operation) -> List[Vertex]:
+        """Creates/finds vertices from operation's points and returns them"""
+        return [self.vertex_list.add(p) for p in operation.bottom_face.points] + \
+            [self.vertex_list.add(p) for p in operation.top_face.points]
+
+    def add_edges(self, operation:Operation, vertices:List[Vertex], block:Block) -> None:
+        """Creates/finds edges from operation and returns them"""
+        edges = self.edge_list.add(vertices, operation.bottom_face.edges, 'bottom') + \
+            self.edge_list.add(vertices, operation.top_face.edges, 'top') + \
+            self.edge_list.add(vertices, operation.side_edges, 'side')
+        
+        for edge in edges:
+            block.add_edge(*edge)
+
+    def chop_block(self, operation:Operation, block:Block) -> None:
+        """Chops the block as declared in Operation"""
+        for axis in (0, 1, 2):
+            for chop in operation.chops[axis]:
+                block.chop(axis, chop)
+    
+    def add_patches(self, vertices:List[Vertex], operation:Operation) -> None:
+        """Creates patches and projects faces"""
+        self.patch_list.add(vertices, operation)
+        
     # def merge_patches(self, master:str, slave:str) -> None:
     #     """Merges two non-conforming named patches using face merging;
     #     https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-470004.3.2

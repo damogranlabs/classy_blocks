@@ -25,9 +25,9 @@ elbow = Elbow(
     sweep_angle, arc_center, rotation_axis, radius_2
 )
 
-# elbow.set_start_patch('inlet')
-# elbow.set_outer_patch('walls')
-# elbow.set_end_patch('outlet')
+elbow.set_start_patch('inlet')
+elbow.set_outer_patch('walls')
+elbow.set_end_patch('outlet')
 
 # counts and gradings
 elbow.chop_tangential(start_size=core_size)

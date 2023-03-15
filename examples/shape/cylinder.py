@@ -10,9 +10,9 @@ radius_point_1 = [0., 0., 2.]
 
 cylinder = Cylinder(axis_point_1, axis_point_2, radius_point_1)
 
-# cylinder.set_bottom_patch('inlet')
-# cylinder.set_top_patch('outlet')
-# cylinder.set_outer_patch('walls')
+cylinder.set_start_patch('inlet')
+cylinder.set_end_patch('outlet')
+cylinder.set_outer_patch('walls')
 
 bl_thickness = 0.05
 core_size = 0.2

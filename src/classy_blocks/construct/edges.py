@@ -66,7 +66,7 @@ class Origin(EdgeData):
     def __init__(self, origin:PointType, flatness:float=1):
         self.origin = np.asarray(origin, dtype=constants.DTYPE)
         self.flatness = flatness
-    
+
     def transform(self, function: Callable) -> 'Origin':
         self.origin = function(self.origin)
         return self
@@ -116,4 +116,3 @@ class Project(EdgeData):
             self.geometry = geometry
         else:
             self.geometry = [geometry]
-

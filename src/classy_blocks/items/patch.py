@@ -1,18 +1,28 @@
-import dataclasses
+import warnings
 
-from typing import List
+from typing import List, Dict
 
 from classy_blocks.items.side import Side
 
-@dataclasses.dataclass
 class Patch:
-    """Definition of a patch, including type, 
-    belonging faces and other settings"""
-    name:str
-    sides:List[Side]
-    type:str
-    settings:dict = dataclasses.field(default_factory=dict)
+    """Definition of a patch, including type, belonging faces and other settings"""
+    def __init__(self, name:str):
+        self.name = name
 
+        self.sides:List[Side] = []
+
+        self.kind = 'patch' # 'type'
+        self.settings:Dict[str, str] = {}
+
+    def add_side(self, side:Side) -> None:
+        """Adds a side to the list if it doesn't exist yet"""
+        for existing in self.sides:
+            if existing == side:
+                warnings.warn(f"Side {side.description} has already been assigned to {self.name}")
+                return
+
+        self.sides.append(side)
+    
     @property
     def description(self) -> str:
         """patch definition for blockMeshDict"""
@@ -26,11 +36,11 @@ class Patch:
         # }
         # TODO: do something with all that \t\n\n};\t\t chaos
         out = "\t" + self.name + "\n\t{\n"
-        out += f"\t\ttype {self.type};\n"
+        out += f"\t\ttype {self.kind};\n"
         out += "\t\tfaces\n\t\t(\n"
 
-        for face in self.sides:
-            out += f"\t\t\t{face.description}\n"
+        for quad in self.sides:
+            out += f"\t\t\t{quad.description}\n"
 
         for key, value in self.settings.items():
             out += f"\n\t\t{key} {value};"

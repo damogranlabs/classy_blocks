@@ -1,14 +1,16 @@
 import abc
 import copy
 
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Union
 
-from classy_blocks.types import AxisType, NPPointType, PointType, VectorType
+from classy_blocks.types import AxisType, NPPointType, PointType, VectorType, OrientType
 from classy_blocks.base.transformable import TransformableBase
 
-from classy_blocks.construct.edges import EdgeData
 from classy_blocks.construct.flat.face import Face
+from classy_blocks.construct.edges import EdgeData
 from classy_blocks.grading.chop import Chop
+
+from classy_blocks.util import constants
 
 class Operation(TransformableBase, abc.ABC):
     """A user-friendly way to create a Block, as a 2-point Box,
@@ -22,6 +24,8 @@ class Operation(TransformableBase, abc.ABC):
         self.side_edges:List[Optional[EdgeData]] = [None]*4
         self.chops:Dict[AxisType, List[Chop]] = {0: [], 1: [], 2: []}
 
+        self.patch_names:Dict[OrientType, str] = {}
+        self.projected_sides:Dict[OrientType, str] = {}
         self.cell_zone = "" # set with self.cell_zone
 
     def add_side_edge(self, corner_1:int, edge_data:EdgeData) -> None:
@@ -39,16 +43,43 @@ class Operation(TransformableBase, abc.ABC):
         Kwargs: see arguments for Chop object"""
         self.chops[axis].append(Chop(**kwargs))
 
-    # def set_patch(self, sides: Union[str, List[str]], patch_name: str) -> None:
-    #     """bottom: bottom face
-    #     top: top face
+    def set_patch(self, sides: Union[OrientType, List[OrientType]], name:str) -> None:
+        """Assign a patch to given side of the block; 
 
-    #     front: along first edge of a face
-    #     back: opposite front
+        Args:
+        - side: 'bottom', 'top', 'front', 'back', 'left', 'right',
+            a single value or a list of sides; names correspond to position in
+            the sketch from blockMesh documentation:
+            https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility
+            bottom, top: faces from which the Operation was created
+            front: along first edge of a face
+            back: opposite front
+            right: along second edge of a face
+            left: opposite right
+        - name: the name that goes into blockMeshDict
+        
+        Use mesh.set_patch_* methods to change other properties (type and other settings)"""
+        if not isinstance(sides, list):
+            sides = [sides]
 
-    #     right: along second edge of a face
-    #     left: opposite right"""
-    #     self.block.set_patch(sides, patch_name)
+        for orient in sides:
+            self.patch_names[orient] = name
+    
+    def project_side(self, side:OrientType, geometry:str) -> None:
+        """Project given side to named geometry;
+
+        Args:
+        - side: 'bottom', 'top', 'front', 'back', 'left', 'right';
+            only
+            the sketch from blockMesh documentation:
+            https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility
+            bottom, top: faces from which the Operation was created
+            front: along first edge of a face
+            back: opposite front
+            right: along second edge of a face
+            left: opposite right
+        - geometry: name of predefined geometry (add separately to Mesh object)"""
+        self.projected_sides[side] = geometry
 
     def copy(self) -> 'Operation':
         """Returns a copy of this Operation"""
@@ -92,7 +123,7 @@ class Operation(TransformableBase, abc.ABC):
         for edge in self.side_edges:
             if edge is not None:
                 edge.scale(ratio, origin)
-        
+
         return self
 
     def set_cell_zone(self, cell_zone: str) -> None:

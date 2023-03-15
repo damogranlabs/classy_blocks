@@ -1,16 +1,12 @@
-import warnings
-from typing import List, Literal, Union, Dict
+from typing import List, Dict
 
-from classy_blocks.types import PointListType, AxisType, OrientType, EdgeKindType
+from classy_blocks.types import AxisType
 
-from classy_blocks.construct.edges import Project
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edges.edge import Edge
-from classy_blocks.items.edges.factory import factory
 from classy_blocks.items.wire import Wire
 from classy_blocks.items.axis import Axis
 
-from classy_blocks.items.side import Side
 from classy_blocks.grading.chop import Chop
 
 from classy_blocks.util import constants
@@ -43,9 +39,6 @@ class Block:
                 axis_wires[axis].append(wire)
 
         self.axes = [Axis(i, axis_wires[i]) for i in (0, 1, 2)]
-
-        # Side objects define patch names and projections
-        self.sides = {o:Side(self.vertices, o) for o in constants.FACE_MAP}
 
         # cellZone to which the block belongs to
         self.cell_zone = ""
@@ -127,48 +120,6 @@ class Block:
 
         return all_edges
 
-    def set_patch(self,
-                  orients: Union[OrientType, List[OrientType]],
-                  patch_name: str,
-                  patch_type:str='patch') -> None:
-        """assign one or more block sides (constants.FACE_MAP) to a chosen patch name;
-        if type is not specified, it will becom 'patch'"""
-        if isinstance(orients, str):
-            orients = [orients]
-
-        for orient in orients:
-            if self.sides[orient].patch_name is not None:
-                warnings.warn(f"Replacing patch {self.sides[orient].patch_name} with {patch_name}")
-
-            self.sides[orient].patch_name = patch_name
-            self.sides[orient].patch_type = patch_type
-
-    def project_face(self,
-                     orient:OrientType,
-                     geometry:Union[List[str], str],
-                     edges:bool=True) -> None:
-        """Assign one or more block faces (self.face_map)
-        to be projected to a geometry (defined in Mesh)"""
-        assert orient in constants.FACE_MAP
-
-        if isinstance(geometry, str):
-            geometry = [geometry]
-
-        self.sides[orient].project_to = geometry
-
-        if edges:
-            corners = self.sides[orient].corners
-
-            for i, corner_1 in enumerate(corners):
-                corner_2 = corners[(i+1) % 4]
-
-                edge = factory.create(
-                    self.vertices[corner_1],
-                    self.vertices[corner_2],
-                    Project(geometry)
-                )
-                self.add_edge(corner_1, corner_2, edge)
-
     @property
     def is_defined(self) -> bool:
         """Returns True if counts and gradings are defined for all axes"""
@@ -182,7 +133,7 @@ class Block:
         # TODO: TEST
         if self.is_defined:
             return False
-        
+
         updated = False
 
         if not self.is_defined:
