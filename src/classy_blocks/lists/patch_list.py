@@ -6,39 +6,13 @@ from classy_blocks.items.side import Side
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.patch import Patch
 
-# class FaceList:
-#     """Handling of the 'faces' part of blockMeshDict (projected faces)"""
-#     def __init__(self):
-#         # a list of [[4 vertices], 'projected geometry']
-#         self.faces:List = []
-
-#     def collect(self, blocks:List[BlockData]) -> None:
-#         """Gathers projected faces from blocks"""
-#         for block in blocks:
-#             # TODO: check for existing faces
-#             for orient, side in block.sides.items():
-#                 if side.project is not None:
-#                     vertices = block.get_side_vertices(orient)
-#                     self.faces.append([vertices, side.project])
-
-#     def output(self) -> str:
-#         """Formats the 'faces' list to be output into blockMeshDict"""
-#         flist = "faces\n(\n"
-
-#         for data in self.faces:
-#             flist += f"\tproject {PatchList.format_face(data[0])} {data[1]}\n"
-
-#         flist += ");\n\n"
-
-#         return flist
-
 class PatchList:
-    """Handling of the 'boundary' part of blockMeshDict"""
+    """Handling of the patches ('boundary') part of blockMeshDict"""
     def __init__(self):
         self.patches:Dict[str, Patch] = {} # TODO: OrderedDict for consistent testing?
 
     def add(self, vertices:List[Vertex], operation:Operation) -> None:
-        """Create Patches from operation's quads"""
+        """Create Patches from operation's patch_names"""
         for orient in operation.patch_names:
             self.add_side(operation.patch_names[orient], orient, vertices)
 
@@ -60,4 +34,3 @@ class PatchList:
         out += ");\n\n"
 
         return out
-

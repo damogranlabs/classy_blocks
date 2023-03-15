@@ -1,11 +1,13 @@
 import abc
 
-from typing import List
+from typing import Sequence, TypeVar
 
-from classy_blocks.construct.operations.operation import Operation
+AdditiveT = TypeVar('AdditiveT', bound='AdditiveBase')
 
 class AdditiveBase(abc.ABC):
     """A base class for any entity that can be added to mesh using
     mesh.add(); with all the machinery required to do that"""
-    operations:List[Operation]
-
+    @property
+    @abc.abstractmethod
+    def operations(self:AdditiveT) -> Sequence[AdditiveT]:
+        """A list of operations to be added to mesh"""

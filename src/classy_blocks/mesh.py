@@ -1,16 +1,15 @@
 """The Mesh object ties everything together and writes the blockMeshDict in the end."""
-from typing import Union, Optional, List
+from typing import  Optional, List
 
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.block import Block
 from classy_blocks.lists.block_list import BlockList
 from classy_blocks.lists.vertex_list import VertexList
 from classy_blocks.lists.edge_list import EdgeList
 from classy_blocks.lists.patch_list import PatchList
+from classy_blocks.lists.face_list import FaceList
 
 from classy_blocks.construct.operations.operation import Operation
-#from classy_blocks.construct.shapes import Shape
 
 from classy_blocks.base.additive import AdditiveBase
 
@@ -22,8 +21,9 @@ class Mesh:
     def __init__(self):
         self.vertex_list = VertexList()
         self.edge_list = EdgeList()
-        self.block_list = BlockList()
+        self._block_list = BlockList()
         self.patch_list = PatchList()
+        self.face_list = FaceList()
 
         self.settings = {
             # TODO: test output
@@ -40,37 +40,36 @@ class Mesh:
             'merged': [],
         }
 
-    def add(self, shape:AdditiveBase) -> None:
+    def add(self, entity:AdditiveBase) -> None:
         """Add a classy_blocks entity to the mesh;
         can be a plain Block, created from points, Operation, Shape or Object."""
-        for op in shape.operations:
-            self.add_operation(op)
+        for operation in entity.operations:
+            self.add_operation(operation)
 
     def add_operation(self, operation:Operation) -> None:
         """Takes an operation, converts it to Block and adds that to the mesh"""
-        vertices = self.add_vertices(operation)
+        vertices = self._add_vertices(operation)
 
-        block = Block(len(self.block_list.blocks), vertices)
-        self.add_edges(operation, vertices, block)
-        self.chop_block(operation, block)
-        self.block_list.add(block)
+        block = Block(len(self._block_list.blocks), vertices)
+        self._add_edges(operation, vertices, block)
+        self._chop_block(operation, block)
+        self._block_list.add(block)
 
-        self.add_patches(vertices, operation)
+        self._add_patches(vertices, operation)
 
-        # generate patches from block's faces
-        #self.boundary.add(block)
-
+        self._project_faces(vertices, operation)
+        
         # TODO: TEST
         #if hasattr(item, "geometry"):
         #    raise NotImplementedError
         #   # self.add_geometry(item.geometry)
 
-    def add_vertices(self, operation:Operation) -> List[Vertex]:
+    def _add_vertices(self, operation:Operation) -> List[Vertex]:
         """Creates/finds vertices from operation's points and returns them"""
         return [self.vertex_list.add(p) for p in operation.bottom_face.points] + \
             [self.vertex_list.add(p) for p in operation.top_face.points]
 
-    def add_edges(self, operation:Operation, vertices:List[Vertex], block:Block) -> None:
+    def _add_edges(self, operation:Operation, vertices:List[Vertex], block:Block) -> None:
         """Creates/finds edges from operation and returns them"""
         edges = self.edge_list.add(vertices, operation.bottom_face.edges, 'bottom') + \
             self.edge_list.add(vertices, operation.top_face.edges, 'top') + \
@@ -79,15 +78,19 @@ class Mesh:
         for edge in edges:
             block.add_edge(*edge)
 
-    def chop_block(self, operation:Operation, block:Block) -> None:
+    def _chop_block(self, operation:Operation, block:Block) -> None:
         """Chops the block as declared in Operation"""
         for axis in (0, 1, 2):
             for chop in operation.chops[axis]:
                 block.chop(axis, chop)
     
-    def add_patches(self, vertices:List[Vertex], operation:Operation) -> None:
+    def _add_patches(self, vertices:List[Vertex], operation:Operation) -> None:
         """Creates patches and projects faces"""
         self.patch_list.add(vertices, operation)
+    
+    def _project_faces(self, vertices:List[Vertex], operation:Operation) -> None:
+        """Collects projected faces from operation"""
+        self.face_list.add(vertices, operation)
         
     # def merge_patches(self, master:str, slave:str) -> None:
     #     """Merges two non-conforming named patches using face merging;
@@ -114,9 +117,9 @@ class Mesh:
         a VTK file is created first where each block is a single cell, to see simplified
         blocking in case blockMesh fails with an unfriendly error message."""
         if debug_path is not None:
-           write_vtk(debug_path, self.vertex_list.vertices, self.block_list.blocks)
+           write_vtk(debug_path, self.vertex_list.vertices, self._block_list.blocks)
 
-        self.block_list.propagate_gradings()
+        self._block_list.propagate_gradings()
 
         with open(output_path, 'w', encoding='utf-8') as output:
             output.write(constants.MESH_HEADER)
@@ -129,10 +132,11 @@ class Mesh:
             #f.write(self.geometry.output())
 
             output.write(self.vertex_list.description)
-            output.write(self.block_list.description)
+            output.write(self._block_list.description)
             output.write(self.edge_list.description)
 
             output.write(self.patch_list.description)
+            output.write(self.face_list.description)
 
             # patches: output manually
             # if len(self.patches['merged']) > 0:

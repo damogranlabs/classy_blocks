@@ -5,14 +5,13 @@ from typing import List, Optional, Dict, Union
 
 from classy_blocks.types import AxisType, NPPointType, PointType, VectorType, OrientType
 from classy_blocks.base.transformable import TransformableBase
+from classy_blocks.base.additive import AdditiveBase
 
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.edges import EdgeData
 from classy_blocks.grading.chop import Chop
 
-from classy_blocks.util import constants
-
-class Operation(TransformableBase, abc.ABC):
+class Operation(TransformableBase, AdditiveBase, abc.ABC):
     """A user-friendly way to create a Block, as a 2-point Box,
     extruded/revolved from a single Face or Lofted between two faces
     with optional side edges."""
@@ -64,7 +63,7 @@ class Operation(TransformableBase, abc.ABC):
 
         for orient in sides:
             self.patch_names[orient] = name
-    
+
     def project_side(self, side:OrientType, geometry:str) -> None:
         """Project given side to named geometry;
 
@@ -134,3 +133,7 @@ class Operation(TransformableBase, abc.ABC):
     def center(self) -> NPPointType:
         """Center of this object"""
         return (self.bottom_face.center + self.top_face.center)/2
+
+    @property
+    def operations(self):
+        return [self]

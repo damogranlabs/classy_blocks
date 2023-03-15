@@ -1,5 +1,5 @@
 import abc
-from typing import Type, Callable, List, TypeVar
+from typing import Callable, List, TypeVar
 
 from classy_blocks.types import AxisType, OrientType
 
@@ -7,7 +7,6 @@ from classy_blocks.construct.edges import Arc
 from classy_blocks.construct.shapes.shape import Shape
 from classy_blocks.construct.flat.circle import Circle
 from classy_blocks.construct.flat import circle
-from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.operations.loft import Loft
 
 ShapeT = TypeVar('ShapeT', bound='RoundShape')
@@ -45,7 +44,7 @@ class RoundShape(Shape, abc.ABC):
         else:
             self.sketch_mid = None
 
-        self.operations = []
+        self.lofts:List[Loft] = []
 
         for i, face_1 in enumerate(self.sketch_1.faces):
             face_2 = self.sketch_2.faces[i]
@@ -59,7 +58,7 @@ class RoundShape(Shape, abc.ABC):
                 for i, point in enumerate(face_mid.points):
                     loft.add_side_edge(i, Arc(point))
 
-            self.operations.append(loft)
+            self.lofts.append(loft)
 
     @abc.abstractmethod
     def transform_function(self, **kwargs) -> Callable:
@@ -67,18 +66,18 @@ class RoundShape(Shape, abc.ABC):
         a Loft will be made from those"""
 
     @property
-    def core(self) -> List[Operation]:
+    def core(self) -> List[Loft]:
         """Operations in the center of the shape"""
-        return self.operations[:len(self.sketch_1.core)]
+        return self.lofts[:len(self.sketch_1.core)]
 
     @property
-    def shell(self) -> List[Operation]:
+    def shell(self) -> List[Loft]:
         """Operations on the outside of the shape"""
-        return self.operations[len(self.sketch_1.core):]
+        return self.lofts[len(self.sketch_1.core):]
 
     def chop_axial(self, **kwargs):
         """Chop the shape between start and end face"""
-        self.operations[0].chop(self.axial_axis, **kwargs)
+        self.lofts[0].chop(self.axial_axis, **kwargs)
 
     def chop_radial(self, **kwargs):
         """Chop the outer 'ring', or 'shell';
@@ -100,15 +99,19 @@ class RoundShape(Shape, abc.ABC):
 
     def set_start_patch(self, name:str) -> None:
         """Assign the faces of start sketch to a named patch"""
-        for operation in self.operations:
+        for operation in self.lofts:
             operation.set_patch(self.start_patch, name)
 
     def set_end_patch(self, name:str) -> None:
         """Assign the faces of end sketch to a named patch"""
-        for operation in self.operations:
+        for operation in self.lofts:
             operation.set_patch(self.end_patch, name)
-    
+
     def set_outer_patch(self, name:str) -> None:
         """Assign the faces of end sketch to a named patch"""
         for operation in self.shell:
             operation.set_patch(self.outer_patch, name)
+
+    @property
+    def operations(self):
+        return self.lofts

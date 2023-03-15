@@ -22,7 +22,7 @@ class Patch:
                 return
 
         self.sides.append(side)
-    
+
     @property
     def description(self) -> str:
         """patch definition for blockMeshDict"""
