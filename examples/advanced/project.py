@@ -7,18 +7,32 @@ geometry = {
         'type triSurfaceMesh',
         'name terrain',
         'file "terrain.stl"',
+    ],
+    'left_wall': [
+        'type       searchablePlane',
+        'planeType  pointAndNormal',
+        'point      (-1 0 0)',
+        'normal     (1  0  0)',
     ]
 }
 
 mesh = Mesh()
 
-box = Box([-1, -1, -1], [2, 2, 2])
+box = Box([-1., -1., -1.], [1., 1., 1.])
 
-# use edges=True to include all edges;
+# project a face to geometry
 box.project_side('bottom', 'terrain')
 
-# to project a specific edge only, use block.project_edge()
-# extrude.block.project_edge(0, 1, 'terrain')
+# projection of an edge to a surface will move it in various directions,
+# depending on the geometry, distorting the box's side
+box.project_edge(0, 1, 'terrain')
+
+# to avoid that, project an edge to two surfaces;
+# this will make it stick to their intersection
+box.project_edge(3, 0, ['terrain', 'left_wall'])
+
+# an edge can remain 'not projected' but this can cause
+# bad quality cells if geometries differ enough
 # extrude.block.project_edge(1, 2, 'terrain')
 # extrude.block.project_edge(2, 3, 'terrain')
 # extrude.block.project_edge(3, 0, 'terrain')
@@ -31,6 +45,6 @@ box.set_patch('bottom', 'terrain')
 mesh.add(box)
 
 #mesh.set_default_patch('atmosphere', 'patch')
-#mesh.add_geometry(geometry)
+mesh.add_geometry(geometry)
 
 mesh.write(os.path.join('..', 'case', 'system', 'blockMeshDict'), debug_path='debug.vtk')

@@ -7,6 +7,7 @@ from classy_blocks.types import AxisType, NPPointType, PointType, VectorType, Or
 from classy_blocks.base.transformable import TransformableBase
 from classy_blocks.base.additive import AdditiveBase
 
+from classy_blocks.construct.edges import Project
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.edges import EdgeData
 from classy_blocks.grading.chop import Chop
@@ -79,6 +80,25 @@ class Operation(TransformableBase, AdditiveBase, abc.ABC):
             left: opposite right
         - geometry: name of predefined geometry (add separately to Mesh object)"""
         self.projected_sides[side] = geometry
+
+    def project_edge(self, corner_1:int, corner_2:int, geometry:Union[str, List[str]]) -> None:
+        """Project an edge to a surface or an intersection of two surfaces"""
+        # TODO: TEST
+        # Find out whether the edge belongs to top/bottom face or side_edges
+        edge_data = Project(geometry)
+        corners = {corner_1, corner_2}
+        if corner_1 < corner_2:
+            start_corner = min(corners)
+        else:
+            start_corner = max(corners)
+
+        if corners.issubset({0, 1, 2, 3}):
+            self.bottom_face.edges[start_corner] = edge_data
+        elif corners.issubset({4, 5, 6, 7}):
+            self.top_face.edges[start_corner] = edge_data
+        else:
+            self.side_edges[start_corner] = edge_data
+
 
     def copy(self) -> 'Operation':
         """Returns a copy of this Operation"""

@@ -16,4 +16,4 @@ class ProjectEdge(Edge):
     @property
     def description(self):
         # TODO: handle a single string or a list
-        return f"project {self.vertex_1.index} {self.vertex_2.index} ({self.data.geometry})"
+        return f"project {self.vertex_1.index} {self.vertex_2.index} ({' '.join(self.data.geometry)})"

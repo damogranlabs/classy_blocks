@@ -13,7 +13,7 @@ class TestMesh(DataTestCase):
         """Add a block to the Mesh()"""
         self.mesh.add(self.get_single_data(0))
 
-        self.assertEqual(len(self.mesh._block_list.blocks), 1)
+        self.assertEqual(len(self.mesh.block_list.blocks), 1)
     
     def test_shared_edge(self):
         """Blocks 0 and 1 should have the same Edge object"""
@@ -21,8 +21,8 @@ class TestMesh(DataTestCase):
         self.mesh.add(self.get_single_data(1))
 
         self.assertEqual(
-            id(self.mesh._block_list.blocks[0].frame.edges[1]),
-            id(self.mesh._block_list.blocks[1].frame.edges[0])
+            id(self.mesh.block_list.blocks[0].frame.edges[1]),
+            id(self.mesh.block_list.blocks[1].frame.edges[0])
         )
 
     # def test_prepare(self):

@@ -8,6 +8,7 @@ from classy_blocks.lists.vertex_list import VertexList
 from classy_blocks.lists.edge_list import EdgeList
 from classy_blocks.lists.patch_list import PatchList
 from classy_blocks.lists.face_list import FaceList
+from classy_blocks.lists.geometry_list import GeometryList
 
 from classy_blocks.construct.operations.operation import Operation
 
@@ -21,9 +22,10 @@ class Mesh:
     def __init__(self):
         self.vertex_list = VertexList()
         self.edge_list = EdgeList()
-        self._block_list = BlockList()
+        self.block_list = BlockList()
         self.patch_list = PatchList()
         self.face_list = FaceList()
+        self.geometry_list = GeometryList()
 
         self.settings = {
             # TODO: test output
@@ -33,11 +35,6 @@ class Mesh:
             'mergeType': None, # use 'points' to fall back to the older point-based block merging 
             'checkFaceCorrespondence': None, # true by default, turn off if blockMesh fails (3-sided pyramids etc.)
             'verbose': None,
-        }
-
-        self.patches = {
-            'default': None,
-            'merged': [],
         }
 
     def add(self, entity:AdditiveBase) -> None:
@@ -50,15 +47,15 @@ class Mesh:
         """Takes an operation, converts it to Block and adds that to the mesh"""
         vertices = self._add_vertices(operation)
 
-        block = Block(len(self._block_list.blocks), vertices)
+        block = Block(len(self.block_list.blocks), vertices)
         self._add_edges(operation, vertices, block)
         self._chop_block(operation, block)
-        self._block_list.add(block)
+        self.block_list.add(block)
 
         self._add_patches(vertices, operation)
 
         self._project_faces(vertices, operation)
-        
+
         # TODO: TEST
         #if hasattr(item, "geometry"):
         #    raise NotImplementedError
@@ -83,15 +80,15 @@ class Mesh:
         for axis in (0, 1, 2):
             for chop in operation.chops[axis]:
                 block.chop(axis, chop)
-    
+
     def _add_patches(self, vertices:List[Vertex], operation:Operation) -> None:
         """Creates patches and projects faces"""
         self.patch_list.add(vertices, operation)
-    
+
     def _project_faces(self, vertices:List[Vertex], operation:Operation) -> None:
         """Collects projected faces from operation"""
         self.face_list.add(vertices, operation)
-        
+
     # def merge_patches(self, master:str, slave:str) -> None:
     #     """Merges two non-conforming named patches using face merging;
     #     https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-470004.3.2
@@ -105,21 +102,21 @@ class Mesh:
 
     #     self.patches['default'] = {"name": name, "type": ptype}
 
-    # def add_geometry(self, geometry:dict) -> None:
-    #     """Adds named entry in the 'geometry' section of blockMeshDict;
-    #     'g' is in the form of dictionary {'geometry_name': [list of properties]};
-    #     properties are as specified by searchable* class in documentation.
-    #     See examples/advanced/project for an example."""
-    #     self.geometry.add(geometry)
+    def add_geometry(self, geometry:dict) -> None:
+        """Adds named entry in the 'geometry' section of blockMeshDict;
+        'g' is in the form of dictionary {'geometry_name': [list of properties]};
+        properties are as specified by searchable* class in documentation.
+        See examples/advanced/project for an example."""
+        self.geometry_list.add(geometry)
 
     def write(self, output_path:str, debug_path:Optional[str]=None) -> None:
         """Writes a blockMeshDict to specified location. If debug_path is specified,
         a VTK file is created first where each block is a single cell, to see simplified
         blocking in case blockMesh fails with an unfriendly error message."""
         if debug_path is not None:
-           write_vtk(debug_path, self.vertex_list.vertices, self._block_list.blocks)
+           write_vtk(debug_path, self.vertex_list.vertices, self.block_list.blocks)
 
-        self._block_list.propagate_gradings()
+        self.block_list.propagate_gradings()
 
         with open(output_path, 'w', encoding='utf-8') as output:
             output.write(constants.MESH_HEADER)
@@ -132,7 +129,7 @@ class Mesh:
             #f.write(self.geometry.output())
 
             output.write(self.vertex_list.description)
-            output.write(self._block_list.description)
+            output.write(self.block_list.description)
             output.write(self.edge_list.description)
 
             output.write(self.patch_list.description)
@@ -151,6 +148,8 @@ class Mesh:
             #     f.write(f"\tname {self.patches['default']['name']};\n")
             #     f.write(f"\ttype {self.patches['default']['type']};")
             #     f.write("\n}\n\n")
+
+            output.write(self.geometry_list.description)
 
             output.write(constants.MESH_FOOTER)
 

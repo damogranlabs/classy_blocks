@@ -1,8 +1,9 @@
+from typing import Dict, List
 
 class GeometryList:
     """Handling of the 'geometry' part of blockMeshDict"""
     def __init__(self):
-        self.geometry:dict = {}
+        self.geometry:Dict[str, List[str]] = {}
 
     def add(self, geometry:dict) -> None:
         """Adds named entry in the 'geometry' section of blockMeshDict;
@@ -10,24 +11,26 @@ class GeometryList:
         properties are as specified by searchable* class in documentation.
         See examples/advanced/project for an example."""
         # concatenate the two dictionaries
+        # TODO: TEST
         self.geometry = {**self.geometry, **geometry}
 
-    def output(self):
+    @property
+    def description(self):
         """Formats a string to be inserted into blockMeshDict"""
         # nothing to output?
         if len(self.geometry.items()) == 0:
             return ""
 
-        glist = "geometry\n{\n"
+        out = "geometry\n{\n"
 
         for name, properties in self.geometry.items():
-            glist += f"\t{name}\n\t{{\n"
+            out += f"\t{name}\n\t{{\n"
 
             for prop in properties:
-                glist += f"\t\t{prop};\n"
+                out += f"\t\t{prop};\n"
 
-            glist += "\t}\n"
+            out += "\t}\n"
 
-        glist += "};\n\n"
+        out += "};\n\n"
 
-        return glist
+        return out

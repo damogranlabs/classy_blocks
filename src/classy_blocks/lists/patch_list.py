@@ -11,6 +11,12 @@ class PatchList:
     def __init__(self):
         self.patches:Dict[str, Patch] = {} # TODO: OrderedDict for consistent testing?
 
+        # TODO:
+        # self.default_patch = Patch('')
+        #self.merged
+        #'merged': [],
+        #}
+
     def add(self, vertices:List[Vertex], operation:Operation) -> None:
         """Create Patches from operation's patch_names"""
         for orient in operation.patch_names:

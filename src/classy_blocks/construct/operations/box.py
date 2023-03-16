@@ -1,11 +1,10 @@
-from typing import List
-
 import numpy as np
 
 from classy_blocks.types import PointType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.loft import Loft
-from classy_blocks.util import functions as f
+
+from classy_blocks.util.constants import DTYPE
 
 class Box(Loft):
     """A Rudimentary Box with edges aligned to
@@ -15,18 +14,24 @@ class Box(Loft):
     https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility
 
     Args:
-    - point_0: 'bottom-left' corner position
-    - sizes: a list of 3 floats for box sizes in x1, x2, x3 directions."""
-    # TODO: change to corner+diagonal and auto-calculate coordinates
-    def __init__(self, point_0: PointType, sizes:List[float]):
-        point_0 = np.asarray(point_0)
-        
-        self.point_0 = point_0
-        self.sizes = sizes
+    - start_point: one corner of the box
+    - diagonal_point: corner at the other end of volumetric diagonal to start_point;
 
-        delta_x = f.vector(1, 0, 0)*sizes[0]
-        delta_y = f.vector(0, 1, 0)*sizes[1]
-        delta_z = f.vector(0, 0, 1)*sizes[2]
+    Box() will always sort input data so that it becomes aligned with
+    cartesian coordinate system. Therefore edge 0-1 will correspond to x-axis,
+    1-2 to y- and 0-4 to z-axis."""
+    def __init__(self, start_point:PointType, diagonal_point:PointType):
+        # TODO: TEST
+        start_point = np.asarray(start_point)
+        diagonal_point = np.asarray(diagonal_point)
+        parr = np.vstack((start_point, diagonal_point)).T
+
+        point_0 = np.array([min(parr[0]), min(parr[1]), min(parr[2])], dtype=DTYPE)
+        point_6 = np.array([max(parr[0]), max(parr[1]), max(parr[2])], dtype=DTYPE)
+
+        delta_x = np.array([point_6[0] - point_0[0], 0, 0], dtype=DTYPE)
+        delta_y = np.array([0, point_6[1] - point_0[1], 0], dtype=DTYPE)
+        delta_z = np.array([0, 0, point_6[2] - point_0[2]], dtype=DTYPE)
 
         bottom_face = Face([
             point_0,
