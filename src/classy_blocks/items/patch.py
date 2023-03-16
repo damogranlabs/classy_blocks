@@ -12,7 +12,7 @@ class Patch:
         self.sides:List[Side] = []
 
         self.kind = 'patch' # 'type'
-        self.settings:Dict[str, str] = {}
+        self.settings:List[str] = []
 
     def add_side(self, side:Side) -> None:
         """Adds a side to the list if it doesn't exist yet"""
@@ -42,8 +42,8 @@ class Patch:
         for quad in self.sides:
             out += f"\t\t\t{quad.description}\n"
 
-        for key, value in self.settings.items():
-            out += f"\n\t\t{key} {value};"
+        for option in self.settings:
+            out += f"\n\t\t{option};"
 
         out += "\t\t);"
         out += "\n\t}\n"

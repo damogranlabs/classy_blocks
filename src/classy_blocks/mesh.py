@@ -1,5 +1,5 @@
 """The Mesh object ties everything together and writes the blockMeshDict in the end."""
-from typing import  Optional, List
+from typing import  Optional, List, Dict
 
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.block import Block
@@ -95,12 +95,16 @@ class Mesh:
     #     (breaks the 100% hex-mesh rule)"""
     #     self.patches['merged'].append([master, slave])
 
-    # def set_default_patch(self, name:str, ptype:str) -> None:
-    #     """Adds the 'defaultPatch' entry to the mesh; any non-specified block boundaries
-    #     will be assigned this patch"""
-    #     assert ptype in ("patch", "wall", "empty", "wedge")
+    def set_default_patch(self, name:str, kind:str) -> None:
+        """Adds the 'defaultPatch' entry to the mesh; any non-specified block boundaries
+        will be assigned this patch"""
+        self.patch_list.set_default(name, kind)
 
-    #     self.patches['default'] = {"name": name, "type": ptype}
+    def modify_patch(self, name:str, kind:str, settings:Optional[List[str]]=None) -> None:
+        """Fetches a patch named 'patch' and modifies its type and optionally
+        other settings. They are passed on to blockMeshDict as a list of strings
+        as-is, with no additional brain power used"""
+        self.patch_list.modify(name, kind, settings)
 
     def add_geometry(self, geometry:dict) -> None:
         """Adds named entry in the 'geometry' section of blockMeshDict;
@@ -126,30 +130,21 @@ class Mesh:
                     output.write(f"{key} {value};\n")
             output.write('\n')
 
-            #f.write(self.geometry.output())
+            output.write(self.geometry_list.description)
 
             output.write(self.vertex_list.description)
             output.write(self.block_list.description)
             output.write(self.edge_list.description)
-
-            output.write(self.patch_list.description)
             output.write(self.face_list.description)
+            output.write(self.patch_list.description)
 
-            # patches: output manually
+            # merged patches: output manually
             # if len(self.patches['merged']) > 0:
             #     f.write("mergePatchPairs\n(\n")
             #     for pair in self.patches['merged']:
             #         f.write(f"\t({pair[0]} {pair[1]})\n")
                 
             #     f.write(");\n\n")
-
-            # if self.patches['default'] is not None:
-            #     f.write("defaultPatch\n{\n")
-            #     f.write(f"\tname {self.patches['default']['name']};\n")
-            #     f.write(f"\ttype {self.patches['default']['type']};")
-            #     f.write("\n}\n\n")
-
-            output.write(self.geometry_list.description)
 
             output.write(constants.MESH_FOOTER)
 

@@ -161,7 +161,11 @@ mesh.add(revolve)
 [Any geometry that snappyHexMesh understands](https://www.openfoam.com/documentation/guides/latest/doc/guide-meshing-snappyhexmesh-geometry.html)
 is also supported by blockMesh.
 That includes searchable surfaces such as spheres and cylinders and triangulated surfaces.
-Simply provide geometry definition as documentation specifies, then call a `project_face()` on Block object.
+
+Projecting a block side to a geometry is straightforward; edges, however, can be projected to a single geometry (will 'snap' to the closest point) or to an intersection of two surfaces, which will define it exactly.
+
+Geometry is specified as a simple dictionary of strings and is thrown in blockMeshDict exactly as provided by the user.
+
 
 ```python
 geometry = {
@@ -169,25 +173,19 @@ geometry = {
         'type triSurfaceMesh',
         'name terrain',
         'file "terrain.stl"',
+    ],
+    'left_wall': [
+        'type       searchablePlane',
+        'planeType  pointAndNormal',
+        'point      (-1 0 0)',
+        'normal     (1  0  0)',
     ]
 }
 
-base = Face([
-    [-1, -1, -1],
-    [ 1, -1, -1],
-    [ 1,  1, -1],
-    [-1,  1, -1]
-])
-
-extrude = Extrude(base, [0, 0, 2])
-extrude.block.project_face('bottom', 'terrain', edges=True)
-extrude.chop(0, count=20)
-extrude.chop(1, count=20)
-extrude.chop(2, start_size=0.01, c2c_expansion=1.2)
-
-extrude.set_patch('bottom', 'terrain')
-mesh.add(extrude)
-mesh.set_default_patch('atmosphere', 'patch')
+box = Box([-1., -1., -1.], [1., 1., 1.])
+box.project_side('bottom', 'terrain')
+box.project_edge(0, 1, 'terrain')
+box.project_edge(3, 0, ['terrain', 'left_wall'])
 ```
 
 ## Face Merging
@@ -249,42 +247,12 @@ There's no official documentation yet so here are some tips for easier navigatio
 
 ## The Process, Roughly
 
-1. User writes a script that defines blocks, edges, shapes, whatever is needed.
+1. User writes a script that defines operations/shapes/objects, their edges, projections, cell counts, whatever is needed.
 1. All the stuff is added to mesh.
-1. Mesh converts user entered blocks/points/edges/whatever into new objects that
-are aware of their neighbours (blocks use the same vertices, edges) and can write output and handle later modification.
+1. Mesh converts user entered data into vertices, blocks, edges and whatnot. 
 1. The mesh can be written at that point; or,
 1. Modification of placed geometry, either by manually moving vertices or by utilizing some sort of optimization algorithm.
 1. Output of optimized/modified mesh.
-
-## Classy Lingo (Terminology)
-
-User-provided data and object that's created from it:
-- `Point` define a point in 3d space and provide transformations (translate, rotate, scale)
-- `Block` is a collection of points, patch names and chopping information
-- `Edge` defines geometry of block curves
-- `Side` refers to block faces - left, right, front, back, top, bottom
-- `Face` is a collection of 4 Points with optional Curves between them. It is used as a base for Operations and Shapes.
-- `Patch` defines patches - name, type, locations
-
-The original objects are referred to after they are added to mesh but new ones are created:
-- `Vertex` connects a Point with an index in blockMeshDict
-- `BlockOps` can now tell block size and move vertices and edges
-
-
-## Block Creation
-
-A blockMesh is created from a number of blocks, therefore a `Block` object is in the center of attention. It is always
-created from 8 vertices - the order of which follows
-the [sketch on openfoam.com user manual](https://www.openfoam.com/documentation/user-guide/blockMesh.php). Edges are
-added to block by specifying vertex indexes and a list of points in between.
-
-`Operation`s simply provide an interface for calculating those 8 vertices in a _user-friendly_ way, taking care of
-intricate calculations of points and edges.
-
-Once blocks are created, additional data must/may be added (number of cells, grading, patches, projections).
-Finally, all blocks must be added to Mesh. That will prepare data for blockMesh and create a blockMeshDict from a
-template.
 
 # TODO
 - Unchecked list items from [Features](#features)

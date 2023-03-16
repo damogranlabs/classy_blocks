@@ -5,7 +5,6 @@ import numpy as np
 from classy_blocks.construct import edges
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.util import constants
-from classy_blocks.util import functions as f
 
 @dataclasses.dataclass
 class SplineEdge(Edge):
@@ -15,10 +14,9 @@ class SplineEdge(Edge):
     @property
     def length(self):
         # just sum distances between self.points
-        points = np.asarray([point for point in self.data.points])
-        shifted = np.roll(points, 1, axis=0)
+        shifted = np.roll(self.data.points, 1, axis=0)
 
-        return np.sum(f.norm(points - shifted)[1:])
+        return np.sum(np.linalg.norm(self.data.points - shifted, axis=0))
 
     @property
     def description(self):

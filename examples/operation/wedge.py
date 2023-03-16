@@ -1,42 +1,44 @@
-from classy_blocks import Face, Wedge, Mesh
+import os
+from classy_blocks import Face, Wedge, Mesh, Spline
 
-def get_mesh():
-    mesh = Mesh()
+mesh = Mesh()
 
-    # a face with a single bump;
-    base = Face([[0, 0, 0], [1, 0, 0], [1, 0.2, 0], [0, 0.2, 0]])
-    base.add_edge(2, [
-        [0.75, 0.15, 0], # a spline edge
-        [0.50, 0.20, 0], # with 3
-        [0.25, 0.25, 0], # points
-    ], kind='spline')
+# a face with a single bump;
+base = Face(
+    # points
+    [[0, 0, 0], [1, 0, 0], [1, 0.2, 0], [0, 0.2, 0]],
+    # edges
+    [None, None, Spline([[0.75, 0.15, 0], [0.50, 0.20, 0], [0.25, 0.25, 0]]), None]
+)
 
-    # move it away from the axis of rotation
-    # x axis = [1, 0, 0]
-    base = base.translate([0, 1, 0])
+# move it away from the axis of rotation
+# x axis = [1, 0, 0]
+base.translate([0, 1, 0])
 
-    # then copy it along x-axis,
-    # representing an annular seal with grooves
-    wedges = []
-    for _ in range(5):
-        wedge = Wedge(base)
+# create a wedge, then copy it along x-axis,
+# representing an annular seal with grooves
+wedge = Wedge(base)
+wedge.set_outer_patch('static_wall')
+wedge.set_inner_patch('rotating_walls')
+wedge.chop(0, count=30)
 
-        # this has to be set on all blocks;
-        # others will be copied
-        wedge.chop(0, count=30)
+wedges = [wedge.copy().translate([x, 0, 0]) for x in range(1, 6)]
+wedges[0].set_patch('left', 'inlet')
+wedges[-1].set_patch('right', 'outlet')
 
-        wedge.set_outer_patch('static_wall')
-        wedge.set_inner_patch('rotating_walls')
+# this will be copied to all next blocks
+wedges[0].chop(1, c2c_expansion=1.2, start_size=0.01, invert=True)
 
-        wedges.append(wedge)
-        mesh.add(wedge)
+# Once an entity is added to the mesh,
+# its modifications will not be reflected there;
+# adding is the last thing to do
+for op in wedges:
+    mesh.add(op)
 
-        base = base.translate([1, 0, 0])
+# change patch types and whatnot
+mesh.modify_patch('static_wall', 'wall')
+mesh.modify_patch('rotating_walls', 'wall')
+mesh.modify_patch('wedge_front', 'wedge')
+mesh.modify_patch('wedge_back', 'wedge')
 
-    wedges[0].set_left_patch('inlet')
-    wedges[-1].set_right_patch('outlet')
-
-    # this will be copied to all next blocks
-    wedges[0].chop(1, c2c_expansion=1.2, start_size=0.01, invert=True)
-
-    return mesh
+mesh.write(os.path.join('..', 'case', 'system', 'blockMeshDict'))

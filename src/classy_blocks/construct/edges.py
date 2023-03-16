@@ -4,7 +4,7 @@ from typing import List, Optional, Union, Callable
 
 import numpy as np
 
-from classy_blocks.types import VectorType, PointType, PointListType, EdgeKindType
+from classy_blocks.types import VectorType, PointType, PointListType, EdgeKindType, NPPointListType
 from classy_blocks.base.transformable import TransformableBase
 from classy_blocks.util import functions as f
 from classy_blocks.util import constants
@@ -97,7 +97,7 @@ class Spline(EdgeData):
     kind = 'spline'
 
     def __init__(self, points:PointListType):
-        self.points = np.asarray(points, dtype=constants.DTYPE)
+        self.points:NPPointListType = np.asarray(points, dtype=constants.DTYPE)
 
     def transform(self, function: Callable) -> 'Spline':
         self.points = np.asarray([function(p) for p in self.points])

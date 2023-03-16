@@ -1,4 +1,3 @@
-import functools
 from typing import List, Optional, Set
 
 from classy_blocks.types import AxisType

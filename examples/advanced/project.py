@@ -44,7 +44,7 @@ box.set_patch('bottom', 'terrain')
 
 mesh.add(box)
 
-#mesh.set_default_patch('atmosphere', 'patch')
+mesh.set_default_patch('atmosphere', 'patch')
 mesh.add_geometry(geometry)
 
 mesh.write(os.path.join('..', 'case', 'system', 'blockMeshDict'), debug_path='debug.vtk')

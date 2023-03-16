@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from classy_blocks.types import OrientType
 from classy_blocks.construct.operations.operation import Operation
@@ -10,12 +10,7 @@ class PatchList:
     """Handling of the patches ('boundary') part of blockMeshDict"""
     def __init__(self):
         self.patches:Dict[str, Patch] = {} # TODO: OrderedDict for consistent testing?
-
-        # TODO:
-        # self.default_patch = Patch('')
-        #self.merged
-        #'merged': [],
-        #}
+        self.default:Optional[Dict[str, str]] = None
 
     def add(self, vertices:List[Vertex], operation:Operation) -> None:
         """Create Patches from operation's patch_names"""
@@ -29,6 +24,17 @@ class PatchList:
 
         self.patches[patch_name].add_side(Side(orient, vertices))
 
+    def set_default(self, name:str, kind:str) -> None:
+        """Creates the default Patch"""
+        self.default = {'name': name, 'kind': kind }
+
+    def modify(self, name:str, kind:str, settings:Optional[List[str]]=None) -> None:
+        """Changes patch's properties"""
+        self.patches[name].kind = kind
+
+        if settings is not None:
+            self.patches[name].settings = settings
+
     @property
     def description(self) -> str:
         """Outputs a 'boundary' and 'faces' dict to be inserted directly into blockMeshDict"""
@@ -38,5 +44,11 @@ class PatchList:
             out += patch.description
 
         out += ");\n\n"
+
+        if self.default is not None:
+            out += "defaultPatch\n{\n"
+            out += f"\tname {self.default['name']};\n"
+            out += f"\ttype {self.default['kind']};\n"
+            out += "}\n\n"
 
         return out
