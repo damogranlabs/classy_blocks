@@ -12,8 +12,7 @@ class ProjectEdge(Edge):
     def length(self):
         # can't say much about that length, eh?
         return super().length
-    
+
     @property
     def description(self):
-        # TODO: handle a single string or a list
         return f"project {self.vertex_1.index} {self.vertex_2.index} ({' '.join(self.data.geometry)})"

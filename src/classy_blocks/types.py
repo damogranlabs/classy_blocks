@@ -24,3 +24,6 @@ AxisType:TypeAlias = Literal[0, 1, 2]
 
 # which block size to take when chopping
 ChopTakeType:TypeAlias = Literal['min', 'max', 'avg']
+
+# Project vertex/edge to one or multiple geometries
+ProjectToType:TypeAlias = Union[str, List[str]]

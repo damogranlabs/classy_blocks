@@ -5,7 +5,7 @@ from typing import Optional
 import numpy as np
 
 from classy_blocks.base.transformable import TransformableBase
-from classy_blocks.types import PointType, VectorType, NPPointType
+from classy_blocks.types import PointType, VectorType, NPPointType, ProjectToType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
@@ -22,7 +22,7 @@ class Vertex(TransformableBase):
         # index in blockMeshDict; address of this object when creating edges/blocks
         self.index = index 
 
-        # TODO: project
+        self.project_to:Optional[ProjectToType] = None
 
     def translate(self, displacement:VectorType) -> 'Vertex':
         """Move this point by 'displacement' vector"""
@@ -39,6 +39,14 @@ class Vertex(TransformableBase):
         self.pos = f.scale(self.pos, ratio, origin)
         return self
 
+    def project(self, geometry:ProjectToType) -> None:
+        """Project this vertex to a single or multiple geometries"""
+        # TODO: TEST
+        if not isinstance(geometry, list):
+            geometry = [geometry]
+
+        self.project_to = geometry
+
     def __eq__(self, other):
         return self.index == other.index
 
@@ -48,4 +56,12 @@ class Vertex(TransformableBase):
     @property
     def description(self) -> str:
         """ Returns a string representation to be written to blockMeshDict"""
-        return f"{vector_format(self.pos)} // {self.index}"
+        # TODO: TEST
+        point = vector_format(self.pos)
+        comment = f"// {self.index}"
+
+        if self.project_to is not None:
+            return f"project {point} ({' '.join(self.project_to)}) {comment}"
+        
+        return f"{point} {comment}"
+

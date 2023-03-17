@@ -63,17 +63,34 @@ class Mesh:
 
     def _add_vertices(self, operation:Operation) -> List[Vertex]:
         """Creates/finds vertices from operation's points and returns them"""
-        return [self.vertex_list.add(p) for p in operation.bottom_face.points] + \
+        vertices:List[Vertex] = \
+            [self.vertex_list.add(p) for p in operation.bottom_face.points] + \
             [self.vertex_list.add(p) for p in operation.top_face.points]
+    
+        # TODO: avoid daisy.chaining.of.objects
+        for data in operation.projections.vertices:
+            vertices[data.corner].project(data.geometry)
+        
+        return vertices
 
     def _add_edges(self, operation:Operation, vertices:List[Vertex], block:Block) -> None:
         """Creates/finds edges from operation and returns them"""
-        edges = self.edge_list.add(vertices, operation.bottom_face.edges, 'bottom') + \
-            self.edge_list.add(vertices, operation.top_face.edges, 'top') + \
-            self.edge_list.add(vertices, operation.side_edges, 'side')
-        
+        # TODO: no daisy.object.chaining
+        edges = \
+            self.edge_list.add_from_operation(vertices, operation.bottom_face.edges, 'bottom') + \
+            self.edge_list.add_from_operation(vertices, operation.top_face.edges, 'top') + \
+            self.edge_list.add_from_operation(vertices, operation.side_edges, 'side')
+
         for edge in edges:
             block.add_edge(*edge)
+
+        # also add projected edges - override whatever's been defined already
+        edges = self.edge_list.add_projected(vertices, operation.projections.edges)
+
+        for edge in edges:
+            block.add_edge(*edge)
+
+        print(block.edge_list)
 
     def _chop_block(self, operation:Operation, block:Block) -> None:
         """Chops the block as declared in Operation"""

@@ -1,3 +1,4 @@
+import dataclasses
 import abc
 import copy
 
@@ -7,7 +8,7 @@ from classy_blocks.types import AxisType, NPPointType, PointType, VectorType, Or
 from classy_blocks.base.transformable import TransformableBase
 from classy_blocks.base.additive import AdditiveBase
 
-from classy_blocks.construct.edges import Project
+from classy_blocks.construct.operations.projections import ProjectedEntities
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.edges import EdgeData
 from classy_blocks.grading.chop import Chop
@@ -23,9 +24,10 @@ class Operation(TransformableBase, AdditiveBase, abc.ABC):
         self.top_face = top_face
         self.side_edges:List[Optional[EdgeData]] = [None]*4
         self.chops:Dict[AxisType, List[Chop]] = {0: [], 1: [], 2: []}
-
         self.patch_names:Dict[OrientType, str] = {}
-        self.projected_sides:Dict[OrientType, str] = {}
+
+        self.projections = ProjectedEntities()
+
         self.cell_zone = "" # set with self.cell_zone
 
     def add_side_edge(self, corner_1:int, edge_data:EdgeData) -> None:
@@ -79,26 +81,17 @@ class Operation(TransformableBase, AdditiveBase, abc.ABC):
             right: along second edge of a face
             left: opposite right
         - geometry: name of predefined geometry (add separately to Mesh object)"""
-        self.projected_sides[side] = geometry
+        self.projections.add_side(side, geometry)
 
     def project_edge(self, corner_1:int, corner_2:int, geometry:Union[str, List[str]]) -> None:
         """Project an edge to a surface or an intersection of two surfaces"""
-        # TODO: TEST
-        # Find out whether the edge belongs to top/bottom face or side_edges
-        edge_data = Project(geometry)
-        corners = {corner_1, corner_2}
-        if corner_1 < corner_2:
-            start_corner = min(corners)
-        else:
-            start_corner = max(corners)
+        self.projections.add_edge(corner_1, corner_2, geometry)
 
-        if corners.issubset({0, 1, 2, 3}):
-            self.bottom_face.edges[start_corner] = edge_data
-        elif corners.issubset({4, 5, 6, 7}):
-            self.top_face.edges[start_corner] = edge_data
-        else:
-            self.side_edges[start_corner] = edge_data
-
+    def project_corner(self, corner:int, geometry:Union[str, List[str]]) -> None:
+        """Project the vertex at given corner (local index 0...7) to a single
+        surface or an intersection of multiple surface. WIP according to
+        https://github.com/OpenFOAM/OpenFOAM-10/blob/master/src/meshTools/searchableSurfaces/searchableSurfacesQueries/searchableSurfacesQueries.H"""
+        self.projections.add_vertex(corner, geometry)
 
     def copy(self) -> 'Operation':
         """Returns a copy of this Operation"""

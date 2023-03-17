@@ -1,7 +1,8 @@
 from typing import List, Tuple, Literal, Optional
 
 from classy_blocks.base.exceptions import EdgeNotFoundError
-from classy_blocks.construct.edges import EdgeData
+from classy_blocks.construct.edges import EdgeData, Project
+from classy_blocks.construct.operations.projections import ProjectedEdgeData
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
@@ -24,7 +25,7 @@ class EdgeList:
 
         raise EdgeNotFoundError(f"Edge not found: {str(vertex_1)}, {str(vertex_2)}")
 
-    def add(self,
+    def add_from_operation(self,
             vertices:List[Vertex], # 8 vertices of the block
             data:List[Optional[EdgeData]], # a list of edges from Face/Operation
             direction:Literal['bottom', 'top', 'side'] # use indexes for top/bottom face, or sides
@@ -56,6 +57,28 @@ class EdgeList:
                     self.edges.append(edge)
 
                     edges.append((corner_1, corner_2, edge))
+
+        return edges
+
+    def add_projected(self, vertices:List[Vertex], data:List[ProjectedEdgeData]) -> List[Tuple[int, int, Edge]]:
+        """Collect projected edge data from operation"""
+        # TODO: test
+        edges:List[Tuple[int, int, Edge]] = []
+
+        for edge_data in data:
+            vertex_1 = vertices[edge_data.corner_1]
+            vertex_2 = vertices[edge_data.corner_2]
+
+            try:
+                # remove existing edges between those vertices
+                self.edges.remove(self.find(vertex_1, vertex_2))
+            except EdgeNotFoundError:
+                # no such edge yet, ok
+                pass
+
+            edge = factory.create(vertex_1, vertex_2, Project(edge_data.geometry))
+            self.edges.append(edge)
+            edges.append((edge_data.corner_1, edge_data.corner_2, edge))
 
         return edges
 
@@ -91,11 +114,11 @@ class EdgeList:
 
         if direction ==  'bottom':
             return corner_1, (corner_1+1)%4
-        
+
         if direction == 'top':
             return corner_1 + 4, (corner_1+1)%4 + 4
-    
+
         if direction == 'side':
             return corner_1, corner_1 + 4
-        
+
         raise ValueError(f"No defined direction: {direction}")

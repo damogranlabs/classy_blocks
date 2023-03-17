@@ -18,7 +18,14 @@ geometry = {
 
 mesh = Mesh()
 
-box = Box([-1., -1., -1.], [1., 1., 1.])
+# 'miss' the vertices deliberately;
+# project them to geometry later
+box = Box([-0.9, -0.9, -0.9], [1., 1., 1.])
+
+# project misplaced vertices
+box.project_corner(0, ['terrain', 'left_wall'])
+box.project_corner(1, 'terrain')
+box.project_corner(2, 'terrain')
 
 # project a face to geometry
 box.project_side('bottom', 'terrain')

@@ -35,7 +35,7 @@ class FaceList:
 
     def add(self, vertices:List[Vertex], operation:Operation) -> None:
         """Collect projected sides from operation data"""
-        for orient, geometry in operation.projected_sides.items():
+        for orient, geometry in operation.projections.sides.items():
             self.add_side(Side(orient, vertices), geometry)
 
     def add_side(self, side:Side, geometry:str) -> None:

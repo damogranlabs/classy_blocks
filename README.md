@@ -96,8 +96,9 @@ After blocks have been placed, it is possible to create new geometry based on pl
 - [x] Automatic propagation of grading and cell count from a single block to all connected blocks as required by blockMesh
 - [x] Projections of vertices, edges and block faces to geometry (triangulated and [searchable surfaces](https://www.openfoam.com/documentation/guides/latest/doc/guide-meshing-snappyhexmesh-geometry.html#meshing-snappyhexmesh-searchable-objects))*
 - [x] Face merging as described by [blockMesh user guide](https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-470004.3.2). Breaks the pure-hexahedral-mesh rule but can often save the day for trickier geometries.
+- [ ] Auto grading for Low-Re meshes: boundary layer with specified cell-to-cell expansion, transition with 2:1 expansion, and specified 'bulk' cell size
 
-* Not implemented: projected Vertex
+> \* Not implemented: projected Vertex
 
 # Examples
 
@@ -256,6 +257,8 @@ There's no official documentation yet so here are some tips for easier navigatio
 
 # TODO
 - Unchecked list items from [Features](#features)
+- Usability
+    - Frustum with any profile, not just arc
 - Chaining:
     - *FrustumWall.expand()
     - *FrustumWall.contract()

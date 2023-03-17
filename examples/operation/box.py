@@ -2,7 +2,7 @@ import os
 
 from classy_blocks import Box, Mesh
 
-box = Box([-1, -2, -4], [2, 4, 8])
+box = Box([-1, -2, -4], [4, 2, 1])
 
 # direction of corners 0-1
 box.chop(0, start_size=0.02, c2c_expansion=1.2, length_ratio=0.5, invert=False)

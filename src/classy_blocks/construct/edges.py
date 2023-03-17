@@ -37,7 +37,6 @@ class Line(EdgeData):
     """A 'line' edge is created by default and needs no extra parameters"""
     kind = 'line'
 
-
 class Arc(EdgeData):
     """Parameters for an arc edge: classic OpenFOAM circular arc
     definition with a single point lying anywhere on the arc"""
