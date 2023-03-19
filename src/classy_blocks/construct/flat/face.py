@@ -5,7 +5,7 @@ import copy
 import numpy as np
 
 from classy_blocks.types import VectorType, PointType, PointListType, \
-    NPPointType, NPVectorType
+    NPPointType, NPVectorType, NPPointListType
 from classy_blocks.base.transformable import TransformableBase
 from classy_blocks.construct.edges import EdgeData
 from classy_blocks.util import constants
@@ -46,7 +46,7 @@ class Face(TransformableBase):
 
             # TODO: coplanar edges?
 
-        self.points = points
+        self.points:NPPointListType = points
 
         # Edges
         self.edges:List[Optional[EdgeData]] = [None]*4

@@ -1,9 +1,11 @@
 import abc
 import copy
 
-from typing import List, Optional, Dict, Union
+from typing import List, Optional, Dict, Union, TypeVar
 
-from classy_blocks.types import AxisType, NPPointType, PointType, VectorType, OrientType
+import numpy as np
+
+from classy_blocks.types import AxisType, NPPointType, PointType, VectorType, OrientType, NPPointListType
 from classy_blocks.base.transformable import TransformableBase
 from classy_blocks.base.additive import AdditiveBase
 
@@ -11,6 +13,10 @@ from classy_blocks.construct.operations.projections import ProjectedEntities
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.edges import EdgeData
 from classy_blocks.grading.chop import Chop
+
+from classy_blocks.util import constants
+
+OperationT = TypeVar('OperationT', bound='Operation')
 
 class Operation(TransformableBase, AdditiveBase, abc.ABC):
     """A user-friendly way to create a Block, as a 2-point Box,
@@ -66,7 +72,7 @@ class Operation(TransformableBase, AdditiveBase, abc.ABC):
         for orient in sides:
             self.patch_names[orient] = name
 
-    def project_side(self, side:OrientType, geometry:str) -> None:
+    def project_side(self, side:OrientType, geometry:str, edges:bool=False) -> None:
         """Project given side to named geometry;
 
         Args:
@@ -79,8 +85,18 @@ class Operation(TransformableBase, AdditiveBase, abc.ABC):
             back: opposite front
             right: along second edge of a face
             left: opposite right
-        - geometry: name of predefined geometry (add separately to Mesh object)"""
+        - geometry: name of predefined geometry (add separately to Mesh object)
+        - edges:if True, all edges belonging to this side will also be projected"""
+        # TODO: TEST
         self.projections.add_side(side, geometry)
+
+        if edges:
+            for i, corner in enumerate(constants.FACE_MAP[side]):
+                self.project_edge(
+                    corner,
+                    constants.FACE_MAP[side][(i+1) % 4], geometry
+                )
+
 
     def project_edge(self, corner_1:int, corner_2:int, geometry:Union[str, List[str]]) -> None:
         """Project an edge to a surface or an intersection of two surfaces"""
@@ -92,7 +108,7 @@ class Operation(TransformableBase, AdditiveBase, abc.ABC):
         https://github.com/OpenFOAM/OpenFOAM-10/blob/master/src/meshTools/searchableSurfaces/searchableSurfacesQueries/searchableSurfacesQueries.H"""
         self.projections.add_vertex(corner, geometry)
 
-    def copy(self) -> 'Operation':
+    def copy(self:OperationT) -> OperationT:
         """Returns a copy of this Operation"""
         return copy.deepcopy(self)
 
@@ -147,5 +163,21 @@ class Operation(TransformableBase, AdditiveBase, abc.ABC):
         return (self.bottom_face.center + self.top_face.center)/2
 
     @property
-    def operations(self):
+    def operations(self:OperationT) -> List[OperationT]:
         return [self]
+
+    @property
+    def points(self) -> NPPointType:
+        """Returns 8 points from which this operation is created"""
+        return np.concatenate((self.bottom_face.points, self.top_face.points))
+
+    @property
+    def faces(self) -> Dict[OrientType, Face]:
+        """Create a new Face from points on given 'side' of this Operation;
+        does not copy edges (they don't need to be copied)"""
+        # TODO: TEST
+
+        return {
+            side:Face([self.points[i] for i in corners])
+            for side, corners in constants.FACE_MAP.items()
+        }

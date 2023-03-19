@@ -2,7 +2,7 @@ from typing import List, Dict
 
 import numpy as np
 
-from classy_blocks.types import PointType, VectorType, NPPointType, NPVectorType
+from classy_blocks.types import PointType, VectorType, NPPointType, NPVectorType, NPPointListType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.construct.edges import Origin
@@ -31,6 +31,8 @@ class QuarterDisk(Sketch):
         self.side_ratio = side_ratio
 
         # calculate points needed to construct faces:
+        # these points must not be remembered because they will not change
+        # when transforming this sketch; they must be taken from the faces themselves
         points:Dict[str, NPPointType] = {
             'O': self.center_point,
             'S1': self.center_point + self.radius_vector * self.side_ratio,
@@ -77,7 +79,21 @@ class QuarterDisk(Sketch):
         """Radius of this *circle, length of self.radius_vector"""
         return float(f.norm(self.radius_vector))
 
-class SemiDisk(QuarterDisk):
+    @property
+    def points(self) -> Dict[str, NPPointType]:
+        """Returns points as named during construction of a QuarterDisk"""
+        # TODO: TEST
+        return {
+            'O': self.center_point,
+            'S1': self.faces[0].points[1],
+            'D': self.faces[0].points[2],
+            'S2': self.faces[0].points[3],
+            'P1': self.faces[1].points[1],
+            'P2': self.faces[1].points[2],
+            'P3': self.faces[2].points[2]
+        }
+
+class HalfDisk(QuarterDisk):
     """A base for shapes with semi-circular
     cross-sections; a helper for creating Circle;
     see description of Circle object for more details"""
@@ -94,8 +110,8 @@ class SemiDisk(QuarterDisk):
         self.core = self.core + other_quarter.core
         self.shell = self.shell + other_quarter.shell
 
-class Disk(SemiDisk):
-    """A 2D sketch of an H-grid circle; to be used for
+class Disk(HalfDisk):
+    """A 2D sketch of an H-grid disk; to be used for
     all solid round shapes (cylinder, frustum, elbow, ...
     
     H-grid parameters:
@@ -114,7 +130,6 @@ class Disk(SemiDisk):
     Relative size of the inner square (O-D), diagonal_ratio:
     - too small will cause unnecessary high number of small cells in the square;
     - too large will prevent creating large numbers of boundary layers
-    Orthogonality of the inner square (O-S), side_ratio:
     """
     def __init__(self,
                  center_point:PointType,

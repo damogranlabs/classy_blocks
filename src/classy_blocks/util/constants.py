@@ -42,12 +42,6 @@ def vector_format(vector) -> str:
     # ACHTUNG, keep about the same order of magnitude than TOL
     return f"({vector[0]:.8f} {vector[1]:.8f} {vector[2]:.8f})"
 
-# Sphere parameters:
-# The same sketch as above but it represents sphere cross-section.
-# Vector O-S is circle normal; there are two different angles DOS;
-sphere_diagonal_angle = np.pi / 4
-sphere_side_angle = np.pi / 6
-
 MESH_HEADER =  ("/*---------------------------------------------------------------------------*\\\n"
                 "| =========                 |                                                 |\n"
                 "| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n"

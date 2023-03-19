@@ -43,6 +43,8 @@ class Mesh:
         for operation in entity.operations:
             self.add_operation(operation)
 
+        self.add_geometry(entity.geometry)
+
     def add_operation(self, operation:Operation) -> None:
         """Takes an operation, converts it to Block and adds that to the mesh"""
         vertices = self._add_vertices(operation)
@@ -55,11 +57,6 @@ class Mesh:
         self._add_patches(vertices, operation)
 
         self._project_faces(vertices, operation)
-
-        # TODO: TEST
-        #if hasattr(item, "geometry"):
-        #    raise NotImplementedError
-        #   # self.add_geometry(item.geometry)
 
     def _add_vertices(self, operation:Operation) -> List[Vertex]:
         """Creates/finds vertices from operation's points and returns them"""

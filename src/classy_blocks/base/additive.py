@@ -1,6 +1,6 @@
 import abc
 
-from typing import Sequence, TypeVar
+from typing import Sequence, TypeVar, Dict, List
 
 AdditiveT = TypeVar('AdditiveT', bound='AdditiveBase')
 
@@ -11,3 +11,10 @@ class AdditiveBase(abc.ABC):
     @abc.abstractmethod
     def operations(self:AdditiveT) -> Sequence[AdditiveT]:
         """A list of operations to be added to mesh"""
+
+    @property
+    def geometry(self) -> Dict[str, List[str]]:
+        """Some shapes need to project faces to a
+        geometry, defined ad-hoc at creation time;
+        the mesh will look into this property to add those"""
+        return {}

@@ -67,12 +67,12 @@ class RoundShape(Shape, abc.ABC):
         a Loft will be made from those"""
 
     @property
-    def core(self) -> List[Operation]:
+    def core(self):
         """Operations in the center of the shape"""
         return self.operations[:len(self.sketch_1.core)]
 
     @property
-    def shell(self) -> List[Operation]:
+    def shell(self):
         """Operations on the outside of the shape"""
         return self.operations[len(self.sketch_1.core):]
 
