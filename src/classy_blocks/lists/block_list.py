@@ -29,6 +29,7 @@ class BlockList:
         """Copy references to gradings from defined blocks to their neighbours"""
         # a riddle similar to sudoku, keep traversing
         # and copying counts until there's no undefined blocks left
+        # TODO: TEST
         undefined_blocks = set(range(len(self.blocks)))
 
         while len(undefined_blocks) > 0:

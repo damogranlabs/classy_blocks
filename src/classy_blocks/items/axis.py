@@ -77,8 +77,7 @@ class Axis:
         if self._grading is None:
             # grading was specified but not yet created;
             # do it now and remember the object
-            self._grading = Grading()
-            self._grading.set_length(self.length)
+            self._grading = Grading(self.length)
 
             for chop in self.chops:
                 self._grading.add_chop(chop)

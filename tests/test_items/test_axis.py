@@ -67,12 +67,4 @@ class AxisTests(BlockTestCase):
         block_0 = self.make_block(0)
         
         self.assertEqual(block_0.axes[0].grading.count, 6)
-    
-    def test_grading_other(self):
-        """Get grading, defined on neighbour's axis"""
-        block_0 = self.make_block(0)
-        block_1 = self.make_block(1)
-
-        block_0.add_neighbour(block_1)
-
-        self.assertEqual(block_0.axes[1].grading.count, 6)
+s

@@ -5,8 +5,9 @@ from classy_blocks.types import AxisType, OrientType
 
 from classy_blocks.construct.edges import Arc
 from classy_blocks.construct.shapes.shape import Shape
-from classy_blocks.construct.flat.circle import Circle
-from classy_blocks.construct.flat import circle
+from classy_blocks.construct.flat.disk import Disk
+from classy_blocks.construct.flat import disk
+from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.operations.loft import Loft
 
 ShapeT = TypeVar('ShapeT', bound='RoundShape')
@@ -18,9 +19,9 @@ class RoundShape(Shape, abc.ABC):
     are created between.
     
     Solid round shapes: Elbow, Frustum, Cylinder;
-    they are created using an OH-grid (see Circle), have a
+    they are created using an OH-grid (see Disk), have a
     'start' and 'end' sketch and an 'outer' surface."""
-    sketch_class = Circle # Sketch class to be used for construction of the Shape
+    sketch_class = Disk # Sketch class to be used for construction of the Shape
 
     axial_axis:AxisType = 2 # Axis along which 'outer sides' run
     radial_axis:AxisType = 0 # Axis that goes from center to 'outer side'
@@ -66,25 +67,25 @@ class RoundShape(Shape, abc.ABC):
         a Loft will be made from those"""
 
     @property
-    def core(self) -> List[Loft]:
+    def core(self) -> List[Operation]:
         """Operations in the center of the shape"""
-        return self.lofts[:len(self.sketch_1.core)]
+        return self.operations[:len(self.sketch_1.core)]
 
     @property
-    def shell(self) -> List[Loft]:
+    def shell(self) -> List[Operation]:
         """Operations on the outside of the shape"""
-        return self.lofts[len(self.sketch_1.core):]
+        return self.operations[len(self.sketch_1.core):]
 
     def chop_axial(self, **kwargs):
         """Chop the shape between start and end face"""
-        self.lofts[0].chop(self.axial_axis, **kwargs)
+        self.operations[0].chop(self.axial_axis, **kwargs)
 
     def chop_radial(self, **kwargs):
         """Chop the outer 'ring', or 'shell';
         core blocks will be defined by tangential chops"""
         # scale all radial sizes to this ratio or core cells will be
         # smaller than shell's
-        c2s_ratio = max(circle.CORE_DIAGONAL_RATIO, circle.CORE_SIDE_RATIO)
+        c2s_ratio = max(disk.CORE_DIAGONAL_RATIO, disk.CORE_SIDE_RATIO)
         if "start_size" in kwargs:
             kwargs["start_size"] *= c2s_ratio
         if "end_size" in kwargs:
@@ -99,12 +100,12 @@ class RoundShape(Shape, abc.ABC):
 
     def set_start_patch(self, name:str) -> None:
         """Assign the faces of start sketch to a named patch"""
-        for operation in self.lofts:
+        for operation in self.operations:
             operation.set_patch(self.start_patch, name)
 
     def set_end_patch(self, name:str) -> None:
         """Assign the faces of end sketch to a named patch"""
-        for operation in self.lofts:
+        for operation in self.operations:
             operation.set_patch(self.end_patch, name)
 
     def set_outer_patch(self, name:str) -> None:

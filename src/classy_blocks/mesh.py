@@ -90,8 +90,6 @@ class Mesh:
         for edge in edges:
             block.add_edge(*edge)
 
-        print(block.edge_list)
-
     def _chop_block(self, operation:Operation, block:Block) -> None:
         """Chops the block as declared in Operation"""
         for axis in (0, 1, 2):
@@ -135,7 +133,7 @@ class Mesh:
         a VTK file is created first where each block is a single cell, to see simplified
         blocking in case blockMesh fails with an unfriendly error message."""
         if debug_path is not None:
-           write_vtk(debug_path, self.vertex_list.vertices, self.block_list.blocks)
+            write_vtk(debug_path, self.vertex_list.vertices, self.block_list.blocks)
 
         self.block_list.propagate_gradings()
 

@@ -11,6 +11,7 @@ from classy_blocks.construct.operations.wedge import Wedge
 from classy_blocks.construct.shapes.elbow import Elbow
 from classy_blocks.construct.shapes.frustum import Frustum
 from classy_blocks.construct.shapes.cylinder import Cylinder
+from classy_blocks.construct.shapes.rings import ExtrudedRing, RevolvedRing
 
 from classy_blocks.mesh import Mesh
 

@@ -1,4 +1,3 @@
-import copy
 from typing import List, Dict
 
 import numpy as np
@@ -10,11 +9,11 @@ from classy_blocks.construct.edges import Origin
 from classy_blocks.util import functions as f
 
 # ratios between core and outer points;
-# see docstring of Circle class
+# see docstring of Disk class
 CORE_DIAGONAL_RATIO = 0.7
 CORE_SIDE_RATIO = 0.62
 
-class QuarterCircle(Sketch):
+class QuarterDisk(Sketch):
     """A base for shapes with quarter-circular
     cross-sections; a helper for creating SemiCircle and Circle;
     see description of Circle object for more details"""
@@ -78,7 +77,7 @@ class QuarterCircle(Sketch):
         """Radius of this *circle, length of self.radius_vector"""
         return float(f.norm(self.radius_vector))
 
-class SemiCircle(QuarterCircle):
+class SemiDisk(QuarterDisk):
     """A base for shapes with semi-circular
     cross-sections; a helper for creating Circle;
     see description of Circle object for more details"""
@@ -95,7 +94,7 @@ class SemiCircle(QuarterCircle):
         self.core = self.core + other_quarter.core
         self.shell = self.shell + other_quarter.shell
 
-class Circle(SemiCircle):
+class Disk(SemiDisk):
     """A 2D sketch of an H-grid circle; to be used for
     all solid round shapes (cylinder, frustum, elbow, ...
     

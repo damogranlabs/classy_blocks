@@ -5,7 +5,7 @@ from typing import Optional
 import numpy as np
 
 from classy_blocks.base.transformable import TransformableBase
-from classy_blocks.types import PointType, VectorType, NPPointType, ProjectToType
+from classy_blocks.types import PointType, VectorType, ProjectToType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
@@ -15,12 +15,12 @@ class Vertex(TransformableBase):
     """A 3D point in space with all transformations and an assigned index"""
     # keep the list as a class variable
     def __init__(self, position:PointType, index:int):
-        position:NPPointType = np.asarray(position, dtype=constants.DTYPE)
+        position = np.asarray(position, dtype=constants.DTYPE)
         assert np.shape(position) == (3, ), "Provide a point in 3D space"
         self.pos = position
 
         # index in blockMeshDict; address of this object when creating edges/blocks
-        self.index = index 
+        self.index = index
 
         self.project_to:Optional[ProjectToType] = None
 
@@ -62,6 +62,5 @@ class Vertex(TransformableBase):
 
         if self.project_to is not None:
             return f"project {point} ({' '.join(self.project_to)}) {comment}"
-        
-        return f"{point} {comment}"
 
+        return f"{point} {comment}"

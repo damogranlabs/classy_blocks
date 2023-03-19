@@ -33,9 +33,9 @@ class BlockTests(BlockTestCase):
         block_0.add_neighbour(block_1)
 
         # block_1 is block_0's neighbour in axes 1 and 2
-        self.assertListEqual(block_0.axes[0].neighbours, [])
-        self.assertListEqual(block_0.axes[1].neighbours, [block_1.axes[1]])
-        self.assertListEqual(block_0.axes[2].neighbours, [block_1.axes[2]])
+        self.assertSetEqual(block_0.axes[0].neighbours, set())
+        self.assertSetEqual(block_0.axes[1].neighbours, {block_1.axes[1]})
+        self.assertSetEqual(block_0.axes[2].neighbours, {block_1.axes[2]})
 
     def test_add_neighbour_2_wires(self):
         """Two blocks that share an edge only"""
@@ -57,9 +57,9 @@ class BlockTests(BlockTestCase):
 
         block_0.add_neighbour(block_2)
         # block_2 is block_0'2 neighbour only on axis 2
-        self.assertListEqual(block_0.axes[0].neighbours, [])
-        self.assertListEqual(block_0.axes[1].neighbours, [])
-        self.assertListEqual(block_0.axes[2].neighbours, [block_2.axes[2]])
+        self.assertSetEqual(block_0.axes[0].neighbours, set())
+        self.assertSetEqual(block_0.axes[1].neighbours, set())
+        self.assertSetEqual(block_0.axes[2].neighbours, {block_2.axes[2]})
 
 
     def test_add_neighbour_3(self):

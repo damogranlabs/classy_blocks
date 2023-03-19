@@ -13,6 +13,12 @@ geometry = {
         'planeType  pointAndNormal',
         'point      (-1 0 0)',
         'normal     (1  0  0)',
+    ],
+    'front_wall': [
+        'type       searchablePlane',
+        'planeType  pointAndNormal',
+        'point      (0 -1 0)',
+        'normal     (0  1  0)',
     ]
 }
 
@@ -23,11 +29,14 @@ mesh = Mesh()
 box = Box([-0.9, -0.9, -0.9], [1., 1., 1.])
 
 # project misplaced vertices
-box.project_corner(0, ['terrain', 'left_wall'])
+box.project_corner(0, ['terrain', 'left_wall', 'front_wall'])
 box.project_corner(1, 'terrain')
 box.project_corner(2, 'terrain')
 
-# project a face to geometry
+# project a face to geometry;
+# when using Loft/Extrude/Revolve, you could specify
+# those when creating a Face; you'd still have to 
+# project other sides this way
 box.project_side('bottom', 'terrain')
 
 # projection of an edge to a surface will move it in various directions,

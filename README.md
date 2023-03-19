@@ -82,7 +82,7 @@ After blocks have been placed, it is possible to create new geometry based on pl
 
 - [ ] Move Block's Vertex/Edge/Face
 - [ ] Delete a Block created by a Shape or Object
-- [x] Project Block's Vertex/Edge/Face*
+- [x] Project Block's Vertex/Edge/Face
 - [ ] Chain Block's face to generate a new block
 - [x] Chain Shape's surface (top/bottom/outer) to generate a new Shape
 - [ ] Join two Blocks by extending their Edges
@@ -94,11 +94,9 @@ After blocks have been placed, it is possible to create new geometry based on pl
 - [x] Automatic calculation of cell count and grading by specifying any of a number of parameters (cell-to-cell expansionr atio, start cell width, end cell width, total expansion ratio)
 - [ ] [Edge grading](https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-450004.3.1.3) (separate specification for each edge)
 - [x] Automatic propagation of grading and cell count from a single block to all connected blocks as required by blockMesh
-- [x] Projections of vertices, edges and block faces to geometry (triangulated and [searchable surfaces](https://www.openfoam.com/documentation/guides/latest/doc/guide-meshing-snappyhexmesh-geometry.html#meshing-snappyhexmesh-searchable-objects))*
+- [x] Projections of vertices, edges and block faces to geometry (triangulated and [searchable surfaces](https://www.openfoam.com/documentation/guides/latest/doc/guide-meshing-snappyhexmesh-geometry.html#meshing-snappyhexmesh-searchable-objects))
 - [x] Face merging as described by [blockMesh user guide](https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-470004.3.2). Breaks the pure-hexahedral-mesh rule but can often save the day for trickier geometries.
 - [ ] Auto grading for Low-Re meshes: boundary layer with specified cell-to-cell expansion, transition with 2:1 expansion, and specified 'bulk' cell size
-
-> \* Not implemented: projected Vertex
 
 # Examples
 
