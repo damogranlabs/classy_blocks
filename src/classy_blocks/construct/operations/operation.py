@@ -1,11 +1,10 @@
 import abc
-import copy
 
 from typing import List, Optional, Dict, Union, TypeVar
 
 import numpy as np
 
-from classy_blocks.types import AxisType, NPPointType, PointType, VectorType, OrientType, NPPointListType
+from classy_blocks.types import AxisType, NPPointType, PointType, VectorType, OrientType
 from classy_blocks.base.transformable import TransformableBase
 from classy_blocks.base.additive import AdditiveBase
 

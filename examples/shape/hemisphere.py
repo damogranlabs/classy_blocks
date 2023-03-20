@@ -1,7 +1,7 @@
 import os
 
 from classy_blocks import Mesh
-from classy_blocks.construct.shapes.sphere import EighthSphere, HemiSphere
+from classy_blocks.construct.shapes.sphere import HemiSphere
 
 
 center_point = [0.0, 0.0, 0.0]
@@ -20,5 +20,6 @@ sphere.set_outer_patch('walls')
 
 mesh = Mesh()
 mesh.add(sphere)
+mesh.modify_patch('walls', 'wall')
 
 mesh.write(os.path.join('..', 'case', 'system', 'blockMeshDict'), debug_path='debug.vtk')
