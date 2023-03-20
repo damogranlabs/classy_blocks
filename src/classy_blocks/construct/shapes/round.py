@@ -1,13 +1,13 @@
 import abc
-from typing import Callable, List, TypeVar
+from typing import List, TypeVar
 
 from classy_blocks.types import AxisType, OrientType
 
 from classy_blocks.construct.edges import Arc
 from classy_blocks.construct.shapes.shape import Shape
+from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.construct.flat.disk import Disk
 from classy_blocks.construct.flat import disk
-from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.operations.loft import Loft
 
 ShapeT = TypeVar('ShapeT', bound='RoundShape')
@@ -62,7 +62,7 @@ class RoundShape(Shape, abc.ABC):
             self.lofts.append(loft)
 
     @abc.abstractmethod
-    def transform_function(self, **kwargs) -> Callable:
+    def transform_function(self, **kwargs) -> Sketch:
         """A function that transforms sketch_1 to sketch_2;
         a Loft will be made from those"""
 

@@ -23,9 +23,11 @@ class QuarterDisk(Sketch):
                 normal:VectorType,
                 diagonal_ratio:float=CORE_DIAGONAL_RATIO,
                 side_ratio:float=CORE_SIDE_RATIO):
-        self.center_point = np.asarray(center_point)
-        self.radius_point = np.asarray(radius_point)
-        self.normal = f.unit_vector(np.asarray(normal))
+
+        center_point = np.asarray(center_point)
+        radius_point = np.asarray(radius_point)
+        normal = f.unit_vector(np.asarray(normal))
+        radius_vector = radius_point - center_point
 
         self.diagonal_ratio = diagonal_ratio
         self.side_ratio = side_ratio
@@ -34,15 +36,15 @@ class QuarterDisk(Sketch):
         # these points must not be remembered because they will not change
         # when transforming this sketch; they must be taken from the faces themselves
         points:Dict[str, NPPointType] = {
-            'O': self.center_point,
-            'S1': self.center_point + self.radius_vector * self.side_ratio,
-            'P1': self.center_point + self.radius_vector,
-            'D': self.center_point + self.radius_vector * self.diagonal_ratio,
+            'O': center_point,
+            'S1': center_point + radius_vector * self.side_ratio,
+            'P1': center_point + radius_vector,
+            'D': center_point + radius_vector * self.diagonal_ratio,
         }
-        points['D'] = f.rotate(points['D'], self.normal, np.pi/4)
-        points['P2'] = f.rotate(points['P1'], self.normal, np.pi/4)
-        points['S2'] = f.rotate(points['S1'], self.normal, np.pi/2)
-        points['P3'] = f.rotate(points['P1'], self.normal, np.pi/2)
+        points['D'] = f.rotate(points['D'], normal, np.pi/4)
+        points['P2'] = f.rotate(points['P1'], normal, np.pi/4)
+        points['S2'] = f.rotate(points['S1'], normal, np.pi/2)
+        points['P3'] = f.rotate(points['P1'], normal, np.pi/2)
 
         def make_face(keys, edges):
             return Face([points[k] for k in keys], edges)
@@ -53,13 +55,13 @@ class QuarterDisk(Sketch):
         # shell 1: S1-P1-P2-D
         shell_face_1 = make_face(
             ['S1', 'P1', 'P2', 'D'],
-            [None, Origin(self.center_point), None, None]
+            [None, Origin(center_point), None, None]
         )
 
         # shell 2: D-P2-P3-S
         shell_face_2 = make_face(
             ['D', 'P2', 'P3', 'S2'],
-            [None, Origin(self.center_point), None, None]
+            [None, Origin(center_point), None, None]
         )
 
         self.shell = [shell_face_1, shell_face_2]
@@ -80,18 +82,39 @@ class QuarterDisk(Sketch):
         return float(f.norm(self.radius_vector))
 
     @property
+    def center_point(self) -> NPPointType:
+        """Center point of this sketch"""
+        return self.points['O']
+
+    @property
+    def radius_point(self) -> NPPointType:
+        """Point at outer radius"""
+        return self.points['P1']
+
+    @property
     def points(self) -> Dict[str, NPPointType]:
         """Returns points as named during construction of a QuarterDisk"""
         # TODO: TEST
+        # Refer to core and shell because SemiDisk and Disk will add new faces
+        # to self.faces[]
         return {
-            'O': self.center_point,
-            'S1': self.faces[0].points[1],
-            'D': self.faces[0].points[2],
-            'S2': self.faces[0].points[3],
-            'P1': self.faces[1].points[1],
-            'P2': self.faces[1].points[2],
-            'P3': self.faces[2].points[2]
+            'O': self.core[0].points[0],
+            'S1': self.core[0].points[1],
+            'D': self.core[0].points[2],
+            'S2': self.core[0].points[3],
+            'P1': self.shell[0].points[1],
+            'P2': self.shell[0].points[2],
+            'P3': self.shell[1].points[2]
         }
+
+    @property
+    def normal(self) -> NPVectorType:
+        """Normal of this sketch"""
+        return self.faces[0].normal
+
+    @property
+    def n_segments(self):
+        return len(self.shell)
 
 class HalfDisk(QuarterDisk):
     """A base for shapes with semi-circular

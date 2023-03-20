@@ -2,8 +2,12 @@ from typing import Optional
 
 import numpy as np
 
+
 from classy_blocks.types import PointType
+from classy_blocks.construct.flat.disk import Disk
 from classy_blocks.construct.shapes.round import RoundShape
+
+from classy_blocks.util import functions as f
 
 class Frustum(RoundShape):
     """Creates a cone frustum (truncated cylinder).
@@ -40,3 +44,20 @@ class Frustum(RoundShape):
             {"displacement": self.axis, "radius": radius_2},
             mid_params
         )
+
+    
+    @classmethod
+    def chain(cls, source, length, radius_2, radius_mid=None):
+        """Chain this Frustum to an existing Shape;
+        Use length < 0 to begin on start face and go 'backwards'"""
+        # TODO: TEST
+        assert source.sketch_class == Disk
+
+        if length < 0:
+            sketch = source.sketch_1
+        else:
+            sketch = source.sketch_2
+
+        axis_point_2 = sketch.center_point + f.unit_vector(sketch.normal) * length
+
+        return cls(sketch.center_point, axis_point_2, sketch.radius_point, radius_2, radius_mid)

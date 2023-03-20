@@ -1,5 +1,5 @@
 """The Mesh object ties everything together and writes the blockMeshDict in the end."""
-from typing import  Optional, List, Dict
+from typing import  Optional, List
 
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.block import Block

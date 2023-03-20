@@ -2,7 +2,7 @@ from typing import List
 
 import numpy as np
 
-from classy_blocks.types import PointType, VectorType
+from classy_blocks.types import PointType, VectorType, NPPointType, NPVectorType
 from classy_blocks.construct.edges import Origin
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketch import Sketch
@@ -20,35 +20,76 @@ class Annulus(Sketch):
                  normal:VectorType,
                  inner_radius:float, n_segments:int=8):
 
-        self.center_point = np.asarray(center_point)
-        self.normal = f.unit_vector(np.asarray(normal))
+        center_point = np.asarray(center_point)
+        normal = f.unit_vector(np.asarray(normal))
 
         outer_radius_point = np.asarray(outer_radius_point)
-        inner_radius_point = self.center_point + \
-            f.unit_vector(outer_radius_point - self.center_point) * inner_radius
 
-        self.n_segments = n_segments
+        inner_radius_point = center_point + \
+            f.unit_vector(outer_radius_point - center_point) * inner_radius
 
         segment_angle = 2 * np.pi / n_segments
 
         face = Face([ # points
                 inner_radius_point,
                 outer_radius_point,
-                f.rotate(outer_radius_point, self.normal, segment_angle, self.center_point),
-                f.rotate(inner_radius_point, self.normal, segment_angle, self.center_point)
+                f.rotate(outer_radius_point, normal, segment_angle, center_point),
+                f.rotate(inner_radius_point, normal, segment_angle, center_point)
             ],
             [ # edges
-                None, Origin(self.center_point),
-                None, Origin(self.center_point)
+                None, Origin(center_point),
+                None, Origin(center_point)
             ]
         )
 
         self.core = []
         self.shell = [
-            face.copy().rotate(i*segment_angle, self.normal, self.center_point)
-            for i in range(self.n_segments)
+            face.copy().rotate(i*segment_angle, normal, center_point)
+            for i in range(n_segments)
         ]
 
     @property
     def faces(self) -> List[Face]:
         return self.shell
+
+    @property
+    def inner_radius_point(self) -> NPPointType:
+        """"""
+        return self.faces[0].points[0]
+
+    @property
+    def outer_radius_point(self) -> NPPointType:
+        """"""
+        return self.faces[0].points[1]
+
+    @property
+    def radius_point(self) -> NPPointType:
+        return self.outer_radius_point
+
+    @property
+    def radius(self) -> float:
+        return self.outer_radius_point - self.center_point
+
+    @property
+    def center_point(self) -> NPPointType:
+        """"""
+        return self.center
+
+    @property
+    def inner_radius(self) -> float:
+        """Returns inner radius as length, that is, distance between
+        center and inner radius point"""
+        return f.norm(self.inner_radius_point - self.center_point)
+
+    @property
+    def outer_radius(self) -> float:
+        """"""
+        return f.norm(self.outer_radius_point - self.inner_radius_point)
+
+    @property
+    def normal(self) -> NPVectorType:
+        return self.faces[0].normal
+
+    @property
+    def n_segments(self):
+        return len(self.faces)

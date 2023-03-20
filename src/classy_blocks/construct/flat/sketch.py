@@ -47,3 +47,8 @@ class Sketch(TransformableBase, abc.ABC):
     def center(self) -> NPPointType:
         """Center of this sketch; an average of all faces"""
         return np.average([f.center for f in self.faces], axis=0)
+
+    @property
+    @abc.abstractmethod
+    def n_segments(self) -> int:
+        """Number of faces defining this annulus"""

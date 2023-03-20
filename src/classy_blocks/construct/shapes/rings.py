@@ -6,9 +6,10 @@ from classy_blocks.types import PointType, OrientType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.annulus import Annulus
 from classy_blocks.construct.operations.operation import Operation
-from classy_blocks.construct.shapes.round import Shape, RoundShape
+from classy_blocks.construct.shapes.round import RoundShape
 from classy_blocks.construct.operations.revolve import Revolve
 
+from classy_blocks.util import functions as f
 
 class ExtrudedRing(RoundShape):
     """A ring, created by specifying its base, then extruding it"""
@@ -39,6 +40,50 @@ class ExtrudedRing(RoundShape):
         """Assign the faces of inside surface to a named patch"""
         for operation in self.shell:
             operation.set_patch(self.inner_patch, name)
+
+    @classmethod
+    def chain(cls, source:RoundShape, length:float) -> 'ExtrudedRing':
+        """Creates a new cylinder on start or end face of a round source Shape;
+        Use length > 0 to go 'forward' from source's end face or
+        length < 0 to go 'backward' from source's start face"""
+        # TODO: TEST
+        assert isinstance(source, ExtrudedRing)
+
+        if length > 0:
+            sketch = source.sketch_2
+        else:
+            sketch = source.sketch_1
+
+        return cls(
+            sketch.center_point,
+            sketch.center_point + f.unit_vector(sketch.normal) * length,
+            sketch.outer_radius_point,
+            sketch.inner_radius,
+            n_segments=sketch.n_segments,
+        )
+
+    @classmethod
+    def expand(cls, source, thickness: float) -> 'ExtrudedRing':
+        """Create a new concentric Ring with radius, enlarged by 'thickness';
+        Can be used on Cylinder or ExtrudedRing"""
+        # TODO: TEST
+        s1 = source.sketch_1
+        s2 = source.sketch_2
+
+        new_radius_point = s1.center_point + f.unit_vector(s1.radius_point - s1.center_point) * (s1.radius + thickness)
+
+        return cls(s1.center_point, s2.center_point, new_radius_point, s1.radius, n_segments=s1.n_segments)
+
+    @classmethod
+    def contract(cls, source, inner_radius: float):
+        # TODO: TEST
+        assert source.__class__ == cls
+
+        s1 = source.sketch_1
+        s2 = source.sketch_2
+        assert inner_radius < s1.inner_radius
+
+        return cls(s1.center_point, s2.center_point, s1.inner_radius_point, inner_radius)
 
 class RevolvedRing(ExtrudedRing):
     """A ring specified by its cross-section; can be of arbitrary shape.
