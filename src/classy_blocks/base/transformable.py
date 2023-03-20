@@ -1,4 +1,5 @@
 import abc
+import copy
 from typing import Optional, TypeVar
 
 from classy_blocks.types import PointType, VectorType
@@ -23,3 +24,7 @@ class TransformableBase(abc.ABC):
         """Scale with respect to given origin; returns the same instance
         to enable chaining of transformations. If no origin is given,
         the entity is scaled with respect to its center"""
+
+    def copy(self:TrBaseT) -> TrBaseT:
+        """Returns a copy of this object"""
+        return copy.deepcopy(self)

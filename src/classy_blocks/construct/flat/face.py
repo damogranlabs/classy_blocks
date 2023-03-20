@@ -70,6 +70,9 @@ class Face(TransformableBase):
         return self
 
     def rotate(self, angle: float, axis: VectorType, origin: Optional[PointType] = None) -> 'Face':
+        if origin is None:
+            origin = self.center
+
         self.points = np.array([
             f.rotate(p, axis, angle, origin) for p in self.points
         ], dtype=constants.DTYPE)
@@ -79,7 +82,7 @@ class Face(TransformableBase):
                 edge.rotate(angle, axis, origin)
 
         return self
-    
+
     def scale(self, ratio: float, origin: Optional[PointType] = None) -> 'Face':
         if origin is None:
             origin = self.center
@@ -87,17 +90,17 @@ class Face(TransformableBase):
         self.points = np.array([
             f.scale(p, ratio, origin) for p in self.points
         ], dtype=constants.DTYPE)
-        
+
         for edge in self.edges:
             if edge is not None:
                 edge.scale(ratio, origin)
-        
+
         return self
 
     def invert(self) -> None:
         """Reverses the order of points in this face."""
         self.points = np.flip(self.points, axis=0)
-    
+
     def copy(self) -> 'Face':
         """Returns a copy of this Face"""
         return copy.deepcopy(self)

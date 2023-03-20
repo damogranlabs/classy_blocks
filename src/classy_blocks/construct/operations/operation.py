@@ -108,10 +108,6 @@ class Operation(TransformableBase, AdditiveBase, abc.ABC):
         https://github.com/OpenFOAM/OpenFOAM-10/blob/master/src/meshTools/searchableSurfaces/searchableSurfacesQueries/searchableSurfacesQueries.H"""
         self.projections.add_vertex(corner, geometry)
 
-    def copy(self:OperationT) -> OperationT:
-        """Returns a copy of this Operation"""
-        return copy.deepcopy(self)
-
     def translate(self, displacement: VectorType) -> 'Operation':
         """returns a translated copy of this Operation"""
         self.bottom_face.translate(displacement)
