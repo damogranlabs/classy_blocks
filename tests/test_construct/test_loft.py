@@ -60,7 +60,7 @@ class OperationTests(unittest.TestCase):
         rotated_op = self.loft.copy().rotate(angle, axis, origin)
 
         def extrude_direction(op):
-            return op.top_face.points[0] - op.bottom_face.points[0]
+            return op.top_face.center - op.bottom_face.center
 
         np.testing.assert_almost_equal(
             f.angle_between(extrude_direction(original_op), extrude_direction(rotated_op)),

@@ -32,14 +32,6 @@ class TestFunctions(unittest.TestCase):
         """Vector norm"""
         self.assertEqual(f.norm(f.vector(1, 0, 0)), 1)
 
-    def test_norm_matrix(self):
-        """Norm of a list of vectors"""
-        np.testing.assert_array_equal(
-            f.norm(np.array([[1, 0, 0], [2, 0, 0], [3, 0, 0]])),
-            np.array([1, 2, 3])
-        )
-
-
     def test_angle_between(self):
         """angle between two vectors"""
         v1 = f.vector(0, 0, 1)

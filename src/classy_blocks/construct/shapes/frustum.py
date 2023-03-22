@@ -32,20 +32,19 @@ class Frustum(RoundShape):
                  axis_point_2:PointType,
                  radius_point_1:PointType,
                  radius_2: float, radius_mid:Optional[float]=None):
-        self.axis = np.asarray(axis_point_2) - np.asarray(axis_point_1)
+        axis = np.asarray(axis_point_2) - np.asarray(axis_point_1)
 
         if radius_mid is None:
             mid_params = None
         else:
-            mid_params = {"displacement": self.axis / 2, "radius": radius_mid}
+            mid_params = {"displacement": axis / 2, "radius": radius_mid}
 
         super().__init__(
-            [axis_point_1, radius_point_1, self.axis],
-            {"displacement": self.axis, "radius": radius_2},
+            [axis_point_1, radius_point_1, axis],
+            {"displacement": axis, "radius": radius_2},
             mid_params
         )
 
-    
     @classmethod
     def chain(cls, source, length, radius_2, radius_mid=None):
         """Chain this Frustum to an existing Shape;

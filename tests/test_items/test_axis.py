@@ -67,4 +67,3 @@ class AxisTests(BlockTestCase):
         block_0 = self.make_block(0)
         
         self.assertEqual(block_0.axes[0].grading.count, 6)
-s
