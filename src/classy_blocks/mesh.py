@@ -52,16 +52,17 @@ class Mesh:
         """Creates/finds vertices from operation's points and returns them"""
         vertices:List[Vertex] = []
 
+        # TODO: prettify
         for corner in range(8):
-            duplicate = False
             patch = operation.get_patch_from_corner(corner)
+            point = operation.points[corner]
+            slave_patch = None
 
             if patch is not None:
                 if self.patch_list.is_slave(patch):
-                    duplicate = True
+                    slave_patch = patch
             
-            point = operation.points[corner]
-            vertices.append(self.vertex_list.add(point, duplicate))
+            vertices.append(self.vertex_list.add(point, slave_patch))
     
         for data in operation.projections.vertices:
             vertices[data.corner].project(data.geometry)
