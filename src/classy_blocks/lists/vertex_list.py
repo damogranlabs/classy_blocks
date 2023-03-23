@@ -1,7 +1,5 @@
 from typing import List, Dict, Optional
 
-import numpy as np
-
 from classy_blocks.base.exceptions import VertexNotFoundError
 from classy_blocks.types import NPPointType
 from classy_blocks.util import constants

@@ -1,4 +1,4 @@
-import abc
+import dataclasses
 
 from typing import List, Optional, Union, Callable
 
@@ -115,3 +115,11 @@ class Project(EdgeData):
             self.geometry = geometry
         else:
             self.geometry = [geometry]
+
+@dataclasses.dataclass
+class EdgeInfo:
+    """Information about a specific edge in an operation/list
+    before it's been added to list and block"""
+    corner_1:int
+    corner_2:int
+    data:EdgeData

@@ -4,6 +4,7 @@ from typing import  Optional, List
 
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.block import Block
+
 from classy_blocks.lists.block_list import BlockList
 from classy_blocks.lists.vertex_list import VertexList
 from classy_blocks.lists.edge_list import EdgeList
@@ -41,11 +42,12 @@ class Mesh:
             'verbose': None,
         }
 
-        self._assembled = False
-
     def add(self, entity:AdditiveBase) -> None:
         """Add a classy_blocks entity to the mesh;
         can be a plain Block, created from points, Operation, Shape or Object."""
+        # this does nothing yet;
+        # the data will be processed automatically on a
+        # proper occasion (before write/optimize)
         self.depot.append(entity)
 
     def _add_vertices(self, operation:Operation) -> List[Vertex]:
@@ -68,37 +70,6 @@ class Mesh:
             vertices[data.corner].project(data.geometry)
         
         return vertices
-
-    def _add_edges(self, operation:Operation, vertices:List[Vertex], block:Block) -> None:
-        """Creates/finds edges from operation and returns them"""
-        # TODO: no daisy.object.chaining
-        edges = \
-            self.edge_list.add_from_operation(vertices, operation.bottom_face.edges, 'bottom') + \
-            self.edge_list.add_from_operation(vertices, operation.top_face.edges, 'top') + \
-            self.edge_list.add_from_operation(vertices, operation.side_edges, 'side')
-
-        for edge in edges:
-            block.add_edge(*edge)
-
-        # also add projected edges - override whatever's been defined already
-        edges = self.edge_list.add_projected(vertices, operation.projections.edges)
-
-        for edge in edges:
-            block.add_edge(*edge)
-
-    def _chop_block(self, operation:Operation, block:Block) -> None:
-        """Chops the block as declared in Operation"""
-        for axis in (0, 1, 2):
-            for chop in operation.chops[axis]:
-                block.chop(axis, chop)
-
-    def _add_patches(self, vertices:List[Vertex], operation:Operation) -> None:
-        """Creates patches and projects faces"""
-        self.patch_list.add(vertices, operation)
-
-    def _project_faces(self, vertices:List[Vertex], operation:Operation) -> None:
-        """Collects projected faces from operation"""
-        self.face_list.add(vertices, operation)
 
     def merge_patches(self, master:str, slave:str) -> None:
         """Merges two non-conforming named patches using face merging;
@@ -130,27 +101,29 @@ class Mesh:
         blockMeshDict. After this has been done, the above objects 
         cease to have any function or influence on mesh."""
         for entity in self.depot:
-
             for operation in entity.operations:
+                #
                 vertices = self._add_vertices(operation)
 
                 block = Block(len(self.block_list.blocks), vertices)
-                self._add_edges(operation, vertices, block)
-                self._chop_block(operation, block)
+                for info in self.edge_list.add_from_operation(vertices, operation):
+                    block.add_edge(info.corner_1, info.corner_2, info.data)
+
+                # chop
+                for axis in (0, 1, 2):
+                    for chop in operation.chops[axis]:
+                        block.chop(axis, chop)
+
                 self.block_list.add(block)
-
-                self._add_patches(vertices, operation)
-
-                self._project_faces(vertices, operation)
+                self.patch_list.add(vertices, operation)
+                self.face_list.add(vertices, operation)
         
             self.add_geometry(entity.geometry)
-
-        self._assembled = True
 
     @property
     def is_assembled(self) -> bool:
         """Returns True if assemble() has been executed on this mesh"""
-        return self._assembled
+        return len(self.vertex_list.vertices) > 0
 
     def write(self, output_path:str, debug_path:Optional[str]=None) -> None:
         """Writes a blockMeshDict to specified location. If debug_path is specified,

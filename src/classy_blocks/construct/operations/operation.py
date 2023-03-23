@@ -1,5 +1,3 @@
-import abc
-
 from typing import List, Optional, Dict, Union, TypeVar
 
 import numpy as np
@@ -9,7 +7,7 @@ from classy_blocks.base.additive import AdditiveBase
 
 from classy_blocks.construct.operations.projections import ProjectedEntities
 from classy_blocks.construct.flat.face import Face
-from classy_blocks.construct.edges import EdgeData
+from classy_blocks.construct.edges import EdgeData, EdgeInfo
 from classy_blocks.grading.chop import Chop
 
 from classy_blocks.util import constants
@@ -169,6 +167,11 @@ class Operation(AdditiveBase):
     def points(self) -> NPPointType:
         """Returns 8 points from which this operation is created"""
         return np.concatenate((self.bottom_face.points, self.top_face.points))
+
+    @property
+    def edges(self) -> List[EdgeInfo]:
+        """Returns assembled EdgeInfo from faces, sides and projections"""
+        raise NotImplemented
 
     @property
     def faces(self) -> Dict[OrientType, Face]:
