@@ -20,9 +20,9 @@ core_size = 0.1
 # Cylinder/Frustum with non-flat start/end faces.
 frustum = Frustum(axis_point_1, axis_point_2, radius_point_1, radius_2, radius_mid=1.1)
 
-# frustum.set_bottom_patch('inlet')
-# frustum.set_top_patch('outlet')
-# frustum.set_outer_patch('walls')
+frustum.set_start_patch('inlet')
+frustum.set_outer_patch('walls')
+frustum.set_end_patch('outlet')
 
 frustum.chop_axial(count=30)
 frustum.chop_radial(start_size=core_size, end_size=bl_thickness)

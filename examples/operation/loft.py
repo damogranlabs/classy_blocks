@@ -34,6 +34,6 @@ loft.chop(2, count=30)
 
 mesh = Mesh()
 mesh.add_operation(loft)
-#mesh.set_default_patch('walls', 'wall')
+mesh.set_default_patch('walls', 'wall')
 
 mesh.write(os.path.join('..', 'case', 'system', 'blockMeshDict'))

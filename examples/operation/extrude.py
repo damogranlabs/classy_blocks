@@ -22,7 +22,7 @@ extrude.chop(2, c2c_expansion=1, count=20)
 
 mesh = Mesh()
 mesh.add_operation(extrude)
-#mesh.set_default_patch('walls', 'wall')
+mesh.set_default_patch('walls', 'wall')
 
 mesh.write(os.path.join('..', 'case', 'system', 'blockMeshDict'))
 
