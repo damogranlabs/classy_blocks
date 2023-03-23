@@ -2,9 +2,11 @@ import abc
 
 from typing import Sequence, TypeVar, Dict, List
 
+from classy_blocks.base.transformable import TransformableBase
+
 AdditiveT = TypeVar('AdditiveT', bound='AdditiveBase')
 
-class AdditiveBase(abc.ABC):
+class AdditiveBase(TransformableBase):
     """A base class for any entity that can be added to mesh using
     mesh.add(); with all the machinery required to do that"""
     @property

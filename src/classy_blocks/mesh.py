@@ -21,6 +21,9 @@ from classy_blocks.util.tools import write_vtk
 class Mesh:
     """contains blocks, edges and all necessary methods for assembling blockMeshDict"""
     def __init__(self):
+        # List of all added operations/shapes
+        self.depot:List[AdditiveBase] = []
+
         self.vertex_list = VertexList()
         self.edge_list = EdgeList()
         self.block_list = BlockList()

@@ -6,11 +6,10 @@ import numpy as np
 
 from classy_blocks.types import VectorType, PointType, NPPointType
 from classy_blocks.base.additive import AdditiveBase
-from classy_blocks.base.transformable import TransformableBase
 
 ShapeT = TypeVar('ShapeT', bound='Shape')
 
-class Shape(AdditiveBase, TransformableBase, abc.ABC):
+class Shape(AdditiveBase):
     """A collection of Operations that form a predefined
     parametric shape"""
     def set_cell_zone(self, cell_zone:str) -> None:

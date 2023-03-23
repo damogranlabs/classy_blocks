@@ -4,7 +4,7 @@ from typing import Optional, TypeVar
 
 from classy_blocks.types import PointType, VectorType
 
-TrBaseT = TypeVar("TTrBase", bound="TransformableBase")
+TrBaseT = TypeVar("TrBaseT", bound="TransformableBase")
 
 class TransformableBase(abc.ABC):
     """Base class for every entity that can be transformed;

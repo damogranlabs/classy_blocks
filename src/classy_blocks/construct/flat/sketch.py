@@ -11,7 +11,7 @@ from classy_blocks.construct.flat.face import Face
 
 SketchT = TypeVar('SketchT', bound='Sketch')
 
-class Sketch(TransformableBase, abc.ABC):
+class Sketch(TransformableBase):
     """A collection of Faces that form the basis of a 3D Shape."""
     @property
     @abc.abstractmethod

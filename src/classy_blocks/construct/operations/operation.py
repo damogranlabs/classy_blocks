@@ -5,7 +5,6 @@ from typing import List, Optional, Dict, Union, TypeVar
 import numpy as np
 
 from classy_blocks.types import AxisType, NPPointType, PointType, VectorType, OrientType
-from classy_blocks.base.transformable import TransformableBase
 from classy_blocks.base.additive import AdditiveBase
 
 from classy_blocks.construct.operations.projections import ProjectedEntities
@@ -17,7 +16,7 @@ from classy_blocks.util import constants
 
 OperationT = TypeVar('OperationT', bound='Operation')
 
-class Operation(TransformableBase, AdditiveBase, abc.ABC):
+class Operation(AdditiveBase):
     """A user-friendly way to create a Block, as a 2-point Box,
     extruded/revolved from a single Face or Lofted between two faces
     with optional side edges."""

@@ -9,7 +9,7 @@ from classy_blocks.base.transformable import TransformableBase
 from classy_blocks.util import functions as f
 from classy_blocks.util import constants
 
-class EdgeData(TransformableBase, abc.ABC):
+class EdgeData(TransformableBase):
     """Common operations on classes for edge creation"""
     kind:EdgeKindType # Edge type, the string that follows vertices in blockMeshDict.edges
 
