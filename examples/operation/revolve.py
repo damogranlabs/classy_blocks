@@ -18,7 +18,7 @@ revolve.chop(1, count=10)
 revolve.chop(2, count=30)
 
 mesh = Mesh()
-mesh.add_operation(revolve)
+mesh.add(revolve)
 mesh.set_default_patch('walls', 'wall')
 
 mesh.write(os.path.join('..', 'case', 'system', 'blockMeshDict'))

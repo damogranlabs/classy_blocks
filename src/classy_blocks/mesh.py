@@ -41,34 +41,28 @@ class Mesh:
             'verbose': None,
         }
 
+        self._assembled = False
+
     def add(self, entity:AdditiveBase) -> None:
         """Add a classy_blocks entity to the mesh;
         can be a plain Block, created from points, Operation, Shape or Object."""
-        for operation in entity.operations:
-            self.add_operation(operation)
-
-        self.add_geometry(entity.geometry)
-
-    def add_operation(self, operation:Operation) -> None:
-        """Takes an operation, converts it to Block and adds that to the mesh"""
-        vertices = self._add_vertices(operation)
-
-        block = Block(len(self.block_list.blocks), vertices)
-        self._add_edges(operation, vertices, block)
-        self._chop_block(operation, block)
-        self.block_list.add(block)
-
-        self._add_patches(vertices, operation)
-
-        self._project_faces(vertices, operation)
+        self.depot.append(entity)
 
     def _add_vertices(self, operation:Operation) -> List[Vertex]:
         """Creates/finds vertices from operation's points and returns them"""
-        vertices:List[Vertex] = \
-            [self.vertex_list.add(p) for p in operation.bottom_face.points] + \
-            [self.vertex_list.add(p) for p in operation.top_face.points]
+        vertices:List[Vertex] = []
+
+        for corner in range(8):
+            duplicate = False
+            patch = operation.get_patch_from_corner(corner)
+
+            if patch is not None:
+                if self.patch_list.is_slave(patch):
+                    duplicate = True
+            
+            point = operation.points[corner]
+            vertices.append(self.vertex_list.add(point, duplicate))
     
-        # TODO: avoid daisy.chaining.of.objects
         for data in operation.projections.vertices:
             vertices[data.corner].project(data.geometry)
         
@@ -105,11 +99,11 @@ class Mesh:
         """Collects projected faces from operation"""
         self.face_list.add(vertices, operation)
 
-    # def merge_patches(self, master:str, slave:str) -> None:
-    #     """Merges two non-conforming named patches using face merging;
-    #     https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-470004.3.2
-    #     (breaks the 100% hex-mesh rule)"""
-    #     self.patches['merged'].append([master, slave])
+    def merge_patches(self, master:str, slave:str) -> None:
+        """Merges two non-conforming named patches using face merging;
+        https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-470004.3.2
+        (breaks the 100% hex-mesh rule)"""
+        self.patch_list.merge(master, slave)
 
     def set_default_patch(self, name:str, kind:str) -> None:
         """Adds the 'defaultPatch' entry to the mesh; any non-specified block boundaries
@@ -129,6 +123,34 @@ class Mesh:
         See examples/advanced/project for an example."""
         self.geometry_list.add(geometry)
 
+    def assemble(self) -> None:
+        """Converts classy_blocks entities (operations and shapes) to
+        actual vertices, edges, blocks and other stuff to be inserted into
+        blockMeshDict. After this has been done, the above objects 
+        cease to have any function or influence on mesh."""
+        for entity in self.depot:
+
+            for operation in entity.operations:
+                vertices = self._add_vertices(operation)
+
+                block = Block(len(self.block_list.blocks), vertices)
+                self._add_edges(operation, vertices, block)
+                self._chop_block(operation, block)
+                self.block_list.add(block)
+
+                self._add_patches(vertices, operation)
+
+                self._project_faces(vertices, operation)
+        
+            self.add_geometry(entity.geometry)
+
+        self._assembled = True
+
+    @property
+    def is_assembled(self) -> bool:
+        """Returns True if assemble() has been executed on this mesh"""
+        return self._assembled
+
     def write(self, output_path:str, debug_path:Optional[str]=None) -> None:
         """Writes a blockMeshDict to specified location. If debug_path is specified,
         a VTK file is created first where each block is a single cell, to see simplified
@@ -136,6 +158,10 @@ class Mesh:
         if debug_path is not None:
             write_vtk(debug_path, self.vertex_list.vertices, self.block_list.blocks)
 
+        if not self.is_assembled:
+            self.assemble()
+
+        # gradings 
         self.block_list.propagate_gradings()
 
         with open(output_path, 'w', encoding='utf-8') as output:
@@ -154,13 +180,4 @@ class Mesh:
             output.write(self.face_list.description)
             output.write(self.patch_list.description)
 
-            # merged patches: output manually
-            # if len(self.patches['merged']) > 0:
-            #     f.write("mergePatchPairs\n(\n")
-            #     for pair in self.patches['merged']:
-            #         f.write(f"\t({pair[0]} {pair[1]})\n")
-                
-            #     f.write(");\n\n")
-
             output.write(constants.MESH_FOOTER)
-

@@ -25,42 +25,23 @@ class VertexList:
 
         raise VertexNotFoundError(f"Vertex not found: {str(position)}")
 
-    def add(self, point:NPPointType) -> Vertex:
-        """Re-use existing vertices when there's already one at the position;"""
+    def add(self, point:NPPointType, duplicate:bool=False) -> Vertex:
+        """Re-use existing vertices when there's already one at the position;
+        unless that vertex belongs to a slave of a face-merged pair - 
+        in that case add a duplicate in the same position anyway"""
+        # TODO: TEST
         try:
+            if duplicate:
+                # create a new one in any case
+                raise VertexNotFoundError
+
             vertex = self.find(point)
-            # TODO: check for face-merged stuff
         except VertexNotFoundError:
             # no vertex was found, add a new one;
             vertex = Vertex(point, len(self.vertices))
             self.vertices.append(vertex)
-
+        
         return vertex
-
-        # merged patches: duplicate all points that define slave patches
-        # duplicated_points = {}  # { original_index:new_vertex }
-        # slave_patches = [mp[1] for mp in merged_patches]
-
-        # for patch in slave_patches:
-        #     for block in blocks:
-        #         if patch in block.patches:
-        #             patch_sides = block.get_patch_sides(patch)
-        #             for side in patch_sides:
-        #                 face_indexes = block.get_side_indexes(side, local=True)
-
-        #                 for i in face_indexes:
-        #                     vertex = block.vertices[i]
-
-        #                     if vertex.mesh_index not in duplicated_points:
-        #                         new_vertex = Vertex(vertex.point)
-        #                         new_vertex.mesh_index = len(self.vertices)
-        #                         self.vertices.append(new_vertex)
-
-        #                         block.vertices[i] = new_vertex
-
-        #                         duplicated_points[vertex.mesh_index] = new_vertex
-        #                     else:
-        #                         block.vertices[i] = duplicated_points[vertex.mesh_index]
 
     @property
     def description(self) -> str:

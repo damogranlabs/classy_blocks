@@ -16,7 +16,7 @@ box.chop(1, start_size=0.02, c2c_expansion=1.2, length_ratio=0.5, invert=True)
 box.chop(2, c2c_expansion=1, count=20)
 
 mesh = Mesh()
-mesh.add_operation(box)
+mesh.add(box)
 mesh.set_default_patch('walls', 'wall')
 
 mesh.write(os.path.join('..', 'case', 'system', 'blockMeshDict'))

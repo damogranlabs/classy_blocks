@@ -11,18 +11,23 @@ class PatchList:
     def __init__(self):
         self.patches:Dict[str, Patch] = {} # TODO: OrderedDict for consistent testing?
         self.default:Optional[Dict[str, str]] = None
+        self.merged:List[List[str]] = [] # data for the mergePatchPairs entry
 
     def add(self, vertices:List[Vertex], operation:Operation) -> None:
         """Create Patches from operation's patch_names"""
         for orient in operation.patch_names:
             self.add_side(operation.patch_names[orient], orient, vertices)
 
+    def get(self, name:str) -> Patch:
+        """Fetches an existing Patch or creates a new one"""
+        if name not in self.patches:
+            self.patches[name] = Patch(name)
+
+        return self.patches[name]
+
     def add_side(self, patch_name:str, orient:OrientType, vertices:List[Vertex]) -> None:
         """Adds a quad to an existing patch or creates a new one"""
-        if patch_name not in self.patches:
-            self.patches[patch_name] = Patch(patch_name)
-
-        self.patches[patch_name].add_side(Side(orient, vertices))
+        self.get(patch_name).add_side(Side(orient, vertices))
 
     def set_default(self, name:str, kind:str) -> None:
         """Creates the default Patch"""
@@ -30,10 +35,15 @@ class PatchList:
 
     def modify(self, name:str, kind:str, settings:Optional[List[str]]=None) -> None:
         """Changes patch's properties"""
-        self.patches[name].kind = kind
+        patch = self.get(name)
+        patch.kind = kind
 
         if settings is not None:
-            self.patches[name].settings = settings
+            patch.settings = settings
+
+    def merge(self, master:str, slave:str) -> None:
+        """Adds an entry in mergePatchPairs list in blockMeshDict"""
+        self.merged.append([master, slave])
 
     @property
     def description(self) -> str:
@@ -51,4 +61,20 @@ class PatchList:
             out += f"\ttype {self.default['kind']};\n"
             out += "}\n\n"
 
+        # merged patches
+        out += "mergePatchPairs\n(\n"
+        for pair in self.merged:
+            out += f"\t({pair[0]} {pair[1]})\n"
+        out += ");\n\n"
+
         return out
+
+    def is_slave(self, name:str) -> bool:
+        """Returns True if a patch with given name is 
+        listed as a slave in merged patches"""
+        # TODO: TEST
+        for pair in self.merged:
+            if pair[1] == name:
+                return True
+        
+        return False

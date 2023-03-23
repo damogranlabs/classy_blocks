@@ -46,7 +46,13 @@ class Operation(AdditiveBase):
         2: between faces / along operation path
 
         Kwargs: see arguments for Chop object"""
+        # TODO: TEST
         self.chops[axis].append(Chop(**kwargs))
+
+    def unchop(self, axis:AxisType) -> None:
+        """Removed existing chops from an operation
+        (comes handy after copying etc.)"""
+        self.chops[axis] = []
 
     def set_patch(self, sides: Union[OrientType, List[OrientType]], name:str) -> None:
         """Assign a patch to given side of the block; 
@@ -94,7 +100,6 @@ class Operation(AdditiveBase):
                     corner,
                     constants.FACE_MAP[side][(i+1) % 4], geometry
                 )
-
 
     def project_edge(self, corner_1:int, corner_2:int, geometry:Union[str, List[str]]) -> None:
         """Project an edge to a surface or an intersection of two surfaces"""
@@ -175,3 +180,12 @@ class Operation(AdditiveBase):
             side:Face([self.points[i] for i in corners])
             for side, corners in constants.FACE_MAP.items()
         }
+
+    def get_patch_from_corner(self, corner:int) -> Optional[str]:
+        """Returns patch name at given corner or None if
+        no patch has been defined"""
+        for side, patch in self.patch_names.items():
+            if corner in constants.FACE_MAP[side]:
+                return patch
+        
+        return None
