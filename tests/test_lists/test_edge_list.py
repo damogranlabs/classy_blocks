@@ -26,26 +26,26 @@ class EdgeListTests(DataTestCase):
     def test_get_corners_bottom(self, corner_1, corner_2):
         """get_corners for a bottom face"""
         output = (corner_1, corner_2)
-        self.assertTupleEqual(EdgeList.get_corners(corner_1, 'bottom'), output)
+        self.assertTupleEqual(EdgeList.get_corners(corner_1), output)
 
     @parameterized.expand(((0, 4, 5), (1, 5, 6), (2, 6, 7), (3, 7, 4)))
     def test_get_corners_top(self, index, corner_1, corner_2):
         """get_corners for a bottom face"""
         output = (corner_1, corner_2)
-        self.assertTupleEqual(EdgeList.get_corners(index, 'top'), output)
+        self.assertTupleEqual(EdgeList.get_corners(index), output)
 
     @parameterized.expand(((0, 4), (1, 5), (2, 6), (3, 7)))
     def test_get_corners_side(self, corner_1, corner_2):
         """get_corners for a side corners"""
         output = (corner_1, corner_2)
-        self.assertTupleEqual(EdgeList.get_corners(corner_1, 'side'), output)
+        self.assertTupleEqual(EdgeList.get_corners(corner_1), output)
 
     def test_add_new(self):
         """Add an edge when no such thing exists"""
         vertices = self.get_vertices(0)
         face_edges = [Arc([0.5, 0.5, 0])]
 
-        edges = self.el.add_from_operation(vertices, face_edges, 'bottom')
+        edges = self.el.add_from_operation(vertices, face_edges)
 
         self.assertEqual(len(edges), 1)
         self.assertEqual(len(self.el.edges), 1)
@@ -55,8 +55,8 @@ class EdgeListTests(DataTestCase):
         vertices = self.get_vertices(0)
         face_edges = [Arc([0.5, 0.5, 0])]
 
-        self.el.add_from_operation(vertices, face_edges, 'bottom')
-        self.el.add_from_operation(vertices, face_edges, 'bottom')
+        self.el.add_from_operation(vertices, face_edges)
+        self.el.add_from_operation(vertices, face_edges)
 
         self.assertEqual(len(self.el.edges), 1)
 
@@ -65,7 +65,7 @@ class EdgeListTests(DataTestCase):
         vertices = self.get_vertices(0)
         face_edges = [Arc([0.5, 0, 0])]
 
-        self.el.add_from_operation(vertices, face_edges, 'bottom')
+        self.el.add_from_operation(vertices, face_edges)
 
         self.assertEqual(len(self.el.edges), 0)
 
@@ -77,8 +77,8 @@ class EdgeListTests(DataTestCase):
         bottom_face_edges = [None, None, Spline([[0.7, 1.3, 0], [0.3, 1.3, 0]]), None]
         top_face_edges = [None, None, PolyLine([[0.7, 1.1, 1], [0.3, 1.1, 1]]), None]
         
-        self.el.add_from_operation(vertices, bottom_face_edges, 'bottom')
-        self.el.add_from_operation(vertices, top_face_edges, 'top')
+        self.el.add_from_operation(vertices, bottom_face_edges)
+        self.el.add_from_operation(vertices, top_face_edges)
         
         self.assertEqual(len(self.el.edges), 2)
 
