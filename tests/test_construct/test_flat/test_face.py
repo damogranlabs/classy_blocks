@@ -15,14 +15,6 @@ class FaceTests(unittest.TestCase):
         # provide less than 4 points
         with self.assertRaises(Exception):
             _ = Face(self.points[:3])
-
-    def test_coplanar_points_fail(self):
-        with self.assertRaises(Exception):
-            self.points[-1][-1] = 0.1
-            Face(self.points, check_coplanar=True)
-
-    def test_coplanar_points_success(self):
-        Face(self.points, check_coplanar=True)
     
     def test_face_center(self):
         np.testing.assert_array_equal(Face(self.points).center, [0.5, 0.5, 0])

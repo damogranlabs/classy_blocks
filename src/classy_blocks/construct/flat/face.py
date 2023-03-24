@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional,
 
 import copy
 
@@ -23,28 +23,15 @@ class Face(TransformableBase):
             the same as passed to Block.add_edge(). Each element of the list
             represents an edge between its corner and the next, for instance:
 
-            - edges=[None, ['arc', [0.4, 1, 1]], None, None] will create an
+            - edges=[None, Arc([0.4, 1, 1]]), None, None] will create an
             arc edge between the 1st and the 2nd vertex of this face
-            - edges=[['project', 'terrain']*4] will project all 4 edges
-            of this face: 0-1, 1-2, 2-3, 3-0.
-        
-        check_coplanar: if True, a ValueError will be raised given non-coplanar points
-    """
-    def __init__(self, points:PointListType, edges:Optional[List[Optional[EdgeData]]]=None, check_coplanar:bool=False):
+            - edges=[Project(['terrain']*4) will project all 4 edges
+            of this face: 0-1, 1-2, 2-3, 3-0."""
+    def __init__(self, points:PointListType, edges:Optional[List[Optional[EdgeData]]]=None):
         # Points
         points = np.asarray(points, dtype=constants.DTYPE)
         if np.shape(points) != (4, 3):
             raise ValueError("Provide exactly 4 points in 3D space")
-
-        if check_coplanar:
-            if abs(
-                np.dot(
-                    points[1] - points[0],
-                    np.cross(points[3] - points[0], points[2] - points[0])
-                )) > constants.TOL:
-                raise ValueError("Points are not coplanar!")
-
-            # TODO: coplanar edges?
 
         self.points:NPPointListType = points
 
@@ -56,7 +43,6 @@ class Face(TransformableBase):
         assert len(self.edges) == 4, "Provide exactly 4 edges; use None for straight lines"
 
     def translate(self, displacement: VectorType) -> 'Face':
-        # TODO: do something with repetition all over translate/rotate/scale
         displacement = np.asarray(displacement, dtype=constants.DTYPE)
 
         self.points = np.array([
