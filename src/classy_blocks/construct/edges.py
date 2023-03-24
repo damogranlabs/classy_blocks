@@ -48,6 +48,9 @@ class Arc(EdgeData):
     def transform(self, function: Callable) -> 'Arc':
         self.point = function(self.point)
         return self
+    
+    def __repr__(self):
+        return str(self.point)
 
 class Origin(EdgeData):
     """Parameters for an arc edge, alternative ESI-CFD version;
@@ -69,6 +72,9 @@ class Origin(EdgeData):
     def transform(self, function: Callable) -> 'Origin':
         self.origin = function(self.origin)
         return self
+    
+    def __repr__(self):
+        return f"{self.origin}:{self.flatness}"
 
 class Angle(EdgeData):
     """Parameters for an arc edge, alternative definition
@@ -90,6 +96,9 @@ class Angle(EdgeData):
         self.axis = function(self.axis)
         self.axis = f.unit_vector(self.axis)
         return self
+    
+    def __repr__(self):
+        return f"{self.angle}:{self.axis}"
 
 class Spline(EdgeData):
     """Parameters for a spline edge"""
@@ -101,6 +110,9 @@ class Spline(EdgeData):
     def transform(self, function: Callable) -> 'Spline':
         self.points = np.asarray([function(p) for p in self.points])
         return self
+    
+    def __repr__(self):
+        return str(self.points)
 
 class PolyLine(Spline):
     """Parameters for a polyLine edge"""
@@ -116,10 +128,5 @@ class Project(EdgeData):
         else:
             self.geometry = [geometry]
 
-@dataclasses.dataclass
-class EdgeInfo:
-    """Information about a specific edge in an operation/list
-    before it's been added to list and block"""
-    corner_1:int
-    corner_2:int
-    data:EdgeData
+    def __repr__(self):
+        return self.geometry

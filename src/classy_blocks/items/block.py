@@ -2,6 +2,7 @@ from typing import List, Dict
 
 from classy_blocks.types import AxisType
 
+from classy_blocks.items.frame import Frame
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.wire import Wire
@@ -20,25 +21,16 @@ class Block:
         # vertices, edges, counts and gradings
         self.vertices = vertices
 
-        # Storing and retrieving pairs of vertices a.k.a. 'wires';
-        # self.wires can be indexed so that the desired Wire can be accessed directly;
-        # for instance, an edge between vertices 2 and 6 is obtained with
-        # self.wires[2][6].edge
-        self.wires:List[Dict[int, Wire]] = [{} for _ in range(8)]
-        # wires of each axis
-        axis_wires = [[], [], []]
+        # wires and axes
+        self.wires = Frame()
 
         # create wires and connections for quicker addressing
         for axis in range(3):
             for pair in constants.AXIS_PAIRS[axis]:
                 wire = Wire(self.vertices, axis, pair[0], pair[1])
+                self.wires.add_beam(pair[0], pair[1], wire)
 
-                self.wires[pair[0]][pair[1]] = wire
-                self.wires[pair[1]][pair[0]] = wire
-
-                axis_wires[axis].append(wire)
-
-        self.axes = [Axis(i, axis_wires[i]) for i in (0, 1, 2)]
+        self.axes = [Axis(i, self.wires.get_axis_beams(i)) for i in (0, 1, 2)]
 
         # cellZone to which the block belongs to
         self.cell_zone = ""

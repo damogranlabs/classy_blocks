@@ -102,14 +102,12 @@ class Mesh:
         cease to have any function or influence on mesh."""
         for entity in self.depot:
             for operation in entity.operations:
-                #
                 vertices = self._add_vertices(operation)
 
                 block = Block(len(self.block_list.blocks), vertices)
-                for info in self.edge_list.add_from_operation(vertices, operation):
-                    block.add_edge(info.corner_1, info.corner_2, info.data)
+                for data in self.edge_list.add_from_operation(vertices, operation):
+                    block.add_edge(*data)
 
-                # chop
                 for axis in (0, 1, 2):
                     for chop in operation.chops[axis]:
                         block.chop(axis, chop)
@@ -129,11 +127,11 @@ class Mesh:
         """Writes a blockMeshDict to specified location. If debug_path is specified,
         a VTK file is created first where each block is a single cell, to see simplified
         blocking in case blockMesh fails with an unfriendly error message."""
-        if debug_path is not None:
-            write_vtk(debug_path, self.vertex_list.vertices, self.block_list.blocks)
-
         if not self.is_assembled:
             self.assemble()
+
+        if debug_path is not None:
+            write_vtk(debug_path, self.vertex_list.vertices, self.block_list.blocks)
 
         # gradings 
         self.block_list.propagate_gradings()

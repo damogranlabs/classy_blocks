@@ -3,11 +3,14 @@ from typing import List, Optional, Dict, Union, TypeVar
 import numpy as np
 
 from classy_blocks.types import AxisType, NPPointType, PointType, VectorType, OrientType
+
 from classy_blocks.base.additive import AdditiveBase
+
+from classy_blocks.items.frame import Frame
 
 from classy_blocks.construct.operations.projections import ProjectedEntities
 from classy_blocks.construct.flat.face import Face
-from classy_blocks.construct.edges import EdgeData, EdgeInfo
+from classy_blocks.construct.edges import EdgeData, Project
 from classy_blocks.grading.chop import Chop
 
 from classy_blocks.util import constants
@@ -169,9 +172,28 @@ class Operation(AdditiveBase):
         return np.concatenate((self.bottom_face.points, self.top_face.points))
 
     @property
-    def edges(self) -> List[EdgeInfo]:
-        """Returns assembled EdgeInfo from faces, sides and projections"""
-        raise NotImplemented
+    def edges(self) -> Frame:
+        """Returns a Frame with edges as its beams"""
+        frame = Frame()
+
+        for i, data in enumerate(self.bottom_face.edges):
+            if data is not None:
+                frame.add_beam(i, (i+1)%4, data)
+
+        for i, data in enumerate(self.top_face.edges):
+            if data is not None:
+                frame.add_beam(4+i, 4+(i+1)%4, data)
+
+        for i, data in enumerate(self.side_edges):
+            if data is not None:
+                frame.add_beam(i, i+4, data)
+
+        # projected edges: manually added later, therefore
+        # must be overwritten
+        for data in self.projections.edges:
+            frame.add_beam(data.corner_1, data.corner_2, Project(data.geometry))
+
+        return frame
 
     @property
     def faces(self) -> Dict[OrientType, Face]:

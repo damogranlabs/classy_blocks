@@ -89,11 +89,6 @@ class OriginEdge(ArcEdgeBase):
             self.data.origin, self.adjust_center, self.data.flatness)
 
     @property
-    def length(self):
-        # TODO: test
-        return f.arc_length_3point(self.vertex_1.pos, self.third_point, self.vertex_2.pos)
-
-    @property
     def description(self):
         # TODO: test
         # produce 2 lines:

@@ -51,4 +51,4 @@ class Wire:
             self.coincidents.add(wire)
 
     def __repr__(self):
-        return f"Wire {self.vertices} (corners {self.corners})"
+        return f"Wire {self.corners[0]}-{self.corners[1]}"

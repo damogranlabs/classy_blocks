@@ -24,9 +24,9 @@ FACE_MAP:Dict[OrientType, Tuple[int, int, int, int]] = {
 
 # pairs of corner indexes along axes
 AXIS_PAIRS = (
-    ((0, 1), (3, 2), (7, 6), (4, 5)),  # x
-    ((0, 3), (1, 2), (5, 6), (4, 7)),  # y
-    ((0, 4), (1, 5), (2, 6), (3, 7)),  # z
+    ((0, 1), (3, 2), (7, 6), (4, 5)), # x
+    ((0, 3), (1, 2), (5, 6), (4, 7)), # y
+    ((0, 4), (1, 5), (2, 6), (3, 7)), # z
 )
 
 # pairs of corner indexes that define edges (and not diagonals)
