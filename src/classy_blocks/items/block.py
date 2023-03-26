@@ -115,14 +115,12 @@ class Block:
     @property
     def is_defined(self) -> bool:
         """Returns True if counts and gradings are defined for all axes"""
-        # TODO: TEST
         return all(axis.is_defined for axis in self.axes)
 
     def copy_grading(self) -> bool:
         """Attempts to copy grading from a neighbouring block;
         Returns True if the block is/has been defined, False
         if the block still has missing data"""
-        # TODO: TEST
         if self.is_defined:
             return False
 
@@ -137,26 +135,13 @@ class Block:
     @property
     def description(self) -> str:
         """hex definition for blockMesh"""
-        # TODO: test
-        out = "\thex "
-
-        # vertices
-        out += " ( " + " ".join(str(v.index) for v in self.vertices) + " ) "
-
-        # cellZone
-        out += self.cell_zone
-
-        # number of cells
-        out += " (" + " ".join([str(axis.grading.count) for axis in self.axes]) + " ) "
-
-        # grading
-        # TODO: no daisy.object.chaining
-        out += " simpleGrading (" + \
+        fmt_vertices = "( " + " ".join(str(v.index) for v in self.vertices) + " )"
+        fmt_count = "( " + " ".join([str(axis.grading.count) for axis in self.axes]) + " )"
+        # FIXME: no daisy.object.chaining
+        fmt_grading = "simpleGrading ( " + \
             self.axes[0].grading.description + " " + \
             self.axes[1].grading.description + " " + \
-            self.axes[2].grading.description + ") "
+            self.axes[2].grading.description + " )"
+        fmt_comments = f"// {self.index} {self.comment}\n"
 
-        # add a comment with block index
-        out += f" // {self.index} {self.comment}\n"
-
-        return out
+        return f"\thex {fmt_vertices} {self.cell_zone} {fmt_count} {fmt_grading} {fmt_comments}"

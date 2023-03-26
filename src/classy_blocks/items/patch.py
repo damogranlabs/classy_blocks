@@ -35,6 +35,7 @@ class Patch:
         #     );
         # }
         # TODO: do something with all that \t\n\n};\t\t chaos
+        # TODO: TEST
         out = "\t" + self.name + "\n\t{\n"
         out += f"\t\ttype {self.kind};\n"
         out += "\t\tfaces\n\t\t(\n"

@@ -41,7 +41,6 @@ class Vertex(TransformableBase):
 
     def project(self, geometry:ProjectToType) -> None:
         """Project this vertex to a single or multiple geometries"""
-        # TODO: TEST
         if not isinstance(geometry, list):
             geometry = [geometry]
 
@@ -56,7 +55,6 @@ class Vertex(TransformableBase):
     @property
     def description(self) -> str:
         """ Returns a string representation to be written to blockMeshDict"""
-        # TODO: TEST
         point = vector_format(self.pos)
         comment = f"// {self.index}"
 

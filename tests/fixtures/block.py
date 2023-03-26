@@ -1,5 +1,3 @@
-import dataclasses
-
 from typing import List
 
 from tests.fixtures.data import DataTestCase

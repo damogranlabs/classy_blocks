@@ -1,18 +1,18 @@
 import abc
-from typing import List, TypeVar
+
+from typing import List, TypeVar, Type
 
 from classy_blocks.types import AxisType, OrientType
 
 from classy_blocks.construct.edges import Arc
 from classy_blocks.construct.shapes.shape import Shape
 from classy_blocks.construct.flat.sketch import Sketch
-from classy_blocks.construct.flat.disk import Disk
 from classy_blocks.construct.flat import disk
 from classy_blocks.construct.operations.loft import Loft
 
 ShapeT = TypeVar('ShapeT', bound='RoundShape')
 
-class RoundShape(Shape, abc.ABC):
+class RoundShape(Shape):
     """An object, lofted between 2 or more sketches;
     to form blocks, sketches are transformed with specified
     functions (and so are side edges) and loft operations
@@ -21,7 +21,7 @@ class RoundShape(Shape, abc.ABC):
     Solid round shapes: Elbow, Frustum, Cylinder;
     they are created using an OH-grid (see Disk), have a
     'start' and 'end' sketch and an 'outer' surface."""
-    sketch_class = Disk # Sketch class to be used for construction of the Shape
+    sketch_class:Type[Sketch] # Sketch class to be used for construction of the Shape
 
     axial_axis:AxisType = 2 # Axis along which 'outer sides' run
     radial_axis:AxisType = 0 # Axis that goes from center to 'outer side'

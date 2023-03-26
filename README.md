@@ -267,9 +267,7 @@ There's no official documentation yet so here are some tips for easier navigatio
 - Examples
     - Ramjet engine
 - Technical stuff:
-    - Redefine classes to support modification
-    - Simplify imports (direct import from classy_blocks instead of specifying complete module paths)
-    - Package to pypi
+    - Skew transform
     - Debugging: connection between block and Shapes, naming
     - More tests
     - Documentation
