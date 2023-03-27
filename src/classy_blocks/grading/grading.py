@@ -222,5 +222,3 @@ class Grading:
                     return False
 
         return True
-
-    

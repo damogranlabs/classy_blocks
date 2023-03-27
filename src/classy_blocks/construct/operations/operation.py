@@ -174,6 +174,7 @@ class Operation(AdditiveBase):
     @property
     def edges(self) -> Frame:
         """Returns a Frame with edges as its beams"""
+        # TODO: TEST
         frame = Frame()
 
         for i, data in enumerate(self.bottom_face.edges):
@@ -209,6 +210,7 @@ class Operation(AdditiveBase):
     def get_patch_from_corner(self, corner:int) -> Optional[str]:
         """Returns patch name at given corner or None if
         no patch has been defined"""
+        # TODO: TEST
         for side, patch in self.patch_names.items():
             if corner in constants.FACE_MAP[side]:
                 return patch

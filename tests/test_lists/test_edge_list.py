@@ -1,8 +1,11 @@
 from typing import List
-from parameterized import parameterized
 
 from tests.fixtures.data import DataTestCase
 
+from classy_blocks.base.exceptions import EdgeNotFoundError
+from classy_blocks.construct.flat.face import Face
+from classy_blocks.construct.edges import Project
+from classy_blocks.construct.operations.revolve import Revolve
 from classy_blocks.construct.edges import Arc, PolyLine, Spline
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.lists.vertex_list import VertexList
@@ -21,51 +24,48 @@ class EdgeListTests(DataTestCase):
             vertices.append(self.vl.add(point))
     
         return vertices
+    
+    def test_find_existing(self):
+        """Find an existing edge"""
+        vertices = self.get_vertices(0)
+        edge = self.el.add(vertices[0], vertices[1], Arc([0.5, 0.5, 0]))
 
-    @parameterized.expand(((0, 1), (1, 2), (2, 3), (3, 0)))
-    def test_get_corners_bottom(self, corner_1, corner_2):
-        """get_corners for a bottom face"""
-        output = (corner_1, corner_2)
-        self.assertTupleEqual(EdgeList.get_corners(corner_1), output)
+        self.assertEqual(self.el.find(vertices[0], vertices[1]),edge)
+    
+    def test_find_existing_invertex(self):
+        """Find an existing edge with inverted vertices"""
+        vertices = self.get_vertices(0)
+        edge = self.el.add(vertices[0], vertices[1], Arc([0.5, 0.5, 0]))
 
-    @parameterized.expand(((0, 4, 5), (1, 5, 6), (2, 6, 7), (3, 7, 4)))
-    def test_get_corners_top(self, index, corner_1, corner_2):
-        """get_corners for a bottom face"""
-        output = (corner_1, corner_2)
-        self.assertTupleEqual(EdgeList.get_corners(index), output)
+        self.assertEqual(self.el.find(vertices[1], vertices[0]),edge)
 
-    @parameterized.expand(((0, 4), (1, 5), (2, 6), (3, 7)))
-    def test_get_corners_side(self, corner_1, corner_2):
-        """get_corners for a side corners"""
-        output = (corner_1, corner_2)
-        self.assertTupleEqual(EdgeList.get_corners(corner_1), output)
+    def test_find_nonexisting(self):
+        """Raise an EdgeNotFoundError for a non-existing edge"""
+        vertices = self.get_vertices(0)
+        edge = self.el.add(vertices[0], vertices[1], Arc([0.5, 0.5, 0]))
+
+        with self.assertRaises(EdgeNotFoundError):
+            self.assertEqual(self.el.find(vertices[1], vertices[2]),edge)
 
     def test_add_new(self):
         """Add an edge when no such thing exists"""
         vertices = self.get_vertices(0)
-        face_edges = [Arc([0.5, 0.5, 0])]
+        self.el.add(vertices[0], vertices[1], Arc([0.5, 0.5, 0]))
 
-        edges = self.el.add_from_operation(vertices, face_edges)
-
-        self.assertEqual(len(edges), 1)
         self.assertEqual(len(self.el.edges), 1)
     
     def test_add_existing(self):
         """Add the same edges twice"""
         vertices = self.get_vertices(0)
-        face_edges = [Arc([0.5, 0.5, 0])]
-
-        self.el.add_from_operation(vertices, face_edges)
-        self.el.add_from_operation(vertices, face_edges)
+        self.el.add(vertices[0], vertices[1], Arc([0.5, 0.5, 0]))
+        self.el.add(vertices[0], vertices[1], Arc([0.5, 0.5, 0]))
 
         self.assertEqual(len(self.el.edges), 1)
 
     def test_add_invalid(self):
         """Add a circular edge that's actually a line"""
         vertices = self.get_vertices(0)
-        face_edges = [Arc([0.5, 0, 0])]
-
-        self.el.add_from_operation(vertices, face_edges)
+        self.el.add(vertices[0], vertices[1], Arc([0.5, 0, 0]))
 
         self.assertEqual(len(self.el.edges), 0)
 
@@ -74,11 +74,8 @@ class EdgeListTests(DataTestCase):
         vertices = self.get_vertices(0)
 
         # add some custom edges
-        bottom_face_edges = [None, None, Spline([[0.7, 1.3, 0], [0.3, 1.3, 0]]), None]
-        top_face_edges = [None, None, PolyLine([[0.7, 1.1, 1], [0.3, 1.1, 1]]), None]
-        
-        self.el.add_from_operation(vertices, bottom_face_edges)
-        self.el.add_from_operation(vertices, top_face_edges)
+        self.el.add(vertices[2], vertices[3], Spline([[0.7, 1.3, 0], [0.3, 1.3, 0]]))
+        self.el.add(vertices[6], vertices[7], PolyLine([[0.7, 1.1, 1], [0.3, 1.1, 1]]))
         
         self.assertEqual(len(self.el.edges), 2)
 
@@ -87,3 +84,39 @@ class EdgeListTests(DataTestCase):
 
         self.assertEqual(self.el.edges[1].vertex_1.index, 6)
         self.assertEqual(self.el.edges[1].vertex_2.index, 7)
+    
+    def test_add_from_operations(self):
+        """Add edges from an operation"""
+        face = Face(
+            [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]],
+            [None, Project('terrain'), None, None]
+        )
+
+        revolve = Revolve(face, 1, [0, 0, 1], [-1, 0, 0])
+
+        for point in revolve.points:
+            self.vl.add(point)
+
+        self.el.add_from_operation(self.vl.vertices, revolve)
+
+        self.assertEqual(len(self.el.edges), 6)
+
+        # 4 arcs from a revolve and 2 projections from a faces,
+        # 6 'line' edges
+        no_arc = 0
+        no_project = 0
+
+        for edge in self.el.edges:
+            if edge.kind == 'angle':
+                no_arc += 1
+            elif edge.kind == 'project':
+                no_project += 1
+            else:
+                raise AssertionError(f"Unexpected edge kind: {edge.kind}")
+    
+        self.assertEqual(no_arc, 4)
+        self.assertEqual(no_project, 2)
+    
+    def test_description(self):
+        """String output"""
+        # TODO

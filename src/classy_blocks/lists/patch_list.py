@@ -15,6 +15,7 @@ class PatchList:
 
     def add(self, vertices:List[Vertex], operation:Operation) -> None:
         """Create Patches from operation's patch_names"""
+        # TODO: TEST
         for orient in operation.patch_names:
             self.add_side(operation.patch_names[orient], orient, vertices)
 
