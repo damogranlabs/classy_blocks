@@ -20,7 +20,7 @@ class VertexList:
         """checks if any of existing vertices in self.vertices are
         in the same location as the passed one; if so, returns
         the existing vertex"""
-        # TODO: optimize (octree/kdtree from scipy) (?)
+        # FIXME: optimize (octree/kdtree from scipy) (?)
         for vertex in self.vertices:
             if f.norm(vertex.pos - position) < constants.TOL:
                 return vertex
@@ -40,8 +40,7 @@ class VertexList:
         """Re-use existing vertices when there's already one at the position;
         unless that vertex belongs to a slave of a face-merged pair - 
         in that case add a duplicate in the same position anyway"""
-        # TODO: TEST
-        # TODO: prettify
+        # FIXME: prettify
         if slave_patch is not None:
             try:
                 return self.find_duplicated(point, slave_patch)

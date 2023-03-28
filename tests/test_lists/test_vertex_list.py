@@ -53,7 +53,8 @@ class VertexListTests(DataTestCase):
         np.testing.assert_array_equal(first_points, self.blocks[0].points)
         np.testing.assert_array_equal(second_points, self.blocks[1].points)
 
-    def test_find(self):
+    def test_find_success(self):
+        """Find an existing vertex at specified point"""
         self.add_all(self.blocks[0].points)
         self.add_all(self.blocks[1].points)
 
@@ -67,25 +68,45 @@ class VertexListTests(DataTestCase):
             self.assertEqual(self.vlist.find(point).index, i)
 
     def test_find_fail(self):
+        """Raise an error when no vertex was found at specified point"""
         self.add_all(self.blocks[0].points)
 
         with self.assertRaises(VertexNotFoundError):
             self.vlist.find(f.vector(999, 999, 999))
 
-    # def test_output(self):
-    #     vertices = VertexList()
-    #     vertices.collect([self.block_0], [])
-    #     self.maxDiff = None
+    def test_find_duplicated_success(self):
+        """An existing vertex at specified point and slave patch was found"""
+        self.add_all(self.blocks[0].points)
+        self.vlist.duplicated['terrain'] = [self.vlist.vertices[0]]
 
-    #     expected_output = "vertices\n(\n" + \
-    #         "\t(0.00000000 0.00000000 0.00000000) // 0\n" + \
-    #         "\t(1.00000000 0.00000000 0.00000000) // 1\n" + \
-    #         "\t(1.00000000 1.00000000 0.00000000) // 2\n" + \
-    #         "\t(0.00000000 1.00000000 0.00000000) // 3\n" + \
-    #         "\t(0.00000000 0.00000000 1.00000000) // 4\n" + \
-    #         "\t(1.00000000 0.00000000 1.00000000) // 5\n" + \
-    #         "\t(1.00000000 1.00000000 1.00000000) // 6\n" + \
-    #         "\t(0.00000000 1.00000000 1.00000000) // 7\n" + \
-    #         ");\n\n"
+        self.assertEqual(
+            self.vlist.find_duplicated(self.vlist.vertices[0].pos, 'terrain'),
+            self.vlist.vertices[0]
+        )
 
-    #     self.assertEqual(vertices.output(), expected_output)
+    def test_find_duplicated_fail(self):
+        """Raise a VertexNotFoundError when no vertices are on the specified slave patch"""
+        self.add_all(self.blocks[0].points)
+
+        with self.assertRaises(VertexNotFoundError):
+            _ = self.vlist.find_duplicated(self.vlist.vertices[0].pos, 'terrain')
+
+    def test_add_slave_single(self):
+        """Add a vertex on slave patch; must be duplicated"""
+        self.add_all(self.blocks[0].points)
+
+        new_vertex = self.vlist.add(self.vlist.vertices[0].pos, 'terrain')
+
+        self.assertEqual(len(self.vlist.vertices), 9)
+        self.assertNotEqual(self.vlist.vertices[0], new_vertex)
+    
+    def test_add_slave_multiple(self):
+        """Add a vertex on slave patch multiple times;
+        must be duplicated only once"""
+        self.add_all(self.blocks[0].points)
+
+        self.vlist.add(self.vlist.vertices[0].pos, 'terrain')
+        self.vlist.add(self.vlist.vertices[0].pos, 'terrain')
+        self.vlist.add(self.vlist.vertices[0].pos, 'terrain')
+
+        self.assertEqual(len(self.vlist.vertices), 9)

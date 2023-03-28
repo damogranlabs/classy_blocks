@@ -1,8 +1,11 @@
 from parameterized import parameterized
 
+from classy_blocks.items.block import Block
+
 from tests.fixtures.block import BlockTestCase
 
 class AxisTests(BlockTestCase):
+    """Tests of the Axis object"""
     def test_lengths(self):
         """Block dimensions"""
         # Not all wires on this axis are of the same length
@@ -59,8 +62,18 @@ class AxisTests(BlockTestCase):
         self.assertTrue(block_0.axes[axis].is_aligned(block_1.axes[axis]))
 
     def test_is_not_aligned(self):
-        # TODO
-        pass
+        """Return False when axes are not aligned"""
+        block_0 = self.make_block(0)
+
+        # turn block_1 upside-down
+        vertices_1 = self.make_vertices(1)
+        vertices_1 = [vertices_1[i] for i in [7, 6, 5, 4, 3, 2, 1, 0]]
+
+        block_1 = Block(1, vertices_1)
+
+        block_0.add_neighbour(block_1)
+
+        self.assertFalse(block_1.axes[1].is_aligned(block_0.axes[1]))
 
     def test_grading_self(self):
         """Grading, defined on this axis"""
