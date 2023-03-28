@@ -1,5 +1,6 @@
 from typing import List
 
+from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.items.block import Block
 
 
@@ -12,7 +13,7 @@ class BlockList:
     def add(self, block:Block) -> None:
         """Add blocks"""
         block.index = len(self.blocks)
-        
+
         self.blocks.append(block)
         self.update_neighbours(block)
 
@@ -29,7 +30,6 @@ class BlockList:
         """Copy references to gradings from defined blocks to their neighbours"""
         # a riddle similar to sudoku, keep traversing
         # and copying counts until there's no undefined blocks left
-        # TODO: TEST
         undefined_blocks = set(range(len(self.blocks)))
 
         while len(undefined_blocks) > 0:
@@ -55,11 +55,11 @@ class BlockList:
             message = "Blocks with non-defined counts: \n"
             for i in list(undefined_blocks):
                 message += f"{i}: "
-                for n in (0, 1, 2):
-                    message += str(self.blocks[i].axes[n].grading.count) + " "
+                for axis in (0, 1, 2):
+                    message += str(self.blocks[i].axes[axis].grading.count) + " "
                 message += "\n"
 
-            raise Exception(message)
+            raise UndefinedGradingsError(message)
 
     @property
     def description(self) -> str:

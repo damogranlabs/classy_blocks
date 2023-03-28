@@ -122,6 +122,18 @@ class Mesh:
     def is_assembled(self) -> bool:
         """Returns True if assemble() has been executed on this mesh"""
         return len(self.vertex_list.vertices) > 0
+    
+    def format_settings(self) -> str:
+        """Put self.settings in a proper, blockMesh-readable format"""
+        out = ''
+
+        for key, value in self.settings.items():
+            if value is not None:
+                out += f"{key} {value};\n"
+
+        out += '\n'
+
+        return out
 
     def write(self, output_path:str, debug_path:Optional[str]=None) -> None:
         """Writes a blockMeshDict to specified location. If debug_path is specified,
@@ -139,10 +151,7 @@ class Mesh:
         with open(output_path, 'w', encoding='utf-8') as output:
             output.write(constants.MESH_HEADER)
 
-            for key, value in self.settings.items():
-                if value is not None:
-                    output.write(f"{key} {value};\n")
-            output.write('\n')
+            output.write(self.format_settings())
 
             output.write(self.geometry_list.description)
 

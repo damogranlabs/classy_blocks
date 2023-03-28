@@ -1,5 +1,6 @@
 from tests.fixtures.block import BlockTestCase
 
+from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.lists.block_list import BlockList
 
 class BlockListTests(BlockTestCase):
@@ -14,20 +15,24 @@ class BlockListTests(BlockTestCase):
         self.bl.add(self.make_block(1))
         self.assertEqual(self.bl.blocks[1].index, 1)
 
+    def test_propagate_gradings_ok(self):
+        """Define all block's grading data"""
+        for index in (0, 1, 2):
+            self.bl.add(self.make_block(index))
+        
+        self.bl.propagate_gradings()
 
-    # def test_merge_patches_duplicate(self):
-    #     """duplicate coincident points on merged patches"""
-    #     self.hexa_0.set_patch("right", "master")
-    #     self.hexa_0.chop(1, count=10)
+        for block in self.bl.blocks:
+            self.assertTrue(block.is_defined)
+        
+    def test_propagate_gradings_exception(self):
+        """Raise an exception when there's not enough grading data"""
+        blocks = [self.make_block(i) for i in (0, 1, 2)]
 
-    #     self.hexa_1.set_patch("left", "slave")
-    #     self.mesh.merge_patches("master", "slave")
-    #     self.hexa_2.chop(0, count=10)
+        blocks[0].axes[0].chops = []
 
-    #     self.prepare()
+        for block in blocks:
+            self.bl.add(block)
 
-    #     # make sure hexa_0 and hexa_1 share no vertices
-    #     set_0 = set(self.mesh.hexas[0].get_patch_sides("right"))
-    #     set_1 = set(self.mesh.hexas[1].get_patch_sides("left"))
-
-    #     self.assertTrue(set_0.isdisjoint(set_1))
+        with self.assertRaises(UndefinedGradingsError):
+            self.bl.propagate_gradings()

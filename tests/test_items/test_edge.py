@@ -218,6 +218,10 @@ class EdgeLengthTests(unittest.TestCase):
             Vertex([0, 0, 0], 0), Vertex([1, 0, 0], 1), data
         )
 
+    def test_degenerate_arc(self):
+        """Length of an Arc edge with three collinear points"""
+        self.assertEqual(self.get_edge(edges.Arc([0.5, 0, 0])).length, 1)
+
     def test_arc_edge(self):
         """Length of a classical arc edge"""
         self.assertAlmostEqual(

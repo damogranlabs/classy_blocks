@@ -116,7 +116,3 @@ class EdgeListTests(DataTestCase):
     
         self.assertEqual(no_arc, 4)
         self.assertEqual(no_project, 2)
-    
-    def test_description(self):
-        """String output"""
-        # TODO

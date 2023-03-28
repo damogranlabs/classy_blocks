@@ -15,7 +15,6 @@ class PatchList:
 
     def add(self, vertices:List[Vertex], operation:Operation) -> None:
         """Create Patches from operation's patch_names"""
-        # TODO: TEST
         for orient in operation.patch_names:
             self.add_side(operation.patch_names[orient], orient, vertices)
 
@@ -73,7 +72,6 @@ class PatchList:
     def is_slave(self, name:str) -> bool:
         """Returns True if a patch with given name is 
         listed as a slave in merged patches"""
-        # TODO: TEST
         for pair in self.merged:
             if pair[1] == name:
                 return True

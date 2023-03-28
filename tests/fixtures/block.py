@@ -2,6 +2,8 @@ from typing import List
 
 from tests.fixtures.data import DataTestCase
 
+from classy_blocks.construct.flat.face import Face
+from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.block import Block
 from classy_blocks.items.edges.factory import factory
@@ -9,6 +11,7 @@ from classy_blocks.items.edges.factory import factory
 class BlockTestCase(DataTestCase):
     """Block item tests"""
     def make_vertices(self, index:int) -> List[Vertex]:
+        """Generates Vertex objects for testing"""
         data = self.get_single_data(index)
         points = data.points
         indexes = data.indexes
@@ -36,3 +39,11 @@ class BlockTestCase(DataTestCase):
                 block.chop(axis, chop)
 
         return block
+
+    def make_loft(self, index:int) -> Loft:
+        """Creates a Loft for tests that require an operation"""
+        vertices = self.make_vertices(index)
+        face_1 = Face([vertices[i].pos for i in (0, 1, 2, 3)])
+        face_2 = Face([vertices[i].pos for i in (4, 5, 6, 7)])
+
+        return Loft(face_1, face_2)
