@@ -51,7 +51,7 @@ class AngleEdge(ArcEdgeBase):
         # produce two lines
         # one with this edge's specification
         # arc <vertex-1> <vertex-2> <angle> (axis) alternative edge specification:
-        out = f"// arc {self.vertex_1.index} {self.vertex_2.index} "
+        out = f"\t// arc {self.vertex_1.index} {self.vertex_2.index} "
         out += f"{self.data.angle} {constants.vector_format(self.data.axis)}\n"
 
         # the other is a classic three-point arc definition

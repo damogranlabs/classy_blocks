@@ -62,7 +62,7 @@ for m in inspect.getmembers(gc):
 def calculate(length: float, parameters: dict) -> Tuple[int, float]:
     """Calculates cell count and total expansion ratio for a block
     by calling functions that take known variables and return new values"""
-    # TODO: move all this yada yada into Division class or something
+    # FIXME: move all this yada yada into Division class or something
     keys = parameters.keys()
     calculated = set()
 
@@ -192,7 +192,7 @@ class Grading:
             return str(self.specification[0][2])
 
         # multi-grading: make a nice list
-        # TODO: make a nicer list
+        # FIXME: make a nicer list
         length_ratio_sum = 0
         out = "(\n"
 

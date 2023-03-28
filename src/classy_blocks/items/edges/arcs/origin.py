@@ -84,17 +84,22 @@ class OriginEdge(ArcEdgeBase):
     @property
     def third_point(self) -> PointType:
         """Calculated arc point from origin and flatness"""
-        return arc_from_origin(
+        point = arc_from_origin(
             self.vertex_1.pos, self.vertex_2.pos,
             self.data.origin, self.adjust_center, self.data.flatness)
+        
+        if np.any(np.isnan(point)):
+            # try to create a friendly error message :/
+            raise ValueError(f"Invalid edge specification: {self}")
+    
+        return point
 
     @property
     def description(self):
-        # TODO: test
         # produce 2 lines:
         # one commented out with user-provided description
         # arc 0 1 origin 1.1 (0 0 0)
-        out = f"// arc {self.vertex_1.index} {self.vertex_2.index} origin"
+        out = f"\t// arc {self.vertex_1.index} {self.vertex_2.index} origin"
         out += f" {self.data.flatness} {constants.vector_format(self.data.origin)}\n"
         # the other one with a default three-point arc description
         return out + super().description

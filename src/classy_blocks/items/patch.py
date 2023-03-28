@@ -1,8 +1,9 @@
 import warnings
 
-from typing import List, Dict
+from typing import List
 
 from classy_blocks.items.side import Side
+from classy_blocks.util.tools import indent
 
 class Patch:
     """Definition of a patch, including type, belonging faces and other settings"""
@@ -34,19 +35,19 @@ class Patch:
         #         (0 1 2 3)
         #     );
         # }
-        # TODO: do something with all that \t\n\n};\t\t chaos
-        # TODO: TEST
-        out = "\t" + self.name + "\n\t{\n"
-        out += f"\t\ttype {self.kind};\n"
-        out += "\t\tfaces\n\t\t(\n"
+        out = indent(self.name, 1)
+        out += indent("{", 1)
+        out += indent(f"type {self.kind};", 2)
+        out += indent("faces", 2)
+        out += indent("(", 2)
 
         for quad in self.sides:
-            out += f"\t\t\t{quad.description}\n"
+            out += indent(f"{quad.description}", 3)
 
         for option in self.settings:
-            out += f"\n\t\t{option};"
+            out += indent(f"{option};", 2)
 
-        out += "\t\t);"
-        out += "\n\t}\n"
+        out += indent(");", 2)
+        out += indent("}", 1)
 
         return out

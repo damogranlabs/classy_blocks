@@ -58,7 +58,7 @@ class EdgeList:
         out = "edges\n(\n"
 
         for edge in self.edges:
-            out += f"\t{edge.description}\n"
+            out += edge.description + "\n"
 
         out += ");\n\n"
 

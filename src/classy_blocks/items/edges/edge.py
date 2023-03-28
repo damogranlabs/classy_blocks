@@ -46,7 +46,6 @@ class Edge(TransformableBase):
     @property
     def is_valid(self) -> bool:
         """Returns True if this edge is elligible to be put into blockMeshDict"""
-        # TODO: TEST
         if self.data.kind == 'line':
             # no need to specify lines
             return False
@@ -71,7 +70,7 @@ class Edge(TransformableBase):
     def description(self) -> str:
         """string description of the edge to be put in blockMeshDict"""
         # subclasses continue from here
-        return f"{self.data.kind} {self.vertex_1.index} {self.vertex_2.index} "
+        return f"\t{self.data.kind} {self.vertex_1.index} {self.vertex_2.index} "
 
     def __eq__(self, other):
         # An Edge is defined between two vertices regardless of

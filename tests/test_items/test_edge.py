@@ -5,6 +5,7 @@ import numpy as np
 from classy_blocks.items.vertex import Vertex
 
 from classy_blocks.construct import edges
+from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.arcs.arc import ArcEdge
 from classy_blocks.items.edges.arcs.origin import OriginEdge, arc_from_origin
 from classy_blocks.items.edges.arcs.angle import AngleEdge, arc_from_theta
@@ -14,7 +15,8 @@ from classy_blocks.items.edges.factory import factory
 
 from classy_blocks.util import functions as f
 
-class EdgeTests(unittest.TestCase):
+class EdgeTransformTests(unittest.TestCase):
+    """Transformations of all edge types"""
     def setUp(self):
         self.vertex_1 = Vertex([0, 0, 0], 0)
         self.vertex_2 = Vertex([1, 0, 0], 1)
@@ -72,7 +74,7 @@ class EdgeTests(unittest.TestCase):
         )
 
 class EdgeFactoryTests(unittest.TestCase):
-    """Factory tests; examples from BlockDef.add_edge docstring"""
+    """Factory tests: edge creation"""
     def setUp(self):
         self.vertex_1 = Vertex([0, 0, 0], 0)
         self.vertex_2 = Vertex([1, 0, 0], 1)
@@ -148,6 +150,102 @@ class EdgeFactoryTests(unittest.TestCase):
 
         self.assertIsInstance(edg, ProjectEdge)
         self.assertListEqual(edg.data.geometry, geometry)
+    
+class EdgeValidityTests(unittest.TestCase):
+    """Exclusive tests of Edge.is_valid property"""
+    def get_edge(self, data:edges.EdgeData) -> Edge:
+        """A shortcut to factory method"""
+        return factory.create(
+            Vertex([0, 0, 0], 0), Vertex([1, 0, 0], 1), data
+        )
+    
+    def test_degenerate(self):
+        """An edge between two vertices at the same point"""
+        edge = factory.create(Vertex([0, 0, 0], 0), Vertex([1, 0, 0], 1), edges.Line())
+        self.assertFalse(edge.is_valid)
+
+    def test_line_edge(self):
+        """line.is_valid"""
+        # always false because lines need not be included in blockMeshDict, thus
+        # they must be dropped
+        self.assertFalse(self.get_edge(edges.Line()).is_valid)
+
+    def test_valid_arc(self):
+        """arc.is_valid"""
+        self.assertTrue(self.get_edge(edges.Arc([0.5, 0.2, 0])).is_valid)
+
+    def test_invalid_arc(self):
+        """Arc from three collinear points"""
+        self.assertFalse(self.get_edge(edges.Arc([0.5, 0, 0])).is_valid)
+    
+    def test_invalid_origin(self):
+        """Catch exceptions raised when calculating arc point from the 'origin' alternative"""
+        with self.assertRaises(ValueError):
+            edge = self.get_edge(edges.Origin([0.5, 0, 0]))
+            _ = edge.is_valid
+    
+    def test_valid_origin(self):
+        """A normal arc edge"""
+        self.assertTrue(self.get_edge(edges.Arc([0.5, 0.1, 0])).is_valid)
+    
+    def test_invalid_angle(self):
+        """Catch exceptions raised whtn calculating arc point from the 'angle' alternative"""
+        with self.assertRaises(AssertionError):
+            edge = self.get_edge(edges.Angle(0, [0, 0, 1]))
+            _ = edge.is_valid
+        
+    def test_valid_angle(self):
+        """A normal angle edge"""
+        self.assertTrue(self.get_edge(edges.Angle(np.pi, [0, 0, 1])).is_valid)
+
+    def test_valid_spline(self):
+        """Spline edges are always valid"""
+        self.assertTrue(self.get_edge(edges.Spline([[0, 0, 0], [0, 0, 0], [0, 0, 0]])).is_valid)
+    
+    def test_valid_polyline(self):
+        """Same as spline, always valid"""
+        self.assertTrue(self.get_edge(edges.PolyLine([[0, 0, 0], [0, 0, 0], [0, 0, 0]])).is_valid)
+
+    def test_valid_project(self):
+        """Projected edges cannot be checked for validity, therefore... they are assumed valid"""
+        self.assertTrue(self.get_edge(edges.Project(['terrain', 'walls'])).is_valid)
+
+class EdgeLengthTests(unittest.TestCase):
+    """Various edge's lengths"""
+    def get_edge(self, data:edges.EdgeData) -> Edge:
+        """A shortcut to factory method"""
+        return factory.create(
+            Vertex([0, 0, 0], 0), Vertex([1, 0, 0], 1), data
+        )
+
+    def test_arc_edge(self):
+        """Length of a classical arc edge"""
+        self.assertAlmostEqual(
+            self.get_edge(edges.Arc([0.5, 0.5, 0])).length,
+            0.5*np.pi
+        )
+
+    def test_origin_edge(self):
+        """Length of the 'origin' edge"""
+        self.assertAlmostEqual(
+            self.get_edge(edges.Origin([0.5, -0.5, 0])).length,
+            2**0.5*np.pi/4
+        )
+        
+    def test_spline_edge(self):
+        """Length of the 'spline' edge - the segments, actually"""
+        self.assertEqual(self.get_edge(edges.Spline([[1, 0, 0], [1, 1, 0]])).length, 3)
+
+    def test_project_edge(self):
+        """Length of the 'project' edge is equal to a line"""
+        self.assertEqual(self.get_edge(edges.Project('terrain')).length, 1)
+    
+    def test_flattened_edge(self):
+        """A 'flattened' origin edge is shorter"""
+        self.assertLess(
+            self.get_edge(edges.Origin([0.5, -0.5, 0], 2)).length,
+            self.get_edge(edges.Origin([0.5, -0.5, 0], 1)).length
+        )
 
 class AlternativeArcTests(unittest.TestCase):
     """Origin and Axis arc specification"""
@@ -199,4 +297,38 @@ class AlternativeArcTests(unittest.TestCase):
         np.testing.assert_array_almost_equal(
             adjusted_point,
             expected_point
+        )
+
+class EdgeDescriptionTests(unittest.TestCase):
+    """Tests of edge outputs"""
+    def get_edge(self, data:edges.EdgeData) -> Edge:
+        """A shortcut to factory method"""
+        return factory.create(
+            Vertex([0, 0, 0], 0), Vertex([1, 0, 0], 1), data
+        )
+
+    def test_arc_description(self):
+        self.assertEqual(
+            self.get_edge(edges.Arc([0.5, 0.1, 0])).description,
+            "\tarc 0 1 (0.50000000 0.10000000 0.00000000)"
+        )
+    
+    def test_angle_description(self):
+        self.assertEqual(
+            self.get_edge(edges.Angle(np.pi, [0, 0, 1])).description,
+            f"\t// arc 0 1 {np.pi} (0.00000000 0.00000000 1.00000000)\n" + \
+            "\tarc 0 1 (0.50000000 -0.50000000 0.00000000)"
+        )
+
+    def test_origin_description(self):
+        self.assertEqual(
+            self.get_edge(edges.Origin([0.5, -0.5, 0])).description,
+            "\t// arc 0 1 origin 1 (0.50000000 -0.50000000 0.00000000)\n" + \
+            "\tarc 0 1 (0.50000000 0.20710678 0.00000000)"
+        )
+
+    def test_spline_description(self):
+        self.assertEqual(
+            self.get_edge(edges.Spline([[0, 1, 0], [1, 1, 0]])).description,
+            "\tspline 0 1 ((0.00000000 1.00000000 0.00000000) (1.00000000 1.00000000 0.00000000))"
         )

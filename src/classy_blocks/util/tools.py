@@ -98,4 +98,7 @@ def write_vtk(path:str, vertices:List[Vertex], blocks:List[Block]) -> None:
 
         for i in range(n_blocks):
             output.write(f"{i}\n")
-        
+
+def indent(text:str, levels:int) -> str:
+    """Indents 'text' by 'levels' tab characters"""
+    return "\t"*levels + text + "\n"
