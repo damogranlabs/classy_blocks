@@ -41,10 +41,10 @@ class QuarterDisk(Sketch):
             'P1': center_point + radius_vector,
             'D': center_point + radius_vector * self.diagonal_ratio,
         }
-        points['D'] = f.rotate(points['D'], normal, np.pi/4)
-        points['P2'] = f.rotate(points['P1'], normal, np.pi/4)
-        points['S2'] = f.rotate(points['S1'], normal, np.pi/2)
-        points['P3'] = f.rotate(points['P1'], normal, np.pi/2)
+        points['D'] = f.rotate(points['D'], normal, np.pi/4, center_point)
+        points['P2'] = f.rotate(points['P1'], normal, np.pi/4, center_point)
+        points['S2'] = f.rotate(points['S1'], normal, np.pi/2, center_point)
+        points['P3'] = f.rotate(points['P1'], normal, np.pi/2, center_point)
 
         def make_face(keys, edges):
             return Face([points[k] for k in keys], edges)
@@ -74,7 +74,7 @@ class QuarterDisk(Sketch):
     def radius_vector(self) -> NPVectorType:
         """Vector that points from center of this
         *Circle to its (first) radius point"""
-        return self.radius_point - self.center_point
+        return self.radius_point - self.center
 
     @property
     def radius(self) -> float:
@@ -82,14 +82,14 @@ class QuarterDisk(Sketch):
         return float(f.norm(self.radius_vector))
 
     @property
-    def center_point(self) -> NPPointType:
-        """Center point of this sketch"""
-        return self.points['O']
-
-    @property
     def radius_point(self) -> NPPointType:
         """Point at outer radius"""
         return self.points['P1']
+    
+    @property
+    def center(self) -> NPPointType:
+        """Center point of this sketch"""
+        return self.points['O']
 
     @property
     def points(self) -> Dict[str, NPPointType]:
@@ -127,7 +127,7 @@ class HalfDisk(QuarterDisk):
                  side_ratio: float=CORE_SIDE_RATIO):
         super().__init__(center_point, radius_point, normal, diagonal_ratio, side_ratio)
         # rotate core and shell faces
-        other_quarter = self.copy().rotate(np.pi/2, self.normal, self.center_point)
+        other_quarter = self.copy().rotate(np.pi/2, self.normal, self.center)
 
         self.core = self.core + other_quarter.core
         self.shell = self.shell + other_quarter.shell
@@ -161,7 +161,7 @@ class Disk(HalfDisk):
                  side_ratio: float=CORE_SIDE_RATIO):
         super().__init__(center_point, radius_point, normal, diagonal_ratio, side_ratio)
         # rotate core and shell faces
-        other_half = self.copy().rotate(np.pi, self.normal, self.center_point)
+        other_half = self.copy().rotate(np.pi, self.normal, self.center)
 
         self.core = self.core + other_half.core
         self.shell = self.shell + other_half.shell

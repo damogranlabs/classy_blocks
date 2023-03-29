@@ -86,6 +86,9 @@ class EighthSphere(RoundShape):
                  normal:VectorType,
                  diagonal_angle:float=np.pi/5):
 
+        # TODO: move these to properties
+        # BUG: move these to properties
+        # (will not change with transforms!)
         self.center_point = np.asarray(center_point)
         self.radius_point = np.asarray(radius_point)
         self.normal = f.unit_vector(np.asarray(normal))

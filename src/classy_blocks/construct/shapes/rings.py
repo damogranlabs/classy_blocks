@@ -55,8 +55,8 @@ class ExtrudedRing(RoundShape):
             sketch = source.sketch_1
 
         return cls(
-            sketch.center_point,
-            sketch.center_point + f.unit_vector(sketch.normal) * length,
+            sketch.center,
+            sketch.center + f.unit_vector(sketch.normal) * length,
             sketch.outer_radius_point,
             sketch.inner_radius,
             n_segments=sketch.n_segments,

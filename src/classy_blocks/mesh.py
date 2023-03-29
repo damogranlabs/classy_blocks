@@ -52,7 +52,7 @@ class Mesh:
         """Creates/finds vertices from operation's points and returns them"""
         vertices:List[Vertex] = []
 
-        # FIXME: prettify/move logic elsewhere
+        # FIXME: prettify/move logic elsewhere/remove private method
         for corner in range(8):
             point = operation.points[corner]
             # remove master patches, only slave will remain

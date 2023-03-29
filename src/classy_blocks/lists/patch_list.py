@@ -1,5 +1,7 @@
 from typing import Dict, List, Optional, Set
 
+from collections import OrderedDict
+
 from classy_blocks.types import OrientType
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.items.side import Side
@@ -9,7 +11,7 @@ from classy_blocks.items.patch import Patch
 class PatchList:
     """Handling of the patches ('boundary') part of blockMeshDict"""
     def __init__(self):
-        self.patches:Dict[str, Patch] = {} # TODO: OrderedDict for consistent testing?
+        self.patches:OrderedDict[str, Patch] = OrderedDict()
         self.default:Optional[Dict[str, str]] = None
         self.merged:List[List[str]] = [] # data for the mergePatchPairs entry
 

@@ -79,14 +79,10 @@ def rotation_matrix(axis:VectorType, theta:float):
     return scipy.linalg.expm(np.cross(np.eye(3), axis / norm(axis) * theta))
 
 
-def rotate(point:PointType, axis:VectorType, angle:float, origin:Optional[PointType]=None) -> NPPointType:
+def rotate(point:PointType, axis:VectorType, angle:float, origin:PointType) -> NPPointType:
     """Rotate a point around any axis given by axis by angle theta [radians]"""
     point = np.asarray(point)
     axis = np.asarray(axis)
-
-    if origin is None:
-        origin = [0, 0, 0]
-
     origin = np.asarray(origin)
 
     rotated_point = np.dot(rotation_matrix(axis, angle), point - origin)

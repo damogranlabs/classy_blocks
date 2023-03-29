@@ -25,6 +25,7 @@ package with type hinting, static typing and no python-ish duck-typing hacks.
 - Changed examples so that an example file runs directly instead of calling run.py (that created a lot of confusion)
 - Box() is now an operation (previously Shape)
 - simplified cylinder and sphere creation
+- Chaining of elbows/cylinders/etc always with start_face parameters (instead of negative length)
 ### Removed
 - *Wall shapes will be created later with a different approach
 - Examples with *Wall shapes will be recreated later with new approaches

@@ -68,10 +68,10 @@ class Annulus(Sketch):
 
     @property
     def radius(self) -> float:
-        return self.outer_radius_point - self.center_point
+        return self.outer_radius_point - self.center
 
     @property
-    def center_point(self) -> NPPointType:
+    def center(self) -> NPPointType:
         """"""
         return self.center
 
@@ -79,7 +79,7 @@ class Annulus(Sketch):
     def inner_radius(self) -> float:
         """Returns inner radius as length, that is, distance between
         center and inner radius point"""
-        return f.norm(self.inner_radius_point - self.center_point)
+        return f.norm(self.inner_radius_point - self.center)
 
     @property
     def outer_radius(self) -> float:

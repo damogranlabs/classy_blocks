@@ -2,14 +2,14 @@ import os
 
 from classy_blocks import Mesh, Hemisphere
 
-center_point = [0.0, 0.0, 0.0]
+center = [0.0, 0.0, 0.0]
 radius_point = [0.0, 0.0, 1.0]
 normal = [0.0, 1.0, 0.0]
 
 cell_size = 0.1
 bl_thickness = 0.01
 
-sphere = Hemisphere(center_point, radius_point, normal)
+sphere = Hemisphere(center, radius_point, normal)
 sphere.chop_axial(start_size=cell_size)
 sphere.chop_radial(start_size=cell_size, end_size=bl_thickness)
 sphere.chop_tangential(start_size=cell_size)

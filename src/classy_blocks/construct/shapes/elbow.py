@@ -20,9 +20,13 @@ class Elbow(RoundShape):
         return new_sketch
 
     def __init__(self,
-        center_point_1: PointType, radius_point_1: PointType, normal_1: VectorType,
-        sweep_angle: float, arc_center: PointType, rotation_axis: VectorType,
-        radius_2: float):
+        center_point_1:PointType,
+        radius_point_1:PointType,
+        normal_1:VectorType,
+        sweep_angle:float,
+        arc_center:PointType,
+        rotation_axis:VectorType,
+        radius_2:float):
 
         radius_1 = f.norm(np.asarray(radius_point_1) - np.asarray(center_point_1))
 
@@ -43,3 +47,23 @@ class Elbow(RoundShape):
                 "radius": (radius_1 + radius_2) / 2,
             },
         )
+
+    @classmethod
+    def chain(cls,
+              source:RoundShape,
+              sweep_angle:float,
+              arc_center:PointType,
+              rotation_axis:VectorType,
+              radius_2:float,
+              start_face:bool=False):
+        """Use another round Shape's end face as a starting point for this Elbow;
+        Returns a new Elbow object. To start from the other side, use start_face = True"""
+        assert source.sketch_class == Disk
+
+        # TODO: TEST
+        if start_face:
+            s = source.sketch_1
+        else:
+            s = source.sketch_2
+
+        return cls(s.center, s.radius_point, s.normal, sweep_angle, arc_center, rotation_axis, radius_2)

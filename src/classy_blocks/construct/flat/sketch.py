@@ -3,8 +3,6 @@ import copy
 
 from typing import List, Optional, TypeVar
 
-import numpy as np
-
 from classy_blocks.types import VectorType, PointType, NPPointType
 from classy_blocks.base.transformable import TransformableBase
 from classy_blocks.construct.flat.face import Face
@@ -44,9 +42,9 @@ class Sketch(TransformableBase):
         return self
 
     @property
+    @abc.abstractmethod
     def center(self) -> NPPointType:
         """Center of this sketch; an average of all faces"""
-        return np.average([f.center for f in self.faces], axis=0)
 
     @property
     @abc.abstractmethod

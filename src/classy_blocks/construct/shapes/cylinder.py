@@ -20,18 +20,21 @@ class Cylinder(Frustum):
         super().__init__(axis_point_1, axis_point_2, radius_point_1, radius_1)
 
     @classmethod
-    def chain(cls, source:RoundShape, length:float) -> 'Cylinder':
+    def chain(cls, source:RoundShape, length:float, start_face:bool=False) -> 'Cylinder':
         """Creates a new Cylinder on start or end face of a round Shape (Elbow, Frustum, Cylinder);
         Use length > 0 to extrude 'forward' from source's end face;
         Use length < 0 to extrude 'backward' from source' start face"""
+        # FIXME: different number of parameters in this and parent class
         assert source.sketch_class == Disk
-        # TODO: TEST
-        if length > 0:
-            sketch = source.sketch_2
-        else:
-            sketch = source.sketch_1
+        assert length > 0, "Use start_face=True and a positive length to chain backwards"
 
-        axis_point_1 = sketch.center_point
+        if start_face:
+            sketch = source.sketch_1
+            length = -length
+        else:
+            sketch = source.sketch_2
+
+        axis_point_1 = sketch.center
         radius_point_1 = sketch.radius_point
         normal = sketch.normal
 

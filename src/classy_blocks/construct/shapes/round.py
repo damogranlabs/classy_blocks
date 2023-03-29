@@ -1,6 +1,6 @@
 import abc
 
-from typing import List, TypeVar, Type
+from typing import List, TypeVar
 
 from classy_blocks.types import AxisType, OrientType
 
@@ -21,7 +21,7 @@ class RoundShape(Shape):
     Solid round shapes: Elbow, Frustum, Cylinder;
     they are created using an OH-grid (see Disk), have a
     'start' and 'end' sketch and an 'outer' surface."""
-    sketch_class:Type[Sketch] # Sketch class to be used for construction of the Shape
+    sketch_class = disk.Disk
 
     axial_axis:AxisType = 2 # Axis along which 'outer sides' run
     radial_axis:AxisType = 0 # Axis that goes from center to 'outer side'

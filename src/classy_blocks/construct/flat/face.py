@@ -109,4 +109,4 @@ class Face(TransformableBase):
         side_2 = np.roll(points, -1, axis=0) - center
         normals = np.cross(side_1, side_2)
 
-        return np.average(normals, axis=0)
+        return f.unit_vector(np.average(normals, axis=0))
