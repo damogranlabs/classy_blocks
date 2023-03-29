@@ -66,7 +66,7 @@ class OperationTests(BlockTestCase):
         self.loft.set_patch('bottom', 'terrain')
 
         for i in (0, 1, 2, 3):
-            self.assertListEqual(self.loft.get_patches_at_corner(i), ['terrain'])
+            self.assertSetEqual(self.loft.get_patches_at_corner(i), {'terrain'})
         
     def test_patch_from_corner_multiple(self):
         """Multiple patches from faces on this corner"""
@@ -74,5 +74,5 @@ class OperationTests(BlockTestCase):
         self.loft.set_patch('front', 'wall')
         self.loft.set_patch('left', 'atmosphere')
 
-        self.assertListEqual(self.loft.get_patches_at_corner(0), ['terrain', 'wall', 'atmosphere'])
-        self.assertListEqual(self.loft.get_patches_at_corner(1), ['terrain', 'wall'])
+        self.assertSetEqual(self.loft.get_patches_at_corner(0), {'terrain', 'wall', 'atmosphere'})
+        self.assertSetEqual(self.loft.get_patches_at_corner(1), {'terrain', 'wall'})

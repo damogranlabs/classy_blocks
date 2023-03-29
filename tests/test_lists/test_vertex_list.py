@@ -65,14 +65,14 @@ class VertexListTests(DataTestCase):
             # but slightly displaced (well within tolerances)
             point = vertex.pos + f.vector(displacement, displacement, displacement)
 
-            self.assertEqual(self.vlist.find(point).index, i)
+            self.assertEqual(self.vlist.find_unique(point).index, i)
 
     def test_find_fail(self):
         """Raise an error when no vertex was found at specified point"""
         self.add_all(self.blocks[0].points)
 
         with self.assertRaises(VertexNotFoundError):
-            self.vlist.find(f.vector(999, 999, 999))
+            self.vlist.find_unique(f.vector(999, 999, 999))
 
     def test_find_duplicated_success(self):
         """An existing vertex at specified point and slave patch was found"""
@@ -81,7 +81,7 @@ class VertexListTests(DataTestCase):
         self.vlist.duplicated = [DuplicatedEntry(master_vertex, ['terrain'])]
 
         self.assertEqual(
-            self.vlist.find(master_vertex.pos, ['terrain']),
+            self.vlist.find_duplicated(master_vertex.pos, ['terrain']),
             self.vlist.vertices[0]
         )
 
@@ -90,7 +90,7 @@ class VertexListTests(DataTestCase):
         self.add_all(self.blocks[0].points)
 
         with self.assertRaises(VertexNotFoundError):
-            _ = self.vlist.find(self.vlist.vertices[0].pos, ['terrain'])
+            _ = self.vlist.find_duplicated(self.vlist.vertices[0].pos, ['terrain'])
 
     def test_add_slave_single(self):
         """Add a vertex on slave patch; must be duplicated"""
