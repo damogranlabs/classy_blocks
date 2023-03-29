@@ -94,7 +94,6 @@ class QuarterDisk(Sketch):
     @property
     def points(self) -> Dict[str, NPPointType]:
         """Returns points as named during construction of a QuarterDisk"""
-        # TODO: TEST
         # Refer to core and shell because SemiDisk and Disk will add new faces
         # to self.faces[]
         return {

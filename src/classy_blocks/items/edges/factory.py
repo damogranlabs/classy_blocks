@@ -4,7 +4,7 @@ from classy_blocks.types import EdgeKindType
 from classy_blocks.construct.edges import EdgeData
 from classy_blocks.items.edges.edge import Edge
 
-# TODO: make this automatic
+# FIXME: make this automatic
 from classy_blocks.items.edges.line import LineEdge
 from classy_blocks.items.edges.arcs.arc import ArcEdge
 from classy_blocks.items.edges.arcs.origin import OriginEdge

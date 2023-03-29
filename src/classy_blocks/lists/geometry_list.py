@@ -11,7 +11,6 @@ class GeometryList:
         properties are as specified by searchable* class in documentation.
         See examples/advanced/project for an example."""
         # concatenate the two dictionaries
-        # TODO: TEST
         self.geometry = {**self.geometry, **geometry}
 
     @property

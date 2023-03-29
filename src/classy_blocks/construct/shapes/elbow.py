@@ -12,7 +12,7 @@ class Elbow(RoundShape):
     sketch_class = Disk
 
     def transform_function(self, **kwargs):
-        # TODO: invent a better method than juggling with **kwargs
+        # FIXME: invent a better method than juggling with **kwargs
         new_sketch = self.sketch_1.copy()
         new_sketch.rotate(kwargs['angle'], kwargs['axis'], kwargs['origin'])
         new_sketch.scale(kwargs['radius']/self.sketch_1.radius)

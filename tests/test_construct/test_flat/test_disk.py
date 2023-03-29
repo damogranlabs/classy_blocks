@@ -74,4 +74,27 @@ class QuarterDiskTests(unittest.TestCase):
         self.assertGreater(f.norm(points[3] - points[2]), TOL)
         self.assertGreater(f.norm(points[0] - points[3]), TOL)
 
+    def test_points_keys(self):
+        """Check positions of points in the @points property"""
+        self.assertSetEqual(
+            {'O', 'S1', 'P1', 'D', 'P2', 'S2', 'P3'},
+            set(self.qdisk.points.keys())
+        )
 
+    @parameterized.expand((
+        ('O', [0, 0, 0]),
+        ('S1', [0.5, 0, 0]),
+        ('P1', [1, 0, 0]),
+        ('D', [2**0.5/4, 2**0.5/4, 0]),
+        ('P2', [2**0.5/2, 2**0.5/2, 0]),
+        ('P3', [0, 1, 0]),
+        ('S2', [0, 0.5, 0])
+    ))
+    def test_point_position(self, key, position):
+        """Check that the points are symmetrical with respect to
+        diagonal"""
+        qdisk = QuarterDisk([0, 0, 0], [1, 0, 0], [0, 0, 1], 0.5, 0.5)
+
+        self.assertTrue(
+            f.norm(qdisk.points[key] - position) < TOL
+        )

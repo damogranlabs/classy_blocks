@@ -21,7 +21,6 @@ class Box(Loft):
     cartesian coordinate system. Therefore edge 0-1 will correspond to x-axis,
     1-2 to y- and 0-4 to z-axis."""
     def __init__(self, start_point:PointType, diagonal_point:PointType):
-        # TODO: TEST
         start_point = np.asarray(start_point)
         diagonal_point = np.asarray(diagonal_point)
         parr = np.vstack((start_point, diagonal_point)).T
