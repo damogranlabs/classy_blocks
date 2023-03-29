@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict, Union, TypeVar
+from typing import List, Optional, Dict, Union, TypeVar, Set
 
 import numpy as np
 
@@ -47,7 +47,6 @@ class Operation(AdditiveBase):
         2: between faces / along operation path
 
         Kwargs: see arguments for Chop object"""
-        # TODO: TEST
         self.chops[axis].append(Chop(**kwargs))
 
     def unchop(self, axis:AxisType) -> None:
@@ -92,7 +91,6 @@ class Operation(AdditiveBase):
             left: opposite right
         - geometry: name of predefined geometry (add separately to Mesh object)
         - edges:if True, all edges belonging to this side will also be projected"""
-        # TODO: TEST
         self.projections.add_side(side, geometry)
 
         if edges:
@@ -174,7 +172,6 @@ class Operation(AdditiveBase):
     @property
     def edges(self) -> Frame:
         """Returns a Frame with edges as its beams"""
-        # TODO: TEST
         frame = Frame()
 
         for i, data in enumerate(self.bottom_face.edges):
@@ -200,19 +197,17 @@ class Operation(AdditiveBase):
     def faces(self) -> Dict[OrientType, Face]:
         """Create a new Face from points on given 'side' of this Operation;
         does not copy edges (they don't need to be copied)"""
-        # TODO: TEST
-
         return {
             side:Face([self.points[i] for i in corners])
             for side, corners in constants.FACE_MAP.items()
         }
 
-    def get_patch_from_corner(self, corner:int) -> Optional[str]:
-        """Returns patch name at given corner or None if
-        no patch has been defined"""
-        # TODO: TEST
+    def get_patches_at_corner(self, corner:int) -> Set[str]:
+        """Returns patch names at given corner (up to 3)"""
+        patches = set()
+        
         for side, patch in self.patch_names.items():
             if corner in constants.FACE_MAP[side]:
-                return patch
-        
-        return None
+                patches.add(patch)
+            
+        return patches

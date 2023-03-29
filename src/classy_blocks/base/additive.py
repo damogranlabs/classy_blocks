@@ -11,7 +11,7 @@ class AdditiveBase(TransformableBase):
     mesh.add(); with all the machinery required to do that"""
     @property
     @abc.abstractmethod
-    def operations(self:AdditiveT) -> Sequence[AdditiveT]:
+    def operations(self:AdditiveT) -> Sequence[AdditiveT]: # TODO: this must return an Operation!
         """A list of operations to be added to mesh"""
 
     @property

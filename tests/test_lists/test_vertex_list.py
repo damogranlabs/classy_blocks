@@ -4,7 +4,7 @@ from classy_blocks.util import functions as f
 from classy_blocks.util import constants
 
 from classy_blocks.base.exceptions import VertexNotFoundError
-from classy_blocks.lists.vertex_list import VertexList
+from classy_blocks.lists.vertex_list import VertexList, DuplicatedEntry
 
 from tests.fixtures.data import DataTestCase
 
@@ -77,10 +77,11 @@ class VertexListTests(DataTestCase):
     def test_find_duplicated_success(self):
         """An existing vertex at specified point and slave patch was found"""
         self.add_all(self.blocks[0].points)
-        self.vlist.duplicated['terrain'] = [self.vlist.vertices[0]]
+        master_vertex = self.vlist.vertices[0]
+        self.vlist.duplicated = [DuplicatedEntry(master_vertex, ['terrain'])]
 
         self.assertEqual(
-            self.vlist.find_duplicated(self.vlist.vertices[0].pos, 'terrain'),
+            self.vlist.find(master_vertex.pos, ['terrain']),
             self.vlist.vertices[0]
         )
 
@@ -89,13 +90,13 @@ class VertexListTests(DataTestCase):
         self.add_all(self.blocks[0].points)
 
         with self.assertRaises(VertexNotFoundError):
-            _ = self.vlist.find_duplicated(self.vlist.vertices[0].pos, 'terrain')
+            _ = self.vlist.find(self.vlist.vertices[0].pos, ['terrain'])
 
     def test_add_slave_single(self):
         """Add a vertex on slave patch; must be duplicated"""
         self.add_all(self.blocks[0].points)
 
-        new_vertex = self.vlist.add(self.vlist.vertices[0].pos, 'terrain')
+        new_vertex = self.vlist.add(self.vlist.vertices[0].pos, ['terrain'])
 
         self.assertEqual(len(self.vlist.vertices), 9)
         self.assertNotEqual(self.vlist.vertices[0], new_vertex)
@@ -105,8 +106,8 @@ class VertexListTests(DataTestCase):
         must be duplicated only once"""
         self.add_all(self.blocks[0].points)
 
-        self.vlist.add(self.vlist.vertices[0].pos, 'terrain')
-        self.vlist.add(self.vlist.vertices[0].pos, 'terrain')
-        self.vlist.add(self.vlist.vertices[0].pos, 'terrain')
+        self.vlist.add(self.vlist.vertices[0].pos, ['terrain'])
+        self.vlist.add(self.vlist.vertices[0].pos, ['terrain'])
+        self.vlist.add(self.vlist.vertices[0].pos, ['terrain'])
 
         self.assertEqual(len(self.vlist.vertices), 9)

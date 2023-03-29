@@ -24,7 +24,7 @@ fine_box.set_patch('top', 'cylinder_master')
 mesh.add(fine_box)
 
 # merge the boxes
-mesh.merge_patches('box_slave', 'box_master')
+mesh.merge_patches('box_master', 'box_slave')
 
 # add another cylinder on top; this will have no
 # coincident points

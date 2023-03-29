@@ -20,6 +20,8 @@ class Frustum(RoundShape):
 
         Sides are straight unless radius_mid is given; in that case a profiled body
         of revolution is created."""
+    sketch_class = Disk
+    
     def transform_function(self, **kwargs):
         new_sketch = self.sketch_1.copy()
         new_sketch.translate(kwargs['displacement'])

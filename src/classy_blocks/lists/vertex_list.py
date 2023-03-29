@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import List, Optional
 
 from classy_blocks.base.exceptions import VertexNotFoundError
 from classy_blocks.types import NPPointType
@@ -7,6 +7,18 @@ from classy_blocks.util import functions as f
 
 from classy_blocks.items.vertex import Vertex
 
+class DuplicatedEntry:
+    """A pair vertex:{set of slave patches} that describes
+    a duplicated vertex on mentioned patches"""
+    def __init__(self, vertex:Vertex, patches:List[str]):
+        self.vertex = vertex
+        self.patches = sorted(patches)
+    
+    @property
+    def point(self) -> NPPointType:
+        """Vertex's point"""
+        return self.vertex.pos
+
 class VertexList:
     """ Handling of the 'vertices' part of blockMeshDict """
     def __init__(self):
@@ -14,61 +26,65 @@ class VertexList:
 
         # a collection of duplicated vertices
         # belonging to a certain patch name
-        self.duplicated:Dict[str, List[Vertex]] = {}
+        self.duplicated:List[DuplicatedEntry] = []
 
-    def find(self, position:NPPointType) -> Vertex:
+    def find_duplicated(self, position:NPPointType, slave_patches:List[str]) -> Vertex:
+        """Finds an appropriate entry in self.duplicated, if any"""
+        slave_patches.sort()
+        
+        for dupe in self.duplicated:
+            if f.norm(position - dupe.point) < constants.TOL:
+                if dupe.patches == slave_patches:
+                    return dupe.vertex
+        
+        raise VertexNotFoundError(f"No duplicated vertex found: {str(position)} {slave_patches}")
+
+    def find_unique(self, position:NPPointType) -> Vertex:
         """checks if any of existing vertices in self.vertices are
         in the same location as the passed one; if so, returns
         the existing vertex"""
-        # FIXME: optimize (octree/kdtree from scipy) (?)
         for vertex in self.vertices:
             if f.norm(vertex.pos - position) < constants.TOL:
                 return vertex
 
         raise VertexNotFoundError(f"Vertex not found: {str(position)}")
 
-    def find_duplicated(self, position:NPPointType, slave_patch:str) -> Vertex:
-        """Finds an already duplicated vertex on a slave patch; raises
-        a VertexNotFoundError if there's no such vertex yet"""
-        for vertex in self.duplicated.get(slave_patch, []):
-            if f.norm(vertex.pos - position) < constants.TOL:
-                return vertex
-        
-        raise VertexNotFoundError(f"No duplicated vertex found at {str(position)}")
-
-    def add(self, point:NPPointType, slave_patch:Optional[str]=None) -> Vertex:
+    def add(self, point:NPPointType, slave_patches:Optional[List[str]]=None) -> Vertex:
         """Re-use existing vertices when there's already one at the position;
         unless that vertex belongs to a slave of a face-merged pair - 
         in that case add a duplicate in the same position anyway"""
-        # FIXME: prettify
-        if slave_patch is not None:
+
+        # different scenarios:
+        # 1. add a new vertex, nothing exist at this location yet
+        # 2. reuse an existing vertex at this location
+        # 3. add a new, duplicated vertex at the same location but for a different set of slave patches
+        # 4. add a new, 'master' vertex because what's at the same location belongs to a slave patch
+
+        if slave_patches is None:
+            # scenario #1 and #2
             try:
-                return self.find_duplicated(point, slave_patch)
+                vertex = self.find_unique(point)
+
+                # scenario #4:
+                for dupe in self.duplicated:
+                    if dupe.vertex == vertex:
+                        # a point that belongs to a slave patch
+                        # has been found but we need one for a 'master' patch
+                        raise VertexNotFoundError
             except VertexNotFoundError:
                 vertex = Vertex(point, len(self.vertices))
                 self.vertices.append(vertex)
-
-                if slave_patch is not None:
-                    if slave_patch not in self.duplicated:
-                        self.duplicated[slave_patch] = []
-
-                    self.duplicated[slave_patch].append(vertex)
-                
-                return vertex
-
+            
+            return vertex
+    
+        # scenario 3: slave_patches is not None
         try:
-            vertex = self.find(point)
+            vertex = self.find_duplicated(point, slave_patches)
         except VertexNotFoundError:
-            # no vertex was found, add a new one;
             vertex = Vertex(point, len(self.vertices))
             self.vertices.append(vertex)
-
-            if slave_patch is not None:
-                if slave_patch not in self.duplicated:
-                    self.duplicated[slave_patch] = []
-
-                self.duplicated[slave_patch].append(vertex)
-
+            self.duplicated.append(DuplicatedEntry(vertex, slave_patches))
+        
         return vertex
 
     @property

@@ -1,6 +1,5 @@
 """The Mesh object ties everything together and writes the blockMeshDict in the end."""
-# TODO: TEST
-from typing import  Optional, List
+from typing import Optional, List, Dict
 
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.block import Block
@@ -33,7 +32,6 @@ class Mesh:
         self.geometry_list = GeometryList()
 
         self.settings = {
-            # TODO: test output
             'prescale': None,
             'scale': 1,
             'transform': None,
@@ -46,25 +44,21 @@ class Mesh:
         """Add a classy_blocks entity to the mesh;
         can be a plain Block, created from points, Operation, Shape or Object."""
         # this does nothing yet;
-        # the data will be processed automatically on a
-        # proper occasion (before write/optimize)
+        # the data will be processed automatically at an
+        # appropriate occasion (before write/optimize)
         self.depot.append(entity)
 
     def _add_vertices(self, operation:Operation) -> List[Vertex]:
         """Creates/finds vertices from operation's points and returns them"""
         vertices:List[Vertex] = []
 
-        # TODO: prettify
+        # FIXME: prettify/move logic elsewhere
         for corner in range(8):
-            patch = operation.get_patch_from_corner(corner)
             point = operation.points[corner]
-            slave_patch = None
-
-            if patch is not None:
-                if self.patch_list.is_slave(patch):
-                    slave_patch = patch
-            
-            vertices.append(self.vertex_list.add(point, slave_patch))
+            # remove master patches, only slave will remain
+            patches = operation.get_patches_at_corner(corner)
+            patches = patches.intersection(self.patch_list.slave_patches)
+            vertices.append(self.vertex_list.add(point, list(patches)))
     
         for data in operation.projections.vertices:
             vertices[data.corner].project(data.geometry)
@@ -100,6 +94,7 @@ class Mesh:
         actual vertices, edges, blocks and other stuff to be inserted into
         blockMeshDict. After this has been done, the above objects 
         cease to have any function or influence on mesh."""
+        # first, collect data about patches and merged stuff
         for entity in self.depot:
             for operation in entity.operations:
                 vertices = self._add_vertices(operation)

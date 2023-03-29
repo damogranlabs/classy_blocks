@@ -2,12 +2,15 @@ import numpy as np
 
 from classy_blocks.types import PointType, VectorType
 
+from classy_blocks.construct.flat.disk import Disk
 from classy_blocks.construct.shapes.round import RoundShape
 
 from classy_blocks.util import functions as f
 
 class Elbow(RoundShape):
     """A curved round shape of varying cross-section"""
+    sketch_class = Disk
+
     def transform_function(self, **kwargs):
         # TODO: invent a better method than juggling with **kwargs
         new_sketch = self.sketch_1.copy()

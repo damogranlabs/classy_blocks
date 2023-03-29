@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set
 
 from classy_blocks.types import OrientType
 from classy_blocks.construct.operations.operation import Operation
@@ -69,11 +69,17 @@ class PatchList:
 
         return out
 
+    @property
+    def master_patches(self) -> Set[str]:
+        """A list of master patch names"""
+        return {patches[0] for patches in self.merged}
+
+    @property
+    def slave_patches(self) -> Set[str]:
+        """A list of master patch names"""
+        return {patches[1] for patches in self.merged}
+
     def is_slave(self, name:str) -> bool:
         """Returns True if a patch with given name is 
         listed as a slave in merged patches"""
-        for pair in self.merged:
-            if pair[1] == name:
-                return True
-        
-        return False
+        return name in self.slave_patches
