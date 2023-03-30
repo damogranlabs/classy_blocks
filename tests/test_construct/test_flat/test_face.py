@@ -8,14 +8,14 @@ from classy_blocks.util import functions as f
 
 
 class FaceTests(unittest.TestCase):
-    def setUp(self):        
-        self.points = [[0., 0., 0.], [1., 0., 0.], [1., 1., 0.], [0., 1., 0.]]
+    def setUp(self):
+        self.points = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [0.0, 1.0, 0.0]]
 
     def test_face_points(self):
         # provide less than 4 points
         with self.assertRaises(Exception):
             _ = Face(self.points[:3])
-    
+
     def test_face_center(self):
         np.testing.assert_array_equal(Face(self.points).center, [0.5, 0.5, 0])
 
@@ -23,7 +23,8 @@ class FaceTests(unittest.TestCase):
         face_edges = [
             edges.Arc([0.5, -0.25, 0]),
             edges.Spline([[1.1, 0.25, 0], [1.2, 0.5, 0], [1.1, 0.75, 0]]),
-            None, None
+            None,
+            None,
         ]
 
         translate_vector = np.random.rand(3)
@@ -39,16 +40,13 @@ class FaceTests(unittest.TestCase):
             np.testing.assert_almost_equal(p1, p2 - translate_vector)
 
         # check arc edge
-        np.testing.assert_almost_equal(
-            translated_face.edges[0].point - translate_vector,
-            original_face.edges[0].point
-        )
+        np.testing.assert_almost_equal(translated_face.edges[0].point - translate_vector, original_face.edges[0].point)
 
         # check spline edge
         for i in range(len(face_edges[1].points)):
             np.testing.assert_almost_equal(
-                translated_face.edges[1].points[i] - translate_vector,
-                original_face.edges[1].points[i])
+                translated_face.edges[1].points[i] - translate_vector, original_face.edges[1].points[i]
+            )
 
     def test_rotate_face(self):
         # only test that the Face.rotate function works properly;

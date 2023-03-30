@@ -10,9 +10,11 @@ from classy_blocks.types import PointType, VectorType, EdgeKindType
 from classy_blocks.util import functions as f
 from classy_blocks.util import constants
 
+
 @dataclasses.dataclass
 class Edge(TransformableBase):
     """Common stuff for all edge objects"""
+
     vertex_1: Vertex
     vertex_2: Vertex
     data: EdgeData
@@ -21,7 +23,7 @@ class Edge(TransformableBase):
         assert isinstance(self.vertex_1, Vertex)
         assert isinstance(self.vertex_2, Vertex)
 
-    def translate(self, displacement: VectorType) -> 'Edge':
+    def translate(self, displacement: VectorType) -> "Edge":
         """Move all points in the edge (but not start and end)
         by a displacement vector."""
         self.data.translate(displacement)
@@ -33,7 +35,7 @@ class Edge(TransformableBase):
         self.data.rotate(angle, axis, origin)
         return self
 
-    def scale(self, ratio: float, origin: Optional[PointType] = None) -> 'Edge':
+    def scale(self, ratio: float, origin: Optional[PointType] = None) -> "Edge":
         """Scales the edge points around given origin"""
         self.data.scale(ratio, origin)
         return self
@@ -46,7 +48,7 @@ class Edge(TransformableBase):
     @property
     def is_valid(self) -> bool:
         """Returns True if this edge is elligible to be put into blockMeshDict"""
-        if self.data.kind == 'line':
+        if self.data.kind == "line":
             # no need to specify lines
             return False
 
@@ -75,5 +77,4 @@ class Edge(TransformableBase):
     def __eq__(self, other):
         # An Edge is defined between two vertices regardless of
         # its orientation
-        return {self.vertex_1.index, self.vertex_2.index} == \
-            {other.vertex_1.index, other.vertex_2.index}
+        return {self.vertex_1.index, self.vertex_2.index} == {other.vertex_1.index, other.vertex_2.index}

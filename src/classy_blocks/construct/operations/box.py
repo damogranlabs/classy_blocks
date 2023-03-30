@@ -6,6 +6,7 @@ from classy_blocks.construct.operations.loft import Loft
 
 from classy_blocks.util.constants import DTYPE
 
+
 class Box(Loft):
     """A Rudimentary Box with edges aligned to
     cartesian coordinates x-y-z. Refer to sketch
@@ -20,7 +21,8 @@ class Box(Loft):
     Box() will always sort input data so that it becomes aligned with
     cartesian coordinate system. Therefore edge 0-1 will correspond to x-axis,
     1-2 to y- and 0-4 to z-axis."""
-    def __init__(self, start_point:PointType, diagonal_point:PointType):
+
+    def __init__(self, start_point: PointType, diagonal_point: PointType):
         start_point = np.asarray(start_point)
         diagonal_point = np.asarray(diagonal_point)
         parr = np.vstack((start_point, diagonal_point)).T
@@ -32,12 +34,7 @@ class Box(Loft):
         delta_y = np.array([0, point_6[1] - point_0[1], 0], dtype=DTYPE)
         delta_z = np.array([0, 0, point_6[2] - point_0[2]], dtype=DTYPE)
 
-        bottom_face = Face([
-            point_0,
-            point_0 + delta_x,
-            point_0 + delta_x + delta_y,
-            point_0 + delta_y
-        ])
+        bottom_face = Face([point_0, point_0 + delta_x, point_0 + delta_x + delta_y, point_0 + delta_y])
         top_face = bottom_face.copy().translate(delta_z)
 
         super().__init__(bottom_face, top_face)

@@ -11,35 +11,37 @@ from classy_blocks.util import functions as f
 
 from classy_blocks.util.constants import vector_format
 
+
 class Vertex(TransformableBase):
     """A 3D point in space with all transformations and an assigned index"""
+
     # keep the list as a class variable
-    def __init__(self, position:PointType, index:int):
+    def __init__(self, position: PointType, index: int):
         position = np.asarray(position, dtype=constants.DTYPE)
-        assert np.shape(position) == (3, ), "Provide a point in 3D space"
+        assert np.shape(position) == (3,), "Provide a point in 3D space"
         self.pos = position
 
         # index in blockMeshDict; address of this object when creating edges/blocks
         self.index = index
 
-        self.project_to:Optional[ProjectToType] = None
+        self.project_to: Optional[ProjectToType] = None
 
-    def translate(self, displacement:VectorType) -> 'Vertex':
+    def translate(self, displacement: VectorType) -> "Vertex":
         """Move this point by 'displacement' vector"""
         self.pos += np.asarray(displacement, dtype=constants.DTYPE)
         return self
 
-    def rotate(self, angle, axis, origin=None) -> 'Vertex':
-        """ Rotate this point around an arbitrary axis and origin """
+    def rotate(self, angle, axis, origin=None) -> "Vertex":
+        """Rotate this point around an arbitrary axis and origin"""
         self.pos = f.rotate(self.pos, f.unit_vector(axis), angle, origin)
         return self
 
-    def scale(self, ratio:float, origin:Optional[PointType]=None) -> 'Vertex':
+    def scale(self, ratio: float, origin: Optional[PointType] = None) -> "Vertex":
         """Scale point's position around origin."""
         self.pos = f.scale(self.pos, ratio, origin)
         return self
 
-    def project(self, geometry:ProjectToType) -> None:
+    def project(self, geometry: ProjectToType) -> None:
         """Project this vertex to a single or multiple geometries"""
         if not isinstance(geometry, list):
             geometry = [geometry]
@@ -54,7 +56,7 @@ class Vertex(TransformableBase):
 
     @property
     def description(self) -> str:
-        """ Returns a string representation to be written to blockMeshDict"""
+        """Returns a string representation to be written to blockMeshDict"""
         point = vector_format(self.pos)
         comment = f"// {self.index}"
 

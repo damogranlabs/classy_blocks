@@ -14,39 +14,36 @@ class Annulus(Sketch):
     In real-life, Annulus and Ring are the same 2D objects.
     Here, however, Annulus is a 2D collection of faces whereas
     Ring is an annulus that has been extruded to 3D."""
-    def __init__(self,
-                 center_point:PointType,
-                 outer_radius_point:PointType,
-                 normal:VectorType,
-                 inner_radius:float, n_segments:int=8):
 
+    def __init__(
+        self,
+        center_point: PointType,
+        outer_radius_point: PointType,
+        normal: VectorType,
+        inner_radius: float,
+        n_segments: int = 8,
+    ):
         center_point = np.asarray(center_point)
         normal = f.unit_vector(np.asarray(normal))
 
         outer_radius_point = np.asarray(outer_radius_point)
 
-        inner_radius_point = center_point + \
-            f.unit_vector(outer_radius_point - center_point) * inner_radius
+        inner_radius_point = center_point + f.unit_vector(outer_radius_point - center_point) * inner_radius
 
         segment_angle = 2 * np.pi / n_segments
 
-        face = Face([ # points
+        face = Face(
+            [  # points
                 inner_radius_point,
                 outer_radius_point,
                 f.rotate(outer_radius_point, normal, segment_angle, center_point),
-                f.rotate(inner_radius_point, normal, segment_angle, center_point)
+                f.rotate(inner_radius_point, normal, segment_angle, center_point),
             ],
-            [ # edges
-                None, Origin(center_point),
-                None, Origin(center_point)
-            ]
+            [None, Origin(center_point), None, Origin(center_point)],  # edges
         )
 
         self.core = []
-        self.shell = [
-            face.copy().rotate(i*segment_angle, normal, center_point)
-            for i in range(n_segments)
-        ]
+        self.shell = [face.copy().rotate(i * segment_angle, normal, center_point) for i in range(n_segments)]
 
         assert self.inner_radius < self.outer_radius, "Outer ring radius must be larger than inner!"
 

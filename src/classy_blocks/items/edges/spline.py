@@ -8,6 +8,7 @@ from classy_blocks.util import constants
 
 from classy_blocks.util import functions as f
 
+
 @dataclasses.dataclass
 class SplineEdge(Edge):
     """Spline edge, defined by multiple points"""

@@ -6,26 +6,28 @@ from classy_blocks.grading.chop import Chop
 from classy_blocks.items.wire import Wire
 from classy_blocks.grading.grading import Grading
 
+
 class Axis:
     """One of block axes, numbered 0, 1, 2, and the relevant data"""
-    def __init__(self, index:AxisType, wires:List[Wire]):
+
+    def __init__(self, index: AxisType, wires: List[Wire]):
         self.index = index
         self.wires = wires
 
         # will be added as blocks are added to mesh
-        self.neighbours:Set['Axis'] = set()
-        self.chops:List[Chop] = []
+        self.neighbours: Set["Axis"] = set()
+        self.chops: List[Chop] = []
 
-        self._grading:Optional[Grading] = None
+        self._grading: Optional[Grading] = None
 
-    def add_neighbour(self, axis:'Axis') -> None:
+    def add_neighbour(self, axis: "Axis") -> None:
         """Adds an 'axis' from another block if it shares at least one wire"""
         for this_wire in self.wires:
             for nei_wire in axis.wires:
                 if this_wire.is_coincident(nei_wire):
                     self.neighbours.add(axis)
 
-    def is_aligned(self, other:'Axis') -> bool:
+    def is_aligned(self, other: "Axis") -> bool:
         """Returns True if wires of the other axis are aligned
         to wires of this one"""
         # first identify common wires
@@ -36,7 +38,7 @@ class Axis:
 
         raise RuntimeError("Axes are not neighbours")
 
-    def chop(self, chop:Chop) -> None:
+    def chop(self, chop: Chop) -> None:
         """Add a chop to this axis' grading"""
         self.chops.append(chop)
 
@@ -52,19 +54,19 @@ class Axis:
         parameter in the first chop; the default is 'avg' if there
         are no chops yet"""
         if len(self.chops) < 1:
-            take = 'avg'
+            take = "avg"
         else:
             take = self.chops[0].take
 
         lengths = self.lengths
 
-        if take == 'min':
+        if take == "min":
             return min(lengths)
 
-        if take == 'max':
+        if take == "max":
             return max(lengths)
 
-        return sum(lengths)/len(lengths)
+        return sum(lengths) / len(lengths)
 
     @property
     def is_defined(self) -> bool:

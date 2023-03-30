@@ -1,10 +1,7 @@
 import os
 import classy_blocks as cb
 
-base = cb.Face(
-    [ [0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0] ],
-    [cb.Arc([0.5, -0.2, 0]), None, None, None]
-)
+base = cb.Face([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]], [cb.Arc([0.5, -0.2, 0]), None, None, None])
 
 extrude = cb.Extrude(base, [0.5, 0.5, 3])
 
@@ -21,6 +18,6 @@ extrude.chop(2, c2c_expansion=1, count=20)
 
 mesh = cb.Mesh()
 mesh.add(extrude)
-mesh.set_default_patch('walls', 'wall')
+mesh.set_default_patch("walls", "wall")
 
-mesh.write(os.path.join('..', 'case', 'system', 'blockMeshDict'))
+mesh.write(os.path.join("..", "case", "system", "blockMeshDict"))

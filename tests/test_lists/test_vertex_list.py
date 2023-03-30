@@ -8,6 +8,7 @@ from classy_blocks.lists.vertex_list import VertexList, DuplicatedEntry
 
 from tests.fixtures.data import DataTestCase
 
+
 class VertexListTests(DataTestCase):
     def setUp(self):
         super().setUp()
@@ -18,7 +19,7 @@ class VertexListTests(DataTestCase):
         vertices = []
         for p in points:
             vertices.append(self.vlist.add(p))
-        
+
         return vertices
 
     def test_collect_vertices_single(self):
@@ -34,7 +35,7 @@ class VertexListTests(DataTestCase):
         self.add_all(self.blocks[1].points)
 
         self.assertEqual(len(self.vlist.vertices), 12)
-        
+
     def test_collect_vertices_indexes(self):
         """Check that the correct vertices are assigned to block
         on collect()"""
@@ -58,7 +59,7 @@ class VertexListTests(DataTestCase):
         self.add_all(self.blocks[0].points)
         self.add_all(self.blocks[1].points)
 
-        displacement = constants.TOL/10
+        displacement = constants.TOL / 10
 
         for i, vertex in enumerate(self.vlist.vertices):
             # we're searching for this point
@@ -78,36 +79,33 @@ class VertexListTests(DataTestCase):
         """An existing vertex at specified point and slave patch was found"""
         self.add_all(self.blocks[0].points)
         master_vertex = self.vlist.vertices[0]
-        self.vlist.duplicated = [DuplicatedEntry(master_vertex, ['terrain'])]
+        self.vlist.duplicated = [DuplicatedEntry(master_vertex, ["terrain"])]
 
-        self.assertEqual(
-            self.vlist.find_duplicated(master_vertex.pos, ['terrain']),
-            self.vlist.vertices[0]
-        )
+        self.assertEqual(self.vlist.find_duplicated(master_vertex.pos, ["terrain"]), self.vlist.vertices[0])
 
     def test_find_duplicated_fail(self):
         """Raise a VertexNotFoundError when no vertices are on the specified slave patch"""
         self.add_all(self.blocks[0].points)
 
         with self.assertRaises(VertexNotFoundError):
-            _ = self.vlist.find_duplicated(self.vlist.vertices[0].pos, ['terrain'])
+            _ = self.vlist.find_duplicated(self.vlist.vertices[0].pos, ["terrain"])
 
     def test_add_slave_single(self):
         """Add a vertex on slave patch; must be duplicated"""
         self.add_all(self.blocks[0].points)
 
-        new_vertex = self.vlist.add(self.vlist.vertices[0].pos, ['terrain'])
+        new_vertex = self.vlist.add(self.vlist.vertices[0].pos, ["terrain"])
 
         self.assertEqual(len(self.vlist.vertices), 9)
         self.assertNotEqual(self.vlist.vertices[0], new_vertex)
-    
+
     def test_add_slave_multiple(self):
         """Add a vertex on slave patch multiple times;
         must be duplicated only once"""
         self.add_all(self.blocks[0].points)
 
-        self.vlist.add(self.vlist.vertices[0].pos, ['terrain'])
-        self.vlist.add(self.vlist.vertices[0].pos, ['terrain'])
-        self.vlist.add(self.vlist.vertices[0].pos, ['terrain'])
+        self.vlist.add(self.vlist.vertices[0].pos, ["terrain"])
+        self.vlist.add(self.vlist.vertices[0].pos, ["terrain"])
+        self.vlist.add(self.vlist.vertices[0].pos, ["terrain"])
 
         self.assertEqual(len(self.vlist.vertices), 9)

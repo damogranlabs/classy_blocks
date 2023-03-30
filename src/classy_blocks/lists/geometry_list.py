@@ -1,11 +1,13 @@
 from typing import Dict, List
 
+
 class GeometryList:
     """Handling of the 'geometry' part of blockMeshDict"""
-    def __init__(self):
-        self.geometry:Dict[str, List[str]] = {}
 
-    def add(self, geometry:dict) -> None:
+    def __init__(self):
+        self.geometry: Dict[str, List[str]] = {}
+
+    def add(self, geometry: dict) -> None:
         """Adds named entry in the 'geometry' section of blockMeshDict;
         'g' is in the form of dictionary {'geometry_name': [list of properties]};
         properties are as specified by searchable* class in documentation.

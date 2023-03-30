@@ -11,11 +11,14 @@ from classy_blocks.construct.shapes.round import RoundShape
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
-def eighth_sphere_lofts(center_point:NPPointType,
-                 radius_point:NPPointType,
-                 normal:NPVectorType,
-                 geometry_name:str,
-                 diagonal_angle:float=np.pi/5):
+
+def eighth_sphere_lofts(
+    center_point: NPPointType,
+    radius_point: NPPointType,
+    normal: NPVectorType,
+    geometry_name: str,
+    diagonal_angle: float = np.pi / 5,
+):
     """A collection of 4 lofts for an eighth of a sphere;
     used to construct all other sphere pieces and derivatives"""
     # An 8th of a sphere has 3 equal flat sides and one round;
@@ -25,67 +28,52 @@ def eighth_sphere_lofts(center_point:NPPointType,
     # rotate a QuarterDisk twice around 'bottom' two edges to get them;
     axes = {
         # around 'O-P1', 'front':
-        'front': bottom.points['P1'] - bottom.points['O'],
-        # around 'O-P3', 'left':    
-        'left': bottom.points['P3'] - bottom.points['O'],
+        "front": bottom.points["P1"] - bottom.points["O"],
+        # around 'O-P3', 'left':
+        "left": bottom.points["P3"] - bottom.points["O"],
         # diagonal O-D is obtained by rotating around an at 45 degrees
-        'diagonal': f.rotate(
-            bottom.points['P3'], normal, np.pi/4, center_point) - \
-            bottom.points['O']
+        "diagonal": f.rotate(bottom.points["P3"], normal, np.pi / 4, center_point) - bottom.points["O"],
     }
 
-    front = bottom.copy().rotate(np.pi/2, axes['front'], center_point)
-    left = bottom.copy().rotate(-np.pi/2, axes['left'], center_point)
+    front = bottom.copy().rotate(np.pi / 2, axes["front"], center_point)
+    left = bottom.copy().rotate(-np.pi / 2, axes["left"], center_point)
 
-    point_DU = f.rotate(bottom.points['D'], axes['diagonal'], -diagonal_angle, center_point)
-    point_P2U = f.rotate(bottom.points['P2'], axes['diagonal'], -diagonal_angle, center_point)
+    point_DU = f.rotate(bottom.points["D"], axes["diagonal"], -diagonal_angle, center_point)
+    point_P2U = f.rotate(bottom.points["P2"], axes["diagonal"], -diagonal_angle, center_point)
 
     # 4 lofts for an eighth sphere, 1 core and 3 shell
-    lofts:List[Loft] = []
+    lofts: List[Loft] = []
 
     # core
-    core = Loft(
-        bottom.core[0], Face([
-        front.points['S2'], front.points['D'], point_DU, left.points['D']])
-    )
+    core = Loft(bottom.core[0], Face([front.points["S2"], front.points["D"], point_DU, left.points["D"]]))
     lofts.append(core)
 
     # shell
-    shell_1 = Loft(
-        bottom.shell[0],
-        Face([front.points['D'], front.points['P2'],  point_P2U, point_DU])
-    )
-    shell_1.project_side('right', geometry_name, edges=True)
+    shell_1 = Loft(bottom.shell[0], Face([front.points["D"], front.points["P2"], point_P2U, point_DU]))
+    shell_1.project_side("right", geometry_name, edges=True)
 
-    shell_2 = Loft(
-        bottom.faces[2],
-        Face([point_DU, point_P2U, left.points['P2'], left.points['D']
-    ]))
-    shell_2.project_side('right', geometry_name, edges=True)
+    shell_2 = Loft(bottom.faces[2], Face([point_DU, point_P2U, left.points["P2"], left.points["D"]]))
+    shell_2.project_side("right", geometry_name, edges=True)
 
-    shell_3 = Loft(
-        shell_1.top_face,
-        left.faces[1]
-    )
-    shell_3.project_side('right', geometry_name, edges=True)
+    shell_3 = Loft(shell_1.top_face, left.faces[1])
+    shell_3.project_side("right", geometry_name, edges=True)
     lofts += [shell_1, shell_2, shell_3]
 
     return lofts
 
+
 class EighthSphere(RoundShape):
     """One eighth of a sphere, the base shape for half and whole spheres"""
-    n_cores:int = 1
+
+    n_cores: int = 1
 
     def transform_function(self, **kwargs):
         # Nothing to do here
         pass
 
-    def __init__(self,
-                 center_point:PointType,
-                 radius_point:PointType,
-                 normal:VectorType,
-                 diagonal_angle:float=np.pi/5):
-
+    def __init__(
+        self, center_point: PointType, radius_point: PointType, normal: VectorType, diagonal_angle: float = np.pi / 5
+    ):
         # TODO: move these to properties
         # BUG: move these to properties
         # (will not change with transforms!)
@@ -94,11 +82,7 @@ class EighthSphere(RoundShape):
         self.normal = f.unit_vector(np.asarray(normal))
 
         self.lofts = eighth_sphere_lofts(
-            self.center_point,
-            self.radius_point,
-            self.normal,
-            self.geometry_name,
-            diagonal_angle
+            self.center_point, self.radius_point, self.normal, self.geometry_name, diagonal_angle
         )
 
     ### Chopping
@@ -113,7 +97,7 @@ class EighthSphere(RoundShape):
     def chop_tangential(self, **kwargs):
         """Chop circumferentially"""
         for i, operation in enumerate(self.shell):
-            if (i+1) % 3 == 0:
+            if (i + 1) % 3 == 0:
                 continue
 
             operation.chop(1, **kwargs)
@@ -123,13 +107,13 @@ class EighthSphere(RoundShape):
         # chop everything except the top loft,
         # that's the 3rd operation in shell
         for operation in self.core:
-            operation.set_patch('bottom', name)
+            operation.set_patch("bottom", name)
 
         for i, operation in enumerate(self.shell):
-            if (i+1) % 3 == 0:
+            if (i + 1) % 3 == 0:
                 continue
 
-            operation.set_patch('bottom', name)
+            operation.set_patch("bottom", name)
 
     @property
     def operations(self):
@@ -137,11 +121,11 @@ class EighthSphere(RoundShape):
 
     @property
     def core(self):
-        return self.lofts[:self.n_cores]
+        return self.lofts[: self.n_cores]
 
     @property
     def shell(self):
-        return self.lofts[self.n_cores:]
+        return self.lofts[self.n_cores :]
 
     @property
     def radius(self) -> float:
@@ -164,25 +148,23 @@ class EighthSphere(RoundShape):
             ]
         }
 
+
 class Hemisphere(EighthSphere):
     """A Quarter of a sphere, used as a base for Hemisphere"""
-    # TODO: TEST
-    n_cores:int = 4
 
-    def __init__(self,
-                 center_point: PointType,
-                 radius_point: PointType,
-                 normal: VectorType,
-                 diagonal_angle: float = np.pi / 5):
+    # TODO: TEST
+    n_cores: int = 4
+
+    def __init__(
+        self, center_point: PointType, radius_point: PointType, normal: VectorType, diagonal_angle: float = np.pi / 5
+    ):
         super().__init__(center_point, radius_point, normal, diagonal_angle)
 
         rotated_core = []
         rotated_shell = []
 
-        for i in range(1, self.n_cores+1):
-            rotated_radius_point = f.rotate(
-                self.radius_point, self.normal, i*np.pi/2, self.center_point
-            )
+        for i in range(1, self.n_cores + 1):
+            rotated_radius_point = f.rotate(self.radius_point, self.normal, i * np.pi / 2, self.center_point)
 
             rotated_eighth = eighth_sphere_lofts(
                 self.center_point, rotated_radius_point, self.normal, self.geometry_name
@@ -195,11 +177,11 @@ class Hemisphere(EighthSphere):
 
     @property
     def core(self):
-        return self.lofts[:self.n_cores]
+        return self.lofts[: self.n_cores]
 
     @property
     def shell(self):
-        return self.lofts[self.n_cores:]
+        return self.lofts[self.n_cores :]
 
     @classmethod
     def chain(cls, source, start_face=False):

@@ -3,9 +3,11 @@ import dataclasses
 from classy_blocks.construct import edges
 from classy_blocks.items.edges.edge import Edge
 
+
 @dataclasses.dataclass
 class ProjectEdge(Edge):
     """Edge, projected to a specified geometry"""
+
     data: edges.Project
 
     @property

@@ -12,9 +12,11 @@ from classy_blocks.grading.chop import Chop
 
 from classy_blocks.util import constants
 
+
 class Block:
     """A Block and everything that belongs to it"""
-    def __init__(self, index:int, vertices:List[Vertex]):
+
+    def __init__(self, index: int, vertices: List[Vertex]):
         # index in blockMeshDict
         self.index = index
 
@@ -39,12 +41,12 @@ class Block:
         # (visible in blockMeshDict, useful for debugging)
         self.comment = ""
 
-    def add_edge(self, corner_1:int, corner_2:int, edge:Edge):
+    def add_edge(self, corner_1: int, corner_2: int, edge: Edge):
         """Adds an edge between vertices at specified indexes."""
         assert 0 <= corner_1 < 8 and 0 <= corner_2 < 8, "Use block-local indexing (0...7)"
         self.wires[corner_1][corner_2].edge = edge
 
-    def chop(self, axis: AxisType, chop:Chop) -> None:
+    def chop(self, axis: AxisType, chop: Chop) -> None:
         """Set block's cell count/size and grading for a given direction/axis.
         Exactly two of the following keyword arguments must be provided:
 
@@ -77,11 +79,11 @@ class Block:
             the same 'axis' parameter."""
         self.axes[axis].chop(chop)
 
-    def get_axis_wires(self, axis:AxisType) -> List[Wire]:
+    def get_axis_wires(self, axis: AxisType) -> List[Wire]:
         """Returns a list of wires that run in the given axis"""
         return self.axes[axis].wires
 
-    def add_neighbour(self, candidate:'Block') -> None:
+    def add_neighbour(self, candidate: "Block") -> None:
         """Add a block to neighbours, if applicable"""
         if candidate == self:
             return
@@ -107,7 +109,7 @@ class Block:
         all_edges = []
 
         for wire in self.wire_list:
-            if wire.edge.kind != 'line':
+            if wire.edge.kind != "line":
                 all_edges.append(wire.edge)
 
         return all_edges
@@ -138,10 +140,15 @@ class Block:
         fmt_vertices = "( " + " ".join(str(v.index) for v in self.vertices) + " )"
         fmt_count = "( " + " ".join([str(axis.grading.count) for axis in self.axes]) + " )"
         # FIXME: no daisy.object.chaining
-        fmt_grading = "simpleGrading ( " + \
-            self.axes[0].grading.description + " " + \
-            self.axes[1].grading.description + " " + \
-            self.axes[2].grading.description + " )"
+        fmt_grading = (
+            "simpleGrading ( "
+            + self.axes[0].grading.description
+            + " "
+            + self.axes[1].grading.description
+            + " "
+            + self.axes[2].grading.description
+            + " )"
+        )
         fmt_comments = f"// {self.index} {self.comment}\n"
 
         return f"\thex {fmt_vertices} {self.cell_zone} {fmt_count} {fmt_grading} {fmt_comments}"

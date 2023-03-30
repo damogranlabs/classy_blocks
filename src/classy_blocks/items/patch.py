@@ -5,17 +5,19 @@ from typing import List
 from classy_blocks.items.side import Side
 from classy_blocks.util.tools import indent
 
+
 class Patch:
     """Definition of a patch, including type, belonging faces and other settings"""
-    def __init__(self, name:str):
+
+    def __init__(self, name: str):
         self.name = name
 
-        self.sides:List[Side] = []
+        self.sides: List[Side] = []
 
-        self.kind = 'patch' # 'type'
-        self.settings:List[str] = []
+        self.kind = "patch"  # 'type'
+        self.settings: List[str] = []
 
-    def add_side(self, side:Side) -> None:
+    def add_side(self, side: Side) -> None:
         """Adds a side to the list if it doesn't exist yet"""
         for existing in self.sides:
             if existing == side:

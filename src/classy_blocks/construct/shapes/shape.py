@@ -7,12 +7,14 @@ import numpy as np
 from classy_blocks.types import VectorType, PointType, NPPointType
 from classy_blocks.base.additive import AdditiveBase
 
-ShapeT = TypeVar('ShapeT', bound='Shape')
+ShapeT = TypeVar("ShapeT", bound="Shape")
+
 
 class Shape(AdditiveBase):
     """A collection of Operations that form a predefined
     parametric shape"""
-    def set_cell_zone(self, cell_zone:str) -> None:
+
+    def set_cell_zone(self, cell_zone: str) -> None:
         """Sets cell zone for all blocks in this shape"""
         for op in self.operations:
             op.set_cell_zone(cell_zone)
@@ -23,7 +25,7 @@ class Shape(AdditiveBase):
 
         return self
 
-    def rotate(self: ShapeT, angle: float, axis: VectorType, origin: Optional[PointType]=None) -> ShapeT:
+    def rotate(self: ShapeT, angle: float, axis: VectorType, origin: Optional[PointType] = None) -> ShapeT:
         if origin is None:
             origin = self.center
 
@@ -32,7 +34,7 @@ class Shape(AdditiveBase):
 
         return self
 
-    def scale(self: ShapeT, ratio: float, origin:Optional[PointType]=None) -> ShapeT:
+    def scale(self: ShapeT, ratio: float, origin: Optional[PointType] = None) -> ShapeT:
         if origin is None:
             origin = self.center
 

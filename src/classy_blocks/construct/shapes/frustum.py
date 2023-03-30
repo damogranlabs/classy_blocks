@@ -9,6 +9,7 @@ from classy_blocks.construct.shapes.round import RoundShape
 
 from classy_blocks.util import functions as f
 
+
 class Frustum(RoundShape):
     """Creates a cone frustum (truncated cylinder).
 
@@ -20,20 +21,24 @@ class Frustum(RoundShape):
 
         Sides are straight unless radius_mid is given; in that case a profiled body
         of revolution is created."""
+
     sketch_class = Disk
-    
+
     def transform_function(self, **kwargs):
         new_sketch = self.sketch_1.copy()
-        new_sketch.translate(kwargs['displacement'])
-        new_sketch.scale(kwargs['radius']/self.sketch_1.radius)
+        new_sketch.translate(kwargs["displacement"])
+        new_sketch.scale(kwargs["radius"] / self.sketch_1.radius)
 
         return new_sketch
 
-    def __init__(self,
-                 axis_point_1:PointType,
-                 axis_point_2:PointType,
-                 radius_point_1:PointType,
-                 radius_2: float, radius_mid:Optional[float]=None):
+    def __init__(
+        self,
+        axis_point_1: PointType,
+        axis_point_2: PointType,
+        radius_point_1: PointType,
+        radius_2: float,
+        radius_mid: Optional[float] = None,
+    ):
         axis = np.asarray(axis_point_2) - np.asarray(axis_point_1)
 
         if radius_mid is None:
@@ -41,18 +46,17 @@ class Frustum(RoundShape):
         else:
             mid_params = {"displacement": axis / 2, "radius": radius_mid}
 
-        super().__init__(
-            [axis_point_1, radius_point_1, axis],
-            {"displacement": axis, "radius": radius_2},
-            mid_params
-        )
+        super().__init__([axis_point_1, radius_point_1, axis], {"displacement": axis, "radius": radius_2}, mid_params)
 
     @classmethod
-    def chain(cls, source:RoundShape,
-              length:float,
-              radius_2:float,
-              start_face:bool=False,
-              radius_mid:Optional[float]=None) -> 'Frustum':
+    def chain(
+        cls,
+        source: RoundShape,
+        length: float,
+        radius_2: float,
+        start_face: bool = False,
+        radius_mid: Optional[float] = None,
+    ) -> "Frustum":
         """Chain this Frustum to an existing Shape;
         Use length < 0 to begin on start face and go 'backwards'"""
         assert source.sketch_class == Disk

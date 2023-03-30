@@ -2,8 +2,10 @@ import unittest
 
 import classy_blocks as cb
 
+
 class ImportsTests(unittest.TestCase):
     """Import all objects relevant to the user directly from cb"""
+
     def test_import_flat(self):
         """Flat stuff"""
         _ = cb.Face
@@ -33,7 +35,7 @@ class ImportsTests(unittest.TestCase):
         _ = cb.ExtrudedRing
         _ = cb.RevolvedRing
         _ = cb.Hemisphere
-    
+
     def test_import_mesh(self):
         """The core stuff"""
         _ = cb.Mesh

@@ -14,6 +14,7 @@ r_max = 1 / constants.TOL
 # name (get_<result>__<param1>__<param2>(length, param1, param2));
 # length is a default argument, passed in always, for simplicity
 
+
 ### functions returning start_size
 def get_start_size__count__c2c_expansion(length, count, c2c_expansion):
     assert length > 0

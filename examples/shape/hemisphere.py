@@ -13,11 +13,11 @@ sphere.chop_axial(start_size=cell_size)
 sphere.chop_radial(start_size=cell_size, end_size=bl_thickness)
 sphere.chop_tangential(start_size=cell_size)
 
-sphere.set_start_patch('atmosphere') # the 'flat' part of the hemisphere
-sphere.set_outer_patch('walls')
+sphere.set_start_patch("atmosphere")  # the 'flat' part of the hemisphere
+sphere.set_outer_patch("walls")
 
 mesh = cb.Mesh()
 mesh.add(sphere)
 
-mesh.modify_patch('walls', 'wall')
-mesh.write(os.path.join('..', 'case', 'system', 'blockMeshDict'), debug_path='debug.vtk')
+mesh.modify_patch("walls", "wall")
+mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

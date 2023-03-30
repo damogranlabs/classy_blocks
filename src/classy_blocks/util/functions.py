@@ -8,38 +8,42 @@ import scipy.linalg
 import scipy.optimize
 import scipy.spatial
 
-from classy_blocks.types import PointType, VectorType, PointListType, \
-    NPPointType, NPVectorType
+from classy_blocks.types import PointType, VectorType, PointListType, NPPointType, NPVectorType
 from classy_blocks.util import constants
 
-def vector(x:float, y:float, z:float) -> NPVectorType:
+
+def vector(x: float, y: float, z: float) -> NPVectorType:
     """A shortcut for creating 3D-space vectors;
     in case you need a lot of manual np.array([...])"""
     return np.array([x, y, z])
 
 
-def deg2rad(deg:float) -> float:
+def deg2rad(deg: float) -> float:
     """Convert degrees (input) to radians"""
     return deg * np.pi / 180.0
 
-def rad2deg(rad:float) -> float:
+
+def rad2deg(rad: float) -> float:
     """convert radians (input) to degrees"""
     return rad * 180.0 / np.pi
 
-def norm(matrix:Union[PointType, PointListType]) -> float:
-    """ a shortcut to scipy.linalg.norm() """
+
+def norm(matrix: Union[PointType, PointListType]) -> float:
+    """a shortcut to scipy.linalg.norm()"""
     # for arrays of vectors:
-    #matrix = np.asarray(matrix, dtype=constants.DTYPE)
-    #return scipy.linalg.norm(matrix, axis=len(np.shape(matrix))-1)
+    # matrix = np.asarray(matrix, dtype=constants.DTYPE)
+    # return scipy.linalg.norm(matrix, axis=len(np.shape(matrix))-1)
 
     return float(scipy.linalg.norm(matrix))
 
-def unit_vector(vect:VectorType) -> NPVectorType:
+
+def unit_vector(vect: VectorType) -> NPVectorType:
     """Returns a vector of magnitude 1 with the same direction"""
     vect = np.asarray(vect, dtype=constants.DTYPE)
-    return  vect / norm(vect)
+    return vect / norm(vect)
 
-def angle_between(v1:VectorType, v2:VectorType) -> float:
+
+def angle_between(v1: VectorType, v2: VectorType) -> float:
     """Returns the angle between vectors 'v1' and 'v2', in radians:
 
     >>> angle_between((1, 0, 0), (0, 1, 0))
@@ -56,7 +60,8 @@ def angle_between(v1:VectorType, v2:VectorType) -> float:
 
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
-def rotation_matrix(axis:VectorType, theta:float):
+
+def rotation_matrix(axis: VectorType, theta: float):
     """
     Return the rotation matrix associated with counterclockwise rotation about
     the given axis by theta radians.
@@ -79,7 +84,7 @@ def rotation_matrix(axis:VectorType, theta:float):
     return scipy.linalg.expm(np.cross(np.eye(3), axis / norm(axis) * theta))
 
 
-def rotate(point:PointType, axis:VectorType, angle:float, origin:PointType) -> NPPointType:
+def rotate(point: PointType, axis: VectorType, angle: float, origin: PointType) -> NPPointType:
     """Rotate a point around any axis given by axis by angle theta [radians]"""
     point = np.asarray(point)
     axis = np.asarray(axis)
@@ -88,17 +93,19 @@ def rotate(point:PointType, axis:VectorType, angle:float, origin:PointType) -> N
     rotated_point = np.dot(rotation_matrix(axis, angle), point - origin)
     return rotated_point + origin
 
-def scale(point:PointType, ratio:float, origin:Optional[PointType]=None) -> NPPointType:
-        """Scales a point around origin by specified ratio;
-        if not specified, origin is taken as [0, 0, 0]."""
-        if origin is None:
-            origin = vector(0, 0, 0)
 
-        origin = np.asarray(origin, dtype=constants.DTYPE)
+def scale(point: PointType, ratio: float, origin: Optional[PointType] = None) -> NPPointType:
+    """Scales a point around origin by specified ratio;
+    if not specified, origin is taken as [0, 0, 0]."""
+    if origin is None:
+        origin = vector(0, 0, 0)
 
-        return origin + (point - origin)*ratio
+    origin = np.asarray(origin, dtype=constants.DTYPE)
 
-def to_polar(point:PointType, axis:Literal['x', 'y', 'z']='z') -> NPVectorType:
+    return origin + (point - origin) * ratio
+
+
+def to_polar(point: PointType, axis: Literal["x", "y", "z"] = "z") -> NPVectorType:
     """Convert (x, y, z) point to (radius, angle, height);
     the axis of the new polar coordinate system can be chosen ('x' or 'z')"""
 
@@ -115,10 +122,8 @@ def to_polar(point:PointType, axis:Literal['x', 'y', 'z']='z') -> NPVectorType:
 
     return vector(radius, angle, height)
 
-def to_cartesian(
-        point:PointType,
-        direction:Literal[1, -1]=1,
-        axis:Literal['x', 'z']='z') -> NPPointType:
+
+def to_cartesian(point: PointType, direction: Literal[1, -1] = 1, axis: Literal["x", "z"] = "z") -> NPPointType:
     """Converts a point given in (r, theta, z) coordinates to
     cartesian coordinate system.
 
@@ -142,7 +147,7 @@ def to_cartesian(
     return vector(height, radius * np.cos(angle), radius * np.sin(angle))
 
 
-def lin_map(x:float, x_min:float, x_max:float, out_min:float, out_max:float, limit:bool=False) -> float:
+def lin_map(x: float, x_min: float, x_max: float, out_min: float, out_max: float, limit: bool = False) -> float:
     """map x that should take values from x_min to x_max
     to values out_min to out_max"""
     r = float(x - x_min) * float(out_max - out_min) / float(x_max - x_min) + float(out_min)
@@ -152,7 +157,8 @@ def lin_map(x:float, x_min:float, x_max:float, out_min:float, out_max:float, lim
     else:
         return r
 
-def arc_length_3point(A:PointType, B:PointType, C:PointType) -> float:
+
+def arc_length_3point(A: PointType, B: PointType, C: PointType) -> float:
     """Returns length of arc defined by 3 points, A, B and C; B is the point in between"""
     ### Meticulously transcribed from
     # https://develop.openfoam.com/Development/openfoam/-/blob/master/src/mesh/blockMesh/blockEdges/arcEdge/arcEdge.C
@@ -198,11 +204,8 @@ def arc_length_3point(A:PointType, B:PointType, C:PointType) -> float:
 
     return angle * norm(radius)
 
-def arc_mid(
-    axis: VectorType,
-    center: PointType,
-    radius: float,
-    point_1: PointType, point_2: PointType) -> PointType:
+
+def arc_mid(axis: VectorType, center: PointType, radius: float, point_1: PointType, point_2: PointType) -> PointType:
     """Returns the midpoint of the specified arc in 3D space"""
     # Kudos to this guy for his shrewd solution
     # https://math.stackexchange.com/questions/3717427

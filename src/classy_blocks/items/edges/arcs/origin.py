@@ -11,6 +11,7 @@ from classy_blocks.types import PointType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
+
 def arc_from_origin(
     edge_point_1: PointType,
     edge_point_2: PointType,
@@ -74,9 +75,11 @@ def arc_from_origin(
     # done, return the calculated point
     return f.arc_mid(axis, center, radius, edge_point_1, edge_point_2)
 
+
 @dataclasses.dataclass
 class OriginEdge(ArcEdgeBase):
     """Alternative arc edge specification: origin and radius multiplier"""
+
     data: edges.Origin
 
     adjust_center: ClassVar[bool] = True
@@ -85,13 +88,13 @@ class OriginEdge(ArcEdgeBase):
     def third_point(self) -> PointType:
         """Calculated arc point from origin and flatness"""
         point = arc_from_origin(
-            self.vertex_1.pos, self.vertex_2.pos,
-            self.data.origin, self.adjust_center, self.data.flatness)
-        
+            self.vertex_1.pos, self.vertex_2.pos, self.data.origin, self.adjust_center, self.data.flatness
+        )
+
         if np.any(np.isnan(point)):
             # try to create a friendly error message :/
             raise ValueError(f"Invalid edge specification: {self}")
-    
+
         return point
 
     @property

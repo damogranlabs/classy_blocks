@@ -8,34 +8,36 @@ from classy_blocks.items.side import Side
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.patch import Patch
 
+
 class PatchList:
     """Handling of the patches ('boundary') part of blockMeshDict"""
-    def __init__(self):
-        self.patches:OrderedDict[str, Patch] = OrderedDict()
-        self.default:Optional[Dict[str, str]] = None
-        self.merged:List[List[str]] = [] # data for the mergePatchPairs entry
 
-    def add(self, vertices:List[Vertex], operation:Operation) -> None:
+    def __init__(self):
+        self.patches: OrderedDict[str, Patch] = OrderedDict()
+        self.default: Optional[Dict[str, str]] = None
+        self.merged: List[List[str]] = []  # data for the mergePatchPairs entry
+
+    def add(self, vertices: List[Vertex], operation: Operation) -> None:
         """Create Patches from operation's patch_names"""
         for orient in operation.patch_names:
             self.add_side(operation.patch_names[orient], orient, vertices)
 
-    def get(self, name:str) -> Patch:
+    def get(self, name: str) -> Patch:
         """Fetches an existing Patch or creates a new one"""
         if name not in self.patches:
             self.patches[name] = Patch(name)
 
         return self.patches[name]
 
-    def add_side(self, patch_name:str, orient:OrientType, vertices:List[Vertex]) -> None:
+    def add_side(self, patch_name: str, orient: OrientType, vertices: List[Vertex]) -> None:
         """Adds a quad to an existing patch or creates a new one"""
         self.get(patch_name).add_side(Side(orient, vertices))
 
-    def set_default(self, name:str, kind:str) -> None:
+    def set_default(self, name: str, kind: str) -> None:
         """Creates the default Patch"""
-        self.default = {'name': name, 'kind': kind }
+        self.default = {"name": name, "kind": kind}
 
-    def modify(self, name:str, kind:str, settings:Optional[List[str]]=None) -> None:
+    def modify(self, name: str, kind: str, settings: Optional[List[str]] = None) -> None:
         """Changes patch's properties"""
         patch = self.get(name)
         patch.kind = kind
@@ -43,7 +45,7 @@ class PatchList:
         if settings is not None:
             patch.settings = settings
 
-    def merge(self, master:str, slave:str) -> None:
+    def merge(self, master: str, slave: str) -> None:
         """Adds an entry in mergePatchPairs list in blockMeshDict"""
         self.merged.append([master, slave])
 
@@ -81,7 +83,7 @@ class PatchList:
         """A list of master patch names"""
         return {patches[1] for patches in self.merged}
 
-    def is_slave(self, name:str) -> bool:
-        """Returns True if a patch with given name is 
+    def is_slave(self, name: str) -> bool:
+        """Returns True if a patch with given name is
         listed as a slave in merged patches"""
         return name in self.slave_patches

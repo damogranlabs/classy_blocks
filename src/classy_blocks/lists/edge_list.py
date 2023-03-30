@@ -7,12 +7,14 @@ from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
 
+
 class EdgeList:
     """Handling of the 'edges' part of blockMeshDict"""
-    def __init__(self):
-        self.edges:List[Edge] = []
 
-    def find(self, vertex_1:Vertex, vertex_2:Vertex) -> Edge:
+    def __init__(self):
+        self.edges: List[Edge] = []
+
+    def find(self, vertex_1: Vertex, vertex_2: Vertex) -> Edge:
         """checks if an edge with the same pair of vertices
         exists in self.edges already"""
         for edge in self.edges:
@@ -21,7 +23,7 @@ class EdgeList:
 
         raise EdgeNotFoundError(f"Edge not found: {str(vertex_1)}, {str(vertex_2)}")
 
-    def add(self, vertex_1:Vertex, vertex_2:Vertex, data:EdgeData) -> Edge:
+    def add(self, vertex_1: Vertex, vertex_2: Vertex, data: EdgeData) -> Edge:
         """Adds an edge between given vertices or returns an existing one"""
         try:
             # if this edge exists in the list, return it regardless of what's
@@ -35,7 +37,7 @@ class EdgeList:
 
         return edge
 
-    def add_from_operation(self, vertices:List[Vertex], operation:Operation) -> List[Tuple[int, int, Edge]]:
+    def add_from_operation(self, vertices: List[Vertex], operation: Operation) -> List[Tuple[int, int, Edge]]:
         """Queries the operation for edge data and creates edge objects from it"""
         data_frame = operation.edges
         edges = []
@@ -49,7 +51,7 @@ class EdgeList:
 
             edge = self.add(vertex_1, vertex_2, data[2])
             edges.append((corner_1, corner_2, edge))
-        
+
         return edges
 
     @property

@@ -8,6 +8,7 @@ from classy_blocks.grading import calculator as gc
 from classy_blocks.grading import grading
 from classy_blocks.grading.grading import Grading
 
+
 # numbers are calculated with the calculator all this is 'borrowed' from
 # https://openfoamwiki.net/index.php/Scripts/blockMesh_grading_calculation
 # with a few differences:
@@ -203,27 +204,29 @@ class TestGrading(unittest.TestCase):
 
         self.assertListEqual(expected_functions, grading.functions)
 
-    @parameterized.expand((
-        # [{keys}, count, total_expansion]; length=1 for all cases
-        [{"count": 10, "total_expansion": 5}, 10, 5],
-        [{"count": 10, "c2c_expansion": 1.1}, 10, 2.357947691],
-        [{"count": 10, "c2c_expansion": 0.9}, 10, 0.387420489],
-        [{"count": 10, "start_size": 0.2}, 10, 0.1903283012],
-        [{"count": 10, "end_size": 0.2}, 10, 5.254123465509412],
-        [{"count": 10, "end_size": 0.05}, 10, 0.2912203517],
-        [{"total_expansion": 5, "c2c_expansion": 1.1}, 17, 5],
-        [{"total_expansion": 0.2, "c2c_expansion": 0.9}, 16, 0.2],
-        [{"total_expansion": 0.2, "start_size": 0.1}, 20, 0.2],
-        [{"total_expansion": 5, "start_size": 0.1}, 4, 5],
-        [{"total_expansion": 5, "end_size": 0.5}, 4, 5],
-        [{"total_expansion": 0.2, "end_size": 0.1}, 4, 0.2],
-        [{"c2c_expansion": 1.1, "start_size": 0.1}, 8, 1.9487171],
-        [{"c2c_expansion": 0.95, "start_size": 0.1}, 14, 0.5133420832],
-        [{"c2c_expansion": 1.1, "end_size": 0.1}, 26, 10.8347059433],
-        [{"c2c_expansion": 0.95, "end_size": 0.1}, 9, 0.66342043128],
-        [{"start_size": 0.1, "end_size": 0.05}, 14, 0.5],
-        [{"start_size": 0.05, "end_size": 0.1}, 14, 2],
-    ))
+    @parameterized.expand(
+        (
+            # [{keys}, count, total_expansion]; length=1 for all cases
+            [{"count": 10, "total_expansion": 5}, 10, 5],
+            [{"count": 10, "c2c_expansion": 1.1}, 10, 2.357947691],
+            [{"count": 10, "c2c_expansion": 0.9}, 10, 0.387420489],
+            [{"count": 10, "start_size": 0.2}, 10, 0.1903283012],
+            [{"count": 10, "end_size": 0.2}, 10, 5.254123465509412],
+            [{"count": 10, "end_size": 0.05}, 10, 0.2912203517],
+            [{"total_expansion": 5, "c2c_expansion": 1.1}, 17, 5],
+            [{"total_expansion": 0.2, "c2c_expansion": 0.9}, 16, 0.2],
+            [{"total_expansion": 0.2, "start_size": 0.1}, 20, 0.2],
+            [{"total_expansion": 5, "start_size": 0.1}, 4, 5],
+            [{"total_expansion": 5, "end_size": 0.5}, 4, 5],
+            [{"total_expansion": 0.2, "end_size": 0.1}, 4, 0.2],
+            [{"c2c_expansion": 1.1, "start_size": 0.1}, 8, 1.9487171],
+            [{"c2c_expansion": 0.95, "start_size": 0.1}, 14, 0.5133420832],
+            [{"c2c_expansion": 1.1, "end_size": 0.1}, 26, 10.8347059433],
+            [{"c2c_expansion": 0.95, "end_size": 0.1}, 9, 0.66342043128],
+            [{"start_size": 0.1, "end_size": 0.05}, 14, 0.5],
+            [{"start_size": 0.05, "end_size": 0.1}, 14, 2],
+        )
+    )
     def test_calculate(self, keys, count, total_expansion):
         results = grading.calculate(1, keys)
         self.assertEqual(results[0], count)
@@ -295,10 +298,7 @@ class TestGrading(unittest.TestCase):
         self.g.add_chop(Chop(0.5, count=10, start_size=0.05, invert=False))
         self.g.add_chop(Chop(0.5, count=10, start_size=0.05, invert=True))
 
-        self.assertEqual(
-            self.g.specification[0][2],
-            1/self.g.specification[1][2]
-        )
+        self.assertEqual(self.g.specification[0][2], 1 / self.g.specification[1][2])
 
     def test_is_defined(self):
         self.g.add_chop(Chop(1, count=10, start_size=0.05))

@@ -3,6 +3,7 @@ from tests.fixtures.block import BlockTestCase
 from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.lists.block_list import BlockList
 
+
 class BlockListTests(BlockTestCase):
     def setUp(self):
         self.bl = BlockList()
@@ -19,12 +20,12 @@ class BlockListTests(BlockTestCase):
         """Define all block's grading data"""
         for index in (0, 1, 2):
             self.bl.add(self.make_block(index))
-        
+
         self.bl.propagate_gradings()
 
         for block in self.bl.blocks:
             self.assertTrue(block.is_defined)
-        
+
     def test_propagate_gradings_exception(self):
         """Raise an exception when there's not enough grading data"""
         blocks = [self.make_block(i) for i in (0, 1, 2)]

@@ -19,8 +19,8 @@ bl_thickness = 0.05
 c2c_expansion = 1.25
 
 # patches
-fixed_patch = 'fixed_wall'
-rotating_patch = 'rotating_wall'
+fixed_patch = "fixed_wall"
+rotating_patch = "rotating_wall"
 
 mesh = cb.Mesh()
 
@@ -29,19 +29,17 @@ mesh = cb.Mesh()
 shapes = []
 
 # block 0
-shapes.append(cb.Cylinder(
-    [0, 0, 0], # axis point 1
-    [w_gap, 0, 0], # axis point 2
-    [0, r_wheel - t_rim, 0] # radius point 1
-))
-shapes.append(cb.Cylinder.chain(shapes[0], (w_rim - w_wheel)/2))
+shapes.append(
+    cb.Cylinder([0, 0, 0], [w_gap, 0, 0], [0, r_wheel - t_rim, 0])  # axis point 1  # axis point 2  # radius point 1
+)
+shapes.append(cb.Cylinder.chain(shapes[0], (w_rim - w_wheel) / 2))
 shapes.append(cb.ExtrudedRing.expand(shapes[0], t_rim))
 shapes.append(cb.ExtrudedRing.expand(shapes[2], h_gap))
 shapes.append(cb.ExtrudedRing.chain(shapes[3], w_rim))
 shapes.append(cb.ExtrudedRing.chain(shapes[4], w_gap))
 shapes.append(cb.ExtrudedRing.contract(shapes[5], r_wheel - t_rim))
 shapes.append(cb.ExtrudedRing.contract(shapes[6], r_shaft))
-shapes.append(cb.ExtrudedRing.chain(shapes[7], (w_rim - w_wheel)/2, start_face=True))
+shapes.append(cb.ExtrudedRing.chain(shapes[7], (w_rim - w_wheel) / 2, start_face=True))
 
 # Chopping:
 # Cells on fixed wall are cell_size;
@@ -52,9 +50,11 @@ shapes.append(cb.ExtrudedRing.chain(shapes[7], (w_rim - w_wheel)/2, start_face=T
 # In a), too large cells might be obtained far away from the wall, or
 # in b), to high cell-to-cell expansion might be made.
 
-def double_chop(function):        
+
+def double_chop(function):
     function(length_ratio=0.5, start_size=bl_thickness, c2c_expansion=c2c_expansion)
-    function(length_ratio=0.5, end_size=bl_thickness, c2c_expansion=1/c2c_expansion)
+    function(length_ratio=0.5, end_size=bl_thickness, c2c_expansion=1 / c2c_expansion)
+
 
 # Axial
 for i in (1, 2, 4, 6, 8):
@@ -64,11 +64,11 @@ for i in (1, 2, 4, 6, 8):
 for i in (2, 4, 6, 7):
     double_chop(shapes[i].chop_radial)
 
-shapes[0].chop_radial(end_size=bl_thickness, c2c_expansion=1/c2c_expansion)
+shapes[0].chop_radial(end_size=bl_thickness, c2c_expansion=1 / c2c_expansion)
 
 # adjust this cell size to obtain roughly the same cell sizes
 # in core and shell of the cylinder
-shapes[2].chop_tangential(start_size=4*cell_size)
+shapes[2].chop_tangential(start_size=4 * cell_size)
 
 # Patch names:
 for i in (0, 2, 3):
@@ -83,7 +83,7 @@ for i in (5, 6, 7):
 for shape in shapes:
     mesh.add(shape)
 
-mesh.set_default_patch(rotating_patch, 'wall')
-mesh.modify_patch(fixed_patch, 'wall')
+mesh.set_default_patch(rotating_patch, "wall")
+mesh.modify_patch(fixed_patch, "wall")
 
-mesh.write(os.path.join('..', 'case', 'system', 'blockMeshDict'), debug_path='debug.vtk')
+mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

@@ -4,12 +4,12 @@ import copy
 
 import numpy as np
 
-from classy_blocks.types import VectorType, PointType, PointListType, \
-    NPPointType, NPVectorType, NPPointListType
+from classy_blocks.types import VectorType, PointType, PointListType, NPPointType, NPVectorType, NPPointListType
 from classy_blocks.base.transformable import TransformableBase
 from classy_blocks.construct.edges import EdgeData
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
+
 
 class Face(TransformableBase):
     """A collection of 4 Vertices and optionally 4 Edges,
@@ -27,27 +27,26 @@ class Face(TransformableBase):
             arc edge between the 1st and the 2nd vertex of this face
             - edges=[Project(['terrain']*4) will project all 4 edges
             of this face: 0-1, 1-2, 2-3, 3-0."""
-    def __init__(self, points:PointListType, edges:Optional[List[Optional[EdgeData]]]=None):
+
+    def __init__(self, points: PointListType, edges: Optional[List[Optional[EdgeData]]] = None):
         # Points
         points = np.asarray(points, dtype=constants.DTYPE)
         if np.shape(points) != (4, 3):
             raise ValueError("Provide exactly 4 points in 3D space")
 
-        self.points:NPPointListType = points
+        self.points: NPPointListType = points
 
         # Edges
-        self.edges:List[Optional[EdgeData]] = [None]*4
+        self.edges: List[Optional[EdgeData]] = [None] * 4
         if edges is not None:
             self.edges = edges
 
         assert len(self.edges) == 4, "Provide exactly 4 edges; use None for straight lines"
 
-    def translate(self, displacement: VectorType) -> 'Face':
+    def translate(self, displacement: VectorType) -> "Face":
         displacement = np.asarray(displacement, dtype=constants.DTYPE)
 
-        self.points = np.array([
-            p + displacement for p in self.points
-        ], dtype=constants.DTYPE)
+        self.points = np.array([p + displacement for p in self.points], dtype=constants.DTYPE)
 
         for edge in self.edges:
             if edge is not None:
@@ -55,13 +54,11 @@ class Face(TransformableBase):
 
         return self
 
-    def rotate(self, angle: float, axis: VectorType, origin: Optional[PointType] = None) -> 'Face':
+    def rotate(self, angle: float, axis: VectorType, origin: Optional[PointType] = None) -> "Face":
         if origin is None:
             origin = self.center
 
-        self.points = np.array([
-            f.rotate(p, axis, angle, origin) for p in self.points
-        ], dtype=constants.DTYPE)
+        self.points = np.array([f.rotate(p, axis, angle, origin) for p in self.points], dtype=constants.DTYPE)
 
         for edge in self.edges:
             if edge is not None:
@@ -69,13 +66,11 @@ class Face(TransformableBase):
 
         return self
 
-    def scale(self, ratio: float, origin: Optional[PointType] = None) -> 'Face':
+    def scale(self, ratio: float, origin: Optional[PointType] = None) -> "Face":
         if origin is None:
             origin = self.center
 
-        self.points = np.array([
-            f.scale(p, ratio, origin) for p in self.points
-        ], dtype=constants.DTYPE)
+        self.points = np.array([f.scale(p, ratio, origin) for p in self.points], dtype=constants.DTYPE)
 
         for edge in self.edges:
             if edge is not None:
@@ -87,7 +82,7 @@ class Face(TransformableBase):
         """Reverses the order of points in this face."""
         self.points = np.flip(self.points, axis=0)
 
-    def copy(self) -> 'Face':
+    def copy(self) -> "Face":
         """Returns a copy of this Face"""
         return copy.deepcopy(self)
 

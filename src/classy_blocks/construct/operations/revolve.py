@@ -4,6 +4,7 @@ from classy_blocks.construct.operations.loft import Loft
 
 from classy_blocks.types import VectorType
 
+
 class Revolve(Loft):
     """Takes a Face and revolves it by angle around axis;
     axis can be translated so that it goes through desired origin.
@@ -11,7 +12,7 @@ class Revolve(Loft):
     Angle is given in radians,
     revolve is in positive sense (counter-clockwise - right hand rule)"""
 
-    def __init__(self, base:Face, angle:float, axis:VectorType, origin:VectorType):
+    def __init__(self, base: Face, angle: float, axis: VectorType, origin: VectorType):
         self.base = base
         self.angle = angle
         self.axis = axis

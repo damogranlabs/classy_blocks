@@ -8,6 +8,7 @@ from classy_blocks.types import PointType, VectorType
 from classy_blocks.util import functions as f
 from classy_blocks.util import constants
 
+
 def arc_from_theta(edge_point_1: PointType, edge_point_2: PointType, angle: float, axis: VectorType) -> PointType:
     """Calculates a point on the arc edge from given sector angle and an
     axis of the arc. An interface to the Foundation's
@@ -37,10 +38,12 @@ def arc_from_theta(edge_point_1: PointType, edge_point_2: PointType, angle: floa
 
     return f.arc_mid(axis, center, radius, edge_point_1, edge_point_2)
 
+
 @dataclasses.dataclass
 class AngleEdge(ArcEdgeBase):
     """Alternative arc edge specification: sector angle and axis"""
-    data:edges.Angle
+
+    data: edges.Angle
 
     @property
     def third_point(self):

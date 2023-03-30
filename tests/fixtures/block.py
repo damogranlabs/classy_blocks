@@ -8,9 +8,11 @@ from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.block import Block
 from classy_blocks.items.edges.factory import factory
 
+
 class BlockTestCase(DataTestCase):
     """Block item tests"""
-    def make_vertices(self, index:int) -> List[Vertex]:
+
+    def make_vertices(self, index: int) -> List[Vertex]:
         """Generates Vertex objects for testing"""
         data = self.get_single_data(index)
         points = data.points
@@ -18,7 +20,7 @@ class BlockTestCase(DataTestCase):
 
         return [Vertex(p, indexes[i]) for i, p in enumerate(points)]
 
-    def make_block(self, index:int) -> Block:
+    def make_block(self, index: int) -> Block:
         """The test subject"""
         block_data = self.get_single_data(index)
         vertices = self.make_vertices(index)
@@ -40,7 +42,7 @@ class BlockTestCase(DataTestCase):
 
         return block
 
-    def make_loft(self, index:int) -> Loft:
+    def make_loft(self, index: int) -> Loft:
         """Creates a Loft for tests that require an operation"""
         vertices = self.make_vertices(index)
         face_1 = Face([vertices[i].pos for i in (0, 1, 2, 3)])

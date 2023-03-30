@@ -10,26 +10,28 @@ from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.construct.flat import disk
 from classy_blocks.construct.operations.loft import Loft
 
-ShapeT = TypeVar('ShapeT', bound='RoundShape')
+ShapeT = TypeVar("ShapeT", bound="RoundShape")
+
 
 class RoundShape(Shape):
     """An object, lofted between 2 or more sketches;
     to form blocks, sketches are transformed with specified
     functions (and so are side edges) and loft operations
     are created between.
-    
+
     Solid round shapes: Elbow, Frustum, Cylinder;
     they are created using an OH-grid (see Disk), have a
     'start' and 'end' sketch and an 'outer' surface."""
+
     sketch_class = disk.Disk
 
-    axial_axis:AxisType = 2 # Axis along which 'outer sides' run
-    radial_axis:AxisType = 0 # Axis that goes from center to 'outer side'
-    tangential_axis:AxisType = 1 # Axis that goes around the circumference of the shape"""
+    axial_axis: AxisType = 2  # Axis along which 'outer sides' run
+    radial_axis: AxisType = 0  # Axis that goes from center to 'outer side'
+    tangential_axis: AxisType = 1  # Axis that goes around the circumference of the shape"""
 
-    start_patch:OrientType ='bottom' # Sides of blocks that define the start patch
-    end_patch:OrientType = 'top' # Sides of blocks that define the end patch"""
-    outer_patch:OrientType = 'right' # Sides of blocks that define the outer surface
+    start_patch: OrientType = "bottom"  # Sides of blocks that define the start patch
+    end_patch: OrientType = "top"  # Sides of blocks that define the end patch"""
+    outer_patch: OrientType = "right"  # Sides of blocks that define the outer surface
 
     def __init__(self, args_1, transform_2_args, transform_mid_args=None):
         # start with sketch_1 and transform it
@@ -44,7 +46,7 @@ class RoundShape(Shape):
         else:
             self.sketch_mid = None
 
-        self.lofts:List[Loft] = []
+        self.lofts: List[Loft] = []
 
         for i, face_1 in enumerate(self.sketch_1.faces):
             face_2 = self.sketch_2.faces[i]
@@ -68,12 +70,12 @@ class RoundShape(Shape):
     @property
     def core(self):
         """Operations in the center of the shape"""
-        return self.operations[:len(self.sketch_1.core)]
+        return self.operations[: len(self.sketch_1.core)]
 
     @property
     def shell(self):
         """Operations on the outside of the shape"""
-        return self.operations[len(self.sketch_1.core):]
+        return self.operations[len(self.sketch_1.core) :]
 
     def chop_axial(self, **kwargs):
         """Chop the shape between start and end face"""
@@ -94,20 +96,20 @@ class RoundShape(Shape):
 
     def chop_tangential(self, **kwargs):
         """Circumferential chop; also defines core sizes"""
-        for i in (0, 1, 2, -1): # minimal number of blocks that need to be set
+        for i in (0, 1, 2, -1):  # minimal number of blocks that need to be set
             self.shell[i].chop(self.tangential_axis, **kwargs)
 
-    def set_start_patch(self, name:str) -> None:
+    def set_start_patch(self, name: str) -> None:
         """Assign the faces of start sketch to a named patch"""
         for operation in self.operations:
             operation.set_patch(self.start_patch, name)
 
-    def set_end_patch(self, name:str) -> None:
+    def set_end_patch(self, name: str) -> None:
         """Assign the faces of end sketch to a named patch"""
         for operation in self.operations:
             operation.set_patch(self.end_patch, name)
 
-    def set_outer_patch(self, name:str) -> None:
+    def set_outer_patch(self, name: str) -> None:
         """Assign the faces of end sketch to a named patch"""
         for operation in self.shell:
             operation.set_patch(self.outer_patch, name)

@@ -5,8 +5,10 @@ from classy_blocks.items.wire import Wire
 
 from tests.fixtures.data import DataTestCase
 
+
 class WireTests(DataTestCase):
     """Tests of Pair object"""
+
     def setUp(self):
         block = self.get_single_data(0)
 
@@ -14,13 +16,13 @@ class WireTests(DataTestCase):
 
         self.corner_1 = 1
         self.corner_2 = 2
-        self.axis = 1 # make sure corners and axis are consistent
+        self.axis = 1  # make sure corners and axis are consistent
 
     @property
     def wire(self) -> Wire:
         """The test subject"""
         return Wire(self.vertices, self.axis, self.corner_1, self.corner_2)
-    
+
     def test_is_valid(self):
         """Valid with two different vertices"""
         self.assertTrue(self.wire.is_valid)
@@ -36,7 +38,7 @@ class WireTests(DataTestCase):
         wire_2 = copy.copy(self.wire)
 
         self.assertTrue(wire_1.is_coincident(wire_2))
-    
+
     def test_coincident_inverted(self):
         """Coincident pair (__eq__()) with an inverted pair"""
         wire_1 = self.wire
@@ -46,11 +48,11 @@ class WireTests(DataTestCase):
         wire_2.vertices.reverse()
 
         self.assertTrue(wire_1.is_coincident(wire_2))
-    
+
     def test_not_coincident(self):
         """Non-coincident pair"""
         wire_1 = self.wire
-        
+
         self.corner_1 = 0
         self.corner_2 = 1
         self.axis = 0

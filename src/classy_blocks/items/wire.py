@@ -7,10 +7,12 @@ from classy_blocks.items.edges.factory import factory
 
 from classy_blocks.grading.grading import Grading
 
+
 class Wire:
     """Represents two vertices that define an edge;
     supplies tools to create and compare, etc"""
-    def __init__(self, vertices:List[Vertex], axis:int, corner_1:int, corner_2:int):
+
+    def __init__(self, vertices: List[Vertex], axis: int, corner_1: int, corner_2: int):
         self.corners = [corner_1, corner_2]
         self.vertices = [vertices[corner_1], vertices[corner_2]]
 
@@ -18,26 +20,26 @@ class Wire:
 
         # the default edge is 'line' but will be replaced if the user wishes so
         # (that is, not included in edge.factory.registry)
-        self.edge:Edge = factory.create(self.vertices[0], self.vertices[1], Line())
+        self.edge: Edge = factory.create(self.vertices[0], self.vertices[1], Line())
 
         # grading/counts of this wire (edgeGrading only)
-        self.grading:Optional[Grading] = None
+        self.grading: Optional[Grading] = None
 
         # up to 4 wires can be at the same spot; this list holds other
         # coincident wires
-        self.coincidents:Set['Wire'] = set()
+        self.coincidents: Set["Wire"] = set()
 
     @property
     def is_valid(self) -> bool:
         """A pair with two equal vertices is useless"""
         return self.vertices[0] != self.vertices[1]
 
-    def is_coincident(self, wire:'Wire') -> bool:
+    def is_coincident(self, wire: "Wire") -> bool:
         """Returns True if this wire is in the same spot than the argument,
         regardless of alignment"""
         return self.vertices in [wire.vertices, wire.vertices[::-1]]
 
-    def is_aligned(self, wire:'Wire') -> bool:
+    def is_aligned(self, wire: "Wire") -> bool:
         """Returns true is this pair has the same alignment
         as the pair in the argument"""
         if not self.is_coincident(wire):

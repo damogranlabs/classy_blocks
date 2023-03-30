@@ -87,14 +87,15 @@ def calculate(length: float, parameters: dict) -> Tuple[int, float]:
 
 class Grading:
     """Grading specification for a single edge"""
-    def __init__(self, length:float):
+
+    def __init__(self, length: float):
         # "multi-grading" specification according to:
         # https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
-        self.specification:List[List] = []  # a list of lists [length ratio, count ratio, total expansion]
+        self.specification: List[List] = []  # a list of lists [length ratio, count ratio, total expansion]
 
         self.length = length
 
-    def add_chop(self, chop:Chop) -> None:
+    def add_chop(self, chop: Chop) -> None:
         """Add a grading division to block specification.
         Use length_ratio for multigrading (see documentation).
         Available grading parameters are:
@@ -146,11 +147,11 @@ class Grading:
         self.specification.append([chop.length_ratio, count, total_expansion])
 
     @property
-    def inverted(self) -> 'Grading':
+    def inverted(self) -> "Grading":
         """Returns this grading but inverted
         in case neighbours are defined upside-down"""
         if len(self.specification) == 0:
-            return  self # nothing to invert
+            return self  # nothing to invert
 
         g_inv = copy.deepcopy(self)
 
@@ -162,7 +163,7 @@ class Grading:
 
         # then do 1/total_expansion
         for i, div in enumerate(g_inv.specification):
-            g_inv.specification[i][2] = 1/div[2]
+            g_inv.specification[i][2] = 1 / div[2]
 
         return g_inv
 
