@@ -68,7 +68,6 @@ class BlockList:
 
         for block in self.blocks:
             out += block.description
-            out += '\n'
 
         out += ");\n\n"
 

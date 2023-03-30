@@ -15,4 +15,4 @@ class ProjectEdge(Edge):
 
     @property
     def description(self):
-        return f"project {self.vertex_1.index} {self.vertex_2.index} ({' '.join(self.data.geometry)})"
+        return f"\tproject {self.vertex_1.index} {self.vertex_2.index} ({' '.join(self.data.geometry)})"

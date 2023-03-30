@@ -16,7 +16,7 @@ from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.base.additive import AdditiveBase
 
 from classy_blocks.util import constants
-from classy_blocks.util.tools import write_vtk
+from classy_blocks.util.vtk_writer import write_vtk
 
 class Mesh:
     """contains blocks, edges and all necessary methods for assembling blockMeshDict"""

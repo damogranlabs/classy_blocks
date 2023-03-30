@@ -45,7 +45,7 @@ end_cap.set_cell_zone(stuff_zone)
 mesh.add(end_cap)
 
 # atmosphere
-atm_above = Cylinder.chain(body, -atm_height)
+atm_above = Cylinder.chain(body, atm_height, start_face=True)
 atm_above.chop_axial(start_size=h_atm)
 atm_above.set_end_patch('atmosphere')
 mesh.add(atm_above)
@@ -61,7 +61,7 @@ atm_side_above.set_end_patch('atmosphere')
 atm_side_above.set_outer_patch('atmosphere')
 mesh.add(atm_side_above)
 
-atm_side_below = ExtrudedRing.chain(atm_side_above, -body_length)
+atm_side_below = ExtrudedRing.chain(atm_side_above, body_length, start_face=True)
 atm_side_below.chop_axial(start_size=h_atm)
 atm_side_below.set_outer_patch('atmosphere')
 atm_side_below.set_end_patch('atmosphere')

@@ -207,11 +207,11 @@ class Hemisphere(EighthSphere):
 
         # TODO: TEST
         if start_face:
-            center_point = source.sketch_1.center_point
+            center_point = source.sketch_1.center
             radius_point = source.sketch_1.radius_point
             normal = -source.sketch_1.normal
         else:
-            center_point = source.sketch_2.center_point
+            center_point = source.sketch_2.center
             radius_point = source.sketch_2.radius_point
             normal = source.sketch_2.normal
 

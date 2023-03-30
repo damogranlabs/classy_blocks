@@ -42,7 +42,7 @@ shapes.append(ExtrudedRing.chain(shapes[3], w_rim))
 shapes.append(ExtrudedRing.chain(shapes[4], w_gap))
 shapes.append(ExtrudedRing.contract(shapes[5], r_wheel - t_rim))
 shapes.append(ExtrudedRing.contract(shapes[6], r_shaft))
-shapes.append(ExtrudedRing.chain(shapes[7], -(w_rim - w_wheel)/2))
+shapes.append(ExtrudedRing.chain(shapes[7], (w_rim - w_wheel)/2, start_face=True))
 
 # Chopping:
 # Cells on fixed wall are cell_size;

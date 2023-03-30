@@ -6,10 +6,6 @@
  - Width of start cell
  - Width of end cell
 
-from ..util import grading_calculator as gc
-import inspect
-import warnings
-
 Also in reality, some are very important:
  - Width of start cell: required to keep y+ <= 1
  - Cell-to-cell expansion ratio: 1 < recommended <= 1.2
@@ -47,6 +43,7 @@ from typing import Tuple, List
 from classy_blocks.grading.chop import Chop
 from classy_blocks.grading import calculator as gc
 from classy_blocks.util import constants
+from classy_blocks.util.tools import indent
 
 # gather available functions for calculation of grading parameters
 functions = []  # list [ [return_value, {parameters}, function], ... ]
@@ -194,15 +191,15 @@ class Grading:
         # multi-grading: make a nice list
         # FIXME: make a nicer list
         length_ratio_sum = 0
-        out = "(\n"
+        out = "("
 
         for spec in self.specification:
-            out += f"\t({spec[0]} {spec[1]} {spec[2]})\n"
+            out += f"({spec[0]} {spec[1]} {spec[2]})"
             length_ratio_sum += spec[0]
 
         out += ")"
 
-        if length_ratio_sum != 1:
+        if not math.isclose(length_ratio_sum, 1, rel_tol=constants.TOL):
             warnings.warn(f"Length ratio doesn't add up to 1: {length_ratio_sum}")
 
         return out

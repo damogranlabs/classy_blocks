@@ -49,7 +49,7 @@ class FaceList:
         out = "faces\n(\n"
 
         for face in self.faces:
-            out += "\t" + face.description + "\n"
+            out += face.description
 
         out += ");\n\n"
 
