@@ -1,7 +1,7 @@
 import os
 import numpy as np
 
-from classy_blocks import Cylinder, Frustum, Mesh
+import classy_blocks as cb
 from classy_blocks.util import functions as f
 
 def calculate_fillet(r_pipe, r_fillet, a_cone):
@@ -37,11 +37,11 @@ cell_size = 0.08*D
 # use bigger cells in lenghty entry/exit sections
 cell_dilution = 5 
 
-mesh = Mesh()
+mesh = cb.Mesh()
 
 shapes = []
 # entry tube
-shapes.append(Cylinder(
+shapes.append(cb.Cylinder(
     [0, 0, 0],
     [D*entry_length, 0, 0],
     [0, D/2, 0]))
@@ -56,12 +56,12 @@ l_cone = calculate_cone(r_fillet_1, r_fillet_2, entry_angle/2) - l_fillet_1 - l_
 # print(l_fillet_1, l_cone, l_fillet_2)
 # print(r_fillet_1, r_fillet_2)
 
-shapes.append(Frustum.chain(shapes[-1], l_fillet_1, r_fillet_1, radius_mid=r_fillet_1_mid))
-shapes.append(Frustum.chain(shapes[-1], l_cone, r_fillet_2))
-shapes.append(Frustum.chain(shapes[-1], l_fillet_2, d/2, radius_mid=r_fillet_2_mid))
+shapes.append(cb.Frustum.chain(shapes[-1], l_fillet_1, r_fillet_1, radius_mid=r_fillet_1_mid))
+shapes.append(cb.Frustum.chain(shapes[-1], l_cone, r_fillet_2))
+shapes.append(cb.Frustum.chain(shapes[-1], l_fillet_2, d/2, radius_mid=r_fillet_2_mid))
 
 # the narrowest part
-shapes.append(Cylinder.chain(shapes[-1], d))
+shapes.append(cb.Cylinder.chain(shapes[-1], d))
 
 # expansion:
 # same as contraction but at different angle
@@ -71,10 +71,10 @@ l_cone = calculate_cone(r_fillet_3, r_fillet_4, exit_angle/2) - l_fillet_3 - l_f
 # print(l_fillet_3, l_cone, l_fillet_4)
 # print(r_fillet_3, r_fillet_4)
 
-shapes.append(Frustum.chain(shapes[-1], l_fillet_3, r_fillet_3, radius_mid=r_fillet_3_mid))
-shapes.append(Frustum.chain(shapes[-1], l_cone, r_fillet_4))
-shapes.append(Frustum.chain(shapes[-1], l_fillet_4, D/2, radius_mid=r_fillet_4_mid))
-shapes.append(Cylinder.chain(shapes[-1], D*exit_length))
+shapes.append(cb.Frustum.chain(shapes[-1], l_fillet_3, r_fillet_3, radius_mid=r_fillet_3_mid))
+shapes.append(cb.Frustum.chain(shapes[-1], l_cone, r_fillet_4))
+shapes.append(cb.Frustum.chain(shapes[-1], l_fillet_4, D/2, radius_mid=r_fillet_4_mid))
+shapes.append(cb.Cylinder.chain(shapes[-1], D*exit_length))
 
 # all cells sizes in longitudinal direction are fixed by the first block
 shapes[0].chop_radial(start_size=cell_size)

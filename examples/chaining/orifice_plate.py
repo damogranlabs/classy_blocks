@@ -1,6 +1,5 @@
 import os
-
-from classy_blocks import Cylinder, Frustum, ExtrudedRing, Mesh
+import classy_blocks as cb
 
 # see orifice_plate.svg for sketch
 
@@ -17,24 +16,24 @@ cell_size = t # use much less in real life
 # use bigger cells in lenghty entry/exit sections
 cell_dilution = 2
 
-mesh = Mesh()
+mesh = cb.Mesh()
 
 r_0 = d_0/2
 r_1 = r_0 + t/4
 r_2 = r_0 + t/2
 
 shapes = [None]*7
-shapes[0] = Cylinder(
+shapes[0] = cb.Cylinder(
     [0, 0, 0],
     [D*entry_length, 0, 0],
     [0, r_1, 0])
 
-shapes[1] = Frustum.chain(shapes[0], t/4, r_0)
-shapes[2] = Cylinder.chain(shapes[1], t/4)
-shapes[3] = Frustum.chain(shapes[2], t/2, r_2)
-shapes[4] = Cylinder.chain(shapes[3], D*exit_length)
-shapes[5] = ExtrudedRing.expand(shapes[0], D/2 - r_1)
-shapes[6] = ExtrudedRing.expand(shapes[4], D/2 - r_2)
+shapes[1] = cb.Frustum.chain(shapes[0], t/4, r_0)
+shapes[2] = cb.Cylinder.chain(shapes[1], t/4)
+shapes[3] = cb.Frustum.chain(shapes[2], t/2, r_2)
+shapes[4] = cb.Cylinder.chain(shapes[3], D*exit_length)
+shapes[5] = cb.ExtrudedRing.expand(shapes[0], D/2 - r_1)
+shapes[6] = cb.ExtrudedRing.expand(shapes[4], D/2 - r_2)
 
 # chop to a sensible number of cells;
 # dilute long inlet/outlet sections
@@ -64,6 +63,4 @@ for i in (4, 6):
     shapes[i].set_end_patch('outlet')
 
 mesh.set_default_patch('walls', 'wall')
-
-
 mesh.write(os.path.join('..', 'case', 'system', 'blockMeshDict'), debug_path='debug.vtk')

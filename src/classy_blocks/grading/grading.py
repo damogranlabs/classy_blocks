@@ -43,7 +43,6 @@ from typing import Tuple, List
 from classy_blocks.grading.chop import Chop
 from classy_blocks.grading import calculator as gc
 from classy_blocks.util import constants
-from classy_blocks.util.tools import indent
 
 # gather available functions for calculation of grading parameters
 functions = []  # list [ [return_value, {parameters}, function], ... ]

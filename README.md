@@ -4,16 +4,14 @@
 
 Python classes for easier creation of OpenFOAM's blockMesh dictionaries.
 
-> Warning! This project is currently under development and is not yet very user-friendly. It still lacks some important
-> features and probably features a lot of bugs. However, you're welcome to suggest features, improvements, and point out
-> bugs.
+> Warning! This project is currently under development and is not yet very user-friendly. It still lacks some important features and probably features a lot of bugs. However, you're welcome to suggest features, improvements, and point out bugs.
 
 # About
 _blockMesh_ is a very powerful mesher but the amount of manual labour it requires to make even the simplest
-meshes makes it mostly useless. Even attempts to simplify or parametrize _blockMeshDict_s with `#calc` or even
+meshes makes it mostly useless. Even attempts to simplify or parametrize blockMeshDicts with `#calc` or even
 the dreadful `m4` quickly become unmanageable and cryptic.
 
-classy_blocks' aim is to ease the burden of meticulous work by providing a
+classy_blocks' aim is to minimize the amount of meticulous work by providing a
 more intuitive workflow, off-the-shelf parts and some automatic helpers for building and optimization of block-structured hexahedral meshes.
 Still it is not an automatic mesher and therefore some kinds of geometry are more suited than others.
 
@@ -53,7 +51,7 @@ Still it is not an automatic mesher and therefore some kinds of geometry are mor
 As opposed to blockMesh, where the user is expected to manually enter pre-calculated vertices, edges, blocks and whatnot, classy_blocks tries to mimic procedural modeling of modern 3D CAD programs. Here, a Python script contains steps that describe geometry of blocks, their cell count, grading, patches and so on. At the end, the procedure is translated directly to blockMeshDict and no manual editing of the latter should be required.
 
 ## Building Elements
-_Unchecked items are not implemented yet_
+_Unchecked items are not implemented yet but are on a TODO list_
 
 - [x] Manual definition of a Block with Vertices, Edges and Faces
 - [x] Operations (Loft, Extrude, Revolve)
@@ -68,8 +66,8 @@ _Unchecked items are not implemented yet_
     - [x] Cylinder
     - [x] Ring (annulus)
     - [x] Hemisphere
-    - [x] Elbow wall (thickened shell of an Elbow)
-    - [x] Frustum wall
+    - [ ] Elbow wall (thickened shell of an Elbow)
+    - [ ] Frustum wall
     - [ ] Hemisphere wall
 - [ ] Predefined parametric Objects
     - [ ] T-joint (round pipes)
@@ -95,7 +93,7 @@ After blocks have been placed, it is possible to create new geometry based on pl
 - [ ] [Edge grading](https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-450004.3.1.3) (separate specification for each edge)
 - [x] Automatic propagation of grading and cell count from a single block to all connected blocks as required by blockMesh
 - [x] Projections of vertices, edges and block faces to geometry (triangulated and [searchable surfaces](https://www.openfoam.com/documentation/guides/latest/doc/guide-meshing-snappyhexmesh-geometry.html#meshing-snappyhexmesh-searchable-objects))
-- [x] Face merging as described by [blockMesh user guide](https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-470004.3.2). Breaks the pure-hexahedral-mesh rule but can often save the day for trickier geometries.
+- [x] Face merging as described by [blockMesh user guide](https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-470004.3.2). Breaks the pure-hexahedral-mesh rule but can often save the day for trickier geometries. Automatic duplication of points on merged block faces
 - [ ] Auto grading for Low-Re meshes: boundary layer with specified cell-to-cell expansion, transition with 2:1 expansion, and specified 'bulk' cell size
 
 # Examples
@@ -232,13 +230,47 @@ By showing `block_ids` with a proper color scale the blocking can be visualized.
 This is useful when blockMesh fails with errors reporting invalid/inside-out blocks but VTK will
 happily show anything.
 
+## Showcase
+
+These are some screenshots of parametric models, built with classy_blocks.
+
+Rectangular ducts (Extrude and Revolve Operations)
+![Ducts](showcase/elbows.png "Ducts")
+
+3D pipes with twists and turns (chained Elbow and Cylinder Shapes)
+![Piping](showcase/piping.png "Piping")
+
+A simple tank with rounded edges
+![Tank](showcase/tank.png "Tank")
+
+A flywheel in a case. VTK Blocking output for debug is shown in the middle
+![Flywheel](showcase/flywheel.png "Flywheel")
+
+Venturi tube
+![Venturi tube](showcase/venturi_tube.png "Venturi tube")
+
+2D mesh for studying Karman Vortex Street
+![Karman Vortex Street](showcase/karman.png "Karman vortex street")
+
+Helmholtz nozzle, a resonator with sharp edges. See [this sketch](https://www.researchgate.net/figure/Schematic-diagram-of-a-Helmholtz-oscillator-and-its-operating-principles_fig6_305275686).
+![Helmholtz nozzle](showcase/resonator.png "Helmholtz resonator")
+
+Edges and faces, projected to an STL surface
+![Projected](showcase/projected.png "Projected edges and faces")
+
+Mesh for studying flow around a sphere, with projected edges and faces
+![Sphere](showcase/sphere.png "Flow around a sphere")
+
+A parametric, Low-Re mesh of a real-life impeller *(not included in examples)*
+![Impeller - Low Re](showcase/impeller_full.png "Low-Re Impeller")
+
+
 # Prerequisites
 
 Package (python) dependencies can be found in *setup.py* file.
 Other dependencies that must be installed:
-- blockMesh (OpenFOAM)
-- OpenFoam
-- python
+- python3.7 and higher
+- OpenFoam: .org or .com version is supported, foam-extend's blockMesh doesn't support multigrading but is otherwise also compatible.
 
 # Technical Information
 
@@ -263,7 +295,7 @@ There's no official documentation yet so here are some tips for easier navigatio
     - *ElbowWall.contract()
     - Box.chain()
     - Block.chain() (low-level), or Block.get_face() -> Face
-- Optimization
+- Manual modification, automatic optimization
 - Examples
     - Ramjet engine
 - Technical stuff:

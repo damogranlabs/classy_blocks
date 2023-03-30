@@ -1,12 +1,11 @@
 import os
+import classy_blocks as cb
 
-from classy_blocks import Box, Cylinder, Mesh
-
-mesh = Mesh()
+mesh = cb.Mesh()
 
 # two boxes, connected with a geometrically identical
 # but different cell count
-coarse_box = Box([-0.5, -0.5, 0], [0.5, 0.5, 1])
+coarse_box = cb.Box([-0.5, -0.5, 0], [0.5, 0.5, 1])
 for i in (0, 1, 2):
     coarse_box.chop(i, count=10)
 coarse_box.set_patch('bottom', 'inlet')
@@ -28,7 +27,7 @@ mesh.merge_patches('box_master', 'box_slave')
 
 # add another cylinder on top; this will have no
 # coincident points
-cylinder = Cylinder(
+cylinder = cb.Cylinder(
     [0, 0, 2],
     [0, 0, 3],
     [0.25, 0, 2]

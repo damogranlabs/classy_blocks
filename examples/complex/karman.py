@@ -1,6 +1,5 @@
 import os
-
-from classy_blocks import ExtrudedRing, Box, Mesh
+import classy_blocks as cb
 
 cylinder_diameter = 20e-3 # [m]
 ring_thickness = 5e-3 # [m]
@@ -18,13 +17,13 @@ c2c_expansion = 1.2 # cell-to-cell expansion ratio
 # it's a 2-dimensional case
 z = 0.01
 
-mesh = Mesh()
+mesh = cb.Mesh()
 
 # a layer of cells on the cylinder
 d = 2**0.5/2
 outer_point = d*(cylinder_diameter/2 + ring_thickness)
 
-wall_ring = ExtrudedRing(
+wall_ring = cb.ExtrudedRing(
     [0, 0, 0],
     [0, 0, z],
     [outer_point, outer_point, 0],

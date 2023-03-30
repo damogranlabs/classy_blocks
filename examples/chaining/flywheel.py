@@ -1,6 +1,5 @@
 import os
-
-from classy_blocks import Cylinder, ExtrudedRing, Mesh
+import classy_blocks as cb
 
 # A mesh for calculation of friction losses of a rotating rotor in a fluid.
 # See flywheel.svg for explanation of dimensions and block numbers;
@@ -23,26 +22,26 @@ c2c_expansion = 1.25
 fixed_patch = 'fixed_wall'
 rotating_patch = 'rotating_wall'
 
-mesh = Mesh()
+mesh = cb.Mesh()
 
 # put all shapes into this list for easier 'handling';
 # indexes refer to block numbers in sketch
 shapes = []
 
 # block 0
-shapes.append(Cylinder(
+shapes.append(cb.Cylinder(
     [0, 0, 0], # axis point 1
     [w_gap, 0, 0], # axis point 2
     [0, r_wheel - t_rim, 0] # radius point 1
 ))
-shapes.append(Cylinder.chain(shapes[0], (w_rim - w_wheel)/2))
-shapes.append(ExtrudedRing.expand(shapes[0], t_rim))
-shapes.append(ExtrudedRing.expand(shapes[2], h_gap))
-shapes.append(ExtrudedRing.chain(shapes[3], w_rim))
-shapes.append(ExtrudedRing.chain(shapes[4], w_gap))
-shapes.append(ExtrudedRing.contract(shapes[5], r_wheel - t_rim))
-shapes.append(ExtrudedRing.contract(shapes[6], r_shaft))
-shapes.append(ExtrudedRing.chain(shapes[7], (w_rim - w_wheel)/2, start_face=True))
+shapes.append(cb.Cylinder.chain(shapes[0], (w_rim - w_wheel)/2))
+shapes.append(cb.ExtrudedRing.expand(shapes[0], t_rim))
+shapes.append(cb.ExtrudedRing.expand(shapes[2], h_gap))
+shapes.append(cb.ExtrudedRing.chain(shapes[3], w_rim))
+shapes.append(cb.ExtrudedRing.chain(shapes[4], w_gap))
+shapes.append(cb.ExtrudedRing.contract(shapes[5], r_wheel - t_rim))
+shapes.append(cb.ExtrudedRing.contract(shapes[6], r_shaft))
+shapes.append(cb.ExtrudedRing.chain(shapes[7], (w_rim - w_wheel)/2, start_face=True))
 
 # Chopping:
 # Cells on fixed wall are cell_size;

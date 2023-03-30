@@ -1,10 +1,9 @@
 import os
+import classy_blocks as cb
 
-from classy_blocks import Mesh, ExtrudedRing
+mesh = cb.Mesh()
 
-mesh = Mesh()
-
-pipe_wall = ExtrudedRing(
+pipe_wall = cb.ExtrudedRing(
     [0, 0, 0], # axis_point_1
     [2, 2, 0], # axis_point_2
     [-0.707, 0.707, 0], # outer_radius

@@ -1,11 +1,10 @@
-import numpy as np
-
 import os
 
-from classy_blocks import Mesh
-from classy_blocks.construct.shapes.elbow import Elbow
+import numpy as np
 
-mesh = Mesh()
+import classy_blocks as cb
+
+mesh = cb.Mesh()
 
 radius_1 = 1
 center_point_1 = [0., 0., 0.]
@@ -20,7 +19,7 @@ radius_2 = 0.4
 boundary_size = 0.01
 core_size = 0.08
 
-elbow = Elbow(
+elbow = cb.Elbow(
     center_point_1, radius_point_1, normal_1,
     sweep_angle, arc_center, rotation_axis, radius_2
 )

@@ -1,14 +1,14 @@
 import os
-from classy_blocks import Face, Wedge, Mesh, Spline
+import classy_blocks as cb
 
-mesh = Mesh()
+mesh = cb.Mesh()
 
 # a face with a single bump;
-base = Face(
+base = cb.Face(
     # points
     [[0, 0, 0], [1, 0, 0], [1, 0.2, 0], [0, 0.2, 0]],
     # edges
-    [None, None, Spline([[0.75, 0.15, 0], [0.50, 0.20, 0], [0.25, 0.25, 0]]), None]
+    [None, None, cb.Spline([[0.75, 0.15, 0], [0.50, 0.20, 0], [0.25, 0.25, 0]]), None]
 )
 
 # move it away from the axis of rotation
@@ -17,7 +17,7 @@ base.translate([0, 1, 0])
 
 # create a wedge, then copy it along x-axis,
 # representing an annular seal with grooves
-wedge = Wedge(base)
+wedge = cb.Wedge(base)
 wedge.set_outer_patch('static_wall')
 wedge.set_inner_patch('rotating_walls')
 wedge.chop(0, count=30)

@@ -1,14 +1,13 @@
 import os
+import classy_blocks as cb
 
-from classy_blocks import Cylinder, Mesh
-
-mesh = Mesh()
+mesh = cb.Mesh()
 
 axis_point_1 = [0., 0., 0.]
 axis_point_2 = [5., 5., 0.]
 radius_point_1 = [0., 0., 2.]
 
-cylinder = Cylinder(axis_point_1, axis_point_2, radius_point_1)
+cylinder = cb.Cylinder(axis_point_1, axis_point_2, radius_point_1)
 
 cylinder.set_start_patch('inlet')
 cylinder.set_end_patch('outlet')

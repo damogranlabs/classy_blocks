@@ -1,9 +1,7 @@
 import os
+import classy_blocks as cb
 
-from classy_blocks import Mesh, Face, Arc, RevolvedRing
-
-
-mesh = Mesh()
+mesh = cb.Mesh()
 
 # points that define ring cross-section;
 # must be specified in the following order:
@@ -21,12 +19,12 @@ xs_points = [
 ]
 
 xs_edges = [ # these must be consistent with points
-    None, None, Arc([0.3, 0.55, 0]), None
+    None, None, cb.Arc([0.3, 0.55, 0]), None
 ]
 
-face = Face(xs_points, xs_edges)
+face = cb.Face(xs_points, xs_edges)
 
-pipe_wall = RevolvedRing(
+pipe_wall = cb.RevolvedRing(
     [0, 0, 0], # axis_point_1
     [1, 0, 0], # axis_point_2, 
     face

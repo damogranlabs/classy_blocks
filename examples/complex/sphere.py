@@ -1,6 +1,5 @@
 import os
-
-from classy_blocks import Face, Loft, Mesh
+import classy_blocks as cb
 
 # sphere radius
 r = 0.5
@@ -38,7 +37,7 @@ yc = [-width,      -co, co, width]
 zc = [-width,      -co, co, width]
 
 # create a 3x3 grid of blocks; leave the middle out
-mesh = Mesh()
+mesh = cb.Mesh()
 oplist = []
 
 projected_faces = {
@@ -60,21 +59,21 @@ for i in range(3):
 
             n = len(oplist)
 
-            bottom_face = Face([
+            bottom_face = cb.Face([
                 [xc[k],   yc[j],   zc[i]],
                 [xc[k+1], yc[j],   zc[i]],
                 [xc[k+1], yc[j+1], zc[i]],
                 [xc[k],   yc[j+1], zc[i]]
             ])
 
-            top_face = Face([
+            top_face = cb.Face([
                 [xc[k],   yc[j],   zc[i+1]],
                 [xc[k+1], yc[j],   zc[i+1]],
                 [xc[k+1], yc[j+1], zc[i+1]],
                 [xc[k],   yc[j+1], zc[i+1]],
             ])
 
-            loft = Loft(bottom_face, top_face)
+            loft = cb.Loft(bottom_face, top_face)
 
             if n in projected_faces: # blocks around the center
                 loft.project_side(projected_faces[n], 'outer_sphere', edges=True)
@@ -98,9 +97,9 @@ for i, side in projected_faces.items():
         bottom_face.invert()
 
     top_points = bottom_face.points*(ci/co)
-    top_face = Face(top_points)
+    top_face = cb.Face(top_points)
 
-    loft = Loft(bottom_face, top_face)
+    loft = cb.Loft(bottom_face, top_face)
     loft.project_side('top', 'inner_sphere', edges=True)
 
     loft.chop(0, start_size=ball_cell_size)

@@ -1,7 +1,7 @@
 import os
-from classy_blocks import Frustum, Mesh
+import classy_blocks as cb
 
-mesh = Mesh()
+mesh = cb.Mesh()
 
 axis_point_1 = [0., 0., 0.]
 axis_point_2 = [2., 2., 0.]
@@ -18,7 +18,7 @@ core_size = 0.1
 # Also, in drastic cases, non-orthogonality at beginning/end face will be high
 # because of sharp edges; in those cases it is better to use RevolvedRing combined with
 # Cylinder/Frustum with non-flat start/end faces.
-frustum = Frustum(axis_point_1, axis_point_2, radius_point_1, radius_2, radius_mid=1.1)
+frustum = cb.Frustum(axis_point_1, axis_point_2, radius_point_1, radius_2, radius_mid=1.1)
 
 frustum.set_start_patch('inlet')
 frustum.set_outer_patch('walls')

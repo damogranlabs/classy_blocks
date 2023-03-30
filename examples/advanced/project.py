@@ -1,6 +1,5 @@
 import os
-
-from classy_blocks import Box, Mesh
+import classy_blocks as cb
 
 geometry = {
     'terrain': [
@@ -22,11 +21,11 @@ geometry = {
     ]
 }
 
-mesh = Mesh()
+mesh = cb.Mesh()
 
 # 'miss' the vertices deliberately;
 # project them to geometry later
-box = Box([-0.9, -0.9, -0.9], [1., 1., 1.])
+box = cb.Box([-0.9, -0.9, -0.9], [1., 1., 1.])
 
 # project misplaced vertices
 box.project_corner(0, ['terrain', 'left_wall', 'front_wall'])
