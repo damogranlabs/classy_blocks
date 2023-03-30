@@ -13,9 +13,10 @@ package with type hinting, static typing and no python-ish duck-typing hacks.
 - static type analysis, formatting, linting
 - Origin and Angle edges (Foundation and ESI alternatives to arc)
 - Projection of vertices to geometry
-- Direct imports of user-usable objects from `cb`, like `cb.Mesh, cb.Loft, cb.Arc`
+- Import convention `import classy_blocks as cb` and direct imports of user-usable objects from `cb`, like `cb.Mesh, cb.Loft, cb.Arc`
 - `Operation.faces` property that creates new faces on-the-fly for easier chaining of new operations
 - A Frame object that simplifies addressing edges/wires/other stuff between pairs of vertices on a hexahedron
+- ExtrudedRing.fill() method has been added to create cylinders inside rings
 ### Changed
 - Major package layout refactor
 - Edge specification (Arc, Origin, Angle, Project, Spline, PolyLine objects)
@@ -32,3 +33,6 @@ package with type hinting, static typing and no python-ish duck-typing hacks.
 - airfoil2d example requires blocking optimization so it will be recreated when that feature is available
 - block.from_points has been removed (use Loft)
 - T-joint will be added when a skew transform is implemented
+
+# [0.0.1] Status Quo
+Before refactoring

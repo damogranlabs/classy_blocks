@@ -48,10 +48,13 @@ class Annulus(Sketch):
             for i in range(n_segments)
         ]
 
+        assert self.inner_radius < self.outer_radius, "Outer ring radius must be larger than inner!"
+
     @property
     def faces(self) -> List[Face]:
         return self.shell
 
+    # FIXME: do something with inner_/outer/_point/_vector confusion
     @property
     def inner_radius_point(self) -> NPPointType:
         """"""
@@ -68,12 +71,12 @@ class Annulus(Sketch):
 
     @property
     def radius(self) -> float:
-        return self.outer_radius_point - self.center
+        return f.norm(self.outer_radius_point - self.center)
 
     @property
     def center(self) -> NPPointType:
         """"""
-        return self.center
+        return self.faces[0].edges[1].origin
 
     @property
     def inner_radius(self) -> float:
@@ -84,7 +87,7 @@ class Annulus(Sketch):
     @property
     def outer_radius(self) -> float:
         """"""
-        return f.norm(self.outer_radius_point - self.inner_radius_point)
+        return f.norm(self.outer_radius_point - self.center)
 
     @property
     def normal(self) -> NPVectorType:

@@ -2,8 +2,10 @@ import numpy as np
 
 from classy_blocks.types import PointType
 from classy_blocks.construct.flat.disk import Disk
+from classy_blocks.construct.flat.annulus import Annulus
 from classy_blocks.construct.shapes.round import RoundShape
 from classy_blocks.construct.shapes.frustum import Frustum
+from classy_blocks.construct.shapes.rings import ExtrudedRing
 
 from classy_blocks.util import functions as f
 
@@ -26,7 +28,7 @@ class Cylinder(Frustum):
         Use length < 0 to extrude 'backward' from source' start face"""
         # FIXME: different number of parameters in this and parent class
         assert source.sketch_class == Disk
-        assert length > 0, "Use start_face=True and a positive length to chain backwards"
+        assert length > 0, "Use a positive length and start_face=True to chain 'backwards'"
 
         if start_face:
             sketch = source.sketch_1
@@ -41,3 +43,14 @@ class Cylinder(Frustum):
         axis_point_2 = axis_point_1 + f.unit_vector(normal) * length
 
         return cls(axis_point_1, axis_point_2, radius_point_1)
+
+    @classmethod
+    def fill(cls, source:'ExtrudedRing') -> 'Cylinder':
+        """Fills the inside of the ring with a matching cylinder"""
+        assert source.sketch_class == Annulus
+        assert source.sketch_1.n_segments == 8, "Only rings made from 8 segments can be filled"
+        
+        sketch_1 = source.sketch_1
+        sketch_2 = source.sketch_2
+
+        return cls(sketch_1.center, sketch_2.center, sketch_1.inner_radius_point)

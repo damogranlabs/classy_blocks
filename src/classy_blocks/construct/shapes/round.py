@@ -39,7 +39,6 @@ class RoundShape(Shape):
         self.sketch_1 = self.sketch_class(*args_1)
         self.sketch_2 = self.transform_function(**transform_2_args)
 
-        # TODO: TEST
         if transform_mid_args is not None:
             self.sketch_mid = self.transform_function(**transform_mid_args)
         else:

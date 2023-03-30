@@ -55,12 +55,11 @@ class Elbow(RoundShape):
               arc_center:PointType,
               rotation_axis:VectorType,
               radius_2:float,
-              start_face:bool=False):
+              start_face:bool=False) -> 'Elbow':
         """Use another round Shape's end face as a starting point for this Elbow;
         Returns a new Elbow object. To start from the other side, use start_face = True"""
         assert source.sketch_class == Disk
 
-        # TODO: TEST
         if start_face:
             s = source.sketch_1
         else:

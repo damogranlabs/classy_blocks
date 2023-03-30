@@ -166,6 +166,7 @@ class EighthSphere(RoundShape):
 
 class Hemisphere(EighthSphere):
     """A Quarter of a sphere, used as a base for Hemisphere"""
+    # TODO: TEST
     n_cores:int = 4
 
     def __init__(self,

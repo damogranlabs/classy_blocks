@@ -1,5 +1,3 @@
-import dataclasses
-
 from typing import List, Optional, Union, Callable
 
 import numpy as np

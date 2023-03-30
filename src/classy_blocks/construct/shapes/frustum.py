@@ -48,17 +48,22 @@ class Frustum(RoundShape):
         )
 
     @classmethod
-    def chain(cls, source, length, radius_2, radius_mid=None):
+    def chain(cls, source:RoundShape,
+              length:float,
+              radius_2:float,
+              start_face:bool=False,
+              radius_mid:Optional[float]=None) -> 'Frustum':
         """Chain this Frustum to an existing Shape;
         Use length < 0 to begin on start face and go 'backwards'"""
-        # TODO: TEST
         assert source.sketch_class == Disk
+        assert length > 0, "Use a positive length and start_face=True to chain 'backwards'"
 
-        if length < 0:
+        if start_face:
             sketch = source.sketch_1
+            length = -length
         else:
             sketch = source.sketch_2
 
-        axis_point_2 = sketch.center_point + f.unit_vector(sketch.normal) * length
+        axis_point_2 = sketch.center + f.unit_vector(sketch.normal) * length
 
-        return cls(sketch.center_point, axis_point_2, sketch.radius_point, radius_2, radius_mid)
+        return cls(sketch.center, axis_point_2, sketch.radius_point, radius_2, radius_mid)
