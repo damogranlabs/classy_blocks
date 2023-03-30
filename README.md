@@ -42,7 +42,7 @@ Still it is not an automatic mesher and therefore some kinds of geometry are mor
 
 # How To Use It
 - If you just need the `classy_blocks`, install them with: `pip install git+https://github.com/damogranlabs/classy_blocks.git`
-- If you want to run examples, follow instructions in [EXAMPLES_README.md](EXAMPLES_README.md)
+- If you want to run examples, follow instructions in [Examples](#examples)
 - If you want to contribute, follow instructions in [CONTRIBUTING.md](CONTRIBUTING.md)
 
 # Features
@@ -98,18 +98,32 @@ After blocks have been placed, it is possible to create new geometry based on pl
 
 # Examples
 
+How to run:
+
+- `cd` to directory of the chosen example
+- Run `python <example.py>`; that will write blockMeshDict to examples/case
+- Run `blockMesh` on the case
+- Open examples/case/case.foam in paraview to view the result
+
+For instance:
+```bash
+cd examples/chaining
+python tank.py
+blockMesh -case ../case
+```
+
 ## Shapes
 A simple Cylinder:
 
 ```python
-inlet = Cylinder([x_start, 0, 0], [x_end, 0, 0], [0, 0, radius])
+inlet = cb.Cylinder([x_start, 0, 0], [x_end, 0, 0], [0, 0, radius])
 inlet.chop_radial(count=n_cells_radial, end_size=boundary_layer_thickness)
 inlet.chop_axial(start_size=axial_cell_size, end_size=2*axial_cell_size)
 inlet.chop_tangential(count=n_cells_tangential)
 
-inlet.set_bottom_patch('inlet')
+inlet.set_start_patch('inlet')
 inlet.set_outer_patch('wall')
-inlet.set_top_patch('outlet')
+inlet.set_end_patch('outlet')
 mesh.add(inlet)
 ```
 
@@ -123,7 +137,7 @@ An _Operation_ is a 3D shape obtained by swiping a Face into 3rd dimension by a 
 
 ```python
 # a quadrangle with one curved side
-base = Face(
+base = cb.Face(
     [ # quad vertices
         [0, 0, 0],
         [1, 0, 0],
@@ -131,14 +145,14 @@ base = Face(
         [0, 1, 0]
     ],
     [ # edges: None specifies straight edge
-        [0.5, -0.2, 0], # single point: arc
+        cb.Arc([0.5, -0.2, 0]),
         None,
         None,
         None
   ]
 )
 
-revolve = Revolve(
+revolve = cb.Revolve(
     base, # face to revolve
     f.deg2rad(45), # revolve angle
     [0, -1, 0], # axis
@@ -179,7 +193,7 @@ geometry = {
     ]
 }
 
-box = Box([-1., -1., -1.], [1., 1., 1.])
+box = cb.Box([-1., -1., -1.], [1., 1., 1.])
 box.project_side('bottom', 'terrain')
 box.project_edge(0, 1, 'terrain')
 box.project_edge(3, 0, ['terrain', 'left_wall'])
@@ -191,13 +205,13 @@ Simply provide names of patches to be merged and call `mesh.merge_patches(<maste
 classy_blocks will take care of point duplication and whatnot.
 
 ```python
-box = Box([-0.5, -0.5, 0], [0.5, 0.5, 1])
+box = cb.Box([-0.5, -0.5, 0], [0.5, 0.5, 1])
 for i in range(3):
     box.chop(i, count=25)
 box.set_patch('top', 'box_top')
 mesh.add(box)
 
-cylinder = Cylinder(
+cylinder = cb.Cylinder(
     [0, 0, 1],
     [0, 0, 2],
     [0.25, 0, 1]
