@@ -128,7 +128,7 @@ class ExpandContractTests(unittest.TestCase):
         cylinder = Cylinder([0, 0, 0], [1, 0, 0], [0, 1, 0])
         expanded = ExtrudedRing.expand(cylinder, 0.25)
 
-        self.check_success(cylinder, expanded, 16, 2*(17+8))
+        self.check_success(cylinder, expanded, 20, 2*(17+8))
     
     def test_expand_ring(self):
         """Expand a ring from a ring"""

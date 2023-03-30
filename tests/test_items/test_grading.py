@@ -245,17 +245,7 @@ class TestGrading(unittest.TestCase):
         self.add_division(0.5, 0.2, 1)
         self.add_division(0.25, 0.4, 0.5)
 
-        expected_output = (
-            "("
-            + os.linesep
-            + "\t(0.25 0.4 2)"
-            + os.linesep
-            + "\t(0.5 0.2 1)"
-            + os.linesep
-            + "\t(0.25 0.4 0.5)"
-            + os.linesep
-            + ")"
-        )
+        expected_output = "((0.25 0.4 2)(0.5 0.2 1)(0.25 0.4 0.5))"
 
         self.assertEqual(str(self.g.description), expected_output)
 

@@ -141,7 +141,7 @@ class Block:
         fmt_grading = "simpleGrading ( " + \
             self.axes[0].grading.description + " " + \
             self.axes[1].grading.description + " " + \
-            self.axes[2].grading.description + "\t)"
+            self.axes[2].grading.description + " )"
         fmt_comments = f"// {self.index} {self.comment}\n"
 
         return f"\thex {fmt_vertices} {self.cell_zone} {fmt_count} {fmt_grading} {fmt_comments}"
