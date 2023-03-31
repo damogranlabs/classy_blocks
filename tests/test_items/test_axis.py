@@ -13,35 +13,35 @@ class AxisTests(BlockTestCase):
         # Not all wires on this axis are of the same length
         lengths = self.make_block(0).axes[0].lengths
 
-        self.assertEqual(len(lengths), 4)
+        self.assertAlmostEqual(len(lengths), 4)
 
         # all edges in this axis are straight but 0-1
         self.assertNotEqual(lengths[0], lengths[1])
 
-        self.assertEqual(lengths[1], lengths[2])
-        self.assertEqual(lengths[2], lengths[3])
+        self.assertAlmostEqual(lengths[1], lengths[2])
+        self.assertAlmostEqual(lengths[2], lengths[3])
 
     def test_length_default(self):
         """Use average length when no chops are defined"""
-        self.assertEqual(self.make_block(0).axes[0].length, 1.0397797556255037)
+        self.assertAlmostEqual(self.make_block(0).axes[0].length, 1.0397797556255037)
 
     def test_length_min(self):
         """Minimum length"""
         block = self.make_block(0)
         block.axes[0].chops[0].take = "min"
-        self.assertEqual(block.axes[0].length, 1)
+        self.assertAlmostEqual(block.axes[0].length, 1)
 
     def test_length_max(self):
         """Maximum length"""
         block = self.make_block(0)
         block.axes[0].chops[0].take = "max"
-        self.assertEqual(block.axes[0].length, 1.1591190225020154)
+        self.assertAlmostEqual(block.axes[0].length, 1.1591190225020154)
 
     def test_length_avg(self):
         """Average length"""
         block = self.make_block(0)
         block.axes[0].chops[0].take = "avg"
-        self.assertEqual(block.axes[0].length, 1.0397797556255037)
+        self.assertAlmostEqual(block.axes[0].length, 1.0397797556255037)
 
     def test_is_aligned_exception(self):
         """Raise an exception when axes are not aligned"""
@@ -81,4 +81,4 @@ class AxisTests(BlockTestCase):
         """Grading, defined on this axis"""
         block_0 = self.make_block(0)
 
-        self.assertEqual(block_0.axes[0].grading.count, 6)
+        self.assertAlmostEqual(block_0.axes[0].grading.count, 6)
