@@ -6,7 +6,7 @@ jobs:
     pytests:
         strategy:
             matrix:
-                python-version: ["3.6", "3.10"]
+                python-version: ["3.7", "3.10"]
             fail-fast: false
         runs-on: ubuntu-latest
         steps:

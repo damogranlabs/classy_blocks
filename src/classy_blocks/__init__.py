@@ -1,17 +1,17 @@
 __version__ = "0.1.0"
 
-from classy_blocks.construct.edges import Arc, Origin, Angle, Spline, PolyLine, Project
-from classy_blocks.construct.flat.face import Face
-from classy_blocks.construct.operations.loft import Loft
-from classy_blocks.construct.operations.extrude import Extrude
-from classy_blocks.construct.operations.revolve import Revolve
-from classy_blocks.construct.operations.box import Box
-from classy_blocks.construct.operations.wedge import Wedge
+from .construct.edges import Arc, Origin, Angle, Spline, PolyLine, Project
+from .construct.flat.face import Face
+from .construct.operations.loft import Loft
+from .construct.operations.extrude import Extrude
+from .construct.operations.revolve import Revolve
+from .construct.operations.box import Box
+from .construct.operations.wedge import Wedge
 
-from classy_blocks.construct.shapes.elbow import Elbow
-from classy_blocks.construct.shapes.frustum import Frustum
-from classy_blocks.construct.shapes.cylinder import Cylinder
-from classy_blocks.construct.shapes.rings import ExtrudedRing, RevolvedRing
-from classy_blocks.construct.shapes.sphere import Hemisphere
+from .construct.shapes.elbow import Elbow
+from .construct.shapes.frustum import Frustum
+from .construct.shapes.cylinder import Cylinder
+from .construct.shapes.rings import ExtrudedRing, RevolvedRing
+from .construct.shapes.sphere import Hemisphere
 
-from classy_blocks.mesh import Mesh
+from .mesh import Mesh

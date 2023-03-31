@@ -43,6 +43,6 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     install_requires=["numpy", "scipy", "nptyping"],
-    include_package_data=True,
+    include_package_data=False,
     zip_safe=False,
 )
