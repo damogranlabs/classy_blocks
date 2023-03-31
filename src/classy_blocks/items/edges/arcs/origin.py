@@ -13,9 +13,9 @@ from classy_blocks.util import functions as f
 
 
 def arc_from_origin(
-    edge_point_1: PointType,
-    edge_point_2: PointType,
-    center: PointType,
+    edge_point_1: NPPointType,
+    edge_point_2: NPPointType,
+    center: NPPointType,
     adjust_center: bool = True,
     r_multiplier: float = 1.0,
 ):

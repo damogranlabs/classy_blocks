@@ -42,7 +42,7 @@ class Annulus(Sketch):
             [None, Origin(center_point), None, Origin(center_point)],  # edges
         )
 
-        self.core = []
+        self.core: List[Face] = []
         self.shell = [face.copy().rotate(i * segment_angle, normal, center_point) for i in range(n_segments)]
 
         assert self.inner_radius < self.outer_radius, "Outer ring radius must be larger than inner!"
