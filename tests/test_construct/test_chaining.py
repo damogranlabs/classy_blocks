@@ -6,6 +6,7 @@ from classy_blocks.construct.shapes.elbow import Elbow
 from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.construct.shapes.frustum import Frustum
 from classy_blocks.construct.shapes.rings import ExtrudedRing
+from classy_blocks.util.constants import TOL
 
 from classy_blocks.mesh import Mesh
 
@@ -103,7 +104,7 @@ class RingChainingTests(unittest.TestCase):
         self.assertEqual(len(self.mesh.block_list.blocks), 2 * self.ring.sketch_1.n_segments)
         self.assertEqual(len(self.mesh.vertex_list.vertices), 3 * 2 * self.ring.sketch_1.n_segments)
 
-        np.testing.assert_allclose(chained_shape.sketch_2.center, end_center)
+        np.testing.assert_allclose(chained_shape.sketch_2.center, end_center, atol=TOL)
 
     def test_chain_end(self):
         """Chain an extruded ring on end face"""
@@ -146,7 +147,7 @@ class ExpandContractTests(unittest.TestCase):
 
     def test_contract_ring(self):
         """Contract a ring from another ring"""
-        ring = ExtrudedRing([0, 0, 0], [1, 0, 0], [0, 1, 0], 0.4, 9)
+        ring = ExtrudedRing([0, 0, 0], [1, 0, 0], [0, 1, 0], 0.6, 9)
         contracted = ExtrudedRing.contract(ring, 0.2)
         self.check_success(ring, contracted, 18, 2 * 3 * 9)
 

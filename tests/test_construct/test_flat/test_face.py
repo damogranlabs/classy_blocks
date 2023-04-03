@@ -52,7 +52,7 @@ class FaceTests(unittest.TestCase):
         # only test that the Face.rotate function works properly;
         # other machinery (translate, transform...) are tested in
         # test_translate_face above
-        origin = np.random.rand(3)
+        origin = [2, 2, 2]
         angle = np.pi / 3
         axis = np.array([1, 1, 1])
 
@@ -63,7 +63,7 @@ class FaceTests(unittest.TestCase):
             original_point = original_face.points[i]
             rotated_point = rotated_face.points[i]
 
-            np.testing.assert_almost_equal(rotated_point, f.rotate(original_point, axis, angle, origin))
+            np.testing.assert_almost_equal(rotated_point, f.rotate(original_point, angle, axis, origin))
 
     def test_scale_face_default_origin(self):
         original_face = Face(self.points)

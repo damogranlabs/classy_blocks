@@ -1,4 +1,4 @@
-from typing import List, Optional, Union, Callable
+from typing import List, Union, Callable
 
 import numpy as np
 
@@ -24,12 +24,12 @@ class EdgeData(TransformableBase):
 
         return self.transform(lambda p: p + displacement)
 
-    def rotate(self, angle: float, axis: VectorType, origin: Optional[PointType] = None) -> "EdgeData":
+    def rotate(self, angle: float, axis: VectorType, origin: PointType) -> "EdgeData":
         """Rotates all points in this edge (except start and end Vertex) around an
         arbitrary axis and origin (be careful with projected edges, geometry isn't rotated!)"""
-        return self.transform(lambda p: f.rotate(p, axis, angle, origin))
+        return self.transform(lambda p: f.rotate(p, angle, axis, origin))
 
-    def scale(self, ratio: float, origin: Optional[PointType] = None) -> "EdgeData":
+    def scale(self, ratio: float, origin: PointType) -> "EdgeData":
         """Scales the edge points around given origin"""
         return self.transform(lambda p: f.scale(p, ratio, origin))
 

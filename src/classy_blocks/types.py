@@ -4,10 +4,10 @@ from nptyping import NDArray, Shape, Float
 
 # A single point can be specified as a list of floats or as a numpy array
 NPPointType = NDArray[Shape["3, 1"], Float]
-PointType = Union[List[float], NPPointType]
+PointType = Union[List[Union[int, float]], NPPointType]
 # Similar: a list of points
 NPPointListType = NDArray[Shape["*, 3"], Float]
-PointListType = Union[List[List[float]], NPPointListType, List[NPPointType]]
+PointListType = Union[NPPointListType, List[PointType], List[NPPointType]]
 # same as PointType but with a different name to avoid confusion
 NPVectorType = NPPointType
 VectorType = PointType

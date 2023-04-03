@@ -16,19 +16,20 @@ class Face(TransformableBase):
     creating an arbitrary quadrangle.
 
     Args:
-        points: a list or a numpy array of exactly 4 points in 3d space
-        edges: an optional list of data for edge creation;
-            if provided, it must be have exactly 4 elements,
-            each element a list of data for edge creation; the format is
-            the same as passed to Block.add_edge(). Each element of the list
-            represents an edge between its corner and the next, for instance:
+    - points: a list or a numpy array of exactly 4 points in 3d space
+    - edges: an optional list of data for edge creation;
+        if provided, it must be have exactly 4 elements,
+        each element a list of data for edge creation; the format is
+        the same as passed to Block.add_edge(). Each element of the list
+        represents an edge between its corner and the next, for instance:
 
-            - edges=[None, Arc([0.4, 1, 1]]), None, None] will create an
-            arc edge between the 1st and the 2nd vertex of this face
-            - edges=[Project(['terrain']*4) will project all 4 edges
-            of this face: 0-1, 1-2, 2-3, 3-0."""
+        edges=[None, Arc([0.4, 1, 1]]), None, None] will create an arc edge between the 1st and the 2nd vertex
+        edges=[Project(['terrain']*4) will project all 4 edges
+        of this face: 0-1, 1-2, 2-3, 3-0."""
 
-    def __init__(self, points: PointListType, edges: Optional[List[Optional[EdgeData]]] = None):
+    def __init__(
+        self, points: PointListType, edges: Optional[List[Optional[EdgeData]]] = None, check_coplanar: bool = False
+    ):
         # Points
         points = np.asarray(points, dtype=constants.DTYPE)
         if np.shape(points) != (4, 3):
@@ -42,6 +43,12 @@ class Face(TransformableBase):
             self.edges = edges
 
         assert len(self.edges) == 4, "Provide exactly 4 edges; use None for straight lines"
+
+        if check_coplanar:
+            pts = self.points
+            assert (
+                abs(np.dot((pts[1] - pts[0]), np.cross(pts[3] - pts[0], pts[2] - pts[0]))) < constants.TOL
+            ), "FacePoints are not coplanar!"
 
     def translate(self, displacement: VectorType) -> "Face":
         displacement = np.asarray(displacement, dtype=constants.DTYPE)
@@ -58,7 +65,7 @@ class Face(TransformableBase):
         if origin is None:
             origin = self.center
 
-        self.points = np.array([f.rotate(p, axis, angle, origin) for p in self.points], dtype=constants.DTYPE)
+        self.points = np.array([f.rotate(p, angle, axis, origin) for p in self.points], dtype=constants.DTYPE)
 
         for edge in self.edges:
             if edge is not None:

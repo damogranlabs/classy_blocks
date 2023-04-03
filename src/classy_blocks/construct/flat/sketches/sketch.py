@@ -1,10 +1,11 @@
 import abc
 import copy
 
-from typing import List, Optional, TypeVar
+from typing import List, TypeVar, Optional
 
-from classy_blocks.types import VectorType, PointType, NPPointType
+from classy_blocks.types import VectorType, PointType, NPPointType, NPVectorType
 from classy_blocks.base.transformable import TransformableBase
+from classy_blocks.base import transforms as tr
 from classy_blocks.construct.flat.face import Face
 
 SketchT = TypeVar("SketchT", bound="Sketch")
@@ -29,6 +30,9 @@ class Sketch(TransformableBase):
         return self
 
     def rotate(self: SketchT, angle: float, axis: VectorType, origin: Optional[PointType] = None) -> SketchT:
+        if origin is None:
+            origin = self.center
+
         for face in self.faces:
             face.rotate(angle, axis, origin)
 
@@ -43,12 +47,35 @@ class Sketch(TransformableBase):
 
         return self
 
+    def transform(self: SketchT, transform: tr.Transformation) -> SketchT:
+        """A function that transforms sketch_1 to sketch_2;
+        a Loft will be made from those"""
+        for t7m in transform.transforms:
+            if isinstance(t7m, tr.Translation):
+                self.translate(t7m.displacement)
+                continue
+
+            if isinstance(t7m, tr.Rotation):
+                self.rotate(t7m.angle, t7m.axis, t7m.origin)
+                continue
+
+            if isinstance(t7m, tr.Scaling):
+                self.scale(t7m.ratio, t7m.origin)
+                continue
+
+        return self
+
     @property
     @abc.abstractmethod
     def center(self) -> NPPointType:
-        """Center of this sketch; an average of all faces"""
+        """Center of this sketch"""
+
+    @property
+    def normal(self) -> NPVectorType:
+        """Normal of this sketch"""
+        return self.faces[0].normal
 
     @property
     @abc.abstractmethod
     def n_segments(self) -> int:
-        """Number of faces defining this annulus"""
+        """Number of outer faces"""

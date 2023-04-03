@@ -1,25 +1,20 @@
-from typing import List, Union
+from typing import List
 
 import numpy as np
 
 from classy_blocks.types import PointType, OrientType
 from classy_blocks.construct.flat.face import Face
-from classy_blocks.construct.flat.annulus import Annulus
+from classy_blocks.construct.flat.sketches.annulus import Annulus
 from classy_blocks.construct.operations.operation import Operation
-from classy_blocks.construct.shapes.round import RoundShape
+from classy_blocks.construct.shapes.round import RoundSolidShape, RoundHollowShape
 from classy_blocks.construct.operations.revolve import Revolve
+from classy_blocks.base import transforms as tr
 
 from classy_blocks.util import functions as f
 
 
-class ExtrudedRing(RoundShape):
+class ExtrudedRing(RoundHollowShape):
     """A ring, created by specifying its base, then extruding it"""
-
-    sketch_class = Annulus
-    inner_patch: OrientType = "left"
-
-    def transform_function(self, **kwargs):
-        return self.sketch_1.copy().translate(kwargs["displacement"])
 
     def __init__(
         self,
@@ -29,29 +24,19 @@ class ExtrudedRing(RoundShape):
         inner_radius: float,
         n_segments: int = 8,
     ):
-        self.axis = np.asarray(axis_point_2) - np.asarray(axis_point_1)
+        axis = np.asarray(axis_point_2) - np.asarray(axis_point_1)
 
         super().__init__(
-            [axis_point_1, outer_radius_point_1, self.axis, inner_radius, n_segments], {"displacement": self.axis}
+            Annulus(axis_point_1, outer_radius_point_1, axis, inner_radius, n_segments),
+            tr.Transformation([tr.Translation(axis)]),
+            None,
         )
-
-    def chop_tangential(self, **kwargs) -> None:
-        """Circumferential chop"""
-        # Ring has no 'core' so tangential chops must be defined explicitly
-        for operation in self.shell:
-            operation.chop(self.tangential_axis, **kwargs)
-
-    def set_inner_patch(self, name: str) -> None:
-        """Assign the faces of inside surface to a named patch"""
-        for operation in self.shell:
-            operation.set_patch(self.inner_patch, name)
 
     @classmethod
     def chain(cls, source: "ExtrudedRing", length: float, start_face: bool = False) -> "ExtrudedRing":
         """Creates a new ExtrudedRing on end face of source ring;
         use start_face=False to chain 'backwards' from the first face"""
         assert isinstance(source, ExtrudedRing)
-        assert source.sketch_class == Annulus
         assert length > 0, "Use a positive length and start_face=True to chain 'backwards'"
 
         if start_face:
@@ -69,27 +54,30 @@ class ExtrudedRing(RoundShape):
         )
 
     @classmethod
-    def expand(cls, source: RoundShape, thickness: float) -> "ExtrudedRing":
+    def expand(cls, source: RoundSolidShape, thickness: float) -> "ExtrudedRing":
         """Create a new concentric Ring with radius, enlarged by 'thickness';
         Can be used on Cylinder or ExtrudedRing"""
-        s1 = source.sketch_1
-        s2 = source.sketch_2
+        sketch_1 = source.sketch_1
+        sketch_2 = source.sketch_2
 
-        new_radius_point = s1.center + f.unit_vector(s1.radius_point - s1.center) * (s1.radius + thickness)
+        new_radius_point = sketch_1.center + f.unit_vector(sketch_1.radius_point - sketch_1.center) * (
+            sketch_1.radius + thickness
+        )
 
-        return cls(s1.center, s2.center, new_radius_point, s1.radius, n_segments=s1.n_segments)
+        return cls(sketch_1.center, sketch_2.center, new_radius_point, sketch_1.radius, n_segments=sketch_1.n_segments)
 
     @classmethod
     def contract(cls, source: "ExtrudedRing", inner_radius: float) -> "ExtrudedRing":
         """Create a new ring on inner surface of the source"""
-        assert source.sketch_class == Annulus
         assert inner_radius > 0, "Use Cylinder.fill(extruded_ring) to fill the ring with a cylinder"
 
-        s1 = source.sketch_1
-        s2 = source.sketch_2
-        assert inner_radius < s1.inner_radius, "New inner radius must be smaller than source's"
+        sketch_1 = source.sketch_1
+        sketch_2 = source.sketch_2
+        assert inner_radius < sketch_1.inner_radius, "New inner radius must be smaller than source's"
 
-        return cls(s1.center, s2.center, s1.inner_radius_point, inner_radius, n_segments=s1.n_segments)
+        return cls(
+            sketch_1.center, sketch_2.center, sketch_1.inner_radius_point, inner_radius, n_segments=sketch_1.n_segments
+        )
 
 
 class RevolvedRing(ExtrudedRing):
@@ -113,6 +101,9 @@ class RevolvedRing(ExtrudedRing):
     of revolution (with non-orthogonal blocks)
     from known 2d-blocking in cross-section."""
 
+    # FIXME: too many ancestors
+    # TODO: automatic point sorting to match ExtrudedRing numbering?
+
     axial_axis = 0
     radial_axis = 1
     tangential_axis = 2
@@ -121,10 +112,6 @@ class RevolvedRing(ExtrudedRing):
     end_patch: OrientType = "right"
     inner_patch: OrientType = "front"
     outer_patch: OrientType = "back"
-
-    def transform_function(self, **kwargs):
-        # No transforms for this one
-        pass
 
     def __init__(self, axis_point_1: PointType, axis_point_2: PointType, cross_section: Face, n_segments: int = 8):
         self.axis_point_1 = np.asarray(axis_point_1)
@@ -147,11 +134,3 @@ class RevolvedRing(ExtrudedRing):
     @property
     def operations(self) -> List[Operation]:
         return self.revolves
-
-    @property
-    def shell(self) -> List[Operation]:
-        return self.operations
-
-    @property
-    def core(self) -> List[Operation]:
-        return []

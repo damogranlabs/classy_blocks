@@ -2,16 +2,11 @@ from typing import List, Dict
 
 import numpy as np
 
-from classy_blocks.types import PointType, VectorType, NPPointType, NPVectorType, NPPointListType
+from classy_blocks.types import PointType, VectorType, NPPointType, NPVectorType
 from classy_blocks.construct.flat.face import Face
-from classy_blocks.construct.flat.sketch import Sketch
+from classy_blocks.construct.flat.sketches.sketch import Sketch
 from classy_blocks.construct.edges import Origin
 from classy_blocks.util import functions as f
-
-# ratios between core and outer points;
-# see docstring of Disk class
-CORE_DIAGONAL_RATIO = 0.7
-CORE_SIDE_RATIO = 0.62
 
 
 class QuarterDisk(Sketch):
@@ -19,21 +14,16 @@ class QuarterDisk(Sketch):
     cross-sections; a helper for creating SemiCircle and Circle;
     see description of Circle object for more details"""
 
-    def __init__(
-        self,
-        center_point: PointType,
-        radius_point: PointType,
-        normal: VectorType,
-        diagonal_ratio: float = CORE_DIAGONAL_RATIO,
-        side_ratio: float = CORE_SIDE_RATIO,
-    ):
+    # ratios between core and outer points;
+    # see docstring of Disk class
+    diagonal_ratio = 0.7
+    side_ratio = 0.62
+
+    def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
         center_point = np.asarray(center_point)
         radius_point = np.asarray(radius_point)
         normal = f.unit_vector(np.asarray(normal))
         radius_vector = radius_point - center_point
-
-        self.diagonal_ratio = diagonal_ratio
-        self.side_ratio = side_ratio
 
         # calculate points needed to construct faces:
         # these points must not be remembered because they will not change
@@ -44,13 +34,13 @@ class QuarterDisk(Sketch):
             "P1": center_point + radius_vector,
             "D": center_point + radius_vector * self.diagonal_ratio,
         }
-        points["D"] = f.rotate(points["D"], normal, np.pi / 4, center_point)
-        points["P2"] = f.rotate(points["P1"], normal, np.pi / 4, center_point)
-        points["S2"] = f.rotate(points["S1"], normal, np.pi / 2, center_point)
-        points["P3"] = f.rotate(points["P1"], normal, np.pi / 2, center_point)
+        points["D"] = f.rotate(points["D"], np.pi / 4, normal, center_point)
+        points["P2"] = f.rotate(points["P1"], np.pi / 4, normal, center_point)
+        points["S2"] = f.rotate(points["S1"], np.pi / 2, normal, center_point)
+        points["P3"] = f.rotate(points["P1"], np.pi / 2, normal, center_point)
 
         def make_face(keys, edges):
-            return Face([points[k] for k in keys], edges)
+            return Face([points[k] for k in keys], edges, check_coplanar=True)
 
         # core: 0-S-D-S
         self.core = [make_face(["O", "S1", "D", "S2"], None)]
@@ -104,11 +94,6 @@ class QuarterDisk(Sketch):
         }
 
     @property
-    def normal(self) -> NPVectorType:
-        """Normal of this sketch"""
-        return self.faces[0].normal
-
-    @property
     def n_segments(self):
         return len(self.shell)
 
@@ -118,15 +103,8 @@ class HalfDisk(QuarterDisk):
     cross-sections; a helper for creating Circle;
     see description of Circle object for more details"""
 
-    def __init__(
-        self,
-        center_point: PointType,
-        radius_point: PointType,
-        normal: VectorType,
-        diagonal_ratio: float = CORE_DIAGONAL_RATIO,
-        side_ratio: float = CORE_SIDE_RATIO,
-    ):
-        super().__init__(center_point, radius_point, normal, diagonal_ratio, side_ratio)
+    def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
+        super().__init__(center_point, radius_point, normal)
         # rotate core and shell faces
         other_quarter = self.copy().rotate(np.pi / 2, self.normal, self.center)
 
@@ -156,15 +134,8 @@ class Disk(HalfDisk):
     - too large will prevent creating large numbers of boundary layers
     """
 
-    def __init__(
-        self,
-        center_point: PointType,
-        radius_point: PointType,
-        normal: VectorType,
-        diagonal_ratio: float = CORE_DIAGONAL_RATIO,
-        side_ratio: float = CORE_SIDE_RATIO,
-    ):
-        super().__init__(center_point, radius_point, normal, diagonal_ratio, side_ratio)
+    def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
+        super().__init__(center_point, radius_point, normal)
         # rotate core and shell faces
         other_half = self.copy().rotate(np.pi, self.normal, self.center)
 

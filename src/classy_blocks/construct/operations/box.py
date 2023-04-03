@@ -4,8 +4,6 @@ from classy_blocks.types import PointType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.loft import Loft
 
-from classy_blocks.util.constants import DTYPE
-
 
 class Box(Loft):
     """A Rudimentary Box with edges aligned to
@@ -27,14 +25,18 @@ class Box(Loft):
         diagonal_point = np.asarray(diagonal_point)
         parr = np.vstack((start_point, diagonal_point)).T
 
-        point_0 = np.array([min(parr[0]), min(parr[1]), min(parr[2])], dtype=DTYPE)
-        point_6 = np.array([max(parr[0]), max(parr[1]), max(parr[2])], dtype=DTYPE)
+        point_0 = np.asarray([min(parr[0]), min(parr[1]), min(parr[2])])
+        point_6 = np.asarray([max(parr[0]), max(parr[1]), max(parr[2])])
 
-        delta_x = np.array([point_6[0] - point_0[0], 0, 0], dtype=DTYPE)
-        delta_y = np.array([0, point_6[1] - point_0[1], 0], dtype=DTYPE)
-        delta_z = np.array([0, 0, point_6[2] - point_0[2]], dtype=DTYPE)
+        delta_x = [point_6[0] - point_0[0], 0, 0]
+        delta_y = [0, point_6[1] - point_0[1], 0]
+        delta_z = [0, 0, point_6[2] - point_0[2]]
 
-        bottom_face = Face([point_0, point_0 + delta_x, point_0 + delta_x + delta_y, point_0 + delta_y])
+        # this is a workaround to make linter happy (doesn't recognize numpy types properly?
+        print([point_0, point_0 + delta_x, point_0 + delta_x + delta_y, point_0 + delta_y])
+        np_points = np.array([point_0, point_0 + delta_x, point_0 + delta_x + delta_y, point_0 + delta_y])
+
+        bottom_face = Face(np_points)
         top_face = bottom_face.copy().translate(delta_z)
 
         super().__init__(bottom_face, top_face)

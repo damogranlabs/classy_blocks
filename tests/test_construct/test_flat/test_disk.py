@@ -1,9 +1,10 @@
 import unittest
+from unittest.mock import patch
 from parameterized import parameterized
 
 import numpy as np
 
-from classy_blocks.construct.flat.disk import QuarterDisk
+from classy_blocks.construct.flat.sketches.disk import QuarterDisk
 
 from classy_blocks.util.constants import TOL
 from classy_blocks.util import functions as f
@@ -89,9 +90,11 @@ class QuarterDiskTests(unittest.TestCase):
             ("S2", [0, 0.5, 0]),
         )
     )
+    @patch("classy_blocks.construct.flat.sketches.disk.QuarterDisk.side_ratio", new=0.5)
+    @patch("classy_blocks.construct.flat.sketches.disk.QuarterDisk.diagonal_ratio", new=0.5)
     def test_point_position(self, key, position):
         """Check that the points are symmetrical with respect to
         diagonal"""
-        qdisk = QuarterDisk([0, 0, 0], [1, 0, 0], [0, 0, 1], 0.5, 0.5)
+        qdisk = QuarterDisk([0, 0, 0], [1, 0, 0], [0, 0, 1])
 
         self.assertTrue(f.norm(qdisk.points[key] - position) < TOL)

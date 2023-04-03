@@ -51,7 +51,7 @@ class TestFunctions(unittest.TestCase):
         origin = f.vector(0, 1, 0)
         axis = f.vector(0, 0, 1)
 
-        self.assert_np_equal(f.rotate(point, axis, -np.pi / 2, origin), f.vector(1, 1, 0))
+        self.assert_np_equal(f.rotate(point, -np.pi / 2, axis, origin), f.vector(1, 1, 0))
 
     def test_arbitrary_rotation_axis(self):
         """rotation of a point around arbitrary axis"""
@@ -59,7 +59,7 @@ class TestFunctions(unittest.TestCase):
         origin = f.vector(0, 0, 0)
         axis = f.vector(1, 1, 0)
 
-        self.assert_np_almost_equal(f.rotate(point, axis, np.pi, origin), f.vector(0, 1, 0))
+        self.assert_np_almost_equal(f.rotate(point, np.pi, axis, origin), f.vector(0, 1, 0))
 
     def test_to_polar_z_axis(self):
         """cartesian coordinate system to polar c.s., rotation around z-axis"""

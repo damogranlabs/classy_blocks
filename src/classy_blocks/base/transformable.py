@@ -1,6 +1,6 @@
 import abc
 import copy
-from typing import Optional, TypeVar
+from typing import TypeVar
 
 from classy_blocks.types import PointType, VectorType
 
@@ -17,12 +17,12 @@ class TransformableBase(abc.ABC):
         to enable chaining of transformations."""
 
     @abc.abstractmethod
-    def rotate(self: TrBaseT, angle: float, axis: VectorType, origin: Optional[PointType] = None) -> TrBaseT:
+    def rotate(self: TrBaseT, angle: float, axis: VectorType, origin: PointType) -> TrBaseT:
         """Rotate by 'angle' around 'axis' going through 'origin';
         returns the same instance to enable chaining of transformations."""
 
     @abc.abstractmethod
-    def scale(self: TrBaseT, ratio: float, origin: Optional[PointType] = None) -> TrBaseT:
+    def scale(self: TrBaseT, ratio: float, origin: PointType) -> TrBaseT:
         """Scale with respect to given origin; returns the same instance
         to enable chaining of transformations. If no origin is given,
         the entity is scaled with respect to its center"""

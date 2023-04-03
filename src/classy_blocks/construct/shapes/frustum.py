@@ -4,13 +4,15 @@ import numpy as np
 
 
 from classy_blocks.types import PointType
-from classy_blocks.construct.flat.disk import Disk
-from classy_blocks.construct.shapes.round import RoundShape
+from classy_blocks.construct.flat.sketches.disk import Disk
+from classy_blocks.construct.shapes.round import RoundSolidShape
+from classy_blocks.base import transforms as tr
 
+from classy_blocks.util.constants import TOL
 from classy_blocks.util import functions as f
 
 
-class Frustum(RoundShape):
+class Frustum(RoundSolidShape):
     """Creates a cone frustum (truncated cylinder).
 
     Args:
@@ -24,13 +26,6 @@ class Frustum(RoundShape):
 
     sketch_class = Disk
 
-    def transform_function(self, **kwargs):
-        new_sketch = self.sketch_1.copy()
-        new_sketch.translate(kwargs["displacement"])
-        new_sketch.scale(kwargs["radius"] / self.sketch_1.radius)
-
-        return new_sketch
-
     def __init__(
         self,
         axis_point_1: PointType,
@@ -39,19 +34,29 @@ class Frustum(RoundShape):
         radius_2: float,
         radius_mid: Optional[float] = None,
     ):
-        axis = np.asarray(axis_point_2) - np.asarray(axis_point_1)
+        axis_point_1 = np.asarray(axis_point_1)
+        axis = np.asarray(axis_point_2) - axis_point_1
+        radius_point_1 = np.asarray(radius_point_1)
+
+        radius_vector_1 = radius_point_1 - axis_point_1
+        radius_1 = f.norm(radius_vector_1)
+
+        # TODO: TEST
+        assert np.dot(axis, radius_vector_1) < TOL, "Make sure axis and radius vectors are perpendicular"
+
+        transform_2 = tr.Transformation([tr.Translation(axis_point_2 - axis_point_1), tr.Scaling(radius_2 / radius_1)])
 
         if radius_mid is None:
-            mid_params = None
+            transform_mid = None
         else:
-            mid_params = {"displacement": axis / 2, "radius": radius_mid}
+            transform_mid = tr.Transformation([tr.Translation(axis / 2), tr.Scaling(radius_mid / radius_1)])
 
-        super().__init__([axis_point_1, radius_point_1, axis], {"displacement": axis, "radius": radius_2}, mid_params)
+        super().__init__(Disk(axis_point_1, radius_point_1, axis), transform_2, transform_mid)
 
     @classmethod
     def chain(
         cls,
-        source: RoundShape,
+        source: RoundSolidShape,
         length: float,
         radius_2: float,
         start_face: bool = False,
@@ -59,7 +64,6 @@ class Frustum(RoundShape):
     ) -> "Frustum":
         """Chain this Frustum to an existing Shape;
         Use length < 0 to begin on start face and go 'backwards'"""
-        assert source.sketch_class == Disk
         assert length > 0, "Use a positive length and start_face=True to chain 'backwards'"
 
         if start_face:

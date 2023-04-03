@@ -4,9 +4,9 @@ import numpy as np
 
 from classy_blocks.types import PointType, VectorType, NPPointType, NPVectorType
 from classy_blocks.construct.flat.face import Face
-from classy_blocks.construct.flat.disk import Disk, QuarterDisk
+from classy_blocks.construct.flat.sketches.disk import Disk, QuarterDisk
 from classy_blocks.construct.operations.loft import Loft
-from classy_blocks.construct.shapes.round import RoundShape
+from classy_blocks.construct.shapes.round import RoundSolidShape
 
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
@@ -32,14 +32,14 @@ def eighth_sphere_lofts(
         # around 'O-P3', 'left':
         "left": bottom.points["P3"] - bottom.points["O"],
         # diagonal O-D is obtained by rotating around an at 45 degrees
-        "diagonal": f.rotate(bottom.points["P3"], normal, np.pi / 4, center_point) - bottom.points["O"],
+        "diagonal": f.rotate(bottom.points["P3"], np.pi / 4, normal, center_point) - bottom.points["O"],
     }
 
     front = bottom.copy().rotate(np.pi / 2, axes["front"], center_point)
     left = bottom.copy().rotate(-np.pi / 2, axes["left"], center_point)
 
-    point_DU = f.rotate(bottom.points["D"], axes["diagonal"], -diagonal_angle, center_point)
-    point_P2U = f.rotate(bottom.points["P2"], axes["diagonal"], -diagonal_angle, center_point)
+    point_DU = f.rotate(bottom.points["D"], -diagonal_angle, axes["diagonal"], center_point)
+    point_P2U = f.rotate(bottom.points["P2"], -diagonal_angle, axes["diagonal"], center_point)
 
     # 4 lofts for an eighth sphere, 1 core and 3 shell
     lofts: List[Loft] = []
@@ -62,7 +62,7 @@ def eighth_sphere_lofts(
     return lofts
 
 
-class EighthSphere(RoundShape):
+class EighthSphere(RoundSolidShape):
     """One eighth of a sphere, the base shape for half and whole spheres"""
 
     n_cores: int = 1
@@ -164,7 +164,7 @@ class Hemisphere(EighthSphere):
         rotated_shell = []
 
         for i in range(1, self.n_cores + 1):
-            rotated_radius_point = f.rotate(self.radius_point, self.normal, i * np.pi / 2, self.center_point)
+            rotated_radius_point = f.rotate(self.radius_point, i * np.pi / 2, self.normal, self.center_point)
 
             rotated_eighth = eighth_sphere_lofts(
                 self.center_point, rotated_radius_point, self.normal, self.geometry_name

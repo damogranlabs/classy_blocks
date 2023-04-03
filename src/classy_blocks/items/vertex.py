@@ -33,7 +33,7 @@ class Vertex(TransformableBase):
 
     def rotate(self, angle, axis, origin=None) -> "Vertex":
         """Rotate this point around an arbitrary axis and origin"""
-        self.pos = f.rotate(self.pos, f.unit_vector(axis), angle, origin)
+        self.pos = f.rotate(self.pos, angle, f.unit_vector(axis), origin)
         return self
 
     def scale(self, ratio: float, origin: Optional[PointType] = None) -> "Vertex":
