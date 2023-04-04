@@ -34,55 +34,13 @@ calculations meticulously transcribed from the blockmesh grading calculator:
 https://gitlab.com/herpes-free-engineer-hpe/blockmeshgradingweb/-/blob/master/calcBlockMeshGrading.coffee
 (since block length is always known, there's less wrestling but the calculation principle is similar) """
 import copy
-import inspect
 import warnings
 import math
 
-from typing import Tuple, List
+from typing import List
 
 from classy_blocks.grading.chop import Chop
-from classy_blocks.grading import relations as rel
 from classy_blocks.util import constants
-
-# gather available functions for calculation of grading parameters
-functions = []  # list [ [return_value, {parameters}, function], ... ]
-
-for m in inspect.getmembers(rel):
-    if inspect.isfunction(m[1]):
-        # function name is assembled as
-        # get_<result>__<param1>__<param2>
-        data = m[0].split(sep="__")
-        functions.append([data[0][4:], [data[1], data[2]], m[1]])
-
-
-def calculate(length: float, parameters: dict) -> Tuple[int, float]:
-    """Calculates cell count and total expansion ratio for a block
-    by calling functions that take known variables and return new values"""
-    # FIXME: move all this yada yada into Division class or something
-    keys = parameters.keys()
-    calculated = set()
-
-    for k in keys:
-        if parameters[k] is not None:
-            calculated.add(k)
-
-    for _ in range(20):
-        for fdata in functions:
-            freturn = fdata[0]
-            fparams = fdata[1]
-            ffunction = fdata[2]
-            if freturn in calculated:
-                # this value is already calculated, go on
-                continue
-
-            if set(fparams).issubset(calculated):
-                parameters[freturn] = ffunction(length, parameters[fparams[0]], parameters[fparams[1]])
-                calculated.add(freturn)
-
-        if {"count", "total_expansion"}.issubset(calculated):
-            return int(parameters["count"]), parameters["total_expansion"]
-
-    raise ValueError(f"Could not calculate count and grading for given parameters: {parameters}")
 
 
 class Grading:
@@ -117,10 +75,6 @@ class Grading:
 
         length = self.length * chop.length_ratio
 
-        # blockMesh needs two numbers regardless of user's input:
-        # number of cells and total expansion ratio.
-        # those two can be calculated from count and c2c_expansion
-        # so calculate those first
         count, total_expansion = chop.calculate(length)
 
         self.specification.append([chop.length_ratio, count, total_expansion])

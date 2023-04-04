@@ -1,11 +1,8 @@
 import unittest
 from parameterized import parameterized
 
-import os
-
-from classy_blocks.grading.chop import Chop
+from classy_blocks.grading.chop import functions, ChopRelation, Chop
 from classy_blocks.grading import relations as rel
-from classy_blocks.grading import grading
 from classy_blocks.grading.grading import Grading
 
 
@@ -202,7 +199,9 @@ class TestGrading(unittest.TestCase):
             ["total_expansion", ["start_size", "end_size"], rel.get_total_expansion__start_size__end_size],
         ]
 
-        self.assertListEqual(expected_functions, grading.functions)
+        expected_functions = [ChopRelation(f[0], f[1][0], f[1][1], f[2]) for f in expected_functions]
+
+        self.assertListEqual(expected_functions, functions)
 
     @parameterized.expand(
         (
@@ -228,9 +227,10 @@ class TestGrading(unittest.TestCase):
         )
     )
     def test_calculate(self, keys, count, total_expansion):
-        results = grading.calculate(1, keys)
-        self.assertEqual(results[0], count)
-        self.assertAlmostEqual(results[1], total_expansion, places=5)
+        chop = Chop(1, **keys)
+
+        self.assertEqual(chop.calculate(1)[0], count)
+        self.assertAlmostEqual(chop.calculate(1)[1], total_expansion, places=5)
 
     def add_division(self, length_ratio, count_ratio, total_expansion):
         self.g.specification.append([length_ratio, count_ratio, total_expansion])
@@ -258,17 +258,22 @@ class TestGrading(unittest.TestCase):
         self.assertEqual(self.g.specification[0][2], 5)
         self.assertEqual(self.g.inverted.specification[0][2], 0.2)
 
-    def test_add_division_fail(self):
+    def test_add_division_zero_length(self):
+        """Add a chop to zero-length grading"""
         with self.assertRaises(AssertionError):
             self.g.length = 0
             self.g.add_chop(Chop(count=10))
 
+    def test_insuficient_data(self):
+        """Add a chop with not enough data to calculate grading"""
         self.g.length = 1
         with self.assertRaises(ValueError):
             # when using only 1 parameter, c2c_expansion is assumed 1;
             # when specifying that as well, another parameter must be provided
             self.g.add_chop(Chop(c2c_expansion=1.1))
 
+    def test_wrong_combination(self):
+        """Add a chop with specified total_ and c2c_expansion"""
         with self.assertRaises(AssertionError):
             # specified total_expansion and c2c_expansion=1 aren't compatible
             self.g.add_chop(Chop(total_expansion=5))
