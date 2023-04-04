@@ -1,0 +1,56 @@
+import os
+
+import numpy as np
+
+import classy_blocks as cb
+
+mesh = cb.Mesh()
+
+cell_size = 0.08
+
+
+elbow = cb.Elbow(
+    [0, 0, 0], # center_point_1
+    [1, 0, 0], # radius_point_1
+    [0, 1, 0], # normal_1
+    -np.pi/2, # sweep_angle
+    [2, 0, 0], # arc_center
+    [0, 0, 1], # rotation_axis
+    0.5 # radius_2
+)
+elbow.chop_axial(start_size=cell_size)
+elbow.chop_radial(start_size=cell_size)
+elbow.chop_tangential(start_size=cell_size)
+mesh.add(elbow)
+
+chained_elbow = cb.Elbow.chain(
+    elbow, # source
+    -np.pi/2, # sweep_angle
+    [2, 0, 0], # arc_center
+    [0, 0, 1], # rotation_axis
+    1, # radius_2
+)
+chained_elbow.chop_axial(start_size=cell_size)
+mesh.add(chained_elbow)
+
+chained_cylinder = cb.Cylinder.chain(chained_elbow, 1)
+chained_cylinder.chop_axial(start_size=cell_size)
+mesh.add(chained_cylinder)
+
+expanded_cylinder = cb.ExtrudedRing.expand(chained_cylinder, 0.25)
+expanded_cylinder.chop_radial(start_size=cell_size)
+mesh.add(expanded_cylinder)
+
+chained_ring = cb.ExtrudedRing.chain(expanded_cylinder, 2)
+chained_ring.chop_axial(start_size=cell_size)
+mesh.add(chained_ring)
+
+another_chained_ring = cb.ExtrudedRing.chain(chained_ring, 2)
+another_chained_ring.chop_axial(start_size=cell_size)
+mesh.add(another_chained_ring)
+
+contracted_ring = cb.ExtrudedRing.contract(another_chained_ring, 0.1)
+contracted_ring.chop_radial(start_size=cell_size)
+mesh.add(contracted_ring)
+
+mesh.write(os.path.join('..', 'case', 'system', 'blockMeshDict'), debug_path='debug.vtk')
