@@ -16,7 +16,7 @@ class GeometryList:
         self.geometry = {**self.geometry, **geometry}
 
     @property
-    def description(self):
+    def description(self) -> str:
         """Formats a string to be inserted into blockMeshDict"""
         # nothing to output?
         if len(self.geometry.items()) == 0:

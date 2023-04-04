@@ -1,8 +1,42 @@
 import dataclasses
+import inspect
 
-from typing import Optional
+from typing import Optional, Callable, Union, Tuple, Set
 
 from classy_blocks.types import ChopTakeType
+from classy_blocks.grading import relations as rel
+
+
+@dataclasses.dataclass
+class ChopRelation:
+    """A container that links a pair of inputs to a
+    grading calculator function that outputs a new value"""
+
+    output: str
+
+    input_1: str
+    input_2: str
+
+    function: Callable[[float, float, float], Union[int, float]]
+
+    @property
+    def params(self) -> Set[str]:
+        """Input parameters for this chop function"""
+        return {self.input_1, self.input_2}
+
+    @classmethod
+    def from_function(cls, name: str, function: Callable):
+        """Create this object from given name and callable as returned by
+        inspect.getmembers() thingy"""
+        # function name is assembled as
+        # get_<result>__<param1>__<param2>
+        data = name.split(sep="__")
+
+        return cls(data[0][4:], data[1], data[2], function)
+
+
+# gather available functions for calculation of grading parameters
+functions = [ChopRelation.from_function(*member) for member in inspect.getmembers(rel, inspect.isfunction)]
 
 
 @dataclasses.dataclass
@@ -19,3 +53,46 @@ class Chop:
     total_expansion: Optional[float] = None
     invert: bool = False
     take: ChopTakeType = "avg"
+
+    def __post_init__(self):
+        # default: take c2c_expansion=1 if there's less than 2 parameters given
+        grading_params = [self.start_size, self.end_size, self.c2c_expansion, self.count]
+        if grading_params.count(None) > len(grading_params) - 2:
+            self.c2c_expansion = 1
+
+        # also: count can only be an integer
+        if self.count is not None:
+            self.count = max(int(self.count), 1)
+
+    def calculate(self, length: float) -> Tuple[int, float]:
+        """Calculates cell count and total expansion ratio for this chop
+        by calling functions that take known variables and return new values"""
+        # FIXME: move all this yada yada into Division class or something
+        data = dataclasses.asdict(self)
+        calculated: Set[str] = set()
+
+        for key in data.keys():
+            if data[key] is not None:
+                calculated.add(key)
+
+        for _ in range(20):
+            for crel in functions:
+                if crel.output in calculated:
+                    # this value is already calculated, go on
+                    continue
+
+                if crel.params.issubset(calculated):
+                    # value is not yet calculated but parameters are available;
+                    data[crel.output] = crel.function(length, data[crel.input_1], data[crel.input_2])
+                    calculated.add(crel.output)
+
+            if {"count", "total_expansion"}.issubset(calculated):
+                count = int(data["count"])
+                total_expansion = data["total_expansion"]
+
+                if self.invert:
+                    return count, 1 / total_expansion
+
+                return count, total_expansion
+
+        raise ValueError(f"Could not calculate count and grading for given parameters: {data}")

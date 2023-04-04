@@ -41,13 +41,13 @@ import math
 from typing import Tuple, List
 
 from classy_blocks.grading.chop import Chop
-from classy_blocks.grading import calculator as gc
+from classy_blocks.grading import relations as rel
 from classy_blocks.util import constants
 
 # gather available functions for calculation of grading parameters
 functions = []  # list [ [return_value, {parameters}, function], ... ]
 
-for m in inspect.getmembers(gc):
+for m in inspect.getmembers(rel):
     if inspect.isfunction(m[1]):
         # function name is assembled as
         # get_<result>__<param1>__<param2>
@@ -115,34 +115,13 @@ class Grading:
         https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading"""
         assert 0 < chop.length_ratio <= 1
 
-        # default: take c2c_expansion=1 if there's less than 2 parameters given
-        grading_params = [chop.start_size, chop.end_size, chop.c2c_expansion, chop.count]
-        if grading_params.count(None) > len(grading_params) - 2:
-            chop.c2c_expansion = 1
-
-        # also: count can only be an integer
-        if chop.count is not None:
-            chop.count = int(chop.count)
-
         length = self.length * chop.length_ratio
 
         # blockMesh needs two numbers regardless of user's input:
         # number of cells and total expansion ratio.
         # those two can be calculated from count and c2c_expansion
         # so calculate those first
-        count, total_expansion = calculate(
-            length,
-            {
-                "start_size": chop.start_size,
-                "end_size": chop.end_size,
-                "c2c_expansion": chop.c2c_expansion,
-                "count": chop.count,
-                "total_expansion": chop.total_expansion,
-            },
-        )
-
-        if chop.invert:
-            total_expansion = 1 / total_expansion
+        count, total_expansion = chop.calculate(length)
 
         self.specification.append([chop.length_ratio, count, total_expansion])
 

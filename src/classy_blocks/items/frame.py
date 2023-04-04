@@ -42,11 +42,13 @@ class Frame(Generic[BeamT]):
 
     def get_axis_beams(self, axis: AxisType) -> List[BeamT]:
         """Returns all non-None beams from given axis"""
-        beams = [
-            self.beams[pair[0]][pair[1]]
-            for pair in constants.AXIS_PAIRS[axis]
-            if self.beams[pair[0]][pair[1]] is not None
-        ]
+        beams = []
+
+        for pair in constants.AXIS_PAIRS[axis]:
+            beam = self.beams[pair[0]][pair[1]]
+
+            if beam is not None:
+                beams.append(beam)
 
         return beams
 

@@ -4,7 +4,7 @@ from parameterized import parameterized
 import os
 
 from classy_blocks.grading.chop import Chop
-from classy_blocks.grading import calculator as gc
+from classy_blocks.grading import relations as rel
 from classy_blocks.grading import grading
 from classy_blocks.grading.grading import Grading
 
@@ -17,168 +17,168 @@ from classy_blocks.grading.grading import Grading
 class TestGradingCalculator(unittest.TestCase):
     def test_get_start_size__count__c2c_expansion(self):
         # valid cases
-        self.assertEqual(gc.get_start_size__count__c2c_expansion(1, 10, 1), 0.1)
-        self.assertAlmostEqual(gc.get_start_size__count__c2c_expansion(1, 10, 1.1), 0.06274539488, places=5)
+        self.assertEqual(rel.get_start_size__count__c2c_expansion(1, 10, 1), 0.1)
+        self.assertAlmostEqual(rel.get_start_size__count__c2c_expansion(1, 10, 1.1), 0.06274539488, places=5)
 
         # invalid cases
         with self.assertRaises(AssertionError):
-            gc.get_start_size__count__c2c_expansion(0, 10, 1)
+            rel.get_start_size__count__c2c_expansion(0, 10, 1)
 
         with self.assertRaises(AssertionError):
-            gc.get_start_size__count__c2c_expansion(1, 0.5, 1)
+            rel.get_start_size__count__c2c_expansion(1, 0.5, 1)
 
     def test_get_start_size__end_size__total_expansion(self):
-        self.assertEqual(gc.get_start_size__end_size__total_expansion(1, 0.1, 1), 0.1)
+        self.assertEqual(rel.get_start_size__end_size__total_expansion(1, 0.1, 1), 0.1)
 
         with self.assertRaises(AssertionError):
-            gc.get_start_size__end_size__total_expansion(0, 0.1, 1)
+            rel.get_start_size__end_size__total_expansion(0, 0.1, 1)
 
         with self.assertRaises(AssertionError):
-            gc.get_start_size__end_size__total_expansion(1, 0.1, 0)
+            rel.get_start_size__end_size__total_expansion(1, 0.1, 0)
 
     def test_get_end_size__start_size__total_expansion(self):
-        self.assertEqual(gc.get_end_size__start_size__total_expansion(1, 0.1, 10), 1)
+        self.assertEqual(rel.get_end_size__start_size__total_expansion(1, 0.1, 10), 1)
 
         with self.assertRaises(AssertionError):
-            gc.get_end_size__start_size__total_expansion(-1, 0.1, 0)
+            rel.get_end_size__start_size__total_expansion(-1, 0.1, 0)
 
     def test_get_count__start__size__c2c_expansion(self):
         # valid cases
-        self.assertEqual(gc.get_count__start_size__c2c_expansion(1, 1, 1), 2)
-        self.assertEqual(gc.get_count__start_size__c2c_expansion(1, 0.1, 1), 11)
-        self.assertEqual(gc.get_count__start_size__c2c_expansion(1, 0.1, 1.1), 8)
+        self.assertEqual(rel.get_count__start_size__c2c_expansion(1, 1, 1), 2)
+        self.assertEqual(rel.get_count__start_size__c2c_expansion(1, 0.1, 1), 11)
+        self.assertEqual(rel.get_count__start_size__c2c_expansion(1, 0.1, 1.1), 8)
 
         # border cases
-        self.assertEqual(gc.get_count__start_size__c2c_expansion(1, 2, 1), 1)
-        self.assertEqual(gc.get_count__start_size__c2c_expansion(1, 1, 2), 2)
+        self.assertEqual(rel.get_count__start_size__c2c_expansion(1, 2, 1), 1)
+        self.assertEqual(rel.get_count__start_size__c2c_expansion(1, 1, 2), 2)
 
         # invalid cases
         with self.assertRaises(AssertionError):
-            gc.get_count__start_size__c2c_expansion(0, 0.1, 1.1)  # length < 0
+            rel.get_count__start_size__c2c_expansion(0, 0.1, 1.1)  # length < 0
 
         with self.assertRaises(AssertionError):
-            gc.get_count__start_size__c2c_expansion(1, 0, 1.1)  # start_size = 0
+            rel.get_count__start_size__c2c_expansion(1, 0, 1.1)  # start_size = 0
 
         with self.assertRaises(ValueError):
-            gc.get_count__start_size__c2c_expansion(1, 0.95, 0)  # c2c_expansion < 1
+            rel.get_count__start_size__c2c_expansion(1, 0.95, 0)  # c2c_expansion < 1
 
     def test_get_count__end_size__c2c_expansion(self):
         # valid cases
-        self.assertEqual(gc.get_count__end_size__c2c_expansion(1, 0.1, 1), 11)
-        self.assertEqual(gc.get_count__end_size__c2c_expansion(1, 0.1, 1.1), 26)
-        self.assertEqual(gc.get_count__end_size__c2c_expansion(1, 0.1, 0.9), 8)
+        self.assertEqual(rel.get_count__end_size__c2c_expansion(1, 0.1, 1), 11)
+        self.assertEqual(rel.get_count__end_size__c2c_expansion(1, 0.1, 1.1), 26)
+        self.assertEqual(rel.get_count__end_size__c2c_expansion(1, 0.1, 0.9), 8)
 
         # border cases
-        self.assertEqual(gc.get_count__end_size__c2c_expansion(1, 1, 1), 2)
-        self.assertEqual(gc.get_count__end_size__c2c_expansion(1, 1, 2), 2)
+        self.assertEqual(rel.get_count__end_size__c2c_expansion(1, 1, 1), 2)
+        self.assertEqual(rel.get_count__end_size__c2c_expansion(1, 1, 2), 2)
 
         # invalid cases
         with self.assertRaises(ValueError):
-            gc.get_count__end_size__c2c_expansion(1, 0.1, 1.5)
+            rel.get_count__end_size__c2c_expansion(1, 0.1, 1.5)
 
     def test_get_count__total_expansion__c2c_expansion(self):
         # valid cases
-        self.assertEqual(gc.get_count__total_expansion__c2c_expansion(1, 3, 1.1), 12)
+        self.assertEqual(rel.get_count__total_expansion__c2c_expansion(1, 3, 1.1), 12)
 
         # border cases
-        self.assertEqual(gc.get_count__total_expansion__c2c_expansion(1, 1, 1.1), 1)
+        self.assertEqual(rel.get_count__total_expansion__c2c_expansion(1, 1, 1.1), 1)
 
         # invalid cases
         with self.assertRaises(AssertionError):
-            gc.get_count__total_expansion__c2c_expansion(1, 1, 1)
+            rel.get_count__total_expansion__c2c_expansion(1, 1, 1)
 
         with self.assertRaises(AssertionError):
-            gc.get_count__total_expansion__c2c_expansion(1, -1, 1.1)
+            rel.get_count__total_expansion__c2c_expansion(1, -1, 1.1)
 
     def test_get_count__total_expansion__start_size(self):
         # valid cases
-        self.assertEqual(gc.get_count__total_expansion__start_size(1, 1, 0.1), 10)
-        self.assertEqual(gc.get_count__total_expansion__start_size(1, 2, 0.1), 7)
-        self.assertEqual(gc.get_count__total_expansion__start_size(1, 8, 0.1), 3)
+        self.assertEqual(rel.get_count__total_expansion__start_size(1, 1, 0.1), 10)
+        self.assertEqual(rel.get_count__total_expansion__start_size(1, 2, 0.1), 7)
+        self.assertEqual(rel.get_count__total_expansion__start_size(1, 8, 0.1), 3)
 
         # border cases
-        self.assertEqual(gc.get_count__total_expansion__start_size(1, 0.9, 0.5), 3)
-        self.assertEqual(gc.get_count__total_expansion__start_size(1, 0.3, 1), 2)
+        self.assertEqual(rel.get_count__total_expansion__start_size(1, 0.9, 0.5), 3)
+        self.assertEqual(rel.get_count__total_expansion__start_size(1, 0.3, 1), 2)
 
     def test_get_c2c_expansion__count__start_size(self):
         # valid cases
-        self.assertEqual(gc.get_c2c_expansion__count__start_size(1, 10, 0.1), 1)
-        self.assertEqual(gc.get_c2c_expansion__count__start_size(1, 2, 0.1), 9)
-        self.assertAlmostEqual(gc.get_c2c_expansion__count__start_size(1, 5, 0.1), 1.352395572, places=5)
-        self.assertEqual(gc.get_c2c_expansion__count__start_size(1, 2, 0.5), 1)
-        self.assertAlmostEqual(gc.get_c2c_expansion__count__start_size(1, 10, 0.05), 1.1469127, places=5)
+        self.assertEqual(rel.get_c2c_expansion__count__start_size(1, 10, 0.1), 1)
+        self.assertEqual(rel.get_c2c_expansion__count__start_size(1, 2, 0.1), 9)
+        self.assertAlmostEqual(rel.get_c2c_expansion__count__start_size(1, 5, 0.1), 1.352395572, places=5)
+        self.assertEqual(rel.get_c2c_expansion__count__start_size(1, 2, 0.5), 1)
+        self.assertAlmostEqual(rel.get_c2c_expansion__count__start_size(1, 10, 0.05), 1.1469127, places=5)
 
         # border cases
-        self.assertEqual(gc.get_c2c_expansion__count__start_size(1, 1, 0.1), 1)
-        self.assertAlmostEqual(gc.get_c2c_expansion__count__start_size(1, 20, 0.1), 0.9181099911, places=5)
+        self.assertEqual(rel.get_c2c_expansion__count__start_size(1, 1, 0.1), 1)
+        self.assertAlmostEqual(rel.get_c2c_expansion__count__start_size(1, 20, 0.1), 0.9181099911, places=5)
 
         # invalid cases
         with self.assertRaises(AssertionError):
-            gc.get_c2c_expansion__count__start_size(0, 1, 0.1)  # length = 0
+            rel.get_c2c_expansion__count__start_size(0, 1, 0.1)  # length = 0
 
         with self.assertRaises(AssertionError):
-            gc.get_c2c_expansion__count__start_size(1, 0, 0.1)  # count < 1
+            rel.get_c2c_expansion__count__start_size(1, 0, 0.1)  # count < 1
 
         with self.assertRaises(AssertionError):
-            gc.get_c2c_expansion__count__start_size(1, 10, 1.1)  # start_size > length
+            rel.get_c2c_expansion__count__start_size(1, 10, 1.1)  # start_size > length
 
         with self.assertRaises(AssertionError):
-            gc.get_c2c_expansion__count__start_size(1, 10, 0)  # start_size = 0
+            rel.get_c2c_expansion__count__start_size(1, 10, 0)  # start_size = 0
 
         with self.assertRaises(ValueError):
-            gc.get_c2c_expansion__count__start_size(1, 10, 0.9)
+            rel.get_c2c_expansion__count__start_size(1, 10, 0.9)
 
     def test_get_c2c_expansion__count__end_size(self):
         # valid cases
-        self.assertEqual(gc.get_c2c_expansion__count__end_size(1, 10, 0.1), 1)
-        self.assertAlmostEqual(gc.get_c2c_expansion__count__end_size(1, 10, 0.01), 0.6784573173, places=5)
-        self.assertAlmostEqual(gc.get_c2c_expansion__count__end_size(1, 10, 0.2), 1.202420088, places=5)
+        self.assertEqual(rel.get_c2c_expansion__count__end_size(1, 10, 0.1), 1)
+        self.assertAlmostEqual(rel.get_c2c_expansion__count__end_size(1, 10, 0.01), 0.6784573173, places=5)
+        self.assertAlmostEqual(rel.get_c2c_expansion__count__end_size(1, 10, 0.2), 1.202420088, places=5)
 
         # border cases
-        self.assertEqual(gc.get_c2c_expansion__count__end_size(1, 1, 1), 1)
+        self.assertEqual(rel.get_c2c_expansion__count__end_size(1, 1, 1), 1)
 
         # invalid cases
         with self.assertRaises(AssertionError):
-            gc.get_c2c_expansion__count__end_size(1, 0.5, 1)
+            rel.get_c2c_expansion__count__end_size(1, 0.5, 1)
 
         with self.assertRaises(AssertionError):
-            gc.get_c2c_expansion__count__end_size(1, 10, -0.5)
+            rel.get_c2c_expansion__count__end_size(1, 10, -0.5)
 
         with self.assertRaises(ValueError):
-            gc.get_c2c_expansion__count__end_size(1, 10, 1)
+            rel.get_c2c_expansion__count__end_size(1, 10, 1)
 
     def test_get_c2c_expansion__count__total_expansion(self):
         # valid cases
-        self.assertAlmostEqual(gc.get_c2c_expansion__count__total_expansion(1, 10, 5), 1.195813175, places=5)
-        self.assertAlmostEqual(gc.get_c2c_expansion__count__total_expansion(1, 10, 0.5), 0.9258747123, places=5)
+        self.assertAlmostEqual(rel.get_c2c_expansion__count__total_expansion(1, 10, 5), 1.195813175, places=5)
+        self.assertAlmostEqual(rel.get_c2c_expansion__count__total_expansion(1, 10, 0.5), 0.9258747123, places=5)
 
         # border cases
-        self.assertEqual(gc.get_c2c_expansion__count__total_expansion(1, 10, 1), 1)
+        self.assertEqual(rel.get_c2c_expansion__count__total_expansion(1, 10, 1), 1)
 
         # invalid cases
         with self.assertRaises(AssertionError):
-            gc.get_c2c_expansion__count__total_expansion(1, 1, 1)
+            rel.get_c2c_expansion__count__total_expansion(1, 1, 1)
 
     def test_get_total_expansion__count__c2c_expansion(self):
         # valid cases
-        self.assertEqual(gc.get_total_expansion__count__c2c_expansion(1, 10, 1), 1)
-        self.assertEqual(gc.get_total_expansion__count__c2c_expansion(1, 1, 1), 1)
-        self.assertAlmostEqual(gc.get_total_expansion__count__c2c_expansion(1, 10, 1.1), 2.3579476, places=5)
+        self.assertEqual(rel.get_total_expansion__count__c2c_expansion(1, 10, 1), 1)
+        self.assertEqual(rel.get_total_expansion__count__c2c_expansion(1, 1, 1), 1)
+        self.assertAlmostEqual(rel.get_total_expansion__count__c2c_expansion(1, 10, 1.1), 2.3579476, places=5)
 
         # border cases
-        self.assertEqual(gc.get_total_expansion__count__c2c_expansion(1, 1, 1), 1)
+        self.assertEqual(rel.get_total_expansion__count__c2c_expansion(1, 1, 1), 1)
 
         # invalid cases
         with self.assertRaises(AssertionError):
-            gc.get_total_expansion__count__c2c_expansion(1, 0.5, 1)
+            rel.get_total_expansion__count__c2c_expansion(1, 0.5, 1)
 
     def test_get_total_expansion__start_size__end_size(self):
-        self.assertEqual(gc.get_total_expansion__start_size__end_size(1, 1, 1), 1)
-        self.assertAlmostEqual(gc.get_total_expansion__start_size__end_size(1, 0.1, 0.01), 0.1)
-        self.assertAlmostEqual(gc.get_total_expansion__start_size__end_size(1, 0.01, 0.1), 10)
+        self.assertEqual(rel.get_total_expansion__start_size__end_size(1, 1, 1), 1)
+        self.assertAlmostEqual(rel.get_total_expansion__start_size__end_size(1, 0.1, 0.01), 0.1)
+        self.assertAlmostEqual(rel.get_total_expansion__start_size__end_size(1, 0.01, 0.1), 10)
 
         with self.assertRaises(AssertionError):
-            gc.get_total_expansion__start_size__end_size(1, 0, 0.1)
+            rel.get_total_expansion__start_size__end_size(1, 0, 0.1)
 
 
 class TestGrading(unittest.TestCase):
@@ -188,18 +188,18 @@ class TestGrading(unittest.TestCase):
     def test_calculator_functions(self):
         expected_functions = [
             # return_value | param1 | param2 (param0 = length)
-            ["c2c_expansion", ["count", "end_size"], gc.get_c2c_expansion__count__end_size],
-            ["c2c_expansion", ["count", "start_size"], gc.get_c2c_expansion__count__start_size],
-            ["c2c_expansion", ["count", "total_expansion"], gc.get_c2c_expansion__count__total_expansion],
-            ["count", ["end_size", "c2c_expansion"], gc.get_count__end_size__c2c_expansion],
-            ["count", ["start_size", "c2c_expansion"], gc.get_count__start_size__c2c_expansion],
-            ["count", ["total_expansion", "c2c_expansion"], gc.get_count__total_expansion__c2c_expansion],
-            ["count", ["total_expansion", "start_size"], gc.get_count__total_expansion__start_size],
-            ["end_size", ["start_size", "total_expansion"], gc.get_end_size__start_size__total_expansion],
-            ["start_size", ["count", "c2c_expansion"], gc.get_start_size__count__c2c_expansion],
-            ["start_size", ["end_size", "total_expansion"], gc.get_start_size__end_size__total_expansion],
-            ["total_expansion", ["count", "c2c_expansion"], gc.get_total_expansion__count__c2c_expansion],
-            ["total_expansion", ["start_size", "end_size"], gc.get_total_expansion__start_size__end_size],
+            ["c2c_expansion", ["count", "end_size"], rel.get_c2c_expansion__count__end_size],
+            ["c2c_expansion", ["count", "start_size"], rel.get_c2c_expansion__count__start_size],
+            ["c2c_expansion", ["count", "total_expansion"], rel.get_c2c_expansion__count__total_expansion],
+            ["count", ["end_size", "c2c_expansion"], rel.get_count__end_size__c2c_expansion],
+            ["count", ["start_size", "c2c_expansion"], rel.get_count__start_size__c2c_expansion],
+            ["count", ["total_expansion", "c2c_expansion"], rel.get_count__total_expansion__c2c_expansion],
+            ["count", ["total_expansion", "start_size"], rel.get_count__total_expansion__start_size],
+            ["end_size", ["start_size", "total_expansion"], rel.get_end_size__start_size__total_expansion],
+            ["start_size", ["count", "c2c_expansion"], rel.get_start_size__count__c2c_expansion],
+            ["start_size", ["end_size", "total_expansion"], rel.get_start_size__end_size__total_expansion],
+            ["total_expansion", ["count", "c2c_expansion"], rel.get_total_expansion__count__c2c_expansion],
+            ["total_expansion", ["start_size", "end_size"], rel.get_total_expansion__start_size__end_size],
         ]
 
         self.assertListEqual(expected_functions, grading.functions)
