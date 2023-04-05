@@ -6,6 +6,6 @@
     ],
     "settings": {
         "python.languageServer": "Pylance",
-        "python.linting.lintOnSave": true
-    },
+        "python.linting.lintOnSave": true,
+    }
 }
