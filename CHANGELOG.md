@@ -9,7 +9,7 @@ A complete overhaul of all objects in an attempt to create a proper SOLID-obeyin
 package with type hinting, static typing and no python-ish duck-typing hacks.
 
 ### Added
-- TODO examples and showcases from `classy_examples` repo
+- examples and showcases from `classy_examples` repo
 - static type analysis, formatting, linting
 - Origin and Angle edges (Foundation and ESI alternatives to arc)
 - Projection of vertices to geometry
@@ -22,7 +22,7 @@ package with type hinting, static typing and no python-ish duck-typing hacks.
 - Edge specification (Arc, Origin, Angle, Project, Spline, PolyLine objects)
 - Reverted Face specification for operations
 - The Block object is not directly available to the user as it makes no sense to do so
-- TODO Import convention: `import classy_blocks as cb` for examples
+- Import convention: `import classy_blocks as cb` for examples
 - Changed examples so that an example file runs directly instead of calling run.py (that created a lot of confusion)
 - Box() is now an operation (previously Shape)
 - simplified cylinder and sphere creation
