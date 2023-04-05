@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, get_args
 
 from classy_blocks.types import AxisType
 
@@ -24,7 +24,7 @@ class Block:
         self.vertices = vertices
 
         # wires and axes
-        self.wires = Frame()
+        self.wires: Frame = Frame()
 
         # create wires and connections for quicker addressing
         for axis in range(3):
@@ -32,14 +32,14 @@ class Block:
                 wire = Wire(self.vertices, axis, pair[0], pair[1])
                 self.wires.add_beam(pair[0], pair[1], wire)
 
-        self.axes = [Axis(i, self.wires.get_axis_beams(i)) for i in (0, 1, 2)]
+        self.axes = [Axis(i, self.wires.get_axis_beams(i)) for i in get_args(AxisType)]
 
         # cellZone to which the block belongs to
-        self.cell_zone = ""
+        self.cell_zone: str = ""
 
         # written as a comment after block definition
         # (visible in blockMeshDict, useful for debugging)
-        self.comment = ""
+        self.comment: str = ""
 
     def add_edge(self, corner_1: int, corner_2: int, edge: Edge):
         """Adds an edge between vertices at specified indexes."""

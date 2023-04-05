@@ -1,10 +1,11 @@
 import abc
 
-from typing import Sequence, TypeVar, Dict, List
+from typing import Dict, List, TYPE_CHECKING
 
 from classy_blocks.base.transformable import TransformableBase
 
-AdditiveT = TypeVar("AdditiveT", bound="AdditiveBase")
+if TYPE_CHECKING:
+    from classy_blocks.construct.operations.operation import Operation
 
 
 class AdditiveBase(TransformableBase):
@@ -13,7 +14,7 @@ class AdditiveBase(TransformableBase):
 
     @property
     @abc.abstractmethod
-    def operations(self: AdditiveT) -> Sequence[AdditiveT]:  # TODO: this must return an Operation!
+    def operations(self) -> List["Operation"]:  # TODO: sort out (Operation is a child of AdditiveBase?)
         """A list of operations to be added to mesh"""
 
     @property

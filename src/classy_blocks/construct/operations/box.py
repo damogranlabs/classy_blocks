@@ -33,7 +33,6 @@ class Box(Loft):
         delta_z = [0, 0, point_6[2] - point_0[2]]
 
         # this is a workaround to make linter happy (doesn't recognize numpy types properly?
-        print([point_0, point_0 + delta_x, point_0 + delta_x + delta_y, point_0 + delta_y])
         np_points = np.array([point_0, point_0 + delta_x, point_0 + delta_x + delta_y, point_0 + delta_y])
 
         bottom_face = Face(np_points)

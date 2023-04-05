@@ -8,7 +8,7 @@ class BlockList:
     """Handling of the 'blocks' part of blockMeshDict, along with
     count/grading propagation and whatnot"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.blocks: List[Block] = []
 
     def add(self, block: Block) -> None:

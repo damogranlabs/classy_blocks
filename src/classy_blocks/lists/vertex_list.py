@@ -25,7 +25,7 @@ class DuplicatedEntry:
 class VertexList:
     """Handling of the 'vertices' part of blockMeshDict"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.vertices: List[Vertex] = []
 
         # a collection of duplicated vertices

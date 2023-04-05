@@ -4,7 +4,7 @@ from typing import Dict, List
 class GeometryList:
     """Handling of the 'geometry' part of blockMeshDict"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.geometry: Dict[str, List[str]] = {}
 
     def add(self, geometry: dict) -> None:

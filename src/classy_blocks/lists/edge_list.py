@@ -11,7 +11,7 @@ from classy_blocks.items.edges.factory import factory
 class EdgeList:
     """Handling of the 'edges' part of blockMeshDict"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.edges: List[Edge] = []
 
     def find(self, vertex_1: Vertex, vertex_2: Vertex) -> Edge:

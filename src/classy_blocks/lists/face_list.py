@@ -26,7 +26,7 @@ class ProjectedFace:
 class FaceList:
     """Handling of projected faces (the 'faces' part of blockMeshDict)"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.faces: List[ProjectedFace] = []
 
     def find_existing(self, side: Side) -> bool:

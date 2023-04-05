@@ -24,7 +24,7 @@ class Frame(Generic[BeamT]):
 
     valid_pairs = [set(pair) for pair in constants.EDGE_PAIRS]
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.beams: List[Dict[int, Optional[BeamT]]] = [{} for _ in range(8)]
 
         # create wires and connections for quicker addressing

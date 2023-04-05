@@ -1,6 +1,7 @@
 """The Mesh object ties everything together and writes the blockMeshDict in the end."""
-from typing import Optional, List, Dict
+from typing import Optional, List, get_args
 
+from classy_blocks.types import AxisType
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.block import Block
 
@@ -22,7 +23,7 @@ from classy_blocks.util.vtk_writer import write_vtk
 class Mesh:
     """contains blocks, edges and all necessary methods for assembling blockMeshDict"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         # List of all added operations/shapes
         self.depot: List[AdditiveBase] = []
 
@@ -105,7 +106,7 @@ class Mesh:
                 for data in self.edge_list.add_from_operation(vertices, operation):
                     block.add_edge(*data)
 
-                for axis in (0, 1, 2):
+                for axis in get_args(AxisType):
                     for chop in operation.chops[axis]:
                         block.chop(axis, chop)
 

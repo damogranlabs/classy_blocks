@@ -1,8 +1,8 @@
-from typing import List, Union, Callable
+from typing import Callable
 
 import numpy as np
 
-from classy_blocks.types import VectorType, PointType, PointListType, EdgeKindType, NPPointListType
+from classy_blocks.types import VectorType, PointType, PointListType, EdgeKindType, NPPointListType, ProjectToType
 from classy_blocks.base.transformable import TransformableBase
 from classy_blocks.util import functions as f
 from classy_blocks.util import constants
@@ -128,7 +128,8 @@ class Spline(EdgeData):
 class PolyLine(Spline):
     """Parameters for a polyLine edge"""
 
-    kind = "polyLine"
+    # a bug? (https://github.com/python/mypy/issues/8796)
+    kind = "polyLine"  # type: ignore
 
 
 class Project(EdgeData):
@@ -136,7 +137,7 @@ class Project(EdgeData):
 
     kind = "project"
 
-    def __init__(self, geometry: Union[str, List[str]]):
+    def __init__(self, geometry: ProjectToType):
         if isinstance(geometry, list):
             self.geometry = geometry
         else:

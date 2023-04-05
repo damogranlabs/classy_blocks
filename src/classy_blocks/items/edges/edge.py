@@ -1,8 +1,6 @@
 import dataclasses
 import abc
 
-from typing import Optional
-
 from classy_blocks.construct.edges import EdgeData
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.base.transformable import TransformableBase
@@ -29,13 +27,13 @@ class Edge(TransformableBase):
         self.data.translate(displacement)
         return self
 
-    def rotate(self, angle: float, axis: VectorType, origin: Optional[PointType] = None):
+    def rotate(self, angle: float, axis: VectorType, origin: PointType):
         """Rotates all points in this edge (except start and end Vertex) around an
         arbitrary axis and origin (be careful with projected edges, geometry isn't rotated!)"""
         self.data.rotate(angle, axis, origin)
         return self
 
-    def scale(self, ratio: float, origin: Optional[PointType] = None) -> "Edge":
+    def scale(self, ratio: float, origin: PointType) -> "Edge":
         """Scales the edge points around given origin"""
         self.data.scale(ratio, origin)
         return self

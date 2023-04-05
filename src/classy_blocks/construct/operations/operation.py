@@ -172,7 +172,7 @@ class Operation(AdditiveBase):
     @property
     def edges(self) -> Frame:
         """Returns a Frame with edges as its beams"""
-        frame = Frame()
+        frame: Frame = Frame[EdgeData]()
 
         for i, data in enumerate(self.bottom_face.edges):
             if data is not None:
@@ -188,8 +188,8 @@ class Operation(AdditiveBase):
 
         # projected edges: manually added later, therefore
         # must be overwritten
-        for data in self.projections.edges:
-            frame.add_beam(data.corner_1, data.corner_2, Project(data.geometry))
+        for proj in self.projections.edges:
+            frame.add_beam(proj.corner_1, proj.corner_2, Project(proj.geometry))
 
         return frame
 

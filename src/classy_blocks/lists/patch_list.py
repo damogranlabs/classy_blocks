@@ -12,7 +12,7 @@ from classy_blocks.items.patch import Patch
 class PatchList:
     """Handling of the patches ('boundary') part of blockMeshDict"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.patches: OrderedDict[str, Patch] = OrderedDict()
         self.default: Optional[Dict[str, str]] = None
         self.merged: List[List[str]] = []  # data for the mergePatchPairs entry

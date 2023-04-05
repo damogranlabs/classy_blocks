@@ -71,7 +71,6 @@ class BoxTests(unittest.TestCase):
     )
     def test_create_box(self, diagonal_point):
         """Create a box from an arbitrary set of diagonal points"""
-        print(diagonal_point)
         box = Box([0.0, 0.0, 0.0], diagonal_point)
 
         # the diagonal must be the same in all cases
