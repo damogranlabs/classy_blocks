@@ -66,25 +66,31 @@ _Unchecked items are not implemented yet but are on a TODO list_
     - [x] Cylinder
     - [x] Ring (annulus)
     - [x] Hemisphere
-    - [ ] Elbow wall (thickened shell of an Elbow)
-    - [ ] Frustum wall
-    - [ ] Hemisphere wall
+    - [ ] ~~Elbow wall (thickened shell of an Elbow)~~[^1]
+    - [ ] ~~Frustum wall~~[^1]
+    - [ ] ~~Hemisphere wall~~[^1]
 - [ ] Predefined parametric Objects
     - [ ] T-joint (round pipes)
     - [ ] X-joint
     - [ ] N-joint (multiple pipes)
-    - [ ] Box with hole
+    - [ ] Box with hole (radial)
+    - [ ] Box with hole (cartesian)
+- [ ] Other building tools
+    - [x] Use existing Operation's Face to generate a new Operation
+    - [x] Chain Shape's start/end surface to generate a new Shape
+    - [ ] Expand Shape's outer surface to generate a new Shape (Cylinder/Annulus > Annulus)
+    - [ ] Contract Shape's inner surface into a new Shape (Annulus > Cylinder/Annulus)
+    - [ ] Join two Operations by extending their Edges
+    - [ ] Offset Operation's faces to form new ones[^1]
+
+[^1]: Offset will replace Wall objects
 
 ## Modifiers
 After blocks have been placed, it is possible to create new geometry based on placed blocks or to modify them.
 
-- [ ] Move Block's Vertex/Edge/Face
+- [ ] Move Vertex/Edge/Face
 - [ ] Delete a Block created by a Shape or Object
-- [x] Project Block's Vertex/Edge/Face
-- [ ] Chain Block's face to generate a new block
-- [x] Chain Shape's surface (top/bottom/outer) to generate a new Shape
-- [ ] Join two Blocks by extending their Edges
-- [ ] Offset Block's faces to form new Blocks for easier creation of layouts with boundary layers that don't propagate into domain
+- [x] Project Vertex/Edge/Face
 - [ ] Optimize Vertex positions
 
 ## Meshing specification
