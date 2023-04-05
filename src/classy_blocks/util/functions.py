@@ -163,7 +163,6 @@ def arc_length_3point(A: PointType, B: PointType, C: PointType) -> float:
     ### Meticulously transcribed from
     # https://develop.openfoam.com/Development/openfoam/-/blob/master/src/mesh/blockMesh/blockEdges/arcEdge/arcEdge.C
 
-    # FIXME: handle 'invalid values encountered'
     p1 = np.asarray(A, dtype=constants.DTYPE)
     p2 = np.asarray(B, dtype=constants.DTYPE)
     p3 = np.asarray(C, dtype=constants.DTYPE)

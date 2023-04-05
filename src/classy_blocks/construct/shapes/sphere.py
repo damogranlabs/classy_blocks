@@ -185,8 +185,8 @@ class Hemisphere(EighthSphere):
 
     @classmethod
     def chain(cls, source, start_face=False):
-        assert source.sketch_class == Disk
-
+        """Chain this sphere to the end face of a round solid shape;
+        use start_face=True to chain to te start face."""
         # TODO: TEST
         if start_face:
             center_point = source.sketch_1.center
