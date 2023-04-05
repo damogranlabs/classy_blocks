@@ -94,8 +94,8 @@ After blocks have been placed, it is possible to create new geometry based on pl
 - [ ] Optimize Vertex positions
 
 ## Meshing specification
-- [x] Simple definition of edges: a single point for circular, a list of points for a spline edge, name of geometry for projecting
-- [x] Automatic calculation of cell count and grading by specifying any of a number of parameters (cell-to-cell expansionr atio, start cell width, end cell width, total expansion ratio)
+- [x] Simple definition of all supported kinds of edges with a dedicated class (Arc/Origin/Angle/Spline/PolyLine/Project)
+- [x] Automatic calculation of cell count and grading by specifying any of a number of parameters (cell-to-cell expansion ratio, start cell width, end cell width, total expansion ratio)
 - [ ] [Edge grading](https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-450004.3.1.3) (separate specification for each edge)
 - [x] Automatic propagation of grading and cell count from a single block to all connected blocks as required by blockMesh
 - [x] Projections of vertices, edges and block faces to geometry (triangulated and [searchable surfaces](https://www.openfoam.com/documentation/guides/latest/doc/guide-meshing-snappyhexmesh-geometry.html#meshing-snappyhexmesh-searchable-objects))
@@ -309,12 +309,6 @@ There's no official documentation yet so here are some tips for easier navigatio
 - Unchecked list items from [Features](#features)
 - Usability
     - Frustum with any profile, not just arc
-- Chaining:
-    - *FrustumWall.expand()
-    - *FrustumWall.contract()
-    - *ElbowWall.contract()
-    - Box.chain()
-    - Block.chain() (low-level), or Block.get_face() -> Face
 - Manual modification, automatic optimization
 - Examples
     - Ramjet engine
