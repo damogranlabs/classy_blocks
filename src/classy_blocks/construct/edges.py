@@ -144,4 +144,4 @@ class Project(EdgeData):
             self.geometry = [geometry]
 
     def __repr__(self):
-        return self.geometry
+        return str(self.geometry)

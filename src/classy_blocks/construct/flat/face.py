@@ -6,7 +6,7 @@ import numpy as np
 
 from classy_blocks.types import VectorType, PointType, PointListType, NPPointType, NPVectorType, NPPointListType
 from classy_blocks.base.transformable import TransformableBase
-from classy_blocks.construct.edges import EdgeData
+from classy_blocks.construct.edges import EdgeData, Line
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
@@ -38,11 +38,13 @@ class Face(TransformableBase):
         self.points: NPPointListType = points
 
         # Edges
-        self.edges: List[Optional[EdgeData]] = [None] * 4
+        self.edges: List[EdgeData] = [Line(), Line(), Line(), Line()]
         if edges is not None:
-            self.edges = edges
+            assert len(edges) == 4, "Provide exactly 4 edges; use None for straight lines"
 
-        assert len(self.edges) == 4, "Provide exactly 4 edges; use None for straight lines"
+            for i, edge in enumerate(edges):
+                if edge is not None:
+                    self.edges[i] = edge
 
         if check_coplanar:
             pts = self.points
@@ -56,8 +58,7 @@ class Face(TransformableBase):
         self.points = np.array([p + displacement for p in self.points], dtype=constants.DTYPE)
 
         for edge in self.edges:
-            if edge is not None:
-                edge.translate(displacement)
+            edge.translate(displacement)
 
         return self
 
@@ -68,8 +69,7 @@ class Face(TransformableBase):
         self.points = np.array([f.rotate(p, angle, axis, origin) for p in self.points], dtype=constants.DTYPE)
 
         for edge in self.edges:
-            if edge is not None:
-                edge.rotate(angle, axis, origin)
+            edge.rotate(angle, axis, origin)
 
         return self
 
@@ -80,8 +80,7 @@ class Face(TransformableBase):
         self.points = np.array([f.scale(p, ratio, origin) for p in self.points], dtype=constants.DTYPE)
 
         for edge in self.edges:
-            if edge is not None:
-                edge.scale(ratio, origin)
+            edge.scale(ratio, origin)
 
         return self
 

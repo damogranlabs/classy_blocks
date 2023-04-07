@@ -8,9 +8,9 @@ from classy_blocks.base.additive import AdditiveBase
 
 from classy_blocks.items.frame import Frame
 
-from classy_blocks.construct.operations.projections import ProjectedEntities
+from classy_blocks.base.projections import ProjectedEntities
 from classy_blocks.construct.flat.face import Face
-from classy_blocks.construct.edges import EdgeData, Project
+from classy_blocks.construct.edges import EdgeData, Line, Project
 from classy_blocks.grading.chop import Chop
 
 from classy_blocks.util import constants
@@ -28,7 +28,7 @@ class Operation(AdditiveBase):
         # actual object is created by Mesh when it is added.
         self.bottom_face = bottom_face
         self.top_face = top_face
-        self.side_edges: List[Optional[EdgeData]] = [None] * 4
+        self.side_edges: List[EdgeData] = [Line(), Line(), Line(), Line()]
         self.chops: Dict[AxisType, List[Chop]] = {0: [], 1: [], 2: []}
         self.patch_names: Dict[OrientType, str] = {}
 
@@ -116,8 +116,7 @@ class Operation(AdditiveBase):
         self.top_face.translate(displacement)
 
         for edge in self.side_edges:
-            if edge is not None:
-                edge.translate(displacement)
+            edge.translate(displacement)
 
         return self
 
@@ -131,8 +130,7 @@ class Operation(AdditiveBase):
         self.top_face.rotate(angle, axis, origin)
 
         for edge in self.side_edges:
-            if edge is not None:
-                edge.rotate(angle, axis, origin)
+            edge.rotate(angle, axis, origin)
 
         return self
 
@@ -146,8 +144,7 @@ class Operation(AdditiveBase):
         self.top_face.scale(ratio, origin)
 
         for edge in self.side_edges:
-            if edge is not None:
-                edge.scale(ratio, origin)
+            edge.scale(ratio, origin)
 
         return self
 
