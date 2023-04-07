@@ -47,6 +47,7 @@ def get_count__start_size__c2c_expansion(length, start_size, c2c_expansion):
     """Calculates count from given start size and cell-to-cell expansion ratio"""
     assert length > 0
     assert start_size > 0
+    assert c2c_expansion != 0
 
     if abs(c2c_expansion - 1) > constants.TOL:
         count = np.log(1 - length / start_size * (1 - c2c_expansion)) / np.log(c2c_expansion)
@@ -64,6 +65,8 @@ def get_count__end_size__c2c_expansion(length, end_size, c2c_expansion):
         count = np.log(1 / (1 + length / end_size * (1 - c2c_expansion) / c2c_expansion)) / np.log(c2c_expansion)
     else:
         count = length / end_size
+
+    assert not np.isnan(count)
 
     return int(count) + 1
 
@@ -122,9 +125,9 @@ def get_c2c_expansion__count__start_size(length, count, start_size):
     def fexp(c2c):
         return (1 - c2c**count) / (1 - c2c) - length / start_size
 
-    if fexp(c_min) * fexp(c_max) >= 0:
-        message = "Invalid grading parameters: " + f" length {length}, count {count}, start_size {start_size}"
-        raise ValueError(message)
+    assert fexp(c_min) * fexp(c_max) < 0, (
+        "Invalid grading parameters: " + f" length {length}, count {count}, start_size {start_size}"
+    )
 
     return scipy.optimize.brentq(fexp, c_min, c_max)
 
@@ -148,9 +151,9 @@ def get_c2c_expansion__count__end_size(length, count, end_size):
     def fexp(c2c):
         return (1 / c2c ** (count - 1)) * (1 - c2c**count) / (1 - c2c) - length / end_size
 
-    if fexp(c_min) * fexp(c_max) >= 0:
-        message = "Invalid grading parameters: " + f" length {length}, count {count}, end_size {end_size}"
-        raise ValueError(message)
+    assert fexp(c_min) * fexp(c_max) < 0, (
+        "Invalid grading parameters: " + f" length {length}, count {count}, end_size {end_size}"
+    )
 
     return scipy.optimize.brentq(fexp, c_min, c_max)
 

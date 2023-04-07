@@ -85,7 +85,7 @@ def rotation_matrix(axis: VectorType, theta: float):
 
 
 def rotate(point: PointType, angle: float, axis: VectorType, origin: PointType) -> NPPointType:
-    """Rotate a point around any axis given by axis by angle theta [radians]"""
+    """Rotate a point around an axis@origin by a given angle [radians]"""
     point = np.asarray(point)
     axis = np.asarray(axis)
     origin = np.asarray(origin)
@@ -176,8 +176,8 @@ def arc_length_3point(A: PointType, B: PointType, C: PointType) -> float:
     adotb = a.dot(b)
 
     denom = asqr * bsqr - adotb * adotb
-    # if norm(denom) < 1e-5:
-    #     raise ValueError("Invalid arc points!")
+    if norm(denom) < constants.TOL:
+        raise ValueError("Invalid arc points!")
 
     fact = 0.5 * (bsqr - adotb) / denom
 

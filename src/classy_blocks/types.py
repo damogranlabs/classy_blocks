@@ -1,6 +1,5 @@
 """Predefined types"""
 from typing import List, Union, Literal
-from enum import Enum
 from nptyping import NDArray, Shape, Float
 
 # A single point can be specified as a list of floats or as a numpy array
