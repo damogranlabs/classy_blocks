@@ -1,38 +1,36 @@
 """Dataclasses for packing combinations of transforms of <anything>
 into an easily digestable function/method arguments"""
-from typing import List, Union, Optional
-
+import abc
 import dataclasses
 
 from classy_blocks.types import PointType, VectorType
 
 
 @dataclasses.dataclass
-class Translation:
+class TransformationBase(abc.ABC):
+    """A superclass that addresses all
+    dataclasses for transformation parameters"""
+
+
+@dataclasses.dataclass
+class Translation(TransformationBase):
     """Parameters required to translate an entity"""
 
     displacement: VectorType
 
 
 @dataclasses.dataclass
-class Rotation:
+class Rotation(TransformationBase):
     """Parameters required to rotate an entity"""
 
     axis: VectorType
     angle: float
-    origin: Optional[PointType] = None
+    origin: PointType
 
 
 @dataclasses.dataclass
-class Scaling:
+class Scaling(TransformationBase):
     """Parameters required to scale an entity"""
 
     ratio: float
-    origin: Optional[PointType] = None
-
-
-@dataclasses.dataclass
-class Transformation:
-    """A combo of all supported transforms that can be imposed on an entity"""
-
-    transforms: List[Union[Translation, Rotation, Scaling]]
+    origin: PointType

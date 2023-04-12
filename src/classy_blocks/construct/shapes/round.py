@@ -22,8 +22,8 @@ class RoundSolidShape(LoftedShape):
     def __init__(
         self,
         sketch_1: Disk,
-        sketch_2_transform: tr.Transformation,
-        sketch_mid_transform: Optional[tr.Transformation] = None,
+        sketch_2_transform: List[tr.TransformationBase],
+        sketch_mid_transform: Optional[List[tr.TransformationBase]] = None,
     ):
         super().__init__(sketch_1, sketch_2_transform, sketch_mid_transform)
 
@@ -75,8 +75,8 @@ class RoundHollowShape(LoftedShape):
     def __init__(
         self,
         sketch_1: Annulus,
-        sketch_2_transform: tr.Transformation,
-        sketch_mid_transform: Optional[tr.Transformation] = None,
+        sketch_2_transform: List[tr.TransformationBase],
+        sketch_mid_transform: Optional[List[tr.TransformationBase]] = None,
     ):
         super().__init__(sketch_1, sketch_2_transform, sketch_mid_transform)
 

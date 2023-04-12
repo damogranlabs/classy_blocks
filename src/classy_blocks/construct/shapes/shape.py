@@ -70,8 +70,8 @@ class LoftedShape(Shape, Generic[SketchT]):
     def __init__(
         self,
         sketch_1: SketchT,
-        sketch_2_transform: tr.Transformation,
-        sketch_mid_transform: Optional[tr.Transformation] = None,
+        sketch_2_transform: List[tr.TransformationBase],
+        sketch_mid_transform: Optional[List[tr.TransformationBase]] = None,
     ):
         # start with sketch_1 and transform it
         # using the _transform function(transform_2_args) to obtain sketch_2;

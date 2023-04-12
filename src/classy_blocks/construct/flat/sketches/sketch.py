@@ -4,14 +4,14 @@ import copy
 from typing import List, TypeVar, Optional
 
 from classy_blocks.types import VectorType, PointType, NPPointType, NPVectorType
-from classy_blocks.base.transformable import TransformableBase
+from classy_blocks.base.element import ElementBase
 from classy_blocks.base import transforms as tr
 from classy_blocks.construct.flat.face import Face
 
 SketchT = TypeVar("SketchT", bound="Sketch")
 
 
-class Sketch(TransformableBase):
+class Sketch(ElementBase):
     """A collection of Faces that form the basis of a 3D Shape."""
 
     @property
@@ -47,10 +47,10 @@ class Sketch(TransformableBase):
 
         return self
 
-    def transform(self: SketchT, transform: tr.Transformation) -> SketchT:
+    def transform(self: SketchT, transform: List[tr.TransformationBase]) -> SketchT:
         """A function that transforms sketch_1 to sketch_2;
         a Loft will be made from those"""
-        for t7m in transform.transforms:
+        for t7m in transform:
             if isinstance(t7m, tr.Translation):
                 self.translate(t7m.displacement)
                 continue

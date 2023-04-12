@@ -1,20 +1,15 @@
 import abc
 
-from typing import Dict, List, TYPE_CHECKING
-
-from classy_blocks.base.transformable import TransformableBase
-
-if TYPE_CHECKING:
-    from classy_blocks.construct.operations.operation import Operation
+from typing import Dict, List
 
 
-class AdditiveBase(TransformableBase):
+class AdditiveBase:
     """A base class for any entity that can be added to mesh using
     mesh.add(); with all the machinery required to do that"""
 
     @property
     @abc.abstractmethod
-    def operations(self) -> List["Operation"]:  # TODO: sort out (Operation is a child of AdditiveBase?)
+    def operations(self) -> List:
         """A list of operations to be added to mesh"""
 
     @property

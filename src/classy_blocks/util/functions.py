@@ -43,8 +43,8 @@ def unit_vector(vect: VectorType) -> NPVectorType:
     return vect / norm(vect)
 
 
-def angle_between(v1: VectorType, v2: VectorType) -> float:
-    """Returns the angle between vectors 'v1' and 'v2', in radians:
+def angle_between(vect_1: VectorType, vect_2: VectorType) -> float:
+    """Returns the angle between vectors in radians:
 
     >>> angle_between((1, 0, 0), (0, 1, 0))
     1.5707963267948966
@@ -55,8 +55,8 @@ def angle_between(v1: VectorType, v2: VectorType) -> float:
 
     Kudos: https://stackoverflow.com/questions/2827393/
     """
-    v1_u = unit_vector(v1)
-    v2_u = unit_vector(v2)
+    v1_u = unit_vector(vect_1)
+    v2_u = unit_vector(vect_2)
 
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
@@ -100,12 +100,13 @@ def scale(point: PointType, ratio: float, origin: Optional[PointType] = None) ->
     if origin is None:
         origin = vector(0, 0, 0)
 
+    point = np.asarray(point)
     origin = np.asarray(origin, dtype=constants.DTYPE)
 
     return origin + (point - origin) * ratio
 
 
-def to_polar(point: PointType, axis: Literal["x", "y", "z"] = "z") -> NPVectorType:
+def to_polar(point: PointType, axis: Literal["x", "z"] = "z") -> NPVectorType:
     """Convert (x, y, z) point to (radius, angle, height);
     the axis of the new polar coordinate system can be chosen ('x' or 'z')"""
 

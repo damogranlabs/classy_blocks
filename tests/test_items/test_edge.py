@@ -63,7 +63,7 @@ class EdgeTransformTests(unittest.TestCase):
         spline_edge.translate([1, 1, 1])
 
         np.testing.assert_array_equal(
-            spline_edge.data.points,
+            spline_edge.data.through,
             [
                 [1.25, 1.1, 1],
                 [1.5, 1.5, 1],

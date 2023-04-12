@@ -5,13 +5,13 @@ import copy
 import numpy as np
 
 from classy_blocks.types import VectorType, PointType, PointListType, NPPointType, NPVectorType, NPPointListType
-from classy_blocks.base.transformable import TransformableBase
+from classy_blocks.base.element import ElementBase
 from classy_blocks.construct.edges import EdgeData, Line
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
 
-class Face(TransformableBase):
+class Face(ElementBase):
     """A collection of 4 Vertices and optionally 4 Edges,
     creating an arbitrary quadrangle.
 

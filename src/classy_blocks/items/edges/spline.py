@@ -18,7 +18,7 @@ class SplineEdge(Edge):
     @property
     def length(self):
         # just sum distances between defining points
-        all_points = np.concatenate(([self.vertex_1.pos], self.data.points, [self.vertex_2.pos]))
+        all_points = np.concatenate(([self.vertex_1.pos], self.data.through, [self.vertex_2.pos]))
         shifted = np.roll(all_points, 1, axis=0)
 
         distances = (all_points - shifted)[1:]
@@ -27,7 +27,7 @@ class SplineEdge(Edge):
 
     @property
     def description(self):
-        point_list = " ".join([constants.vector_format(p) for p in self.data.points])
+        point_list = " ".join([constants.vector_format(p) for p in self.data.through])
         return super().description + "(" + point_list + ")"
 
 

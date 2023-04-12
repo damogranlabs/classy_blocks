@@ -3,14 +3,14 @@ import abc
 
 from classy_blocks.construct.edges import EdgeData
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.base.transformable import TransformableBase
+from classy_blocks.base.element import ElementBase
 from classy_blocks.types import PointType, VectorType, EdgeKindType
 from classy_blocks.util import functions as f
 from classy_blocks.util import constants
 
 
 @dataclasses.dataclass
-class Edge(TransformableBase):
+class Edge(ElementBase):
     """Common stuff for all edge objects"""
 
     vertex_1: Vertex
@@ -21,22 +21,9 @@ class Edge(TransformableBase):
         assert isinstance(self.vertex_1, Vertex)
         assert isinstance(self.vertex_2, Vertex)
 
-    def translate(self, displacement: VectorType) -> "Edge":
-        """Move all points in the edge (but not start and end)
-        by a displacement vector."""
-        self.data.translate(displacement)
-        return self
-
-    def rotate(self, angle: float, axis: VectorType, origin: PointType):
-        """Rotates all points in this edge (except start and end Vertex) around an
-        arbitrary axis and origin (be careful with projected edges, geometry isn't rotated!)"""
-        self.data.rotate(angle, axis, origin)
-        return self
-
-    def scale(self, ratio: float, origin: PointType) -> "Edge":
-        """Scales the edge points around given origin"""
-        self.data.scale(ratio, origin)
-        return self
+    @property
+    def points(self):
+        return self.data.points
 
     @property
     def kind(self) -> EdgeKindType:

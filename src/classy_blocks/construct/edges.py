@@ -1,37 +1,16 @@
-from typing import Callable
-
 import numpy as np
 
 from classy_blocks.types import VectorType, PointType, PointListType, EdgeKindType, NPPointListType, ProjectToType
-from classy_blocks.base.transformable import TransformableBase
+from classy_blocks.base.element import ElementBase
+from classy_blocks.construct.point import Point, Vector
 from classy_blocks.util import functions as f
 from classy_blocks.util import constants
 
 
-class EdgeData(TransformableBase):
+class EdgeData(ElementBase):
     """Common operations on classes for edge creation"""
 
     kind: EdgeKindType  # Edge type, the string that follows vertices in blockMeshDict.edges
-
-    def transform(self, function: Callable) -> "EdgeData":
-        """An arbitrary transform of this edge by a specified function"""
-        return self
-
-    def translate(self, displacement: VectorType) -> "EdgeData":
-        """Move all points in the edge (but not start and end)
-        by a displacement vector."""
-        displacement = np.asarray(displacement, dtype=constants.DTYPE)
-
-        return self.transform(lambda p: p + displacement)
-
-    def rotate(self, angle: float, axis: VectorType, origin: PointType) -> "EdgeData":
-        """Rotates all points in this edge (except start and end Vertex) around an
-        arbitrary axis and origin (be careful with projected edges, geometry isn't rotated!)"""
-        return self.transform(lambda p: f.rotate(p, angle, axis, origin))
-
-    def scale(self, ratio: float, origin: PointType) -> "EdgeData":
-        """Scales the edge points around given origin"""
-        return self.transform(lambda p: f.scale(p, ratio, origin))
 
 
 class Line(EdgeData):
@@ -47,14 +26,14 @@ class Arc(EdgeData):
     kind = "arc"
 
     def __init__(self, arc_point: PointType):
-        self.point = np.asarray(arc_point, dtype=constants.DTYPE)
-
-    def transform(self, function: Callable) -> "Arc":
-        self.point = function(self.point)
-        return self
+        self.point = Point(arc_point)
 
     def __repr__(self):
         return str(self.point)
+
+    @property
+    def transform_entities(self):
+        return [self.point]
 
 
 class Origin(EdgeData):
@@ -72,15 +51,15 @@ class Origin(EdgeData):
     kind = "origin"
 
     def __init__(self, origin: PointType, flatness: float = 1):
-        self.origin = np.asarray(origin, dtype=constants.DTYPE)
+        self.origin = Point(origin)
         self.flatness = flatness
-
-    def transform(self, function: Callable) -> "Origin":
-        self.origin = function(self.origin)
-        return self
 
     def __repr__(self):
         return f"{self.origin}:{self.flatness}"
+
+    @property
+    def transform_entities(self):
+        return [self.origin]
 
 
 class Angle(EdgeData):
@@ -98,12 +77,7 @@ class Angle(EdgeData):
 
     def __init__(self, angle: float, axis: VectorType):
         self.angle = angle
-        self.axis = f.unit_vector(axis)
-
-    def transform(self, function: Callable) -> "Angle":
-        self.axis = function(self.axis)
-        self.axis = f.unit_vector(self.axis)
-        return self
+        self.axis = Vector(f.unit_vector(axis))
 
     def __repr__(self):
         return f"{self.angle}:{self.axis}"
@@ -115,14 +89,14 @@ class Spline(EdgeData):
     kind = "spline"
 
     def __init__(self, points: PointListType):
-        self.points: NPPointListType = np.asarray(points, dtype=constants.DTYPE)
-
-    def transform(self, function: Callable) -> "Spline":
-        self.points = np.asarray([function(p) for p in self.points])
-        return self
+        self.through: NPPointListType = np.asarray(points, dtype=constants.DTYPE)
 
     def __repr__(self):
-        return str(self.points)
+        return str(self.through)
+
+    @property
+    def points(self):
+        return self.through
 
 
 class PolyLine(Spline):
