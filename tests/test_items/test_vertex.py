@@ -19,26 +19,28 @@ class VertexTests(DataTestCase):
         """Vertex translation with integer delta"""
         delta = [1.0, 0.0, 0.0]
 
-        np.testing.assert_array_almost_equal(Vertex([0, 0, 0], 0).translate(delta).pos, delta)
+        np.testing.assert_array_almost_equal(Vertex([0, 0, 0], 0).translate(delta).position, delta)
 
     def test_translate_float(self):
         """Vertex translation with float delta"""
         coords = [0.0, 0.0, 0.0]
         delta = [1.0, 0.0, 0.0]
 
-        np.testing.assert_array_almost_equal(Vertex(coords, 0).translate(delta).pos, delta)
+        np.testing.assert_array_almost_equal(Vertex(coords, 0).translate(delta).position, delta)
 
     def test_rotate(self):
         """Rotate a point"""
         coords = [1.0, 0.0, 0.0]
 
-        np.testing.assert_array_almost_equal(Vertex(coords, 0).rotate(np.pi / 2, [0, 0, 1], [0, 0, 0]).pos, [0, 1, 0])
+        np.testing.assert_array_almost_equal(
+            Vertex(coords, 0).rotate(np.pi / 2, [0, 0, 1], [0, 0, 0]).position, [0, 1, 0]
+        )
 
     def test_scale(self):
         """Scale a point"""
         coords = [1.0, 0.0, 0.0]
 
-        np.testing.assert_array_almost_equal(Vertex(coords, 0).scale(2, [0, 0, 0]).pos, [2, 0, 0])
+        np.testing.assert_array_almost_equal(Vertex(coords, 0).scale(2, [0, 0, 0]).position, [2, 0, 0])
 
     def test_inequal(self):
         """The __eq__ method returns False"""
@@ -79,4 +81,4 @@ class VertexTests(DataTestCase):
             [tr.Rotation([0, 0, 1], -np.pi / 2, [0, 0, 0]), tr.Scaling(2, [0, 0, 0]), tr.Translation([-2, 0, -2])]
         )
 
-        np.testing.assert_array_almost_equal(v.pos, [0, 0, 0])
+        np.testing.assert_array_almost_equal(v.position, [0, 0, 0])

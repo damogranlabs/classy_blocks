@@ -88,7 +88,7 @@ class OriginEdge(ArcEdgeBase):
     def third_point(self) -> PointType:
         """Calculated arc point from origin and flatness"""
         point = arc_from_origin(
-            self.vertex_1.pos, self.vertex_2.pos, self.data.origin, self.adjust_center, self.data.flatness
+            self.vertex_1.position, self.vertex_2.position, self.data.origin, self.adjust_center, self.data.flatness
         )
 
         if np.any(np.isnan(point)):

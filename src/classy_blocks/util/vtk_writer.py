@@ -74,7 +74,7 @@ def write_vtk(path: str, vertices: List[Vertex], blocks: List[Block]) -> None:
         output.write(f"POINTS {len(vertices)} float\n")
 
         for vertex in vertices:
-            output.write(f"{vertex.pos[0]} {vertex.pos[1]} {vertex.pos[2]}\n")
+            output.write(f"{vertex.position[0]} {vertex.position[1]} {vertex.position[2]}\n")
 
         # cells
         output.write(f"\nCELLS {n_blocks} {9*n_blocks}\n")

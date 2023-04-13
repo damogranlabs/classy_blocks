@@ -12,7 +12,7 @@ class EdgeData(ElementBase):
     kind: EdgeKindType  # Edge type, the string that follows vertices in blockMeshDict.edges
 
     @property
-    def components(self):
+    def parts(self):
         return []
 
 
@@ -35,7 +35,7 @@ class Arc(EdgeData):
         return str(self.point)
 
     @property
-    def components(self):
+    def parts(self):
         return [self.point]
 
 
@@ -61,7 +61,7 @@ class Origin(EdgeData):
         return f"{self.origin}:{self.flatness}"
 
     @property
-    def components(self):
+    def parts(self):
         return [self.origin]
 
 
@@ -92,7 +92,7 @@ class Angle(EdgeData):
         """Axis is not to be scaled"""
 
     @property
-    def components(self):
+    def parts(self):
         return [self.axis]
 
 
@@ -108,7 +108,7 @@ class Spline(EdgeData):
         return str(self.points)
 
     @property
-    def components(self):
+    def parts(self):
         return self.points
 
 

@@ -19,15 +19,15 @@ class Vertex(Point):
         return self.index == other.index
 
     def __repr__(self):
-        return f"Vertex {self.index} at {self.pos}"
+        return f"Vertex {self.index} at {self.position}"
 
     @property
     def description(self) -> str:
         """Returns a string representation to be written to blockMeshDict"""
-        point = vector_format(self.pos)
+        point = vector_format(self.position)
         comment = f"// {self.index}"
 
-        if len(self.project_to) > 0:
-            return f"project {point} ({' '.join(self.project_to)}) {comment}"
+        if len(self.projected_to) > 0:
+            return f"project {point} ({' '.join(self.projected_to)}) {comment}"
 
         return f"{point} {comment}"

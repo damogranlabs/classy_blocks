@@ -15,7 +15,7 @@ class ElementBase(abc.ABC):
     def translate(self: ElementBaseT, displacement: VectorType) -> ElementBaseT:
         """Move by displacement vector; returns the same instance
         to enable chaining of transformations."""
-        for component in self.components:
+        for component in self.parts:
             component.translate(displacement)
 
         return self
@@ -23,7 +23,7 @@ class ElementBase(abc.ABC):
     def rotate(self: ElementBaseT, angle: float, axis: VectorType, origin: PointType) -> ElementBaseT:
         """Rotate by 'angle' around 'axis' going through 'origin';
         returns the same instance to enable chaining of transformations."""
-        for component in self.components:
+        for component in self.parts:
             component.rotate(angle, axis, origin)
 
         return self
@@ -32,7 +32,7 @@ class ElementBase(abc.ABC):
         """Scale with respect to given origin; returns the same instance
         to enable chaining of transformations. If no origin is given,
         the entity is scaled with respect to its center"""
-        for component in self.components:
+        for component in self.parts:
             component.scale(ratio, origin)
 
         return self
@@ -43,7 +43,7 @@ class ElementBase(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def components(self: ElementBaseT) -> List[ElementBaseT]:
+    def parts(self: ElementBaseT) -> List[ElementBaseT]:
         """A list of lower-dimension elements
         from which this element is built, for instance:
         - an edge has a single arc point,
@@ -54,7 +54,7 @@ class ElementBase(abc.ABC):
         """A function that transforms  to sketch_2;
         a Loft will be made from those"""
         for t7m in transforms:
-            for component in self.components:
+            for component in self.parts:
                 if isinstance(t7m, tr.Translation):
                     component.translate(t7m.displacement)
                     continue

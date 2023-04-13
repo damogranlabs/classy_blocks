@@ -47,7 +47,7 @@ class AngleEdge(ArcEdgeBase):
 
     @property
     def third_point(self):
-        return arc_from_theta(self.vertex_1.pos, self.vertex_2.pos, self.data.angle, self.data.axis)
+        return arc_from_theta(self.vertex_1.position, self.vertex_2.position, self.data.angle, self.data.axis)
 
     @property
     def description(self):

@@ -45,7 +45,7 @@ class BlockTestCase(DataTestCase):
     def make_loft(self, index: int) -> Loft:
         """Creates a Loft for tests that require an operation"""
         vertices = self.make_vertices(index)
-        face_1 = Face([vertices[i].pos for i in (0, 1, 2, 3)])
-        face_2 = Face([vertices[i].pos for i in (4, 5, 6, 7)])
+        face_1 = Face([vertices[i].position for i in (0, 1, 2, 3)])
+        face_2 = Face([vertices[i].position for i in (4, 5, 6, 7)])
 
         return Loft(face_1, face_2)

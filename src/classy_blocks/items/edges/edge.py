@@ -4,7 +4,7 @@ import abc
 from classy_blocks.construct.edges import EdgeData
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.base.element import ElementBase
-from classy_blocks.types import PointType, VectorType, EdgeKindType
+from classy_blocks.types import EdgeKindType
 from classy_blocks.util import functions as f
 from classy_blocks.util import constants
 
@@ -39,7 +39,7 @@ class Edge(ElementBase):
 
         # wedge geometries produce coincident
         # edges and vertices; drop those
-        if f.norm(self.vertex_1.pos - self.vertex_2.pos) < constants.TOL:
+        if f.norm(self.vertex_1.position - self.vertex_2.position) < constants.TOL:
             return False
 
         # only arc edges need additional checking (blow-up 1/0 protection)
@@ -50,7 +50,7 @@ class Edge(ElementBase):
     @abc.abstractmethod
     def length(self) -> float:
         """Returns length of this edge's curve"""
-        return f.norm(self.vertex_1.pos - self.vertex_2.pos)
+        return f.norm(self.vertex_1.position - self.vertex_2.position)
 
     @property
     @abc.abstractmethod

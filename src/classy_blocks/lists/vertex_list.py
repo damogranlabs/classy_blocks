@@ -19,7 +19,7 @@ class DuplicatedEntry:
     @property
     def point(self) -> NPPointType:
         """Vertex's point"""
-        return self.vertex.pos
+        return self.vertex.position
 
 
 class VertexList:
@@ -48,7 +48,7 @@ class VertexList:
         in the same location as the passed one; if so, returns
         the existing vertex"""
         for vertex in self.vertices:
-            if f.norm(vertex.pos - position) < constants.TOL:
+            if f.norm(vertex.position - position) < constants.TOL:
                 return vertex
 
         raise VertexNotFoundError(f"Vertex not found: {str(position)}")

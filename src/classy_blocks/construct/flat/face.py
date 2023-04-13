@@ -4,8 +4,9 @@ import copy
 
 import numpy as np
 
-from classy_blocks.types import PointListType, NPPointType, NPVectorType, NPPointListType
+from classy_blocks.types import PointListType, NPPointType, NPVectorType, NPPointListType, ProjectToType
 from classy_blocks.construct.point import Point
+from classy_blocks.construct.edges import Project
 from classy_blocks.base.element import ElementBase
 from classy_blocks.construct.edges import EdgeData, Line
 from classy_blocks.util import constants
@@ -47,29 +48,34 @@ class Face(ElementBase):
                     self.edges[i] = edge
 
         if check_coplanar:
-            pts = self.nppoints
+            pts = self.point_array
             assert (
                 abs(np.dot((pts[1] - pts[0]), np.cross(pts[3] - pts[0], pts[2] - pts[0]))) < constants.TOL
             ), "FacePoints are not coplanar!"
 
+        # name of geometry this face can be projected to
+        self.projected_to: Optional[str] = None
+        # patch name to which this face can belong
+        self.patch_name: Optional[str] = None
+
     def invert(self) -> None:
         """Reverses the order of points in this face."""
-        for i, p in enumerate(np.flip(self.nppoints, axis=0)):
-            self.points[i].pos = p
+        for i, p in enumerate(np.flip(self.point_array, axis=0)):
+            self.points[i].position = p
 
     def copy(self) -> "Face":
         """Returns a copy of this Face"""
         return copy.deepcopy(self)
 
     @property
-    def nppoints(self) -> NPPointListType:
+    def point_array(self) -> NPPointListType:
         """A numpy array of this face's points"""
-        return np.array([p.pos for p in self.points])
+        return np.array([p.position for p in self.points])
 
     @property
     def center(self) -> NPPointType:
         """Center point of this face"""
-        return np.average(self.nppoints, axis=0)
+        return np.average(self.point_array, axis=0)
 
     @property
     def normal(self) -> NPVectorType:
@@ -77,7 +83,7 @@ class Face(ElementBase):
         For non-planar faces the same rule as in OpenFOAM is followed:
         divide a quadrangle into 4 triangles, each joining at face center;
         a normal is the average of normals of those triangles."""
-        points = self.nppoints
+        points = self.point_array
         center = self.center
 
         side_1 = points - center
@@ -87,5 +93,29 @@ class Face(ElementBase):
         return f.unit_vector(np.average(normals, axis=0))
 
     @property
-    def components(self):
+    def parts(self):
         return self.points + self.edges
+
+    def project(self, geometry: str, edges: bool = False, points: bool = False) -> None:
+        """Project this face to given geometry;
+
+        faces can only be projected to a single
+        surface, therefore provide a single string
+        (contrary to Edge/Vertex where 2 or even 3
+        surfaces can be intersected and projected to).
+
+        Use edges=True and points=True as a shortcut to
+        also project face's edges and points to the same
+        geometry. If you want more control (like projecting
+        an edge to an intersection of two surfaces), use
+        face.edges[0] = edges.Project(['geometry1', 'geometry2'])."""
+        self.projected_to = geometry
+
+        # TODO: TEST
+        if edges:
+            for i in range(4):
+                self.edges[i] = Project(geometry)
+
+        if points:
+            for i in range(4):
+                self.points[i].project(geometry)

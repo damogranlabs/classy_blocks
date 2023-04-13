@@ -21,9 +21,9 @@ class ArcEdgeBase(Edge, abc.ABC):
     @property
     def length(self) -> float:
         if self.is_valid:
-            return f.arc_length_3point(self.vertex_1.pos, self.third_point, self.vertex_2.pos)
+            return f.arc_length_3point(self.vertex_1.position, self.third_point, self.vertex_2.position)
         else:
-            return f.norm(self.vertex_1.pos - self.vertex_2.pos)
+            return f.norm(self.vertex_1.position - self.vertex_2.position)
 
     @property
     def description(self):
@@ -41,8 +41,8 @@ class ArcEdgeBase(Edge, abc.ABC):
             # silently dropped
 
             # cross-product of three collinear vertices must be zero
-            arm_1 = self.vertex_1.pos - self.third_point
-            arm_2 = self.vertex_2.pos - self.third_point
+            arm_1 = self.vertex_1.position - self.third_point
+            arm_2 = self.vertex_2.position - self.third_point
 
             return abs(f.norm(np.cross(arm_1, arm_2))) > constants.TOL
 

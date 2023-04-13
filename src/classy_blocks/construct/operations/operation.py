@@ -8,7 +8,6 @@ from classy_blocks.base.additive import AdditiveBase
 
 from classy_blocks.items.frame import Frame
 
-from classy_blocks.base.projections import ProjectedEntities
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.edges import EdgeData, Line, Project
 from classy_blocks.grading.chop import Chop
@@ -19,28 +18,47 @@ OperationT = TypeVar("OperationT", bound="Operation")
 
 
 class Operation(AdditiveBase):
-    """A user-friendly way to create a Block, as a 2-point Box,
-    extruded/revolved from a single Face or Lofted between two faces
-    with optional side edges."""
+    """A base class for all single-block operations
+    (Box, Loft, Revolve, Extrude, Wedge)."""
+
+    SIDES_MAP = ("front", "right", "back", "left")  # connects orients/indexes of side faces/edges
 
     def __init__(self, bottom_face: Face, top_face: Face):
         # An Operation only holds data to create the block;
         # actual object is created by Mesh when it is added.
-        self.bottom_face = bottom_face
-        self.top_face = top_face
-        self.side_edges: List[EdgeData] = [Line(), Line(), Line(), Line()]
+
+        # Top and bottom faces contain all points:
+        self.faces: Dict[OrientType, Face] = {}
+        self.faces["bottom"] = bottom_face
+        self.faces["top"] = top_face
+
+        # side edges, patch names and projections
+        # are held within the other four faces but
+        # points and edges are duplicated; therefore
+        # some care must be taken when getting information
+        # from an Operation:
+        #  - 8 points at corners from top and bottom faces
+        #  - edges on top and bottom from corresponding faces
+        #  - side edges are the first edge in each of left/right/front/back faces
+        #  - projected faces are not duplicated, each face holds its own info
+        # see self.set_* methods and properties
+        for orient in self.SIDES_MAP:
+            self.faces[orient] = Face([self.point_array[i] for i in constants.FACE_MAP[orient]])
+
+        # instructions for cell counts and gradings
         self.chops: Dict[AxisType, List[Chop]] = {0: [], 1: [], 2: []}
-        self.patch_names: Dict[OrientType, str] = {}
 
-        self.projections = ProjectedEntities()
-
-        self.cell_zone = ""  # set with self.cell_zone
+        # optionally, put the block in a cell zone
+        self.cell_zone = ""
 
     def add_side_edge(self, corner_1: int, edge_data: EdgeData) -> None:
         """Add an edge between two vertices at the same
         corner of the lower and upper face (index and index+4 or vice versa)."""
         assert corner_1 < 4, "corner_1 must be an index to a bottom Vertex (0...3)"
-        self.side_edges[corner_1] = edge_data
+
+        # TODO: TEST
+        orient = self.SIDES_MAP[corner_1]
+        self.faces[orient].edges[0] = edge_data
 
     def chop(self, axis: AxisType, **kwargs) -> None:
         """Chop the operation (count/grading) in given axis:
@@ -76,9 +94,9 @@ class Operation(AdditiveBase):
             sides = [sides]
 
         for orient in sides:
-            self.patch_names[orient] = name
+            self.faces[orient].patch_name = name
 
-    def project_side(self, side: OrientType, geometry: str, edges: bool = False) -> None:
+    def project_side(self, side: OrientType, geometry: str, edges: bool = False, points: bool = False) -> None:
         """Project given side to named geometry;
 
         Args:
@@ -93,108 +111,62 @@ class Operation(AdditiveBase):
             left: opposite right
         - geometry: name of predefined geometry (add separately to Mesh object)
         - edges:if True, all edges belonging to this side will also be projected"""
-        self.projections.add_side(side, geometry)
-
-        if edges:
-            for i, corner in enumerate(constants.FACE_MAP[side]):
-                self.project_edge(corner, constants.FACE_MAP[side][(i + 1) % 4], geometry)
+        self.faces[side].project(geometry, edges, points)
 
     def project_edge(self, corner_1: int, corner_2: int, geometry: Union[str, List[str]]) -> None:
         """Project an edge to a surface or an intersection of two surfaces"""
-        self.projections.add_edge(corner_1, corner_2, geometry)
+        # TODO: TEST
+        corner_set = {corner_1, corner_2}
+
+        side_pairs = [set(pair) for pair in constants.AXIS_PAIRS[2]]
+        if corner_set in side_pairs:
+            # that's a side edge
+            corner_start = min(corner_1, corner_2)
+            self.faces[self.SIDES_MAP[corner_start]].edges[0] = Project(geometry)
+        
+        top_pairs = [set(pair) for pair in constants.AXIS_PAIRS[1]]
+        if corner_set in top_pairs:
+            
+
 
     def project_corner(self, corner: int, geometry: Union[str, List[str]]) -> None:
         """Project the vertex at given corner (local index 0...7) to a single
         surface or an intersection of multiple surface. WIP according to
         https://github.com/OpenFOAM/OpenFOAM-10/blob/master/src/meshTools/searchableSurfaces/searchableSurfacesQueries/searchableSurfacesQueries.H
         """
-        self.projections.add_vertex(corner, geometry)
-
-    def translate(self, displacement: VectorType) -> "Operation":
-        """returns a translated copy of this Operation"""
-        self.bottom_face.translate(displacement)
-        self.top_face.translate(displacement)
-
-        for edge in self.side_edges:
-            edge.translate(displacement)
-
-        return self
-
-    def rotate(self, angle: float, axis: VectorType, origin: Optional[PointType] = None) -> "Operation":
-        """Rotate this Operation by a specified angle around given axis;
-        if origin is not specified, center of the Operation is taken"""
-        if origin is None:
-            origin = self.center
-
-        self.bottom_face.rotate(angle, axis, origin)
-        self.top_face.rotate(angle, axis, origin)
-
-        for edge in self.side_edges:
-            edge.rotate(angle, axis, origin)
-
-        return self
-
-    def scale(self, ratio: float, origin: Optional[PointType] = None) -> "Operation":
-        """Scale this Operation by a given ratio.
-        If origin is not specified, center of Operation is taken"""
-        if origin is None:
-            origin = self.center
-
-        self.bottom_face.scale(ratio, origin)
-        self.top_face.scale(ratio, origin)
-
-        for edge in self.side_edges:
-            edge.scale(ratio, origin)
-
-        return self
 
     def set_cell_zone(self, cell_zone: str) -> None:
         """Assign a cellZone to this block."""
         self.cell_zone = cell_zone
 
     @property
-    def center(self) -> NPPointType:
-        """Center of this object"""
-        return (self.bottom_face.center + self.top_face.center) / 2
-
-    @property
     def operations(self: OperationT) -> List[OperationT]:
         return [self]
 
     @property
-    def points(self) -> NPPointType:
+    def point_array(self) -> NPPointType:
         """Returns 8 points from which this operation is created"""
-        return np.concatenate((self.bottom_face.points, self.top_face.points))
+        return np.concatenate((self.faces["bottom"].point_array, self.faces["top"].point_array))
 
     @property
-    def edges(self) -> Frame:
+    def frame(self) -> Frame:
         """Returns a Frame with edges as its beams"""
-        frame: Frame = Frame[EdgeData]()
+        frame: Frame[EdgeData] = Frame()
 
-        for i, data in enumerate(self.bottom_face.edges):
+        for i, data in enumerate(self.faces["bottom"].edges):
             if data is not None:
                 frame.add_beam(i, (i + 1) % 4, data)
 
-        for i, data in enumerate(self.top_face.edges):
+        for i, data in enumerate(self.faces["top"].edges):
             if data is not None:
                 frame.add_beam(4 + i, 4 + (i + 1) % 4, data)
 
-        for i, data in enumerate(self.side_edges):
+        for i, orient in enumerate(self.SIDES_MAP):
+            data = self.faces[orient].edges[0]
             if data is not None:
                 frame.add_beam(i, i + 4, data)
 
-        # projected edges: manually added later, therefore
-        # must be overwritten
-        for proj in self.projections.edges:
-            frame.add_beam(proj.corner_1, proj.corner_2, Project(proj.geometry))
-
         return frame
-
-    @property
-    def faces(self) -> Dict[OrientType, Face]:
-        """Create a new Face from points on given 'side' of this Operation;
-        does not copy edges (they don't need to be copied)"""
-        return {side: Face([self.points[i] for i in corners]) for side, corners in constants.FACE_MAP.items()}
 
     def get_patches_at_corner(self, corner: int) -> Set[str]:
         """Returns patch names at given corner (up to 3)"""
