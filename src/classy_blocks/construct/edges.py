@@ -1,16 +1,19 @@
-import numpy as np
+from typing import List
 
-from classy_blocks.types import VectorType, PointType, PointListType, EdgeKindType, NPPointListType, ProjectToType
+from classy_blocks.types import VectorType, PointType, PointListType, EdgeKindType, ProjectToType
 from classy_blocks.base.element import ElementBase
 from classy_blocks.construct.point import Point, Vector
 from classy_blocks.util import functions as f
-from classy_blocks.util import constants
 
 
 class EdgeData(ElementBase):
     """Common operations on classes for edge creation"""
 
     kind: EdgeKindType  # Edge type, the string that follows vertices in blockMeshDict.edges
+
+    @property
+    def components(self):
+        return []
 
 
 class Line(EdgeData):
@@ -32,7 +35,7 @@ class Arc(EdgeData):
         return str(self.point)
 
     @property
-    def transform_entities(self):
+    def components(self):
         return [self.point]
 
 
@@ -58,7 +61,7 @@ class Origin(EdgeData):
         return f"{self.origin}:{self.flatness}"
 
     @property
-    def transform_entities(self):
+    def components(self):
         return [self.origin]
 
 
@@ -82,6 +85,16 @@ class Angle(EdgeData):
     def __repr__(self):
         return f"{self.angle}:{self.axis}"
 
+    def translate(self, displacement):
+        """Axis is not to be translated"""
+
+    def scale(self, ratio, origin):
+        """Axis is not to be scaled"""
+
+    @property
+    def components(self):
+        return [self.axis]
+
 
 class Spline(EdgeData):
     """Parameters for a spline edge"""
@@ -89,14 +102,14 @@ class Spline(EdgeData):
     kind = "spline"
 
     def __init__(self, points: PointListType):
-        self.through: NPPointListType = np.asarray(points, dtype=constants.DTYPE)
+        self.points: List[Point] = [Point(tr) for tr in points]
 
     def __repr__(self):
-        return str(self.through)
+        return str(self.points)
 
     @property
-    def points(self):
-        return self.through
+    def components(self):
+        return self.points
 
 
 class PolyLine(Spline):

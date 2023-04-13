@@ -42,9 +42,6 @@ class Point(ElementBase):
 
         self.project_to = geometry
 
-    def __eq__(self, other):
-        return f.norm(self.pos - other.pos) < TOL
-
     @property
     def description(self) -> str:
         """Returns a string representation to be written to blockMeshDict"""
@@ -54,6 +51,15 @@ class Point(ElementBase):
     def components(self):
         return [self]
 
+    def __eq__(self, other):
+        return f.norm(self.pos - other.pos) < TOL
 
-# An 'alias' to avoid confusion in mathematical lingo
-Vector = Point
+    def __repr__(self):
+        return f"Point {self.description}"
+
+
+class Vector(Point):
+    """An 'alias' to avoid confusion in mathematical lingo"""
+
+    def __repr__(self):
+        return f"Vector {self.description}"

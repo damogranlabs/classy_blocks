@@ -12,21 +12,30 @@ class ElementBase(abc.ABC):
     """Base class for mesh-building elements and tools
     for manipulation thereof."""
 
-    @abc.abstractmethod
     def translate(self: ElementBaseT, displacement: VectorType) -> ElementBaseT:
         """Move by displacement vector; returns the same instance
         to enable chaining of transformations."""
+        for component in self.components:
+            component.translate(displacement)
 
-    @abc.abstractmethod
+        return self
+
     def rotate(self: ElementBaseT, angle: float, axis: VectorType, origin: PointType) -> ElementBaseT:
         """Rotate by 'angle' around 'axis' going through 'origin';
         returns the same instance to enable chaining of transformations."""
+        for component in self.components:
+            component.rotate(angle, axis, origin)
 
-    @abc.abstractmethod
+        return self
+
     def scale(self: ElementBaseT, ratio: float, origin: PointType) -> ElementBaseT:
         """Scale with respect to given origin; returns the same instance
         to enable chaining of transformations. If no origin is given,
         the entity is scaled with respect to its center"""
+        for component in self.components:
+            component.scale(ratio, origin)
+
+        return self
 
     def copy(self: ElementBaseT) -> ElementBaseT:
         """Returns a copy of this object"""
@@ -40,22 +49,22 @@ class ElementBase(abc.ABC):
         - an edge has a single arc point,
         - a face has 4 points and 4 edges,
         - an Operation has 2 faces and 4 side edges"""
-        return []
 
-    def transform(self: ElementBaseT, transforms: List[tr.TransformationBase]) -> ElementBaseT:
+    def transform(self: ElementBaseT, transforms: List[tr.Transformation]) -> ElementBaseT:
         """A function that transforms  to sketch_2;
         a Loft will be made from those"""
         for t7m in transforms:
-            if isinstance(t7m, tr.Translation):
-                self.translate(t7m.displacement)
-                continue
+            for component in self.components:
+                if isinstance(t7m, tr.Translation):
+                    component.translate(t7m.displacement)
+                    continue
 
-            if isinstance(t7m, tr.Rotation):
-                self.rotate(t7m.angle, t7m.axis, t7m.origin)
-                continue
+                if isinstance(t7m, tr.Rotation):
+                    component.rotate(t7m.angle, t7m.axis, t7m.origin)
+                    continue
 
-            if isinstance(t7m, tr.Scaling):
-                self.scale(t7m.ratio, t7m.origin)
-                continue
+                if isinstance(t7m, tr.Scaling):
+                    component.scale(t7m.ratio, t7m.origin)
+                    continue
 
         return self

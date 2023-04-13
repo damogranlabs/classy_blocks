@@ -7,20 +7,20 @@ from classy_blocks.types import PointType, VectorType
 
 
 @dataclasses.dataclass
-class TransformationBase(abc.ABC):
+class Transformation(abc.ABC):
     """A superclass that addresses all
     dataclasses for transformation parameters"""
 
 
 @dataclasses.dataclass
-class Translation(TransformationBase):
+class Translation(Transformation):
     """Parameters required to translate an entity"""
 
     displacement: VectorType
 
 
 @dataclasses.dataclass
-class Rotation(TransformationBase):
+class Rotation(Transformation):
     """Parameters required to rotate an entity"""
 
     axis: VectorType
@@ -29,7 +29,7 @@ class Rotation(TransformationBase):
 
 
 @dataclasses.dataclass
-class Scaling(TransformationBase):
+class Scaling(Transformation):
     """Parameters required to scale an entity"""
 
     ratio: float

@@ -2,6 +2,7 @@ import numpy as np
 
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.util import constants
+from classy_blocks.base import transforms as tr
 
 from tests.fixtures.data import DataTestCase
 
@@ -69,3 +70,13 @@ class VertexTests(DataTestCase):
         expected = "project (0.00000000 0.00000000 0.00000000) (terrain walls border) // 0"
 
         self.assertEqual(v.description, expected)
+
+    def test_multitransform(self):
+        """Use the Transformation class for multiple transforms"""
+        v = Vertex([0, 1, 1], 0)
+
+        v.transform(
+            [tr.Rotation([0, 0, 1], -np.pi / 2, [0, 0, 0]), tr.Scaling(2, [0, 0, 0]), tr.Translation([-2, 0, -2])]
+        )
+
+        np.testing.assert_array_almost_equal(v.pos, [0, 0, 0])

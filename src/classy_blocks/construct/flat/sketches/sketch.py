@@ -47,7 +47,7 @@ class Sketch(ElementBase):
 
         return self
 
-    def transform(self: SketchT, transform: List[tr.TransformationBase]) -> SketchT:
+    def transform(self: SketchT, transform: List[tr.Transformation]) -> SketchT:
         """A function that transforms sketch_1 to sketch_2;
         a Loft will be made from those"""
         for t7m in transform:
