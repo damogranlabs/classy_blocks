@@ -66,7 +66,7 @@ class Annulus(Sketch):
     @property
     def outer_radius_point(self) -> NPPointType:
         """Point at outer radius, 0-th segment"""
-        return self.faces[0].points[1]
+        return self.faces[0].point_array[1]
 
     @property
     def outer_radius(self) -> float:
@@ -86,7 +86,7 @@ class Annulus(Sketch):
     @property
     def inner_radius_point(self) -> NPPointType:
         """Point at inner radius, 0-th segment"""
-        return self.faces[0].points[0]
+        return self.faces[0].point_array[0]
 
     @property
     def inner_radius(self) -> float:

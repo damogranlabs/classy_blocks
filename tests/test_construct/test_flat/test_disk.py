@@ -25,8 +25,8 @@ class QuarterDiskTests(unittest.TestCase):
             (3, 1, 3),  # S2
         )
         for data in pairs:
-            core_point = qdisk.core[0].points[data[0]]
-            shell_point = qdisk.shell[data[1]].points[data[2]]
+            core_point = qdisk.core[0].point_array[data[0]]
+            shell_point = qdisk.shell[data[1]].point_array[data[2]]
 
             np.testing.assert_array_almost_equal(core_point, shell_point)
 
@@ -68,7 +68,7 @@ class QuarterDiskTests(unittest.TestCase):
     def test_face(self, i_face):
         """Check that quarter disk's faces are properly constructed"""
         # That is, each face has 4 different points
-        points = self.qdisk.faces[i_face].points
+        points = self.qdisk.faces[i_face].point_array
 
         self.assertGreater(f.norm(points[1] - points[0]), TOL)
         self.assertGreater(f.norm(points[2] - points[1]), TOL)
@@ -97,4 +97,4 @@ class QuarterDiskTests(unittest.TestCase):
         diagonal"""
         qdisk = QuarterDisk([0, 0, 0], [1, 0, 0], [0, 0, 1])
 
-        self.assertTrue(f.norm(qdisk.points[key] - position) < TOL)
+        self.assertTrue(f.norm(qdisk.points[key].position - position) < TOL)

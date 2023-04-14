@@ -1,3 +1,4 @@
+import warnings
 from typing import List
 
 from classy_blocks.types import VectorType, PointType, PointListType, EdgeKindType, ProjectToType
@@ -14,6 +15,11 @@ class EdgeData(ElementBase):
     @property
     def parts(self):
         return []
+
+    @property
+    def center(self):
+        warnings.warn("Transforming edge with a default center (0 0 0)!")
+        return f.vector(0, 0, 0)
 
 
 class Line(EdgeData):

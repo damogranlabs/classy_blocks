@@ -26,10 +26,11 @@ class Elbow(RoundSolidShape):
         sketch_1 = Disk(center_point_1, radius_point_1, normal_1)
         radius_ratio = radius_2 / radius_1
 
-        transform_2 = tr.Transformation([tr.Rotation(rotation_axis, sweep_angle, arc_center), tr.Scaling(radius_ratio)])
-        transform_mid = tr.Transformation(
-            [tr.Rotation(rotation_axis, sweep_angle / 2, arc_center), tr.Scaling((radius_1 + radius_2 / radius_1) / 2)]
-        )
+        transform_2 = [tr.Rotation(rotation_axis, sweep_angle, arc_center), tr.Scaling(radius_ratio)]
+        transform_mid = [
+            tr.Rotation(rotation_axis, sweep_angle / 2, arc_center),
+            tr.Scaling((radius_1 + radius_2 / radius_1) / 2),
+        ]
 
         super().__init__(sketch_1, transform_2, transform_mid)
 

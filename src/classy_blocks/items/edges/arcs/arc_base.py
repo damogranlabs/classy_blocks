@@ -4,7 +4,7 @@ import abc
 import numpy as np
 
 from classy_blocks.items.edges.edge import Edge
-from classy_blocks.types import PointType
+from classy_blocks.construct.point import Point
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
@@ -15,13 +15,13 @@ class ArcEdgeBase(Edge, abc.ABC):
 
     @property
     @abc.abstractmethod
-    def third_point(self) -> PointType:
+    def third_point(self) -> Point:
         """The third point that defines the arc, regardless of how it was specified"""
 
     @property
     def length(self) -> float:
         if self.is_valid:
-            return f.arc_length_3point(self.vertex_1.position, self.third_point, self.vertex_2.position)
+            return f.arc_length_3point(self.vertex_1.position, self.third_point.position, self.vertex_2.position)
         else:
             return f.norm(self.vertex_1.position - self.vertex_2.position)
 
@@ -41,8 +41,8 @@ class ArcEdgeBase(Edge, abc.ABC):
             # silently dropped
 
             # cross-product of three collinear vertices must be zero
-            arm_1 = self.vertex_1.position - self.third_point
-            arm_2 = self.vertex_2.position - self.third_point
+            arm_1 = self.vertex_1.position - self.third_point.position
+            arm_2 = self.vertex_2.position - self.third_point.position
 
             return abs(f.norm(np.cross(arm_1, arm_2))) > constants.TOL
 

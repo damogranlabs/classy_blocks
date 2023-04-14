@@ -74,4 +74,4 @@ class BoxTests(unittest.TestCase):
         box = Box([0.0, 0.0, 0.0], diagonal_point)
 
         # the diagonal must be the same in all cases
-        np.testing.assert_array_almost_equal(box.points[6] - box.points[0], [1, 1, 1])
+        np.testing.assert_array_almost_equal(box.point_array[6] - box.point_array[0], [1, 1, 1])

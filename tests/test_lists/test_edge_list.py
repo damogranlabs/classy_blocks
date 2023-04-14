@@ -92,14 +92,14 @@ class EdgeListTests(DataTestCase):
 
         revolve = Revolve(face, 1, [0, 0, 1], [-1, 0, 0])
 
-        for point in revolve.points:
+        for point in revolve.point_array:
             self.vl.add(point)
 
         self.el.add_from_operation(self.vl.vertices, revolve)
 
         self.assertEqual(len(self.el.edges), 6)
 
-        # 4 arcs from a revolve and 2 projections from a faces,
+        # 4 arcs from a revolve and 2 projections from faces,
         # 6 'line' edges
         no_arc = 0
         no_project = 0

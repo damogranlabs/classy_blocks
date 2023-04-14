@@ -1,5 +1,6 @@
 import dataclasses
 import abc
+import warnings
 
 from classy_blocks.construct.edges import EdgeData
 from classy_blocks.items.vertex import Vertex
@@ -58,6 +59,15 @@ class Edge(ElementBase):
         """string description of the edge to be put in blockMeshDict"""
         # subclasses continue from here
         return f"\t{self.data.kind} {self.vertex_1.index} {self.vertex_2.index} "
+
+    @property
+    def center(self):
+        warnings.warn("Transforming edge with a default center (0 0 0)!")
+        return f.vector(0, 0, 0)
+
+    @property
+    def parts(self):
+        return [self.vertex_1, self.vertex_2, self.data]
 
     def __eq__(self, other):
         # An Edge is defined between two vertices regardless of

@@ -1,4 +1,4 @@
-from typing import TypeVar
+from typing import TypeVar, Optional
 
 import numpy as np
 
@@ -25,13 +25,19 @@ class Point(ElementBase):
         self.position += np.asarray(displacement, dtype=DTYPE)
         return self
 
-    def rotate(self, angle, axis, origin=None):
+    def rotate(self, angle, axis, origin: Optional[PointType] = None):
         """Rotate this point around an arbitrary axis and origin"""
+        if origin is None:
+            origin = self.center
+
         self.position = f.rotate(self.position, angle, f.unit_vector(axis), origin)
         return self
 
-    def scale(self, ratio, origin=None):
+    def scale(self, ratio, origin: Optional[PointType] = None):
         """Scale point's position around origin."""
+        if origin is None:
+            origin = self.center
+
         self.position = f.scale(self.position, ratio, origin)
         return self
 
@@ -50,6 +56,10 @@ class Point(ElementBase):
     @property
     def parts(self):
         return [self]
+
+    @property
+    def center(self):
+        return self.position
 
     def __eq__(self, other):
         return f.norm(self.position - other.pos) < TOL

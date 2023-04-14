@@ -24,38 +24,42 @@ class OperationTests(BlockTestCase):
         """Set patch of a single side"""
         self.loft.set_patch("left", "terrain")
 
-        self.assertEqual(len(self.loft.patch_names), 1)
+        self.assertEqual(self.loft.faces["left"].patch_name, "terrain")
 
     def test_set_patch_multiple(self):
         """Set patch of multiple sides"""
         self.loft.set_patch(["left", "bottom", "top"], "terrain")
 
-        self.assertEqual(len(self.loft.patch_names), 3)
+        self.assertEqual(self.loft.faces["left"].patch_name, "terrain")
+        self.assertEqual(self.loft.faces["bottom"].patch_name, "terrain")
+        self.assertEqual(self.loft.faces["top"].patch_name, "terrain")
 
     def test_project_side(self):
         """Project side without edges"""
         self.loft.project_side("bottom", "terrain", edges=False)
-        self.assertEqual(len(self.loft.projections.sides), 1)
-        self.assertEqual(len(self.loft.projections.edges), 0)
+
+        self.assertEqual(self.loft.faces["bottom"].projected_to, "terrain")
 
     def test_project_side_edges(self):
         """Project side with edges"""
         self.loft.project_side("bottom", "terrain", edges=True)
-        self.assertEqual(len(self.loft.projections.sides), 1)
-        self.assertEqual(len(self.loft.projections.edges), 4)
+        self.assertEqual(self.loft.faces["bottom"].projected_to, "terrain")
+
+        for edge in self.loft.faces["bottom"].edges:
+            self.assertTrue(isinstance(edge, Project))
 
     def test_edges(self):
         """An ad-hoc Frame object with edges"""
         self.loft.project_side("bottom", "terrain", edges=True)
         self.loft.add_side_edge(0, Arc([0.1, 0.1, 0.5]))
 
-        edges = self.loft.edges
+        edges = self.loft.edge_map
 
-        self.assertIsInstance(edges[0][4], Arc)
-        self.assertIsInstance(edges[0][1], Project)
-        self.assertIsInstance(edges[1][2], Project)
-        self.assertIsInstance(edges[2][3], Project)
-        self.assertIsInstance(edges[3][0], Project)
+        self.assertIsInstance(edges[0][4][0].edges[0], Arc)
+        self.assertIsInstance(edges[0][1][0].edges[0], Project)
+        self.assertIsInstance(edges[1][2][0].edges[0], Project)
+        self.assertIsInstance(edges[2][3][0].edges[0], Project)
+        self.assertIsInstance(edges[3][0][0].edges[0], Project)
 
     def test_faces(self):
         """A dict of fresh faces"""
@@ -66,6 +70,7 @@ class OperationTests(BlockTestCase):
 
     def test_patch_from_corner_empty(self):
         """No patches defined at any corner"""
+        self.assertSetEqual(self.loft.get_patches_at_corner(0), set())
 
     def test_patch_from_corner_single(self):
         """A single Patch at a specified corner"""
@@ -98,14 +103,14 @@ class OperationTransformTests(unittest.TestCase):
         bottom_edges = [Arc([0.5, -0.25, 0]), None, None, None]
 
         bottom_face = Face(bottom_points, bottom_edges)
-        top_face = bottom_face.copy().translate([0, 0, 1]).rotate(np.pi / 4, [0, 0, 1])
+        top_face = bottom_face.copy().translate([0, 0, 1]).rotate(np.pi / 4, [0, 0, 1], [0, 0, 0])
 
         # create a mid face to take points from
-        mid_face = bottom_face.copy().translate([0, 0, 0.5]).rotate(np.pi / 3, [0, 0, 1])
+        mid_face = bottom_face.copy().translate([0, 0, 0.5]).rotate(np.pi / 3, [0, 0, 1], [0, 0, 0])
 
         self.loft = Loft(bottom_face, top_face)
 
-        for i, point in enumerate(mid_face.points):
+        for i, point in enumerate(mid_face.point_array):
             self.loft.add_side_edge(i, Arc(point))
 
     def test_construct(self):
@@ -119,11 +124,12 @@ class OperationTransformTests(unittest.TestCase):
         translated_op = self.loft.copy().translate(translate_vector)
 
         np.testing.assert_almost_equal(
-            original_op.bottom_face.points + translate_vector, translated_op.bottom_face.points
+            original_op.faces["bottom"].point_array + translate_vector, translated_op.faces["bottom"].point_array
         )
 
         np.testing.assert_almost_equal(
-            original_op.side_edges[0].point + translate_vector, translated_op.side_edges[0].point
+            original_op.edge_map[0][4][0].edges[0].point.position + translate_vector,
+            translated_op.edge_map[0][4][0].edges[0].point.position,
         )
 
     def test_rotate(self):
@@ -135,7 +141,7 @@ class OperationTransformTests(unittest.TestCase):
         rotated_op = self.loft.copy().rotate(angle, axis, origin)
 
         def extrude_direction(op):
-            return op.top_face.center - op.bottom_face.center
+            return f.unit_vector(op.faces["top"].point_array[0] - op.faces["bottom"].point_array[0])
 
         np.testing.assert_almost_equal(
             f.angle_between(extrude_direction(original_op), extrude_direction(rotated_op)), angle

@@ -3,6 +3,7 @@ into an easily digestable function/method arguments"""
 import abc
 import dataclasses
 
+from typing import Optional
 from classy_blocks.types import PointType, VectorType
 
 
@@ -25,7 +26,7 @@ class Rotation(Transformation):
 
     axis: VectorType
     angle: float
-    origin: PointType
+    origin: Optional[PointType] = None
 
 
 @dataclasses.dataclass
@@ -33,4 +34,4 @@ class Scaling(Transformation):
     """Parameters required to scale an entity"""
 
     ratio: float
-    origin: PointType
+    origin: Optional[PointType] = None

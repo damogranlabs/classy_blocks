@@ -46,7 +46,25 @@ class FaceTests(unittest.TestCase):
             translated_face.edges[0].point.position - translate_vector, original_face.edges[0].point.position
         )
 
-    def test_rotate_face(self):
+    def test_rotate_face_center(self):
+        """Face rotation"""
+        # only test that the Face.rotate function works properly;
+        # other machinery (translate, transform...) are tested in
+        # test_translate_face above
+        origin = [0.5, 0.5, 0]
+        angle = np.pi / 3
+        axis = np.array([1.0, 1.0, 1.0])
+
+        original_face = Face(self.points)
+        rotated_face = original_face.copy().rotate(angle, axis)
+
+        for i in range(4):
+            original_point = original_face.points[i].position
+            rotated_point = rotated_face.points[i].position
+
+            np.testing.assert_almost_equal(rotated_point, f.rotate(original_point, angle, axis, origin))
+
+    def test_rotate_face_custom_origin(self):
         """Face rotation"""
         # only test that the Face.rotate function works properly;
         # other machinery (translate, transform...) are tested in
@@ -67,7 +85,7 @@ class FaceTests(unittest.TestCase):
     def test_scale_face_center(self):
         """Scale face from its center"""
         face = Face(self.points)
-        face.scale(2, face.center)
+        face.scale(2)
 
         scaled_points = [[-0.5, -0.5, 0], [1.5, -0.5, 0], [1.5, 1.5, 0], [-0.5, 1.5, 0]]
 

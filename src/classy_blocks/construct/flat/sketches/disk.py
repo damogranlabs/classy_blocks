@@ -71,12 +71,12 @@ class QuarterDisk(Sketch):
     @property
     def radius_point(self) -> NPPointType:
         """Point at outer radius"""
-        return self.points["P1"]
+        return self.points["P1"].position
 
     @property
     def center(self) -> NPPointType:
         """Center point of this sketch"""
-        return self.points["O"]
+        return self.points["O"].position
 
     @property
     def points(self) -> Dict[str, NPPointType]:

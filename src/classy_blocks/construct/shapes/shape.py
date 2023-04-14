@@ -5,48 +5,34 @@ from typing import TypeVar, Optional, List, Generic
 
 import numpy as np
 
-from classy_blocks.types import VectorType, PointType, NPPointType, AxisType, OrientType
-from classy_blocks.base.additive import AdditiveBase
+from classy_blocks.types import NPPointType, AxisType, OrientType
+from classy_blocks.base.element import ElementBase
 from classy_blocks.base import transforms as tr
 from classy_blocks.construct.edges import Arc
 from classy_blocks.construct.flat.sketches.sketch import SketchT
+from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.operations.loft import Loft
 
 ShapeT = TypeVar("ShapeT", bound="Shape")
 
 
-class Shape(AdditiveBase):
+class Shape(ElementBase):
     """A collection of Operations that form a predefined
     parametric shape"""
+
+    @property
+    @abc.abstractmethod
+    def operations(self) -> List[Operation]:
+        """Operations from which the shape is build"""
+
+    @property
+    def parts(self):
+        return self.operations
 
     def set_cell_zone(self, cell_zone: str) -> None:
         """Sets cell zone for all blocks in this shape"""
         for operation in self.operations:
             operation.set_cell_zone(cell_zone)
-
-    def translate(self: ShapeT, displacement: VectorType) -> ShapeT:
-        for operation in self.operations:
-            operation.translate(displacement)
-
-        return self
-
-    def rotate(self: ShapeT, angle: float, axis: VectorType, origin: Optional[PointType] = None) -> ShapeT:
-        if origin is None:
-            origin = self.center
-
-        for operation in self.operations:
-            operation.rotate(angle, axis, origin)
-
-        return self
-
-    def scale(self: ShapeT, ratio: float, origin: Optional[PointType] = None) -> ShapeT:
-        if origin is None:
-            origin = self.center
-
-        for operation in self.operations:
-            operation.scale(ratio, origin)
-
-        return self
 
     @property
     def center(self) -> NPPointType:
@@ -97,7 +83,7 @@ class LoftedShape(Shape, Generic[SketchT]):
                 face_mid = self.sketch_mid.faces[i]
 
                 for i, point in enumerate(face_mid.points):
-                    loft.add_side_edge(i, Arc(point))
+                    loft.add_side_edge(i, Arc(point.position))
 
             self.lofts.append(loft)
 
