@@ -100,7 +100,7 @@ for i, side in projected_faces.items():
         # starting from block's "other side"
         bottom_face.invert()
 
-    top_points = bottom_face.points * (ci / co)
+    top_points = bottom_face.point_array * (ci / co)
     top_face = cb.Face(top_points)
 
     loft = cb.Loft(bottom_face, top_face)

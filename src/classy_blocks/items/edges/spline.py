@@ -2,9 +2,10 @@ import dataclasses
 
 import numpy as np
 
+from classy_blocks.types import NPPointListType
 from classy_blocks.construct import edges
 from classy_blocks.items.edges.edge import Edge
-from classy_blocks.util import constants
+
 
 from classy_blocks.util import functions as f
 
@@ -18,7 +19,7 @@ class SplineEdge(Edge):
     @property
     def length(self):
         # just sum distances between defining points
-        all_points = np.concatenate(([self.vertex_1.position], self.data.through, [self.vertex_2.position]))
+        all_points = np.concatenate(([self.vertex_1.position], self.point_array, [self.vertex_2.position]))
         shifted = np.roll(all_points, 1, axis=0)
 
         distances = (all_points - shifted)[1:]
@@ -26,8 +27,13 @@ class SplineEdge(Edge):
         return np.sum([f.norm(d) for d in distances])
 
     @property
+    def point_array(self) -> NPPointListType:
+        """spline points as numpy array"""
+        return np.array([p.position for p in self.data.points])
+
+    @property
     def description(self):
-        point_list = " ".join([constants.vector_format(p) for p in self.data.through])
+        point_list = " ".join([p.description for p in self.data.points])
         return super().description + "(" + point_list + ")"
 
 

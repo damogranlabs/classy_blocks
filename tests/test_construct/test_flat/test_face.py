@@ -20,6 +20,15 @@ class FaceTests(unittest.TestCase):
         """The center property"""
         np.testing.assert_array_equal(Face(self.points).center, [0.5, 0.5, 0])
 
+    def test_reverse(self):
+        """Reverse face points"""
+        face = Face(self.points)
+        face_points = np.copy(face.point_array)
+
+        face.invert()
+
+        np.testing.assert_array_equal(np.flip(face_points, axis=0), face.point_array)
+
     def test_translate_face(self):
         """Face translation, one custom edge"""
         face_edges = [
@@ -104,3 +113,17 @@ class FaceTests(unittest.TestCase):
         face = Face(self.points, [edges.Arc([0.5, -0.25, 0]), None, None, None]).scale(2, origin=[0, 0, 0])
 
         np.testing.assert_array_equal(face.edges[0].point.position, [1, -0.5, 0])
+
+    def test_add_edge(self):
+        """Replace a Line edge with something else"""
+        face = Face(self.points)
+        face.add_edge(0, edges.Project("terrain"))
+
+        self.assertEqual(face.edges[0].kind, "project")
+
+    def test_remove_edge(self):
+        face = Face(self.points)
+        face.add_edge(0, edges.Project("terrain"))
+        face.add_edge(0, None)
+
+        self.assertEqual(face.edges[0].kind, "line")

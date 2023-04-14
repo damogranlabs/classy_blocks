@@ -65,17 +65,25 @@ class ElementBase(abc.ABC):
         """A function that transforms  to sketch_2;
         a Loft will be made from those"""
         for t7m in transforms:
-            for component in self.parts:
+            for part in self.parts:
                 if isinstance(t7m, tr.Translation):
-                    component.translate(t7m.displacement)
+                    part.translate(t7m.displacement)
                     continue
 
                 if isinstance(t7m, tr.Rotation):
-                    component.rotate(t7m.angle, t7m.axis, t7m.origin)
+                    origin = t7m.origin
+                    if origin is None:
+                        origin = self.center
+
+                    part.rotate(t7m.angle, t7m.axis, origin=origin)
                     continue
 
                 if isinstance(t7m, tr.Scaling):
-                    component.scale(t7m.ratio, t7m.origin)
+                    origin = t7m.origin
+                    if origin is None:
+                        origin = self.center
+
+                    part.scale(t7m.ratio, origin=origin)
                     continue
 
         return self

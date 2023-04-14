@@ -24,9 +24,5 @@ class Revolve(Loft):
         super().__init__(bottom_face, top_face)
 
         # there are 4 side edges: the simplest is to use 'axis and angle'
-        self.side_edges = [
-            edges.Angle(self.angle, self.axis),
-            edges.Angle(self.angle, self.axis),
-            edges.Angle(self.angle, self.axis),
-            edges.Angle(self.angle, self.axis),
-        ]
+        for i in range(4):
+            self.add_side_edge(i, edges.Angle(self.angle, self.axis))

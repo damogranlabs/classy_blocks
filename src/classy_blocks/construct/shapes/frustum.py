@@ -44,12 +44,12 @@ class Frustum(RoundSolidShape):
         # TODO: TEST
         assert np.dot(axis, radius_vector_1) < TOL, "Make sure axis and radius vectors are perpendicular"
 
-        transform_2 = tr.Transformation([tr.Translation(axis_point_2 - axis_point_1), tr.Scaling(radius_2 / radius_1)])
+        transform_2 = [tr.Translation(axis_point_2 - axis_point_1), tr.Scaling(radius_2 / radius_1)]
 
         if radius_mid is None:
             transform_mid = None
         else:
-            transform_mid = tr.Transformation([tr.Translation(axis / 2), tr.Scaling(radius_mid / radius_1)])
+            transform_mid = [tr.Translation(axis / 2), tr.Scaling(radius_mid / radius_1)]
 
         super().__init__(Disk(axis_point_1, radius_point_1, axis), transform_2, transform_mid)
 

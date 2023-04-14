@@ -28,34 +28,40 @@ def eighth_sphere_lofts(
     # rotate a QuarterDisk twice around 'bottom' two edges to get them;
     axes = {
         # around 'O-P1', 'front':
-        "front": bottom.points["P1"] - bottom.points["O"],
+        "front": bottom.points["P1"].position - bottom.points["O"].position,
         # around 'O-P3', 'left':
-        "left": bottom.points["P3"] - bottom.points["O"],
+        "left": bottom.points["P3"].position - bottom.points["O"].position,
         # diagonal O-D is obtained by rotating around an at 45 degrees
-        "diagonal": f.rotate(bottom.points["P3"], np.pi / 4, normal, center_point) - bottom.points["O"],
+        "diagonal": f.rotate(bottom.points["P3"].position, np.pi / 4, normal, center_point)
+        - bottom.points["O"].position,
     }
 
     front = bottom.copy().rotate(np.pi / 2, axes["front"], center_point)
     left = bottom.copy().rotate(-np.pi / 2, axes["left"], center_point)
 
-    point_DU = f.rotate(bottom.points["D"], -diagonal_angle, axes["diagonal"], center_point)
-    point_P2U = f.rotate(bottom.points["P2"], -diagonal_angle, axes["diagonal"], center_point)
+    point_DU = f.rotate(bottom.points["D"].position, -diagonal_angle, axes["diagonal"], center_point)
+    point_P2U = f.rotate(bottom.points["P2"].position, -diagonal_angle, axes["diagonal"], center_point)
 
     # 4 lofts for an eighth sphere, 1 core and 3 shell
     lofts: List[Loft] = []
 
     # core
-    core = Loft(bottom.core[0], Face([front.points["S2"], front.points["D"], point_DU, left.points["D"]]))
+    core = Loft(
+        bottom.core[0],
+        Face([front.points["S2"].position, front.points["D"].position, point_DU, left.points["D"].position]),
+    )
     lofts.append(core)
 
     # shell
-    shell_1 = Loft(bottom.shell[0], Face([front.points["D"], front.points["P2"], point_P2U, point_DU]))
+    shell_1 = Loft(
+        bottom.shell[0], Face([front.points["D"].position, front.points["P2"].position, point_P2U, point_DU])
+    )
     shell_1.project_side("right", geometry_name, edges=True)
 
-    shell_2 = Loft(bottom.faces[2], Face([point_DU, point_P2U, left.points["P2"], left.points["D"]]))
+    shell_2 = Loft(bottom.faces[2], Face([point_DU, point_P2U, left.points["P2"].position, left.points["D"].position]))
     shell_2.project_side("right", geometry_name, edges=True)
 
-    shell_3 = Loft(shell_1.top_face, left.faces[1])
+    shell_3 = Loft(shell_1.faces["top"], left.faces[1])
     shell_3.project_side("right", geometry_name, edges=True)
     lofts += [shell_1, shell_2, shell_3]
 

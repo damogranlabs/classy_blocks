@@ -28,7 +28,7 @@ class ExtrudedRing(RoundHollowShape):
 
         super().__init__(
             Annulus(axis_point_1, outer_radius_point_1, axis, inner_radius, n_segments),
-            tr.Transformation([tr.Translation(axis)]),
+            [tr.Translation(axis)],
             None,
         )
 

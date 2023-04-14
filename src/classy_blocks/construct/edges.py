@@ -37,9 +37,6 @@ class Arc(EdgeData):
     def __init__(self, arc_point: PointType):
         self.point = Point(arc_point)
 
-    def __repr__(self):
-        return str(self.point)
-
     @property
     def parts(self):
         return [self.point]
@@ -63,9 +60,6 @@ class Origin(EdgeData):
         self.origin = Point(origin)
         self.flatness = flatness
 
-    def __repr__(self):
-        return f"{self.origin}:{self.flatness}"
-
     @property
     def parts(self):
         return [self.origin]
@@ -88,13 +82,10 @@ class Angle(EdgeData):
         self.angle = angle
         self.axis = Vector(f.unit_vector(axis))
 
-    def __repr__(self):
-        return f"{self.angle}:{self.axis}"
-
     def translate(self, displacement):
         """Axis is not to be translated"""
 
-    def scale(self, ratio, origin):
+    def scale(self, ratio, origin=None):
         """Axis is not to be scaled"""
 
     @property
@@ -109,9 +100,6 @@ class Spline(EdgeData):
 
     def __init__(self, points: PointListType):
         self.points: List[Point] = [Point(tr) for tr in points]
-
-    def __repr__(self):
-        return str(self.points)
 
     @property
     def parts(self):
@@ -135,6 +123,3 @@ class Project(EdgeData):
             self.geometry = geometry
         else:
             self.geometry = [geometry]
-
-    def __repr__(self):
-        return str(self.geometry)

@@ -3,6 +3,7 @@ from typing import List, Dict
 import numpy as np
 
 from classy_blocks.types import PointType, VectorType, NPPointType, NPVectorType
+from classy_blocks.construct.point import Point
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketches.sketch import Sketch
 from classy_blocks.construct.edges import Origin
@@ -79,7 +80,7 @@ class QuarterDisk(Sketch):
         return self.points["O"].position
 
     @property
-    def points(self) -> Dict[str, NPPointType]:
+    def points(self) -> Dict[str, Point]:
         """Returns points as named during construction of a QuarterDisk"""
         # Refer to core and shell because SemiDisk and Disk will add new faces
         # to self.faces[]

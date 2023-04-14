@@ -2,6 +2,7 @@ import dataclasses
 
 import numpy as np
 
+from classy_blocks.construct.point import Point
 from classy_blocks.construct import edges
 from classy_blocks.items.edges.arcs.arc_base import ArcEdgeBase
 from classy_blocks.types import PointType, VectorType
@@ -47,7 +48,9 @@ class AngleEdge(ArcEdgeBase):
 
     @property
     def third_point(self):
-        return arc_from_theta(self.vertex_1.position, self.vertex_2.position, self.data.angle, self.data.axis)
+        return Point(
+            arc_from_theta(self.vertex_1.position, self.vertex_2.position, self.data.angle, self.data.axis.components)
+        )
 
     @property
     def description(self):
@@ -55,7 +58,7 @@ class AngleEdge(ArcEdgeBase):
         # one with this edge's specification
         # arc <vertex-1> <vertex-2> <angle> (axis) alternative edge specification:
         out = f"\t// arc {self.vertex_1.index} {self.vertex_2.index} "
-        out += f"{self.data.angle} {constants.vector_format(self.data.axis)}\n"
+        out += f"{self.data.angle} {self.data.axis.description}\n"
 
         # the other is a classic three-point arc definition
         return out + super().description

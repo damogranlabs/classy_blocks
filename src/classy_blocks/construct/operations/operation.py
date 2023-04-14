@@ -58,7 +58,7 @@ class Operation(ElementBase):
 
         # TODO: TEST
         orient = self.SIDES_MAP[corner_1]
-        self.faces[orient].edges[0] = edge_data
+        self.faces[orient].add_edge(0, edge_data)
 
     def chop(self, axis: AxisType, **kwargs) -> None:
         """Chop the operation (count/grading) in given axis:
@@ -177,14 +177,13 @@ class Operation(ElementBase):
         # TODO: TEST
         edge_map = Frame[Tuple[Face, int]]()
 
-        for i, data in enumerate(self.faces["bottom"].edges):
+        for i in range(4):
+            # bottom face
             edge_map.add_beam(i, (i + 1) % 4, (self.faces["bottom"], i))
-
-        for i, data in enumerate(self.faces["top"].edges):
+            # top face
             edge_map.add_beam(4 + i, 4 + (i + 1) % 4, (self.faces["top"], i))
-
-        for i, orient in enumerate(self.SIDES_MAP):
-            data = self.faces[orient].edges[0]
+            # sides
+            orient = self.SIDES_MAP[i]
             edge_map.add_beam(i, i + 4, (self.faces[orient], i))
 
         return edge_map
@@ -194,16 +193,17 @@ class Operation(ElementBase):
         """Returns a Frame with edges as its beams"""
         edges = Frame[EdgeData]()
 
-        frame: Frame = Frame[EdgeData]()
-
         for i, data in enumerate(self.faces["bottom"].edges):
-            frame.add_beam(i, (i + 1) % 4, data)
+            if data.kind != "line":
+                edges.add_beam(i, (i + 1) % 4, data)
 
         for i, data in enumerate(self.faces["top"].edges):
-            frame.add_beam(4 + i, 4 + (i + 1) % 4, data)
+            if data.kind != "line":
+                edges.add_beam(4 + i, 4 + (i + 1) % 4, data)
 
         for i, orient in enumerate(self.SIDES_MAP):
             data = self.faces[orient].edges[0]
-            edges.add_beam(i, i + 4, self.faces[orient].edges[0])
+            if data.kind != "line":
+                edges.add_beam(i, i + 4, data)
 
-        return frame
+        return edges

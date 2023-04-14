@@ -177,7 +177,8 @@ def arc_length_3point(A: PointType, B: PointType, C: PointType) -> float:
     adotb = a.dot(b)
 
     denom = asqr * bsqr - adotb * adotb
-    if norm(denom) < constants.TOL:
+    # https://develop.openfoam.com/Development/openfoam/-/blob/master/src/OpenFOAM/primitives/Scalar/floatScalar/floatScalar.H
+    if norm(denom) < 1e-18:
         raise ValueError("Invalid arc points!")
 
     fact = 0.5 * (bsqr - adotb) / denom

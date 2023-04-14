@@ -1,5 +1,5 @@
 """The Mesh object ties everything together and writes the blockMeshDict in the end."""
-from typing import Optional, List, get_args
+from typing import Optional, List, get_args, Union
 
 from classy_blocks.types import AxisType
 from classy_blocks.items.vertex import Vertex
@@ -13,11 +13,12 @@ from classy_blocks.lists.face_list import FaceList
 from classy_blocks.lists.geometry_list import GeometryList
 
 from classy_blocks.construct.operations.operation import Operation
-
-from classy_blocks.base.additive import AdditiveBase
+from classy_blocks.construct.shapes.shape import Shape
 
 from classy_blocks.util import constants
 from classy_blocks.util.vtk_writer import write_vtk
+
+AdditiveType = Union[Operation, Shape]
 
 
 class Mesh:
@@ -25,7 +26,7 @@ class Mesh:
 
     def __init__(self) -> None:
         # List of all added operations/shapes
-        self.depot: List[AdditiveBase] = []
+        self.depot: List[AdditiveType] = []
 
         self.vertex_list = VertexList()
         self.edge_list = EdgeList()
@@ -43,7 +44,7 @@ class Mesh:
             "verbose": None,
         }
 
-    def add(self, entity: AdditiveBase) -> None:
+    def add(self, entity: AdditiveType) -> None:
         """Add a classy_blocks entity to the mesh;
         can be a plain Block, created from points, Operation, Shape or Object."""
         # this does nothing yet;
@@ -57,14 +58,11 @@ class Mesh:
 
         # FIXME: prettify/move logic elsewhere/remove private method
         for corner in range(8):
-            point = operation.points[corner]
+            point = operation.point_array[corner]
             # remove master patches, only slave will remain
             patches = operation.get_patches_at_corner(corner)
             patches = patches.intersection(self.patch_list.slave_patches)
             vertices.append(self.vertex_list.add(point, list(patches)))
-
-        for data in operation.projections.vertices:
-            vertices[data.corner].project(data.geometry)
 
         return vertices
 
@@ -99,7 +97,12 @@ class Mesh:
         cease to have any function or influence on mesh."""
         # first, collect data about patches and merged stuff
         for entity in self.depot:
-            for operation in entity.operations:
+            if isinstance(entity, Operation):
+                operations = [entity]
+            else:
+                operations = entity.operations
+
+            for operation in operations:
                 vertices = self._add_vertices(operation)
 
                 block = Block(len(self.block_list.blocks), vertices)
@@ -114,7 +117,9 @@ class Mesh:
                 self.patch_list.add(vertices, operation)
                 self.face_list.add(vertices, operation)
 
-            self.add_geometry(entity.geometry)
+            # FIXME: prettify, SOLIDify
+            if hasattr(entity, "geometry"):
+                self.add_geometry(entity.geometry)
 
     @property
     def is_assembled(self) -> bool:

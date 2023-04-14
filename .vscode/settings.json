@@ -1,6 +1,6 @@
 {
     "python.testing.pytestEnabled": false,
-    "python.formatting.provider": "black",
+    "python.formatting.provider": "none",
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,
     "python.linting.lintOnSave": true,
@@ -21,5 +21,8 @@
         "**/CVS": true,
         "**/.DS_Store": true,
         "**/Thumbs.db": true,
+    },
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
     }
 }

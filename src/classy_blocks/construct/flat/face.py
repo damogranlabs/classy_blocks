@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import copy
 
@@ -44,8 +44,7 @@ class Face(ElementBase):
             assert len(edges) == 4, "Provide exactly 4 edges; use None for straight lines"
 
             for i, edge in enumerate(edges):
-                if edge is not None:
-                    self.edges[i] = edge
+                self.add_edge(i, edge)
 
         if check_coplanar:
             pts = self.point_array
@@ -58,10 +57,20 @@ class Face(ElementBase):
         # patch name to which this face can belong
         self.patch_name: Optional[str] = None
 
+    def add_edge(self, corner: int, edge_data: Union[EdgeData, None]) -> None:
+        """Adds or replaces an edge between corner and (corner+1);
+        existing edges will be replaced, use None to delete
+        (replace with a straight line)"""
+        assert corner < 4, "Provide a corner index between 0 and 3"
+
+        if edge_data is None:
+            self.edges[corner] = Line()
+        else:
+            self.edges[corner] = edge_data
+
     def invert(self) -> None:
         """Reverses the order of points in this face."""
-        for i, p in enumerate(np.flip(self.point_array, axis=0)):
-            self.points[i].position = p
+        self.points.reverse()
 
     def copy(self) -> "Face":
         """Returns a copy of this Face"""
@@ -114,7 +123,7 @@ class Face(ElementBase):
         # TODO: TEST
         if edges:
             for i in range(4):
-                self.edges[i] = Project(geometry)
+                self.add_edge(i, Project(geometry))
 
         if points:
             for i in range(4):

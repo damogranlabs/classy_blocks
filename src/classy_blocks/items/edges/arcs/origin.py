@@ -5,6 +5,7 @@ from typing import ClassVar
 
 import numpy as np
 
+from classy_blocks.construct.point import Point
 from classy_blocks.construct import edges
 from classy_blocks.items.edges.arcs.arc_base import ArcEdgeBase
 from classy_blocks.types import PointType, NPPointType
@@ -88,14 +89,18 @@ class OriginEdge(ArcEdgeBase):
     def third_point(self) -> PointType:
         """Calculated arc point from origin and flatness"""
         point = arc_from_origin(
-            self.vertex_1.position, self.vertex_2.position, self.data.origin, self.adjust_center, self.data.flatness
+            self.vertex_1.position,
+            self.vertex_2.position,
+            self.data.origin.position,
+            self.adjust_center,
+            self.data.flatness,
         )
 
         if np.any(np.isnan(point)):
             # try to create a friendly error message :/
             raise ValueError(f"Invalid edge specification: {self}")
 
-        return point
+        return Point(point)
 
     @property
     def description(self):
@@ -103,6 +108,6 @@ class OriginEdge(ArcEdgeBase):
         # one commented out with user-provided description
         # arc 0 1 origin 1.1 (0 0 0)
         out = f"\t// arc {self.vertex_1.index} {self.vertex_2.index} origin"
-        out += f" {self.data.flatness} {constants.vector_format(self.data.origin)}\n"
+        out += f" {self.data.flatness} {self.data.origin.description}\n"
         # the other one with a default three-point arc description
         return out + super().description
