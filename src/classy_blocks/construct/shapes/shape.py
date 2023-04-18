@@ -66,10 +66,9 @@ class LoftedShape(Shape, Generic[SketchT]):
         self.sketch_1 = sketch_1
         self.sketch_2 = sketch_1.copy().transform(sketch_2_transform)
 
+        self.sketch_mid: Optional[SketchT] = None
         if sketch_mid_transform is not None:
-            self.sketch_mid: Optional[SketchT] = sketch_1.copy().transform(sketch_mid_transform)
-        else:
-            self.sketch_mid = None
+            self.sketch_mid = sketch_1.copy().transform(sketch_mid_transform)
 
         self.lofts: List[Loft] = []
 

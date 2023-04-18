@@ -1,5 +1,3 @@
-import numpy as np
-
 from typing import Dict, Tuple
 from classy_blocks.types import OrientType
 

@@ -159,22 +159,18 @@ def lin_map(x: float, x_min: float, x_max: float, out_min: float, out_max: float
         return r
 
 
-def arc_length_3point(A: PointType, B: PointType, C: PointType) -> float:
-    """Returns length of arc defined by 3 points, A, B and C; B is the point in between"""
+def arc_length_3point(p_start: NPPointType, p_btw: NPPointType, p_end: NPPointType) -> float:
+    """Returns length of arc defined by 3 points"""
     ### Meticulously transcribed from
     # https://develop.openfoam.com/Development/openfoam/-/blob/master/src/mesh/blockMesh/blockEdges/arcEdge/arcEdge.C
 
-    p1 = np.asarray(A, dtype=constants.DTYPE)
-    p2 = np.asarray(B, dtype=constants.DTYPE)
-    p3 = np.asarray(C, dtype=constants.DTYPE)
-
-    a = p2 - p1
-    b = p3 - p1
+    vect_a = p_btw - p_start
+    vect_b = p_end - p_start
 
     # Find centre of arcEdge
-    asqr = a.dot(a)
-    bsqr = b.dot(b)
-    adotb = a.dot(b)
+    asqr = vect_a.dot(vect_a)
+    bsqr = vect_b.dot(vect_b)
+    adotb = vect_a.dot(vect_b)
 
     denom = asqr * bsqr - adotb * adotb
     # https://develop.openfoam.com/Development/openfoam/-/blob/master/src/OpenFOAM/primitives/Scalar/floatScalar/floatScalar.H
@@ -183,24 +179,24 @@ def arc_length_3point(A: PointType, B: PointType, C: PointType) -> float:
 
     fact = 0.5 * (bsqr - adotb) / denom
 
-    centre = p1 + 0.5 * a + fact * (np.cross(np.cross(a, b), a))
+    centre = p_start + 0.5 * vect_a + fact * (np.cross(np.cross(vect_a, vect_b), vect_a))
 
     # Position vectors from centre
-    r1 = p1 - centre
-    r2 = p2 - centre
-    r3 = p3 - centre
+    rad_start = p_start - centre
+    rad_btw = p_btw - centre
+    rad_end = p_end - centre
 
-    mag1 = norm(r1)
-    mag3 = norm(r3)
+    mag1 = norm(rad_start)
+    mag3 = norm(rad_end)
 
     # The radius from r1 and from r3 will be identical
-    radius = r3
+    radius = rad_end
 
     # Determine the angle
-    angle = np.arccos((r1.dot(r3)) / (mag1 * mag3))
+    angle = np.arccos((rad_start.dot(rad_end)) / (mag1 * mag3))
 
     # Check if the vectors define an exterior or an interior arcEdge
-    if np.dot(np.cross(r1, r2), np.cross(r1, r3)) < 0:
+    if np.dot(np.cross(rad_start, rad_btw), np.cross(rad_start, rad_end)) < 0:
         angle = 2 * np.pi - angle
 
     return angle * norm(radius)

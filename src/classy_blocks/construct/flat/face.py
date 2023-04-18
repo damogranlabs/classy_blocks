@@ -4,7 +4,7 @@ import copy
 
 import numpy as np
 
-from classy_blocks.types import PointListType, NPPointType, NPVectorType, NPPointListType, ProjectToType
+from classy_blocks.types import PointListType, NPPointType, NPVectorType, NPPointListType
 from classy_blocks.construct.point import Point
 from classy_blocks.construct.edges import Project
 from classy_blocks.base.element import ElementBase

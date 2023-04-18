@@ -1,3 +1,5 @@
+from typing import List
+
 import numpy as np
 
 from classy_blocks.types import PointType
@@ -25,7 +27,7 @@ class Cylinder(RoundSolidShape):
         # TODO: TEST
         assert np.dot(axis, radius_point_1 - axis_point_1) < TOL, "Make sure axis and radius vectors are perpendicular"
 
-        transform_2 = [tr.Translation(axis)]
+        transform_2: List[tr.Transformation] = [tr.Translation(axis)]
 
         super().__init__(Disk(axis_point_1, radius_point_1, axis), transform_2, None)
 

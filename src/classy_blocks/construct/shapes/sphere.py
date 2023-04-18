@@ -4,7 +4,7 @@ import numpy as np
 
 from classy_blocks.types import PointType, VectorType, NPPointType, NPVectorType
 from classy_blocks.construct.flat.face import Face
-from classy_blocks.construct.flat.sketches.disk import Disk, QuarterDisk
+from classy_blocks.construct.flat.sketches.disk import QuarterDisk
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.shapes.round import RoundSolidShape
 

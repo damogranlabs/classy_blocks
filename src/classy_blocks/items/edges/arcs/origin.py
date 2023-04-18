@@ -8,7 +8,7 @@ import numpy as np
 from classy_blocks.construct.point import Point
 from classy_blocks.construct import edges
 from classy_blocks.items.edges.arcs.arc_base import ArcEdgeBase
-from classy_blocks.types import PointType, NPPointType
+from classy_blocks.types import NPPointType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
@@ -86,7 +86,7 @@ class OriginEdge(ArcEdgeBase):
     adjust_center: ClassVar[bool] = True
 
     @property
-    def third_point(self) -> PointType:
+    def third_point(self):
         """Calculated arc point from origin and flatness"""
         point = arc_from_origin(
             self.vertex_1.position,

@@ -23,10 +23,6 @@ class Edge(ElementBase):
         assert isinstance(self.vertex_2, Vertex)
 
     @property
-    def points(self):
-        return self.data.points
-
-    @property
     def kind(self) -> EdgeKindType:
         """A shorthand for edge.data.kind"""
         return self.data.kind

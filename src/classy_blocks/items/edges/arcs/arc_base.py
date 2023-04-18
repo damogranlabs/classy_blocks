@@ -22,8 +22,8 @@ class ArcEdgeBase(Edge, abc.ABC):
     def length(self) -> float:
         if self.is_valid:
             return f.arc_length_3point(self.vertex_1.position, self.third_point.position, self.vertex_2.position)
-        else:
-            return f.norm(self.vertex_1.position - self.vertex_2.position)
+
+        return f.norm(self.vertex_1.position - self.vertex_2.position)
 
     @property
     def description(self):

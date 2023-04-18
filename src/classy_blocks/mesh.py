@@ -62,7 +62,8 @@ class Mesh:
             # remove master patches, only slave will remain
             patches = operation.get_patches_at_corner(corner)
             patches = patches.intersection(self.patch_list.slave_patches)
-            vertices.append(self.vertex_list.add(point, list(patches)))
+            new_vertices = self.vertex_list.add(point, list(patches))
+            vertices.append(new_vertices)
 
         return vertices
 

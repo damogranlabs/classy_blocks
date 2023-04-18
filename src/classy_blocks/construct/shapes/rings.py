@@ -123,7 +123,9 @@ class RevolvedRing(ExtrudedRing):
 
         revolve = Revolve(cross_section, angle, self.axis, self.axis_point_1)
 
-        self.revolves = [revolve.copy().rotate(i * angle, self.axis, self.center_point) for i in range(n_segments)]
+        self.revolves: List[Operation] = [
+            revolve.copy().rotate(i * angle, self.axis, self.center_point) for i in range(n_segments)
+        ]
 
     def set_inner_patch(self, name: str) -> None:
         """Assign the faces of inside surface to a named patch"""

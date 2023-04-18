@@ -21,7 +21,12 @@ class Operation(ElementBase):
     """A base class for all single-block operations
     (Box, Loft, Revolve, Extrude, Wedge)."""
 
-    SIDES_MAP = ("front", "right", "back", "left")  # connects orients/indexes of side faces/edges
+    SIDES_MAP: Tuple[OrientType, OrientType, OrientType, OrientType] = (
+        "front",
+        "right",
+        "back",
+        "left",
+    )  # connects orients/indexes of side faces/edges
 
     def __init__(self, bottom_face: Face, top_face: Face):
         # An Operation only holds data to create the block;
@@ -42,6 +47,7 @@ class Operation(ElementBase):
         #  - side edges are the first edge in each of left/right/front/back faces
         #  - projected faces are not duplicated, each face holds its own info
         # see self.set_* methods and properties
+        # TODO: is this really the right way?
         for orient in self.SIDES_MAP:
             self.faces[orient] = Face([self.point_array[i] for i in constants.FACE_MAP[orient]])
 
@@ -150,12 +156,13 @@ class Operation(ElementBase):
 
     def get_patches_at_corner(self, corner: int) -> Set[str]:
         """Returns patch names at given corner (up to 3)"""
-        patches = set()
+        patches: Set[str] = set()
 
         for orient, corners in constants.FACE_MAP.items():
             if corner in corners:
-                if self.faces[orient].patch_name is not None:
-                    patches.add(self.faces[orient].patch_name)
+                patch_name = self.faces[orient].patch_name
+                if patch_name is not None:
+                    patches.add(patch_name)
 
         return patches
 
