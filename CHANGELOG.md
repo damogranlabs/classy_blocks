@@ -31,6 +31,7 @@ package with type hinting, static typing and no python-ish duck-typing hacks.
 - *Wall shapes will be created later with a different approach
 - Examples with *Wall shapes will be recreated later with new approaches
 - airfoil2d example requires blocking optimization so it will be recreated when that feature is available
+- sphere example will be recreated when 'offset' is available
 - block.from_points has been removed (use Loft)
 - T-joint will be added when a skew transform is implemented
 

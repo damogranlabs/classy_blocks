@@ -1,4 +1,5 @@
 import unittest
+from parameterized import parameterized
 
 import numpy as np
 
@@ -24,49 +25,38 @@ class OperationTests(BlockTestCase):
         """Set patch of a single side"""
         self.loft.set_patch("left", "terrain")
 
-        self.assertEqual(self.loft.faces["left"].patch_name, "terrain")
+        self.assertEqual(self.loft.patch_names["left"], "terrain")
 
     def test_set_patch_multiple(self):
         """Set patch of multiple sides"""
         self.loft.set_patch(["left", "bottom", "top"], "terrain")
 
-        self.assertEqual(self.loft.faces["left"].patch_name, "terrain")
-        self.assertEqual(self.loft.faces["bottom"].patch_name, "terrain")
-        self.assertEqual(self.loft.faces["top"].patch_name, "terrain")
+        self.assertEqual(self.loft.patch_names["left"], "terrain")
+        self.assertEqual(self.loft.patch_names["bottom"], "terrain")
+        self.assertEqual(self.loft.patch_names["top"], "terrain")
 
-    def test_project_side(self):
-        """Project side without edges"""
-        self.loft.project_side("bottom", "terrain", edges=False)
-
-        self.assertEqual(self.loft.faces["bottom"].projected_to, "terrain")
-
-    def test_project_side_edges(self):
-        """Project side with edges"""
-        self.loft.project_side("bottom", "terrain", edges=True)
-        self.assertEqual(self.loft.faces["bottom"].projected_to, "terrain")
-
-        for edge in self.loft.faces["bottom"].edges:
-            self.assertTrue(isinstance(edge, Project))
-
-    def test_edges(self):
+    @parameterized.expand(
+        (
+            (0, 4, Arc),
+            (0, 1, Project),
+            (1, 2, Project),
+            (2, 3, Project),
+            (3, 0, Project),
+        )
+    )
+    def test_edges(self, corner_1, corner_2, edge_data_class):
         """An ad-hoc Frame object with edges"""
         self.loft.project_side("bottom", "terrain", edges=True)
         self.loft.add_side_edge(0, Arc([0.1, 0.1, 0.5]))
 
-        edges = self.loft.edge_map
+        edges = self.loft.edges
 
-        self.assertIsInstance(edges[0][4][0].edges[0], Arc)
-        self.assertIsInstance(edges[0][1][0].edges[0], Project)
-        self.assertIsInstance(edges[1][2][0].edges[0], Project)
-        self.assertIsInstance(edges[2][3][0].edges[0], Project)
-        self.assertIsInstance(edges[3][0][0].edges[0], Project)
+        self.assertIsInstance(edges[corner_1][corner_2], edge_data_class)
 
-    def test_faces(self):
+    @parameterized.expand((("bottom", "top", "left", "right", "front", "back")))
+    def test_faces(self, side):
         """A dict of fresh faces"""
-        self.assertEqual(len(self.loft.faces), 6)
-
-        for _, face in self.loft.faces.items():
-            self.assertIsInstance(face, Face)
+        _ = self.loft.get_face(side)
 
     def test_patch_from_corner_empty(self):
         """No patches defined at any corner"""
@@ -87,6 +77,170 @@ class OperationTests(BlockTestCase):
 
         self.assertSetEqual(self.loft.get_patches_at_corner(0), {"terrain", "wall", "atmosphere"})
         self.assertSetEqual(self.loft.get_patches_at_corner(1), {"terrain", "wall"})
+
+    def test_chop(self):
+        """Chop and check"""
+        self.loft.chop(0, count=10)
+
+        self.assertEqual(len(self.loft.chops[0]), 1)
+
+    def test_unchop(self):
+        """Chop, unchop and check"""
+        self.loft.chop(0, count=10)
+        self.loft.unchop(0)
+
+        self.assertEqual(len(self.loft.chops[0]), 0)
+
+    def test_set_cell_zone(self):
+        """Make sure the set_cell_zone method exists"""
+        self.loft.set_cell_zone("test")
+
+        self.assertEqual(self.loft.cell_zone, "test")
+
+    def test_center(self):
+        """Center of the operation"""
+        np.testing.assert_array_almost_equal(self.loft.center, [0.5, 0.5, 0.5])
+
+    @parameterized.expand(("bottom", "top", "front", "back", "left", "right"))
+    def test_set_patch_name(self, side):
+        """Set patch names and retrieve it in operation.patch_names"""
+        self.loft.set_patch(side, "test")
+
+        self.assertEqual(self.loft.patch_names[side], "test")
+
+
+class OperationProjectionTests(BlockTestCase):
+    """Operation: projections"""
+
+    def setUp(self):
+        self.loft = self.make_loft(0)
+
+    def count_edges(self, kind: str) -> int:
+        """Returns the number of non-Line edges in self.loft"""
+        n_edges = 0
+
+        for beam in self.loft.edges.get_all_beams():
+            edge_data = beam[2]
+            if edge_data.kind == kind:
+                n_edges += 1
+
+        return n_edges
+
+    def test_project_side_top(self):
+        """Project a top face, no edges, no points"""
+        self.loft.project_side("top", "terrain")
+
+        self.assertEqual(self.loft.top_face.projected_to, "terrain")
+
+    def test_project_side_bottom(self):
+        """Project a bottom face, no edges, no points"""
+        self.loft.project_side("bottom", "terrain")
+
+        self.assertEqual(self.loft.bottom_face.projected_to, "terrain")
+
+    @parameterized.expand(("front", "right", "back", "left"))
+    def test_project_sides(self, side):
+        """Project sides (without top and bottom), no points, no edges"""
+        self.loft.project_side(side, "terrain")
+
+        index = self.loft.get_index_from_side(side)
+        self.assertEqual(self.loft.side_projects[index], "terrain")
+
+    def test_no_projected_edges(self):
+        """Make sure there are no other than Line edges in a plain operation"""
+
+        self.assertEqual(self.count_edges("line"), 12)
+
+    @parameterized.expand(("top", "bottom", "left", "right", "front", "back"))
+    def test_project_sides_edges(self, side):
+        """When projecting a side with edges=true, 4 Projected edges must be created"""
+        self.loft.project_side(side, "terrain", edges=True)
+
+        self.assertEqual(self.count_edges("project"), 4)
+
+    @parameterized.expand(("top", "bottom", "left", "right", "front", "back"))
+    def test_project_sides_points(self, side):
+        """Project 4 points when projecting sides with points=True"""
+        self.loft.project_side(side, "terrain", points=True)
+
+        n_projected = 0
+
+        for point in self.loft.top_face.points + self.loft.bottom_face.points:
+            if point.projected_to == ["terrain"]:
+                n_projected += 1
+
+        self.assertEqual(n_projected, 4)
+
+    def test_project_side(self):
+        """Project side without edges"""
+        self.loft.project_side("bottom", "terrain", edges=False)
+
+        self.assertEqual(self.loft.bottom_face.projected_to, "terrain")
+
+    def test_project_side_edges(self):
+        """Project side with edges"""
+        self.loft.project_side("bottom", "terrain", edges=True)
+        self.assertEqual(self.loft.bottom_face.projected_to, "terrain")
+
+        for edge in self.loft.bottom_face.edges:
+            self.assertTrue(isinstance(edge, Project))
+
+    def test_project_corner_top(self):
+        """Project a vertex"""
+        self.loft.project_corner(0, "terrain")
+
+        self.assertEqual(self.loft.bottom_face.points[0].projected_to, ["terrain"])
+
+    def test_project_corner_bottom(self):
+        """Project a vertex"""
+        self.loft.project_corner(4, "terrain")
+
+        self.assertEqual(self.loft.top_face.points[0].projected_to, ["terrain"])
+
+    @parameterized.expand(
+        (
+            (0, 1),  # 1
+            (1, 2),  # 2
+            (2, 3),  # 3
+            (3, 0),  # 4
+            (4, 5),  # 5
+            (5, 6),  # 6
+            (6, 7),  # 7
+            (7, 4),  # 8
+            (0, 4),  # 9
+            (1, 5),  # 10
+            (2, 6),  # 11
+            (3, 7),  # 12
+            (1, 0),  # 13
+            (2, 1),  # 14
+            (3, 2),  # 15
+            (0, 3),  # 16
+            (5, 4),  # 17
+            (6, 5),  # 18
+            (7, 6),  # 19
+            (4, 7),  # 20
+            (4, 0),  # 21
+            (5, 1),  # 22
+            (6, 2),  # 23
+            (7, 3),  # 24
+        )
+    )
+    def test_project_edge(self, corner_1, corner_2):
+        """Find the same edge in the frame as projected pair"""
+        self.loft.project_edge(corner_1, corner_2, "test")
+
+        # find the edge in the frame and check if the corners are appropriate
+        found = False
+        for beam in self.loft.edges.get_all_beams():
+            data = beam[2]
+
+            if data.kind == "project":
+                self.assertIn(beam[0], {corner_1, corner_2})
+                self.assertIn(beam[1], {corner_1, corner_2})
+                self.assertEqual(data.geometry, ["test"])
+                found = True
+
+        self.assertTrue(found)
 
 
 class OperationTransformTests(unittest.TestCase):
@@ -124,12 +278,12 @@ class OperationTransformTests(unittest.TestCase):
         translated_op = self.loft.copy().translate(translate_vector)
 
         np.testing.assert_almost_equal(
-            original_op.faces["bottom"].point_array + translate_vector, translated_op.faces["bottom"].point_array
+            original_op.bottom_face.point_array + translate_vector, translated_op.bottom_face.point_array
         )
 
         np.testing.assert_almost_equal(
-            original_op.edge_map[0][4][0].edges[0].point.position + translate_vector,
-            translated_op.edge_map[0][4][0].edges[0].point.position,
+            original_op.edges[0][4].point.position + translate_vector,
+            translated_op.edges[0][4].point.position,
         )
 
     def test_rotate(self):
@@ -141,7 +295,7 @@ class OperationTransformTests(unittest.TestCase):
         rotated_op = self.loft.copy().rotate(angle, axis, origin)
 
         def extrude_direction(op):
-            return f.unit_vector(op.faces["top"].point_array[0] - op.faces["bottom"].point_array[0])
+            return f.unit_vector(op.top_face.point_array[0] - op.bottom_face.point_array[0])
 
         np.testing.assert_almost_equal(
             f.angle_between(extrude_direction(original_op), extrude_direction(rotated_op)), angle

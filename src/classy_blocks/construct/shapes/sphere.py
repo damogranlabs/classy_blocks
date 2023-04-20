@@ -61,7 +61,7 @@ def eighth_sphere_lofts(
     shell_2 = Loft(bottom.faces[2], Face([point_DU, point_P2U, left.points["P2"].position, left.points["D"].position]))
     shell_2.project_side("right", geometry_name, edges=True)
 
-    shell_3 = Loft(shell_1.faces["top"], left.faces[1])
+    shell_3 = Loft(shell_1.top_face, left.faces[1])
     shell_3.project_side("right", geometry_name, edges=True)
     lofts += [shell_1, shell_2, shell_3]
 

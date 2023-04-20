@@ -19,8 +19,8 @@ class PatchList:
 
     def add(self, vertices: List[Vertex], operation: Operation) -> None:
         """Create Patches from operation's patch_names"""
-        for orient in operation.patch_names:
-            self.add_side(operation.patch_names[orient], orient, vertices)
+        for orient, name in operation.patch_names.items():
+            self.add_side(name, orient, vertices)
 
     def get(self, name: str) -> Patch:
         """Fetches an existing Patch or creates a new one"""

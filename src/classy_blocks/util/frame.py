@@ -8,7 +8,7 @@ BeamT = TypeVar("BeamT")
 
 
 class Frame(Generic[BeamT]):
-    """ "A two-dimensional dictionary for holding data
+    """A two-dimensional dictionary for holding data
     between each end of hexahedra edges (called 'beam' generically
     like a cuve's frame would be created from those);
 
@@ -55,11 +55,17 @@ class Frame(Generic[BeamT]):
     def get_all_beams(self) -> List[Tuple[int, int, BeamT]]:
         """Returns all non-None entries in self.beams"""
         beams = []
+        listed = []
 
         for corner_1, pairs in enumerate(self.beams):
             for corner_2, beam in pairs.items():
+                pair = {corner_1, corner_2}
+                if pair in listed:
+                    continue
+
                 if beam is not None:
                     beams.append((corner_1, corner_2, beam))
+                    listed.append(pair)
 
         return beams
 

@@ -5,6 +5,7 @@ from typing import List
 from classy_blocks.items.side import Side
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.construct.operations.operation import Operation
+from classy_blocks.util.constants import SIDES_MAP
 
 
 @dataclasses.dataclass
@@ -39,9 +40,12 @@ class FaceList:
 
     def add(self, vertices: List[Vertex], operation: Operation) -> None:
         """Collect projected sides from operation data"""
-        for orient, face in operation.faces.items():
-            if face.projected_to is not None:
-                self.add_side(Side(orient, vertices), face.projected_to)
+
+        for index, orient in enumerate(SIDES_MAP):
+            geometry = operation.side_projects[index]
+
+            if geometry is not None:
+                self.add_side(Side(orient, vertices), geometry)
 
     def add_side(self, side: Side, geometry: str) -> None:
         """Adds a projected face (side) to the list if it's not there yet"""

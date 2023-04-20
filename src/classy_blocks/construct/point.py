@@ -28,7 +28,7 @@ class Point(ElementBase):
     def rotate(self, angle, axis, origin: Optional[PointType] = None):
         """Rotate this point around an arbitrary axis and origin"""
         if origin is None:
-            origin = self.center
+            origin = f.vector(0, 0, 0)
 
         self.position = f.rotate(self.position, angle, f.unit_vector(axis), origin)
         return self
@@ -36,7 +36,7 @@ class Point(ElementBase):
     def scale(self, ratio, origin: Optional[PointType] = None):
         """Scale point's position around origin."""
         if origin is None:
-            origin = self.center
+            origin = f.vector(0, 0, 0)
 
         self.position = f.scale(self.position, ratio, origin)
         return self
@@ -62,10 +62,13 @@ class Point(ElementBase):
         return self.position
 
     def __eq__(self, other):
-        return f.norm(self.position - other.pos) < TOL
+        return f.norm(self.position - other.position) < TOL
 
     def __repr__(self):
         return f"Point {self.description}"
+
+    def __str__(self):
+        return repr(self)
 
 
 class Vector(Point):

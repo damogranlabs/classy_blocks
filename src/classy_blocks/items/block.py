@@ -2,7 +2,7 @@ from typing import List, get_args
 
 from classy_blocks.types import AxisType
 
-from classy_blocks.items.frame import Frame
+from classy_blocks.util.frame import Frame
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.wire import Wire

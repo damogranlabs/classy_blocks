@@ -9,6 +9,7 @@ cell_size = 0.1
 bl_thickness = 0.01
 
 sphere = cb.Hemisphere(center, radius_point, normal)
+
 sphere.chop_axial(start_size=cell_size)
 sphere.chop_radial(start_size=cell_size, end_size=bl_thickness)
 sphere.chop_tangential(start_size=cell_size)

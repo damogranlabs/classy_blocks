@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 import numpy as np
 
@@ -54,7 +54,7 @@ class ExtrudedRing(RoundHollowShape):
         )
 
     @classmethod
-    def expand(cls, source: RoundSolidShape, thickness: float) -> "ExtrudedRing":
+    def expand(cls, source: Union[RoundSolidShape, RoundHollowShape], thickness: float) -> "ExtrudedRing":
         """Create a new concentric Ring with radius, enlarged by 'thickness';
         Can be used on Cylinder or ExtrudedRing"""
         sketch_1 = source.sketch_1
@@ -101,7 +101,6 @@ class RevolvedRing(ExtrudedRing):
     of revolution (with non-orthogonal blocks)
     from known 2d-blocking in cross-section."""
 
-    # FIXME: too many ancestors
     # TODO: automatic point sorting to match ExtrudedRing numbering?
 
     axial_axis = 0
@@ -129,7 +128,7 @@ class RevolvedRing(ExtrudedRing):
 
     def set_inner_patch(self, name: str) -> None:
         """Assign the faces of inside surface to a named patch"""
-        for operation in self.shell:
+        for operation in self.operations:
             operation.set_patch(self.inner_patch, name)
 
     # methods/properties that differ from a lofted-sketch type of shape

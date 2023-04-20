@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 from classy_blocks.types import OrientType
 
 # data type
@@ -19,6 +19,13 @@ FACE_MAP: Dict[OrientType, Tuple[int, int, int, int]] = {
     "front": (4, 5, 1, 0),
     "back": (7, 6, 2, 3),
 }
+
+SIDES_MAP: List[OrientType] = [
+    "front",
+    "right",
+    "back",
+    "left",
+]
 
 # pairs of corner indexes along axes
 AXIS_PAIRS = (
