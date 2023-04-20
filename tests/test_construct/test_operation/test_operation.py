@@ -231,6 +231,7 @@ class OperationProjectionTests(BlockTestCase):
 
         # find the edge in the frame and check if the corners are appropriate
         found = False
+
         for beam in self.loft.edges.get_all_beams():
             data = beam[2]
 
@@ -239,8 +240,9 @@ class OperationProjectionTests(BlockTestCase):
                 self.assertIn(beam[1], {corner_1, corner_2})
                 self.assertEqual(data.geometry, ["test"])
                 found = True
+                break
 
-        self.assertTrue(found)
+        self.assertTrue(found, f"Edge between {corner_1} and {corner_2} not found!")
 
 
 class OperationTransformTests(unittest.TestCase):
@@ -293,6 +295,20 @@ class OperationTransformTests(unittest.TestCase):
 
         original_op = self.loft
         rotated_op = self.loft.copy().rotate(angle, axis, origin)
+
+        def extrude_direction(op):
+            return f.unit_vector(op.top_face.point_array[0] - op.bottom_face.point_array[0])
+
+        np.testing.assert_almost_equal(
+            f.angle_between(extrude_direction(original_op), extrude_direction(rotated_op)), angle
+        )
+
+    def test_rotate_default_origin(self):
+        axis = [0.0, 1.0, 0.0]
+        angle = np.pi / 2
+
+        original_op = self.loft
+        rotated_op = self.loft.copy().rotate(angle, axis)
 
         def extrude_direction(op):
             return f.unit_vector(op.top_face.point_array[0] - op.bottom_face.point_array[0])

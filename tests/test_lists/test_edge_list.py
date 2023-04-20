@@ -110,7 +110,7 @@ class EdgeListTests(DataTestCase):
             elif edge.kind == "project":
                 no_project += 1
             else:
-                raise AssertionError(f"Unexpected edge kind: {edge.kind}")
+                self.fail(f"Unknown edge type: {edge.kind}")
 
         self.assertEqual(no_arc, 4)
         self.assertEqual(no_project, 2)

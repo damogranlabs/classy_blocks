@@ -5,6 +5,7 @@ from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.shapes.elbow import Elbow
 from classy_blocks.construct.shapes.rings import RevolvedRing
 from classy_blocks.construct.shapes.sphere import Hemisphere
+from classy_blocks.construct.shapes.frustum import Frustum
 from classy_blocks.util import functions as f
 
 
@@ -92,3 +93,15 @@ class SphereTests(unittest.TestCase):
         for loft in sphere.shell:
             for point in loft.get_face("right").point_array:
                 self.assertAlmostEqual(f.norm(point - center), radius)
+
+
+class FrustumTests(unittest.TestCase):
+    def test_curved_side(self):
+        """Create a Frustum with curved side edges"""
+        frustum = Frustum([0, 0, 0], [1, 0, 0], [0, 1, 0], 0.4, 0.333)
+
+        for operation in frustum.shell:
+            edges = operation.edges
+
+            self.assertEqual(edges[1][5].kind, "arc")
+            self.assertEqual(edges[2][6].kind, "arc")

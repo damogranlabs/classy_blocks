@@ -86,21 +86,18 @@ def rotation_matrix(axis: VectorType, theta: float):
 
 def rotate(point: PointType, angle: float, axis: VectorType, origin: PointType) -> NPPointType:
     """Rotate a point around an axis@origin by a given angle [radians]"""
-    point = np.asarray(point)
-    axis = np.asarray(axis)
-    origin = np.asarray(origin)
+    point = np.asarray(point, dtype=constants.DTYPE)
+    axis = np.asarray(axis, dtype=constants.DTYPE)
+    origin = np.asarray(origin, dtype=constants.DTYPE)
 
     rotated_point = np.dot(rotation_matrix(axis, angle), point - origin)
     return rotated_point + origin
 
 
-def scale(point: PointType, ratio: float, origin: Optional[PointType] = None) -> NPPointType:
+def scale(point: PointType, ratio: float, origin: Optional[PointType]) -> NPPointType:
     """Scales a point around origin by specified ratio;
     if not specified, origin is taken as [0, 0, 0]."""
-    if origin is None:
-        origin = vector(0, 0, 0)
-
-    point = np.asarray(point)
+    point = np.asarray(point, dtype=constants.DTYPE)
     origin = np.asarray(origin, dtype=constants.DTYPE)
 
     return origin + (point - origin) * ratio

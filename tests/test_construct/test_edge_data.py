@@ -62,3 +62,11 @@ class EdgeDataTests(unittest.TestCase):
     def test_project_create(self):
         """Create a Projected edge"""
         _ = edges.Project(["terrain", "walls"])
+
+    def test_default_transform(self):
+        """Issue a warning error when transforming an edge
+        with a default center"""
+        edge = edges.Line()
+
+        with self.assertWarns(Warning):
+            edge.rotate(1, [0, 0, 1])

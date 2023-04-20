@@ -151,7 +151,7 @@ class EdgeValidityTests(unittest.TestCase):
 
     def test_degenerate(self):
         """An edge between two vertices at the same point"""
-        edge = factory.create(Vertex([0, 0, 0], 0), Vertex([1, 0, 0], 1), edges.Line())
+        edge = factory.create(Vertex([0, 0, 0], 0), Vertex([0, 0, 0], 1), edges.Arc([1, 1, 1]))
         self.assertFalse(edge.is_valid)
 
     def test_line_edge(self):

@@ -178,7 +178,6 @@ class Operation(ElementBase):
 
     def get_patches_at_corner(self, corner: int) -> set:
         """Returns patch names at given corner (up to 3)"""
-        # TODO: TEST
         patches = set()
 
         # 1st patch: from top or bottom face

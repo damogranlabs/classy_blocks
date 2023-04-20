@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from classy_blocks.construct.point import Point
+from classy_blocks.construct.point import Point, Vector
 from classy_blocks.util.constants import TOL
 
 
@@ -39,3 +39,14 @@ class PointTests(unittest.TestCase):
         other = Point([1 + delta, 1 + delta, 1 + delta])
 
         self.assertFalse(self.point == other)
+
+    def test_point_description(self):
+        """Point output"""
+        self.assertEqual(str(self.point), "Point (1.00000000 1.00000000 1.00000000)")
+        self.assertEqual(repr(self.point), "Point (1.00000000 1.00000000 1.00000000)")
+
+    def test_vector_description(self):
+        """Vector output"""
+        vector = Vector([1, 0, 0])
+        self.assertEqual(str(vector), "Vector (1.00000000 1.00000000 1.00000000)")
+        self.assertEqual(repr(vector), "Vector (1.00000000 1.00000000 1.00000000)")
