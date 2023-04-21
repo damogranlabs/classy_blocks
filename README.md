@@ -6,6 +6,8 @@ Python classes for easier creation of OpenFOAM's blockMesh dictionaries.
 
 > Warning! This project is currently under development and is not yet very user-friendly. It still lacks some important features and probably features a lot of bugs. However, you're welcome to suggest features, improvements, and point out bugs.
 
+> Note: version 1.0.0 introduces backwards-incompatible changes in API. Use [latest 0.0.1 commit](https://github.com/damogranlabs/classy_blocks/tree/30d12834194313c6243a921267aabf3233454280) for your old scripts. However, you might want to give the new version a try...
+
 # About
 _blockMesh_ is a very powerful mesher but the amount of manual labour it requires to make even the simplest
 meshes makes it mostly useless. Even attempts to simplify or parametrize blockMeshDicts with `#calc` or even

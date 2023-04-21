@@ -48,5 +48,5 @@ class PointTests(unittest.TestCase):
     def test_vector_description(self):
         """Vector output"""
         vector = Vector([1, 0, 0])
-        self.assertEqual(str(vector), "Vector (1.00000000 1.00000000 1.00000000)")
-        self.assertEqual(repr(vector), "Vector (1.00000000 1.00000000 1.00000000)")
+        self.assertEqual(str(vector), "Vector (1.00000000 0.00000000 0.00000000)")
+        self.assertEqual(repr(vector), "Vector (1.00000000 0.00000000 0.00000000)")
