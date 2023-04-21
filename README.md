@@ -1,6 +1,6 @@
 # classy_blocks
 
-![Flywheel](https://raw.githubusercontent.com/damogranlabs/classy_examples/main/showcase/flywheel.png "Flywheel")
+![Flywheel](showcase/flywheel.png "Flywheel")
 
 Python classes for easier creation of OpenFOAM's blockMesh dictionaries.
 
@@ -135,8 +135,8 @@ inlet.set_end_patch('outlet')
 mesh.add(inlet)
 ```
 
-> See [examples/shape](https://github.com/damogranlabs/classy_examples) for use of each _shape_
-> and [examples/complex](https://github.com/damogranlabs/classy_examples) for a more real-life example usage of shapes.
+> See `examples/shape` for use of each _shape_
+> and `examples/complex` for a more real-life example usage of shapes.
 
 ## Operations
 
@@ -173,7 +173,7 @@ revolve.chop(2, start_size=0.05) # revolve direction
 mesh.add(revolve)
 ```
 
-> See [examples/operations](https://github.com/damogranlabs/classy_examples) for an example of each operation.
+> See `examples/operations` for an example of each operation.
 
 ## Projection To Geometry
 
@@ -243,7 +243,7 @@ For instance, an `Elbow` can be _chained_ to a `Cylinder` just like joining pipe
 Moreover, most shapes* can be expanded to form a _wall_ version of the same shape. For instance, expanding a `Cylinder`
 creates an `ExtrudedRing`.
 
-> See [examples/chaining](https://github.com/damogranlabs/classy_examples) for an example of each operation.
+> See `examples/chaining` for an example of each operation.
 
 ## Debugging
 
