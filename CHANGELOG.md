@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1. 0. 0] Refactor
 A complete overhaul of all objects in an attempt to create a proper SOLID-obeying
 package with type hinting, static typing and no python-ish duck-typing hacks.
 
@@ -35,5 +35,12 @@ package with type hinting, static typing and no python-ish duck-typing hacks.
 - block.from_points has been removed (use Loft)
 - T-joint will be added when a skew transform is implemented
 
-# [0.0.1] Status Quo
-Before refactoring
+## [0.0.1] Status Quo
+### Added
+examples and showcases from classy_examples repo
+static type analysis, formatting, linting
+### Changed
+Major package layout refactor
+Major CI refactor
+### Removed
+Some dependencies, docs and other stuff that is not ready ATM
