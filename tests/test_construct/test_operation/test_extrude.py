@@ -1,11 +1,11 @@
 import unittest
 
-from parameterized import parameterized
 import numpy as np
 
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.extrude import Extrude
 from classy_blocks.construct.edges import Arc
+from classy_blocks.util import functions as f
 
 
 class ExtrudeTests(unittest.TestCase):
@@ -13,7 +13,7 @@ class ExtrudeTests(unittest.TestCase):
         self.points = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]]
         self.edges = [Arc([0.5, 0.1, 0]), None, None, None]
 
-        self.vector = [0, 0, 1]
+        self.amount = [0, 0, 1]
 
     @property
     def face(self) -> Face:
@@ -21,7 +21,7 @@ class ExtrudeTests(unittest.TestCase):
 
     @property
     def extrude(self) -> Extrude:
-        return Extrude(self.face, self.vector)
+        return Extrude(self.face, self.amount)
 
     def test_extrude_box(self):
         """Create an Extrude"""
@@ -29,18 +29,18 @@ class ExtrudeTests(unittest.TestCase):
 
         for i in range(4):
             np.testing.assert_array_almost_equal(
-                ext.top_face.points[i].position - ext.bottom_face.points[i].position, self.vector
+                ext.top_face.points[i].position - ext.bottom_face.points[i].position, self.amount
             )
 
     def test_extrude_slanted(self):
         """Extrude with a different vector"""
-        self.vector = [1, 1, 1]
+        self.amount = [1, 1, 1]
 
         ext = self.extrude
 
         for i in range(4):
             np.testing.assert_array_almost_equal(
-                ext.top_face.points[i].position - ext.bottom_face.points[i].position, self.vector
+                ext.top_face.points[i].position - ext.bottom_face.points[i].position, self.amount
             )
 
     def test_extrude_edges(self):
@@ -55,3 +55,15 @@ class ExtrudeTests(unittest.TestCase):
                     n_arc += 1
 
         self.assertEqual(n_arc, 2)
+
+    def test_extrude_amount(self):
+        """Extrude by amount"""
+        self.points = np.asarray(self.points) / 2
+        self.amount = 0.1
+
+        ext = self.extrude
+
+        for i in range(4):
+            self.assertAlmostEqual(
+                f.norm(ext.top_face.points[i].position - ext.bottom_face.points[i].position), self.amount
+            )

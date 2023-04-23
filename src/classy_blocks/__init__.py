@@ -1,4 +1,4 @@
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 from .construct.edges import Arc, Origin, Angle, Spline, PolyLine, Project
 from .construct.flat.face import Face
