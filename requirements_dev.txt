@@ -1,7 +1,0 @@
-mypy
-black
-pylint
-parameterized
-nptyping
-
-tox
