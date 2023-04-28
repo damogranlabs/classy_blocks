@@ -80,13 +80,12 @@ Ready to contribute? Here's how to set up `classy_blocks` for local development.
 - Small fixes like documentation, typo or similar: no need to install anything. Do your change and submit PR.
 - Code/test/examples fixes: install local classy_block pkg and development requirements::
 
-    $ python -m pip install -r requirements_dev.txt
-    $ python -m pip install -e .
+    $ python -m pip install -e .[dev]
 
 6. If code changes were made: check that your changes pass tests, typing, format and lint rules::
 
-    $ pytest tests
-    $ mypy typing
+    $ python -m unittest -v -s tests
+    $ mypy src
     $ black src
     $ pylint src
 
@@ -117,4 +116,4 @@ Tips
 
 To run a subset of tests::
 
-$ pytest tests.test_classy_blocks
+$ python -m unittest tests.test_classy_blocks

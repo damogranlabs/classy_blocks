@@ -108,6 +108,7 @@ After blocks have been placed, it is possible to create new geometry based on pl
 
 How to run:
 
+- Install `classy_blocks` as described in (# How To Use It)
 - `cd` to directory of the chosen example
 - Run `python <example.py>`; that will write blockMeshDict to examples/case
 - Run `blockMesh` on the case
@@ -289,7 +290,7 @@ A parametric, Low-Re mesh of a real-life impeller *(not included in examples)*
 
 # Prerequisites
 
-Package (python) dependencies can be found in *setup.py* file.
+Package (python) dependencies can be found in *pyproject.toml* file.
 Other dependencies that must be installed:
 - python3.7 and higher
 - OpenFoam: .org or .com version is supported, foam-extend's blockMesh doesn't support multigrading but is otherwise also compatible.
@@ -302,7 +303,7 @@ There's no official documentation yet so here are some tips for easier navigatio
 
 1. User writes a script that defines operations/shapes/objects, their edges, projections, cell counts, whatever is needed.
 1. All the stuff is added to mesh.
-1. Mesh converts user entered data into vertices, blocks, edges and whatnot. 
+1. Mesh converts user entered data into vertices, blocks, edges and whatnot.
 1. The mesh can be written at that point; or,
 1. Modification of placed geometry, either by manually moving vertices or by utilizing some sort of optimization algorithm.
 1. Output of optimized/modified mesh.
