@@ -27,11 +27,10 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "mypy",
+    "parameterized",
     "black",
     "pylint",
-    "parameterized",
-    "tox"
+    "mypy"
 ]
 
 [tool.black]
