@@ -1,13 +1,13 @@
 """Predefined types"""
-from typing import List, Union, Literal
-from nptyping import NDArray, Shape, Float
+from typing import List, Union, Literal, Sequence, Any
+from nptyping import NDArray, Shape
 
 # A single point can be specified as a list of floats or as a numpy array
-NPPointType = NDArray[Shape["3, 1"], Float]
-PointType = Union[List[Union[int, float]], NPPointType]
+NPPointType = NDArray[Shape["3, 1"], Any]
+PointType = Union[Sequence[Union[int, float]], NPPointType]
 # Similar: a list of points
-NPPointListType = NDArray[Shape["*, 3"], Float]
-PointListType = Union[NPPointListType, List[PointType], List[NPPointType]]
+NPPointListType = NDArray[Shape["*, 3"], Any]
+PointListType = Union[NPPointListType, Sequence[PointType], Sequence[NPPointType]]
 # same as PointType but with a different name to avoid confusion
 NPVectorType = NPPointType
 VectorType = PointType

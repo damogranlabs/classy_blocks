@@ -1,7 +1,7 @@
-from typing import List
+from typing import List, get_args
 
 from tests.fixtures.data import DataTestCase
-
+from classy_blocks.types import AxisType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.items.vertex import Vertex
@@ -36,7 +36,7 @@ class BlockTestCase(DataTestCase):
 
             block.add_edge(corner_1, corner_2, edge)
 
-        for axis in (0, 1, 2):
+        for axis in get_args(AxisType):
             for chop in block_data.chops[axis]:
                 block.chop(axis, chop)
 
