@@ -1,4 +1,5 @@
 import unittest
+from typing import cast
 import numpy as np
 
 from classy_blocks.construct import edges
@@ -50,8 +51,10 @@ class FaceTests(unittest.TestCase):
             np.testing.assert_almost_equal(p1, p2 - translate_vector)
 
         # check arc edge
+        translated_arc = cast(edges.Arc, translated_face.edges[0])
+        orig_arc = cast(edges.Arc, original_face.edges[0])
         np.testing.assert_almost_equal(
-            translated_face.edges[0].point.position - translate_vector, original_face.edges[0].point.position
+            translated_arc.point.position - translate_vector, orig_arc.point.position
         )
 
     def test_rotate_face_center(self):
@@ -111,7 +114,8 @@ class FaceTests(unittest.TestCase):
         """Scale face with one custom edge and check its new data"""
         face = Face(self.points, [edges.Arc([0.5, -0.25, 0]), None, None, None]).scale(2, origin=[0, 0, 0])
 
-        np.testing.assert_array_equal(face.edges[0].point.position, [1, -0.5, 0])
+        arc = cast(edges.Arc, face.edges[0])
+        np.testing.assert_array_equal(arc.point.position, [1, -0.5, 0])
 
     def test_add_edge(self):
         """Replace a Line edge with something else"""
