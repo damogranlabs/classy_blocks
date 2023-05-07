@@ -15,7 +15,7 @@ class Point(ElementBase):
     to a set of surfaces and transformations"""
 
     def __init__(self, position: PointType):
-        self.position = np.asarray(position, dtype=DTYPE)
+        self.position = np.array(position, dtype=DTYPE)
         assert np.shape(self.position) == (3,), "Provide a point in 3D space"
 
         self.projected_to: ProjectToType = []
