@@ -7,17 +7,17 @@ from classy_blocks.construct import edges
 from classy_blocks.items.edges.arcs.arc_base import ArcEdgeBase
 from classy_blocks.types import PointType, VectorType
 from classy_blocks.util import functions as f
-from classy_blocks.util import constants
 
 
 def arc_from_theta(edge_point_1: PointType, edge_point_2: PointType, angle: float, axis: VectorType) -> PointType:
     """Calculates a point on the arc edge from given sector angle and an
     axis of the arc. An interface to the Foundation's
     arc <vertex-1> <vertex-2> <angle> (axis) alternative edge specification:
-    https://github.com/OpenFOAM/OpenFOAM-dev/commit/73d253c34b3e184802efb316f996f244cc795ec6"""
-    # Meticulously transcribed from
-    # https://github.com/OpenFOAM/OpenFOAM-dev/blob/master/src/mesh/blockMesh/blockEdges/arcEdge/arcEdge.C
+    https://github.com/OpenFOAM/OpenFOAM-dev/commit/73d253c34b3e184802efb316f996f244cc795ec6
 
+    Note: Meticulously transcribed from
+    https://github.com/OpenFOAM/OpenFOAM-dev/blob/master/src/mesh/blockMesh/blockEdges/arcEdge/arcEdge.C
+    """
     assert 0 < angle < 360, f"Angle {angle} should be between 0 and 2*pi"
 
     axis = np.asarray(axis)

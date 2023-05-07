@@ -1,4 +1,3 @@
-import dataclasses
 from typing import List, Dict, Union, TypeVar, Optional
 
 import numpy as np
