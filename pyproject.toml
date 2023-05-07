@@ -29,15 +29,15 @@ dependencies = [
 dev = [
     "parameterized",
     "black",
-    "pylint",
+    "ruff",
     "mypy"
 ]
 
 [tool.black]
 line-length = 120
 
-[tool.pylint]
-max-line-length = 120
+[tool.ruff]
+line-length = 120
 
 [[tool.mypy.overrides]]
 module = "scipy,scipy.*,parameterized"
