@@ -2,12 +2,14 @@ import unittest
 import numpy as np
 
 from classy_blocks.construct.flat.face import Face
+from classy_blocks.construct.edges import Origin
 from classy_blocks.construct.shapes.elbow import Elbow
 from classy_blocks.construct.shapes.rings import RevolvedRing
 from classy_blocks.construct.shapes.sphere import Hemisphere
 from classy_blocks.construct.shapes.frustum import Frustum
+from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.util import functions as f
-
+from classy_blocks.mesh import Mesh
 
 class ElbowTests(unittest.TestCase):
     """Tests of the Elbow shape"""
@@ -105,3 +107,15 @@ class FrustumTests(unittest.TestCase):
 
             self.assertEqual(edges[1][5].kind, "arc")
             self.assertEqual(edges[2][6].kind, "arc")
+
+class CylinderTests(unittest.TestCase):
+    def test_cylinder_edges(self):
+        """Bug check: check that all edges are translated equally"""
+        axis_point_1 = [0.0, 0.0, 0.0]
+        axis_point_2 = [1.0, 0.0, 0.0]
+        radius_point_1 = [0.0, 1.0, 0.0]
+        cylinder = Cylinder(axis_point_1, axis_point_2, radius_point_1)
+
+        for face in cylinder.sketch_2.shell:
+            # in Disk, 2nd edge of shell's face is Origin
+            self.assertEqual(face.edges[1].origin.position[0], 1)
