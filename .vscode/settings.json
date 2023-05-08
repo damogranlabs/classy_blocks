@@ -1,7 +1,6 @@
 {
     "python.formatting.provider": "none",
     "python.linting.enabled": true,
-    "python.linting.pylintEnabled": true,
     "python.linting.lintOnSave": true,
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.diagnosticMode": "openFilesOnly",
@@ -20,6 +19,6 @@
         "**/.hg": true,
         "**/CVS": true,
         "**/.DS_Store": true,
-        "**/Thumbs.db": true,
-    },
+        "**/Thumbs.db": true
+    }
 }
