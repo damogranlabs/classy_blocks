@@ -36,4 +36,3 @@ jobs:
             -   name: analysis
                 run: |
                     tox -e analysis
-
