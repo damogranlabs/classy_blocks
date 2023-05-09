@@ -1,3 +1,4 @@
+from typing import Optional
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.revolve import Revolve
 
@@ -27,7 +28,9 @@ class Wedge(Revolve):
                         inner
     __  _____  __  _____  __  _____  __  __ axis of symmetry (x)"""
 
-    def __init__(self, face: Face, angle: float = f.deg2rad(2)):
+    def __init__(self, face: Face, angle: Optional[float] = None):
+        if angle is None:
+            angle = f.deg2rad(2)
         # default axis
         axis = [1.0, 0.0, 0.0]
         # default origin

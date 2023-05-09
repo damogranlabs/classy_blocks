@@ -2,14 +2,12 @@ import unittest
 import numpy as np
 
 from classy_blocks.construct.flat.face import Face
-from classy_blocks.construct.edges import Origin
 from classy_blocks.construct.shapes.elbow import Elbow
 from classy_blocks.construct.shapes.rings import RevolvedRing
 from classy_blocks.construct.shapes.sphere import Hemisphere
 from classy_blocks.construct.shapes.frustum import Frustum
 from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.util import functions as f
-from classy_blocks.mesh import Mesh
 
 class ElbowTests(unittest.TestCase):
     """Tests of the Elbow shape"""

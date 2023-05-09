@@ -133,7 +133,7 @@ class Grading:
         out += ")"
 
         if not math.isclose(length_ratio_sum, 1, rel_tol=constants.TOL):
-            warnings.warn(f"Length ratio doesn't add up to 1: {length_ratio_sum}")
+            warnings.warn(f"Length ratio doesn't add up to 1: {length_ratio_sum}", stacklevel=2)
 
         return out
 

@@ -13,8 +13,8 @@ class FaceTests(unittest.TestCase):
 
     def test_face_points(self):
         """Raise an exception if less than 4 points is provided"""
-        with self.assertRaises(Exception):
-            _ = Face(self.points[:3])
+        with self.assertRaises(ValueError):
+            Face(self.points[:3])
 
     def test_face_center(self):
         """The center property"""

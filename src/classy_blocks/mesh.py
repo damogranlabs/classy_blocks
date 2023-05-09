@@ -120,7 +120,7 @@ class Mesh:
 
             # FIXME: prettify, SOLIDify
             if hasattr(entity, "geometry"):
-                self.add_geometry(entity.geometry)
+                self.add_geometry(entity.__getattribute__("geometry"))
 
     @property
     def is_assembled(self) -> bool:

@@ -164,7 +164,7 @@ class Operation(ElementBase):
 
     @property
     def parts(self):
-        return [self.bottom_face, self.top_face] + self.side_edges
+        return [self.bottom_face, self.top_face, *self.side_edges]
 
     @property
     def point_array(self) -> NPPointType:

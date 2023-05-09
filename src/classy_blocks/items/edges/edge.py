@@ -58,7 +58,7 @@ class Edge(ElementBase):
 
     @property
     def center(self):
-        warnings.warn("Transforming edge with a default center (0 0 0)!")
+        warnings.warn("Transforming edge with a default center (0 0 0)!", stacklevel=2)
         return f.vector(0, 0, 0)
 
     @property

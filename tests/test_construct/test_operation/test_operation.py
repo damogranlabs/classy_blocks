@@ -53,10 +53,10 @@ class OperationTests(BlockTestCase):
 
         self.assertIsInstance(edges[corner_1][corner_2], edge_data_class)
 
-    @parameterized.expand((("bottom", "top", "left", "right", "front", "back")))
+    @parameterized.expand(("bottom", "top", "left", "right", "front", "back"))
     def test_faces(self, side):
         """A dict of fresh faces"""
-        _ = self.loft.get_face(side)
+        self.loft.get_face(side)
 
     def test_patch_from_corner_empty(self):
         """No patches defined at any corner"""

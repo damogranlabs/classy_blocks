@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # stuff that works on lists of points
 
 from typing import Literal
