@@ -53,9 +53,7 @@ class FaceTests(unittest.TestCase):
         # check arc edge
         translated_arc = cast(edges.Arc, translated_face.edges[0])
         orig_arc = cast(edges.Arc, original_face.edges[0])
-        np.testing.assert_almost_equal(
-            translated_arc.point.position - translate_vector, orig_arc.point.position
-        )
+        np.testing.assert_almost_equal(translated_arc.point.position - translate_vector, orig_arc.point.position)
 
     def test_rotate_face_center(self):
         """Face rotation"""

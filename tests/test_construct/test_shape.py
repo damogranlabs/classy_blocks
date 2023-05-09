@@ -9,6 +9,7 @@ from classy_blocks.construct.shapes.frustum import Frustum
 from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.util import functions as f
 
+
 class ElbowTests(unittest.TestCase):
     """Tests of the Elbow shape"""
 
@@ -105,6 +106,7 @@ class FrustumTests(unittest.TestCase):
 
             self.assertEqual(edges[1][5].kind, "arc")
             self.assertEqual(edges[2][6].kind, "arc")
+
 
 class CylinderTests(unittest.TestCase):
     def test_cylinder_edges(self):

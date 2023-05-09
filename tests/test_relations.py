@@ -15,7 +15,7 @@ import unittest
 class TestGradingRelations(unittest.TestCase):
     """Testing valid, border and invalid cases"""
 
-    def assertAlmostEqual(self, *args, **kwargs): # noqa: N802
+    def assertAlmostEqual(self, *args, **kwargs):  # noqa: N802
         kwargs.pop("places", None)
 
         kwargs["places"] = 5
