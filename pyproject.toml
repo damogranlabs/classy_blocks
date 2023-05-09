@@ -37,6 +37,8 @@ dev = [
 line-length = 120
 
 [tool.ruff]
+select = ["E", "F", "N", "UP", "YTT", "B", "A", "ARG", "RUF"]
+target-version = "py38"
 line-length = 120
 
 [[tool.mypy.overrides]]
