@@ -23,14 +23,15 @@ dependencies = [
 "Homepage" = "https://github.com/damogranlabs/classy_blocks"
 "Tutorials" = "https://damogranlabs.com/category/classy_blocks"
 "Bug Tracker" = "https://github.com/damogranlabs/classy_blocks/issues"
-"Contributing" = "https://github.com/damogranlabs/classy_blocks/blob/master/CONTRIBUTING.rst"
+"Contributing" = "https://github.com/damogranlabs/classy_blocks/blob/master/CONTRIBUTING.md"
 
 [project.optional-dependencies]
 dev = [
     "parameterized",
     "black",
     "ruff",
-    "mypy"
+    "mypy",
+    "pre-commit"
 ]
 
 [tool.black]
