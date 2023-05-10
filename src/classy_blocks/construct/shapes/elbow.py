@@ -1,11 +1,9 @@
 import numpy as np
 
-from classy_blocks.types import PointType, VectorType
-
+from classy_blocks.base import transforms as tr
 from classy_blocks.construct.flat.sketches.disk import Disk
 from classy_blocks.construct.shapes.round import RoundSolidShape
-from classy_blocks.base import transforms as tr
-
+from classy_blocks.types import PointType, VectorType
 from classy_blocks.util import functions as f
 
 

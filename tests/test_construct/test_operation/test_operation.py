@@ -1,7 +1,7 @@
 import unittest
-from parameterized import parameterized
 
 import numpy as np
+from parameterized import parameterized
 
 from classy_blocks.construct.edges import Arc, Project
 from classy_blocks.construct.flat.face import Face

@@ -1,10 +1,9 @@
 import dataclasses
 import inspect
+from typing import Callable, Optional, Set, Tuple, Union
 
-from typing import Optional, Callable, Union, Tuple, Set
-
-from classy_blocks.types import ChopTakeType
 from classy_blocks.grading import relations as rel
+from classy_blocks.types import ChopTakeType
 
 
 @dataclasses.dataclass

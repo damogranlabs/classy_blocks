@@ -1,5 +1,4 @@
 import warnings
-
 from typing import List
 
 from classy_blocks.items.side import Side

@@ -3,8 +3,8 @@ import dataclasses
 
 from classy_blocks.base.exceptions import CornerPairError
 from classy_blocks.types import OrientType
-from classy_blocks.util.frame import Frame
 from classy_blocks.util.constants import SIDES_MAP
+from classy_blocks.util.frame import Frame
 
 
 def indent(text: str, levels: int) -> str:

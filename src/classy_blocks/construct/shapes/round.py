@@ -1,12 +1,11 @@
 from typing import List, Optional
 
-from classy_blocks.types import OrientType
-
-from classy_blocks.construct.shapes.shape import LoftedShape
 from classy_blocks.base import transforms as tr
-from classy_blocks.construct.flat.sketches.disk import Disk
 from classy_blocks.construct.flat.sketches.annulus import Annulus
+from classy_blocks.construct.flat.sketches.disk import Disk
 from classy_blocks.construct.operations.loft import Loft
+from classy_blocks.construct.shapes.shape import LoftedShape
+from classy_blocks.types import OrientType
 
 
 class RoundSolidShape(LoftedShape):

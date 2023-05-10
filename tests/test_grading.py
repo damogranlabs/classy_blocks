@@ -1,8 +1,9 @@
 import unittest
+
 from parameterized import parameterized
 
-from classy_blocks.grading.chop import functions, ChopRelation, Chop
 from classy_blocks.grading import relations as rel
+from classy_blocks.grading.chop import Chop, ChopRelation, functions
 from classy_blocks.grading.grading import Grading
 
 

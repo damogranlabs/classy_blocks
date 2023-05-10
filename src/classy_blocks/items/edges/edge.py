@@ -1,13 +1,13 @@
-import dataclasses
 import abc
+import dataclasses
 import warnings
 
+from classy_blocks.base.element import ElementBase
 from classy_blocks.construct.edges import EdgeData
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.base.element import ElementBase
 from classy_blocks.types import EdgeKindType
-from classy_blocks.util import functions as f
 from classy_blocks.util import constants
+from classy_blocks.util import functions as f
 
 
 @dataclasses.dataclass

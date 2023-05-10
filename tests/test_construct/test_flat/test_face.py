@@ -1,5 +1,6 @@
 import unittest
 from typing import cast
+
 import numpy as np
 
 from classy_blocks.construct import edges

@@ -34,9 +34,8 @@ calculations meticulously transcribed from the blockmesh grading calculator:
 https://gitlab.com/herpes-free-engineer-hpe/blockmeshgradingweb/-/blob/master/calcBlockMeshGrading.coffee
 (since block length is always known, there's less wrestling but the calculation principle is similar) """
 import copy
-import warnings
 import math
-
+import warnings
 from typing import List
 
 from classy_blocks.grading.chop import Chop

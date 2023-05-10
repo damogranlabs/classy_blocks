@@ -1,9 +1,9 @@
 import abc
 import copy
-from typing import TypeVar, List, Optional
+from typing import List, Optional, TypeVar
 
-from classy_blocks.types import PointType, VectorType, NPPointType
 from classy_blocks.base import transforms as tr
+from classy_blocks.types import NPPointType, PointType, VectorType
 
 ElementBaseT = TypeVar("ElementBaseT", bound="ElementBase")
 

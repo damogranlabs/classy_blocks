@@ -1,19 +1,16 @@
-from typing import List, Dict, Union, TypeVar, Optional
+from typing import Dict, List, Optional, TypeVar, Union
 
 import numpy as np
 
-from classy_blocks.types import AxisType, NPPointType, OrientType, ProjectToType
-
 from classy_blocks.base.element import ElementBase
+from classy_blocks.construct.edges import EdgeData, Line, Project
+from classy_blocks.construct.flat.face import Face
+from classy_blocks.grading.chop import Chop
+from classy_blocks.types import AxisType, NPPointType, OrientType, ProjectToType
+from classy_blocks.util import constants
+from classy_blocks.util.constants import SIDES_MAP
 from classy_blocks.util.frame import Frame
 from classy_blocks.util.tools import edge_map
-from classy_blocks.construct.edges import Line
-from classy_blocks.construct.flat.face import Face
-from classy_blocks.construct.edges import EdgeData, Project
-from classy_blocks.grading.chop import Chop
-from classy_blocks.util.constants import SIDES_MAP
-
-from classy_blocks.util import constants
 
 OperationT = TypeVar("OperationT", bound="Operation")
 

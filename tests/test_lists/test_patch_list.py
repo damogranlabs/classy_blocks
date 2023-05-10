@@ -1,6 +1,5 @@
-from tests.fixtures.block import BlockTestCase
-
 from classy_blocks.lists.patch_list import PatchList
+from tests.fixtures.block import BlockTestCase
 
 
 class PatchListTests(BlockTestCase):

@@ -2,8 +2,8 @@ import unittest
 
 import numpy as np
 
-from classy_blocks.construct import edges
 from classy_blocks.base import transforms as tr
+from classy_blocks.construct import edges
 from classy_blocks.util import functions as f
 
 

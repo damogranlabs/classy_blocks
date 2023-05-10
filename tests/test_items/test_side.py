@@ -1,7 +1,6 @@
-from tests.fixtures.block import BlockTestCase
-
-from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.side import Side
+from classy_blocks.items.vertex import Vertex
+from tests.fixtures.block import BlockTestCase
 
 
 class SideTests(BlockTestCase):

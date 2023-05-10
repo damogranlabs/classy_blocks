@@ -2,8 +2,8 @@
 into an easily digestable function/method arguments"""
 import abc
 import dataclasses
-
 from typing import Optional
+
 from classy_blocks.types import PointType, VectorType
 
 

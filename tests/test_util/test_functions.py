@@ -1,8 +1,9 @@
 import unittest
+
 import numpy as np
 
-from classy_blocks.util import functions as f
 from classy_blocks.util import curves as c
+from classy_blocks.util import functions as f
 
 
 class TestFunctions(unittest.TestCase):

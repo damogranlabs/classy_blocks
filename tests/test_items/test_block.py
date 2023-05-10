@@ -1,16 +1,12 @@
+import numpy as np
 from parameterized import parameterized
 
-import numpy as np
-
-from tests.fixtures.block import BlockTestCase
-
 from classy_blocks.grading.chop import Chop
-
 from classy_blocks.items.block import Block
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wire import Wire
-
 from classy_blocks.util import functions as f
+from tests.fixtures.block import BlockTestCase
 
 
 class BlockTests(BlockTestCase):

@@ -1,14 +1,13 @@
 """Mathematical functions for general everyday household use"""
-from typing import Union, Optional, Literal
+from typing import Literal, Optional, Union
 
 import numpy as np
-
 import scipy
 import scipy.linalg
 import scipy.optimize
 import scipy.spatial
 
-from classy_blocks.types import PointType, VectorType, PointListType, NPPointType, NPVectorType
+from classy_blocks.types import NPPointType, NPVectorType, PointListType, PointType, VectorType
 from classy_blocks.util import constants
 
 

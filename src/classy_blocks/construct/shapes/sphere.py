@@ -2,12 +2,11 @@ from typing import List
 
 import numpy as np
 
-from classy_blocks.types import PointType, VectorType, NPPointType, NPVectorType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketches.disk import QuarterDisk
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.shapes.round import RoundSolidShape
-
+from classy_blocks.types import NPPointType, NPVectorType, PointType, VectorType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 

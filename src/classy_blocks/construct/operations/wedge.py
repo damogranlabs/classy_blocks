@@ -1,7 +1,7 @@
 from typing import Optional
+
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.revolve import Revolve
-
 from classy_blocks.util import functions as f
 
 

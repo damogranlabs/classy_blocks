@@ -6,9 +6,9 @@ TODO: THIS IS NOT A TEST CASE!
 TODO: Proper CI/CD testing scenario and environment"""
 
 import glob
-import subprocess
 import os
 import shutil
+import subprocess
 
 current_dir = os.getcwd()
 outputs_dir = "tests/outputs/"
