@@ -90,6 +90,7 @@ formatting and other rules.
     $ ruff check src tests
     $ mypy src tests
     $ black --check --diff src tests
+    $ isort --check --diff src tests
     ```
     Make sure you test on all python versions. Help yourself with `tox` configurations.
 
