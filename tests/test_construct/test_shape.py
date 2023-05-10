@@ -52,10 +52,16 @@ class ElbowTests(unittest.TestCase):
         """Radius of the end sketch"""
         self.assertAlmostEqual(self.elbow.sketch_2.radius, self.radius_2)
 
-    def test_radius_mid(self):
+    def test_radius_mid_nonuniform(self):
         """Radius of the middle sketch"""
         # should be between 1 and 2
         self.assertAlmostEqual(self.elbow.sketch_mid.radius, (self.radius_1 + self.radius_2) / 2)
+
+    def test_radius_mid_uniform(self):
+        """Radius of the middle sketch with a uniform cross-section"""
+        # should be the same as 1 and 2
+        self.radius_2 = f.norm(self.center_point_1 - self.radius_point_1)
+        self.assertAlmostEqual(self.elbow.sketch_mid.radius, self.radius_2)
 
 
 class RevolvedRingTests(unittest.TestCase):
