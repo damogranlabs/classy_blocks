@@ -1,11 +1,14 @@
 {
     "[python]": {
         "editor.formatOnSave": true,
-        "editor.wordBasedSuggestions": false,
         "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.wordBasedSuggestions": false,
         "gitlens.codeLens.symbolScopes": [
             "!Module"
         ],
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true,
+        },
     },
     "python.linting.enabled": true,
     "python.linting.lintOnSave": true,
