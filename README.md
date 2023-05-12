@@ -17,6 +17,9 @@ classy_blocks' aim is to minimize the amount of meticulous work by providing a
 more intuitive workflow, off-the-shelf parts and some automatic helpers for building and optimization of block-structured hexahedral meshes.
 Still it is not an automatic mesher and therefore some kinds of geometry are more suited than others.
 
+## Tutorial
+Check out the [classy_blocks tutorial on damogranlabs.com](https://damogranlabs.com/2023/04/classy_blocks-tutorial-part-1-the-basics/)!
+
 ## Useful For
 ### Fields
 - Turbomachinery (impellers, propellers)
@@ -45,7 +48,7 @@ Still it is not an automatic mesher and therefore some kinds of geometry are mor
 # How To Use It
 - If you just need the `classy_blocks`, install them with: `pip install git+https://github.com/damogranlabs/classy_blocks.git`
 - If you want to run examples, follow instructions in [Examples](#examples)
-- If you want to contribute, follow instructions in [CONTRIBUTING.md](CONTRIBUTING.md)
+- If you want to contribute, follow instructions in [CONTRIBUTING.rst](CONTRIBUTING.rst)
 
 # Features
 
