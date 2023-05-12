@@ -24,7 +24,7 @@ class Block:
         self.vertices = vertices
 
         # wires and axes
-        self.wires: Frame = Frame()
+        self.wires = Frame[Wire]()
 
         # create wires and connections for quicker addressing
         for axis in range(3):
@@ -81,7 +81,7 @@ class Block:
 
     def get_axis_wires(self, axis: AxisType) -> List[Wire]:
         """Returns a list of wires that run in the given axis"""
-        return self.axes[axis].wires
+        return self.wires.get_axis_beams(axis)
 
     def add_neighbour(self, candidate: "Block") -> None:
         """Add a block to neighbours, if applicable"""

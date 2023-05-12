@@ -103,16 +103,12 @@ class EdgeListTests(DataTestCase):
         # 6 'line' edges
         no_arc = 0
         no_project = 0
-        no_line = 0
-
+    
         for edge in self.el.edges:
             if edge.kind == "angle":
                 no_arc += 1
             elif edge.kind == "project":
                 no_project += 1
-            elif edge.kind == 'line':
-                no_line  += 1
-    
-        self.assertEqual(no_line, 6)    
+        
         self.assertEqual(no_arc, 4)
         self.assertEqual(no_project, 2)

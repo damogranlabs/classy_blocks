@@ -224,6 +224,11 @@ class EdgeLengthTests(unittest.TestCase):
         """Length of the 'spline' edge - the segments, actually"""
         self.assertEqual(self.get_edge(edges.Spline([[1, 0, 0], [1, 1, 0]])).length, 3)
 
+    def test_poly_edge(self):
+        """Length of the 'polyLine' edge - accurately"""
+        self.assertEqual(self.get_edge(edges.PolyLine([[1, 0, 0], [1, 1, 0]])).length, 3)
+
+
     def test_project_edge(self):
         """Length of the 'project' edge is equal to a line"""
         self.assertEqual(self.get_edge(edges.Project("terrain")).length, 1)
@@ -312,3 +317,18 @@ class EdgeDescriptionTests(unittest.TestCase):
             self.get_edge(edges.Spline([[0, 1, 0], [1, 1, 0]])).description,
             "\tspline 0 1 ((0.00000000 1.00000000 0.00000000) (1.00000000 1.00000000 0.00000000))",
         )
+
+    def test_project_description_single(self):
+        """Projection to a single geometry"""
+        self.assertEqual(
+            self.get_edge(edges.Project('terrain')).description,
+            "\tproject 0 1 (terrain)"
+        )
+
+    def test_project_description_double(self):
+        """Projection to two geometries"""
+        self.assertEqual(
+            self.get_edge(edges.Project(['terrain', 'walls'])).description,
+            "\tproject 0 1 (terrain walls)"
+        )
+    

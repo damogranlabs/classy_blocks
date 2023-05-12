@@ -40,14 +40,15 @@ class Patch:
         out = indent(self.name, 1)
         out += indent("{", 1)
         out += indent(f"type {self.kind};", 2)
+
+        for option in self.settings:
+            out += indent(f"{option};", 2)
+
         out += indent("faces", 2)
         out += indent("(", 2)
 
         for quad in self.sides:
             out += indent(f"{quad.description}", 3)
-
-        for option in self.settings:
-            out += indent(f"{option};", 2)
 
         out += indent(");", 2)
         out += indent("}", 1)

@@ -56,3 +56,12 @@ class PatchTests(BlockTestCase):
         )
 
         self.assertEqual(patch.description, expected)
+
+    def test_options(self):
+        """Add an option and check it's in description"""
+        option = "neighbourPatch left"
+
+        patch = self.patch
+        patch.settings.append(option)
+
+        self.assertTrue(f"\t{option};" in patch.description)
