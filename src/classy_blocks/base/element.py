@@ -64,6 +64,11 @@ class ElementBase(abc.ABC):
     def transform(self: ElementBaseT, transforms: List[tr.Transformation]) -> ElementBaseT:
         """A function that transforms  to sketch_2;
         a Loft will be made from those"""
+
+        # remember center or it will change during transformation
+        # of each self.part
+        center = self.center
+
         for t7m in transforms:
             for part in self.parts:
                 if isinstance(t7m, tr.Translation):
@@ -73,7 +78,7 @@ class ElementBase(abc.ABC):
                 if isinstance(t7m, tr.Rotation):
                     origin = t7m.origin
                     if origin is None:
-                        origin = self.center
+                        origin = center
 
                     part.rotate(t7m.angle, t7m.axis, origin=origin)
                     continue
@@ -81,7 +86,7 @@ class ElementBase(abc.ABC):
                 if isinstance(t7m, tr.Scaling):
                     origin = t7m.origin
                     if origin is None:
-                        origin = self.center
+                        origin = center
 
                     part.scale(t7m.ratio, origin=origin)
                     continue

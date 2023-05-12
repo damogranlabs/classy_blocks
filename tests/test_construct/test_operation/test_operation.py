@@ -6,6 +6,7 @@ import numpy as np
 from classy_blocks.construct.edges import Arc, Project
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.loft import Loft
+from classy_blocks.base.transforms import Rotation
 from classy_blocks.util import functions as f
 from tests.fixtures.block import BlockTestCase
 

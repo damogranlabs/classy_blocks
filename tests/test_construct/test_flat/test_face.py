@@ -3,6 +3,7 @@ import numpy as np
 
 from classy_blocks.construct import edges
 from classy_blocks.items.vertex import Vertex
+from classy_blocks.base.transforms import Rotation
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.util import functions as f
 
@@ -91,6 +92,21 @@ class FaceTests(unittest.TestCase):
 
             np.testing.assert_almost_equal(rotated_point, f.rotate(original_point, angle, axis, origin))
 
+    def test_rotate_default_origin(self):
+        """Rotate a face using the default origin"""
+        # Default origin will use rotation around center;
+        # construct a face aroung center
+        original_face = Face(self.points)
+        original_face.translate(-original_face.center)
+
+        rotated_face = original_face.copy().transform([Rotation([0, 0, 1], np.pi/2)])
+
+        for i in range(4):
+            np.testing.assert_almost_equal(
+                original_face.points[i].position,
+                rotated_face.points[(i+3)%4].position
+            )
+
     def test_scale_face_center(self):
         """Scale face from its center"""
         face = Face(self.points)
@@ -121,9 +137,11 @@ class FaceTests(unittest.TestCase):
 
         self.assertEqual(face.edges[0].kind, "project")
 
-    def test_remove_edge(self):
+    def test_replace_edge(self):
         face = Face(self.points)
         face.add_edge(0, edges.Project("terrain"))
         face.add_edge(0, None)
 
         self.assertEqual(face.edges[0].kind, "line")
+
+    
