@@ -1,11 +1,11 @@
-from typing import TypeVar, Optional
+from typing import Optional, TypeVar
 
 import numpy as np
 
-from classy_blocks.types import PointType, ProjectToType, NPVectorType
 from classy_blocks.base.element import ElementBase
-from classy_blocks.util.constants import DTYPE, TOL, vector_format
+from classy_blocks.types import NPVectorType, PointType, ProjectToType
 from classy_blocks.util import functions as f
+from classy_blocks.util.constants import DTYPE, TOL, vector_format
 
 PointT = TypeVar("PointT", bound="Point")
 

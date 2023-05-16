@@ -1,7 +1,6 @@
-from typing import Optional, List, Dict, TypeVar, Generic, Tuple
+from typing import Dict, Generic, List, Optional, Tuple, TypeVar
 
 from classy_blocks.types import AxisType
-
 from classy_blocks.util import constants
 
 BeamT = TypeVar("BeamT")

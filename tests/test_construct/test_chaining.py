@@ -2,13 +2,12 @@ import unittest
 
 import numpy as np
 
-from classy_blocks.construct.shapes.elbow import Elbow
 from classy_blocks.construct.shapes.cylinder import Cylinder
+from classy_blocks.construct.shapes.elbow import Elbow
 from classy_blocks.construct.shapes.frustum import Frustum
 from classy_blocks.construct.shapes.rings import ExtrudedRing
-from classy_blocks.util.constants import TOL
-
 from classy_blocks.mesh import Mesh
+from classy_blocks.util.constants import TOL
 
 
 class ElbowChainingTests(unittest.TestCase):

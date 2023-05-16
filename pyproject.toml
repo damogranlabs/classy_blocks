@@ -2,42 +2,36 @@
 name = "classy_blocks"
 version = "1.1.0"
 description = "Python classes for easier creation of openFoam's blockMesh dictionaries."
-readme="README.md"
-license = {file = "LICENSE"}
-keywords = [
-    "classy_blocks",
-    "OpenFOAM",
-    "blockMesh"
-]
-authors = [
-    {name = "Nejc Jurkovic", email = "kandelabr@gmail.com" }
-]
+readme = "README.md"
+license = { file = "LICENSE" }
+keywords = ["classy_blocks", "OpenFOAM", "blockMesh"]
+authors = [{ name = "Nejc Jurkovic", email = "kandelabr@gmail.com" }]
 requires-python = ">=3.8"
-dependencies = [
-    "numpy",
-    "scipy",
-    "nptyping"
-]
+dependencies = ["numpy", "scipy", "nptyping"]
 
 [project.urls]
 "Homepage" = "https://github.com/damogranlabs/classy_blocks"
 "Tutorials" = "https://damogranlabs.com/category/classy_blocks"
 "Bug Tracker" = "https://github.com/damogranlabs/classy_blocks/issues"
-"Contributing" = "https://github.com/damogranlabs/classy_blocks/blob/master/CONTRIBUTING.rst"
+"Contributing" = "https://github.com/damogranlabs/classy_blocks/blob/master/CONTRIBUTING.md"
 
 [project.optional-dependencies]
-dev = [
-    "parameterized",
-    "black",
-    "pylint",
-    "mypy"
-]
+dev = ["parameterized", "black", "isort", "ruff", "mypy", "pre-commit"]
 
 [tool.black]
 line-length = 120
+target-version = ["py38"]
 
-[tool.pylint]
-max-line-length = 120
+[tool.isort]
+profile = "black"
+py_version = 38
+line_length = 120
+src_paths = ["src", "tests"]
+
+[tool.ruff]
+select = ["E", "F", "N", "UP", "YTT", "B", "A", "ARG", "RUF"]
+target-version = "py38"
+line-length = 120
 
 [[tool.mypy.overrides]]
 module = "scipy,scipy.*,parameterized"

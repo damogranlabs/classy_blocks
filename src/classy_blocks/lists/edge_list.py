@@ -3,9 +3,9 @@ from typing import List, Tuple
 from classy_blocks.base.exceptions import EdgeNotFoundError
 from classy_blocks.construct.edges import EdgeData
 from classy_blocks.construct.operations.operation import Operation
-from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
+from classy_blocks.items.vertex import Vertex
 
 
 class EdgeList:

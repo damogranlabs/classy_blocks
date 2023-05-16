@@ -1,7 +1,6 @@
-from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct import edges
+from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.loft import Loft
-
 from classy_blocks.types import VectorType
 
 

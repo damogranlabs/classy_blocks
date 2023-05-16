@@ -1,12 +1,12 @@
-from typing import List, Dict
+from typing import Dict, List
 
 import numpy as np
 
-from classy_blocks.types import PointType, VectorType, NPPointType, NPVectorType
-from classy_blocks.construct.point import Point
+from classy_blocks.construct.edges import Origin
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketches.sketch import Sketch
-from classy_blocks.construct.edges import Origin
+from classy_blocks.construct.point import Point
+from classy_blocks.types import NPPointType, NPVectorType, PointType, VectorType
 from classy_blocks.util import functions as f
 
 

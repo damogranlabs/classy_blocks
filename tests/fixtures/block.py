@@ -1,12 +1,12 @@
 from typing import List, get_args
 
-from tests.fixtures.data import DataTestCase
-from classy_blocks.types import AxisType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.loft import Loft
-from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.block import Block
 from classy_blocks.items.edges.factory import factory
+from classy_blocks.items.vertex import Vertex
+from classy_blocks.types import AxisType
+from tests.fixtures.data import DataTestCase
 
 
 class BlockTestCase(DataTestCase):

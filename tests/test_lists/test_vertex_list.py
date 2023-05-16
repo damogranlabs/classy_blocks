@@ -1,11 +1,9 @@
 import numpy as np
 
-from classy_blocks.util import functions as f
-from classy_blocks.util import constants
-
 from classy_blocks.base.exceptions import VertexNotFoundError
-from classy_blocks.lists.vertex_list import VertexList, DuplicatedEntry
-
+from classy_blocks.lists.vertex_list import DuplicatedEntry, VertexList
+from classy_blocks.util import constants
+from classy_blocks.util import functions as f
 from tests.fixtures.data import DataTestCase
 
 

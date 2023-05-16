@@ -1,8 +1,9 @@
 import unittest
+
 import numpy as np
 
-from classy_blocks.util import functions as f
 from classy_blocks.util import curves as c
+from classy_blocks.util import functions as f
 
 
 class TestFunctions(unittest.TestCase):
@@ -154,37 +155,37 @@ class TestFunctions(unittest.TestCase):
         )
 
     def test_arc_length_3point_half(self):
-        A = f.vector(0, 0, 0)
-        B = f.vector(1, 1, 0)
-        C = f.vector(2, 0, 0)
-        self.assertAlmostEqual(f.arc_length_3point(A, B, C), np.pi)
+        a = f.vector(0, 0, 0)
+        b = f.vector(1, 1, 0)
+        c = f.vector(2, 0, 0)
+        self.assertAlmostEqual(f.arc_length_3point(a, b, c), np.pi)
 
     def test_arc_length_3point_quarter(self):
-        A = f.vector(0, 0, 0)
+        a = f.vector(0, 0, 0)
         s2 = 2**0.5 / 2
-        B = f.vector(1 - s2, s2, 0)
-        C = f.vector(1, 1, 0)
-        self.assertAlmostEqual(f.arc_length_3point(A, B, C), np.pi / 2)
+        b = f.vector(1 - s2, s2, 0)
+        c = f.vector(1, 1, 0)
+        self.assertAlmostEqual(f.arc_length_3point(a, b, c), np.pi / 2)
 
     def test_arc_length_3point_3quarter(self):
-        A = f.vector(0, 0, 0)
+        a = f.vector(0, 0, 0)
         s2 = 2**0.5 / 2
-        B = f.vector(1 + s2, s2, 0)
-        C = f.vector(1, -1, 0)
-        self.assertAlmostEqual(f.arc_length_3point(A, B, C), 3 * np.pi / 2)
+        b = f.vector(1 + s2, s2, 0)
+        c = f.vector(1, -1, 0)
+        self.assertAlmostEqual(f.arc_length_3point(a, b, c), 3 * np.pi / 2)
 
     def test_arc_length_3point_full(self):
-        A = f.vector(0, 0, 0)
-        B = f.vector(2, 0, 0)
-        C = f.vector(0, 0, 0)
+        a = f.vector(0, 0, 0)
+        b = f.vector(2, 0, 0)
+        c = f.vector(0, 0, 0)
 
         with self.assertRaises(ValueError):
-            self.assertAlmostEqual(f.arc_length_3point(A, B, C), 2 * np.pi)
+            self.assertAlmostEqual(f.arc_length_3point(a, b, c), 2 * np.pi)
 
     def test_arc_length_3point_zero(self):
-        A = f.vector(0, 0, 0)
-        B = f.vector(0, 0, 0)
-        C = f.vector(0, 0, 0)
+        a = f.vector(0, 0, 0)
+        b = f.vector(0, 0, 0)
+        c = f.vector(0, 0, 0)
 
         with self.assertRaises(ValueError):
-            self.assertAlmostEqual(f.arc_length_3point(A, B, C), 0)
+            self.assertAlmostEqual(f.arc_length_3point(a, b, c), 0)

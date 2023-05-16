@@ -1,7 +1,6 @@
-from tests.fixtures.block import BlockTestCase
-
 from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.lists.block_list import BlockList
+from tests.fixtures.block import BlockTestCase
 
 
 class BlockListTests(BlockTestCase):

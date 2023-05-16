@@ -1,13 +1,12 @@
 import unittest
 from unittest.mock import patch
-from parameterized import parameterized
 
 import numpy as np
+from parameterized import parameterized
 
 from classy_blocks.construct.flat.sketches.disk import QuarterDisk
-
-from classy_blocks.util.constants import TOL
 from classy_blocks.util import functions as f
+from classy_blocks.util.constants import TOL
 
 
 class QuarterDiskTests(unittest.TestCase):

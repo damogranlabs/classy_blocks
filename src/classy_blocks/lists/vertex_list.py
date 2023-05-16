@@ -1,11 +1,10 @@
 from typing import List, Optional
 
 from classy_blocks.base.exceptions import VertexNotFoundError
+from classy_blocks.items.vertex import Vertex
 from classy_blocks.types import NPPointType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
-
-from classy_blocks.items.vertex import Vertex
 
 
 class DuplicatedEntry:

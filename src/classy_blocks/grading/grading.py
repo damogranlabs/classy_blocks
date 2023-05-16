@@ -34,9 +34,8 @@ calculations meticulously transcribed from the blockmesh grading calculator:
 https://gitlab.com/herpes-free-engineer-hpe/blockmeshgradingweb/-/blob/master/calcBlockMeshGrading.coffee
 (since block length is always known, there's less wrestling but the calculation principle is similar) """
 import copy
-import warnings
 import math
-
+import warnings
 from typing import List
 
 from classy_blocks.grading.chop import Chop
@@ -133,7 +132,7 @@ class Grading:
         out += ")"
 
         if not math.isclose(length_ratio_sum, 1, rel_tol=constants.TOL):
-            warnings.warn(f"Length ratio doesn't add up to 1: {length_ratio_sum}")
+            warnings.warn(f"Length ratio doesn't add up to 1: {length_ratio_sum}", stacklevel=2)
 
         return out
 

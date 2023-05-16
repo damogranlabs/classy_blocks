@@ -1,7 +1,6 @@
-from tests.fixtures.block import BlockTestCase
-
-from classy_blocks.mesh import Mesh
 from classy_blocks.construct.operations.box import Box
+from classy_blocks.mesh import Mesh
+from tests.fixtures.block import BlockTestCase
 
 
 class MeshTests(BlockTestCase):

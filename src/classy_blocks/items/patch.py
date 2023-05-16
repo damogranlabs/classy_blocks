@@ -1,5 +1,4 @@
 import warnings
-
 from typing import List
 
 from classy_blocks.items.side import Side
@@ -21,7 +20,7 @@ class Patch:
         """Adds a side to the list if it doesn't exist yet"""
         for existing in self.sides:
             if existing == side:
-                warnings.warn(f"Side {side.description} has already been assigned to {self.name}")
+                warnings.warn(f"Side {side.description} has already been assigned to {self.name}", stacklevel=2)
                 return
 
         self.sides.append(side)

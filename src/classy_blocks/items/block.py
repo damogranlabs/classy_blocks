@@ -1,16 +1,13 @@
 from typing import List, get_args
 
-from classy_blocks.types import AxisType
-
-from classy_blocks.util.frame import Frame
-from classy_blocks.items.vertex import Vertex
-from classy_blocks.items.edges.edge import Edge
-from classy_blocks.items.wire import Wire
-from classy_blocks.items.axis import Axis
-
 from classy_blocks.grading.chop import Chop
-
+from classy_blocks.items.axis import Axis
+from classy_blocks.items.edges.edge import Edge
+from classy_blocks.items.vertex import Vertex
+from classy_blocks.items.wire import Wire
+from classy_blocks.types import AxisType
 from classy_blocks.util import constants
+from classy_blocks.util.frame import Frame
 
 
 class Block:

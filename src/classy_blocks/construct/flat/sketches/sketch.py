@@ -1,11 +1,10 @@
 import abc
 import copy
-
 from typing import List, TypeVar
 
-from classy_blocks.types import NPPointType, NPVectorType
 from classy_blocks.base.element import ElementBase
 from classy_blocks.construct.flat.face import Face
+from classy_blocks.types import NPPointType, NPVectorType
 
 SketchT = TypeVar("SketchT", bound="Sketch")
 

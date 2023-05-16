@@ -2,15 +2,17 @@
 into an easily digestable function/method arguments"""
 import abc
 import dataclasses
-
 from typing import Optional
+
 from classy_blocks.types import PointType, VectorType
 
 
 @dataclasses.dataclass
-class Transformation(abc.ABC):
+class Transformation(abc.ABC):  # noqa
     """A superclass that addresses all
     dataclasses for transformation parameters"""
+
+    pass
 
 
 @dataclasses.dataclass

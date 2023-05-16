@@ -1,7 +1,6 @@
 from parameterized import parameterized
 
 from classy_blocks.items.block import Block
-
 from tests.fixtures.block import BlockTestCase
 
 

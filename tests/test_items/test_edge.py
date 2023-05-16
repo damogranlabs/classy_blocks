@@ -2,17 +2,15 @@ import unittest
 
 import numpy as np
 
-from classy_blocks.items.vertex import Vertex
-
 from classy_blocks.construct import edges
-from classy_blocks.items.edges.edge import Edge
+from classy_blocks.items.edges.arcs.angle import AngleEdge, arc_from_theta
 from classy_blocks.items.edges.arcs.arc import ArcEdge
 from classy_blocks.items.edges.arcs.origin import OriginEdge, arc_from_origin
-from classy_blocks.items.edges.arcs.angle import AngleEdge, arc_from_theta
-from classy_blocks.items.edges.spline import SplineEdge, PolyLineEdge
-from classy_blocks.items.edges.project import ProjectEdge
+from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
-
+from classy_blocks.items.edges.project import ProjectEdge
+from classy_blocks.items.edges.spline import SplineEdge
+from classy_blocks.items.vertex import Vertex
 from classy_blocks.util import functions as f
 
 

@@ -1,17 +1,16 @@
 """Abstract base classes for different Shape types"""
 import abc
-
-from typing import TypeVar, Optional, List, Generic
+from typing import Generic, List, Optional, TypeVar
 
 import numpy as np
 
-from classy_blocks.types import NPPointType, AxisType, OrientType
-from classy_blocks.base.element import ElementBase
 from classy_blocks.base import transforms as tr
+from classy_blocks.base.element import ElementBase
 from classy_blocks.construct.edges import Arc
 from classy_blocks.construct.flat.sketches.sketch import SketchT
-from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.operations.loft import Loft
+from classy_blocks.construct.operations.operation import Operation
+from classy_blocks.types import AxisType, NPPointType, OrientType
 
 ShapeT = TypeVar("ShapeT", bound="Shape")
 
