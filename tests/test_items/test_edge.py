@@ -70,7 +70,15 @@ class EdgeTransformTests(unittest.TestCase):
                 [1.75, 1.1, 1],
             ],
         )
+    
+    def test_default_origin(self):
+        """Issue a warning when transforming with a default origin"""
+        edge = ArcEdge(
+            self.vertex_1, self.vertex_2,
+            edges.Arc([0.5, 0.2, 0]))
 
+        with self.assertWarns(Warning):
+            edge.rotate(1, [0, 0, 1])
 
 class EdgeFactoryTests(unittest.TestCase):
     """Factory tests: edge creation"""
@@ -292,8 +300,13 @@ class EdgeDescriptionTests(unittest.TestCase):
     def get_edge(self, data: edges.EdgeData) -> Edge:
         """A shortcut to factory method"""
         return factory.create(Vertex([0, 0, 0], 0), Vertex([1, 0, 0], 1), data)
+    
+    def test_line_description(self):
+        """Line has no description as it is not valid anyway"""
+        self.assertFalse(self.get_edge(edges.Line()).description)
 
     def test_arc_description(self):
+        """Classic arc description"""
         self.assertEqual(
             self.get_edge(edges.Arc([0.5, 0.1, 0])).description, "\tarc 0 1 (0.50000000 0.10000000 0.00000000)"
         )

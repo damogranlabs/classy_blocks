@@ -237,6 +237,7 @@ class BlockTests(BlockTestCase):
         self.assertEqual(block_0.description, expected_description)
 
 
+
 class WireframeTests(BlockTestCase):
     """Workings of the Frame object in a Block"""
 

@@ -64,8 +64,3 @@ class Edge(ElementBase):
     @property
     def parts(self):
         return [self.vertex_1, self.vertex_2, self.data]
-
-    def __eq__(self, other):
-        # An Edge is defined between two vertices regardless of
-        # its orientation
-        return {self.vertex_1.index, self.vertex_2.index} == {other.vertex_1.index, other.vertex_2.index}

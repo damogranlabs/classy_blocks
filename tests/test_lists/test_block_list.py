@@ -37,3 +37,21 @@ class BlockListTests(BlockTestCase):
 
         with self.assertRaises(UndefinedGradingsError):
             self.bl.propagate_gradings()
+
+    def test_description(self):
+        """Text output for blockMesh"""
+        blocks = [self.make_block(i) for i in (0, 1, 2)]
+
+        for block in blocks:
+            self.bl.add(block)
+
+        self.bl.propagate_gradings()
+
+        expected = "blocks\n(\n"
+        
+        for block in blocks:
+            expected += block.description
+        
+        expected += ");\n\n"
+
+        self.assertEqual(self.bl.description, expected)

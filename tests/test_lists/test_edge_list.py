@@ -112,3 +112,18 @@ class EdgeListTests(DataTestCase):
         
         self.assertEqual(no_arc, 4)
         self.assertEqual(no_project, 2)
+
+    def test_description(self):
+        """Output for blockMesh"""
+        vertices = self.get_vertices(0)
+        self.el.add(vertices[0], vertices[1], Arc([0.5, 0.5, 0]))
+        self.el.add(vertices[0], vertices[1], Arc([0.5, 0.5, 0]))
+
+        expected = "edges\n(\n"
+
+        for edge in self.el.edges:
+            expected += edge.description + "\n"
+
+        expected += ");\n\n"
+
+        self.assertEqual(self.el.description, expected)

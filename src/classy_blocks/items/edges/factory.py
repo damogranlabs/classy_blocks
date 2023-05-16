@@ -25,7 +25,7 @@ class EdgeFactory:
         self.kinds[kind] = creator
 
     def create(self, vertex_1, vertex_2, data: EdgeData) -> Edge:
-        """Creates an EdgeOps of the desired kind and returns it"""
+        """Creates an Edge* of the desired kind and returns it"""
         edge_class = self.kinds[data.kind]
         return edge_class(vertex_1, vertex_2, data)
 
