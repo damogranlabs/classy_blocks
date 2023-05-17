@@ -140,6 +140,8 @@ class Grading:
     def __eq__(self, other):
         # this works theoretically but numerics will probably ruin the party:
         # return self.specification == other.specification
+        if len(self.specification) != len(other.specification):
+            return False
 
         # so just compare number-by-number
         for i, this_spec in enumerate(self.specification):

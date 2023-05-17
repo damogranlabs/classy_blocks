@@ -114,6 +114,8 @@ class Mesh:
                     for chop in operation.chops[axis]:
                         block.chop(axis, chop)
 
+                block.cell_zone = operation.cell_zone
+
                 self.block_list.add(block)
                 self.patch_list.add(vertices, operation)
                 self.face_list.add(vertices, operation)
@@ -149,7 +151,8 @@ class Mesh:
         if debug_path is not None:
             write_vtk(debug_path, self.vertex_list.vertices, self.block_list.blocks)
 
-        # gradings
+        # gradings: define after writing VTK;
+        # if it is not specified correctly, this will raise an exception
         self.block_list.propagate_gradings()
 
         with open(output_path, "w", encoding="utf-8") as output:

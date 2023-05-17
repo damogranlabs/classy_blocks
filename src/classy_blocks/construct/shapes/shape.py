@@ -116,8 +116,3 @@ class LoftedShape(Shape, Generic[SketchT]):
     @abc.abstractmethod
     def shell(self) -> List[Loft]:
         """Operations on the outside of the shape"""
-
-    def set_outer_patch(self, name: str) -> None:
-        """Assign the outer faces to a patch"""
-        for operation in self.shell:
-            operation.set_patch(self.outer_patch, name)

@@ -2,6 +2,8 @@ from tests.fixtures.block import BlockTestCase
 
 from classy_blocks.mesh import Mesh
 from classy_blocks.construct.operations.box import Box
+from classy_blocks.construct.shapes.cylinder import Cylinder
+from classy_blocks.construct.shapes.rings import ExtrudedRing
 
 
 class MeshTests(BlockTestCase):
@@ -127,3 +129,54 @@ class MeshTests(BlockTestCase):
 
         # all vertices must be duplicated
         self.assertEqual(len(self.mesh.vertex_list.vertices), 32)
+
+    def test_cell_zone_operation(self):
+        """Assign cell zone from an operation"""
+        box = Box([0, 0, 0], [1, 1, 1])
+        box.set_cell_zone('mrf')
+
+        self.mesh.add(box)
+        self.mesh.assemble()
+
+        for block in self.mesh.block_list.blocks:
+            self.assertEqual(block.cell_zone, 'mrf')
+
+    def test_cell_zone_shape(self):
+        """Assign cell zone from an operation"""
+        cyl = Cylinder([0, 0, 0], [1, 0, 0], [0, 1, 0])
+        cyl.set_cell_zone('mrf')
+
+        self.mesh.add(cyl)
+        self.mesh.assemble()
+
+        for block in self.mesh.block_list.blocks:
+            self.assertEqual(block.cell_zone, 'mrf')
+    
+    def test_chop_shape_axial(self):
+        """Axial chop of a shape"""
+        cyl = Cylinder([0, 0, 0], [1, 0, 0], [0, 1, 0])
+        cyl.chop_axial(count=10)
+        cyl.chop_radial(count=1)
+        cyl.chop_tangential(count=1)
+
+        self.mesh.add(cyl)
+        self.mesh.assemble()
+        self.mesh.block_list.propagate_gradings()
+        
+        for block in self.mesh.block_list.blocks:
+            self.assertEqual(block.axes[2].grading.count, 10)
+    
+    def test_chop_cylinder_tangential(self):
+        """Cylinder chops differently from rings"""
+        cyl = Cylinder([0, 0, 0], [1, 0, 0], [0, 1, 0])
+        cyl.chop_tangential(count=10)
+        cyl.chop_radial(count=1)
+        cyl.chop_axial(count=1)
+
+        self.mesh.add(cyl)
+        self.mesh.assemble()
+        self.mesh.block_list.propagate_gradings()
+        
+        for block in self.mesh.block_list.blocks:
+            self.assertEqual(block.axes[1].grading.count, 10)
+
