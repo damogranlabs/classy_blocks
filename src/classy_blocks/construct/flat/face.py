@@ -53,7 +53,7 @@ class Face(ElementBase):
             ), "FacePoints are not coplanar!"
 
         # name of geometry this face can be projected to
-        self.projected_to: Optional[ProjectToType] = None
+        self.projected_to: Optional[str] = None
         # patch name to which this face can belong
         self.patch_name: Optional[str] = None
 
