@@ -105,7 +105,7 @@ class Face(ElementBase):
     def parts(self):
         return self.points + self.edges
 
-    def project(self, geometry: ProjectToType, edges: bool = False, points: bool = False) -> None:
+    def project(self, geometry: str, edges: bool = False, points: bool = False) -> None:
         """Project this face to given geometry;
 
         faces can only be projected to a single
