@@ -6,9 +6,65 @@ from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.construct.shapes.elbow import Elbow
 from classy_blocks.construct.shapes.frustum import Frustum
-from classy_blocks.construct.shapes.rings import RevolvedRing
+from classy_blocks.construct.shapes.rings import ExtrudedRing, RevolvedRing
 from classy_blocks.construct.shapes.sphere import Hemisphere
 from classy_blocks.util import functions as f
+
+
+class ShapeTests(unittest.TestCase):
+    """Common shape methods and properties"""
+
+    def setUp(self):
+        self.cylinder = Cylinder([0, 0, 0], [1, 0, 0], [0, 1, 0])
+
+    def test_translate(self):
+        """Translate a cylinder (uses the 'parts' property)"""
+        self.cylinder.translate([1, 0, 0])
+
+        np.testing.assert_array_equal(self.cylinder.sketch_1.center, [1, 0, 0])
+
+    def test_cylinder_center(self):
+        """Center of a cylinder"""
+        np.testing.assert_almost_equal(self.cylinder.center, [0.5, 0, 0])
+
+    def test_set_start_patch(self):
+        """Start patch on all operations"""
+        self.cylinder.set_start_patch("test")
+
+        for operation in self.cylinder.operations:
+            self.assertEqual(operation.bottom_face.patch_name, "test")
+
+    def test_set_end_patch(self):
+        """Start patch on all operations"""
+        self.cylinder.set_end_patch("test")
+
+        for operation in self.cylinder.operations:
+            self.assertEqual(operation.top_face.patch_name, "test")
+
+    def test_outer_patch(self):
+        """Start patch on all operations"""
+        self.cylinder.set_outer_patch("test")
+
+        for operation in self.cylinder.shell:
+            self.assertEqual(operation.patch_names[self.cylinder.outer_patch], "test")
+
+    def test_inner_patch_extruded(self):
+        """Inner patch on an extruded ring"""
+        ring = ExtrudedRing([0, 0, 0], [1, 0, 0], [0, 1, 0], 0.4)
+        ring.set_inner_patch("test")
+
+        for operation in ring.shell:
+            self.assertEqual(operation.patch_names[ring.inner_patch], "test")
+
+    def test_inner_patch_revolved(self):
+        face = Face([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]])
+        face.translate([0, 1, 0])
+        ring = RevolvedRing([0, 0, 0], [1, 0, 0], face)
+
+        ring.set_inner_patch("test")
+
+        for operation in ring.shell:
+            self.assertEqual(operation.patch_names[ring.inner_patch], "test")
 
 
 class ElbowTests(unittest.TestCase):
@@ -73,22 +129,22 @@ class RevolvedRingTests(unittest.TestCase):
         self.axis_point_2 = [1, 0, 0]
         self.n_segments = 8
 
-    @property
-    def ring(self) -> RevolvedRing:
-        """The test subject"""
-        return RevolvedRing(self.axis_point_1, self.axis_point_2, self.face, self.n_segments)
-
-    def test_create(self):
-        """Create a revolved ring"""
-        _ = self.ring
+        self.ring = RevolvedRing(self.axis_point_1, self.axis_point_2, self.face, self.n_segments)
 
     def test_set_inner_patch(self):
         """Inner faces of the ring"""
-        ring = self.ring
-        ring.set_inner_patch("inner")
+        self.ring.set_inner_patch("inner")
 
-        for operation in ring.operations:
+        for operation in self.ring.operations:
             self.assertEqual(operation.patch_names["front"], "inner")
+
+    def test_chop_ring_tangential(self):
+        self.ring.chop_tangential(count=10)
+        self.ring.chop_radial(count=1)
+        self.ring.chop_axial(count=1)
+
+        for operation in self.ring.operations:
+            self.assertEqual(operation.chops[self.ring.tangential_axis][0].count, 10)
 
 
 class SphereTests(unittest.TestCase):
@@ -116,13 +172,30 @@ class FrustumTests(unittest.TestCase):
 
 
 class CylinderTests(unittest.TestCase):
-    def test_cylinder_edges(self):
-        """Bug check: check that all edges are translated equally"""
-        axis_point_1 = [0.0, 0.0, 0.0]
-        axis_point_2 = [1.0, 0.0, 0.0]
-        radius_point_1 = [0.0, 1.0, 0.0]
-        cylinder = Cylinder(axis_point_1, axis_point_2, radius_point_1)
+    def setUp(self):
+        self.axis_point_1 = [0.0, 0.0, 0.0]
+        self.axis_point_2 = [1.0, 0.0, 0.0]
+        self.radius_point_1 = [0.0, 1.0, 0.0]
+        self.cylinder = Cylinder(self.axis_point_1, self.axis_point_2, self.radius_point_1)
 
-        for face in cylinder.sketch_2.shell:
+    def test_edges(self):
+        """Bug check: check that all edges are translated equally"""
+        for face in self.cylinder.sketch_2.shell:
             # in Disk, 2nd edge of shell's face is Origin
             self.assertEqual(face.edges[1].origin.position[0], 1)
+
+    def test_core(self):
+        """Make sure cylinder's core is represented correctly"""
+        self.assertEqual(len(self.cylinder.core), 4)
+
+    def test_chop_radial_start_size(self):
+        """Radial chop and start_size corrections"""
+        self.cylinder.chop_radial(start_size=0.1)
+
+        self.assertNotEqual(self.cylinder.shell[0].chops[0][0].start_size, 0.1)
+
+    def test_chop_radial_end_size(self):
+        """Radial chop and end_size corrections"""
+        self.cylinder.chop_radial(end_size=0.1)
+
+        self.assertNotEqual(self.cylinder.shell[0].chops[0][0].end_size, 0.1)

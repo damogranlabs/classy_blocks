@@ -1,9 +1,11 @@
 import dataclasses
 from typing import List
 
+from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.items.side import Side
 from classy_blocks.items.vertex import Vertex
+from classy_blocks.types import OrientType
 from classy_blocks.util.constants import SIDES_MAP
 
 
@@ -45,6 +47,15 @@ class FaceList:
 
             if geometry is not None:
                 self.add_side(Side(orient, vertices), geometry)
+
+        # don't forget bottom and top faces
+        self.add_face(vertices, "bottom", operation.bottom_face)
+        self.add_face(vertices, "top", operation.top_face)
+
+    def add_face(self, vertices: List[Vertex], orient: OrientType, face: Face) -> None:
+        """Add a face to faces list (if it is projected to anything)"""
+        if face.projected_to is not None:
+            self.add_side(Side(orient, vertices), face.projected_to)
 
     def add_side(self, side: Side, geometry: str) -> None:
         """Adds a projected face (side) to the list if it's not there yet"""

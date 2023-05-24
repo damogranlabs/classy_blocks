@@ -141,3 +141,49 @@ class TestGrading(unittest.TestCase):
 
     def test_is_not_defined(self):
         self.assertFalse(self.g.is_defined)
+
+    def test_warn_ratio(self):
+        """Issue a warning when length_ratios don't add up to 1"""
+        self.g.add_chop(Chop(length_ratio=0.6, start_size=0.1))
+        self.g.add_chop(Chop(length_ratio=0.6, start_size=0.1))
+
+        with self.assertWarns(Warning):
+            _ = self.g.description
+
+    def test_invert_empty(self):
+        """Invert a grading with no chops"""
+        self.assertEqual(id(self.g), id(self.g.inverted))
+
+    def test_equal(self):
+        """Two different gradings with same parameters are equal"""
+        grad1 = Grading(1)
+        grad2 = Grading(1)
+
+        for g in (grad1, grad2):
+            g.add_chop(Chop(length_ratio=0.5, start_size=0.1))
+            g.add_chop(Chop(length_ratio=0.5, end_size=0.1))
+
+        self.assertTrue(grad1 == grad2)
+
+    def test_not_equal_divisionsn(self):
+        """Two gradings with different lengths of specification"""
+        grad1 = Grading(1)
+        grad2 = Grading(1)
+
+        for g in (grad1, grad2):
+            g.add_chop(Chop(length_ratio=0.5, start_size=0.1))
+            g.add_chop(Chop(length_ratio=0.5, end_size=0.1))
+
+        grad1.add_chop(Chop(count=10))
+
+        self.assertFalse(grad1 == grad2)
+
+    def test_not_equal(self):
+        """Two gradings with equal lengths of specification"""
+        grad1 = Grading(1)
+        grad1.add_chop(Chop(length_ratio=0.5, start_size=0.15))
+
+        grad2 = Grading(1)
+        grad2.add_chop(Chop(length_ratio=0.5, end_size=0.1))
+
+        self.assertFalse(grad1 == grad2)

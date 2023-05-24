@@ -72,10 +72,6 @@ class EighthSphere(RoundSolidShape):
 
     n_cores: int = 1
 
-    def transform_function(self, **kwargs):
-        # Nothing to do here
-        pass
-
     def __init__(
         self, center_point: PointType, radius_point: PointType, normal: VectorType, diagonal_angle: float = np.pi / 5
     ):

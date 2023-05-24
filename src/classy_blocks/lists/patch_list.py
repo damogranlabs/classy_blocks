@@ -13,7 +13,7 @@ class PatchList:
 
     def __init__(self) -> None:
         self.patches: OrderedDict[str, Patch] = OrderedDict()
-        self.default: Optional[Dict[str, str]] = None
+        self.default: Dict[str, str] = {}
         self.merged: List[List[str]] = []  # data for the mergePatchPairs entry
 
     def add(self, vertices: List[Vertex], operation: Operation) -> None:
@@ -58,7 +58,7 @@ class PatchList:
 
         out += ");\n\n"
 
-        if self.default is not None:
+        if self.default:
             out += "defaultPatch\n{\n"
             out += f"\tname {self.default['name']};\n"
             out += f"\ttype {self.default['kind']};\n"
