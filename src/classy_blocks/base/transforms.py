@@ -1,6 +1,5 @@
 """Dataclasses for packing combinations of transforms of <anything>
 into an easily digestable function/method arguments"""
-import abc
 import dataclasses
 from typing import Optional
 
@@ -8,11 +7,9 @@ from classy_blocks.types import PointType, VectorType
 
 
 @dataclasses.dataclass
-class Transformation(abc.ABC):  # noqa
+class Transformation:
     """A superclass that addresses all
     dataclasses for transformation parameters"""
-
-    pass
 
 
 @dataclasses.dataclass

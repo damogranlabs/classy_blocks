@@ -68,9 +68,7 @@ def arc_from_origin(
             np.cross(axis, chord)
         )  # mid-chord -> centre
 
-        warnings.warn(
-            "Adjusting center of edge between" + f" {str(edge_point_1)} and {str(edge_point_2)}", stacklevel=2
-        )
+        warnings.warn("Adjusting center of edge between" + f" {edge_point_1!s} and {edge_point_2!s}", stacklevel=2)
 
         return arc_from_origin(p1, p3, new_center, False)
 

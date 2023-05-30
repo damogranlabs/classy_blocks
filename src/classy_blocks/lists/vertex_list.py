@@ -40,7 +40,7 @@ class VertexList:
                 if dupe.patches == slave_patches:
                     return dupe.vertex
 
-        raise VertexNotFoundError(f"No duplicated vertex found: {str(position)} {slave_patches}")
+        raise VertexNotFoundError(f"No duplicated vertex found: {position!s} {slave_patches}")
 
     def find_unique(self, position: NPPointType) -> Vertex:
         """checks if any of existing vertices in self.vertices are
@@ -50,7 +50,7 @@ class VertexList:
             if f.norm(vertex.position - position) < constants.TOL:
                 return vertex
 
-        raise VertexNotFoundError(f"Vertex not found: {str(position)}")
+        raise VertexNotFoundError(f"Vertex not found: {position!s}")
 
     def add(self, point: NPPointType, slave_patches: Optional[List[str]] = None) -> Vertex:
         """Re-use existing vertices when there's already one at the position;

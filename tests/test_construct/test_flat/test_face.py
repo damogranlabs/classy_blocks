@@ -6,7 +6,6 @@ import numpy as np
 from classy_blocks.base.transforms import Rotation
 from classy_blocks.construct import edges
 from classy_blocks.construct.flat.face import Face
-from classy_blocks.items.vertex import Vertex
 from classy_blocks.util import functions as f
 
 
