@@ -22,7 +22,7 @@ class ShapeCreationError(Exception):
     """Base class for shape creation errors (invalid parameters/types to
     shape constructors)"""
 
-    def __init__(self, msg: str, details: Optional[str], *args) -> None:
+    def __init__(self, msg: str, details: Optional[str] = None, *args) -> None:
         self.msg = msg
         self.details = details
 
@@ -46,4 +46,8 @@ class EdgeCreationError(ShapeCreationError):
 
 
 class FaceCreationError(ShapeCreationError):
+    pass
+
+
+class CylinderCreationError(ShapeCreationError):
     pass
