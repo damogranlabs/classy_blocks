@@ -1,4 +1,4 @@
-from classy_blocks.types import PointType
+from typing import Optional
 
 
 class VertexNotFoundError(Exception):
@@ -22,9 +22,20 @@ class ShapeCreationError(Exception):
     """Base class for shape creation errors (invalid parameters/types to
     shape constructors)"""
 
+    def __init__(self, msg: str, details: Optional[str], *args) -> None:
+        self.msg = msg
+        self.details = details
+
+        info = self.msg
+        if self.details:
+            info += f"\n\t{self.details}"
+
+        super().__init__(info, *args)
+
 
 class PointCreationError(ShapeCreationError):
-    def __init__(self, msg: str, position: PointType):
-        self.position = position
+    pass
 
-        super().__init__(f"{msg}\n\tPosition: {position}")
+
+class AnnulusCreationError(ShapeCreationError):
+    pass

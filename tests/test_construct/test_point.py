@@ -22,7 +22,7 @@ class PointTests(unittest.TestCase):
             ((1, 1, 1, 1),),  # To much arguments!"
         ]
     )
-    def test_invalid_parameters(self, position):
+    def test_invalid_creation_parameters(self, position):
         with self.assertRaises(PointCreationError):
             Point(list(position))
 

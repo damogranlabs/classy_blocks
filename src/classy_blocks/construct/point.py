@@ -18,7 +18,7 @@ class Point(ElementBase):
     def __init__(self, position: PointType):
         self.position = np.array(position, dtype=DTYPE)
         if not np.shape(self.position) == (3,):
-            raise PointCreationError("Provide a point in 3D space", position)
+            raise PointCreationError("Provide a point in 3D space", f"Position: {position}")
 
         self.projected_to: ProjectToType = []
 
