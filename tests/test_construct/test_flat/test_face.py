@@ -22,7 +22,7 @@ class FaceTests(unittest.TestCase):
     def test_face_invalid_points(self):
         """Raise an exception if given points does not have correct shape"""
         with self.assertRaises(FaceCreationError):
-            Face(Face([p[:2] for p in self.points]))
+            Face([p[:2] for p in self.points])
 
     def test_face_center(self):
         """The center property"""
