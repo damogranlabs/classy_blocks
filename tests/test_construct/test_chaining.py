@@ -2,7 +2,12 @@ import unittest
 
 import numpy as np
 
-from classy_blocks.base.exceptions import CylinderCreationError, ElbowCreationError, FrustumCreationError
+from classy_blocks.base.exceptions import (
+    CylinderCreationError,
+    ElbowCreationError,
+    ExtrudedRingCreationError,
+    FrustumCreationError,
+)
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.construct.shapes.elbow import Elbow
@@ -118,6 +123,10 @@ class RingChainingTests(unittest.TestCase):
 
         np.testing.assert_allclose(chained_shape.sketch_2.center, end_center, atol=TOL)
 
+    def test_chain_invalid_length(self):
+        with self.assertRaises(ExtrudedRingCreationError):
+            ExtrudedRing.chain(self.ring, -1)
+
     def test_chain_end(self):
         """Chain an extruded ring on end face"""
         chained = ExtrudedRing.chain(self.ring, 1)
@@ -157,6 +166,12 @@ class ExpandContractTests(unittest.TestCase):
 
         self.check_success(ring, expanded, 18, 3 * 9 * 2)
 
+    def test_contract_ring_invalid_radius(self):
+        with self.assertRaises(ExtrudedRingCreationError):
+            ring = ExtrudedRing([0, 0, 0], [1, 0, 0], [0, 1, 0], 0.6, 9)
+            contracted = ExtrudedRing.contract(ring, 2)
+            self.check_success(ring, contracted, 18, 2 * 3 * 9)
+
     def test_contract_ring(self):
         """Contract a ring from another ring"""
         ring = ExtrudedRing([0, 0, 0], [1, 0, 0], [0, 1, 0], 0.6, 9)
@@ -165,10 +180,8 @@ class ExpandContractTests(unittest.TestCase):
 
     def test_fill_assert(self):
         """Make sure the source ring is made from 8 segments"""
-        ring = ExtrudedRing([0, 0, 0], [1, 0, 0], [0, 1, 0], 0.4, 9)
-
         with self.assertRaises(CylinderCreationError):
-            _ = Cylinder.fill(ring)
+            Cylinder.fill(ExtrudedRing([0, 0, 0], [1, 0, 0], [0, 1, 0], 0.4, 9))
 
     def test_fill(self):
         """Fill an ExtrudedRing with a Cylinder"""

@@ -59,3 +59,7 @@ class ElbowCreationError(ShapeCreationError):
 
 class FrustumCreationError(ShapeCreationError):
     pass
+
+
+class ExtrudedRingCreationError(ShapeCreationError):
+    pass

@@ -3,6 +3,7 @@ from typing import List, Union
 import numpy as np
 
 from classy_blocks.base import transforms as tr
+from classy_blocks.base.exceptions import ExtrudedRingCreationError
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketches.annulus import Annulus
 from classy_blocks.construct.operations.operation import Operation
@@ -35,8 +36,11 @@ class ExtrudedRing(RoundHollowShape):
     def chain(cls, source: "ExtrudedRing", length: float, start_face: bool = False) -> "ExtrudedRing":
         """Creates a new ExtrudedRing on end face of source ring;
         use start_face=False to chain 'backwards' from the first face"""
-        assert isinstance(source, ExtrudedRing)
-        assert length > 0, "Use a positive length and start_face=True to chain 'backwards'"
+        if length < 0:
+            raise ExtrudedRingCreationError(
+                "`chain()` operation failed: use a positive length and `start_face=True` to chain 'backwards'",
+                f"Given length: {length}, `start_face={start_face}`",
+            )
 
         if start_face:
             sketch = source.sketch_1
@@ -68,11 +72,19 @@ class ExtrudedRing(RoundHollowShape):
     @classmethod
     def contract(cls, source: "ExtrudedRing", inner_radius: float) -> "ExtrudedRing":
         """Create a new ring on inner surface of the source"""
-        assert inner_radius > 0, "Use Cylinder.fill(extruded_ring) to fill the ring with a cylinder"
+        if inner_radius < 0:
+            raise ExtrudedRingCreationError(
+                "Unable to perform `contract()` operation for inner radius < 0: use `Cylinder.fill(extruded_ring)`",
+                f"Inner radius: {inner_radius}",
+            )
 
         sketch_1 = source.sketch_1
         sketch_2 = source.sketch_2
-        assert inner_radius < sketch_1.inner_radius, "New inner radius must be smaller than source's"
+        if inner_radius > sketch_1.inner_radius:
+            raise ExtrudedRingCreationError(
+                "Unable to perform `contract()` operation: new inner radius must be smaller than source's",
+                f"Inner radius: {inner_radius}, sketch inner radius: {sketch_1.inner_radius}",
+            )
 
         return cls(
             sketch_1.center, sketch_2.center, sketch_1.inner_radius_point, inner_radius, n_segments=sketch_1.n_segments
