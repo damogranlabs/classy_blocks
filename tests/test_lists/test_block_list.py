@@ -47,10 +47,10 @@ class BlockListTests(BlockTestCase):
         self.bl.propagate_gradings()
 
         expected = "blocks\n(\n"
-        
+
         for block in blocks:
             expected += block.description
-        
+
         expected += ");\n\n"
 
         self.assertEqual(self.bl.description, expected)
