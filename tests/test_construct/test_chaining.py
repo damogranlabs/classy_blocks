@@ -2,6 +2,8 @@ import unittest
 
 import numpy as np
 
+from classy_blocks.base.exceptions import CylinderCreationError, ElbowCreationError
+from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.construct.shapes.elbow import Elbow
 from classy_blocks.construct.shapes.frustum import Frustum
@@ -51,6 +53,13 @@ class ElbowChainingTests(unittest.TestCase):
         )  # start_face
 
         self.check_success(chained, [4, 0, 0])
+
+    def test_chain_on_invalid_start_face(self):
+        with self.assertRaises(ElbowCreationError):
+            elbow = self.elbow.copy()
+            # set invalid base shape for chaining
+            elbow.sketch_1 = Face([[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]])
+            Elbow.chain(elbow, np.pi / 2, [2, 0, 0], [0, 0, 1], 1, True)
 
     def test_to_elbow_start(self):
         """Chain an elbow to an elbow on a start sketch"""
@@ -154,7 +163,7 @@ class ExpandContractTests(unittest.TestCase):
         """Make sure the source ring is made from 8 segments"""
         ring = ExtrudedRing([0, 0, 0], [1, 0, 0], [0, 1, 0], 0.4, 9)
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(CylinderCreationError):
             _ = Cylinder.fill(ring)
 
     def test_fill(self):

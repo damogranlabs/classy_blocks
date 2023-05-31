@@ -1,6 +1,7 @@
 import numpy as np
 
 from classy_blocks.base import transforms as tr
+from classy_blocks.base.exceptions import ElbowCreationError
 from classy_blocks.construct.flat.sketches.disk import Disk
 from classy_blocks.construct.shapes.round import RoundSolidShape
 from classy_blocks.types import PointType, VectorType
@@ -27,7 +28,7 @@ class Elbow(RoundSolidShape):
         transform_2 = [tr.Rotation(rotation_axis, sweep_angle, arc_center), tr.Scaling(radius_ratio)]
         transform_mid = [
             tr.Rotation(rotation_axis, sweep_angle / 2, arc_center),
-            tr.Scaling((1+radius_ratio)/2),
+            tr.Scaling((1 + radius_ratio) / 2),
         ]
 
         super().__init__(sketch_1, transform_2, transform_mid)
@@ -44,7 +45,11 @@ class Elbow(RoundSolidShape):
     ) -> "Elbow":
         """Use another round Shape's end face as a starting point for this Elbow;
         Returns a new Elbow object. To start from the other side, use start_face = True"""
-        assert isinstance(source.sketch_1, Disk)
+        if not isinstance(source.sketch_1, Disk):
+            raise ElbowCreationError(
+                "`chain()` operation failed: expecting `Disk`-type face",
+                f"Given `{type(source.sketch_1)}` face instance",
+            )
 
         if start_face:
             sketch = source.sketch_1

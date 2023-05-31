@@ -51,3 +51,7 @@ class FaceCreationError(ShapeCreationError):
 
 class CylinderCreationError(ShapeCreationError):
     pass
+
+
+class ElbowCreationError(ShapeCreationError):
+    pass
