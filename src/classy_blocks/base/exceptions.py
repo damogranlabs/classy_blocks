@@ -55,3 +55,7 @@ class CylinderCreationError(ShapeCreationError):
 
 class ElbowCreationError(ShapeCreationError):
     pass
+
+
+class FrustumCreationError(ShapeCreationError):
+    pass

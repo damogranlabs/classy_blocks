@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from classy_blocks.base.exceptions import CylinderCreationError, ElbowCreationError
+from classy_blocks.base.exceptions import CylinderCreationError, ElbowCreationError, FrustumCreationError
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.construct.shapes.elbow import Elbow
@@ -75,6 +75,10 @@ class ElbowChainingTests(unittest.TestCase):
         """Chain an elbow to a cylinder on a start sketch"""
         chained = Cylinder.chain(self.elbow, 1, start_face=True)
         self.check_success(chained, [0, -1, 0])
+
+    def test_chain_frustum_invalid_length(self):
+        with self.assertRaises(FrustumCreationError):
+            Frustum.chain(self.elbow, -1, 0.5)
 
     def test_to_frustum_start(self):
         """Chain an elbow to a frustum on end sketch"""
