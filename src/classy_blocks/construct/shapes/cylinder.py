@@ -39,10 +39,11 @@ class Cylinder(RoundSolidShape):
     def chain(cls, source: RoundSolidShape, length: float, start_face: bool = False) -> "Cylinder":
         """Creates a new Cylinder on start or end face of a round Shape (Elbow, Frustum, Cylinder);
         Use length > 0 to extrude 'forward' from source's end face;
-        Use length < 0 to extrude 'backward' from source' start face"""
+        Use length > 0 and `start_face=True` to extrude 'backward' from source's start face"""
         if length < 0:
             raise CylinderCreationError(
-                "`chain()` operation failed: use a positive length and `start_face=True` to chain 'backwards'"
+                "`chain()` operation failed: use a positive length and `start_face=True` to chain 'backwards'",
+                f"Given length: {length}, `start_face={start_face}`",
             )
 
         if start_face:
