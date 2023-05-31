@@ -5,15 +5,7 @@
     "python.linting.lintOnSave": true,
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.diagnosticMode": "openFilesOnly",
-    "python.testing.pytestEnabled": false,
-    "python.testing.unittestEnabled": true,
-    "python.testing.unittestArgs": [
-        "-v",
-        "-s",
-        "./tests",
-        "-p",
-        "test_*.py"
-    ],
+    "python.testing.pytestEnabled": true,
     "files.exclude": {
         "**/.git": true,
         "**/.svn": true,
