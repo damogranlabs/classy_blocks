@@ -175,7 +175,7 @@ class EdgeValidityTests(unittest.TestCase):
         with self.assertRaises(EdgeCreationError):
             SplineEdge(
                 Vertex([0, 0, 0], 0),
-                Point([1, 1, 1]),  # type: ignore (must be vertex, not point!)
+                Point([1, 1, 1]),  # type: ignore # must be vertex, not point!
                 edges.Spline(
                     [
                         [0, 0, 0],
