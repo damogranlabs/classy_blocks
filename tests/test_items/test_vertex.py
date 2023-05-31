@@ -1,6 +1,7 @@
 import numpy as np
 
 from classy_blocks.base import transforms as tr
+from classy_blocks.base.exceptions import PointCreationError
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.util import constants
 from tests.fixtures.data import DataTestCase
@@ -11,8 +12,8 @@ class VertexTests(DataTestCase):
 
     def test_assert_3d(self):
         """Raise an exception if the point is not in 3D space"""
-        with self.assertRaises(AssertionError):
-            _ = Vertex([0, 0], 0)
+        with self.assertRaises(PointCreationError):
+            Vertex([0, 0], 0)
 
     def test_translate_int(self):
         """Vertex translation with integer delta"""

@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 from parameterized import parameterized
 
+from classy_blocks.base.exceptions import EdgeCreationError
 from classy_blocks.construct.edges import Arc, Project
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.loft import Loft
@@ -16,10 +17,10 @@ class OperationTests(BlockTestCase):
     def setUp(self):
         self.loft = self.make_loft(0)
 
-    def test_add_side_edge_assert(self):
+    def test_add_side_edge_invalid_corner_index(self):
         """Fail if the user supplies an inappropriate corner to add_side_edge()"""
-        with self.assertRaises(AssertionError):
-            self.loft.add_side_edge(5, Arc([0, 0.5, 0]))
+        with self.assertRaises(EdgeCreationError):
+            self.loft.add_side_edge(4, Arc([0, 1, 0]))
 
     def test_set_patch_single(self):
         """Set patch of a single side"""

@@ -41,5 +41,9 @@ class AnnulusCreationError(ShapeCreationError):
     pass
 
 
+class EdgeCreationError(ShapeCreationError):
+    pass
+
+
 class FaceCreationError(ShapeCreationError):
     pass
