@@ -45,6 +45,10 @@ class EdgeCreationError(ShapeCreationError):
     pass
 
 
+class SideCreationError(ShapeCreationError):
+    pass
+
+
 class FaceCreationError(ShapeCreationError):
     pass
 
