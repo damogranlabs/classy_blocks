@@ -4,6 +4,7 @@ from typing import List, Optional, Union
 import numpy as np
 
 from classy_blocks.base.element import ElementBase
+from classy_blocks.base.exceptions import FaceCreationError
 from classy_blocks.construct.edges import EdgeData, Line, Project
 from classy_blocks.construct.point import Point
 from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, PointListType
@@ -32,23 +33,32 @@ class Face(ElementBase):
     ):
         # Points
         points = np.asarray(points, dtype=constants.DTYPE)
-        if np.shape(points) != (4, 3):
-            raise ValueError("Provide exactly 4 points in 3D space")
+        points_shape = np.shape(points)
+        if points_shape != (4, 3):
+            raise FaceCreationError(
+                "Provide exactly 4 points in 3D space",
+                f"Available {points_shape[0]} points, each with {points_shape[1]} coordinates",
+            )
 
         self.points = [Point(p) for p in points]
         # Edges
         self.edges: List[EdgeData] = [Line(), Line(), Line(), Line()]
         if edges is not None:
-            assert len(edges) == 4, "Provide exactly 4 edges; use None for straight lines"
+            if len(edges) != 4:
+                raise FaceCreationError(
+                    "Provide exactly 4 edges; use None for straight lines", f"Number of edges: {len(edges)}"
+                )
 
             for i, edge in enumerate(edges):
                 self.add_edge(i, edge)
 
         if check_coplanar:
             pts = self.point_array
-            assert (
-                abs(np.dot((pts[1] - pts[0]), np.cross(pts[3] - pts[0], pts[2] - pts[0]))) < constants.TOL
-            ), "FacePoints are not coplanar!"
+            diff = abs(np.dot((pts[1] - pts[0]), np.cross(pts[3] - pts[0], pts[2] - pts[0])))
+            if diff > constants.TOL:
+                raise FaceCreationError(
+                    "FacePoints are not coplanar!", f"Difference: {diff}, tolerance: {constants.TOL}"
+                )
 
         # name of geometry this face can be projected to
         self.projected_to: Optional[str] = None
@@ -59,7 +69,8 @@ class Face(ElementBase):
         """Adds or replaces an edge between corner and (corner+1);
         existing edges will be replaced, use None to delete
         (replace with a straight line)"""
-        assert corner < 4, "Provide a corner index between 0 and 3"
+        if corner > 3:
+            raise FaceCreationError("Provide a corner index between 0 and 3", f"Given corner index: {corner}")
 
         if edge_data is None:
             self.edges[corner] = Line()

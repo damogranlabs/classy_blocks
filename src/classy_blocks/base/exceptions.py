@@ -39,3 +39,7 @@ class PointCreationError(ShapeCreationError):
 
 class AnnulusCreationError(ShapeCreationError):
     pass
+
+
+class FaceCreationError(ShapeCreationError):
+    pass
