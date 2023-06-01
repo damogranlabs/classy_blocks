@@ -1,6 +1,5 @@
 import dataclasses
-import inspect
-from typing import Callable, Optional, Set, Tuple, Union
+from typing import Callable, List, Optional, Set, Tuple, Union
 
 from classy_blocks.grading import relations as rel
 from classy_blocks.types import ChopTakeType
@@ -24,18 +23,24 @@ class ChopRelation:
         return {self.input_1, self.input_2}
 
     @classmethod
-    def from_function(cls, name: str, function: Callable):
-        """Create this object from given name and callable as returned by
-        inspect.getmembers() thingy"""
-        # function name is assembled as
-        # get_<result>__<param1>__<param2>
-        data = name.split(sep="__")
+    def from_function(cls, function: Callable):
+        """Create this object from given callable (relations functions)"""
+        try:
+            # function name is assembled as `get_<result>__<param1>__<param2>`
+            data = function.__name__.split("__")
+            result_param_name = data[0][4:]
+            param1 = data[1]
+            param2 = data[2]
 
-        return cls(data[0][4:], data[1], data[2], function)
+            return cls(result_param_name, param1, param2, function)
+        except Exception as err:
+            raise RuntimeError(f"Invalid function name or unexpected parameter names: {function.__name__}") from err
 
+    @staticmethod
+    def get_possible_combinations() -> List["ChopRelation"]:
+        calculation_functions = rel.get_calculation_functions()
 
-# gather available functions for calculation of grading parameters
-functions = [ChopRelation.from_function(*member) for member in inspect.getmembers(rel, inspect.isfunction)]
+        return [ChopRelation.from_function(f) for _, f in calculation_functions.items()]
 
 
 @dataclasses.dataclass
@@ -84,7 +89,7 @@ class Chop:
 
                 return count, total_expansion
 
-            for crel in functions:
+            for crel in ChopRelation.get_possible_combinations():
                 output = crel.output
                 inputs = crel.inputs
                 function = crel.function
