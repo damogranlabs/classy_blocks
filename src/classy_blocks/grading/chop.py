@@ -89,10 +89,10 @@ class Chop:
 
                 return count, total_expansion
 
-            for crel in ChopRelation.get_possible_combinations():
-                output = crel.output
-                inputs = crel.inputs
-                function = crel.function
+            for chop_rel in ChopRelation.get_possible_combinations():
+                output = chop_rel.output
+                inputs = chop_rel.inputs
+                function = chop_rel.function
 
                 if output in calculated:
                     # this value is already calculated, go on
@@ -100,7 +100,7 @@ class Chop:
 
                 if inputs.issubset(calculated):
                     # value is not yet calculated but parameters are available
-                    data[output] = function(length, data[crel.input_1], data[crel.input_2])
+                    data[output] = function(length, data[chop_rel.input_1], data[chop_rel.input_2])
                     calculated.add(output)
 
         raise ValueError(f"Could not calculate count and grading for given parameters: {data}")
