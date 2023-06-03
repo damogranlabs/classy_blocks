@@ -1,4 +1,5 @@
 import dataclasses
+from functools import lru_cache
 from typing import Callable, List, Optional, Set, Tuple, Union
 
 from classy_blocks.grading import relations as rel
@@ -37,6 +38,7 @@ class ChopRelation:
             raise RuntimeError(f"Invalid function name or unexpected parameter names: {function.__name__}") from err
 
     @staticmethod
+    @lru_cache(maxsize=1)
     def get_possible_combinations() -> List["ChopRelation"]:
         calculation_functions = rel.get_calculation_functions()
 
