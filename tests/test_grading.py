@@ -3,7 +3,7 @@ import unittest
 from parameterized import parameterized
 
 from classy_blocks.grading import relations as rel
-from classy_blocks.grading.chop import Chop, ChopRelation, functions
+from classy_blocks.grading.chop import Chop, ChopRelation
 from classy_blocks.grading.grading import Grading
 
 
@@ -27,10 +27,9 @@ class TestGrading(unittest.TestCase):
             ["total_expansion", ["count", "c2c_expansion"], rel.get_total_expansion__count__c2c_expansion],
             ["total_expansion", ["start_size", "end_size"], rel.get_total_expansion__start_size__end_size],
         ]
-
         expected_functions = [ChopRelation(f[0], f[1][0], f[1][1], f[2]) for f in expected_functions]
 
-        self.assertListEqual(expected_functions, functions)
+        self.assertCountEqual(expected_functions, ChopRelation.get_possible_combinations())
 
     @parameterized.expand(
         (
