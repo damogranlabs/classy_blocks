@@ -105,8 +105,8 @@ def scale(point: PointType, ratio: float, origin: Optional[PointType]) -> NPPoin
 def to_polar(point: PointType, axis: Literal["x", "z"] = "z") -> NPVectorType:
     """Convert (x, y, z) point to (radius, angle, height);
     the axis of the new polar coordinate system can be chosen ('x' or 'z')"""
-
-    assert axis in ["x", "z"]
+    if axis not in ["x", "z"]:
+        raise ValueError(f"`axis` must be 'x' or 'z', got {axis}")
 
     if axis == "z":
         radius = (point[0] ** 2 + point[1] ** 2) ** 0.5
@@ -128,10 +128,11 @@ def to_cartesian(point: PointType, direction: Literal[1, -1] = 1, axis: Literal[
     rotation sense can be inverted with direction=-1
 
     *when axis is 'x': theta goes from 0 at y-axis toward z-axis
-
     """
-    assert direction in [-1, 1]
-    assert axis in ["x", "z"]
+    if direction not in [-1, 1]:
+        raise ValueError(f"`direction` must be '-1' or '1', got {direction}")
+    if axis not in ["x", "z"]:
+        raise ValueError(f"`axis` must be 'x' or 'z', got {axis}")
 
     radius = point[0]
     angle = direction * point[1]

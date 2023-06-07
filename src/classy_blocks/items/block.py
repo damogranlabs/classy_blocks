@@ -40,7 +40,11 @@ class Block:
 
     def add_edge(self, corner_1: int, corner_2: int, edge: Edge):
         """Adds an edge between vertices at specified indexes."""
-        assert 0 <= corner_1 < 8 and 0 <= corner_2 < 8, "Use block-local indexing (0...7)"
+        if not (0 <= corner_1 < 8 and 0 <= corner_2 < 8):
+            raise ValueError(
+                f"Invalid corner 1 ({corner_1}) or corner 2 ({corner_2}) index. Use block-local indexing (0...7)."
+            )
+
         self.wires[corner_1][corner_2].edge = edge
 
     def chop(self, axis: AxisType, chop: Chop) -> None:
