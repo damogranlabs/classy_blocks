@@ -2,6 +2,7 @@ from typing import List
 
 import numpy as np
 
+from classy_blocks.base.exceptions import AnnulusCreationError
 from classy_blocks.construct.edges import Origin
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketches.sketch import Sketch
@@ -26,11 +27,8 @@ class Annulus(Sketch):
     ):
         center_point = np.asarray(center_point)
         normal = f.unit_vector(np.asarray(normal))
-
         outer_radius_point = np.asarray(outer_radius_point)
-
         inner_radius_point = center_point + f.unit_vector(outer_radius_point - center_point) * inner_radius
-
         segment_angle = 2 * np.pi / n_segments
 
         face = Face(
@@ -47,8 +45,16 @@ class Annulus(Sketch):
         self.core: List[Face] = []
         self.shell = [face.copy().rotate(i * segment_angle, normal, center_point) for i in range(n_segments)]
 
-        assert self.inner_radius < self.outer_radius, "Outer ring radius must be larger than inner!"
-        assert abs(np.dot(normal, outer_radius_point - center_point)) < TOL, "Normal and radius are not perpendicular!"
+        if self.inner_radius > self.outer_radius:
+            raise AnnulusCreationError(
+                "Outer ring radius must be larger than inner!",
+                f"Inner radius: {self.inner_radius}, Outer radius: {self.outer_radius}",
+            )
+        diff = abs(np.dot(normal, outer_radius_point - center_point))
+        if diff > TOL:
+            raise AnnulusCreationError(
+                "Normal and radius are not perpendicular!", f"Difference: {diff}, tolerance: {TOL}"
+            )
 
     @property
     def faces(self) -> List[Face]:

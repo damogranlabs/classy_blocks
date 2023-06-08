@@ -3,6 +3,7 @@ from typing import Optional
 import numpy as np
 
 from classy_blocks.base import transforms as tr
+from classy_blocks.base.exceptions import FrustumCreationError
 from classy_blocks.construct.flat.sketches.disk import Disk
 from classy_blocks.construct.shapes.round import RoundSolidShape
 from classy_blocks.types import PointType
@@ -40,7 +41,11 @@ class Frustum(RoundSolidShape):
         radius_1 = f.norm(radius_vector_1)
 
         # TODO: TEST
-        assert np.dot(axis, radius_vector_1) < TOL, "Make sure axis and radius vectors are perpendicular"
+        diff = np.dot(axis, radius_vector_1)
+        if diff > TOL:
+            raise FrustumCreationError(
+                "Axis and radius vectors are not perpendicular", f"Difference: {diff}, tolerance: {TOL}"
+            )
 
         transform_2 = [tr.Translation(axis_point_2 - axis_point_1), tr.Scaling(radius_2 / radius_1)]
 
@@ -61,8 +66,14 @@ class Frustum(RoundSolidShape):
         radius_mid: Optional[float] = None,
     ) -> "Frustum":
         """Chain this Frustum to an existing Shape;
-        Use length < 0 to begin on start face and go 'backwards'"""
-        assert length > 0, "Use a positive length and start_face=True to chain 'backwards'"
+        Use length > 0 to begin on source's end face;
+        Use length > 0 and `start_face=True` to begin on source's start face and go backwards
+        """
+        if length < 0:
+            raise FrustumCreationError(
+                "`chain()` operation failed: use a positive length and `start_face=True` to chain 'backwards'",
+                f"Given length: {length}, `start_face={start_face}`",
+            )
 
         if start_face:
             sketch = source.sketch_1

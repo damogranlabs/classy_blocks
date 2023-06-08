@@ -3,6 +3,7 @@ from typing import List
 import numpy as np
 
 from classy_blocks.base import transforms as tr
+from classy_blocks.base.exceptions import CylinderCreationError
 from classy_blocks.construct.flat.sketches.disk import Disk
 from classy_blocks.construct.shapes.rings import ExtrudedRing
 from classy_blocks.construct.shapes.round import RoundSolidShape
@@ -24,8 +25,11 @@ class Cylinder(RoundSolidShape):
         axis = np.asarray(axis_point_2) - axis_point_1
         radius_point_1 = np.asarray(radius_point_1)
 
-        # TODO: TEST
-        assert np.dot(axis, radius_point_1 - axis_point_1) < TOL, "Make sure axis and radius vectors are perpendicular"
+        diff = np.dot(axis, radius_point_1 - axis_point_1)
+        if diff > TOL:
+            raise CylinderCreationError(
+                "Axis and radius vectors are not perpendicular", f"Difference: {diff}, tolerance: {TOL}"
+            )
 
         transform_2: List[tr.Transformation] = [tr.Translation(axis)]
 
@@ -35,8 +39,12 @@ class Cylinder(RoundSolidShape):
     def chain(cls, source: RoundSolidShape, length: float, start_face: bool = False) -> "Cylinder":
         """Creates a new Cylinder on start or end face of a round Shape (Elbow, Frustum, Cylinder);
         Use length > 0 to extrude 'forward' from source's end face;
-        Use length < 0 to extrude 'backward' from source' start face"""
-        assert length > 0, "Use a positive length and start_face=True to chain 'backwards'"
+        Use length > 0 and `start_face=True` to extrude 'backward' from source's start face"""
+        if length < 0:
+            raise CylinderCreationError(
+                "`chain()` operation failed: use a positive length and `start_face=True` to chain 'backwards'",
+                f"Given length: {length}, `start_face={start_face}`",
+            )
 
         if start_face:
             sketch = source.sketch_1
@@ -55,6 +63,10 @@ class Cylinder(RoundSolidShape):
     @classmethod
     def fill(cls, source: "ExtrudedRing") -> "Cylinder":
         """Fills the inside of the ring with a matching cylinder"""
-        assert source.sketch_1.n_segments == 8, "Only rings made from 8 segments can be filled"
+        if source.sketch_1.n_segments != 8:
+            raise CylinderCreationError(
+                "`chain()` operation failed: nly rings made from 8 segments can be filled",
+                f"{source.sketch_1.n_segments} segments available",
+            )
 
         return cls(source.sketch_1.center, source.sketch_2.center, source.sketch_1.inner_radius_point)

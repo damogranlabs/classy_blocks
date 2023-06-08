@@ -3,6 +3,7 @@ import dataclasses
 import warnings
 
 from classy_blocks.base.element import ElementBase
+from classy_blocks.base.exceptions import EdgeCreationError
 from classy_blocks.construct.edges import EdgeData
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.types import EdgeKindType
@@ -19,8 +20,11 @@ class Edge(ElementBase):
     data: EdgeData
 
     def __post_init__(self):
-        assert isinstance(self.vertex_1, Vertex)
-        assert isinstance(self.vertex_2, Vertex)
+        if not (isinstance(self.vertex_1, Vertex) and isinstance(self.vertex_2, Vertex)):
+            raise EdgeCreationError(
+                "Unable to create `Edge`: at least one of given points is not `Vertex` type",
+                f"Vertex 1: {type(self.vertex_1)}, vertex 2: {type(self.vertex_2)}",
+            )
 
     @property
     def kind(self) -> EdgeKindType:

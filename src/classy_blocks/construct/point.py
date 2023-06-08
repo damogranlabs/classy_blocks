@@ -3,6 +3,7 @@ from typing import Optional, TypeVar
 import numpy as np
 
 from classy_blocks.base.element import ElementBase
+from classy_blocks.base.exceptions import PointCreationError
 from classy_blocks.types import NPVectorType, PointType, ProjectToType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import DTYPE, TOL, vector_format
@@ -16,7 +17,8 @@ class Point(ElementBase):
 
     def __init__(self, position: PointType):
         self.position = np.array(position, dtype=DTYPE)
-        assert np.shape(self.position) == (3,), "Provide a point in 3D space"
+        if not np.shape(self.position) == (3,):
+            raise PointCreationError("Provide a point in 3D space", f"Position: {position}")
 
         self.projected_to: ProjectToType = []
 

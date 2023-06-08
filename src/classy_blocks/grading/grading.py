@@ -70,7 +70,8 @@ class Grading:
 
         Documentation:
         https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading"""
-        assert 0 < chop.length_ratio <= 1
+        if not (0 < chop.length_ratio <= 1):
+            raise ValueError(f"Length ratio must be between 0 and (including) 1, got {chop.length_ratio}")
 
         length = self.length * chop.length_ratio
 

@@ -3,6 +3,7 @@ from typing import Dict, List, Optional, TypeVar, Union
 import numpy as np
 
 from classy_blocks.base.element import ElementBase
+from classy_blocks.base.exceptions import EdgeCreationError
 from classy_blocks.construct.edges import EdgeData, Line, Project
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.grading.chop import Chop
@@ -35,12 +36,16 @@ class Operation(ElementBase):
         # optionally, put the block in a cell zone
         self.cell_zone = ""
 
-    def add_side_edge(self, corner_1: int, edge_data: EdgeData) -> None:
+    def add_side_edge(self, corner_idx: int, edge_data: EdgeData) -> None:
         """Add an edge between two vertices at the same
         corner of the lower and upper face (index and index+4 or vice versa)."""
-        assert corner_1 < 4, "corner_1 must be an index to a bottom Vertex (0...3)"
+        if corner_idx < 0 or corner_idx > 3:
+            raise EdgeCreationError(
+                "Unable to create side edge between two faces: corner must be an index to a bottom Vertex (0...3)",
+                f"Given corner index: {corner_idx}",
+            )
 
-        self.side_edges[corner_1] = edge_data
+        self.side_edges[corner_idx] = edge_data
 
     def chop(self, axis: AxisType, **kwargs) -> None:
         """Chop the operation (count/grading) in given axis:
@@ -240,6 +245,7 @@ class Operation(ElementBase):
     @staticmethod
     def get_index_from_side(side: OrientType) -> int:
         """Returns index of edges/patches/projections from given orient"""
-        assert side in SIDES_MAP, "Use self.top_face()/self.bottom_face() for actions on top and bottom face"
+        if side not in SIDES_MAP:
+            raise RuntimeError("Use self.top_face()/self.bottom_face() for actions on top and bottom face")
 
         return SIDES_MAP.index(side)

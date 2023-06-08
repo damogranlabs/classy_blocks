@@ -18,11 +18,58 @@ R_MAX = 1 / constants.TOL
 # length is a default argument, passed in always, for simplicity
 
 
+# validator functions
+def _validate_length(length) -> None:
+    if length <= 0:
+        raise ValueError(f"Length must be positive, got {length}")
+
+
+def _validate_count(count: float, condition: str) -> None:
+    # short operators at the end, as '>' starts with the same character as '>='
+    allowed_operators = ["==", "!=", ">=", "<=", ">", "<"]
+
+    # This function use `eval()`, make sure input parameters are valid!
+    if not isinstance(count, (int, float)):
+        raise TypeError(f"`{count}` must be an float, got {type(count)}")
+    for operator in allowed_operators:
+        if condition.startswith(operator):
+            try:
+                _ = float(condition.lstrip(operator))
+                break
+            except ValueError as err:
+                raise ValueError(
+                    f"`{condition}` format is invalid: expecting '<operator><number>'. For example: '>=6'"
+                    f"\n\tGot: {condition}"
+                ) from err
+    else:
+        raise ValueError(
+            f"Unknown condition (operator or format): {condition}\n\tAllowed operators are: {allowed_operators}"
+        )
+
+    if not eval(f"{count}{condition}"):
+        raise ValueError(f"Count value ({count}) does not met the condition: {condition}")
+
+
+def _validate_start_end_size(size, name: str) -> None:
+    if size <= 0:
+        raise ValueError(f"{name.capitalize()} size must be positive, got {size}")
+
+
+def _validate_c2c_expansion(c2c_expansion) -> None:
+    if c2c_expansion == 0:
+        raise ValueError("Cell-to-cell expansion must not be 0.")
+
+
+def _validate_total_expansion(expansion) -> None:
+    if expansion == 0:
+        raise ValueError("Total expansion ratio must not be 0.")
+
+
 ### functions returning start_size
 def get_start_size__count__c2c_expansion(length, count, c2c_expansion):
     """Calculates start size from given count and cell-to-cell expansion ratio"""
-    assert length > 0
-    assert count >= 1
+    _validate_length(length)
+    _validate_count(count, ">=1")
 
     if abs(c2c_expansion - 1) > constants.TOL:
         return length * (1 - c2c_expansion) / (1 - c2c_expansion**count)
@@ -32,8 +79,8 @@ def get_start_size__count__c2c_expansion(length, count, c2c_expansion):
 
 def get_start_size__end_size__total_expansion(length, end_size, total_expansion):
     """Calculates start size from given end size and total expansion ratio"""
-    assert length > 0
-    assert total_expansion != 0
+    _validate_length(length)
+    _validate_total_expansion(total_expansion)
 
     return end_size / total_expansion
 
@@ -41,7 +88,7 @@ def get_start_size__end_size__total_expansion(length, end_size, total_expansion)
 ### functions returning end_size
 def get_end_size__start_size__total_expansion(length, start_size, total_expansion):
     """Calculates end size from given start size and total expansion ratio"""
-    assert length > 0
+    _validate_length(length)
 
     return start_size * total_expansion
 
@@ -49,9 +96,9 @@ def get_end_size__start_size__total_expansion(length, start_size, total_expansio
 ### functions returning count
 def get_count__start_size__c2c_expansion(length, start_size, c2c_expansion):
     """Calculates count from given start size and cell-to-cell expansion ratio"""
-    assert length > 0
-    assert start_size > 0
-    assert c2c_expansion != 0
+    _validate_length(length)
+    _validate_start_end_size(start_size, "start")
+    _validate_c2c_expansion(c2c_expansion)
 
     if abs(c2c_expansion - 1) > constants.TOL:
         count = np.log(1 - length / start_size * (1 - c2c_expansion)) / np.log(c2c_expansion)
@@ -63,32 +110,41 @@ def get_count__start_size__c2c_expansion(length, start_size, c2c_expansion):
 
 def get_count__end_size__c2c_expansion(length, end_size, c2c_expansion):
     """Calculates count from given end size and cell-to-cell expansion ratio"""
-    assert length > 0
+    _validate_length(length)
 
     if abs(c2c_expansion - 1) > constants.TOL:
         count = np.log(1 / (1 + length / end_size * (1 - c2c_expansion) / c2c_expansion)) / np.log(c2c_expansion)
     else:
         count = length / end_size
 
-    assert not np.isnan(count)
+    if np.isnan(count):
+        raise ValueError(
+            f"Could not calculate count from end size {end_size} and cell-to-cell expansion ratio {c2c_expansion}"
+        )
 
     return int(count) + 1
 
 
 def get_count__total_expansion__c2c_expansion(length, total_expansion, c2c_expansion):
     """Calculates count from total expansion ratio and cell-to-cell expansion ratio"""
-    assert length > 0
-    assert abs(c2c_expansion - 1) > constants.TOL
-    assert total_expansion > 0
+    _validate_length(length)
+    _validate_total_expansion(total_expansion)
+
+    if abs(c2c_expansion - 1) <= constants.TOL:
+        raise ValueError(
+            "Cell-to-cell expansion - 1 should be less than tolerance:"
+            f"\n\tCell-to-cell expansion ratio: {c2c_expansion}"
+            f"\n\tTolerance: {constants.TOL}"
+        )
 
     return int(np.log(total_expansion) / np.log(c2c_expansion)) + 1
 
 
 def get_count__total_expansion__start_size(length, total_expansion, start_size):
     """Calculates count from given total expansion ratio and start size"""
-    assert length > 0
-    assert start_size > 0
-    assert total_expansion > 0
+    _validate_length(length)
+    _validate_start_end_size(start_size, "start")
+    _validate_total_expansion(total_expansion)
 
     if total_expansion > 1:
         d_min = start_size
@@ -109,9 +165,10 @@ def get_count__total_expansion__start_size(length, total_expansion, start_size):
 ### functions returning c2c_expansion
 def get_c2c_expansion__count__start_size(length, count, start_size):
     """Calculates cell-to-cell expansion ratio from given count and start size"""
-    assert length > 0
-    assert count >= 1
-    assert length > start_size > 0
+    _validate_length(length)
+    _validate_count(count, ">=1")
+    if not (length > start_size > 0):
+        raise ValueError(f"Start size {start_size} must be between 0 and length {length}, got {start_size}")
 
     if count == 1:
         return 1
@@ -129,18 +186,17 @@ def get_c2c_expansion__count__start_size(length, count, start_size):
     def fexp(c2c):
         return (1 - c2c**count) / (1 - c2c) - length / start_size
 
-    assert fexp(c_min) * fexp(c_max) < 0, (
-        "Invalid grading parameters: " + f" length {length}, count {count}, start_size {start_size}"
-    )
+    if fexp(c_min) * fexp(c_max) >= 0:
+        raise ValueError(f"Invalid grading parameters: length {length}, count {count}, start_size {start_size}")
 
     return scipy.optimize.brentq(fexp, c_min, c_max)
 
 
 def get_c2c_expansion__count__end_size(length, count, end_size):
     """Calculates cell-to-cell expansion ratio from given count and end size"""
-    assert length > 0
-    assert count >= 1
-    assert end_size > 0
+    _validate_length(length)
+    _validate_count(count, ">=1")
+    _validate_start_end_size(end_size, "end")
 
     if abs(count * end_size - length) / length < constants.TOL:
         return 1
@@ -155,17 +211,16 @@ def get_c2c_expansion__count__end_size(length, count, end_size):
     def fexp(c2c):
         return (1 / c2c ** (count - 1)) * (1 - c2c**count) / (1 - c2c) - length / end_size
 
-    assert fexp(c_min) * fexp(c_max) < 0, (
-        "Invalid grading parameters: " + f" length {length}, count {count}, end_size {end_size}"
-    )
+    if fexp(c_min) * fexp(c_max) >= 0:
+        raise ValueError(f"Invalid grading parameters: length {length}, count {count}, end_size {end_size}")
 
     return scipy.optimize.brentq(fexp, c_min, c_max)
 
 
 def get_c2c_expansion__count__total_expansion(length, count, total_expansion):
     """Calculates cell-to-cell expansion ratio from given count and total expansion ratio"""
-    assert length > 0
-    assert count > 1
+    _validate_length(length)
+    _validate_count(count, ">1")
 
     return total_expansion ** (1 / (count - 1))
 
@@ -173,17 +228,17 @@ def get_c2c_expansion__count__total_expansion(length, count, total_expansion):
 ### functions returning total expansion
 def get_total_expansion__count__c2c_expansion(length, count, c2c_expansion):
     """Calculates total expansion ratio from given count and cell-to-cell expansion ratio"""
-    assert length > 0
-    assert count >= 1
+    _validate_length(length)
+    _validate_count(count, ">=1")
 
     return c2c_expansion ** (count - 1)
 
 
 def get_total_expansion__start_size__end_size(length, start_size, end_size):
     """Calculates total expansion ratio from given start size and end size"""
-    assert length > 0
-    assert start_size > 0
-    assert end_size > 0
+    _validate_length(length)
+    _validate_start_end_size(start_size, "start")
+    _validate_start_end_size(end_size, "end")
 
     return end_size / start_size
 

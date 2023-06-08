@@ -2,7 +2,9 @@ import unittest
 
 import numpy as np
 
+from classy_blocks.base.exceptions import EdgeCreationError
 from classy_blocks.construct import edges
+from classy_blocks.construct.point import Point
 from classy_blocks.items.edges.arcs.angle import AngleEdge, arc_from_theta
 from classy_blocks.items.edges.arcs.arc import ArcEdge
 from classy_blocks.items.edges.arcs.origin import OriginEdge, arc_from_origin
@@ -169,6 +171,20 @@ class EdgeValidityTests(unittest.TestCase):
         """arc.is_valid"""
         self.assertTrue(self.get_edge(edges.Arc([0.5, 0.2, 0])).is_valid)
 
+    def test_invalid_edge_creation_points(self):
+        with self.assertRaises(EdgeCreationError):
+            SplineEdge(
+                Vertex([0, 0, 0], 0),
+                Point([1, 1, 1]),  # type: ignore # must be vertex, not point!
+                edges.Spline(
+                    [
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0],
+                    ]
+                ),
+            )
+
     def test_invalid_arc(self):
         """Arc from three collinear points"""
         self.assertFalse(self.get_edge(edges.Arc([0.5, 0, 0])).is_valid)
@@ -185,7 +201,7 @@ class EdgeValidityTests(unittest.TestCase):
 
     def test_invalid_angle(self):
         """Catch exceptions raised whtn calculating arc point from the 'angle' alternative"""
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             edge = self.get_edge(edges.Angle(0, [0, 0, 1]))
             _ = edge.is_valid
 
