@@ -1,7 +1,16 @@
 {
-    "python.formatting.provider": "none",
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.wordBasedSuggestions": false,
+        "gitlens.codeLens.symbolScopes": [
+            "!Module"
+        ],
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true,
+        },
+    },
     "python.linting.enabled": true,
-    "python.linting.pylintEnabled": true,
     "python.linting.lintOnSave": true,
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.diagnosticMode": "openFilesOnly",

@@ -1,10 +1,9 @@
 from typing import List, Optional, Set
 
-from classy_blocks.types import AxisType
-
 from classy_blocks.grading.chop import Chop
-from classy_blocks.items.wire import Wire
 from classy_blocks.grading.grading import Grading
+from classy_blocks.items.wire import Wire
+from classy_blocks.types import AxisType
 
 
 class Axis:

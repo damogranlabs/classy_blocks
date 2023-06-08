@@ -1,15 +1,13 @@
 from typing import List
 
-from tests.fixtures.data import DataTestCase
-
 from classy_blocks.base.exceptions import EdgeNotFoundError
+from classy_blocks.construct.edges import Arc, PolyLine, Project, Spline
 from classy_blocks.construct.flat.face import Face
-from classy_blocks.construct.edges import Project
 from classy_blocks.construct.operations.revolve import Revolve
-from classy_blocks.construct.edges import Arc, PolyLine, Spline
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.lists.vertex_list import VertexList
 from classy_blocks.lists.edge_list import EdgeList
+from classy_blocks.lists.vertex_list import VertexList
+from tests.fixtures.data import DataTestCase
 
 
 class EdgeListTests(DataTestCase):
@@ -109,8 +107,21 @@ class EdgeListTests(DataTestCase):
                 no_arc += 1
             elif edge.kind == "project":
                 no_project += 1
-            else:
-                self.fail(f"Unknown edge type: {edge.kind}")
 
         self.assertEqual(no_arc, 4)
         self.assertEqual(no_project, 2)
+
+    def test_description(self):
+        """Output for blockMesh"""
+        vertices = self.get_vertices(0)
+        self.el.add(vertices[0], vertices[1], Arc([0.5, 0.5, 0]))
+        self.el.add(vertices[0], vertices[1], Arc([0.5, 0.5, 0]))
+
+        expected = "edges\n(\n"
+
+        for edge in self.el.edges:
+            expected += edge.description + "\n"
+
+        expected += ");\n\n"
+
+        self.assertEqual(self.el.description, expected)

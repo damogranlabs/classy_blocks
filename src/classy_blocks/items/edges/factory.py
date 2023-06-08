@@ -1,16 +1,16 @@
 from typing import Type
 
-from classy_blocks.types import EdgeKindType
 from classy_blocks.construct.edges import EdgeData
+from classy_blocks.items.edges.arcs.angle import AngleEdge
+from classy_blocks.items.edges.arcs.arc import ArcEdge
+from classy_blocks.items.edges.arcs.origin import OriginEdge
 from classy_blocks.items.edges.edge import Edge
 
 # FIXME: make this automatic
 from classy_blocks.items.edges.line import LineEdge
-from classy_blocks.items.edges.arcs.arc import ArcEdge
-from classy_blocks.items.edges.arcs.origin import OriginEdge
-from classy_blocks.items.edges.arcs.angle import AngleEdge
-from classy_blocks.items.edges.spline import SplineEdge, PolyLineEdge
 from classy_blocks.items.edges.project import ProjectEdge
+from classy_blocks.items.edges.spline import PolyLineEdge, SplineEdge
+from classy_blocks.types import EdgeKindType
 
 
 class EdgeFactory:
@@ -25,7 +25,7 @@ class EdgeFactory:
         self.kinds[kind] = creator
 
     def create(self, vertex_1, vertex_2, data: EdgeData) -> Edge:
-        """Creates an EdgeOps of the desired kind and returns it"""
+        """Creates an Edge* of the desired kind and returns it"""
         edge_class = self.kinds[data.kind]
         return edge_class(vertex_1, vertex_2, data)
 

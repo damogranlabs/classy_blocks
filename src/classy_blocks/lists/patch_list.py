@@ -1,12 +1,11 @@
+from collections import OrderedDict
 from typing import Dict, List, Optional, Set
 
-from collections import OrderedDict
-
-from classy_blocks.types import OrientType
 from classy_blocks.construct.operations.operation import Operation
+from classy_blocks.items.patch import Patch
 from classy_blocks.items.side import Side
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.items.patch import Patch
+from classy_blocks.types import OrientType
 
 
 class PatchList:
@@ -14,7 +13,7 @@ class PatchList:
 
     def __init__(self) -> None:
         self.patches: OrderedDict[str, Patch] = OrderedDict()
-        self.default: Optional[Dict[str, str]] = None
+        self.default: Dict[str, str] = {}
         self.merged: List[List[str]] = []  # data for the mergePatchPairs entry
 
     def add(self, vertices: List[Vertex], operation: Operation) -> None:
@@ -59,7 +58,7 @@ class PatchList:
 
         out += ");\n\n"
 
-        if self.default is not None:
+        if self.default:
             out += "defaultPatch\n{\n"
             out += f"\tname {self.default['name']};\n"
             out += f"\ttype {self.default['kind']};\n"

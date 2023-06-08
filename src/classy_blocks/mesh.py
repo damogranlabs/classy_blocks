@@ -1,20 +1,17 @@
 """The Mesh object ties everything together and writes the blockMeshDict in the end."""
-from typing import Optional, List, get_args, Union
-
-from classy_blocks.types import AxisType
-from classy_blocks.items.vertex import Vertex
-from classy_blocks.items.block import Block
-
-from classy_blocks.lists.block_list import BlockList
-from classy_blocks.lists.vertex_list import VertexList
-from classy_blocks.lists.edge_list import EdgeList
-from classy_blocks.lists.patch_list import PatchList
-from classy_blocks.lists.face_list import FaceList
-from classy_blocks.lists.geometry_list import GeometryList
+from typing import List, Optional, Union, get_args
 
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.shapes.shape import Shape
-
+from classy_blocks.items.block import Block
+from classy_blocks.items.vertex import Vertex
+from classy_blocks.lists.block_list import BlockList
+from classy_blocks.lists.edge_list import EdgeList
+from classy_blocks.lists.face_list import FaceList
+from classy_blocks.lists.geometry_list import GeometryList
+from classy_blocks.lists.patch_list import PatchList
+from classy_blocks.lists.vertex_list import VertexList
+from classy_blocks.types import AxisType
 from classy_blocks.util import constants
 from classy_blocks.util.vtk_writer import write_vtk
 
@@ -114,13 +111,15 @@ class Mesh:
                     for chop in operation.chops[axis]:
                         block.chop(axis, chop)
 
+                block.cell_zone = operation.cell_zone
+
                 self.block_list.add(block)
                 self.patch_list.add(vertices, operation)
                 self.face_list.add(vertices, operation)
 
             # FIXME: prettify, SOLIDify
             if hasattr(entity, "geometry"):
-                self.add_geometry(entity.geometry)
+                self.add_geometry(entity.__getattribute__("geometry"))
 
     @property
     def is_assembled(self) -> bool:
@@ -149,7 +148,8 @@ class Mesh:
         if debug_path is not None:
             write_vtk(debug_path, self.vertex_list.vertices, self.block_list.blocks)
 
-        # gradings
+        # gradings: define after writing VTK;
+        # if it is not specified correctly, this will raise an exception
         self.block_list.propagate_gradings()
 
         with open(output_path, "w", encoding="utf-8") as output:

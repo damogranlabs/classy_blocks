@@ -1,17 +1,16 @@
 """Abstract base classes for different Shape types"""
 import abc
-
-from typing import TypeVar, Optional, List, Generic
+from typing import Generic, List, Optional, TypeVar
 
 import numpy as np
 
-from classy_blocks.types import NPPointType, AxisType, OrientType
-from classy_blocks.base.element import ElementBase
 from classy_blocks.base import transforms as tr
+from classy_blocks.base.element import ElementBase
 from classy_blocks.construct.edges import Arc
 from classy_blocks.construct.flat.sketches.sketch import SketchT
-from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.operations.loft import Loft
+from classy_blocks.construct.operations.operation import Operation
+from classy_blocks.types import AxisType, NPPointType, OrientType
 
 ShapeT = TypeVar("ShapeT", bound="Shape")
 
@@ -116,8 +115,3 @@ class LoftedShape(Shape, Generic[SketchT]):
     @abc.abstractmethod
     def shell(self) -> List[Loft]:
         """Operations on the outside of the shape"""
-
-    def set_outer_patch(self, name: str) -> None:
-        """Assign the outer faces to a patch"""
-        for operation in self.shell:
-            operation.set_patch(self.outer_patch, name)

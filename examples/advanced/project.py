@@ -1,4 +1,5 @@
 import os
+
 import classy_blocks as cb
 
 geometry = {
@@ -12,12 +13,14 @@ geometry = {
         "planeType  pointAndNormal",
         "point      (-1 0 0)",
         "normal     (1  0  0)",
+        "pointAndNormalDict { point (-1 0 0); normal (1 0 0); }",  # ESI version
     ],
     "front_wall": [
         "type       searchablePlane",
         "planeType  pointAndNormal",
         "point      (0 -1 0)",
         "normal     (0  1  0)",
+        "pointAndNormalDict { point (0 -1 0); normal (0 1 0); }",  # ESI version
     ],
 }
 

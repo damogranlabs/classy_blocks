@@ -1,16 +1,13 @@
 from typing import List, get_args
 
-from classy_blocks.types import AxisType
-
-from classy_blocks.util.frame import Frame
-from classy_blocks.items.vertex import Vertex
-from classy_blocks.items.edges.edge import Edge
-from classy_blocks.items.wire import Wire
-from classy_blocks.items.axis import Axis
-
 from classy_blocks.grading.chop import Chop
-
+from classy_blocks.items.axis import Axis
+from classy_blocks.items.edges.edge import Edge
+from classy_blocks.items.vertex import Vertex
+from classy_blocks.items.wire import Wire
+from classy_blocks.types import AxisType
 from classy_blocks.util import constants
+from classy_blocks.util.frame import Frame
 
 
 class Block:
@@ -24,7 +21,7 @@ class Block:
         self.vertices = vertices
 
         # wires and axes
-        self.wires: Frame = Frame()
+        self.wires = Frame[Wire]()
 
         # create wires and connections for quicker addressing
         for axis in range(3):
@@ -81,7 +78,7 @@ class Block:
 
     def get_axis_wires(self, axis: AxisType) -> List[Wire]:
         """Returns a list of wires that run in the given axis"""
-        return self.axes[axis].wires
+        return self.wires.get_axis_beams(axis)
 
     def add_neighbour(self, candidate: "Block") -> None:
         """Add a block to neighbours, if applicable"""

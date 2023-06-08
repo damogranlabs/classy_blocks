@@ -1,14 +1,12 @@
-from typing import List, Optional, Union
-
 import copy
+from typing import List, Optional, Union
 
 import numpy as np
 
-from classy_blocks.types import PointListType, NPPointType, NPVectorType, NPPointListType, ProjectToType
-from classy_blocks.construct.point import Point
-from classy_blocks.construct.edges import Project
 from classy_blocks.base.element import ElementBase
-from classy_blocks.construct.edges import EdgeData, Line
+from classy_blocks.construct.edges import EdgeData, Line, Project
+from classy_blocks.construct.point import Point
+from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, PointListType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
@@ -53,7 +51,7 @@ class Face(ElementBase):
             ), "FacePoints are not coplanar!"
 
         # name of geometry this face can be projected to
-        self.projected_to: Optional[ProjectToType] = None
+        self.projected_to: Optional[str] = None
         # patch name to which this face can belong
         self.patch_name: Optional[str] = None
 
@@ -105,7 +103,7 @@ class Face(ElementBase):
     def parts(self):
         return self.points + self.edges
 
-    def project(self, geometry: ProjectToType, edges: bool = False, points: bool = False) -> None:
+    def project(self, geometry: str, edges: bool = False, points: bool = False) -> None:
         """Project this face to given geometry;
 
         faces can only be projected to a single

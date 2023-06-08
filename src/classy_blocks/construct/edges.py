@@ -1,9 +1,9 @@
 import warnings
 from typing import List
 
-from classy_blocks.types import VectorType, PointType, PointListType, EdgeKindType, ProjectToType
 from classy_blocks.base.element import ElementBase
 from classy_blocks.construct.point import Point, Vector
+from classy_blocks.types import EdgeKindType, PointListType, PointType, ProjectToType, VectorType
 from classy_blocks.util import functions as f
 
 
@@ -18,7 +18,7 @@ class EdgeData(ElementBase):
 
     @property
     def center(self):
-        warnings.warn("Transforming edge with a default center (0 0 0)!")
+        warnings.warn("Transforming edge with a default center (0 0 0)!", stacklevel=2)
         return f.vector(0, 0, 0)
 
 

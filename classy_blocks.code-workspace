@@ -6,6 +6,19 @@
     ],
     "settings": {
         "python.languageServer": "Pylance",
-        "python.linting.lintOnSave": true,
-    }
+        "cSpell.words": [
+            "astype",
+            "linspace",
+            "Pylance",
+            "scipy"
+        ]
+    },
+    "extensions": {
+        "recommendations": [
+            "ms-python.vscode-pylance",
+            "ms-python.python",
+            "charliermarsh.ruff",
+            "ms-python.black-formatter"
+        ]
+    },
 }

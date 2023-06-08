@@ -1,7 +1,7 @@
+from typing import List
+
 from classy_blocks.items.block import Block
 from classy_blocks.items.vertex import Vertex
-
-from typing import List
 
 
 def write_vtk(path: str, vertices: List[Vertex], blocks: List[Block]) -> None:

@@ -2,14 +2,13 @@ from typing import List, Union
 
 import numpy as np
 
-from classy_blocks.types import PointType, OrientType
+from classy_blocks.base import transforms as tr
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketches.annulus import Annulus
 from classy_blocks.construct.operations.operation import Operation
-from classy_blocks.construct.shapes.round import RoundSolidShape, RoundHollowShape
 from classy_blocks.construct.operations.revolve import Revolve
-from classy_blocks.base import transforms as tr
-
+from classy_blocks.construct.shapes.round import RoundHollowShape, RoundSolidShape
+from classy_blocks.types import OrientType, PointType
 from classy_blocks.util import functions as f
 
 

@@ -1,9 +1,7 @@
-from tests.fixtures.block import BlockTestCase
-
-from classy_blocks.types import OrientType
-
 from classy_blocks.items.patch import Patch
 from classy_blocks.items.side import Side
+from classy_blocks.types import OrientType
+from tests.fixtures.block import BlockTestCase
 
 
 class PatchTests(BlockTestCase):
@@ -56,3 +54,12 @@ class PatchTests(BlockTestCase):
         )
 
         self.assertEqual(patch.description, expected)
+
+    def test_options(self):
+        """Add an option and check it's in description"""
+        option = "neighbourPatch left"
+
+        patch = self.patch
+        patch.settings.append(option)
+
+        self.assertTrue(f"\t{option};" in patch.description)

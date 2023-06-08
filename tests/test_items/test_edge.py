@@ -2,17 +2,15 @@ import unittest
 
 import numpy as np
 
-from classy_blocks.items.vertex import Vertex
-
 from classy_blocks.construct import edges
-from classy_blocks.items.edges.edge import Edge
+from classy_blocks.items.edges.arcs.angle import AngleEdge, arc_from_theta
 from classy_blocks.items.edges.arcs.arc import ArcEdge
 from classy_blocks.items.edges.arcs.origin import OriginEdge, arc_from_origin
-from classy_blocks.items.edges.arcs.angle import AngleEdge, arc_from_theta
-from classy_blocks.items.edges.spline import SplineEdge, PolyLineEdge
-from classy_blocks.items.edges.project import ProjectEdge
+from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
-
+from classy_blocks.items.edges.project import ProjectEdge
+from classy_blocks.items.edges.spline import SplineEdge
+from classy_blocks.items.vertex import Vertex
 from classy_blocks.util import functions as f
 
 
@@ -70,6 +68,13 @@ class EdgeTransformTests(unittest.TestCase):
                 [1.75, 1.1, 1],
             ],
         )
+
+    def test_default_origin(self):
+        """Issue a warning when transforming with a default origin"""
+        edge = ArcEdge(self.vertex_1, self.vertex_2, edges.Arc([0.5, 0.2, 0]))
+
+        with self.assertWarns(Warning):
+            edge.rotate(1, [0, 0, 1])
 
 
 class EdgeFactoryTests(unittest.TestCase):
@@ -224,6 +229,10 @@ class EdgeLengthTests(unittest.TestCase):
         """Length of the 'spline' edge - the segments, actually"""
         self.assertEqual(self.get_edge(edges.Spline([[1, 0, 0], [1, 1, 0]])).length, 3)
 
+    def test_poly_edge(self):
+        """Length of the 'polyLine' edge - accurately"""
+        self.assertEqual(self.get_edge(edges.PolyLine([[1, 0, 0], [1, 1, 0]])).length, 3)
+
     def test_project_edge(self):
         """Length of the 'project' edge is equal to a line"""
         self.assertEqual(self.get_edge(edges.Project("terrain")).length, 1)
@@ -288,7 +297,12 @@ class EdgeDescriptionTests(unittest.TestCase):
         """A shortcut to factory method"""
         return factory.create(Vertex([0, 0, 0], 0), Vertex([1, 0, 0], 1), data)
 
+    def test_line_description(self):
+        """Line has no description as it is not valid anyway"""
+        self.assertFalse(self.get_edge(edges.Line()).description)
+
     def test_arc_description(self):
+        """Classic arc description"""
         self.assertEqual(
             self.get_edge(edges.Arc([0.5, 0.1, 0])).description, "\tarc 0 1 (0.50000000 0.10000000 0.00000000)"
         )
@@ -311,4 +325,14 @@ class EdgeDescriptionTests(unittest.TestCase):
         self.assertEqual(
             self.get_edge(edges.Spline([[0, 1, 0], [1, 1, 0]])).description,
             "\tspline 0 1 ((0.00000000 1.00000000 0.00000000) (1.00000000 1.00000000 0.00000000))",
+        )
+
+    def test_project_description_single(self):
+        """Projection to a single geometry"""
+        self.assertEqual(self.get_edge(edges.Project("terrain")).description, "\tproject 0 1 (terrain)")
+
+    def test_project_description_double(self):
+        """Projection to two geometries"""
+        self.assertEqual(
+            self.get_edge(edges.Project(["terrain", "walls"])).description, "\tproject 0 1 (terrain walls)"
         )

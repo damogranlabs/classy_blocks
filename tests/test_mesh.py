@@ -1,7 +1,11 @@
-from tests.fixtures.block import BlockTestCase
+from unittest import mock
 
-from classy_blocks.mesh import Mesh
 from classy_blocks.construct.operations.box import Box
+from classy_blocks.construct.shapes.cylinder import Cylinder
+from classy_blocks.lists.geometry_list import GeometryList
+from classy_blocks.lists.patch_list import PatchList
+from classy_blocks.mesh import Mesh
+from tests.fixtures.block import BlockTestCase
 
 
 class MeshTests(BlockTestCase):
@@ -127,3 +131,73 @@ class MeshTests(BlockTestCase):
 
         # all vertices must be duplicated
         self.assertEqual(len(self.mesh.vertex_list.vertices), 32)
+
+    def test_cell_zone_operation(self):
+        """Assign cell zone from an operation"""
+        box = Box([0, 0, 0], [1, 1, 1])
+        box.set_cell_zone("mrf")
+
+        self.mesh.add(box)
+        self.mesh.assemble()
+
+        for block in self.mesh.block_list.blocks:
+            self.assertEqual(block.cell_zone, "mrf")
+
+    def test_cell_zone_shape(self):
+        """Assign cell zone from an operation"""
+        cyl = Cylinder([0, 0, 0], [1, 0, 0], [0, 1, 0])
+        cyl.set_cell_zone("mrf")
+
+        self.mesh.add(cyl)
+        self.mesh.assemble()
+
+        for block in self.mesh.block_list.blocks:
+            self.assertEqual(block.cell_zone, "mrf")
+
+    def test_chop_shape_axial(self):
+        """Axial chop of a shape"""
+        cyl = Cylinder([0, 0, 0], [1, 0, 0], [0, 1, 0])
+        cyl.chop_axial(count=10)
+        cyl.chop_radial(count=1)
+        cyl.chop_tangential(count=1)
+
+        self.mesh.add(cyl)
+        self.mesh.assemble()
+        self.mesh.block_list.propagate_gradings()
+
+        for block in self.mesh.block_list.blocks:
+            self.assertEqual(block.axes[2].grading.count, 10)
+
+    def test_chop_cylinder_tangential(self):
+        """Cylinder chops differently from rings"""
+        cyl = Cylinder([0, 0, 0], [1, 0, 0], [0, 1, 0])
+        cyl.chop_tangential(count=10)
+        cyl.chop_radial(count=1)
+        cyl.chop_axial(count=1)
+
+        self.mesh.add(cyl)
+        self.mesh.assemble()
+        self.mesh.block_list.propagate_gradings()
+
+        for block in self.mesh.block_list.blocks:
+            self.assertEqual(block.axes[1].grading.count, 10)
+
+    def test_set_default_patch(self):
+        with mock.patch.object(PatchList, "set_default") as mock_default:
+            self.mesh.set_default_patch("terrain", "wall")
+
+        mock_default.assert_called_with("terrain", "wall")
+
+    def test_modify_patch(self):
+        with mock.patch.object(PatchList, "modify") as mock_modify:
+            self.mesh.modify_patch("terrain", "wall", ["transform none"])
+
+        mock_modify.assert_called_with("terrain", "wall", ["transform none"])
+
+    def test_add_geometry(self):
+        test_dict = {"type": "sphere"}
+
+        with mock.patch.object(GeometryList, "add") as mock_add:
+            self.mesh.add_geometry(test_dict)
+
+        mock_add.assert_called_with(test_dict)

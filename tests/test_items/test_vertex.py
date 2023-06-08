@@ -1,9 +1,8 @@
 import numpy as np
 
+from classy_blocks.base import transforms as tr
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.util import constants
-from classy_blocks.base import transforms as tr
-
 from tests.fixtures.data import DataTestCase
 
 

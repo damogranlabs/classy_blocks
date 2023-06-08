@@ -1,3 +1,7 @@
+import inspect
+import sys
+from typing import Callable, Dict
+
 import numpy as np
 import scipy.optimize
 
@@ -182,3 +186,14 @@ def get_total_expansion__start_size__end_size(length, start_size, end_size):
     assert end_size > 0
 
     return end_size / start_size
+
+
+def get_calculation_functions() -> Dict[str, Callable]:
+    # gather available functions for calculation of grading parameters
+    functions = dict()
+    for name, function in inspect.getmembers(sys.modules[__name__], inspect.isfunction):
+        if name.startswith("get_"):
+            if "__" in name:
+                functions[name] = function
+
+    return functions

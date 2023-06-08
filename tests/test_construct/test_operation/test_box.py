@@ -1,7 +1,7 @@
 import unittest
 
-from parameterized import parameterized
 import numpy as np
+from parameterized import parameterized
 
 from classy_blocks.construct.operations.box import Box
 

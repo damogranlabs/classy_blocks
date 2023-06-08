@@ -1,5 +1,4 @@
 import warnings
-
 from typing import List
 
 from classy_blocks.items.side import Side
@@ -21,7 +20,7 @@ class Patch:
         """Adds a side to the list if it doesn't exist yet"""
         for existing in self.sides:
             if existing == side:
-                warnings.warn(f"Side {side.description} has already been assigned to {self.name}")
+                warnings.warn(f"Side {side.description} has already been assigned to {self.name}", stacklevel=2)
                 return
 
         self.sides.append(side)
@@ -40,14 +39,15 @@ class Patch:
         out = indent(self.name, 1)
         out += indent("{", 1)
         out += indent(f"type {self.kind};", 2)
+
+        for option in self.settings:
+            out += indent(f"{option};", 2)
+
         out += indent("faces", 2)
         out += indent("(", 2)
 
         for quad in self.sides:
             out += indent(f"{quad.description}", 3)
-
-        for option in self.settings:
-            out += indent(f"{option};", 2)
 
         out += indent(");", 2)
         out += indent("}", 1)

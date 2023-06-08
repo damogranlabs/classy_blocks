@@ -3,19 +3,17 @@
 # with a few differences:
 # - scipy.optimize.<whatever> can be used here instead of barbarian bisection
 # - all floats are converted to integers by rounding down (only matters for border cases)
-from classy_blocks.grading import relations as rel
-
+import unittest
 
 from parameterized import parameterized
 
-
-import unittest
+from classy_blocks.grading import relations as rel
 
 
 class TestGradingRelations(unittest.TestCase):
     """Testing valid, border and invalid cases"""
 
-    def assertAlmostEqual(self, *args, **kwargs):
+    def assertAlmostEqual(self, *args, **kwargs):  # noqa: N802
         kwargs.pop("places", None)
 
         kwargs["places"] = 5

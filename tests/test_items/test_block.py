@@ -1,16 +1,12 @@
+import numpy as np
 from parameterized import parameterized
 
-import numpy as np
-
-from tests.fixtures.block import BlockTestCase
-
 from classy_blocks.grading.chop import Chop
-
 from classy_blocks.items.block import Block
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wire import Wire
-
 from classy_blocks.util import functions as f
+from tests.fixtures.block import BlockTestCase
 
 
 class BlockTests(BlockTestCase):
@@ -284,3 +280,14 @@ class WireframeTests(BlockTestCase):
     def test_find_wire_success(self, corner_1, corner_2):
         """Find wire by __getitem__"""
         self.assertEqual(type(self.block.wires[corner_1][corner_2]), Wire)
+
+    @parameterized.expand(((0,), (1,), (2,)))
+    def test_get_axis_wires_length(self, axis):
+        """Number of wires for each axis"""
+        self.assertEqual(len(self.block.get_axis_wires(axis)), 4)
+
+    @parameterized.expand(((0, 2), (1, 2), (2, 0)))
+    def test_edge_list_empty(self, block_index, edge_count):
+        """A block with only line edges must have an empty edge_list"""
+        block = self.make_block(block_index)
+        self.assertEqual(len(block.edge_list), edge_count)

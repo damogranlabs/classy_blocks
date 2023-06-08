@@ -33,9 +33,8 @@ Top 'floor':
  7---6--11
  | 0 | 1 |
  4---5--10   ---> x-axis"""
-import unittest
 import dataclasses
-
+import unittest
 from typing import List
 
 import numpy as np
@@ -144,9 +143,3 @@ class DataTestCase(unittest.TestCase):
     def get_all_data() -> List[TestOperationData]:
         """Returns all prepared block data"""
         return test_data
-
-    @staticmethod
-    def get_vertex_indexes(index: int) -> List[int]:
-        """Indexes of the points used for block creation;
-        will be used in tests to create Vertices manually"""
-        return test_data[index].point_indexes

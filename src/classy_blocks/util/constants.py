@@ -1,4 +1,5 @@
-from typing import Dict, Tuple, List
+from typing import Dict, List, Tuple
+
 from classy_blocks.types import OrientType
 
 # data type

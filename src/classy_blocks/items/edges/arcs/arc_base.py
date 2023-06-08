@@ -1,10 +1,10 @@
-import dataclasses
 import abc
+import dataclasses
 
 import numpy as np
 
-from classy_blocks.items.edges.edge import Edge
 from classy_blocks.construct.point import Point
+from classy_blocks.items.edges.edge import Edge
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 

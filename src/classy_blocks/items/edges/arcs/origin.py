@@ -1,12 +1,11 @@
 import dataclasses
 import warnings
-
 from typing import ClassVar
 
 import numpy as np
 
-from classy_blocks.construct.point import Point
 from classy_blocks.construct import edges
+from classy_blocks.construct.point import Point
 from classy_blocks.items.edges.arcs.arc_base import ArcEdgeBase
 from classy_blocks.types import NPPointType
 from classy_blocks.util import constants
@@ -69,7 +68,7 @@ def arc_from_origin(
             np.cross(axis, chord)
         )  # mid-chord -> centre
 
-        warnings.warn("Adjusting center of edge between" + f" {str(edge_point_1)} and {str(edge_point_2)}")
+        warnings.warn("Adjusting center of edge between" + f" {edge_point_1!s} and {edge_point_2!s}", stacklevel=2)
 
         return arc_from_origin(p1, p3, new_center, False)
 

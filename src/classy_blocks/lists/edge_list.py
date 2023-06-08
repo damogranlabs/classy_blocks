@@ -3,9 +3,9 @@ from typing import List, Tuple
 from classy_blocks.base.exceptions import EdgeNotFoundError
 from classy_blocks.construct.edges import EdgeData
 from classy_blocks.construct.operations.operation import Operation
-from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
+from classy_blocks.items.vertex import Vertex
 
 
 class EdgeList:
@@ -21,7 +21,7 @@ class EdgeList:
             if {vertex_1.index, vertex_2.index} == {edge.vertex_1.index, edge.vertex_2.index}:
                 return edge
 
-        raise EdgeNotFoundError(f"Edge not found: {str(vertex_1)}, {str(vertex_2)}")
+        raise EdgeNotFoundError(f"Edge not found: {vertex_1!s}, {vertex_2!s}")
 
     def add(self, vertex_1: Vertex, vertex_2: Vertex, data: EdgeData) -> Edge:
         """Adds an edge between given vertices or returns an existing one"""

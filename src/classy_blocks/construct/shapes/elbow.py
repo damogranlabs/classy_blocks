@@ -1,11 +1,9 @@
 import numpy as np
 
-from classy_blocks.types import PointType, VectorType
-
+from classy_blocks.base import transforms as tr
 from classy_blocks.construct.flat.sketches.disk import Disk
 from classy_blocks.construct.shapes.round import RoundSolidShape
-from classy_blocks.base import transforms as tr
-
+from classy_blocks.types import PointType, VectorType
 from classy_blocks.util import functions as f
 
 
@@ -29,7 +27,7 @@ class Elbow(RoundSolidShape):
         transform_2 = [tr.Rotation(rotation_axis, sweep_angle, arc_center), tr.Scaling(radius_ratio)]
         transform_mid = [
             tr.Rotation(rotation_axis, sweep_angle / 2, arc_center),
-            tr.Scaling((1+radius_ratio)/2),
+            tr.Scaling((1 + radius_ratio) / 2),
         ]
 
         super().__init__(sketch_1, transform_2, transform_mid)
