@@ -86,7 +86,7 @@ Code/test/examples fixes: install local `classy_block` package and development r
 7.  If code changes were made: check that your changes pass tests, typing,
 formatting and other rules.
     ``` shell
-    $ python -m unittest
+    $ python -m pytest
     $ ruff check src tests
     $ mypy src tests
     $ black --check --diff src tests
@@ -120,7 +120,8 @@ Before you submit a pull request, check that it meets these guidelines:
 
 * To run a subset of tests:
 ``` shell
-$ python -m unittest tests.test_classy_blocks
+$ python -m pytest -k TestGrading
 ```
+Follow official `pytest` documentation: https://docs.pytest.org/en/7.3.x/how-to/usage.html#usage
 * `tox` is not installed by default, as it is only dependency of GitHub Actions.
 Install it manually if required.
