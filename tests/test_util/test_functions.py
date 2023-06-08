@@ -114,10 +114,10 @@ class TestFunctions(unittest.TestCase):
         """garbage input to f.to_cartesian()"""
         p = np.array([1, 0, 1])
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             f.to_cartesian(p, direction=0)
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             f.to_cartesian(p, axis="a")
 
     def test_dilute_indexes(self):

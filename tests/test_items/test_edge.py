@@ -201,7 +201,7 @@ class EdgeValidityTests(unittest.TestCase):
 
     def test_invalid_angle(self):
         """Catch exceptions raised whtn calculating arc point from the 'angle' alternative"""
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             edge = self.get_edge(edges.Angle(0, [0, 0, 1]))
             _ = edge.is_valid
 
