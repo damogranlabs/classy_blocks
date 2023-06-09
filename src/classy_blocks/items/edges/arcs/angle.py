@@ -18,7 +18,8 @@ def arc_from_theta(edge_point_1: PointType, edge_point_2: PointType, angle: floa
     Note: Meticulously transcribed from
     https://github.com/OpenFOAM/OpenFOAM-dev/blob/master/src/mesh/blockMesh/blockEdges/arcEdge/arcEdge.C
     """
-    assert 0 < angle < 360, f"Angle {angle} should be between 0 and 2*pi"
+    if not (0 < abs(angle) < np.pi * 2):
+        raise ValueError(f"Angle should be between 0 and 2*pi, got {angle}")
 
     axis = np.asarray(axis)
     edge_point_1 = np.asarray(edge_point_1)

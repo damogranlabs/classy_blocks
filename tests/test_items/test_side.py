@@ -1,14 +1,14 @@
+from classy_blocks.base.exceptions import SideCreationError
 from classy_blocks.items.side import Side
 from classy_blocks.items.vertex import Vertex
 from tests.fixtures.block import BlockTestCase
 
 
 class SideTests(BlockTestCase):
-    def test_create_fail(self):
+    def test_create_invalid_num_of_vertices(self):
         """Attempt to pass only side vertices instead of the whole set"""
-        vertices = [Vertex([0, 0, 0], 0), Vertex([1, 0, 0], 1)]
-        with self.assertRaises(AssertionError):
-            Side("left", vertices)
+        with self.assertRaises(SideCreationError):
+            Side("left", [Vertex([0, 0, 0], 0)])  # missing 7 vertices
 
     def test_create_success(self):
         """Create a Side object and test its contents"""

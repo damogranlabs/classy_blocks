@@ -88,7 +88,7 @@ class TestGrading(unittest.TestCase):
 
     def test_add_division_zero_length(self):
         """Add a chop to zero-length grading"""
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             self.g.length = 0
             self.g.add_chop(Chop(count=10))
 
@@ -102,7 +102,7 @@ class TestGrading(unittest.TestCase):
 
     def test_wrong_combination(self):
         """Add a chop with specified total_ and c2c_expansion"""
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             # specified total_expansion and c2c_expansion=1 aren't compatible
             self.g.add_chop(Chop(total_expansion=5))
 

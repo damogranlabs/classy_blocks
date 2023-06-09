@@ -34,7 +34,10 @@ class Frame(Generic[BeamT]):
     def add_beam(self, corner_1: int, corner_2: int, beam: Optional[BeamT]) -> None:
         """Adds an element between given corners;
         raises an exception if the given pair does not represent a beam"""
-        assert {corner_1, corner_2} in self.valid_pairs, "Invalid combination of corners!"
+        if {corner_1, corner_2} not in self.valid_pairs:
+            raise ValueError(
+                f"Invalid combination of corners. Valid pairs: {self.valid_pairs}, got: {corner_1, corner_2}"
+            )
 
         self.beams[corner_1][corner_2] = beam
         self.beams[corner_2][corner_1] = beam

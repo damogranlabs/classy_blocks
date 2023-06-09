@@ -1,7 +1,9 @@
 import unittest
 
 import numpy as np
+from parameterized import parameterized
 
+from classy_blocks.base.exceptions import PointCreationError
 from classy_blocks.construct.point import Point, Vector
 from classy_blocks.util.constants import TOL
 
@@ -13,6 +15,16 @@ class PointTests(unittest.TestCase):
     def point(self) -> Point:
         """Test subject"""
         return Point([1, 1, 1])
+
+    @parameterized.expand(
+        [
+            ((1, 1),),  # To few arguments!
+            ((1, 1, 1, 1),),  # To much arguments!"
+        ]
+    )
+    def test_invalid_creation_parameters(self, position):
+        with self.assertRaises(PointCreationError):
+            Point(list(position))
 
     def test_default_rotate_origin(self):
         """Rotation without an origin"""

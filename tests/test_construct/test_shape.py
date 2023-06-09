@@ -2,6 +2,7 @@ import unittest
 
 import numpy as np
 
+from classy_blocks.base.exceptions import CylinderCreationError, FrustumCreationError
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.construct.shapes.elbow import Elbow
@@ -160,6 +161,10 @@ class SphereTests(unittest.TestCase):
 
 
 class FrustumTests(unittest.TestCase):
+    def test_non_perpendicular_axis_radius(self):
+        with self.assertRaises(FrustumCreationError):
+            Frustum([0, 0, 0], [1, 1, 0], [0, 1, 0], 0.4)
+
     def test_curved_side(self):
         """Create a Frustum with curved side edges"""
         frustum = Frustum([0, 0, 0], [1, 0, 0], [0, 1, 0], 0.4, 0.333)
@@ -177,6 +182,10 @@ class CylinderTests(unittest.TestCase):
         self.axis_point_2 = [1.0, 0.0, 0.0]
         self.radius_point_1 = [0.0, 1.0, 0.0]
         self.cylinder = Cylinder(self.axis_point_1, self.axis_point_2, self.radius_point_1)
+
+    def test_non_perpendicular_axis_radius(self):
+        with self.assertRaises(CylinderCreationError):
+            Cylinder([0, 0, 0], [1, 0, 0], [1, 0, 0])
 
     def test_edges(self):
         """Bug check: check that all edges are translated equally"""

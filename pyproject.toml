@@ -16,7 +16,7 @@ dependencies = ["numpy", "scipy", "nptyping"]
 "Contributing" = "https://github.com/damogranlabs/classy_blocks/blob/master/CONTRIBUTING.md"
 
 [project.optional-dependencies]
-dev = ["parameterized", "black", "isort", "ruff", "mypy", "pre-commit"]
+dev = ["pytest", "parameterized", "black", "isort", "ruff", "mypy", "pre-commit"]
 
 [tool.black]
 line-length = 120
@@ -36,3 +36,9 @@ line-length = 120
 [[tool.mypy.overrides]]
 module = "scipy,scipy.*,parameterized"
 ignore_missing_imports = true
+
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = ["tests"]

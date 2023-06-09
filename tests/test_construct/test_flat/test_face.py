@@ -3,6 +3,7 @@ from typing import cast
 
 import numpy as np
 
+from classy_blocks.base.exceptions import FaceCreationError
 from classy_blocks.base.transforms import Rotation
 from classy_blocks.construct import edges
 from classy_blocks.construct.flat.face import Face
@@ -13,10 +14,15 @@ class FaceTests(unittest.TestCase):
     def setUp(self):
         self.points = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [0.0, 1.0, 0.0]]
 
-    def test_face_points(self):
+    def test_face_too_few_points(self):
         """Raise an exception if less than 4 points is provided"""
-        with self.assertRaises(ValueError):
+        with self.assertRaises(FaceCreationError):
             Face(self.points[:3])
+
+    def test_face_invalid_points(self):
+        """Raise an exception if given points does not have correct shape"""
+        with self.assertRaises(FaceCreationError):
+            Face([p[:2] for p in self.points])
 
     def test_face_center(self):
         """The center property"""
@@ -135,6 +141,9 @@ class FaceTests(unittest.TestCase):
         face.add_edge(0, edges.Project("terrain"))
 
         self.assertEqual(face.edges[0].kind, "project")
+
+        with self.assertRaises(FaceCreationError):
+            face.add_edge(4, edges.Project("terrain"))
 
     def test_replace_edge(self):
         face = Face(self.points)
