@@ -193,16 +193,18 @@ class Operation(ElementBase):
         return patches
 
     def get_face(self, side: OrientType) -> Face:
-        """Get or create a Face on specified side of the Operation"""
-        if side == "bottom":
-            return self.bottom_face
+        """Returns a new Face on specified side of the Operation;
+        the returned face always points away from block center."""
+        face = Face([self.point_array[i] for i in constants.FACE_MAP[side]])
 
-        if side == "top":
-            return self.top_face
+        # faces in constants.FACE_MAP are oriented as follows:
+        # towards center: bottom, left, front
+        # away from center: top, right, back
 
-        # for other sides, faces must be created
-        # but edges and projections need not be copied
-        return Face([self.point_array[i] for i in constants.FACE_MAP[side]])
+        if side in ("bottom", "left", "front"):
+            face.invert()
+
+        return face
 
     @property
     def patch_names(self) -> Dict[OrientType, str]:
