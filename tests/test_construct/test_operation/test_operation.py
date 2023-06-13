@@ -59,17 +59,6 @@ class OperationTests(BlockTestCase):
         """A dict of fresh faces"""
         self.loft.get_face(side)
 
-    @parameterized.expand(("bottom", "top", "left", "right", "front", "back"))
-    def test_get_face_direction(self, orient):
-        """Check that all faces point away from the block center"""
-        loft_center = self.loft.center
-        face = self.loft.get_face(orient)
-
-        face_to_center = loft_center - face.center
-        face_normal = face.normal
-
-        self.assertLess(np.dot(face_to_center, face_normal), 0)
-
     def test_patch_from_corner_empty(self):
         """No patches defined at any corner"""
         self.assertSetEqual(self.loft.get_patches_at_corner(0), set())

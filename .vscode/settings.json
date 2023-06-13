@@ -14,7 +14,7 @@
     "python.linting.lintOnSave": true,
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.diagnosticMode": "openFilesOnly",
-    "python.testing.pytestEnabled": true,
+    "python.testing.pytestEnabled": false,
     "files.exclude": {
         "**/.git": true,
         "**/.svn": true,
@@ -23,4 +23,15 @@
         "**/.DS_Store": true,
         "**/Thumbs.db": true,
     },
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": true,
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./tests",
+        "-p",
+        "test_*.py"
+    ],
 }

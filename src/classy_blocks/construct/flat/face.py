@@ -77,9 +77,11 @@ class Face(ElementBase):
         else:
             self.edges[corner] = edge_data
 
-    def invert(self) -> None:
+    def invert(self) -> "Face":
         """Reverses the order of points in this face."""
         self.points.reverse()
+
+        return self
 
     def copy(self) -> "Face":
         """Returns a copy of this Face"""
