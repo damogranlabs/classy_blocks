@@ -39,7 +39,7 @@ class Shape(ElementBase):
         return np.average([operation.center for operation in self.operations], axis=0)
 
 
-class LoftedShape(Shape, Generic[SketchT]):
+class SketchedShape(Shape, Generic[SketchT]):
     """A Shape, obtained by taking a Sketch and transforming it once
     or twice (middle/end cross-section), then making profiled Lofts
     from calculated cross-sections (Elbow, Cylinder, Ring, ..."""

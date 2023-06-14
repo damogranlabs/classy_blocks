@@ -4,11 +4,11 @@ from classy_blocks.base import transforms as tr
 from classy_blocks.construct.flat.sketches.annulus import Annulus
 from classy_blocks.construct.flat.sketches.disk import Disk
 from classy_blocks.construct.operations.loft import Loft
-from classy_blocks.construct.shapes.shape import LoftedShape
+from classy_blocks.construct.shapes.shape import SketchedShape
 from classy_blocks.types import OrientType
 
 
-class RoundSolidShape(LoftedShape):
+class RoundSolidShape(SketchedShape):
     """An object, lofted between 2 or more sketches;
     to form blocks, sketches are transformed with specified
     functions (and so are side edges) and loft operations
@@ -59,7 +59,7 @@ class RoundSolidShape(LoftedShape):
             operation.set_patch(self.outer_patch, name)
 
 
-class RoundHollowShape(LoftedShape):
+class RoundHollowShape(SketchedShape):
     """An object, lofted between 2 or more sketches;
     to form blocks, sketches are transformed with specified
     functions (and so are side edges) and loft operations

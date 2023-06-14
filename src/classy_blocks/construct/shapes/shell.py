@@ -149,7 +149,7 @@ class Shell(Shape):
     def operations(self):
         return self.lofts
 
-    def chop(self, **kwargs):
+    def chop(self, axis: int, **kwargs) -> None:
         """Chop in offset direction"""
         for operation in self.operations:
-            operation.chop(2, **kwargs)
+            operation.chop(axis, **kwargs)
