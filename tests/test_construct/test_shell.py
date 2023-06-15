@@ -4,6 +4,7 @@ import numpy as np
 from parameterized import parameterized
 
 from classy_blocks.construct.flat.face import Face
+from classy_blocks.construct.operations.box import Box
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.shapes.shell import (
     AwareFace,
@@ -12,6 +13,7 @@ from classy_blocks.construct.shapes.shell import (
     SharedPoint,
     SharedPointNotFoundError,
     SharedPointStore,
+    Shell,
 )
 from classy_blocks.types import OrientType
 from classy_blocks.util import functions as f
@@ -210,5 +212,45 @@ class AwareFaceStoreTests(SharedPointTests):
         self.assertEqual(len(aware_faces), len(orients))
 
 
-class ShellTests:
-    pass
+class ShellTests(ShellTestsBase):
+    def get_shell_faces(self, orients: List[OrientType]):
+        box = Box([0, 0, 0], [1, 1, 1])
+
+        faces = []
+
+        for orient in orients:
+            face = box.get_face(orient)
+            if orient in ("front", "top", "left"):
+                face.invert()
+
+            faces.append(face)
+
+        return faces
+
+    def get_shell(self, orients: List[OrientType]):
+        return Shell(self.get_shell_faces(orients), 0.5)
+
+    @parameterized.expand(
+        (
+            (["top"],),
+            (["bottom", "top"],),
+            (["bottom", "top", "left", "right", "front", "back"],),
+        )
+    )
+    def test_operations_count(self, orients):
+        self.assertEqual(len(self.get_shell(orients).operations), len(orients))
+
+    def test_chop(self):
+        shell = self.get_shell(["left", "top"])
+        shell.chop(count=10)
+
+        for operation in shell.operations:
+            self.assertEqual(len(operation.chops[2]), 1)
+
+    def test_set_outer_patch(self):
+        orients = ["front", "right"]
+        shell = self.get_shell(orients)
+        shell.set_outer_patch("roof")
+
+        for operation in shell.operations:
+            self.assertEqual(operation.patch_names["top"], "roof")
