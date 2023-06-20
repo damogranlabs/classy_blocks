@@ -55,7 +55,7 @@ class Mesh:
 
         # FIXME: prettify/move logic elsewhere/remove private method
         for corner in range(8):
-            point = operation.point_array[corner]
+            point = operation.points[corner]
             # remove master patches, only slave will remain
             patches = operation.get_patches_at_corner(corner)
             patches = patches.intersection(self.patch_list.slave_patches)

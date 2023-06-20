@@ -6,6 +6,7 @@ from classy_blocks.base.element import ElementBase
 from classy_blocks.base.exceptions import EdgeCreationError
 from classy_blocks.construct.edges import EdgeData, Line, Project
 from classy_blocks.construct.flat.face import Face
+from classy_blocks.construct.point import Point
 from classy_blocks.grading.chop import Chop
 from classy_blocks.types import AxisType, NPPointType, OrientType, ProjectToType
 from classy_blocks.util import constants
@@ -167,6 +168,11 @@ class Operation(ElementBase):
     @property
     def parts(self):
         return [self.bottom_face, self.top_face, *self.side_edges]
+
+    @property
+    def points(self) -> List[Point]:
+        """Returns a list of Point objects that define this Operation"""
+        return self.bottom_face.points + self.top_face.points
 
     @property
     def point_array(self) -> NPPointType:

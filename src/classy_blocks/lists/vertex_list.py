@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 from classy_blocks.base.exceptions import VertexNotFoundError
+from classy_blocks.construct.point import Point
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.types import NPPointType
 from classy_blocks.util import constants
@@ -52,7 +53,7 @@ class VertexList:
 
         raise VertexNotFoundError(f"Vertex not found: {position!s}")
 
-    def add(self, point: NPPointType, slave_patches: Optional[List[str]] = None) -> Vertex:
+    def add(self, point: Point, slave_patches: Optional[List[str]] = None) -> Vertex:
         """Re-use existing vertices when there's already one at the position;
         unless that vertex belongs to a slave of a face-merged pair -
         in that case add a duplicate in the same position anyway"""
@@ -66,7 +67,7 @@ class VertexList:
         if slave_patches is None:
             # scenario #1 and #2
             try:
-                vertex = self.find_unique(point)
+                vertex = self.find_unique(point.position)
 
                 # scenario #4:
                 for dupe in self.duplicated:
@@ -75,16 +76,16 @@ class VertexList:
                         # has been found but we need one for a 'master' patch
                         raise VertexNotFoundError
             except VertexNotFoundError:
-                vertex = Vertex(point, len(self.vertices))
+                vertex = Vertex.from_point(point, len(self.vertices))
                 self.vertices.append(vertex)
 
             return vertex
 
         # scenario 3: slave_patches is not None
         try:
-            vertex = self.find_duplicated(point, slave_patches)
+            vertex = self.find_duplicated(point.position, slave_patches)
         except VertexNotFoundError:
-            vertex = Vertex(point, len(self.vertices))
+            vertex = Vertex.from_point(point, len(self.vertices))
             self.vertices.append(vertex)
             self.duplicated.append(DuplicatedEntry(vertex, slave_patches))
 

@@ -31,3 +31,11 @@ class Vertex(Point):
             return f"project {point} ({' '.join(self.projected_to)}) {comment}"
 
         return f"{point} {comment}"
+
+    @classmethod
+    def from_point(cls, point: Point, index: int):
+        """Creates a Vertex from point, including other properties"""
+        vertex = cls(point.position, index)
+        vertex.projected_to = point.projected_to
+
+        return vertex
