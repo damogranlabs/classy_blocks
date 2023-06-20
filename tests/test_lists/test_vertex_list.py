@@ -1,6 +1,7 @@
 import numpy as np
 
 from classy_blocks.base.exceptions import VertexNotFoundError
+from classy_blocks.construct.point import Point
 from classy_blocks.lists.vertex_list import DuplicatedEntry, VertexList
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
@@ -16,7 +17,7 @@ class VertexListTests(DataTestCase):
     def add_all(self, points):
         vertices = []
         for p in points:
-            vertices.append(self.vlist.add(p))
+            vertices.append(self.vlist.add(Point(p)))
 
         return vertices
 
@@ -92,7 +93,7 @@ class VertexListTests(DataTestCase):
         """Add a vertex on slave patch; must be duplicated"""
         self.add_all(self.blocks[0].points)
 
-        new_vertex = self.vlist.add(self.vlist.vertices[0].position, ["terrain"])
+        new_vertex = self.vlist.add(Point(self.vlist.vertices[0].position), ["terrain"])
 
         self.assertEqual(len(self.vlist.vertices), 9)
         self.assertNotEqual(self.vlist.vertices[0], new_vertex)
@@ -102,8 +103,8 @@ class VertexListTests(DataTestCase):
         must be duplicated only once"""
         self.add_all(self.blocks[0].points)
 
-        self.vlist.add(self.vlist.vertices[0].position, ["terrain"])
-        self.vlist.add(self.vlist.vertices[0].position, ["terrain"])
-        self.vlist.add(self.vlist.vertices[0].position, ["terrain"])
+        self.vlist.add(Point(self.vlist.vertices[0].position), ["terrain"])
+        self.vlist.add(Point(self.vlist.vertices[0].position), ["terrain"])
+        self.vlist.add(Point(self.vlist.vertices[0].position), ["terrain"])
 
         self.assertEqual(len(self.vlist.vertices), 9)

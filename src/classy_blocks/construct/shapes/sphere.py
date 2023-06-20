@@ -136,7 +136,7 @@ class EighthSphere(RoundSolidShape):
     @property
     def geometry_name(self) -> str:
         """Name of a unique geometry this will project to"""
-        return f"sphere_{id(self)!s}"
+        return f"sphere_{id(self)}"
 
     @property
     def geometry(self):

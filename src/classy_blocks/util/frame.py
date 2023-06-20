@@ -21,7 +21,7 @@ class Frame(Generic[BeamT]):
     After the Frame is created, entities must be added separately
     with appropriate methods."""
 
-    valid_pairs = [set(pair) for pair in constants.EDGE_PAIRS]
+    valid_pairs = (set(pair) for pair in constants.EDGE_PAIRS)
 
     def __init__(self) -> None:
         self.beams: List[Dict[int, Optional[BeamT]]] = [{} for _ in range(8)]

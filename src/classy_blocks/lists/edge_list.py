@@ -21,7 +21,7 @@ class EdgeList:
             if {vertex_1.index, vertex_2.index} == {edge.vertex_1.index, edge.vertex_2.index}:
                 return edge
 
-        raise EdgeNotFoundError(f"Edge not found: {vertex_1!s}, {vertex_2!s}")
+        raise EdgeNotFoundError(f"Edge not found: {vertex_1}, {vertex_2}")
 
     def add(self, vertex_1: Vertex, vertex_2: Vertex, data: EdgeData) -> Edge:
         """Adds an edge between given vertices or returns an existing one"""
