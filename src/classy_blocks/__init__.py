@@ -9,6 +9,7 @@ from .construct.shapes.cylinder import Cylinder
 from .construct.shapes.elbow import Elbow
 from .construct.shapes.frustum import Frustum
 from .construct.shapes.rings import ExtrudedRing, RevolvedRing
+from .construct.shapes.shell import Shell
 from .construct.shapes.sphere import Hemisphere
 from .mesh import Mesh
 
@@ -33,5 +34,6 @@ __all__ = [
     "ExtrudedRing",
     "RevolvedRing",
     "Hemisphere",
+    "Shell",
     "Mesh",
 ]

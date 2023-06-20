@@ -35,6 +35,7 @@ class ImportsTests(unittest.TestCase):
         _ = cb.ExtrudedRing
         _ = cb.RevolvedRing
         _ = cb.Hemisphere
+        _ = cb.Shell
 
     def test_import_mesh(self):
         """The core stuff"""
