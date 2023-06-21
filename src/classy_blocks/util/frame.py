@@ -1,4 +1,4 @@
-from typing import Dict, Generic, List, Optional, Tuple, TypeVar
+from typing import ClassVar, Dict, Generic, List, Optional, Set, Tuple, TypeVar
 
 from classy_blocks.types import AxisType
 from classy_blocks.util import constants
@@ -21,7 +21,7 @@ class Frame(Generic[BeamT]):
     After the Frame is created, entities must be added separately
     with appropriate methods."""
 
-    valid_pairs = (set(pair) for pair in constants.EDGE_PAIRS)
+    valid_pairs: ClassVar[List[Set[int]]] = [set(pair) for pair in constants.EDGE_PAIRS]
 
     def __init__(self) -> None:
         self.beams: List[Dict[int, Optional[BeamT]]] = [{} for _ in range(8)]
