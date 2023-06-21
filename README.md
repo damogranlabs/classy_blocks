@@ -71,9 +71,6 @@ _Unchecked items are not implemented yet but are on a TODO list_
     - [x] Cylinder
     - [x] Ring (annulus)
     - [x] Hemisphere
-    - [ ] ~~Elbow wall (thickened shell of an Elbow)~~[^1]
-    - [ ] ~~Frustum wall~~[^1]
-    - [ ] ~~Hemisphere wall~~[^1]
 - [ ] Predefined parametric Objects
     - [ ] T-joint (round pipes)
     - [ ] X-joint
@@ -83,10 +80,10 @@ _Unchecked items are not implemented yet but are on a TODO list_
 - [ ] Other building tools
     - [x] Use existing Operation's Face to generate a new Operation
     - [x] Chain Shape's start/end surface to generate a new Shape
-    - [ ] Expand Shape's outer surface to generate a new Shape (Cylinder/Annulus > Annulus)
-    - [ ] Contract Shape's inner surface into a new Shape (Annulus > Cylinder/Annulus)
+    - [x] Expand Shape's outer surface to generate a new Shape (Cylinder/Annulus > Annulus)
+    - [x] Contract Shape's inner surface into a new Shape (Annulus > Cylinder/Annulus)
     - [ ] Join two Operations by extending their Edges
-    - [ ] Offset Operation's faces to form new ones[^1]
+    - [x] Offset Operation's faces to form new ones[^1]
 
 [^1]: Offset will replace Wall objects
 
@@ -98,7 +95,7 @@ After blocks have been placed, it is possible to create new geometry based on pl
 - [x] Project Vertex/Edge/Face
 - [ ] Optimize Vertex positions
 
-## Meshing specification
+## Meshing Specification
 - [x] Simple definition of all supported kinds of edges with a dedicated class (Arc/Origin/Angle/Spline/PolyLine/Project)
 - [x] Automatic calculation of cell count and grading by specifying any of a number of parameters (cell-to-cell expansion ratio, start cell width, end cell width, total expansion ratio)
 - [ ] [Edge grading](https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-450004.3.1.3) (separate specification for each edge)
@@ -238,7 +235,7 @@ mesh.add(cylinder)
 mesh.merge_patches('box_top', 'cylinder_bottom')
 ```
 
-## Chaining and expanding/contracting
+## Chaining and Expanding/Contracting
 
 Useful for Shapes, mostly for piping and rotational geometry; An existing Shape's start or end sketch can be reused as a
 starting sketch for a new Shape, as long as they are compatible.
@@ -248,6 +245,14 @@ Moreover, most shapes* can be expanded to form a _wall_ version of the same shap
 creates an `ExtrudedRing`.
 
 > See `examples/chaining` for an example of each operation.
+
+## Offsetting Faces
+
+It is possible to create new blocks by offsetting existing blocks' faces.
+As an example, a sphere can be created by offsetting all six faces of a simple box,
+then projected to a `searchableSphere`.
+
+> See `examples/shapes/shell.py` for the sphere tutorial.
 
 ## Debugging
 
