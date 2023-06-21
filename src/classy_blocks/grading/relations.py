@@ -251,4 +251,4 @@ def get_calculation_functions() -> Dict[str, Callable]:
             if "__" in name:
                 functions[name] = function
 
-    return functions
+    return functions  # type: ignore
