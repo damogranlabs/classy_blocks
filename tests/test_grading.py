@@ -69,7 +69,7 @@ class TestGrading(unittest.TestCase):
 
     def test_output_single(self):
         self.add_division(1, 1, 3)
-        self.assertAlmostEqual(str(self.g.description), "3")
+        self.assertEqual(str(self.g.description), "3")
 
     def test_output_multi(self):
         self.add_division(0.25, 0.4, 2)
@@ -78,7 +78,7 @@ class TestGrading(unittest.TestCase):
 
         expected_output = "((0.25 0.4 2)(0.5 0.2 1)(0.25 0.4 0.5))"
 
-        self.assertAlmostEqual(str(self.g.description), expected_output)
+        self.assertEqual(str(self.g.description), expected_output)
 
     def test_copy_invert_simple(self):
         self.add_division(1, 1, 5)
