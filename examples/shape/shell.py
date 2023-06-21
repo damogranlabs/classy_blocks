@@ -34,5 +34,5 @@ mesh.add_geometry(
         ]
     }
 )
-
+mesh.set_default_patch("walls", "wall")
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")
