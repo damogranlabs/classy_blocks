@@ -120,6 +120,15 @@ class ElbowTests(unittest.TestCase):
         self.radius_2 = f.norm(self.center_point_1 - self.radius_point_1)
         self.assertAlmostEqual(self.elbow.sketch_mid.radius, self.radius_2)
 
+    def test_sketch_positions(self):
+        """Sketch positions after Elbow transforms"""
+        elbow = self.elbow
+
+        center_1 = elbow.sketch_1.center
+        center_2 = f.rotate(center_1, self.sweep_angle, self.rotation_axis, self.arc_center)
+
+        np.testing.assert_array_almost_equal(elbow.sketch_2.center, center_2)
+
 
 class RevolvedRingTests(unittest.TestCase):
     """RevolvedRing creation and manipulation"""
@@ -138,6 +147,13 @@ class RevolvedRingTests(unittest.TestCase):
 
         for operation in self.ring.operations:
             self.assertEqual(operation.patch_names["front"], "inner")
+
+    def test_set_outer_patch(self):
+        """Outer faces of the ring"""
+        self.ring.set_outer_patch("outer")
+
+        for operation in self.ring.operations:
+            self.assertEqual(operation.patch_names["back"], "outer")
 
     def test_chop_ring_tangential(self):
         self.ring.chop_tangential(count=10)

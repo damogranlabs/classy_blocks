@@ -3,6 +3,7 @@ from typing import List, Optional
 from classy_blocks.base import transforms as tr
 from classy_blocks.construct.flat.sketches.annulus import Annulus
 from classy_blocks.construct.flat.sketches.disk import Disk
+from classy_blocks.construct.flat.sketches.sketch import Sketch
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.shapes.shape import SketchedShape
 from classy_blocks.types import OrientType
@@ -20,7 +21,7 @@ class RoundSolidShape(SketchedShape):
 
     def __init__(
         self,
-        sketch_1: Disk,
+        sketch_1: Sketch,
         sketch_2_transform: List[tr.Transformation],
         sketch_mid_transform: Optional[List[tr.Transformation]] = None,
     ):
@@ -59,7 +60,7 @@ class RoundSolidShape(SketchedShape):
             operation.set_patch(self.outer_patch, name)
 
 
-class RoundHollowShape(SketchedShape):
+class RoundHollowShape(RoundSolidShape):
     """An object, lofted between 2 or more sketches;
     to form blocks, sketches are transformed with specified
     functions (and so are side edges) and loft operations

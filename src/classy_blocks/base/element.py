@@ -65,11 +65,11 @@ class ElementBase(abc.ABC):
         """A function that transforms  to sketch_2;
         a Loft will be made from those"""
 
-        # remember center or it will change during transformation
-        # of each self.part
-        center = self.center
-
         for t7m in transforms:
+            # remember center or it will change during transformation
+            # of each self.part
+            center = self.center
+
             for part in self.parts:
                 if isinstance(t7m, tr.Translation):
                     part.translate(t7m.displacement)
