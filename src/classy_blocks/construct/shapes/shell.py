@@ -1,3 +1,4 @@
+import functools
 from typing import List
 
 import numpy as np
@@ -20,6 +21,10 @@ class SharedPointNotFoundError(SharedPointError):
 
 class PointNotCoincidentError(SharedPointError):
     pass
+
+
+class DisconnectedChopError(SharedPointError):
+    """Issued when chopping a Shell that has disconnected faces"""
 
 
 class SharedPoint:
@@ -52,11 +57,19 @@ class SharedPoint:
 
         return f.unit_vector(np.sum(normals, axis=0))
 
+    @property
+    def is_shared(self) -> bool:
+        """Returns False if this point is not shared
+        with any other face in the collection"""
+        return len(self.faces) > 1
+
     def __eq__(self, other):
         return self.point == other.point
 
 
 class SharedPointStore:
+    """A collection of shared points"""
+
     def __init__(self) -> None:
         self.shared_points: List[SharedPoint] = []
 
@@ -96,6 +109,12 @@ class AwareFace:
     def get_offset_face(self, amount: float) -> Face:
         return Face(self.get_offset_points(amount))
 
+    @property
+    def is_solitary(self) -> bool:
+        """Returns True is this Face is
+        not adjacent to any other face in the store"""
+        return not any(sp.is_shared for sp in self.shared_points)
+
 
 class AwareFaceStore:
     """Operations on a number of faces; used for creating offset shapes
@@ -104,7 +123,8 @@ class AwareFaceStore:
     def __init__(self, faces: List[Face]):
         self.faces = faces
 
-    def get_point_store(self):
+    @functools.cached_property
+    def point_store(self):
         points_store = SharedPointStore()
 
         for face in self.faces:
@@ -113,23 +133,34 @@ class AwareFaceStore:
 
         return points_store
 
-    def get_aware_faces(self) -> List[AwareFace]:
-        points_store = self.get_point_store()
+    def get_aware_face(self, face) -> AwareFace:
+        shared_points = [self.point_store.find_by_point(face.points[i]) for i in range(4)]
+        return AwareFace(face, shared_points)
+
+    @functools.cached_property
+    def aware_faces(self) -> List[AwareFace]:
         aware_faces: List[AwareFace] = []
 
         for face in self.faces:
-            shared_points = [points_store.find_by_point(face.points[i]) for i in range(4)]
-            aware_face = AwareFace(face, shared_points)
-            aware_faces.append(aware_face)
+            aware_faces.append(self.get_aware_face(face))
 
         return aware_faces
 
-    def get_offset_lofts(self, amount: float):
-        aware_faces = self.get_aware_faces()  # No. 1
-        offset_faces = [awf.get_offset_face(amount) for awf in aware_faces]  # No. 2, 3, 4
+    def get_offset_lofts(self, amount: float) -> List[Loft]:
+        offset_faces = [awf.get_offset_face(amount) for awf in self.aware_faces]  # No. 2, 3, 4
 
         # No. 5
         return [Loft(face, offset_faces[i]) for i, face in enumerate(self.faces)]
+
+    @functools.cached_property
+    def is_disconnected(self) -> bool:
+        """Returns True if there are faces that are not
+        connected to any other face by any point"""
+        for face in self.faces:
+            if self.get_aware_face(face).is_solitary:
+                return True
+
+        return False
 
 
 class Shell(Shape):
@@ -157,8 +188,16 @@ class Shell(Shape):
 
     def chop(self, **kwargs) -> None:
         """Chop in offset direction"""
-        for operation in self.operations:
-            operation.chop(2, **kwargs)
+        # The lofts should be of approximately the same 'height';
+        # therefore it doesn't matter which one to chop. BUT!
+        # Only chop one of them because slight differences caused by
+        # averaging might produce different counts.
+
+        # issue a warning when there are disconnected lofts
+        if self.aware_face_store.is_disconnected:
+            raise DisconnectedChopError("There are unconnected faces in this Shell; chop its operations manually")
+
+        self.operations[0].chop(2, **kwargs)
 
     def set_outer_patch(self, name: str) -> None:
         """Sets patch name for faces that have been offset"""

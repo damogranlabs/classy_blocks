@@ -9,6 +9,7 @@ from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.shapes.shell import (
     AwareFace,
     AwareFaceStore,
+    DisconnectedChopError,
     PointNotCoincidentError,
     SharedPoint,
     SharedPointNotFoundError,
@@ -39,7 +40,15 @@ class ShellTestsBase(DataTestCase):
 
 
 class SharedPointTests(ShellTestsBase):
-    def test_shared_point_equal(self):
+    def get_shared_point(self, orient: OrientType, index: int):
+        face = self.get_face(orient)
+        point = face.points[index]
+        sp = SharedPoint(point)
+        sp.add(face, index)
+
+        return sp
+
+    def test_equal(self):
         face1 = self.bottom_face
         bp1 = SharedPoint(face1.points[1])
         bp1.add(face1, 1)
@@ -50,7 +59,7 @@ class SharedPointTests(ShellTestsBase):
 
         self.assertEqual(bp1, bp2)
 
-    def test_shared_point_add(self):
+    def test_add(self):
         """Add a legit face/index to a BoundPoint"""
         point = self.get_point("bottom", 0)
         bp = SharedPoint(point)
@@ -59,7 +68,7 @@ class SharedPointTests(ShellTestsBase):
 
         self.assertEqual(len(bp.faces), 1)
 
-    def test_shared_point_duplicated(self):
+    def test_duplicated(self):
         """Do not add duplicate faces"""
         face = self.get_face("bottom")
         point = face.points[0]
@@ -71,14 +80,14 @@ class SharedPointTests(ShellTestsBase):
 
         self.assertEqual(len(bp.faces), 1)
 
-    def test_shared_point_noncoincident(self):
+    def test_noncoincident(self):
         """Raise an exception when trying to add a bound point at a different location"""
         bp = SharedPoint(self.get_point("bottom", 0))
 
         with self.assertRaises(PointNotCoincidentError):
             bp.add(self.bottom_face, 1)
 
-    def test_shared_point_normal_single(self):
+    def test_normal_single(self):
         """Normal when a single face is present in a bound point"""
         point = self.get_point("bottom", 0)
         bp = SharedPoint(point)
@@ -86,7 +95,7 @@ class SharedPointTests(ShellTestsBase):
 
         np.testing.assert_array_almost_equal(bp.normal, self.bottom_face.normal)
 
-    def test_shared_point_normal_multiple(self):
+    def test_normal_multiple(self):
         """Normal with multiple faces present"""
         bp = SharedPoint(self.get_point("bottom", 1))
 
@@ -94,6 +103,17 @@ class SharedPointTests(ShellTestsBase):
         bp.add(self.get_face("right"), 1)
 
         np.testing.assert_array_almost_equal(bp.normal, f.unit_vector([1, 0, 1]))
+
+    def test_is_single(self):
+        sp = self.get_shared_point("bottom", 0)
+
+        self.assertFalse(sp.is_shared)
+
+    def test_is_shared(self):
+        sp = self.get_shared_point("bottom", 0)
+        sp.add(self.get_face("front"), 3)
+
+        self.assertTrue(sp.is_shared)
 
 
 class SharedpointStoreTests(ShellTestsBase):
@@ -165,6 +185,17 @@ class AwareFaceTests(SharedPointTests):
             [p.position for p in face_offset.points], [p.position for p in bound_offset.points]
         )
 
+    def test_is_solitary(self):
+        aware_face = self.get_aware_face("bottom")
+
+        self.assertTrue(aware_face.is_solitary)
+
+    def test_is_not_solitary(self):
+        aware_face = self.get_aware_face("bottom")
+        aware_face.shared_points[0].add(self.get_face("front"), 3)
+
+        self.assertFalse(aware_face.is_solitary)
+
 
 class AwareFaceStoreTests(SharedPointTests):
     def get_aws(self, orients: List[OrientType]) -> AwareFaceStore:
@@ -175,27 +206,22 @@ class AwareFaceStoreTests(SharedPointTests):
     def test_get_point_store_single(self):
         store = self.get_aws(["top"])
 
-        point_store = store.get_point_store()
-
-        self.assertEqual(len(point_store.shared_points), 4)
+        self.assertEqual(len(store.point_store.shared_points), 4)
 
     def test_get_point_store_double_separate(self):
         store = self.get_aws(["top", "bottom"])
-        point_store = store.get_point_store()
 
-        self.assertEqual(len(point_store.shared_points), 8)
+        self.assertEqual(len(store.point_store.shared_points), 8)
 
     def test_get_point_store_double_joined(self):
         store = self.get_aws(["top", "front"])
-        point_store = store.get_point_store()
 
-        self.assertEqual(len(point_store.shared_points), 6)
+        self.assertEqual(len(store.point_store.shared_points), 6)
 
     def test_get_point_store_cube(self):
         store = self.get_aws(["front", "back", "left", "right", "top", "bottom"])
-        point_store = store.get_point_store()
 
-        self.assertEqual(len(point_store.shared_points), 8)
+        self.assertEqual(len(store.point_store.shared_points), 8)
 
     @parameterized.expand(
         (
@@ -207,9 +233,8 @@ class AwareFaceStoreTests(SharedPointTests):
     )
     def test_get_aware_faces(self, orients):
         store = self.get_aws(orients)
-        aware_faces = store.get_aware_faces()
 
-        self.assertEqual(len(aware_faces), len(orients))
+        self.assertEqual(len(store.aware_faces), len(orients))
 
 
 class ShellTests(ShellTestsBase):
@@ -244,8 +269,7 @@ class ShellTests(ShellTestsBase):
         shell = self.get_shell(["left", "top"])
         shell.chop(count=10)
 
-        for operation in shell.operations:
-            self.assertEqual(len(operation.chops[2]), 1)
+        self.assertEqual(len(shell.operations[0].chops[2]), 1)
 
     def test_set_outer_patch(self):
         orients = ["front", "right"]
@@ -254,3 +278,9 @@ class ShellTests(ShellTestsBase):
 
         for operation in shell.operations:
             self.assertEqual(operation.patch_names["top"], "roof")
+
+    def test_chop_disconnected(self):
+        shell = self.get_shell(["bottom", "top"])
+
+        with self.assertRaises(DisconnectedChopError):
+            shell.chop(coun=10)

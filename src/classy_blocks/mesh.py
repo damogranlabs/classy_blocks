@@ -166,3 +166,7 @@ class Mesh:
             output.write(self.patch_list.description)
 
             output.write(constants.MESH_FOOTER)
+
+    @property
+    def vertices(self) -> List[Vertex]:
+        return self.vertex_list.vertices
