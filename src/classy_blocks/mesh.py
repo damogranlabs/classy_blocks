@@ -83,7 +83,7 @@ class Mesh:
 
     def add_geometry(self, geometry: dict) -> None:
         """Adds named entry in the 'geometry' section of blockMeshDict;
-        'g' is in the form of dictionary {'geometry_name': [list of properties]};
+        'geometry' is in the form of dictionary {'geometry_name': [list of properties]};
         properties are as specified by searchable* class in documentation.
         See examples/advanced/project for an example."""
         self.geometry_list.add(geometry)
@@ -117,9 +117,8 @@ class Mesh:
                 self.patch_list.add(vertices, operation)
                 self.face_list.add(vertices, operation)
 
-            # FIXME: prettify, SOLIDify
-            if hasattr(entity, "geometry"):
-                self.add_geometry(entity.__getattribute__("geometry"))
+            if entity.geometry is not None:
+                self.add_geometry(entity.geometry)
 
     @property
     def is_assembled(self) -> bool:

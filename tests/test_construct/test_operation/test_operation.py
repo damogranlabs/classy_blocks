@@ -239,7 +239,7 @@ class OperationProjectionTests(BlockTestCase):
             if data.kind == "project":
                 self.assertIn(beam[0], {corner_1, corner_2})
                 self.assertIn(beam[1], {corner_1, corner_2})
-                self.assertEqual(data.geometry, ["test"])
+                self.assertEqual(data.label, ["test"])
                 found = True
                 break
 

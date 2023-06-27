@@ -15,7 +15,7 @@ def eighth_sphere_lofts(
     center_point: NPPointType,
     radius_point: NPPointType,
     normal: NPVectorType,
-    geometry_name: str,
+    geometry_label: str,
     diagonal_angle: float = np.pi / 5,
 ):
     """A collection of 4 lofts for an eighth of a sphere;
@@ -55,13 +55,13 @@ def eighth_sphere_lofts(
     shell_1 = Loft(
         bottom.shell[0], Face([front.points["D"].position, front.points["P2"].position, point_p2u, point_du])
     )
-    shell_1.project_side("right", geometry_name, edges=True)
+    shell_1.project_side("right", geometry_label, edges=True)
 
     shell_2 = Loft(bottom.faces[2], Face([point_du, point_p2u, left.points["P2"].position, left.points["D"].position]))
-    shell_2.project_side("right", geometry_name, edges=True)
+    shell_2.project_side("right", geometry_label, edges=True)
 
     shell_3 = Loft(shell_1.top_face, left.faces[1])
-    shell_3.project_side("right", geometry_name, edges=True)
+    shell_3.project_side("right", geometry_label, edges=True)
     lofts += [shell_1, shell_2, shell_3]
 
     return lofts
@@ -83,7 +83,7 @@ class EighthSphere(RoundSolidShape):
         self.normal = f.unit_vector(np.asarray(normal))
 
         self.lofts = eighth_sphere_lofts(
-            self.center_point, self.radius_point, self.normal, self.geometry_name, diagonal_angle
+            self.center_point, self.radius_point, self.normal, self.geometry_label, diagonal_angle
         )
 
     ### Chopping
@@ -134,14 +134,14 @@ class EighthSphere(RoundSolidShape):
         return f.norm(self.radius_point - self.center_point)
 
     @property
-    def geometry_name(self) -> str:
+    def geometry_label(self) -> str:
         """Name of a unique geometry this will project to"""
         return f"sphere_{id(self)}"
 
     @property
     def geometry(self):
         return {
-            self.geometry_name: [
+            self.geometry_label: [
                 "type searchableSphere",
                 f"origin {constants.vector_format(self.center_point)}",
                 f"centre {constants.vector_format(self.center_point)}",
@@ -168,7 +168,7 @@ class Hemisphere(EighthSphere):
             rotated_radius_point = f.rotate(self.radius_point, i * np.pi / 2, self.normal, self.center_point)
 
             rotated_eighth = eighth_sphere_lofts(
-                self.center_point, rotated_radius_point, self.normal, self.geometry_name
+                self.center_point, rotated_radius_point, self.normal, self.geometry_label
             )
 
             rotated_core.append(rotated_eighth[0])

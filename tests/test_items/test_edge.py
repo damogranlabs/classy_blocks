@@ -135,18 +135,18 @@ class EdgeFactoryTests(unittest.TestCase):
         np.testing.assert_array_equal(points, edg.point_array)
 
     def test_project_edge_single(self):
-        geometry = "terrain"
-        edg = factory.create(self.vertex_1, self.vertex_2, edges.Project(geometry))
+        label = "terrain"
+        edg = factory.create(self.vertex_1, self.vertex_2, edges.Project(label))
 
         self.assertIsInstance(edg, ProjectEdge)
-        self.assertListEqual(edg.data.geometry, [geometry])
+        self.assertListEqual(edg.data.label, [label])
 
     def test_project_edge_multi(self):
-        geometry = ["terrain", "walls"]
-        edg = factory.create(self.vertex_1, self.vertex_2, edges.Project(geometry))
+        label = ["terrain", "walls"]
+        edg = factory.create(self.vertex_1, self.vertex_2, edges.Project(label))
 
         self.assertIsInstance(edg, ProjectEdge)
-        self.assertListEqual(edg.data.geometry, geometry)
+        self.assertListEqual(edg.data.label, label)
 
 
 class EdgeValidityTests(unittest.TestCase):

@@ -78,7 +78,7 @@ class FaceListTests(BlockTestCase):
 
         self.flist.add(self.vertices, self.loft)
 
-        self.assertEqual(self.flist.faces[0].geometry, "terrain")
+        self.assertEqual(self.flist.faces[0].label, "terrain")
 
     def test_description(self):
         self.loft.project_side("bottom", "terrain")

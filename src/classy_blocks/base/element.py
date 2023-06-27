@@ -1,6 +1,6 @@
 import abc
 import copy
-from typing import List, Optional, TypeVar
+from typing import Dict, List, Optional, TypeVar
 
 from classy_blocks.base import transforms as tr
 from classy_blocks.types import NPPointType, PointType, VectorType
@@ -60,6 +60,13 @@ class ElementBase(abc.ABC):
     @abc.abstractmethod
     def center(self) -> NPPointType:
         """Center of this entity; used as default origin for transforms"""
+
+    @property
+    def geometry(self) -> Optional[Dict]:
+        """A searchable surface, defined in an entity itself;
+        (like, for instance, sphere's blocks are automatically
+        projected to an ad-hoc defined searchableSphere"""
+        return None
 
     def transform(self: ElementBaseT, transforms: List[tr.Transformation]) -> ElementBaseT:
         """A function that transforms  to sketch_2;

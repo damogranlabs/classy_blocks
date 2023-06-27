@@ -62,23 +62,23 @@ class Operation(ElementBase):
         (comes handy after copying etc.)"""
         self.chops[axis] = []
 
-    def project_corner(self, corner: int, geometry: ProjectToType) -> None:
+    def project_corner(self, corner: int, label: ProjectToType) -> None:
         """Project the vertex at given corner (local index 0...7) to a single
         surface or an intersection of multiple surface. WIP according to
         https://github.com/OpenFOAM/OpenFOAM-10/blob/master/src/meshTools/searchableSurfaces/searchableSurfacesQueries/searchableSurfacesQueries.H
         """
         # bottom and top faces define operation's points
         if corner > 3:
-            self.top_face.points[corner - 4].project(geometry)
+            self.top_face.points[corner - 4].project(label)
         else:
-            self.bottom_face.points[corner].project(geometry)
+            self.bottom_face.points[corner].project(label)
 
-    def project_edge(self, corner_1: int, corner_2: int, geometry: ProjectToType) -> None:
+    def project_edge(self, corner_1: int, corner_2: int, label: ProjectToType) -> None:
         """Replace an edge between given corners with a Projected one"""
         # decide where the required edge sits
         loc = edge_map[corner_1][corner_2]
 
-        edge = Project(geometry)
+        edge = Project(label)
 
         # bottom or top face?
         if loc.side == "bottom":
@@ -92,8 +92,8 @@ class Operation(ElementBase):
         # sides
         self.side_edges[loc.start_corner] = edge
 
-    def project_side(self, side: OrientType, geometry: str, edges: bool = False, points: bool = False) -> None:
-        """Project given side to named geometry;
+    def project_side(self, side: OrientType, label: str, edges: bool = False, points: bool = False) -> None:
+        """Project given side to a labeled geometry;
 
         Args:
         - side: 'bottom', 'top', 'front', 'back', 'left', 'right';
@@ -104,33 +104,33 @@ class Operation(ElementBase):
             back: opposite front
             right: along second edge of a face
             left: opposite right
-        - geometry: name of predefined geometry (add separately to Mesh object)
+        - label: name of predefined geometry (add separately to Mesh object)
         - edges:if True, all edges belonging to this side will also be projected"""
         # TODO: TEST with other sides
         if side == "bottom":
-            self.bottom_face.project(geometry, edges, points)
+            self.bottom_face.project(label, edges, points)
             return
 
         if side == "top":
-            self.top_face.project(geometry, edges, points)
+            self.top_face.project(label, edges, points)
             return
 
         index_1 = self.get_index_from_side(side)
         index_2 = (index_1 + 1) % 4
 
-        self.side_projects[index_1] = geometry
+        self.side_projects[index_1] = label
 
         if edges:
-            self.side_edges[index_1] = Project(geometry)
-            self.side_edges[index_2] = Project(geometry)
+            self.side_edges[index_1] = Project(label)
+            self.side_edges[index_2] = Project(label)
 
-            self.top_face.edges[index_1] = Project(geometry)
-            self.bottom_face.edges[index_1] = Project(geometry)
+            self.top_face.edges[index_1] = Project(label)
+            self.bottom_face.edges[index_1] = Project(label)
 
         if points:
             for face in (self.top_face, self.bottom_face):
                 for point_index in (index_1, index_2):
-                    face.points[point_index].project(geometry)
+                    face.points[point_index].project(label)
 
     def set_patch(self, sides: Union[OrientType, List[OrientType]], name: str) -> None:
         """Assign a patch to given side of the block;

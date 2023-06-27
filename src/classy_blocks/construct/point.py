@@ -43,12 +43,12 @@ class Point(ElementBase):
         self.position = f.scale(self.position, ratio, origin)
         return self
 
-    def project(self, geometry: ProjectToType) -> None:
+    def project(self, label: ProjectToType) -> None:
         """Project this vertex to a single or multiple geometries"""
-        if not isinstance(geometry, list):
-            geometry = [geometry]
+        if not isinstance(label, list):
+            label = [label]
 
-        self.projected_to = geometry
+        self.projected_to = label
 
     @property
     def description(self) -> str:

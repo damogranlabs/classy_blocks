@@ -14,7 +14,7 @@ class ProjectedFace:
     """An entry in blockMeshDict.faces"""
 
     side: Side
-    geometry: str
+    label: str
 
     def __eq__(self, other):
         return self.side == other.side
@@ -22,7 +22,7 @@ class ProjectedFace:
     @property
     def description(self) -> str:
         """Formats the 'faces' list to be output into blockMeshDict"""
-        return f"\tproject {self.side.description} {self.geometry}\n"
+        return f"\tproject {self.side.description} {self.label}\n"
 
 
 class FaceList:
@@ -43,10 +43,10 @@ class FaceList:
         """Collect projected sides from operation data"""
 
         for index, orient in enumerate(SIDES_MAP):
-            geometry = operation.side_projects[index]
+            label = operation.side_projects[index]
 
-            if geometry is not None:
-                self.add_side(Side(orient, vertices), geometry)
+            if label is not None:
+                self.add_side(Side(orient, vertices), label)
 
         # don't forget bottom and top faces
         self.add_face(vertices, "bottom", operation.bottom_face)
@@ -57,10 +57,10 @@ class FaceList:
         if face.projected_to is not None:
             self.add_side(Side(orient, vertices), face.projected_to)
 
-    def add_side(self, side: Side, geometry: str) -> None:
+    def add_side(self, side: Side, label: str) -> None:
         """Adds a projected face (side) to the list if it's not there yet"""
         if not self.find_existing(side):
-            self.faces.append(ProjectedFace(side, geometry))
+            self.faces.append(ProjectedFace(side, label))
 
     @property
     def description(self) -> str:

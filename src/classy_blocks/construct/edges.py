@@ -118,8 +118,8 @@ class Project(EdgeData):
 
     kind = "project"
 
-    def __init__(self, geometry: ProjectToType):
-        if isinstance(geometry, list):
-            self.geometry = geometry
+    def __init__(self, label: ProjectToType):
+        if isinstance(label, list):
+            self.label = label
         else:
-            self.geometry = [geometry]
+            self.label = [label]

@@ -116,7 +116,7 @@ class Face(ElementBase):
     def parts(self):
         return self.points + self.edges
 
-    def project(self, geometry: str, edges: bool = False, points: bool = False) -> None:
+    def project(self, label: str, edges: bool = False, points: bool = False) -> None:
         """Project this face to given geometry;
 
         faces can only be projected to a single
@@ -128,14 +128,17 @@ class Face(ElementBase):
         also project face's edges and points to the same
         geometry. If you want more control (like projecting
         an edge to an intersection of two surfaces), use
-        face.edges[0] = edges.Project(['geometry1', 'geometry2'])."""
-        self.projected_to = geometry
+        face.edges[0] = edges.Project(['label1', 'label2']).
+
+        Geometry with provided label must be defined separately
+        in Mesh object."""
+        self.projected_to = label
 
         # TODO: TEST
         if edges:
             for i in range(4):
-                self.add_edge(i, Project(geometry))
+                self.add_edge(i, Project(label))
 
         if points:
             for i in range(4):
-                self.points[i].project(geometry)
+                self.points[i].project(label)

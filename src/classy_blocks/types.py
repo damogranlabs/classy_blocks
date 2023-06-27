@@ -26,5 +26,6 @@ AxisType = Literal[0, 1, 2]
 # which block size to take when chopping
 ChopTakeType = Literal["min", "max", "avg"]
 
+#
 # Project vertex/edge to one or multiple geometries
 ProjectToType = Union[str, List[str]]
