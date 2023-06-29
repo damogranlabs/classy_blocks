@@ -94,7 +94,11 @@ class Axis:
 
         for neighbour in self.neighbours:
             if neighbour.is_defined:
-                self._grading = neighbour.grading
+                if self.is_aligned(neighbour):
+                    self._grading = neighbour.grading
+                else:
+                    self._grading = neighbour.grading.inverted
+
                 return True
 
         return False
