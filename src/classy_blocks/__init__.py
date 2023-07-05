@@ -12,6 +12,7 @@ from .construct.shapes.rings import ExtrudedRing, RevolvedRing
 from .construct.shapes.shell import Shell
 from .construct.shapes.sphere import Hemisphere
 from .mesh import Mesh
+from .modify.find.vertex import VertexFinder
 
 __all__ = [
     "Arc",
@@ -36,4 +37,6 @@ __all__ = [
     "Hemisphere",
     "Shell",
     "Mesh",
+    # Modification of assembled meshes
+    "VertexFinder",
 ]
