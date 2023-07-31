@@ -116,6 +116,11 @@ Before you submit a pull request, check that it meets these guidelines:
     the feature to the list in [README.md]("https://github.com/damogranlabs/classy_blocks/blob/master/README.md")
     and/or [CHANGELOG.md](https://github.com/damogranlabs/classy_blocks/blob/master/CHANGELOG.md).
 
+## Uploading To PyPi
+Just follow the official documentation:
+- [Generate distribution](https://packaging.python.org/en/latest/tutorials/packaging-projects/#generating-distribution-archives)
+- [Upload to PyPi](https://packaging.python.org/en/latest/tutorials/packaging-projects/#uploading-the-distribution-archives)
+
 ## Tips
 
 * To run a subset of tests:
