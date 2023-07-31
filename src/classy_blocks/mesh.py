@@ -42,8 +42,7 @@ class Mesh:
         }
 
     def add(self, entity: AdditiveType) -> None:
-        """Add a classy_blocks entity to the mesh;
-        can be a plain Block, created from points, Operation, Shape or Object."""
+        """Add a classy_blocks entity to the mesh (Operation or a Shape)"""
         # this does nothing yet;
         # the data will be processed automatically at an
         # appropriate occasion (before write/optimize)
@@ -169,3 +168,7 @@ class Mesh:
     @property
     def vertices(self) -> List[Vertex]:
         return self.vertex_list.vertices
+
+    @property
+    def blocks(self) -> List[Block]:
+        return self.block_list.blocks
