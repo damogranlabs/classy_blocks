@@ -22,15 +22,15 @@ mesh.assemble()
 
 # move the middle vertex to a sub-optimal position
 finder = cb.VertexFinder(mesh)
-vertex = finder.by_position([0, 0, 0])[0]
-vertex.translate([0.6, 0.6, 0.6])
+mid_vertex = finder.by_position([0, 0, 0])[0]
+mid_vertex.translate([0.6, 0.6, 0.6])
 
 # find a better spot for the above point using automatic optimization
 optimizer = Optimizer(mesh)
 
 # define which vertices can move during optimization, and in which DoF
-center_clamp = FreeClamp(vertex)
-optimizer.release_vertex(center_clamp)
+mid_clamp = FreeClamp(mid_vertex)
+optimizer.release_vertex(mid_clamp)
 
 
 optimizer.optimize()

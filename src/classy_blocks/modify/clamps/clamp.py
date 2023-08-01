@@ -8,7 +8,8 @@ from classy_blocks.types import NPPointType
 class ClampBase(abc.ABC):
     """Movement restriction for optimization by vertex movement"""
 
-    vertex: Vertex
+    def __init__(self, vertex: Vertex):
+        self.vertex = vertex
 
     @property
     @abc.abstractmethod

@@ -10,7 +10,6 @@ class Junction:
 
     def __init__(self, vertex: Vertex):
         self.vertex = vertex
-
         self.cells: Set[Cell] = set()
 
     def add_cell(self, cell: Cell) -> None:
@@ -18,8 +17,13 @@ class Junction:
         it is part of this junction (one common vertex);
         return False otherwise"""
         for vertex in cell.vertices:
-            print(f"Checking vertex {vertex.index}")
             if vertex == self.vertex:
                 self.cells.add(cell)
-                print(f"Adding vertex {self.vertex.index}")
                 return
+
+    @property
+    def quality(self) -> float:
+        """Returns average quality of all cells at this junction;
+        this serves as an indicator of which junction to optimize,
+        not a measurement of overall mesh quality"""
+        return sum([cell.quality for cell in self.cells]) / len(self.cells)

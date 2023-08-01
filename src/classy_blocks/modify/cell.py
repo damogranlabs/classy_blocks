@@ -110,7 +110,8 @@ class Cell:
         """Center point of each face"""
         return np.average(self.face_points, axis=1)
 
-    def get_quality(self):
+    @property
+    def quality(self) -> float:
         quality = 0
 
         center = self.center
@@ -138,9 +139,12 @@ class Cell:
             face_normals = np.cross(side_1, side_2)
 
             if neighbour is None:
+                # Cells at the wall simply use center of the face on the wall
+                # instead of their neighbour's center
                 c2c = center - face_center
             else:
                 c2c = center - neighbour.center
+
             c2cn = c2c / np.linalg.norm(c2c)
 
             nnorms = np.linalg.norm(face_normals, axis=1) + VSMALL
@@ -164,10 +168,7 @@ class Cell:
 
             quality += np.sum(q_scale(1.5, 0.25, 0.15, abs(angles)))
 
-            if i > 1:
-                continue
-
-            ### aspect ratio: only for top and bottom faces
+            ### aspect ratio
             side_max = max(side_1_norms)
             side_min = min(side_1_norms) + VSMALL
             aspect_factor = np.log10(side_max / side_min)
