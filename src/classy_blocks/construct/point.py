@@ -22,6 +22,12 @@ class Point(ElementBase):
 
         self.projected_to: ProjectToType = []
 
+    def move_to(self, position: PointType) -> None:
+        """Move this point to supplied position"""
+        self.position[0] = position[0]
+        self.position[1] = position[1]
+        self.position[2] = position[2]
+
     def translate(self, displacement):
         """Move this point by 'displacement' vector"""
         self.position += np.asarray(displacement, dtype=DTYPE)

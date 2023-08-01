@@ -1,6 +1,6 @@
-from classy_blocks.modify.grid import Grid
 from parameterized import parameterized
 
+from classy_blocks.modify.grid import Grid
 from tests.fixtures.mesh import MeshTestCase
 
 
@@ -19,3 +19,7 @@ class GridTests(MeshTestCase):
     def test_junction_cells(self, index, count):
         """Each junction contains cells that include that vertex"""
         self.assertEqual(len(self.grid.junctions[index].cells), count)
+
+    @parameterized.expand(((0, "right", 1), (1, "left", 0), (1, "back", 2), (2, "front", 1)))
+    def test_cell_neighbours(self, parent, orient, neighbour):
+        self.assertEqual(self.grid.cells[parent].neighbours[orient], self.grid.cells[neighbour])

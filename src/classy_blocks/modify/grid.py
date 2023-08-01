@@ -13,6 +13,7 @@ class Grid:
         self.junctions = [Junction(vertex) for vertex in self.mesh.vertices]
 
         self._bind_junctions()
+        self._bind_neighbours()
 
     def _bind_junctions(self) -> None:
         """Adds cells to junctions"""
@@ -22,3 +23,6 @@ class Grid:
 
     def _bind_neighbours(self) -> None:
         """Adds neighbours to cells"""
+        for cell_1 in self.cells:
+            for cell_2 in self.cells:
+                cell_1.add_neighbour(cell_2)

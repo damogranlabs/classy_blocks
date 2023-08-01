@@ -1,6 +1,8 @@
 import os
 
 import classy_blocks as cb
+from classy_blocks.modify.clamps.free import FreeClamp
+from classy_blocks.modify.optimizer import Optimizer
 
 mesh = cb.Mesh()
 
@@ -21,11 +23,16 @@ mesh.assemble()
 # move the middle vertex to a sub-optimal position
 finder = cb.VertexFinder(mesh)
 vertex = finder.by_position([0, 0, 0])[0]
-vertex.translate([0.3, 0.3, 0.3])
+vertex.translate([0.6, 0.6, 0.6])
 
-# automatically find a better spot for the above point;
-from classy_blocks.modify.optimizer import Optimizer
-
+# find a better spot for the above point using automatic optimization
 optimizer = Optimizer(mesh)
+
+# define which vertices can move during optimization, and in which DoF
+center_clamp = FreeClamp(vertex)
+optimizer.release_vertex(center_clamp)
+
+
+optimizer.optimize()
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")
