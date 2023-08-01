@@ -34,3 +34,16 @@ class CellTests(BlockTestCase):
         cell_2 = Cell(self.make_block(index_2))
 
         self.assertEqual(cell_1.get_common_side(cell_2), orient)
+
+    def test_quality_good(self):
+        cell = Cell(self.make_block(0))
+
+        self.assertLess(cell.get_quality(), 1)
+
+    def test_quality_bad(self):
+        block = self.make_block(0)
+        block.vertices[0].move_to([-10, -10, -10])
+
+        cell = Cell(block)
+
+        self.assertGreater(cell.get_quality(), 100)
