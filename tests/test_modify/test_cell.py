@@ -38,7 +38,7 @@ class CellTests(BlockTestCase):
     def test_quality_good(self):
         cell = Cell(self.make_block(0))
 
-        self.assertLess(cell.get_quality(), 1)
+        self.assertLess(cell.quality, 1)
 
     def test_quality_bad(self):
         block = self.make_block(0)
@@ -46,4 +46,4 @@ class CellTests(BlockTestCase):
 
         cell = Cell(block)
 
-        self.assertGreater(cell.get_quality(), 100)
+        self.assertGreater(cell.quality, 100)

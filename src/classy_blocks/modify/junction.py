@@ -13,9 +13,8 @@ class Junction:
         self.cells: Set[Cell] = set()
 
     def add_cell(self, cell: Cell) -> None:
-        """Adds the given cell to the list and returns True if
-        it is part of this junction (one common vertex);
-        return False otherwise"""
+        """Adds the given cell to the list if it is
+        a part of this junction (one common vertex)"""
         for vertex in cell.vertices:
             if vertex == self.vertex:
                 self.cells.add(cell)
