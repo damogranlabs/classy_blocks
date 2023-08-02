@@ -12,7 +12,10 @@ from .construct.shapes.rings import ExtrudedRing, RevolvedRing
 from .construct.shapes.shell import Shell
 from .construct.shapes.sphere import Hemisphere
 from .mesh import Mesh
+from .modify.clamps.curve import AnalyticCurveClamp, InterpolatedCurveClamp, LineClamp
+from .modify.clamps.free import FreeClamp
 from .modify.find.vertex import VertexFinder
+from .modify.optimizer import Optimizer
 
 __all__ = [
     "Arc",
@@ -39,4 +42,10 @@ __all__ = [
     "Mesh",
     # Modification of assembled meshes
     "VertexFinder",
+    # Clamps
+    "FreeClamp",
+    "LineClamp",
+    "AnalyticCurveClamp",
+    "InterpolatedCurveClamp",
+    "Optimizer",
 ]

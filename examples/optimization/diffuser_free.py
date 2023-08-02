@@ -1,8 +1,6 @@
 import os
 
 import classy_blocks as cb
-from classy_blocks.modify.clamps.free import FreeClamp
-from classy_blocks.modify.optimizer import Optimizer
 
 mesh = cb.Mesh()
 
@@ -38,10 +36,10 @@ finder = cb.VertexFinder(mesh)
 inner_vertices = finder.by_position([3.5, 0, 0], radius=1.75)
 
 # Release those vertices so that optimization can find a better position for them
-optimizer = Optimizer(mesh)
+optimizer = cb.Optimizer(mesh)
 
 for vertex in inner_vertices:
-    clamp = FreeClamp(vertex)
+    clamp = cb.FreeClamp(vertex)
     optimizer.release_vertex(clamp)
 
 optimizer.optimize()

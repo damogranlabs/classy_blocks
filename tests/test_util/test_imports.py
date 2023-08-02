@@ -40,3 +40,15 @@ class ImportsTests(unittest.TestCase):
     def test_import_mesh(self):
         """The core stuff"""
         _ = cb.Mesh
+
+    def test_import_finders(self):
+        _ = cb.VertexFinder
+
+    def test_import_clamps(self):
+        _ = cb.FreeClamp
+        _ = cb.LineClamp
+        _ = cb.AnalyticCurveClamp
+        _ = cb.InterpolatedCurveClamp
+
+    def test_import_optimizer(self):
+        _ = cb.Optimizer
