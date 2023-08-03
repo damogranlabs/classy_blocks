@@ -30,10 +30,17 @@ class ClampTests(unittest.TestCase):
 
         self.assertAlmostEqual(clamp.params[0], 0)
 
-    def test_line_init_fail(self):
+    def test_line_init_warning(self):
         """Initialization of LineClamp with a non-coincident vertex"""
-        with self.assertRaises(RuntimeError):
+        with self.assertWarns(Warning):
             _ = LineClamp(self.vertex, [1, 1, 1], [2, 1, 1])
+
+    def test_line_init_warning_result(self):
+        """Initialization of LineClamp with a non-coincident vertex;
+        update vertex with closest point"""
+        clamp = LineClamp(self.vertex, [1, 1, 1], [2, 1, 1])
+
+        np.testing.assert_array_almost_equal(clamp.point, [0, 1, 1])
 
     def test_line_init_far(self):
         """Initialization that will yield t < 0"""

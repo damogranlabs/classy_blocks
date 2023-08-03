@@ -1,4 +1,5 @@
 import abc
+import warnings
 from typing import Callable, List
 
 import scipy.optimize
@@ -12,12 +13,14 @@ from classy_blocks.util.constants import TOL
 class ClampBase(abc.ABC):
     """Movement restriction for optimization by vertex movement"""
 
-    def __init__(self, vertex: Vertex, position_function: Callable[[list[float]], NPPointType]):
+    def __init__(self, vertex: Vertex, position_function: Callable[[List[float]], NPPointType]):
         self.vertex = vertex
         self.position_function = position_function
 
         self.params = self.get_params_from_vertex()
         self.bounds: List[List[float]] = []
+
+        self.update_params(self.params)
 
     @property
     @abc.abstractmethod
@@ -33,7 +36,14 @@ class ClampBase(abc.ABC):
         result = scipy.optimize.root(distance_from_vertex, self.initial_params, tol=TOL)
 
         if not result.success:
-            raise RuntimeError("Could not find initial parameter, check if vertex is coincident with provided function")
+            warnings.warn("The vertex doesn't lie on a specified curve, a closest point will be used", stacklevel=2)
+            result = scipy.optimize.minimize(distance_from_vertex, self.initial_params, tol=TOL)
+            # if not result.success:
+            #     raise RuntimeError(
+            #         "Could not find initial parameter, check if vertex is coincident with provided function; "
+            #         + result.message
+            #         + str(result.x)
+            #     )
 
         return result.x
 
