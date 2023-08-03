@@ -14,6 +14,7 @@ from .construct.shapes.sphere import Hemisphere
 from .mesh import Mesh
 from .modify.clamps.curve import AnalyticCurveClamp, InterpolatedCurveClamp, LineClamp
 from .modify.clamps.free import FreeClamp
+from .modify.clamps.surface import AnalyticSurfaceClamp, PlaneClamp
 from .modify.find.vertex import VertexFinder
 from .modify.optimizer import Optimizer
 
@@ -47,5 +48,8 @@ __all__ = [
     "LineClamp",
     "AnalyticCurveClamp",
     "InterpolatedCurveClamp",
+    "AnalyticSurfaceClamp",
+    "PlaneClamp",
+    # Optimization
     "Optimizer",
 ]

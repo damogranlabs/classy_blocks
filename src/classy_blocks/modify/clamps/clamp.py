@@ -1,5 +1,4 @@
 import abc
-import warnings
 from typing import Callable, List
 
 import scipy.optimize
@@ -33,18 +32,7 @@ class ClampBase(abc.ABC):
         def distance_from_vertex(params):
             return f.norm(self.point - self.position_function(params))
 
-        result = scipy.optimize.root(distance_from_vertex, self.initial_params, tol=TOL)
-
-        if not result.success:
-            warnings.warn("The vertex doesn't lie on a specified curve, a closest point will be used", stacklevel=2)
-            result = scipy.optimize.minimize(distance_from_vertex, self.initial_params, tol=TOL)
-            # if not result.success:
-            #     raise RuntimeError(
-            #         "Could not find initial parameter, check if vertex is coincident with provided function; "
-            #         + result.message
-            #         + str(result.x)
-            #     )
-
+        result = scipy.optimize.minimize(distance_from_vertex, self.initial_params, method="SLSQP", tol=TOL)
         return result.x
 
     def update_params(self, params: List[float]):

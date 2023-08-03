@@ -28,7 +28,9 @@ class LineClamp(ClampBase):
 
 class AnalyticCurveClamp(ClampBase):
     """Clamp that restricts point movement during optimization
-    to an analytically defined function"""
+    to an analytically defined function p = f(t);
+
+    Function f must take a single parameter 't' and return a point in 3D space."""
 
     def __init__(self, vertex: Vertex, function: Callable[[List[float]], NPPointType], initial: Optional[float] = 0):
         self._custom_initial = initial
