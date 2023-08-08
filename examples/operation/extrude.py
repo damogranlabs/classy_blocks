@@ -1,4 +1,5 @@
 import os
+
 import classy_blocks as cb
 
 base = cb.Face([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]], [cb.Arc([0.5, -0.2, 0]), None, None, None])

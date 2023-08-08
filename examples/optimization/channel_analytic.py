@@ -67,11 +67,11 @@ for x in x_coords[1:-1]:
     vertices_top += finder.by_position([x, height, -thickness])
 
 for vertex in vertices_front:
-    clamp = cb.AnalyticCurveClamp(vertex, shapefunc_front)
+    clamp = cb.ParametricCurveClamp(vertex, shapefunc_front)
     optimizer.release_vertex(clamp)
 
 for vertex in vertices_back:
-    clamp = cb.AnalyticCurveClamp(vertex, shapefunc_back)
+    clamp = cb.ParametricCurveClamp(vertex, shapefunc_back)
     optimizer.release_vertex(clamp)
 
 for vertex in vertices_top:

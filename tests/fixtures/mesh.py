@@ -3,7 +3,6 @@ from typing import get_args
 from classy_blocks.construct.operations.box import Box
 from classy_blocks.mesh import Mesh
 from classy_blocks.types import AxisType
-
 from tests.fixtures.data import DataTestCase
 
 

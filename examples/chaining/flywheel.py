@@ -1,4 +1,5 @@
 import os
+
 import classy_blocks as cb
 
 # A mesh for calculation of friction losses of a rotating rotor in a fluid.

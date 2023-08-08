@@ -1,4 +1,5 @@
 import os
+
 import classy_blocks as cb
 
 box = cb.Box([-1, -2, -4], [4, 2, 1])

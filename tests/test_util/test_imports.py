@@ -47,8 +47,7 @@ class ImportsTests(unittest.TestCase):
     def test_import_clamps(self):
         _ = cb.FreeClamp
         _ = cb.LineClamp
-        _ = cb.AnalyticCurveClamp
-        _ = cb.InterpolatedCurveClamp
+        _ = cb.ParametricCurveClamp
 
     def test_import_optimizer(self):
         _ = cb.Optimizer

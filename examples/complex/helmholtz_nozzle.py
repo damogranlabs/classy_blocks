@@ -1,4 +1,5 @@
 import os
+
 import classy_blocks as cb
 
 # A nozzle with a chamber that produces self-induced oscillations.

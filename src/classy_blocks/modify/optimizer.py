@@ -7,6 +7,7 @@ from classy_blocks.modify.clamps.clamp import ClampBase
 from classy_blocks.modify.grid import Grid
 from classy_blocks.modify.junction import Junction
 from classy_blocks.util.constants import VSMALL
+from classy_blocks.util.tools import report
 
 
 class NoJunctionError(Exception):
@@ -46,15 +47,18 @@ class Optimizer:
         raise NoClampError
 
     def optimize_clamp(self, clamp: ClampBase, tolerance: float) -> None:
-        # print(f"    Optimizing point {point.sketch_index}: {point.sensitivity}")
         junction = self._get_junction(clamp)
+
+        report(f"  > Optimizing junction at vertex {clamp.vertex.index} ({junction.quality})")
 
         def fquality(params):
             # move all vertices according to X
             clamp.update_params(params)
-            return junction.quality
+            return self.grid.quality
 
         scipy.optimize.minimize(fquality, clamp.params, method="SLSQP", tol=tolerance)
+
+        report(f"  > > Best quality: {junction.quality}")
 
     def optimize_iteration(self, tolerance: float) -> None:
         # gather points that can be moved with optimization
@@ -71,10 +75,13 @@ class Optimizer:
         so that better mesh quality is obtained."""
         prev_quality = self.grid.quality
 
-        for _ in range(max_iterations):
+        for i in range(max_iterations):
             self.optimize_iteration(tolerance)
 
             this_quality = self.grid.quality
 
+            report(f"Optimization iteration {i}: {prev_quality} > {this_quality}")
+
             if abs((prev_quality - this_quality) / (this_quality + VSMALL)) < tolerance:
+                report("Tolerance reached, stopping optimization")
                 break
