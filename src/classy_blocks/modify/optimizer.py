@@ -46,7 +46,7 @@ class Optimizer:
 
         raise NoClampError
 
-    def optimize_clamp(self, clamp: ClampBase, tolerance: float) -> None:
+    def optimize_clamp(self, clamp: ClampBase) -> None:
         initial_quality = self.grid.quality
         initial_params = clamp.params
 
@@ -55,7 +55,7 @@ class Optimizer:
             clamp.update_params(params)
             return self.grid.quality
 
-        scipy.optimize.minimize(fquality, clamp.params, method="SLSQP", tol=tolerance)
+        scipy.optimize.minimize(fquality, clamp.params, method="SLSQP", tol=1e-2)
 
         if self.grid.quality > initial_quality:
             # rollback if quality is worse
@@ -63,22 +63,22 @@ class Optimizer:
 
         report(f"  > Optimized junction at vertex {clamp.vertex.index}: {initial_quality} > {self.grid.quality}")
 
-    def optimize_iteration(self, tolerance: float) -> None:
+    def optimize_iteration(self) -> None:
         # gather points that can be moved with optimization
         for junction in self.grid.get_ordered_junctions():
             try:
                 clamp = self._get_clamp(junction)
-                self.optimize_clamp(clamp, tolerance)
+                self.optimize_clamp(clamp)
             except NoClampError:
                 continue
 
-    def optimize(self, max_iterations: int = 3, tolerance: float = 1e-3) -> None:
+    def optimize(self, max_iterations: int = 5, tolerance: float = 0.1) -> None:
         """Move vertices, defined and restrained in Clamps
         so that better mesh quality is obtained."""
         prev_quality = self.grid.quality
 
         for i in range(max_iterations):
-            self.optimize_iteration(tolerance)
+            self.optimize_iteration()
 
             this_quality = self.grid.quality
 
