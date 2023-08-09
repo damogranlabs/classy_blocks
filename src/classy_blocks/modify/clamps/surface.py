@@ -11,7 +11,9 @@ from classy_blocks.util.constants import DTYPE
 
 class PlaneClamp(ClampBase):
     """Clamp that restricts point movement
-    during optimization to a plane, defined by point and normal."""
+    during optimization to an infinite plane, defined by point and normal.
+
+    Bounds are not supported."""
 
     def __init__(self, vertex: Vertex, point: PointType, normal: VectorType):
         point = np.array(point, dtype=DTYPE)
@@ -33,7 +35,7 @@ class PlaneClamp(ClampBase):
         return [0, 0]
 
 
-class AnalyticSurfaceClamp(ClampBase):
+class ParametricSurfaceClamp(ClampBase):
     """Clamp that restricts point movement
     during optimization to a surface, defined by a function:
 
@@ -42,17 +44,16 @@ class AnalyticSurfaceClamp(ClampBase):
     Function f must take two parameters 'u' and 'v' and return a single point in 3D space."""
 
     def __init__(
-        self, vertex: Vertex, function: Callable[[List[float]], NPPointType], initial: Optional[List[float]] = None
+        self, vertex: Vertex, function: Callable[[List[float]], NPPointType], bounds: Optional[List[List[float]]] = None
     ):
-        if initial is None:
-            initial = [0, 0]
-
-        self._custom_initial = initial
-        super().__init__(vertex, function)
+        super().__init__(vertex, function, bounds)
 
     @property
     def initial_params(self):
-        return self._custom_initial
+        if self.bounds is None:
+            return [0, 0]
+
+        return np.average(self.bounds, axis=1)
 
 
 class InterpolatedSurfaceClamp(ClampBase):
