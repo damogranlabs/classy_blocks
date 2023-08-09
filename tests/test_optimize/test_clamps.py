@@ -107,9 +107,15 @@ class CurveClampTests(ClampTestsBase):
 
         self.assertAlmostEqual(clamp.params[0], 1, places=3)
 
+    def test_radial_init(self):
+        self.vertex.move_to([1, 0, 0])
+        clamp = RadialClamp(self.vertex, [0, 0, -1], [0, 0, 1])
+
+        np.testing.assert_array_almost_equal(clamp.point, [1, 0, 0])
+
     def test_radial_rotate(self):
         self.vertex.move_to([1, 0, 0])
-        clamp = RadialClamp(self.vertex, [0, 0, 0], [0, 0, 1])
+        clamp = RadialClamp(self.vertex, [0, 0, -1], [0, 0, 1])
 
         clamp.update_params([np.pi / 2])
 

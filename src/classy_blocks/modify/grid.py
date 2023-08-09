@@ -36,4 +36,4 @@ class Grid:
 
     def get_ordered_junctions(self) -> List[Junction]:
         """Returns a list of Junctions, ordered by worst quality first"""
-        return sorted(self.junctions, key=lambda j: j.quality)
+        return list(reversed(sorted(self.junctions, key=lambda j: j.quality)))
