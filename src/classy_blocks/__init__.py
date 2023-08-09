@@ -12,7 +12,7 @@ from .construct.shapes.rings import ExtrudedRing, RevolvedRing
 from .construct.shapes.shell import Shell
 from .construct.shapes.sphere import Hemisphere
 from .mesh import Mesh
-from .modify.clamps.curve import LineClamp, ParametricCurveClamp
+from .modify.clamps.curve import LineClamp, ParametricCurveClamp, RadialClamp
 from .modify.clamps.free import FreeClamp
 from .modify.clamps.surface import ParametricSurfaceClamp, PlaneClamp
 from .modify.find.vertex import VertexFinder
@@ -47,6 +47,7 @@ __all__ = [
     "FreeClamp",
     "LineClamp",
     "ParametricCurveClamp",
+    "RadialClamp",
     "ParametricSurfaceClamp",
     "PlaneClamp",
     # Optimization

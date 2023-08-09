@@ -1,10 +1,12 @@
+import copy
 from typing import Callable, List, Optional
 
 import numpy as np
 
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.modify.clamps.clamp import ClampBase
-from classy_blocks.types import NPPointType, PointType
+from classy_blocks.types import NPPointType, PointType, VectorType
+from classy_blocks.util import functions as f
 from classy_blocks.util.constants import DTYPE
 
 
@@ -64,6 +66,24 @@ class ParametricCurveClamp(ClampBase):
 #     to a curve, interpolated between provided points"""
 
 
-# class CircleClamp(ClampBase):
-#     """Clamp that restricts point movement during optimization
-#     to a circle, defined by a center, radius and normal"""
+class RadialClamp(ClampBase):
+    """Clamp that restricts point movement during optimization
+    to a circular trajectory, defined by center, normal and
+    vertex position at clamp initialization.
+
+    Parameter t goes from 0 at initial vertex position to 2*pi
+    at the same position all the way around the circle"""
+
+    def __init__(self, vertex: Vertex, center: PointType, normal: VectorType, bounds: Optional[List[float]] = None):
+        initial_point = copy.copy(vertex.position)
+
+        if bounds is not None:
+            clamp_bounds = [bounds]
+        else:
+            clamp_bounds = None
+
+        super().__init__(vertex, lambda params: f.rotate(initial_point, params[0], normal, center), clamp_bounds)
+
+    @property
+    def initial_params(self):
+        return [0]

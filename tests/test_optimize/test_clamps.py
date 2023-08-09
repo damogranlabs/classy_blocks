@@ -4,7 +4,7 @@ from typing import List
 import numpy as np
 
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.modify.clamps.curve import LineClamp, ParametricCurveClamp
+from classy_blocks.modify.clamps.curve import LineClamp, ParametricCurveClamp, RadialClamp
 from classy_blocks.modify.clamps.free import FreeClamp
 from classy_blocks.modify.clamps.surface import ParametricSurfaceClamp, PlaneClamp
 from classy_blocks.types import NPPointType
@@ -106,6 +106,14 @@ class CurveClampTests(ClampTestsBase):
         clamp = ParametricCurveClamp(self.vertex, self.function, [0, 1])
 
         self.assertAlmostEqual(clamp.params[0], 1, places=3)
+
+    def test_radial_rotate(self):
+        self.vertex.move_to([1, 0, 0])
+        clamp = RadialClamp(self.vertex, [0, 0, 0], [0, 0, 1])
+
+        clamp.update_params([np.pi / 2])
+
+        np.testing.assert_array_almost_equal(clamp.point, [0, 1, 0])
 
 
 class SurfaceClampTests(ClampTestsBase):
