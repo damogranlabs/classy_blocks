@@ -6,7 +6,7 @@ Python classes for easier creation of OpenFOAM's blockMesh dictionaries.
 
 > Warning! This project is currently under development and is not yet very user-friendly. It still lacks some important features and probably features a lot of bugs. However, you're welcome to suggest features, improvements, and point out bugs.
 
-> Note: version 1.0.0 introduces backwards-incompatible changes in API. Use [latest 0.0.1 commit](https://github.com/damogranlabs/classy_blocks/tree/30d12834194313c6243a921267aabf3233454280) for your old scripts. However, you might want to give the new version a try...
+> Note: version 1.0.0 introduced backwards-incompatible changes in API. Use [latest 0.0.1 commit](https://github.com/damogranlabs/classy_blocks/tree/30d12834194313c6243a921267aabf3233454280) for your old scripts. However, you might want to give the new version a try...
 
 # About
 _blockMesh_ is a very powerful mesher but the amount of manual labour it requires to make even the simplest
@@ -46,7 +46,8 @@ Check out the [classy_blocks tutorial on damogranlabs.com](https://damogranlabs.
 - One-off simulations (use automatic meshers)
 
 # How To Use It
-- If you just need the `classy_blocks`, install them with: `pip install git+https://github.com/damogranlabs/classy_blocks.git`
+- To install the current _stable_ version from pypi, use `pip install classy_blocks`
+- To download the cutting-edge development version, unstall the development branch from github:  `pip install git+https://github.com/damogranlabs/classy_blocks.git@development`
 - If you want to run examples, follow instructions in [Examples](#examples)
 - If you want to contribute, follow instructions in [CONTRIBUTING.rst](CONTRIBUTING.rst)
 
@@ -83,17 +84,15 @@ _Unchecked items are not implemented yet but are on a TODO list_
     - [x] Expand Shape's outer surface to generate a new Shape (Cylinder/Annulus > Annulus)
     - [x] Contract Shape's inner surface into a new Shape (Annulus > Cylinder/Annulus)
     - [ ] Join two Operations by extending their Edges
-    - [x] Offset Operation's faces to form new ones[^1]
-
-[^1]: Offset will replace Wall objects
+    - [x] Offset Operation's faces to form new ones
 
 ## Modifiers
 After blocks have been placed, it is possible to create new geometry based on placed blocks or to modify them.
 
-- [ ] Move Vertex/Edge/Face
+- [x] Move Vertex/Edge/Face
 - [ ] Delete a Block created by a Shape or Object
 - [x] Project Vertex/Edge/Face
-- [ ] Optimize Vertex positions
+- [x] Optimize Vertex positions
 
 ## Meshing Specification
 - [x] Simple definition of all supported kinds of edges with a dedicated class (Arc/Origin/Angle/Spline/PolyLine/Project)
@@ -108,7 +107,7 @@ After blocks have been placed, it is possible to create new geometry based on pl
 
 How to run:
 
-- Install `classy_blocks` as described in (# How To Use It)
+- Install `classy_blocks` as described above
 - `cd` to directory of the chosen example
 - Run `python <example.py>`; that will write blockMeshDict to examples/case
 - Run `blockMesh` on the case
@@ -253,6 +252,42 @@ As an example, a sphere can be created by offsetting all six faces of a simple b
 then projected to a `searchableSphere`.
 
 > See `examples/shapes/shell.py` for the sphere tutorial.
+
+## Automatic Blocking Optimization
+
+Once an approximate blocking is established, one can fetch specific vertices and specifies certain degrees of freedom along which those vertices will be moved to get blocks of better quality.
+
+Block is treated as a single cell for which OpenFOAM's cell quality criteria are calculated and optimized per user's instructions.
+
+Vertices can move freely (3 degrees of freedom), along a specified line/curve (1 DoF) or surface (2 DoF).
+
+```python
+# [...] A simple setup with two cylinders of different radii,
+# connected by a short conical frustum that has bad cells
+# [...]
+
+mesh.assemble()
+
+# Find inside vertices
+finder = cb.VertexFinder(mesh)
+inner_vertices = finder.by_position([3.5, 0, 0], radius=1.75)
+
+optimizer = cb.Optimizer(mesh)
+
+# Move chosen vertices along a line, parallel to x-axis
+for vertex in inner_vertices:
+    clamp = cb.LineClamp(vertex, vertex.position, vertex.position + f.vector(1, 0, 0))
+    optimizer.release_vertex(clamp)
+
+optimizer.optimize()
+
+mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")
+```
+
+The result (basic blocking > optimized):
+![Diffuser](showcase/diffuser_optimization.png "Diffuser")
+
+> See `examples/optimization` for the diffuser example.
 
 ## Debugging
 
