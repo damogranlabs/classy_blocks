@@ -1,3 +1,4 @@
+import collections
 import copy
 from typing import List, Optional, Union
 
@@ -7,7 +8,7 @@ from classy_blocks.base.element import ElementBase
 from classy_blocks.base.exceptions import FaceCreationError
 from classy_blocks.construct.edges import EdgeData, Line, Project
 from classy_blocks.construct.point import Point
-from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, PointListType
+from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, PointListType, PointType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
@@ -142,3 +143,25 @@ class Face(ElementBase):
         if points:
             for i in range(4):
                 self.points[i].project(label)
+
+    def shift(self, count: int) -> "Face":
+        """Shifts points of this face by 'count', changing its
+        starting point"""
+        indexes = collections.deque(range(4))
+        indexes.rotate(count)
+
+        self.points = [self.points[i] for i in indexes]
+        self.edges = [self.edges[i] for i in indexes]
+
+        return self
+
+    def reorient(self, start_near: PointType) -> "Face":
+        """Shifts points of this face in circle so that the starting point
+        is closest to given position; the normal is not affected."""
+        position = np.array(start_near, dtype=constants.DTYPE)
+        indexes = list(range(4))
+        indexes.sort(key=lambda i: f.norm(position - self.points[i].position))
+
+        self.shift(indexes[0])
+
+        return self

@@ -151,3 +151,22 @@ class FaceTests(unittest.TestCase):
         face.add_edge(0, None)
 
         self.assertEqual(face.edges[0].kind, "line")
+
+    def test_reorient_indexes(self):
+        face = Face(self.points)
+
+        face.reorient([2, 2, 0])
+
+        orig_points = np.array(self.points)
+        new_points = np.array([point.position for point in face.points])
+
+        np.testing.assert_array_equal(np.roll(orig_points, 2, axis=0), new_points)
+
+    def test_reorient_normal(self):
+        face = Face(self.points)
+        orig_normal = face.normal
+
+        face.reorient([2, 2, 0])
+        new_normal = face.normal
+
+        np.testing.assert_array_equal(orig_normal, new_normal)

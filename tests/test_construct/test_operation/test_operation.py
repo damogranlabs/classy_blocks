@@ -317,3 +317,18 @@ class OperationTransformTests(unittest.TestCase):
         np.testing.assert_almost_equal(
             f.angle_between(extrude_direction(original_op), extrude_direction(rotated_op)), angle
         )
+
+    @parameterized.expand(
+        (
+            ("bottom", [0, 0, -100]),
+            ("top", [0, 0, 100]),
+            ("left", [-100, 0, 0]),
+            ("right", [100, 0, 0]),
+            ("front", [0, -100, 0]),
+            ("back", [0, 100, 0]),
+        )
+    )
+    def test_get_face(self, side, position):
+        loft = self.loft
+
+        self.assertListEqual(loft.get_face(side).points, loft.get_face_near(position).points)
