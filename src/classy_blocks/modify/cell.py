@@ -152,7 +152,7 @@ class Cell:
 
             angles = 180 * np.arccos(np.dot(normals, c2cn)) / np.pi
 
-            quality += np.sum(q_scale(1.5, 0.25, 0.05, angles))
+            quality += np.sum(q_scale(1.25, 0.35, 0.8, angles))
 
             ### cell inner angles
             sides_1 = np.roll(face_points, -1, axis=0) - face_points
@@ -173,6 +173,6 @@ class Cell:
             side_min = min(side_1_norms) + VSMALL
             aspect_factor = np.log10(side_max / side_min)
 
-            quality += np.sum(q_scale(2.1, 7, 0.05, aspect_factor))
+            quality += np.sum(q_scale(3, 2.5, 3, aspect_factor))
 
         return quality
