@@ -55,7 +55,7 @@ class Optimizer:
             clamp.update_params(params)
             return self.grid.quality
 
-        scipy.optimize.minimize(fquality, clamp.params, method="SLSQP", tol=1e-2)
+        scipy.optimize.minimize(fquality, clamp.params, method="SLSQP", tol=1e-2, options={"maxiter": 100})
 
         current_quality = self.grid.quality
 
@@ -78,7 +78,7 @@ class Optimizer:
                 continue
 
     def optimize(self, max_iterations: int = 20, tolerance: float = 0.05) -> None:
-        """Move vertices, defined and restrained in Clamps
+        """Move vertices, defined and restrained with Clamps
         so that better mesh quality is obtained."""
         prev_quality = self.grid.quality
 
