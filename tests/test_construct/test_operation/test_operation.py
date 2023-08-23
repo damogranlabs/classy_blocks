@@ -245,6 +245,20 @@ class OperationProjectionTests(BlockTestCase):
 
         self.assertTrue(found, f"Edge between {corner_1} and {corner_2} not found!")
 
+    def test_project_edge_twice(self):
+        """Project the same edge with two different geometries"""
+        self.loft.project_edge(0, 1, "terrain")
+        self.loft.project_edge(0, 1, "walls")
+
+        self.assertListEqual(self.loft.bottom_face.edges[0].label, ["terrain", "walls"])
+
+    def test_project_edge_twice_same(self):
+        """Project the same edge with two equal geometries"""
+        self.loft.project_edge(0, 1, "terrain")
+        self.loft.project_edge(0, 1, "terrain")
+
+        self.assertListEqual(self.loft.bottom_face.edges[0].label, ["terrain"])
+
 
 class OperationTransformTests(unittest.TestCase):
     """Loft inherits directly from Operation with no additional

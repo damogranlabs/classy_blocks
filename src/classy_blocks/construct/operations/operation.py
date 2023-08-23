@@ -75,22 +75,35 @@ class Operation(ElementBase):
             self.bottom_face.points[corner].project(label)
 
     def project_edge(self, corner_1: int, corner_2: int, label: ProjectToType) -> None:
-        """Replace an edge between given corners with a Projected one"""
+        """Replace an edge between given corners with a Projected one
+        or add geometry to an already projected edge"""
         # decide where the required edge sits
         loc = edge_map[corner_1][corner_2]
 
-        edge = Project(label)
+        def add_or_update(edge: EdgeData):
+            nonlocal label
+
+            if isinstance(edge, Project):
+                if label not in edge.label:
+                    edge.label.append(label)
+                    return edge
+
+            return Project(label)
 
         # bottom or top face?
         if loc.side == "bottom":
+            edge = add_or_update(self.bottom_face.edges[loc.start_corner])
             self.bottom_face.edges[loc.start_corner] = edge
             return
 
         if loc.side == "top":
+            edge = add_or_update(self.top_face.edges[loc.start_corner])
             self.top_face.edges[loc.start_corner] = edge
+
             return
 
         # sides
+        edge = add_or_update(self.side_edges[loc.start_corner])
         self.side_edges[loc.start_corner] = edge
 
     def project_side(self, side: OrientType, label: str, edges: bool = False, points: bool = False) -> None:
