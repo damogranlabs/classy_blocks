@@ -2,6 +2,7 @@ import warnings
 from typing import List
 
 from classy_blocks.base.element import ElementBase
+from classy_blocks.base.exceptions import EdgeCreationError
 from classy_blocks.construct.point import Point, Vector
 from classy_blocks.types import EdgeKindType, PointListType, PointType, ProjectToType, VectorType
 from classy_blocks.util import functions as f
@@ -119,7 +120,31 @@ class Project(EdgeData):
     kind = "project"
 
     def __init__(self, label: ProjectToType):
-        if isinstance(label, list):
-            self.label = label
-        else:
-            self.label = [label]
+        self.label = self.convert_label(label)
+        self.check_length()
+
+    @staticmethod
+    def convert_label(label: ProjectToType) -> List[str]:
+        """Makes sure label is always a list of strings
+        of length 1 or 2"""
+        if isinstance(label, str):
+            return [label]
+
+        # sort to keep consistent for debugging and testing purposes
+        return list(sorted(label))
+
+    def check_length(self) -> None:
+        """Raises an exception if there are too many surfaces to project to"""
+        if not (0 < len(self.label) < 3):
+            raise EdgeCreationError(f"Edges can only be projected to 1 or 2 surfaces: {self.label}")
+
+    def add_label(self, label: ProjectToType) -> None:
+        """Projects this edge to another surface"""
+        new_labels = self.convert_label(label)
+
+        for add_label in new_labels:
+            if add_label not in self.label:
+                self.label.append(add_label)
+
+        self.label.sort()
+        self.check_length()

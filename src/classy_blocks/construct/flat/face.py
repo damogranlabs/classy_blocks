@@ -8,7 +8,7 @@ from classy_blocks.base.element import ElementBase
 from classy_blocks.base.exceptions import FaceCreationError
 from classy_blocks.construct.edges import EdgeData, Line, Project
 from classy_blocks.construct.point import Point
-from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, PointListType, PointType
+from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, PointListType, PointType, ProjectToType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
@@ -67,9 +67,8 @@ class Face(ElementBase):
         self.patch_name: Optional[str] = None
 
     def add_edge(self, corner: int, edge_data: Union[EdgeData, None]) -> None:
-        """Adds or replaces an edge between corner and (corner+1);
-        existing edges will be replaced, use None to delete
-        (replace with a straight line)"""
+        """Replaces an existing edge between corner and (corner+1);
+        use None to delete an edge (replace with a straight line)"""
         if corner > 3:
             raise FaceCreationError("Provide a corner index between 0 and 3", f"Given corner index: {corner}")
 
@@ -77,6 +76,14 @@ class Face(ElementBase):
             self.edges[corner] = Line()
         else:
             self.edges[corner] = edge_data
+
+    def project_edge(self, corner: int, label: ProjectToType) -> None:
+        """Adds a Project edge or add the label to an existing one"""
+        if isinstance(self.edges[corner], Project):
+            self.edges[corner].add_label(label)
+            return
+
+        self.add_edge(corner, Project(label))
 
     def invert(self) -> "Face":
         """Reverses the order of points in this face."""

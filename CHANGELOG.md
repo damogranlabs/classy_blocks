@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Calling .project() on a Point/Vertex will add the new geometry instead of replacing it.
 - Calling .project_edge() on an Operation will add the new geometry instead of replacing it.
+- Calling .project_side() on an Operation will add the new geometry to edges instead of replacing them.
 
 # [1.3.0] Blocking Optimization
 ### Added
