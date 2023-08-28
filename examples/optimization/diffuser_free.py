@@ -30,10 +30,9 @@ mesh.set_default_patch("walls", "wall")
 mesh.assemble()
 
 # Find inside vertices (start and stop surfaces of cylinders and frustum);
-# this is a bit clumsy at the moment, position and radius were
-# defined experimentally; better tools will be developed in the future.
-finder = cb.VertexFinder(mesh)
-inner_vertices = finder.by_position([3.5, 0, 0], radius=1.75)
+finder = cb.RoundSolidFinder(mesh, diffuser)
+inner_vertices = finder.find_core(True)
+inner_vertices.update(finder.find_core(False))
 
 # Release those vertices so that optimization can find a better position for them
 optimizer = cb.Optimizer(mesh)

@@ -16,7 +16,14 @@ class Vertex(Point):
         self.index = index
 
     def __eq__(self, other):
+        # When vertices are created from points,
+        # it is ensured there are no duplicated at the same position.
+        # Thus index is unique for the spot.
+        # Same applies for __hash__.
         return self.index == other.index
+
+    def __hash__(self):
+        return self.index
 
     def __repr__(self):
         return f"Vertex {self.index} at {self.position}"

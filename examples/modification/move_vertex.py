@@ -12,8 +12,8 @@ cylinder.chop_tangential(count=8)
 mesh.add(cylinder)
 mesh.assemble()
 
-finder = cb.VertexFinder(mesh)
-vertex = finder.by_position([1, 0, 0])[0]
+finder = cb.GeometricFinder(mesh)
+vertex = finder.find_in_sphere([1, 0, 0])[0]
 vertex.translate([0.4, 0, 0])
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

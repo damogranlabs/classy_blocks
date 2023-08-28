@@ -21,8 +21,8 @@ mesh.set_default_patch("walls", "wall")
 mesh.assemble()
 
 # move the middle vertex to a sub-optimal position
-finder = cb.VertexFinder(mesh)
-mid_vertex = finder.by_position([0, 0, 0])[0]
+finder = cb.GeometricFinder(mesh)
+mid_vertex = finder.find_in_sphere([0, 0, 0])[0]
 mid_vertex.translate([0.6, 0.6, 0.6])
 
 # find a better spot for the above point using automatic optimization

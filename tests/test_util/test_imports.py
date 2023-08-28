@@ -42,7 +42,8 @@ class ImportsTests(unittest.TestCase):
         _ = cb.Mesh
 
     def test_import_finders(self):
-        _ = cb.VertexFinder
+        _ = cb.GeometricFinder
+        _ = cb.RoundSolidFinder
 
     def test_import_clamps(self):
         _ = cb.FreeClamp

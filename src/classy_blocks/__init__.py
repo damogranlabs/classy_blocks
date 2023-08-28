@@ -15,7 +15,8 @@ from .mesh import Mesh
 from .modify.clamps.curve import LineClamp, ParametricCurveClamp, RadialClamp
 from .modify.clamps.free import FreeClamp
 from .modify.clamps.surface import ParametricSurfaceClamp, PlaneClamp
-from .modify.find.vertex import VertexFinder
+from .modify.find.geometric import GeometricFinder
+from .modify.find.shape import RoundSolidFinder
 from .modify.optimizer import Optimizer
 
 __all__ = [
@@ -42,14 +43,15 @@ __all__ = [
     "Shell",
     "Mesh",
     # Modification of assembled meshes
-    "VertexFinder",
-    # Clamps
+    "GeometricFinder",
+    "RoundSolidFinder",
+    # Optimization: Clamps
     "FreeClamp",
     "LineClamp",
     "ParametricCurveClamp",
     "RadialClamp",
     "ParametricSurfaceClamp",
     "PlaneClamp",
-    # Optimization
+    # Optimization: optimizer
     "Optimizer",
 ]

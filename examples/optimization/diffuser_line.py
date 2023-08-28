@@ -31,8 +31,9 @@ mesh.set_default_patch("walls", "wall")
 mesh.assemble()
 
 # Find inside vertices
-finder = cb.VertexFinder(mesh)
-inner_vertices = finder.by_position([3.5, 0, 0], radius=1.75)
+finder = cb.RoundSolidFinder(mesh, diffuser)
+inner_vertices = finder.find_core(True)
+inner_vertices.update(finder.find_core(False))
 
 # Release those vertices so that optimization can find a better position for them
 optimizer = cb.Optimizer(mesh)

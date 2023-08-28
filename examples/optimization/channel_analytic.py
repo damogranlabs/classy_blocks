@@ -54,17 +54,17 @@ mesh.set_default_patch("walls", "wall")
 # clamps will also move vertices to closest points on curve.
 # Move top vertices along top edge (linear)
 mesh.assemble()
-finder = cb.VertexFinder(mesh)
+finder = cb.GeometricFinder(mesh)
 optimizer = cb.Optimizer(mesh)
 
 vertices_front = []
 vertices_back = []
 vertices_top = []
 for x in x_coords[1:-1]:
-    vertices_front += finder.by_position([x, 0, 0])
-    vertices_back += finder.by_position([x, 0, -thickness])
-    vertices_top += finder.by_position([x, height, 0])
-    vertices_top += finder.by_position([x, height, -thickness])
+    vertices_front += finder.find_in_sphere([x, 0, 0])
+    vertices_back += finder.find_in_sphere([x, 0, -thickness])
+    vertices_top += finder.find_in_sphere([x, height, 0])
+    vertices_top += finder.find_in_sphere([x, height, -thickness])
 
 for vertex in vertices_front:
     clamp = cb.ParametricCurveClamp(vertex, shapefunc_front)
