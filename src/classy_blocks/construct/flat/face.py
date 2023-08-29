@@ -146,7 +146,7 @@ class Face(ElementBase):
         # TODO: TEST
         if edges:
             for i in range(4):
-                self.add_edge(i, Project(label))
+                self.project_edge(i, label)
 
         if points:
             for i in range(4):
