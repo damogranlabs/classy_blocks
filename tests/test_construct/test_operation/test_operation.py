@@ -195,7 +195,7 @@ class OperationProjectionTests(BlockTestCase):
 
         for edge in self.loft.bottom_face.edges:
             self.assertTrue(isinstance(edge, Project))
-    
+
     def test_project_two_sides_top(self):
         """Project two sides with a common edge to two different geometries"""
         self.loft.project_side("front", "terrain", edges=True)
@@ -360,50 +360,3 @@ class OperationTransformTests(unittest.TestCase):
         np.testing.assert_almost_equal(
             f.angle_between(extrude_direction(original_op), extrude_direction(rotated_op)), angle
         )
-
-class OperationReorientTests(BlockTestCase):
-    VIEWPOINTS =  (
-        ("bottom", [0, 0, -100]),
-        ("top", [0, 0, 100]),
-        ("left", [-100, 0, 0]),
-        ("right", [100, 0, 0]),
-        ("front", [0, -100, 0]),
-        ("back", [0, 100, 0]),
-    )
-
-    def setUp(self):
-        super().setUp()
-
-        self.loft = self.make_loft(0)
-    
-    @parameterized.expand(VIEWPOINTS)
-    def test_get_face(self, side, position):
-        """Get face on all sides of a regular cube"""
-        loft = self.loft
-
-        self.assertListEqual(loft.get_face(side).points, loft.get_face_near(position).points)
-
-    @parameterized.expand(VIEWPOINTS)
-    def test_get_face_skewed(self, side, position):
-        """Get face on a skewed loft"""
-        loft = self.loft
-        loft.top_face.translate([0.9, 0.9, 0])
-
-        self.assertListEqual(loft.get_face(side).points, loft.get_face_near(position).points)
-    
-
-    @parameterized.expand(VIEWPOINTS)
-    def test_get_face_high_ar(self, side, position):
-        """Get face on a loft with high aspect ratio"""
-        loft = self.loft
-        loft.top_face.translate([0, 0, 5])
-
-        self.assertListEqual(loft.get_face(side).points, loft.get_face_near(position).points)
-    
-    @parameterized.expand(VIEWPOINTS)
-    def test_get_face_combined(self, side, position):
-        """Get face on a loft where top face is displaced in all directions"""
-        loft = self.loft
-        loft.top_face.translate([0.9, 0.9, 5])
-
-        self.assertListEqual(loft.get_face(side).points, loft.get_face_near(position).points)

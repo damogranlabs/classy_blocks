@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, TypeVar, Union, get_args
+from typing import Dict, List, Optional, TypeVar, Union
 
 import numpy as np
 
@@ -8,9 +8,8 @@ from classy_blocks.construct.edges import EdgeData, Line, Project
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.point import Point
 from classy_blocks.grading.chop import Chop
-from classy_blocks.types import AxisType, NPPointType, OrientType, PointType, ProjectToType
+from classy_blocks.types import AxisType, NPPointType, OrientType, ProjectToType
 from classy_blocks.util import constants
-from classy_blocks.util import functions as f
 from classy_blocks.util.constants import SIDES_MAP
 from classy_blocks.util.frame import Frame
 from classy_blocks.util.tools import edge_map
@@ -219,19 +218,6 @@ class Operation(ElementBase):
         Warning: bottom, left and front faces must be inverted prior
         to using them for a loft/extrude etc."""
         return Face([self.point_array[i] for i in constants.FACE_MAP[side]])
-
-    def get_face_near(self, position: PointType) -> Face:
-        """Creates a face from this operation that is closest to given position;
-        it will be oriented as-is (see face.reorient).
-
-        Most reliable with points far away from the operation and approximately aligned
-        with the axis in which the searched face resides."""
-        position = np.array(position, dtype=constants.DTYPE)
-        faces = [self.get_face(side) for side in get_args(OrientType)]
-
-        faces.sort(key=lambda face: f.norm(face.center - position))
-
-        return faces[0]
 
     @property
     def patch_names(self) -> Dict[OrientType, str]:
