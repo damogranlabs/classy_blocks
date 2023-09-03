@@ -18,6 +18,7 @@ from .modify.clamps.surface import ParametricSurfaceClamp, PlaneClamp
 from .modify.find.geometric import GeometricFinder
 from .modify.find.shape import RoundSolidFinder
 from .modify.optimizer import Optimizer
+from .modify.reorient.viewpoint import ViewpointReorienter
 
 __all__ = [
     "Arc",
@@ -54,4 +55,6 @@ __all__ = [
     "PlaneClamp",
     # Optimization: optimizer
     "Optimizer",
+    # Auto-orientation
+    "ViewpointReorienter",
 ]

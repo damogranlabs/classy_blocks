@@ -45,10 +45,6 @@ class QuadrangleTests(unittest.TestCase):
         # upper-right part
         self.tri_2 = Triangle([f.vector(0, 0, 0), f.vector(1, 1, 0), f.vector(0, 1, 0)])
 
-    @property
-    def quad(self) -> Quadrangle:
-        return Quadrangle([self.tri_1, self.tri_2])
-
     def test_get_common_points(self):
         list_1 = self.tri_1.points
         list_2 = self.tri_2.points

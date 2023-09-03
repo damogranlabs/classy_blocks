@@ -96,6 +96,7 @@ After blocks have been placed, it is possible to create new geometry based on pl
 
 ## Meshing Specification
 - [x] Simple definition of all supported kinds of edges with a dedicated class (Arc/Origin/Angle/Spline/PolyLine/Project)
+- [x] Automatic sorting/reorienting of block vertices based on specified _front_ and _top_ points
 - [x] Automatic calculation of cell count and grading by specifying any of a number of parameters (cell-to-cell expansion ratio, start cell width, end cell width, total expansion ratio)
 - [ ] [Edge grading](https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-450004.3.1.3) (separate specification for each edge)
 - [x] Automatic propagation of grading and cell count from a single block to all connected blocks as required by blockMesh
@@ -355,12 +356,10 @@ There's no official documentation yet so here are some tips for easier navigatio
 - Unchecked list items from [Features](#features)
 - Usability
     - Frustum with any profile, not just arc
-- Manual modification, automatic optimization
-- Examples
-    - Ramjet engine
+    - Joining two blocks by moving vertices/creating new blocks
 - Technical stuff:
     - Skew transform
     - Debugging: connection between block and Shapes, naming
-    - More tests
+    - 101% test coverage
     - Documentation
     - spline/polyLine edge: automatic point sorting

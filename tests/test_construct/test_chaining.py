@@ -169,8 +169,7 @@ class ExpandContractTests(unittest.TestCase):
     def test_contract_ring_invalid_radius(self):
         with self.assertRaises(ExtrudedRingCreationError):
             ring = ExtrudedRing([0, 0, 0], [1, 0, 0], [0, 1, 0], 0.6, 9)
-            contracted = ExtrudedRing.contract(ring, 2)
-            self.check_success(ring, contracted, 18, 2 * 3 * 9)
+            _ = ExtrudedRing.contract(ring, 2)
 
     def test_contract_ring(self):
         """Contract a ring from another ring"""

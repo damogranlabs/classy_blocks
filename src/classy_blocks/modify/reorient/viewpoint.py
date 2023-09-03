@@ -103,8 +103,8 @@ class Quadrangle:
 class ViewpointReorienter:
     """Reorient an Operation so that faces are aligned as viewed by
     observer from a specified viewpoint.
-    The faces must be approximately aligned with observer's position:
-    looking at front face, the top face points at ceiling, etc.
+    Two points must be specified, one 'in front' of the block (preferrably far away)
+    and other 'above' the block (can also be far away).
 
     Will fail with degenerate hexahedras (concavity, wedges, dubiously aligned faces, ...).
 

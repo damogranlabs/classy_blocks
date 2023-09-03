@@ -13,7 +13,8 @@ mesh.add(cylinder)
 mesh.assemble()
 
 finder = cb.GeometricFinder(mesh)
-vertex = finder.find_in_sphere([1, 0, 0])[0]
+vertex = list(finder.find_in_sphere([1, 0, 0]))[0]
 vertex.translate([0.4, 0, 0])
 
+mesh.set_default_patch("walls", "wall")
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

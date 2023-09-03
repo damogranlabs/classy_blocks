@@ -16,10 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Slide along a curve (line, parametric curve) (1 DoF)
     - Move on a surface (parametric surface) (2 DoF)
 - Reorienting Operations and Faces
-  - `Operation`: `get_face_near()` returns a Face whose center is nearest to a given point
   - `Face`:
     - `shift()` method to rotate points around
     - `reorient()` method that rotates points so that they start nearest to given position
+  - `ViewpointOrienter`: a class for auto-orienting operation's points based on specified points 'in front' and 'above' the operation.
 
 ### Changed
 - Projection Behaviour
