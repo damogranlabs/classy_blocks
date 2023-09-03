@@ -80,8 +80,9 @@ class Face(ElementBase):
     def project_edge(self, corner: int, label: ProjectToType) -> None:
         """Adds a Project edge or add the label to an existing one"""
         edge = self.edges[corner]
+
         if isinstance(edge, Project):
-            self.edges[corner].add_label(label)
+            edge.add_label(label)
             return
 
         self.add_edge(corner, Project(label))

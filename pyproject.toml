@@ -34,7 +34,7 @@ target-version = "py38"
 line-length = 120
 
 [[tool.mypy.overrides]]
-module = "scipy,scipy.*,parameterized"
+module = "scipy,scipy.*,parameterized.*"
 ignore_missing_imports = true
 
 
