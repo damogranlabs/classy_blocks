@@ -336,7 +336,7 @@ A parametric, Low-Re mesh of a real-life impeller *(not included in examples)*
 
 Package (python) dependencies can be found in *pyproject.toml* file.
 Other dependencies that must be installed:
-- python3.7 and higher
+- python3.8 and higher
 - OpenFoam: .org or .com version is supported, foam-extend's blockMesh doesn't support multigrading but is otherwise also compatible.
 
 # Technical Information
