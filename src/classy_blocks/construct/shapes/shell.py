@@ -147,9 +147,8 @@ class AwareFaceStore:
         return aware_faces
 
     def get_offset_lofts(self, amount: float) -> List[Loft]:
-        offset_faces = [awf.get_offset_face(amount) for awf in self.aware_faces]  # No. 2, 3, 4
+        offset_faces = [awf.get_offset_face(amount) for awf in self.aware_faces]
 
-        # No. 5
         return [Loft(face, offset_faces[i]) for i, face in enumerate(self.faces)]
 
     @functools.cached_property

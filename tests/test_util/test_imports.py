@@ -40,3 +40,16 @@ class ImportsTests(unittest.TestCase):
     def test_import_mesh(self):
         """The core stuff"""
         _ = cb.Mesh
+
+    def test_import_finders(self):
+        _ = cb.GeometricFinder
+        _ = cb.RoundSolidFinder
+
+    def test_import_clamps(self):
+        _ = cb.FreeClamp
+        _ = cb.LineClamp
+        _ = cb.ParametricCurveClamp
+        _ = cb.RadialClamp
+
+    def test_import_optimizer(self):
+        _ = cb.Optimizer

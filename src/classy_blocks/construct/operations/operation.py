@@ -37,6 +37,14 @@ class Operation(ElementBase):
         # optionally, put the block in a cell zone
         self.cell_zone = ""
 
+    def _project_update(self, edge: EdgeData, label: ProjectToType):
+        """Adds a label to a Project edge or creates a new Project edge and returns it"""
+        if isinstance(edge, Project):
+            edge.add_label(label)
+            return edge
+
+        return Project(label)
+
     def add_side_edge(self, corner_idx: int, edge_data: EdgeData) -> None:
         """Add an edge between two vertices at the same
         corner of the lower and upper face (index and index+4 or vice versa)."""
@@ -74,23 +82,23 @@ class Operation(ElementBase):
             self.bottom_face.points[corner].project(label)
 
     def project_edge(self, corner_1: int, corner_2: int, label: ProjectToType) -> None:
-        """Replace an edge between given corners with a Projected one"""
+        """Replace an edge between given corners with a Projected one
+        or add geometry to an already projected edge"""
         # decide where the required edge sits
         loc = edge_map[corner_1][corner_2]
-
-        edge = Project(label)
+        corner = loc.start_corner
 
         # bottom or top face?
         if loc.side == "bottom":
-            self.bottom_face.edges[loc.start_corner] = edge
+            self.bottom_face.edges[corner] = self._project_update(self.bottom_face.edges[corner], label)
             return
 
         if loc.side == "top":
-            self.top_face.edges[loc.start_corner] = edge
+            self.top_face.edges[corner] = self._project_update(self.top_face.edges[loc.start_corner], label)
             return
 
         # sides
-        self.side_edges[loc.start_corner] = edge
+        self.side_edges[corner] = self._project_update(self.side_edges[corner], label)
 
     def project_side(self, side: OrientType, label: str, edges: bool = False, points: bool = False) -> None:
         """Project given side to a labeled geometry;
@@ -106,7 +114,6 @@ class Operation(ElementBase):
             left: opposite right
         - label: name of predefined geometry (add separately to Mesh object)
         - edges:if True, all edges belonging to this side will also be projected"""
-        # TODO: TEST with other sides
         if side == "bottom":
             self.bottom_face.project(label, edges, points)
             return
@@ -121,11 +128,14 @@ class Operation(ElementBase):
         self.side_projects[index_1] = label
 
         if edges:
-            self.side_edges[index_1] = Project(label)
-            self.side_edges[index_2] = Project(label)
+            self.project_edge(index_1, index_2, label)
+            self.project_edge(index_1 + 4, index_2 + 4, label)
 
-            self.top_face.edges[index_1] = Project(label)
-            self.bottom_face.edges[index_1] = Project(label)
+            self.side_edges[index_1] = self._project_update(self.side_edges[index_1], label)
+            self.side_edges[index_2] = self._project_update(self.side_edges[index_2], label)
+
+            self.top_face.project_edge(index_1, label)
+            self.bottom_face.project_edge(index_1, label)
 
         if points:
             for face in (self.top_face, self.bottom_face):

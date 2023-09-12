@@ -186,6 +186,26 @@ class OperationProjectionTests(BlockTestCase):
         for edge in self.loft.bottom_face.edges:
             self.assertTrue(isinstance(edge, Project))
 
+    def test_project_two_sides_bottom(self):
+        """Project two sides with a common edge to two different geometries"""
+        self.loft.project_side("bottom", "terrain", edges=True)
+        self.loft.project_side("front", "walls", edges=True)
+
+        self.assertListEqual(self.loft.bottom_face.edges[0].label, ["terrain", "walls"])
+
+        for edge in self.loft.bottom_face.edges:
+            self.assertTrue(isinstance(edge, Project))
+
+    def test_project_two_sides_top(self):
+        """Project two sides with a common edge to two different geometries"""
+        self.loft.project_side("front", "terrain", edges=True)
+        self.loft.project_side("top", "walls", edges=True)
+
+        self.assertListEqual(self.loft.top_face.edges[0].label, ["terrain", "walls"])
+
+        for edge in self.loft.top_face.edges:
+            self.assertTrue(isinstance(edge, Project))
+
     def test_project_corner_top(self):
         """Project a vertex"""
         self.loft.project_corner(0, "terrain")
@@ -244,6 +264,29 @@ class OperationProjectionTests(BlockTestCase):
                 break
 
         self.assertTrue(found, f"Edge between {corner_1} and {corner_2} not found!")
+
+    def test_project_edge_twice(self):
+        """Project the same edge with two different geometries"""
+        self.loft.project_edge(0, 1, "terrain")
+        self.loft.project_edge(0, 1, "walls")
+
+        self.assertListEqual(self.loft.bottom_face.edges[0].label, ["terrain", "walls"])
+
+    @parameterized.expand(
+        (
+            ("terrain", "walls", ["terrain", "walls"]),
+            ("terrain", "terrain", ["terrain"]),
+            ("terrain", ["terrain", "walls"], ["terrain", "walls"]),
+            (["terrain"], ["terrain"], ["terrain"]),
+            (["terrain"], ["walls"], ["terrain", "walls"]),
+        )
+    )
+    def test_project_edge_multiple(self, first, second, result):
+        """Project the same edge with two equal geometries"""
+        self.loft.project_edge(0, 1, first)
+        self.loft.project_edge(0, 1, second)
+
+        self.assertListEqual(self.loft.bottom_face.edges[0].label, result)
 
 
 class OperationTransformTests(unittest.TestCase):

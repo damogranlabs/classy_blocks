@@ -12,6 +12,13 @@ from .construct.shapes.rings import ExtrudedRing, RevolvedRing
 from .construct.shapes.shell import Shell
 from .construct.shapes.sphere import Hemisphere
 from .mesh import Mesh
+from .modify.clamps.curve import LineClamp, ParametricCurveClamp, RadialClamp
+from .modify.clamps.free import FreeClamp
+from .modify.clamps.surface import ParametricSurfaceClamp, PlaneClamp
+from .modify.find.geometric import GeometricFinder
+from .modify.find.shape import RoundSolidFinder
+from .modify.optimizer import Optimizer
+from .modify.reorient.viewpoint import ViewpointReorienter
 
 __all__ = [
     "Arc",
@@ -36,4 +43,18 @@ __all__ = [
     "Hemisphere",
     "Shell",
     "Mesh",
+    # Modification of assembled meshes
+    "GeometricFinder",
+    "RoundSolidFinder",
+    # Optimization: Clamps
+    "FreeClamp",
+    "LineClamp",
+    "ParametricCurveClamp",
+    "RadialClamp",
+    "ParametricSurfaceClamp",
+    "PlaneClamp",
+    # Optimization: optimizer
+    "Optimizer",
+    # Auto-orientation
+    "ViewpointReorienter",
 ]

@@ -7,6 +7,11 @@ from classy_blocks.util.constants import SIDES_MAP
 from classy_blocks.util.frame import Frame
 
 
+def report(text):
+    """TODO: improve (verbosity, logging, ...)"""
+    print(text)
+
+
 def indent(text: str, levels: int) -> str:
     """Indents 'text' by 'levels' tab characters"""
     return "\t" * levels + text + "\n"

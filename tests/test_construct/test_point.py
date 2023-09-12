@@ -62,3 +62,20 @@ class PointTests(unittest.TestCase):
         vector = Vector([1, 0, 0])
         self.assertEqual(str(vector), "Vector (1.00000000 0.00000000 0.00000000)")
         self.assertEqual(repr(vector), "Vector (1.00000000 0.00000000 0.00000000)")
+
+    def test_project_twice(self):
+        """Multiple calls to project() must add geometry to the projections list"""
+        point = self.point
+
+        point.project("terrain")
+        point.project("also_terrain")
+
+        self.assertListEqual(point.projected_to, ["terrain", "also_terrain"])
+
+    def test_project_twice_mixed(self):
+        point = self.point
+
+        point.project("terrain")
+        point.project(["also_terrain", "also_also_terrain"])
+
+        self.assertListEqual(point.projected_to, ["terrain", "also_terrain", "also_also_terrain"])
