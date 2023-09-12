@@ -15,7 +15,7 @@ class Extrude(Loft):
     def __init__(self, base: Face, amount: Union[float, VectorType]):
         self.base = base
 
-        if isinstance(amount, float):
+        if isinstance(amount, float) or isinstance(amount, int):
             extrude_vector = self.base.normal * amount
         else:
             extrude_vector = np.asarray(amount)
