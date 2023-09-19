@@ -1,3 +1,4 @@
+import copy
 from typing import List
 
 import scipy.optimize
@@ -48,7 +49,7 @@ class Optimizer:
 
     def optimize_clamp(self, clamp: ClampBase) -> float:
         initial_quality = self.grid.quality
-        initial_params = clamp.params
+        initial_params = copy.copy(clamp.params)
 
         def fquality(params):
             # move all vertices according to X
