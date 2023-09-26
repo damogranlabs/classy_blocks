@@ -1,5 +1,6 @@
 from unittest import mock
 
+import numpy as np
 from parameterized import parameterized
 
 from classy_blocks.construct.operations.box import Box
@@ -234,3 +235,13 @@ class MeshTests(BlockTestCase):
             self.mesh.clear()
 
         mock_clear.assert_called()
+
+    def test_backport(self):
+        box = Box([0, 0, 0], [1, 1, 1])
+        self.mesh.add(box)
+        self.mesh.assemble()
+        self.mesh.vertices[0].move_to([-1, -1, -1])
+
+        self.mesh.backport()
+
+        np.testing.assert_array_equal(box.point_array[0], [-1, -1, -1])
