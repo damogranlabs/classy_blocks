@@ -201,3 +201,15 @@ class MeshTests(BlockTestCase):
             self.mesh.add_geometry(test_dict)
 
         mock_add.assert_called_with(test_dict)
+
+    def test_operations(self):
+        """Add an op and a shape and check operation count"""
+        # a single block
+        box = Box([0, 0, 0], [1, 1, 1])
+        self.mesh.add(box)
+
+        # 12 blocks
+        cylinder = Cylinder([2, 0, 0], [3, 0, 0], [2, 1, 0])
+        self.mesh.add(cylinder)
+
+        self.assertEqual(len(self.mesh.operations), 13)

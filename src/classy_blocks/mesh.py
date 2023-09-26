@@ -136,6 +136,16 @@ class Mesh:
 
         return out
 
+    def backport(self) -> None:
+        """When mesh is assembled, points from depot are converted to vertices and
+        operations are converted to blocks. When vertices are edited (modification/optimization),
+        depot entities remain unchanged. This can cause problems with some edges
+        (Origin, Axis, ...) and future stuff.
+
+        This method updates depot from blocks, clears all lists and reassembles the
+        mesh as if it was modified from the start."""
+        raise NotImplementedError
+
     def write(self, output_path: str, debug_path: Optional[str] = None) -> None:
         """Writes a blockMeshDict to specified location. If debug_path is specified,
         a VTK file is created first where each block is a single cell, to see simplified
@@ -168,6 +178,19 @@ class Mesh:
     @property
     def vertices(self) -> List[Vertex]:
         return self.vertex_list.vertices
+
+    @property
+    def operations(self) -> List[Operation]:
+        """Returns a list of operations from all entities in depot"""
+        operations: List[Operation] = []
+
+        for entity in self.depot:
+            if isinstance(entity, Operation):
+                operations.append(entity)
+            else:
+                operations += entity.operations
+
+        return operations
 
     @property
     def blocks(self) -> List[Block]:
