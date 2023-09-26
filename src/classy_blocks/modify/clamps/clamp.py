@@ -36,9 +36,8 @@ class ClampBase(abc.ABC):
         def distance_from_vertex(params):
             return f.norm(self.point - self.position_function(params))
 
-        result = scipy.optimize.minimize(
-            distance_from_vertex, self.initial_params, bounds=self.bounds, method="SLSQP", tol=TOL
-        )
+        result = scipy.optimize.minimize(distance_from_vertex, self.initial_params, bounds=self.bounds, tol=TOL)
+
         return result.x
 
     def update_params(self, params: List[float]):

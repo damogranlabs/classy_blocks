@@ -47,34 +47,62 @@ class Optimizer:
 
         raise NoClampError
 
-    def optimize_clamp(self, clamp: ClampBase) -> float:
-        initial_quality = self.grid.quality
+    def optimize_clamp(self, clamp: ClampBase, relaxation: float) -> float:
+        """Move clamp.vertex so that quality at junction is improved;
+        rollback changes if grid quality decreased after optimization"""
+        initial_grid_quality = self.grid.quality
         initial_params = copy.copy(clamp.params)
+        junction = self._get_junction(clamp)
 
         def fquality(params):
             # move all vertices according to X
             clamp.update_params(params)
-            return self.grid.quality
+            return junction.quality
 
-        scipy.optimize.minimize(fquality, clamp.params, method="SLSQP", tol=1e-2, options={"maxiter": 100})
+        scipy.optimize.minimize(
+            fquality,
+            clamp.params,
+            method="COBYLA",
+            options={"maxiter": 10, "tol": 1, "rhobeg": 1e-4},
+        )
 
-        current_quality = self.grid.quality
+        current_grid_quality = self.grid.quality
 
-        if current_quality > initial_quality:
+        if current_grid_quality > initial_grid_quality:
             # rollback if quality is worse
             clamp.update_params(initial_params)
-            current_quality = 1
+            msg = (
+                f"  < Rollback at vertex {clamp.vertex.index}: {initial_grid_quality:.3e} < {current_grid_quality:.3e}"
+            )
+            report(msg)
+            current_grid_quality = 1
+        else:
+            msg = "  > Optimized junction at vertex "
+            msg += f"{clamp.vertex.index}: {initial_grid_quality:.3e} > {current_grid_quality:.3e}"
+            report(msg)
 
-        report(f"  > Optimized junction at vertex {clamp.vertex.index}: {initial_quality} > {self.grid.quality}")
+            # underrelaxation
+            import numpy as np
 
-        return initial_quality / current_quality
+            old_params = np.array(initial_params)
+            new_params = np.array(clamp.params)
+            relaxed = old_params + relaxation * (new_params - old_params)
 
-    def optimize_iteration(self) -> None:
+            clamp.update_params(relaxed)
+
+        return initial_grid_quality / current_grid_quality
+
+    def optimize_iteration(self, iteration: int) -> None:
         # gather points that can be moved with optimization
+        if iteration > 0:
+            relaxation = 1
+        else:
+            relaxation = 0.5
+
         for junction in self.grid.get_ordered_junctions():
             try:
                 clamp = self._get_clamp(junction)
-                self.optimize_clamp(clamp)
+                self.optimize_clamp(clamp, relaxation)
             except NoClampError:
                 continue
 
@@ -84,11 +112,11 @@ class Optimizer:
         prev_quality = self.grid.quality
 
         for i in range(max_iterations):
-            self.optimize_iteration()
+            self.optimize_iteration(i)
 
             this_quality = self.grid.quality
 
-            report(f"Optimization iteration {i}: {prev_quality} > {this_quality}")
+            report(f"Optimization iteration {i}: {prev_quality:.3e} > {this_quality:.3e}")
 
             if abs((prev_quality - this_quality) / (this_quality + VSMALL)) < tolerance:
                 report("Tolerance reached, stopping optimization")
