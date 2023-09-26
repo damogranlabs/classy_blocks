@@ -91,6 +91,11 @@ class VertexList:
 
         return vertex
 
+    def clear(self) -> None:
+        """Empties all lists"""
+        self.vertices.clear()
+        self.duplicated.clear()
+
     @property
     def description(self) -> str:
         """Output for blockMeshDict"""

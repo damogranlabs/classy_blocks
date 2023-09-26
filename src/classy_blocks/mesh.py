@@ -119,10 +119,38 @@ class Mesh:
             if entity.geometry is not None:
                 self.add_geometry(entity.geometry)
 
-    @property
-    def is_assembled(self) -> bool:
-        """Returns True if assemble() has been executed on this mesh"""
-        return len(self.vertex_list.vertices) > 0
+    def clear(self) -> None:
+        """Undoes the assemble() method; clears created blocks and other lists
+        but leaves added depot items intact"""
+        self.vertex_list.clear()
+        self.edge_list.clear()
+        self.block_list.clear()
+        self.patch_list.clear()
+        self.face_list.clear()
+
+    def backport(self) -> None:
+        """When mesh is assembled, points from depot are converted to vertices and
+        operations are converted to blocks. When vertices are edited (modification/optimization),
+        depot entities remain unchanged. This can cause problems with some edges
+        (Origin, Axis, ...) and future stuff.
+
+        This method updates depot from blocks, clears all lists and reassembles the
+        mesh as if it was modified from the start."""
+        if not self.is_assembled:
+            raise RuntimeError("Cannot backport non-assembled mesh")
+
+        operations = self.operations
+        blocks = self.blocks
+
+        for i, block in enumerate(blocks):
+            op = operations[i]
+
+            vertices = [vertex.position for vertex in block.vertices]
+            op.bottom_face.update(vertices[:4])
+            op.top_face.update(vertices[4:])
+
+        self.clear()
+        self.assemble()
 
     def format_settings(self) -> str:
         """Put self.settings in a proper, blockMesh-readable format"""
@@ -135,16 +163,6 @@ class Mesh:
         out += "\n"
 
         return out
-
-    def backport(self) -> None:
-        """When mesh is assembled, points from depot are converted to vertices and
-        operations are converted to blocks. When vertices are edited (modification/optimization),
-        depot entities remain unchanged. This can cause problems with some edges
-        (Origin, Axis, ...) and future stuff.
-
-        This method updates depot from blocks, clears all lists and reassembles the
-        mesh as if it was modified from the start."""
-        raise NotImplementedError
 
     def write(self, output_path: str, debug_path: Optional[str] = None) -> None:
         """Writes a blockMeshDict to specified location. If debug_path is specified,
@@ -174,6 +192,11 @@ class Mesh:
             output.write(self.patch_list.description)
 
             output.write(constants.MESH_FOOTER)
+
+    @property
+    def is_assembled(self) -> bool:
+        """Returns True if assemble() has been executed on this mesh"""
+        return len(self.vertex_list.vertices) > 0
 
     @property
     def vertices(self) -> List[Vertex]:

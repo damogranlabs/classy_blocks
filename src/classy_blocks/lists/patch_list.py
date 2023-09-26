@@ -48,6 +48,10 @@ class PatchList:
         """Adds an entry in mergePatchPairs list in blockMeshDict"""
         self.merged.append([master, slave])
 
+    def clear(self) -> None:
+        """Removes collected patches but leaves settings intact"""
+        self.patches.clear()
+
     @property
     def description(self) -> str:
         """Outputs a 'boundary' and 'faces' dict to be inserted directly into blockMeshDict"""

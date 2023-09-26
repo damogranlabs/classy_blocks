@@ -62,6 +62,10 @@ class FaceList:
         if not self.find_existing(side):
             self.faces.append(ProjectedFace(side, label))
 
+    def clear(self) -> None:
+        """Removes collected faces"""
+        self.faces.clear()
+
     @property
     def description(self) -> str:
         """Formats the 'faces' list to be output into blockMeshDict"""

@@ -54,6 +54,10 @@ class EdgeList:
 
         return edges
 
+    def clear(self) -> None:
+        """Empties all lists"""
+        self.edges.clear()
+
     @property
     def description(self) -> str:
         """Outputs a list of edges to be inserted into blockMeshDict"""

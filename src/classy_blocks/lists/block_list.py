@@ -62,6 +62,10 @@ class BlockList:
 
             raise UndefinedGradingsError(message)
 
+    def clear(self) -> None:
+        """Removes created blocks"""
+        self.blocks.clear()
+
     @property
     def description(self) -> str:
         """Outputs a list of blocks to be inserted directly into blockMeshDict"""

@@ -1,9 +1,15 @@
 from unittest import mock
 
+from parameterized import parameterized
+
 from classy_blocks.construct.operations.box import Box
 from classy_blocks.construct.shapes.cylinder import Cylinder
+from classy_blocks.lists.block_list import BlockList
+from classy_blocks.lists.edge_list import EdgeList
+from classy_blocks.lists.face_list import FaceList
 from classy_blocks.lists.geometry_list import GeometryList
 from classy_blocks.lists.patch_list import PatchList
+from classy_blocks.lists.vertex_list import VertexList
 from classy_blocks.mesh import Mesh
 from tests.fixtures.block import BlockTestCase
 
@@ -213,3 +219,18 @@ class MeshTests(BlockTestCase):
         self.mesh.add(cylinder)
 
         self.assertEqual(len(self.mesh.operations), 13)
+
+    @parameterized.expand(
+        (
+            (VertexList,),
+            (BlockList,),
+            (EdgeList,),
+            (PatchList,),
+            (FaceList,),
+        )
+    )
+    def test_clear_mesh_block_list(self, klass):
+        with mock.patch.object(klass, "clear") as mock_clear:
+            self.mesh.clear()
+
+        mock_clear.assert_called()
