@@ -94,10 +94,9 @@ class Optimizer:
 
     def optimize_iteration(self, iteration: int) -> None:
         # gather points that can be moved with optimization
+        relaxation = 0.5
         if iteration > 0:
             relaxation = 1
-        else:
-            relaxation = 0.5
 
         for junction in self.grid.get_ordered_junctions():
             try:

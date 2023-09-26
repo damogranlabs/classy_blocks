@@ -66,6 +66,11 @@ class Face(ElementBase):
         # patch name to which this face can belong
         self.patch_name: Optional[str] = None
 
+    def update(self, points: PointListType) -> None:
+        """Moves points from current position to given"""
+        for i, point in enumerate(points):
+            self.points[i].position = np.array(point, dtype=constants.DTYPE)
+
     def add_edge(self, corner: int, edge_data: Union[EdgeData, None]) -> None:
         """Replaces an existing edge between corner and (corner+1);
         use None to delete an edge (replace with a straight line)"""

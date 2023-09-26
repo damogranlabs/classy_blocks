@@ -170,3 +170,11 @@ class FaceTests(unittest.TestCase):
         new_normal = face.normal
 
         np.testing.assert_array_equal(orig_normal, new_normal)
+
+    def test_update(self):
+        face = Face(self.points)
+
+        new_points = np.array(self.points) + f.vector(1, 1, 1)
+        face.update(new_points)
+
+        np.testing.assert_array_equal(face.point_array, new_points)
