@@ -1,6 +1,7 @@
 import copy
 from typing import List
 
+import numpy as np
 import scipy.optimize
 
 from classy_blocks.mesh import Mesh
@@ -62,9 +63,13 @@ class Optimizer:
         scipy.optimize.minimize(
             fquality,
             clamp.params,
-            method="COBYLA",
-            options={"maxiter": 10, "tol": 1, "rhobeg": 1e-4},
+            bounds=clamp.bounds,
+            method="L-BFGS-B",
+            options={"maxiter": 20, "ftol": 1, "eps": junction.delta / 10},
         )
+        # alas, works well with this kind of problem but does not support bounds
+        # method="COBYLA",
+        # options={"maxiter": 20, "tol": 1, "rhobeg": junction.delta / 10},
 
         current_grid_quality = self.grid.quality
 
@@ -81,23 +86,12 @@ class Optimizer:
             msg += f"{clamp.vertex.index}: {initial_grid_quality:.3e} > {current_grid_quality:.3e}"
             report(msg)
 
-            # underrelaxation
-            import numpy as np
-
-            old_params = np.array(initial_params)
-            new_params = np.array(clamp.params)
-            relaxed = old_params + relaxation * (new_params - old_params)
-
-            clamp.update_params(relaxed)
+            clamp.update_params(clamp.params, relaxation)
 
         return initial_grid_quality / current_grid_quality
 
-    def optimize_iteration(self, iteration: int) -> None:
+    def optimize_iteration(self, relaxation: float) -> None:
         # gather points that can be moved with optimization
-        relaxation = 0.5
-        if iteration > 0:
-            relaxation = 1
-
         for junction in self.grid.get_ordered_junctions():
             try:
                 clamp = self._get_clamp(junction)
@@ -105,17 +99,20 @@ class Optimizer:
             except NoClampError:
                 continue
 
-    def optimize(self, max_iterations: int = 20, tolerance: float = 0.05) -> None:
+    def optimize(self, max_iterations: int = 20, tolerance: float = 0.05, initial_relaxation=0.5) -> None:
         """Move vertices, defined and restrained with Clamps
         so that better mesh quality is obtained."""
         prev_quality = self.grid.quality
 
         for i in range(max_iterations):
-            self.optimize_iteration(i)
+            # use lower relaxation factor with first iterations, then increase
+            # TODO: tests
+            relaxation = 1 - initial_relaxation * np.exp(-i)
+            self.optimize_iteration(relaxation)
 
             this_quality = self.grid.quality
 
-            report(f"Optimization iteration {i}: {prev_quality:.3e} > {this_quality:.3e}")
+            report(f"Optimization iteration {i}: {prev_quality:.3e} > {this_quality:.3e} (relaxation: {relaxation}")
 
             if abs((prev_quality - this_quality) / (this_quality + VSMALL)) < tolerance:
                 report("Tolerance reached, stopping optimization")

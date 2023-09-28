@@ -33,6 +33,13 @@ class FreeClampTests(ClampTestsBase):
 
         np.testing.assert_array_equal(self.vertex.position, [1, 0, 0])
 
+    def test_free_relaxation(self):
+        """Update params but with under-relaxation"""
+        clamp = FreeClamp(self.vertex)
+        clamp.update_params([1, 0, 0], relaxation=0.5)
+
+        np.testing.assert_array_almost_equal(self.vertex.position, [0.5, 0, 0])
+
 
 class CurveClampTests(ClampTestsBase):
     def setUp(self):
@@ -83,6 +90,13 @@ class CurveClampTests(ClampTestsBase):
         clamp = LineClamp(self.vertex, [0, 0, 0], [1, 1, 1], [0, 1])
 
         self.assertAlmostEqual(clamp.params[0], 1)
+
+    def test_line_relaxation(self):
+        clamp = LineClamp(self.vertex, [0, 0, 0], [1, 1, 1])
+
+        clamp.update_params([0.5], relaxation=0.5)
+
+        np.testing.assert_array_almost_equal(clamp.point, [0.25, 0.25, 0.25])
 
     def test_analytic_init(self):
         clamp = ParametricCurveClamp(self.vertex, self.function)

@@ -6,7 +6,8 @@ import numpy as np
 from classy_blocks.items.block import Block
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.types import NPPointListType, NPPointType, OrientType
-from classy_blocks.util.constants import FACE_MAP, VSMALL
+from classy_blocks.util import functions as f
+from classy_blocks.util.constants import EDGE_PAIRS, FACE_MAP, VSMALL
 
 
 class NoCommonSidesError(Exception):
@@ -176,3 +177,11 @@ class Cell:
             quality += np.sum(q_scale(3, 2.5, 3, aspect_factor))
 
         return quality
+
+    @property
+    def reference_size(self) -> float:
+        """Returns the length of the shortest edge;
+        used for initial optimization step"""
+        lengths = [f.norm(self.points[pair[0]] - self.points[pair[1]]) for pair in EDGE_PAIRS]
+
+        return min(lengths)

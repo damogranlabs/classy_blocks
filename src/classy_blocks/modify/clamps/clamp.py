@@ -1,6 +1,7 @@
 import abc
 from typing import Callable, List, Optional
 
+import numpy as np
 import scipy.optimize
 
 from classy_blocks.items.vertex import Vertex
@@ -40,8 +41,15 @@ class ClampBase(abc.ABC):
 
         return result.x
 
-    def update_params(self, params: List[float]):
-        self.params = params
+    def update_params(self, params: List[float], relaxation: float = 1):
+        """Updates parameters to given. Optionally limit the change
+        using the same logic as under-relaxation in CFD."""
+        old_params = np.array(self.params)
+        new_params = np.array(params)
+
+        relaxed = old_params + relaxation * (new_params - old_params)
+
+        self.params = relaxed.tolist()
         self.vertex.move_to(self.position_function(self.params))
 
     @property
