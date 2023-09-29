@@ -112,7 +112,7 @@ class Optimizer:
 
             this_quality = self.grid.quality
 
-            report(f"Optimization iteration {i}: {prev_quality:.3e} > {this_quality:.3e} (relaxation: {relaxation}")
+            report(f"Optimization iteration {i}: {prev_quality:.3e} > {this_quality:.3e} (relaxation: {relaxation})")
 
             if abs((prev_quality - this_quality) / (this_quality + VSMALL)) < tolerance:
                 report("Tolerance reached, stopping optimization")
