@@ -107,7 +107,7 @@ class Optimizer:
         for i in range(max_iterations):
             # use lower relaxation factor with first iterations, then increase
             # TODO: tests
-            relaxation = 1 - initial_relaxation * np.exp(-i)
+            relaxation = 1 - (1 - initial_relaxation) * np.exp(-i)
             self.optimize_iteration(relaxation)
 
             this_quality = self.grid.quality
