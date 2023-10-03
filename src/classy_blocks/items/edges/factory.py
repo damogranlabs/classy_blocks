@@ -8,6 +8,7 @@ from classy_blocks.items.edges.edge import Edge
 
 # FIXME: make this automatic
 from classy_blocks.items.edges.line import LineEdge
+from classy_blocks.items.edges.on_curve import CurveEdge
 from classy_blocks.items.edges.project import ProjectEdge
 from classy_blocks.items.edges.spline import PolyLineEdge, SplineEdge
 from classy_blocks.types import EdgeKindType
@@ -38,3 +39,4 @@ factory.register_kind("angle", AngleEdge)
 factory.register_kind("spline", SplineEdge)
 factory.register_kind("polyLine", PolyLineEdge)
 factory.register_kind("project", ProjectEdge)
+factory.register_kind("curve", CurveEdge)

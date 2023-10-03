@@ -6,6 +6,9 @@ import classy_blocks as cb
 class ImportsTests(unittest.TestCase):
     """Import all objects relevant to the user directly from cb"""
 
+    def test_import_base(self):
+        _ = cb.Curve
+
     def test_import_flat(self):
         """Flat stuff"""
         _ = cb.Face
@@ -18,6 +21,7 @@ class ImportsTests(unittest.TestCase):
         _ = cb.Spline
         _ = cb.PolyLine
         _ = cb.Project
+        _ = cb.OnCurve
 
     def test_import_operations(self):
         """Import Operations"""

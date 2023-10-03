@@ -58,7 +58,7 @@ class Edge(ElementBase):
     def description(self) -> str:
         """string description of the edge to be put in blockMeshDict"""
         # subclasses continue from here
-        return f"\t{self.data.kind} {self.vertex_1.index} {self.vertex_2.index} "
+        return f"\t{self.kind} {self.vertex_1.index} {self.vertex_2.index} "
 
     @property
     def center(self):

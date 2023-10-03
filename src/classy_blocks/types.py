@@ -14,7 +14,7 @@ NPVectorType = NPPointType
 VectorType = PointType
 
 # edge kinds as per blockMesh's definition
-EdgeKindType = Literal["line", "arc", "origin", "angle", "spline", "polyLine", "project"]
+EdgeKindType = Literal["line", "arc", "origin", "angle", "spline", "polyLine", "project", "curve"]
 # edges: arc: 1 point, projected: string, everything else: a list of points
 EdgeDataType = Union[PointType, PointListType, str]
 

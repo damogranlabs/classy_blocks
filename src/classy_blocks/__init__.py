@@ -1,4 +1,5 @@
-from .construct.edges import Angle, Arc, Origin, PolyLine, Project, Spline
+from .base.curve import Curve
+from .construct.edges import Angle, Arc, OnCurve, Origin, PolyLine, Project, Spline
 from .construct.flat.face import Face
 from .construct.operations.box import Box
 from .construct.operations.extrude import Extrude
@@ -21,12 +22,16 @@ from .modify.optimizer import Optimizer
 from .modify.reorient.viewpoint import ViewpointReorienter
 
 __all__ = [
+    # base
+    "Curve",
+    # edges
     "Arc",
     "Origin",
     "Angle",
     "Spline",
     "PolyLine",
     "Project",
+    "OnCurve",
     "Face",
     # construct operations
     "Loft",

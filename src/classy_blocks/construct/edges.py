@@ -1,6 +1,7 @@
 import warnings
 from typing import List
 
+from classy_blocks.base.curve import Curve
 from classy_blocks.base.element import ElementBase
 from classy_blocks.base.exceptions import EdgeCreationError
 from classy_blocks.construct.point import Point, Vector
@@ -148,3 +149,23 @@ class Project(EdgeData):
 
         self.label.sort()
         self.check_length()
+
+
+class OnCurve(EdgeData):
+    """An edge, snapped to the given parametric curve"""
+
+    kind = "curve"
+
+    def __init__(self, curve: Curve, n_points: int = 10):
+        self.curve = curve
+        self.n_points = n_points
+
+    @property
+    def parts(self):
+        warnings.warn(f"Not transforming {self.__class__.__name__} edge!", stacklevel=2)
+        return []
+
+    @property
+    def center(self):
+        warnings.warn(f"Not transforming {self.__class__.__name__} edge!", stacklevel=2)
+        return f.vector(0, 0, 0)
