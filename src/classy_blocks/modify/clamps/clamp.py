@@ -18,17 +18,19 @@ class ClampBase(abc.ABC):
         vertex: Vertex,
         position_function: Callable[[List[float]], NPPointType],
         bounds: Optional[List[List[float]]] = None,
+        initial_params: Optional[List[float]] = None,
     ):
         self.vertex = vertex
         self.position_function = position_function
         self.bounds = bounds
+        self.initial_params = initial_params
 
         self.params = self.get_params_from_vertex()
         self.update_params(self.params)
 
     @property
     @abc.abstractmethod
-    def initial_params(self) -> List[float]:
+    def initial_guess(self) -> List[float]:
         """Returns initial guess for get_params_from_vertex"""
 
     def get_params_from_vertex(self) -> List[float]:
@@ -37,7 +39,7 @@ class ClampBase(abc.ABC):
         def distance_from_vertex(params):
             return f.norm(self.point - self.position_function(params))
 
-        result = scipy.optimize.minimize(distance_from_vertex, self.initial_params, bounds=self.bounds, tol=TOL)
+        result = scipy.optimize.minimize(distance_from_vertex, self.initial_guess, bounds=self.bounds, tol=TOL)
 
         return result.x
 

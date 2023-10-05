@@ -17,12 +17,12 @@ class CurveEdge(Edge):
     @property
     def param_start(self) -> float:
         """Parameter of given curve at vertex 1"""
-        return self.data.curve.get_closest_param(self.vertex_1.position, self.data.curve.bounds[0])
+        return self.data.curve.get_closest_param(self.vertex_1.position)
 
     @property
     def param_end(self) -> float:
         """Parameter of given curve at vertex 2"""
-        return self.data.curve.get_closest_param(self.vertex_2.position, self.data.curve.bounds[1])
+        return self.data.curve.get_closest_param(self.vertex_2.position)
 
     @property
     def length(self):

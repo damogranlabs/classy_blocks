@@ -6,7 +6,7 @@ from classy_blocks.modify.clamps.clamp import ClampBase
 
 class FreeClamp(ClampBase):
     def __init__(self, vertex: Vertex):
-        super().__init__(vertex, lambda params: np.asarray(params))
+        super().__init__(vertex, np.asarray)
 
     def get_params_from_vertex(self):
         """Returns parameters from initial vertex position"""
@@ -14,5 +14,5 @@ class FreeClamp(ClampBase):
         return self.vertex.position
 
     @property
-    def initial_params(self):
+    def initial_guess(self):
         return self.vertex.position

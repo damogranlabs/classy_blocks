@@ -36,8 +36,6 @@ class Curve:
         if t_to is None:
             t_to = self.bounds[1]
 
-        print(t_from, t_to)
-
         return np.array([self.function(t) for t in np.linspace(t_from, t_to, num=count)])
 
     def get_closest_param(self, position: PointType) -> float:

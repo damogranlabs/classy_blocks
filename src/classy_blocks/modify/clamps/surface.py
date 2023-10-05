@@ -1,5 +1,3 @@
-from typing import Callable, List, Optional
-
 import numpy as np
 
 from classy_blocks.items.vertex import Vertex
@@ -31,7 +29,7 @@ class PlaneClamp(ClampBase):
         super().__init__(vertex, position_function)
 
     @property
-    def initial_params(self):
+    def initial_guess(self):
         return [0, 0]
 
 
@@ -43,22 +41,17 @@ class ParametricSurfaceClamp(ClampBase):
 
     Function f must take two parameters 'u' and 'v' and return a single point in 3D space."""
 
-    def __init__(
-        self, vertex: Vertex, function: Callable[[List[float]], NPPointType], bounds: Optional[List[List[float]]] = None
-    ):
-        super().__init__(vertex, function, bounds)
-
     @property
-    def initial_params(self):
-        if self.bounds is None:
+    def initial_guess(self):
+        if self.initial_params is None:
             return [0, 0]
 
-        return np.average(self.bounds, axis=1)
+        return self.initial_params
 
 
-class InterpolatedSurfaceClamp(ClampBase):
-    pass
+# class InterpolatedSurfaceClamp(ClampBase):
+#    TODO
 
 
-class TriangulatedSurfaceClamp(ClampBase):
-    pass
+# class TriangulatedSurfaceClamp(ClampBase):
+#    TODO

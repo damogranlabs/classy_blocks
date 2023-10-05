@@ -30,11 +30,10 @@ class LineClamp(ClampBase):
         super().__init__(vertex, lambda params: point_1 + params[0] * vector, clamp_bounds)
 
     @property
-    def initial_params(self) -> List[float]:
-        if self.bounds is None:
-            return [0.5]
-
-        return [(self.bounds[0][0] + self.bounds[0][1]) / 2.0]
+    def initial_guess(self) -> List[float]:
+        # Finding the closest point on a line is reliable enough
+        # so that specific initial parameters are not needed
+        return [0]
 
 
 class ParametricCurveClamp(ClampBase):
@@ -44,21 +43,30 @@ class ParametricCurveClamp(ClampBase):
     Function f must take a single parameter 't' and return a point in 3D space."""
 
     def __init__(
-        self, vertex: Vertex, function: Callable[[List[float]], NPPointType], bounds: Optional[List[float]] = None
+        self,
+        vertex: Vertex,
+        function: Callable[[List[float]], NPPointType],
+        bounds: Optional[List[float]] = None,
+        initial_param: Optional[float] = None,
     ):
         if bounds is not None:
             clamp_bounds = [bounds]
         else:
             clamp_bounds = None
 
-        super().__init__(vertex, function, clamp_bounds)
+        if initial_param is not None:
+            initial = [initial_param]
+        else:
+            initial = None
+
+        super().__init__(vertex, function, clamp_bounds, initial)
 
     @property
-    def initial_params(self):
-        if self.bounds is None:
-            return [0.5]
+    def initial_guess(self):
+        if self.initial_params is None:
+            return [0]
 
-        return [(self.bounds[0][0] + self.bounds[0][1]) / 2.0]
+        return self.initial_params
 
 
 # class InterpolatedCurveClamp(ClampBase):
@@ -85,5 +93,5 @@ class RadialClamp(ClampBase):
         super().__init__(vertex, lambda params: f.rotate(initial_point, params[0], normal, center), clamp_bounds)
 
     @property
-    def initial_params(self):
+    def initial_guess(self):
         return [0]

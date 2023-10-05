@@ -183,12 +183,12 @@ class SurfaceClampTests(ClampTestsBase):
     def test_parametric_initial_unbounded(self):
         clamp = ParametricSurfaceClamp(self.vertex, self.function)
 
-        np.testing.assert_array_almost_equal(clamp.initial_params, [0, 0])
+        np.testing.assert_array_almost_equal(clamp.initial_guess, [0, 0])
 
     def test_parametric_initial_bounded(self):
         clamp = ParametricSurfaceClamp(self.vertex, self.function, [[0, 1], [0, 1]])
 
-        np.testing.assert_array_almost_equal(clamp.initial_params, [0.5, 0.5])
+        np.testing.assert_array_almost_equal(clamp.initial_guess, [0, 0])
 
     def test_parametric_move(self):
         clamp = ParametricSurfaceClamp(self.vertex, self.function)
