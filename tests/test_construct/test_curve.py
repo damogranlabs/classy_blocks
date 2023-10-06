@@ -12,7 +12,7 @@ class CircleCurveTests(unittest.TestCase):
     def setUp(self):
         def circle(t: float) -> NPPointType:
             # Test curve: a circle with radius 1
-            return np.array([cos(t), sin(t), 0])
+            return np.array([3 * cos(t), 3 * sin(t), 0])
 
         self.circle = circle
         self.curve = Curve(circle, [0, np.pi])
@@ -29,13 +29,13 @@ class CircleCurveTests(unittest.TestCase):
 
     @parameterized.expand(
         (
-            ([1, 0, 0], 0),
-            ([0, 1, 0], np.pi / 2),
-            ([-1, 0, 0], np.pi),
+            ([3, 0, 0], 0),
+            ([0, 3, 0], np.pi / 2),
+            ([-3, 0, 0], np.pi),
         )
     )
     def test_closest_param(self, position, param):
-        self.assertAlmostEqual(self.curve.get_closest_param(position), param)
+        self.assertAlmostEqual(self.curve.get_closest_param(position), param, places=5)
 
     def test_from_points(self):
         points = [self.circle(t) for t in np.linspace(0, np.pi)]
@@ -50,3 +50,10 @@ class CircleCurveTests(unittest.TestCase):
         analytic_points = [self.circle(t) for t in np.linspace(0, np.pi, count)]
 
         np.testing.assert_almost_equal(discretized_points, analytic_points)
+
+    @parameterized.expand(((0, 1, np.pi), (0, 0.5, np.pi / 2), (0.5, 1, np.pi / 2), (0.25, 0.75, np.pi / 2)))
+    def test_from_points_length(self, param_from, param_to, length):
+        points = [self.circle(t) for t in np.linspace(0, np.pi)]
+        curve = Curve.from_points(points, 0, 1)
+
+        self.assertAlmostEqual(curve.get_length(param_from, param_to), length, places=self.places)

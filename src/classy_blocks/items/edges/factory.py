@@ -4,11 +4,11 @@ from classy_blocks.construct.edges import EdgeData
 from classy_blocks.items.edges.arcs.angle import AngleEdge
 from classy_blocks.items.edges.arcs.arc import ArcEdge
 from classy_blocks.items.edges.arcs.origin import OriginEdge
+from classy_blocks.items.edges.curve import CurveEdge
 from classy_blocks.items.edges.edge import Edge
 
 # FIXME: make this automatic
 from classy_blocks.items.edges.line import LineEdge
-from classy_blocks.items.edges.on_curve import CurveEdge
 from classy_blocks.items.edges.project import ProjectEdge
 from classy_blocks.items.edges.spline import PolyLineEdge, SplineEdge
 from classy_blocks.types import EdgeKindType

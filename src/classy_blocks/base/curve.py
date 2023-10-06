@@ -53,12 +53,9 @@ class Curve:
         # return scipy.integrate.quad(dr_dt_mag, t_from, t_to, epsabs=self.eps)[0]
 
         # TODO: check for discontinuities and use the above if there are none
-        d_this = self.discretize(t_from, t_to, count=100)
-        d_next = np.roll(d_this, 1)
+        disc = self.discretize(t_from, t_to, count=20)
 
-        norms = np.linalg.norm(d_this[:-1] - d_next[1:], axis=0)
-
-        return np.sum(norms)
+        return np.sum(np.sqrt(np.sum((disc[:-1] - disc[1:]) ** 2, axis=1)))
 
     @property
     def length(self) -> float:
