@@ -4,7 +4,7 @@ from classy_blocks.construct.edges import EdgeData
 from classy_blocks.items.edges.arcs.angle import AngleEdge
 from classy_blocks.items.edges.arcs.arc import ArcEdge
 from classy_blocks.items.edges.arcs.origin import OriginEdge
-from classy_blocks.items.edges.curve import CurveEdge
+from classy_blocks.items.edges.curve import OnCurveEdge
 from classy_blocks.items.edges.edge import Edge
 
 # FIXME: make this automatic
@@ -39,4 +39,4 @@ factory.register_kind("angle", AngleEdge)
 factory.register_kind("spline", SplineEdge)
 factory.register_kind("polyLine", PolyLineEdge)
 factory.register_kind("project", ProjectEdge)
-factory.register_kind("curve", CurveEdge)
+factory.register_kind("curve", OnCurveEdge)

@@ -1,3 +1,4 @@
+import warnings
 from typing import Callable, List, Optional
 
 import numpy as np
@@ -53,6 +54,7 @@ class Curve:
         # return scipy.integrate.quad(dr_dt_mag, t_from, t_to, epsabs=self.eps)[0]
 
         # TODO: check for discontinuities and use the above if there are none
+        # TODO: use the same function as items.edges.spline
         disc = self.discretize(t_from, t_to, count=20)
 
         return np.sum(np.sqrt(np.sum((disc[:-1] - disc[1:]) ** 2, axis=1)))
@@ -81,3 +83,8 @@ class Curve:
             return np.array([fx(t), fy(t), fz(t)])
 
         return cls(function, [t_from, t_to])
+
+    @property
+    def center(self):
+        warnings.warn("Using an approximate default curve center (average)!", stacklevel=2)
+        return np.average(self.discretize(), axis=0)

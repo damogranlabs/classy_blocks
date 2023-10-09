@@ -12,7 +12,9 @@ from classy_blocks.util import functions as f
 class EdgeData(ElementBase):
     """Common operations on classes for edge creation"""
 
-    kind: EdgeKindType  # Edge type, the string that follows vertices in blockMeshDict.edges
+    # edge kind, interpreted by edge factory;
+    # coincident in some cases with what goes into blockMeshDict
+    kind: EdgeKindType
 
     @property
     def parts(self):
@@ -22,6 +24,9 @@ class EdgeData(ElementBase):
     def center(self):
         warnings.warn("Transforming edge with a default center (0 0 0)!", stacklevel=2)
         return f.vector(0, 0, 0)
+
+    def representation(self) -> EdgeKindType:
+        return self.kind
 
 
 class Line(EdgeData):
@@ -156,9 +161,11 @@ class OnCurve(EdgeData):
 
     kind = "curve"
 
-    def __init__(self, curve: Curve, n_points: int = 10):
+    def __init__(self, curve: Curve, n_points: int = 10, representation: EdgeKindType = "spline"):
         self.curve = curve
         self.n_points = n_points
+
+        self.representation = representation
 
     @property
     def parts(self):

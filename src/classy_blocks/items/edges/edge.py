@@ -32,9 +32,14 @@ class Edge(ElementBase):
         return self.data.kind
 
     @property
+    def representation(self) -> EdgeKindType:
+        """A string that goes into blockMesh"""
+        return self.data.kind
+
+    @property
     def is_valid(self) -> bool:
         """Returns True if this edge is elligible to be put into blockMeshDict"""
-        if self.data.kind == "line":
+        if self.kind == "line":
             # no need to specify lines
             return False
 
@@ -58,7 +63,7 @@ class Edge(ElementBase):
     def description(self) -> str:
         """string description of the edge to be put in blockMeshDict"""
         # subclasses continue from here
-        return f"\t{self.kind} {self.vertex_1.index} {self.vertex_2.index} "
+        return f"\t{self.representation} {self.vertex_1.index} {self.vertex_2.index} "
 
     @property
     def center(self):

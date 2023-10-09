@@ -6,6 +6,7 @@ from classy_blocks.construct import edges
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.types import NPPointListType
 from classy_blocks.util import functions as f
+from classy_blocks.util.constants import vector_format
 
 
 @dataclasses.dataclass
@@ -31,7 +32,7 @@ class SplineEdge(Edge):
 
     @property
     def description(self):
-        point_list = " ".join([p.description for p in self.data.points])
+        point_list = " ".join([vector_format(p) for p in self.point_array])
         return super().description + "(" + point_list + ")"
 
 
