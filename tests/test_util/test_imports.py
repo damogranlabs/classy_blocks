@@ -6,8 +6,11 @@ import classy_blocks as cb
 class ImportsTests(unittest.TestCase):
     """Import all objects relevant to the user directly from cb"""
 
-    def test_import_base(self):
-        _ = cb.Curve
+    def test_import_curves(self):
+        _ = cb.DiscreteCurve
+        _ = cb.LinearInterpolatedCurve
+        _ = cb.SplineInterpolatedCurve
+        _ = cb.AnalyticCurve
 
     def test_import_flat(self):
         """Flat stuff"""
@@ -50,6 +53,7 @@ class ImportsTests(unittest.TestCase):
         _ = cb.RoundSolidFinder
 
     def test_import_clamps(self):
+        _ = cb.ClampBase
         _ = cb.FreeClamp
         _ = cb.LineClamp
         _ = cb.ParametricCurveClamp

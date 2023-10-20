@@ -1,9 +1,9 @@
 import warnings
 from typing import List
 
-from classy_blocks.base.curve import Curve
 from classy_blocks.base.element import ElementBase
 from classy_blocks.base.exceptions import EdgeCreationError
+from classy_blocks.construct.curves.curve import CurveBase
 from classy_blocks.construct.point import Point, Vector
 from classy_blocks.types import EdgeKindType, PointListType, PointType, ProjectToType, VectorType
 from classy_blocks.util import functions as f
@@ -161,7 +161,7 @@ class OnCurve(EdgeData):
 
     kind = "curve"
 
-    def __init__(self, curve: Curve, n_points: int = 10, representation: EdgeKindType = "spline"):
+    def __init__(self, curve: CurveBase, n_points: int = 10, representation: EdgeKindType = "spline"):
         self.curve = curve
         self.n_points = n_points
 

@@ -1,5 +1,4 @@
-"""Predefined types"""
-from typing import Any, List, Literal, Sequence, Union
+from typing import Any, Callable, List, Literal, Sequence, Union
 
 from nptyping import NDArray, Shape
 
@@ -12,6 +11,9 @@ PointListType = Union[NPPointListType, Sequence[PointType], Sequence[NPPointType
 # same as PointType but with a different name to avoid confusion
 NPVectorType = NPPointType
 VectorType = PointType
+
+# parametric curve
+ParamCurveFuncType = Callable[[float], NPPointType]
 
 # edge kinds as per blockMesh's definition
 EdgeKindType = Literal["line", "arc", "origin", "angle", "spline", "polyLine", "project", "curve"]
@@ -26,6 +28,5 @@ AxisType = Literal[0, 1, 2]
 # which block size to take when chopping
 ChopTakeType = Literal["min", "max", "avg"]
 
-#
 # Project vertex/edge to one or multiple geometries
 ProjectToType = Union[str, List[str]]

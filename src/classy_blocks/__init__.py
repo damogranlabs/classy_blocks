@@ -1,4 +1,6 @@
-from .base.curve import Curve
+from .construct.curves.analytic import AnalyticCurve
+from .construct.curves.discrete import DiscreteCurve
+from .construct.curves.interpolated import LinearInterpolatedCurve, SplineInterpolatedCurve
 from .construct.edges import Angle, Arc, OnCurve, Origin, PolyLine, Project, Spline
 from .construct.flat.face import Face
 from .construct.operations.box import Box
@@ -13,6 +15,7 @@ from .construct.shapes.rings import ExtrudedRing, RevolvedRing
 from .construct.shapes.shell import Shell
 from .construct.shapes.sphere import Hemisphere
 from .mesh import Mesh
+from .modify.clamps.clamp import ClampBase
 from .modify.clamps.curve import LineClamp, ParametricCurveClamp, RadialClamp
 from .modify.clamps.free import FreeClamp
 from .modify.clamps.surface import ParametricSurfaceClamp, PlaneClamp
@@ -22,8 +25,11 @@ from .modify.optimizer import Optimizer
 from .modify.reorient.viewpoint import ViewpointReorienter
 
 __all__ = [
-    # base
-    "Curve",
+    # curves
+    "DiscreteCurve",
+    "LinearInterpolatedCurve",
+    "SplineInterpolatedCurve",
+    "AnalyticCurve",
     # edges
     "Arc",
     "Origin",
@@ -52,6 +58,7 @@ __all__ = [
     "GeometricFinder",
     "RoundSolidFinder",
     # Optimization: Clamps
+    "ClampBase",
     "FreeClamp",
     "LineClamp",
     "ParametricCurveClamp",
