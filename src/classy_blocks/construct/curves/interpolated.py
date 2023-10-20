@@ -21,10 +21,7 @@ class InterpolatedCurveBase(FunctionCurveBase, abc.ABC):
     Length, discretization, center and other calculated properties
     are based on that function rather than specified points."""
 
-    @property
-    @abc.abstractmethod
-    def _interpolator(self) -> Type[InterpolatorBase]:
-        pass
+    _interpolator: Type[InterpolatorBase]
 
     def __init__(self, points: PointListType, extrapolate: bool = True):
         self.points = self._check_points(points)
@@ -42,9 +39,7 @@ class InterpolatedCurveBase(FunctionCurveBase, abc.ABC):
 
 
 class LinearInterpolatedCurve(InterpolatedCurveBase):
-    @property
-    def _interpolator(self):
-        return LinearInterpolator
+    _interpolator = LinearInterpolator
 
     def get_length(self, param_from: Optional[float] = None, param_to: Optional[float] = None) -> float:
         """Returns the length of this curve by summing distance between
@@ -60,6 +55,4 @@ class LinearInterpolatedCurve(InterpolatedCurveBase):
 
 
 class SplineInterpolatedCurve(InterpolatedCurveBase):
-    @property
-    def _interpolator(self):
-        return SplineInterpolator
+    _interpolator = SplineInterpolator
