@@ -58,7 +58,7 @@ class EdgeDataTests(unittest.TestCase):
         spline = edges.Spline(points)
         spline.scale(2, [0, 0, 0])
 
-        np.testing.assert_array_almost_equal([p.position for p in spline.points], 2 * points)
+        np.testing.assert_array_almost_equal(spline.curve.discretize(), 2 * points)
 
     def test_project_create_single(self):
         """Create an edge, projected to a single surface"""

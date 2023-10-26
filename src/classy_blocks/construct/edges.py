@@ -4,16 +4,15 @@ from typing import List
 from classy_blocks.base.element import ElementBase
 from classy_blocks.base.exceptions import EdgeCreationError
 from classy_blocks.construct.curves.curve import CurveBase
+from classy_blocks.construct.curves.discrete import DiscreteCurve
 from classy_blocks.construct.point import Point, Vector
-from classy_blocks.types import EdgeKindType, PointListType, PointType, ProjectToType, VectorType
+from classy_blocks.types import EdgeKindType, NPPointListType, PointListType, PointType, ProjectToType, VectorType
 from classy_blocks.util import functions as f
 
 
 class EdgeData(ElementBase):
     """Common operations on classes for edge creation"""
 
-    # edge kind, interpreted by edge factory;
-    # coincident in some cases with what goes into blockMeshDict
     kind: EdgeKindType
 
     @property
@@ -25,7 +24,9 @@ class EdgeData(ElementBase):
         warnings.warn("Transforming edge with a default center (0 0 0)!", stacklevel=2)
         return f.vector(0, 0, 0)
 
+    @property
     def representation(self) -> EdgeKindType:
+        # what goes into blockMeshDict's edge definition
         return self.kind
 
 
@@ -100,26 +101,6 @@ class Angle(EdgeData):
         return [self.axis]
 
 
-class Spline(EdgeData):
-    """Parameters for a spline edge"""
-
-    kind = "spline"
-
-    def __init__(self, points: PointListType):
-        self.points: List[Point] = [Point(tr) for tr in points]
-
-    @property
-    def parts(self):
-        return self.points
-
-
-class PolyLine(Spline):
-    """Parameters for a polyLine edge"""
-
-    # a bug? (https://github.com/python/mypy/issues/8796)
-    kind = "polyLine"  # type: ignore
-
-
 class Project(EdgeData):
     """Parameters for a 'project' edge"""
 
@@ -157,15 +138,15 @@ class Project(EdgeData):
 
 
 class OnCurve(EdgeData):
-    """An edge, snapped to the given parametric curve"""
+    """An edge, snapped to a parametric curve"""
 
-    kind = "curve"
+    kind: EdgeKindType = "curve"
 
     def __init__(self, curve: CurveBase, n_points: int = 10, representation: EdgeKindType = "spline"):
         self.curve = curve
         self.n_points = n_points
 
-        self.representation = representation
+        self._repr: EdgeKindType = representation
 
     @property
     def parts(self):
@@ -176,3 +157,39 @@ class OnCurve(EdgeData):
     def center(self):
         warnings.warn(f"Not transforming {self.__class__.__name__} edge!", stacklevel=2)
         return f.vector(0, 0, 0)
+
+    @property
+    def representation(self) -> EdgeKindType:
+        return self._repr
+
+    def discretize(self, param_from: float, param_to: float) -> NPPointListType:
+        return self.curve.discretize(param_from, param_to, self.n_points + 2)
+
+
+class Spline(OnCurve):
+    """Parameters for a spline edge"""
+
+    kind: EdgeKindType = "spline"
+
+    def __init__(self, points: PointListType):
+        curve = DiscreteCurve(points)
+        super().__init__(curve, n_points=len(points), representation=self.kind)
+
+    @property
+    def parts(self):
+        return [self.curve]
+
+    @property
+    def representation(self) -> EdgeKindType:
+        return self.kind
+
+
+class PolyLine(Spline):
+    """Parameters for a polyLine edge"""
+
+    # a bug? (https://github.com/python/mypy/issues/8796)
+    kind: EdgeKindType = "polyLine"
+
+    @property
+    def representation(self) -> EdgeKindType:
+        return self.kind

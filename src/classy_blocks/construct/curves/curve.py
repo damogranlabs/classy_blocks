@@ -47,7 +47,7 @@ class CurveBase(ElementBase):
 
     @abc.abstractmethod
     def discretize(
-        self, param_from: Optional[float] = None, param_to: Optional[float] = None, count: int = 15
+        self, param_from: Optional[float] = None, param_to: Optional[float] = None, count: int = 10
     ) -> NPPointListType:
         """Discretizes this curve into 'count' points.
         Optionally, use the curve between passed parameters; default 'count' is chosen

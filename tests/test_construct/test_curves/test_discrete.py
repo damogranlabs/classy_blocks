@@ -87,3 +87,16 @@ class DiscreteCurveTests(unittest.TestCase):
 
     def test_center(self):
         np.testing.assert_almost_equal(self.curve.center, [1.5, 3.5, 0])
+
+    def test_scale(self):
+        scaled = self.curve.scale(2, [0, 0, 0])
+
+        np.testing.assert_array_almost_equal(
+            scaled.discretize(),
+            [
+                [0, 0, 0],
+                [2, 2, 0],
+                [4, 8, 0],
+                [6, 18, 0],
+            ],
+        )
