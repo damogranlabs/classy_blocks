@@ -1,8 +1,8 @@
 import unittest
-from typing import List
 
 import numpy as np
 
+from classy_blocks.construct.curves.analytic import AnalyticCurve
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.modify.clamps.curve import LineClamp, ParametricCurveClamp, RadialClamp
 from classy_blocks.modify.clamps.free import FreeClamp
@@ -17,9 +17,6 @@ class ClampTestsBase(unittest.TestCase):
 
 
 class FreeClampTests(ClampTestsBase):
-    def setUp(self):
-        super().setUp()
-
     def test_free_init(self):
         """Initialization of FreeClamp"""
         clamp = FreeClamp(self.vertex)
@@ -45,11 +42,10 @@ class CurveClampTests(ClampTestsBase):
     def setUp(self):
         super().setUp()
 
-        def function(params: List[float]) -> NPPointType:
-            t = params[0]
+        def function(t: float) -> NPPointType:
             return f.vector(np.sin(t), np.cos(t), t)
 
-        self.function = function
+        self.curve = AnalyticCurve(function, (0, 2 * np.pi))
 
     def test_line_init(self):
         """Initialization of LineClamp"""
@@ -60,7 +56,7 @@ class CurveClampTests(ClampTestsBase):
     def test_line_init_noncoincident(self):
         """Initialization of LineClamp with a non-coincident vertex;
         update vertex with closest point"""
-        clamp = LineClamp(self.vertex, [1, 1, 1], [2, 1, 1])
+        clamp = LineClamp(self.vertex, [1, 1, 1], [2, 1, 1], (-100, 100))
 
         # don't be too strict about initial parameters,
         # optimization will move everything away anyhow
@@ -68,7 +64,7 @@ class CurveClampTests(ClampTestsBase):
 
     def test_line_init_far(self):
         """Initialization that will yield t < 0"""
-        clamp = LineClamp(self.vertex, [1, 1, 1], [2, 2, 2])
+        clamp = LineClamp(self.vertex, [1, 1, 1], [2, 2, 2], (-100, 100))
 
         self.assertAlmostEqual(clamp.params[0], -1)
 
@@ -81,13 +77,13 @@ class CurveClampTests(ClampTestsBase):
 
     def test_line_bounds_lower(self):
         self.vertex.move_to([-1, -1, -1])
-        clamp = LineClamp(self.vertex, [0, 0, 0], [1, 1, 1], [0, 1])
+        clamp = LineClamp(self.vertex, [0, 0, 0], [1, 1, 1], (0, 1))
 
         self.assertAlmostEqual(clamp.params[0], 0)
 
     def test_line_bounds_upper(self):
         self.vertex.move_to([2, 2, 2])
-        clamp = LineClamp(self.vertex, [0, 0, 0], [1, 1, 1], [0, 1])
+        clamp = LineClamp(self.vertex, [0, 0, 0], [1, 1, 1], (0, 1))
 
         self.assertAlmostEqual(clamp.params[0], 1)
 
@@ -99,25 +95,26 @@ class CurveClampTests(ClampTestsBase):
         np.testing.assert_array_almost_equal(clamp.point, [0.25, 0.25, 0.25])
 
     def test_analytic_init(self):
-        clamp = ParametricCurveClamp(self.vertex, self.function)
+        clamp = ParametricCurveClamp(self.vertex, self.curve)
 
         self.assertAlmostEqual(clamp.params[0], 0, places=3)
 
     def test_analytic_init_noncoincident(self):
         self.vertex.move_to([0, 0, 1])
-        clamp = ParametricCurveClamp(self.vertex, self.function)
+        clamp = ParametricCurveClamp(self.vertex, self.curve)
 
         self.assertAlmostEqual(clamp.params[0], 1, places=3)
 
     def test_analytic_bounds_lower(self):
         self.vertex.move_to([-1, -1, -1])
-        clamp = ParametricCurveClamp(self.vertex, self.function, [0, 1])
+        clamp = ParametricCurveClamp(self.vertex, self.curve)
 
         self.assertAlmostEqual(clamp.params[0], 0, places=3)
 
     def test_analytic_bounds_upper(self):
         self.vertex.move_to([0, 0, 2])
-        clamp = ParametricCurveClamp(self.vertex, self.function, [0, 1])
+        self.curve.bounds = (0, 1)
+        clamp = ParametricCurveClamp(self.vertex, self.curve)
 
         self.assertAlmostEqual(clamp.params[0], 1, places=3)
 
