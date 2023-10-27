@@ -123,6 +123,7 @@ class FunctionCurveBase(PointCurveBase):
         return result.x[0]
 
     def get_point(self, param: float) -> NPPointType:
+        self._check_param(param)
         return self.function(param)
 
     def get_length(self, param_from: Optional[float] = None, param_to: Optional[float] = None) -> float:
