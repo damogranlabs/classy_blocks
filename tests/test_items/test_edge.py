@@ -4,14 +4,15 @@ import numpy as np
 
 from classy_blocks.base.exceptions import EdgeCreationError
 from classy_blocks.construct import edges
+from classy_blocks.construct.curves.interpolated import LinearInterpolatedCurve
 from classy_blocks.construct.point import Point
 from classy_blocks.items.edges.arcs.angle import AngleEdge, arc_from_theta
 from classy_blocks.items.edges.arcs.arc import ArcEdge
 from classy_blocks.items.edges.arcs.origin import OriginEdge, arc_from_origin
+from classy_blocks.items.edges.curve import OnCurveEdge, SplineEdge
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
 from classy_blocks.items.edges.project import ProjectEdge
-from classy_blocks.items.edges.spline import SplineEdge
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.util import functions as f
 
@@ -352,3 +353,38 @@ class EdgeDescriptionTests(unittest.TestCase):
         self.assertEqual(
             self.get_edge(edges.Project(["terrain", "walls"])).description, "\tproject 0 1 (terrain walls)"
         )
+
+
+class OnCurveEdgeTests(unittest.TestCase):
+    def setUp(self):
+        self.vertex_1 = Vertex([0, 0, 0], 0)
+        self.vertex_2 = Vertex([1, 0, 0], 1)
+
+        self.points = [
+            [0.05, 0.05, 0],  # vertex_1 but not exact
+            [0.25, 0.2, 0],
+            [0.5, 0.3, 0],
+            [0.75, 0.2, 0],
+            [1, 0, 0],  # vertex_2, exact
+        ]
+
+        self.curve = LinearInterpolatedCurve(self.points)
+
+    @property
+    def edge(self) -> OnCurveEdge:
+        return OnCurveEdge(self.vertex_1, self.vertex_2, edges.OnCurve(self.curve))
+
+    def test_length(self):
+        self.assertGreater(self.edge.length, 1)
+
+    def test_param_start(self):
+        self.assertAlmostEqual(self.edge.param_start, 0)
+
+    def test_param_end(self):
+        self.assertAlmostEqual(self.edge.param_end, 4)  # index of the last point
+
+    def test_point_array(self):
+        self.assertEqual(len(self.edge.point_array), self.edge.data.n_points)
+
+    def test_representation(self):
+        self.assertEqual(self.edge.representation, "spline")

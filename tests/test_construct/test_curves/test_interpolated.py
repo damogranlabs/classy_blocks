@@ -110,3 +110,7 @@ class SplineInterpolatedCurveTests(unittest.TestCase):
         curve.translate([0, 0, 1])
 
         np.testing.assert_equal(curve.get_point(1), [1, 1, 1])
+
+    def test_center_warning(self):
+        with self.assertWarns(Warning):
+            _ = self.curve.center

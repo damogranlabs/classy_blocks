@@ -63,8 +63,6 @@ class PolyLineEdge(SplineEdge):
 class OnCurveEdge(CurveEdgeBase):
     """Spline edge, defined by a parametric curve"""
 
-    # TODO: TEST
-
     data: edges.OnCurve
 
     @property
