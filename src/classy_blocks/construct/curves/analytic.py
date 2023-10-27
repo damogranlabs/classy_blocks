@@ -18,8 +18,8 @@ class AnalyticCurve(FunctionCurveBase):
         raise NotImplementedError("Transforming analytic curves is currently not supported")
 
 
-# class CircleCurve(AnalyticCurve):
-# TODO!
-
 # class LineCurve(AnalyticCurve):
+#     def __init__(self, point_1:PointType, point_2:PointType):
+
+# class CircleCurve(AnalyticCurve):
 # TODO!
