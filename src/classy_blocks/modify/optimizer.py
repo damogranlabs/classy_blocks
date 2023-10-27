@@ -99,7 +99,7 @@ class Optimizer:
             except NoClampError:
                 continue
 
-    def optimize(self, max_iterations: int = 20, tolerance: float = 0.05, initial_relaxation=0.5) -> None:
+    def optimize(self, max_iterations: int = 20, tolerance: float = 0.05, initial_relaxation=0.7) -> None:
         """Move vertices, defined and restrained with Clamps
         so that better mesh quality is obtained."""
         prev_quality = self.grid.quality

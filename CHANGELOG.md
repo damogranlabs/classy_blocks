@@ -4,10 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# [1.3.1] Curves
+# [1.3.2] Curves
 ### Added
-- *Curve objects
+- *Curve objects for dealing with edge specification and optimization
 
+# [1.3.1] Optimization/Backport
+### Added
+- mesh.clear() removes lists of all items that were populated during mesh.assemble()
+- mesh.backport() updates user supplied operations' points with results of optimization/modification
+
+### Changed
+- Optimizer: under-relaxation for the first optimization iterations
 
 # [1.3.0] Blocking Optimization
 ### Added
