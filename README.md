@@ -362,4 +362,3 @@ There's no official documentation yet so here are some tips for easier navigatio
     - Debugging: connection between block and Shapes, naming
     - 101% test coverage
     - Documentation
-    - spline/polyLine edge: automatic point sorting
