@@ -4,8 +4,9 @@ from math import cos, sin
 import numpy as np
 from parameterized import parameterized
 
-from classy_blocks.construct.curves.analytic import AnalyticCurve, LineCurve
+from classy_blocks.construct.curves.analytic import AnalyticCurve, CircleCurve, LineCurve
 from classy_blocks.types import NPPointType
+from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
 
 
@@ -76,7 +77,7 @@ class LineCurveTests(unittest.TestCase):
         )
     )
     def test_values_within_bounds(self, param, value):
-        np.testing.assert_array_almost_equal(self.curve.get_point(param), value)
+        np.testing.assert_almost_equal(self.curve.get_point(param), value)
 
     @parameterized.expand(
         (
@@ -92,19 +93,60 @@ class LineCurveTests(unittest.TestCase):
         curve = self.curve
         curve.translate([1, 0, 0])
 
-        np.testing.assert_array_almost_equal(curve.get_point(0), [1, 0, 0])
+        np.testing.assert_almost_equal(curve.get_point(0), [1, 0, 0])
 
     def test_rotate(self):
         curve = self.curve
         curve.rotate(np.pi / 4, [0, 0, 1], [0, 0, 0])
 
-        np.testing.assert_array_almost_equal(curve.get_point(1), [0, 2**0.5, 0])
+        np.testing.assert_almost_equal(curve.get_point(1), [0, 2**0.5, 0])
 
     def test_scale(self):
         curve = self.curve
         curve.scale(2, [0, 0, 0])
 
-        np.testing.assert_array_almost_equal(curve.get_point(1), [2, 2, 0])
+        np.testing.assert_almost_equal(curve.get_point(1), [2, 2, 0])
+
+    def test_scale_nocenter(self):
+        curve = self.curve
+        curve.scale(2)
+
+        np.testing.assert_almost_equal(curve.get_point(0), [-0.5, -0.5, 0])
 
     def test_center(self):
-        np.testing.assert_array_almost_equal(self.curve.center, [0.5, 0.5, 0])
+        np.testing.assert_almost_equal(self.curve.center, [0.5, 0.5, 0])
+
+
+class CircleCurveTests(unittest.TestCase):
+    def setUp(self):
+        self.origin = [1, 1, 0]
+        self.rim = [2, 1, 0]
+        self.normal = [0, 0, 1]
+
+        self.bounds = (0, 2 * np.pi)
+
+    @property
+    def curve(self) -> CircleCurve:
+        return CircleCurve(self.origin, self.rim, self.normal, self.bounds)
+
+    @parameterized.expand(((0, [2, 1, 0]), (np.pi / 2, [1, 2, 0]), (np.pi, [0, 1, 0]), (3 * np.pi / 2, [1, 0, 0])))
+    def test_circle_points(self, param, point):
+        np.testing.assert_almost_equal(self.curve.get_point(param), point)
+
+    def test_translate(self):
+        curve = self.curve
+        curve.translate([-1, 0, 0])
+
+        np.testing.assert_almost_equal(curve.get_point(0), [1, 1, 0])
+
+    def test_rotate(self):
+        curve = self.curve
+        curve.rotate(np.pi / 2, [0, 0, 1])
+
+        np.testing.assert_almost_equal(curve.get_point(0), [1, 2, 0])
+
+    def test_scale(self):
+        curve = self.curve
+        curve.scale(2)
+
+        np.testing.assert_almost_equal(f.norm(curve.get_point(0) - curve.center), 2)
