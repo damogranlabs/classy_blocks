@@ -64,10 +64,20 @@ class CurveBase(ElementBase):
         return self.get_length(self.bounds[0], self.bounds[1])
 
     @abc.abstractmethod
-    def get_closest_param(self, point: PointType, param_start: Optional[float] = None) -> float:
+    def get_closest_param(self, point: PointType) -> float:
         """Finds the parameter on curve where point is the closest to given point;
         To improve search speed and reliability, an optional starting
         estimation can be supplied."""
+        # because curves can have all sorts of shapes, find
+        # initial guess by checking distance to discretized points
+        point = np.array(point)
+        all_points = self.discretize()
+
+        distances = np.array([f.norm(p - point) for p in all_points])
+        params = np.linspace(self.bounds[0], self.bounds[1], num=len(distances))
+
+        i_distance = np.argmin(distances)
+        return params[i_distance]
 
 
 class PointCurveBase(CurveBase):
@@ -107,13 +117,11 @@ class FunctionCurveBase(PointCurveBase):
 
         return np.array([self.function(t) for t in params])
 
-    def get_closest_param(self, point: PointType, param_start: Optional[float] = None) -> float:
+    def get_closest_param(self, point: PointType) -> float:
         """Finds the param on curve where point is the closest to given point;
         To improve search speed and reliability, an optional starting
         estimation can be supplied."""
-        if param_start is None:
-            param_start = sum(self.bounds) / 2
-
+        param_start = super().get_closest_param(point)
         point = np.array(point)
 
         result = scipy.optimize.minimize(

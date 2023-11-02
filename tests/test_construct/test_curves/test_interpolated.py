@@ -46,19 +46,17 @@ class LinearInterpolatedCurveTests(unittest.TestCase):
 
     @parameterized.expand(
         (
-            # without starting param
-            ([-1, 3, 0], None, 1),
-            ([0.2, 2, 0], None, 1.2),
-            ([0.8, 2, 0], None, 1.8),
-            ([1.1, -0.5, 0], None, 3.1),
-            # with starting param: same point will yield different params
-            ([0.5, 0.5, 0], 0.3, 0.5),
-            ([0.5, 0.5, 0], 1.3, 1.5),
-            ([0.5, 0.5, 0], 2.3, 2.5),
+            # the easy ones
+            ([-1, 3, 0], 1),
+            ([0.2, 2, 0], 1.2),
+            ([0.8, 2, 0], 1.8),
+            ([1.1, -0.5, 0], 3.1),
+            # more difficult samples
+            ([1.1, 0.1, 0], 3.1),
         )
     )
-    def test_get_closest_param(self, point, start, param):
-        self.assertAlmostEqual(self.curve.get_closest_param(point, start), param, places=3)
+    def test_get_closest_param(self, point, param):
+        self.assertAlmostEqual(self.curve.get_closest_param(point), param, places=3)
 
     def test_transform(self):
         curve = self.curve
@@ -114,3 +112,25 @@ class SplineInterpolatedCurveTests(unittest.TestCase):
     def test_center_warning(self):
         with self.assertWarns(Warning):
             _ = self.curve.center
+
+    @parameterized.expand(
+        (
+            (0,),
+            (0.5,),
+            (1,),
+            (1.5,),
+            (2,),
+            (2.5,),
+            (3,),
+        )
+    )
+    def test_interpolation_values_line(self, param):
+        self.points = [
+            [0, 0, 0],
+            [1, 1, 0],
+            [2, 2, 0],
+            [3, 3, 0],
+        ]
+        curve = self.curve
+
+        np.testing.assert_almost_equal(curve.get_point(param), [param, param, 0])
