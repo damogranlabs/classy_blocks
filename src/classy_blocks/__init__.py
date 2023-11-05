@@ -16,8 +16,9 @@ from .construct.shapes.shell import Shell
 from .construct.shapes.sphere import Hemisphere
 from .mesh import Mesh
 from .modify.clamps.clamp import ClampBase
-from .modify.clamps.curve import LineClamp, ParametricCurveClamp, RadialClamp
+from .modify.clamps.curve import CurveClamp, LineClamp, RadialClamp
 from .modify.clamps.free import FreeClamp
+from .modify.clamps.links import LinkBase, RotationLink, TranslationLink
 from .modify.clamps.surface import ParametricSurfaceClamp, PlaneClamp
 from .modify.find.geometric import GeometricFinder
 from .modify.find.shape import RoundSolidFinder
@@ -61,10 +62,14 @@ __all__ = [
     "ClampBase",
     "FreeClamp",
     "LineClamp",
-    "ParametricCurveClamp",
+    "CurveClamp",
     "RadialClamp",
     "ParametricSurfaceClamp",
     "PlaneClamp",
+    # Optimization: links
+    "LinkBase",
+    "TranslationLink",
+    "RotationLink",
     # Optimization: optimizer
     "Optimizer",
     # Auto-orientation

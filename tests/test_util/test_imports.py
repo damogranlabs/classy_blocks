@@ -56,8 +56,13 @@ class ImportsTests(unittest.TestCase):
         _ = cb.ClampBase
         _ = cb.FreeClamp
         _ = cb.LineClamp
-        _ = cb.ParametricCurveClamp
+        _ = cb.CurveClamp
         _ = cb.RadialClamp
+
+    def test_import_links(self):
+        _ = cb.LinkBase
+        _ = cb.TranslationLink
+        _ = cb.RotationLink
 
     def test_import_optimizer(self):
         _ = cb.Optimizer

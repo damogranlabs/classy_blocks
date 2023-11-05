@@ -4,7 +4,7 @@ import numpy as np
 
 from classy_blocks.construct.curves.analytic import AnalyticCurve
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.modify.clamps.curve import LineClamp, ParametricCurveClamp, RadialClamp
+from classy_blocks.modify.clamps.curve import CurveClamp, LineClamp, RadialClamp
 from classy_blocks.modify.clamps.free import FreeClamp
 from classy_blocks.modify.clamps.surface import ParametricSurfaceClamp, PlaneClamp
 from classy_blocks.types import NPPointType
@@ -95,26 +95,26 @@ class CurveClampTests(ClampTestsBase):
         np.testing.assert_array_almost_equal(clamp.point, [0.25, 0.25, 0.25])
 
     def test_analytic_init(self):
-        clamp = ParametricCurveClamp(self.vertex, self.curve)
+        clamp = CurveClamp(self.vertex, self.curve)
 
         self.assertAlmostEqual(clamp.params[0], 0, places=3)
 
     def test_analytic_init_noncoincident(self):
         self.vertex.move_to([0, 0, 1])
-        clamp = ParametricCurveClamp(self.vertex, self.curve)
+        clamp = CurveClamp(self.vertex, self.curve)
 
         self.assertAlmostEqual(clamp.params[0], 1, places=3)
 
     def test_analytic_bounds_lower(self):
         self.vertex.move_to([-1, -1, -1])
-        clamp = ParametricCurveClamp(self.vertex, self.curve)
+        clamp = CurveClamp(self.vertex, self.curve)
 
         self.assertAlmostEqual(clamp.params[0], 0, places=3)
 
     def test_analytic_bounds_upper(self):
         self.vertex.move_to([0, 0, 2])
         self.curve.bounds = (0, 1)
-        clamp = ParametricCurveClamp(self.vertex, self.curve)
+        clamp = CurveClamp(self.vertex, self.curve)
 
         self.assertAlmostEqual(clamp.params[0], 1, places=3)
 

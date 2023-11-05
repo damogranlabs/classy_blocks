@@ -58,7 +58,11 @@ class Optimizer:
         def fquality(params):
             # move all vertices according to X
             clamp.update_params(params)
-            return junction.quality
+
+            if clamp.is_linked:
+                return self.grid.quality
+            else:
+                return junction.quality
 
         scipy.optimize.minimize(
             fquality,

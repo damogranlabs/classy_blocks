@@ -9,7 +9,7 @@ from classy_blocks.types import PointType, VectorType
 from classy_blocks.util import functions as f
 
 
-class ParametricCurveClamp(ClampBase):
+class CurveClamp(ClampBase):
     """Clamp that restricts point movement during optimization
     to a predefined curve.
 
@@ -27,15 +27,12 @@ class ParametricCurveClamp(ClampBase):
         if initial_param is not None:
             initial = [initial_param]
         else:
-            initial = None
+            initial = [curve.get_closest_param(vertex.position)]
 
         super().__init__(vertex, lambda t: curve.get_point(t[0]), [list(curve.bounds)], initial)
 
     @property
     def initial_guess(self):
-        if self.initial_params is None:
-            return [0]
-
         return self.initial_params
 
 
