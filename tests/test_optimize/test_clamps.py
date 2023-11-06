@@ -6,6 +6,7 @@ from classy_blocks.construct.curves.analytic import AnalyticCurve
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.modify.clamps.curve import CurveClamp, LineClamp, RadialClamp
 from classy_blocks.modify.clamps.free import FreeClamp
+from classy_blocks.modify.clamps.links import TranslationLink
 from classy_blocks.modify.clamps.surface import ParametricSurfaceClamp, PlaneClamp
 from classy_blocks.types import NPPointType
 from classy_blocks.util import functions as f
@@ -36,6 +37,17 @@ class FreeClampTests(ClampTestsBase):
         clamp.update_params([1, 0, 0], relaxation=0.5)
 
         np.testing.assert_array_almost_equal(self.vertex.position, [0.5, 0, 0])
+
+    def test_linked(self):
+        clamp = FreeClamp(self.vertex)
+        follower = Vertex([1, 1, 1], 1)
+        link = TranslationLink(clamp.vertex, follower)
+        clamp.add_link(link)
+
+        self.assertTrue(clamp.is_linked)
+
+    def test_not_linked(self):
+        self.assertFalse(FreeClamp(self.vertex).is_linked)
 
 
 class CurveClampTests(ClampTestsBase):

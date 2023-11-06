@@ -5,6 +5,7 @@ from parameterized import parameterized
 
 from classy_blocks.construct.operations.box import Box
 from classy_blocks.construct.shapes.cylinder import Cylinder
+from classy_blocks.construct.shapes.sphere import EighthSphere
 from classy_blocks.lists.block_list import BlockList
 from classy_blocks.lists.edge_list import EdgeList
 from classy_blocks.lists.face_list import FaceList
@@ -236,6 +237,17 @@ class MeshTests(BlockTestCase):
 
         mock_clear.assert_called()
 
+    def test_with_geometry(self):
+        esph = EighthSphere([0, 0, 0], [1, 0, 0], [0, 0, 1])
+        esph.chop_axial(count=10)
+        esph.chop_radial(count=10)
+        esph.chop_tangential(count=10)
+
+        self.mesh.add(esph)
+        self.mesh.assemble()
+
+        self.assertEqual(len(self.mesh.geometry_list.geometry), 1)
+
     def test_backport(self):
         box = Box([0, 0, 0], [1, 1, 1])
         self.mesh.add(box)
@@ -245,3 +257,9 @@ class MeshTests(BlockTestCase):
         self.mesh.backport()
 
         np.testing.assert_array_equal(box.point_array[0], [-1, -1, -1])
+
+    def test_backport_empty(self):
+        self.mesh.add(self.make_loft(0))
+
+        with self.assertRaises(RuntimeError):
+            self.mesh.backport()
