@@ -150,13 +150,11 @@ class OnCurve(EdgeData):
 
     @property
     def parts(self):
-        warnings.warn(f"Not transforming {self.__class__.__name__} edge!", stacklevel=2)
-        return []
+        return [self.curve]
 
     @property
     def center(self):
-        warnings.warn(f"Not transforming {self.__class__.__name__} edge!", stacklevel=2)
-        return f.vector(0, 0, 0)
+        return self.curve.center
 
     @property
     def representation(self) -> EdgeKindType:
@@ -178,6 +176,10 @@ class Spline(OnCurve):
     @property
     def parts(self):
         return [self.curve]
+
+    @property
+    def center(self):
+        return self.curve.center
 
     @property
     def representation(self) -> EdgeKindType:

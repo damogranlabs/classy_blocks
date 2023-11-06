@@ -5,6 +5,7 @@ import numpy as np
 from classy_blocks.base import transforms as tr
 from classy_blocks.base.exceptions import EdgeCreationError
 from classy_blocks.construct import edges
+from classy_blocks.construct.curves.discrete import DiscreteCurve
 from classy_blocks.util import functions as f
 
 
@@ -112,3 +113,62 @@ class EdgeDataTests(unittest.TestCase):
 
         with self.assertWarns(Warning):
             edge.rotate(1, [0, 0, 1])
+
+    def test_default_repr(self):
+        self.assertEqual(edges.Line().representation, "line")
+
+
+class CurveEdgeTests(unittest.TestCase):
+    @property
+    def points(self):
+        return np.array(
+            [
+                [0, 0, 0],
+                [0.5, 0.5, 0],
+                [1, 0.5, 0],
+                [1.5, 0, 0],
+            ]
+        )
+
+    @property
+    def curve(self) -> DiscreteCurve:
+        return DiscreteCurve(self.points)
+
+    def test_on_curve_translate(self):
+        edge = edges.OnCurve(self.curve)
+        edge.translate([0, 0, 1])
+
+        np.testing.assert_equal(edge.curve.discretize(), self.points + np.array([0, 0, 1]))
+
+    def test_on_curve_rotate(self):
+        edge = edges.OnCurve(self.curve)
+        edge.rotate(np.pi / 2, [0, 0, 1], [0, 0, 0])
+
+        np.testing.assert_equal(
+            edge.curve.discretize(), [f.rotate(p, np.pi / 2, [0, 0, 1], [0, 0, 0]) for p in self.points]
+        )
+
+    def test_on_curve_rotate_nocenter(self):
+        edge = edges.OnCurve(self.curve)
+        edge.rotate(np.pi / 2, [0, 0, 1])
+
+        default_center = np.average(self.points, axis=0)
+
+        np.testing.assert_equal(
+            edge.curve.discretize(), [f.rotate(p, np.pi / 2, [0, 0, 1], default_center) for p in self.points]
+        )
+
+    def test_spline_repr(self):
+        edge = edges.Spline(self.points)
+
+        self.assertEqual(edge.representation, "spline")
+
+    def test_polyline_repr(self):
+        edge = edges.PolyLine(self.points)
+
+        self.assertEqual(edge.representation, "polyLine")
+
+    def test_spline_center(self):
+        edge = edges.Spline(self.points)
+
+        np.testing.assert_equal(edge.center, np.average(self.points, axis=0))
