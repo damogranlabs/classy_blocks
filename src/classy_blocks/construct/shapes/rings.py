@@ -72,7 +72,7 @@ class ExtrudedRing(RoundHollowShape):
     @classmethod
     def contract(cls, source: "ExtrudedRing", inner_radius: float) -> "ExtrudedRing":
         """Create a new ring on inner surface of the source"""
-        if inner_radius < 0:
+        if inner_radius <= 0:
             raise ExtrudedRingCreationError(
                 "Unable to perform `contract()` operation for inner radius < 0: use `Cylinder.fill(extruded_ring)`",
                 f"Inner radius: {inner_radius}",

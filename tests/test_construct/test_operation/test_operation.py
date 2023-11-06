@@ -360,3 +360,7 @@ class OperationTransformTests(unittest.TestCase):
         np.testing.assert_almost_equal(
             f.angle_between(extrude_direction(original_op), extrude_direction(rotated_op)), angle
         )
+
+    def test_index_from_side(self):
+        with self.assertRaises(RuntimeError):
+            _ = self.loft.get_index_from_side("top")

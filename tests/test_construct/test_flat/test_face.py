@@ -178,3 +178,14 @@ class FaceTests(unittest.TestCase):
         face.update(new_points)
 
         np.testing.assert_array_equal(face.point_array, new_points)
+
+    def test_wrong_edge_count(self):
+        with self.assertRaises(FaceCreationError):
+            _ = Face(self.points, [edges.Arc([1, 1, 1]), None, None, None, None])
+
+    def test_check_coplanar_raise(self):
+        points = self.points
+        points[-1] = [1.0, 1.0, 1.0]
+
+        with self.assertRaises(FaceCreationError):
+            _ = Face(self.points, check_coplanar=True)

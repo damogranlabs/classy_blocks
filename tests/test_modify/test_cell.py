@@ -1,6 +1,6 @@
 from parameterized import parameterized
 
-from classy_blocks.modify.cell import Cell
+from classy_blocks.modify.cell import Cell, NoCommonSidesError
 from tests.fixtures.block import BlockTestCase
 
 
@@ -34,6 +34,13 @@ class CellTests(BlockTestCase):
         cell_2 = Cell(self.make_block(index_2))
 
         self.assertEqual(cell_1.get_common_side(cell_2), orient)
+
+    def test_no_common_sides(self):
+        with self.assertRaises(NoCommonSidesError):
+            cell_1 = Cell(self.make_block(0))
+            cell_2 = Cell(self.make_block(2))
+
+            cell_1.get_common_side(cell_2)
 
     def test_quality_good(self):
         cell = Cell(self.make_block(0))

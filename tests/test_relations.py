@@ -8,6 +8,8 @@ import unittest
 from parameterized import parameterized
 
 from classy_blocks.grading import relations as rel
+from classy_blocks.grading.chop import ChopRelation
+from classy_blocks.util import functions as f
 
 
 class TestGradingRelations(unittest.TestCase):
@@ -226,3 +228,22 @@ class TestGradingRelations(unittest.TestCase):
     )
     def test_validate_count_valid(self, count, condition):
         rel._validate_count(count, condition)
+
+    def test_validate_count_invalid_type(self):
+        with self.assertRaises(TypeError):
+            rel._validate_count("a", "==")
+
+    def test_validate_count_invalid_operator(self):
+        with self.assertRaises(ValueError):
+            rel._validate_count(10, "xx")
+
+    def test_validate_count_unknown_operator(self):
+        with self.assertRaises(ValueError):
+            rel._validate_count(10, ">x")
+
+
+class ChopRelationTests(unittest.TestCase):
+    def test_from_function_invalid(self):
+        """Raise an exception when an unknown relation is found"""
+        with self.assertRaises(RuntimeError):
+            _ = ChopRelation.from_function(f.angle_between)

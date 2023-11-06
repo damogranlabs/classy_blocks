@@ -81,6 +81,11 @@ class ElbowChainingTests(unittest.TestCase):
         chained = Cylinder.chain(self.elbow, 1, start_face=True)
         self.check_success(chained, [0, -1, 0])
 
+    def test_to_cylinder_negative(self):
+        """Raise an exception when chaining with a negative length"""
+        with self.assertRaises(CylinderCreationError):
+            Cylinder.chain(self.elbow, -1)
+
     def test_chain_frustum_invalid_length(self):
         with self.assertRaises(FrustumCreationError):
             Frustum.chain(self.elbow, -1, 0.5)
@@ -170,6 +175,11 @@ class ExpandContractTests(unittest.TestCase):
         with self.assertRaises(ExtrudedRingCreationError):
             ring = ExtrudedRing([0, 0, 0], [1, 0, 0], [0, 1, 0], 0.6, 9)
             _ = ExtrudedRing.contract(ring, 2)
+
+    def test_contract_ring_zero_radius(self):
+        with self.assertRaises(ExtrudedRingCreationError):
+            ring = ExtrudedRing([0, 0, 0], [1, 0, 0], [0, 1, 0], 0.6, 9)
+            _ = ExtrudedRing.contract(ring, 0)
 
     def test_contract_ring(self):
         """Contract a ring from another ring"""

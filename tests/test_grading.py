@@ -133,6 +133,11 @@ class TestGrading(unittest.TestCase):
 
         self.assertAlmostEqual(self.g.specification[0][2], 1 / self.g.specification[1][2])
 
+    def test_add_wrong_ratio(self):
+        """Add a chop with an invalid length ratio"""
+        with self.assertRaises(ValueError):
+            self.g.add_chop(Chop(length_ratio=0, count=10))
+
     def test_is_defined(self):
         self.g.add_chop(Chop(1, count=10, start_size=0.05))
 

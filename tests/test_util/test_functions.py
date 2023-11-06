@@ -75,6 +75,10 @@ class TestFunctions(unittest.TestCase):
 
         self.assert_np_almost_equal(polar, f.to_polar(cartesian, axis="x"))
 
+    def test_to_polar_invalid_axis(self):
+        with self.assertRaises(ValueError):
+            _ = f.to_polar([0, 1, 1], "y")
+
     def test_lin_map(self):
         """map a value"""
         self.assertEqual(f.lin_map(10, 0, 100, 0, 1000), 100)

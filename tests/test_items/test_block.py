@@ -1,6 +1,7 @@
 import numpy as np
 from parameterized import parameterized
 
+from classy_blocks.construct.edges import Arc
 from classy_blocks.grading.chop import Chop
 from classy_blocks.items.block import Block
 from classy_blocks.items.vertex import Vertex
@@ -291,3 +292,10 @@ class WireframeTests(BlockTestCase):
         """A block with only line edges must have an empty edge_list"""
         block = self.make_block(block_index)
         self.assertEqual(len(block.edge_list), edge_count)
+
+    def test_index_exception(self):
+        """Raise an exception when wrong indexes are provided to add_edge()"""
+        block = self.make_block(0)
+
+        with self.assertRaises(ValueError):
+            block.add_edge(0, 9, Arc([1, 1, 1]))
