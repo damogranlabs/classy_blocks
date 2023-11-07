@@ -105,8 +105,6 @@ class EighthSphere(RoundSolidShape):
 
     ### Patches
     def set_start_patch(self, name: str) -> None:
-        # chop everything except the top loft,
-        # that's the 3rd operation in shell
         for operation in self.core:
             operation.set_patch("bottom", name)
 

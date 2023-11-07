@@ -8,7 +8,7 @@ from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.construct.shapes.elbow import Elbow
 from classy_blocks.construct.shapes.frustum import Frustum
 from classy_blocks.construct.shapes.rings import ExtrudedRing, RevolvedRing
-from classy_blocks.construct.shapes.sphere import Hemisphere
+from classy_blocks.construct.shapes.sphere import EighthSphere, Hemisphere
 from classy_blocks.util import functions as f
 
 
@@ -174,6 +174,23 @@ class SphereTests(unittest.TestCase):
         for loft in sphere.shell:
             for point in loft.get_face("right").point_array:
                 self.assertAlmostEqual(f.norm(point - center), radius)
+
+    def test_start_patch(self):
+        sphere = Hemisphere([0, 0, 0], [1, 0, 0], [0, 0, 1])
+        sphere.set_start_patch("flat")
+
+        n_patches = 0
+
+        for operation in sphere.operations:
+            if len(operation.patch_names) > 0:
+                n_patches += 1
+
+        self.assertEqual(n_patches, 12)
+
+    def test_core(self):
+        sphere = EighthSphere([0, 0, 0], [1, 0, 0], [0, 0, 1])
+
+        self.assertEqual(len(sphere.core), 1)
 
 
 class FrustumTests(unittest.TestCase):

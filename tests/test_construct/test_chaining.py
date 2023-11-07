@@ -13,6 +13,7 @@ from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.construct.shapes.elbow import Elbow
 from classy_blocks.construct.shapes.frustum import Frustum
 from classy_blocks.construct.shapes.rings import ExtrudedRing
+from classy_blocks.construct.shapes.sphere import Hemisphere
 from classy_blocks.mesh import Mesh
 from classy_blocks.util.constants import TOL
 
@@ -91,14 +92,20 @@ class ElbowChainingTests(unittest.TestCase):
             Frustum.chain(self.elbow, -1, 0.5)
 
     def test_to_frustum_start(self):
-        """Chain an elbow to a frustum on end sketch"""
         chained = Frustum.chain(self.elbow, 1, 0.5)
         self.check_success(chained, [3, 2, 0])
 
     def test_to_frustum_end(self):
-        """Chain an elbow to a frustum on start sketch"""
         chained = Frustum.chain(self.elbow, 1, 0.5, start_face=True)
         self.check_success(chained, [0, -1, 0])
+
+    def test_to_sphere_end(self):
+        chained = Hemisphere.chain(self.elbow, start_face=False)
+        np.testing.assert_equal(chained.center_point, self.elbow.sketch_2.center)
+
+    def test_to_sphere_start(self):
+        chained = Hemisphere.chain(self.elbow, start_face=True)
+        np.testing.assert_equal(chained.center_point, self.elbow.sketch_1.center)
 
 
 class RingChainingTests(unittest.TestCase):
