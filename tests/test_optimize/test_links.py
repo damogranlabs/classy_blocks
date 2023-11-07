@@ -36,9 +36,18 @@ class RotationLinkTests(unittest.TestCase):
         self.follower = Vertex([0, 1, 0], 1)
 
     def test_rotate(self):
-        link = RotationLink(self.leader, self.follower, [0, 0, 0], [0, 0, 1])
+        link = RotationLink(self.leader, self.follower, [0, 0, 1], [0, 0, 0])
 
         self.leader.move_to([0, 1, 0])
         link.update()
 
         np.testing.assert_equal(self.follower.position, [-1, 0, 0])
+
+    def test_rotate_negative(self):
+        """Rotate in negative direction"""
+        link = RotationLink(self.leader, self.follower, [0, 0, 1], [0, 0, 0])
+
+        self.leader.move_to([0, -1, 0])
+        link.update()
+
+        np.testing.assert_equal(self.follower.position, [1, 0, 0])

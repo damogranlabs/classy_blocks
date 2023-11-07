@@ -46,7 +46,7 @@ class RotationLink(LinkBase):
     It will only work correctly when leader is rotated
     around given axis and origin."""
 
-    def __init__(self, leader: Vertex, follower: Vertex, origin: PointType, axis: VectorType):
+    def __init__(self, leader: Vertex, follower: Vertex, axis: VectorType, origin: PointType):
         super().__init__(leader, follower)
 
         self.origin = np.array(origin)
@@ -57,5 +57,8 @@ class RotationLink(LinkBase):
 
     def transform(self) -> NPPointType:
         transform_angle = f.angle_between(self.leader.position, self.orig_leader_pos)
+
+        if np.dot(self.axis, np.cross(self.orig_leader_pos, self.leader.position)) < 0:
+            transform_angle *= -1
 
         return f.rotate(self.orig_follower_pos, transform_angle, self.axis, self.origin)
