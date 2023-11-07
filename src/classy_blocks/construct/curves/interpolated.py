@@ -61,9 +61,6 @@ class LinearInterpolatedCurve(InterpolatedCurveBase):
             indexes = []
 
         params = [param_from, *[i / self.segments for i in indexes], param_to]
-
-        print(params)
-
         discretized = np.array([self.function(t) for t in params])
         return np.sum(np.sqrt(np.sum((discretized[:-1] - discretized[1:]) ** 2, axis=1)))
 
