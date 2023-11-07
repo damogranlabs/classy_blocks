@@ -23,10 +23,15 @@ class InterpolatedCurveBase(FunctionCurveBase, abc.ABC):
 
     _interpolator: Type[InterpolatorBase]
 
-    def __init__(self, points: PointListType, extrapolate: bool = True):
+    def __init__(self, points: PointListType):
         self.points = self._check_points(points)
-        self.function = self._interpolator(self.points, extrapolate)
-        self.bounds = (0, len(self.points) - 1)
+        self.function = self._interpolator(self.points, False)
+        self.bounds = (0, 1)
+
+    @property
+    def segments(self) -> int:
+        """Returns number of points this curve was created from"""
+        return len(self.points) - 1
 
     @property
     def parts(self):
@@ -46,10 +51,19 @@ class LinearInterpolatedCurve(InterpolatedCurveBase):
         points. The 'count' parameter is ignored as the original points are taken."""
         # TODO: use the same function as items.edges.spline
         param_from, param_to = self._get_params(param_from, param_to)
-        index_from = int(param_from) + 1
-        index_to = int(param_to) - 1
 
-        params = [param_from, *list(range(index_from, index_to + 1)), param_to]
+        index_from = int(param_from * self.segments) + 1
+        index_to = int(param_to * self.segments)
+
+        if index_from < index_to:
+            indexes = list(range(index_from, index_to + 1))
+        else:
+            indexes = []
+
+        params = [param_from, *[i / self.segments for i in indexes], param_to]
+
+        print(params)
+
         discretized = np.array([self.function(t) for t in params])
         return np.sum(np.sqrt(np.sum((discretized[:-1] - discretized[1:]) ** 2, axis=1)))
 

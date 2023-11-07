@@ -381,7 +381,7 @@ class OnCurveEdgeTests(unittest.TestCase):
         self.assertAlmostEqual(self.edge.param_start, 0)
 
     def test_param_end(self):
-        self.assertAlmostEqual(self.edge.param_end, 4)  # index of the last point
+        self.assertAlmostEqual(self.edge.param_end, 1)  # the last point
 
     def test_point_array(self):
         self.assertEqual(len(self.edge.point_array), self.edge.data.n_points)

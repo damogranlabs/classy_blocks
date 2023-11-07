@@ -37,7 +37,7 @@ class CurveBase(ElementBase):
         self._check_param(param_to)
 
         if param_from == param_to:
-            raise ValueError("Provide two different parameters for discretization " "(or use get_point())")
+            raise ValueError("Provide two different parameters for discretization (or use get_point())")
 
         return param_from, param_to
 

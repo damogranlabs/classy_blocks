@@ -39,7 +39,7 @@ class InterpolatorBase(abc.ABC):
 
     @property
     def params(self) -> NDArray:
-        return np.array(list(range(len(self.points))))
+        return np.linspace(0, 1, num=len(self.points))
 
     @property
     def positions(self) -> NPPointListType:

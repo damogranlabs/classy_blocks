@@ -86,6 +86,8 @@ for i, point in enumerate(foil_curve.discretize(count=7)):
     # points 9...15
     points[i + 9] = point
 
+points[12] = foil_curve.get_point(foil_curve.get_closest_param(points[0]))
+
 points[16] = np.average(np.take(points, (9, 4, 3, 2), axis=0), axis=0)
 points[17] = np.average(np.take(points, (15, 5, 6, 7), axis=0), axis=0)
 
@@ -164,7 +166,7 @@ def make_link(leader):
 
 
 # Points that slide along airfoil curve
-for index in (10, 11, 12, 13, 14):
+for index in (10, 11, 13, 14):
     opt_vertex = find_vertex(index)
     clamp = cb.CurveClamp(opt_vertex, foil_curve)
     clamp.add_link(make_link(opt_vertex))
@@ -192,9 +194,8 @@ optimize_along_line(7, 8, 6)
 optimize_along_line(4, 3, 6)
 optimize_along_line(5, 3, 6)
 
-
 if OPTIMIZE:
-    optimizer.optimize(tolerance=0.001)
+    optimizer.optimize(tolerance=0.01)
 
 ### Write the mesh
 mesh.modify_patch("topAndBottom", "empty")

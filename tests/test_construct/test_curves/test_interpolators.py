@@ -21,9 +21,9 @@ class LinearInterpolatorTests(unittest.TestCase):
     @parameterized.expand(
         (
             (0, [0, 0, 0]),
-            (1, [0, 1, 0]),
-            (2, [1, 1, 0]),
-            (0.5, [0, 0.5, 0]),
+            (1 / 4, [0, 1, 0]),
+            (2 / 4, [1, 1, 0]),
+            (0.5 / 4, [0, 0.5, 0]),
         )
     )
     def test_points(self, param, result):
@@ -44,7 +44,7 @@ class LinearInterpolatorTests(unittest.TestCase):
             point.rotate(np.pi / 2, [0, 0, 1])
 
         # the interpolation function must not change unless invalidated
-        np.testing.assert_equal(intfun(1), [0, 1, 0])
+        np.testing.assert_equal(intfun(0.25), [0, 1, 0])
 
     def test_invalidate(self):
         intfun = LinearInterpolator(self.points, True)
@@ -54,4 +54,4 @@ class LinearInterpolatorTests(unittest.TestCase):
 
         intfun.invalidate()
 
-        np.testing.assert_equal(intfun(1), [0, 1, 1])
+        np.testing.assert_equal(intfun(0.25), [0, 1, 1])
