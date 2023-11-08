@@ -3,7 +3,8 @@ import abc
 import numpy as np
 
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.types import NPPointType, PointType, VectorType
+from classy_blocks.types import NPPointType, NPVectorType, PointType, VectorType
+from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
 
@@ -50,15 +51,30 @@ class RotationLink(LinkBase):
         super().__init__(leader, follower)
 
         self.origin = np.array(origin)
-        self.axis = np.array(axis)
+        self.axis = f.unit_vector(axis)
 
-        self.orig_leader_pos = np.copy(leader.position)
-        self.orig_follower_pos = np.copy(follower.position)
+        self.orig_leader_radius = self._get_radius(leader.position)
+        self.orig_follower_pos = np.copy(self.follower.position)
+
+        if f.norm(self.orig_leader_radius) < constants.TOL:
+            raise ValueError("Leader and rotation axis are coincident!")
 
     def transform(self) -> NPPointType:
-        transform_angle = f.angle_between(self.leader.position, self.orig_leader_pos)
+        prev_radius = self.orig_leader_radius
+        this_radius = self._get_radius(self.leader.position)
 
-        if np.dot(self.axis, np.cross(self.orig_leader_pos, self.leader.position)) < 0:
-            transform_angle *= -1
+        angle = f.angle_between(prev_radius, this_radius)
 
-        return f.rotate(self.orig_follower_pos, transform_angle, self.axis, self.origin)
+        cross_rad = np.cross(prev_radius, this_radius)
+        if np.dot(cross_rad, self.axis) < 0:
+            angle = -angle
+
+        return f.rotate(self.orig_follower_pos, angle, self.axis, self.origin)
+
+    def _get_height(self, point: NPPointType) -> NPVectorType:
+        """Returns projection of the point to the axis"""
+        return np.dot(point - self.origin, self.axis) * self.axis
+
+    def _get_radius(self, point: NPPointType) -> NPVectorType:
+        """Returns projection of the point to plane, given by origin and axis"""
+        return (point - self.origin) - self._get_height(point)
