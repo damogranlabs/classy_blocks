@@ -9,6 +9,8 @@ DTYPE = "float"  # dtype as taken by np.array()
 TOL = 1e-7
 # a small-ish value, named after OpenFOAM's constant
 VSMALL = 1e-6
+# a big-ish value
+VBIG = 1e12
 
 # Block definition:
 # a more intuitive and quicker way to set patches,
