@@ -213,19 +213,3 @@ class Optimizer:
             iteration = driver.begin_iteration(self.grid.quality)
             self.optimize_iteration(iteration)
             driver.end_iteration(self.grid.quality)
-
-        # for i in range(max_iterations):
-        #     # use lower relaxation factor with first iterations, then increase
-        #     # TODO: tests
-        #     relaxation = 1 - (1 - initial_relaxation) * np.exp(-i)
-        #     self.optimize_iteration(relaxation)
-
-        #     this_quality = self.grid.quality
-
-        #     report(f"Optimization iteration {i}: {prev_quality:.3e} > {this_quality:.3e} (relaxation: {relaxation})")
-
-        #     if abs((prev_quality - this_quality) / (this_quality + VSMALL)) < tolerance:
-        #         report("Tolerance reached, stopping optimization")
-        #         break
-
-        #     prev_quality = this_quality

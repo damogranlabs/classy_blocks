@@ -30,7 +30,7 @@ Check out the [classy_blocks tutorial on damogranlabs.com](https://damogranlabs.
 - Solids (heat transfer, mechanical stresses)
 
 ### Cases
-- Simpler rotational geometry (immersed rotors, mixers)
+- Simpler rotational geometry (immersed rotors, mixers, cyclones)
 - Pipes/channels
 - Tanks/plenums/containers
 - External aerodynamics of blunt bodies
@@ -84,7 +84,7 @@ _Unchecked items are not implemented yet but are on a TODO list_
     - [x] Expand Shape's outer surface to generate a new Shape (Cylinder/Annulus > Annulus)
     - [x] Contract Shape's inner surface into a new Shape (Annulus > Cylinder/Annulus)
     - [ ] Join two Operations by extending their Edges
-    - [x] Offset Operation's faces to form new ones
+    - [x] Offset Operation's faces to form new operations
 
 ## Modifiers
 After blocks have been placed, it is possible to create new geometry based on placed blocks or to modify them.
@@ -112,7 +112,7 @@ How to run:
 - `cd` to directory of the chosen example
 - Run `python <example.py>`; that will write blockMeshDict to examples/case
 - Run `blockMesh` on the case
-- Open examples/case/case.foam in paraview to view the result
+- Open `examples/case/case.foam` in ParaView to view the result
 
 For instance:
 ```bash
@@ -269,9 +269,9 @@ Vertices can move freely (3 degrees of freedom), along a specified line/curve (1
 
 mesh.assemble()
 
-# Find inside vertices
-finder = cb.VertexFinder(mesh)
-inner_vertices = finder.by_position([3.5, 0, 0], radius=1.75)
+# Find inside vertices at connecting frustum
+finder = cb.RoundSolidFinder(mesh, frustum)
+inner_vertices = finder.find_core(True).union(finder.find_core(False))
 
 optimizer = cb.Optimizer(mesh)
 
@@ -327,6 +327,10 @@ Edges and faces, projected to an STL surface
 
 Mesh for studying flow around a sphere, with projected edges and faces
 ![Sphere](showcase/sphere.png "Flow around a sphere")
+
+Airfoil core with blunt trailing edge (imported points from NACA generator) and adjustable angle of attack. Exact blocking is determined by in-situ optimization
+(see `examples/complex/airfoil.py`). A simulation-ready mesh needs additional blocks to expand domain further away from the airfoil.
+![Airfoil](showcase/airfoil.png "Airfoil core mesh")
 
 A parametric, Low-Re mesh of a real-life impeller *(not included in examples)*
 ![Impeller - Low Re](showcase/impeller_full.png "Low-Re Impeller")

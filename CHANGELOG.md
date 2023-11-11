@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# [1.3.3]
+### Added
+- Airfoil example
+- Translation and Rotational Link: move together with vertices being optimized (see the airfoil example)
+
+### Changed
+- Renamed ParametricCurveClamp to CurveClamp (takes Curve object of any kind)
+- Interpolated curves' indexes are now between 0 and 1 (easier to work with than using len(points) every time)
+- Optimization driver:
+  - Termination tolerance is now based on initial improvement instead of quality
+  - Relaxation starts at 0.5 by default and increases linearly to 1 in a given number of relaxed iterations
+
+### Removed
+- Curve.get_closest_param() now finds initial_param automatically
+
 # [1.3.2] Curves
 ### Added
 - *Curve objects for dealing with edge specification and optimization
