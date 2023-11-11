@@ -8,7 +8,7 @@ from classy_blocks.mesh import Mesh
 from classy_blocks.modify.clamps.clamp import ClampBase
 from classy_blocks.modify.grid import Grid
 from classy_blocks.modify.junction import Junction
-from classy_blocks.util.constants import VBIG
+from classy_blocks.util.constants import VBIG, VSMALL
 from classy_blocks.util.tools import report
 
 
@@ -31,6 +31,9 @@ class IterationData:
 
     @property
     def improvement(self) -> float:
+        if abs(self.initial_quality - self.final_quality) < VSMALL:
+            return VSMALL
+
         return self.initial_quality - self.final_quality
 
     def report_begin(self):
@@ -65,13 +68,6 @@ class IterationDriver:
 
         iteration.final_quality = quality
         iteration.report_end()
-
-    @property
-    def last_quality(self) -> float:
-        if len(self.iterations) < 1:
-            return VBIG
-
-        return self.iterations[-1].final_quality
 
     @property
     def next_relaxation(self) -> float:

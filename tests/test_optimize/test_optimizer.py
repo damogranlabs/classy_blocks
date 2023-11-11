@@ -118,6 +118,16 @@ class IterationDriverTests(unittest.TestCase):
 
         self.assertFalse(driver.converged)
 
+    def test_converged_inadequate(self):
+        """No improvement, no convergence"""
+        driver = self.driver
+
+        for _ in range(1, driver.max_iterations - 1):
+            driver.begin_iteration(1000)
+            driver.end_iteration(1000)
+
+        self.assertFalse(driver.converged)
+
     def test_converged_improvement(self):
         driver = self.driver
 

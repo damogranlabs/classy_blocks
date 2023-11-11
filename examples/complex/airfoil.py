@@ -195,7 +195,7 @@ optimize_along_line(4, 3, 6)
 optimize_along_line(5, 3, 6)
 
 if OPTIMIZE:
-    optimizer.optimize()
+    optimizer.optimize(tolerance=1e-5)
 
 ### Write the mesh
 mesh.modify_patch("topAndBottom", "empty")
