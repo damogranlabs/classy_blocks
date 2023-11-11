@@ -39,6 +39,11 @@ class IterationDriverTests(unittest.TestCase):
 
         self.assertEqual(driver.next_relaxation, relaxation)
 
+    def test_no_relaxation(self):
+        driver = IterationDriver(10, 0, 0.1)
+
+        self.assertEqual(driver.next_relaxation, 1)
+
     def test_initial_improvement_empty(self):
         self.assertEqual(self.driver.initial_improvement, VBIG)
 
@@ -97,7 +102,19 @@ class IterationDriverTests(unittest.TestCase):
         driver = self.driver
 
         driver.begin_iteration(1000)
+        driver.end_iteration(999)
+
+        self.assertFalse(driver.converged)
+
+    def test_converged_relaxed(self):
+        """Cannot converge until relaxation equals to 1"""
+        driver = self.driver
+
+        driver.begin_iteration(1000)
         driver.end_iteration(900)
+
+        driver.begin_iteration(900)
+        driver.end_iteration(890)
 
         self.assertFalse(driver.converged)
 
@@ -109,6 +126,9 @@ class IterationDriverTests(unittest.TestCase):
 
         driver.begin_iteration(900)
         driver.end_iteration(890)
+
+        driver.begin_iteration(890)
+        driver.end_iteration(889)
 
         self.assertTrue(driver.converged)
 

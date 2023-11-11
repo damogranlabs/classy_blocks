@@ -24,6 +24,7 @@ class NoClampError(Exception):
 class IterationData:
     """Data about a single iteration's progress"""
 
+    index: int
     relaxation: float
     initial_quality: float
     final_quality: float = VBIG
@@ -31,6 +32,12 @@ class IterationData:
     @property
     def improvement(self) -> float:
         return self.initial_quality - self.final_quality
+
+    def report_begin(self):
+        report(f"Starting iteration {self.index+1} (relaxation {self.relaxation:.2f})")
+
+    def report_end(self):
+        report(f"Iteration {self.index+1} finished. Improvement: {self.initial_quality:.3e} > {self.final_quality:.3e}")
 
 
 class IterationDriver:
@@ -46,13 +53,18 @@ class IterationDriver:
         self.iterations: List[IterationData] = []
 
     def begin_iteration(self, quality: float) -> IterationData:
-        iteration = IterationData(self.next_relaxation, quality)
+        iteration = IterationData(len(self.iterations), self.next_relaxation, quality)
+        iteration.report_begin()
+
         self.iterations.append(iteration)
 
         return iteration
 
     def end_iteration(self, quality: float) -> None:
-        self.iterations[-1].final_quality = quality
+        iteration = self.iterations[-1]
+
+        iteration.final_quality = quality
+        iteration.report_end()
 
     @property
     def last_quality(self) -> float:
@@ -64,6 +76,9 @@ class IterationDriver:
     @property
     def next_relaxation(self) -> float:
         """Returns the relaxation factor for the next iteration"""
+        if self.relaxed_iterations == 0:
+            return 1
+
         step = (1 - self.INITIAL_RELAXATION) / self.relaxed_iterations
         iteration = len(self.iterations)
 
@@ -90,10 +105,20 @@ class IterationDriver:
             # so that the result of the last can be compared with the first one
             return False
 
+        if len(self.iterations) <= self.relaxed_iterations:
+            # always make at least relaxed_iterations + 1
+            # so that the last iteration has relaxation = 1
+            return False
+
         if len(self.iterations) >= self.max_iterations:
+            report("Iteration limit hit, stopping optimization.")
             return True
 
-        return self.last_improvement / self.initial_improvement < self.tolerance * self.initial_improvement
+        if self.last_improvement / self.initial_improvement < self.tolerance * self.initial_improvement:
+            print("Tolerance reached, stopping optimization.")
+            return True
+
+        return False
 
 
 class Optimizer:
