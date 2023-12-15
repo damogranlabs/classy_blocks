@@ -4,7 +4,7 @@ import numpy as np
 
 from classy_blocks.base import transforms as tr
 from classy_blocks.base.exceptions import CylinderCreationError
-from classy_blocks.construct.flat.sketches.disk import Disk
+from classy_blocks.construct.flat.sketches.disk import Disk, HalfDisk
 from classy_blocks.construct.shapes.rings import ExtrudedRing
 from classy_blocks.construct.shapes.round import RoundSolidShape
 from classy_blocks.types import PointType
@@ -12,13 +12,16 @@ from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
 
 
-class Cylinder(RoundSolidShape):
-    """A Cylinder.
+class SemiCylinder(RoundSolidShape):
+    """Half of a cylinder; it is constructed from
+    given point and axis in a positive sense - right-hand rule.
 
     Args:
     axis_point_1: position of start face
     axis_point_2: position of end face
     radius_point_1: defines starting point and radius"""
+
+    sketch_class = HalfDisk
 
     def __init__(self, axis_point_1: PointType, axis_point_2: PointType, radius_point_1: PointType):
         axis_point_1 = np.asarray(axis_point_1)
@@ -33,7 +36,18 @@ class Cylinder(RoundSolidShape):
 
         transform_2: List[tr.Transformation] = [tr.Translation(axis)]
 
-        super().__init__(Disk(axis_point_1, radius_point_1, axis), transform_2, None)
+        super().__init__(self.sketch_class(axis_point_1, radius_point_1, axis), transform_2, None)
+
+
+class Cylinder(SemiCylinder):
+    """A Cylinder.
+
+    Args:
+    axis_point_1: position of start face
+    axis_point_2: position of end face
+    radius_point_1: defines starting point and radius"""
+
+    sketch_class = Disk
 
     @classmethod
     def chain(cls, source: RoundSolidShape, length: float, start_face: bool = False) -> "Cylinder":

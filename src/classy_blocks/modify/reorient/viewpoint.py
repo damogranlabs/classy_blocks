@@ -34,7 +34,7 @@ class Triangle:
         """Flips the triangle so that its normal points the other way"""
         self.points = np.flip(self.points, axis=0)
 
-    def orient(self, hull_center: NPPointType):
+    def orient(self, hull_center: NPPointType) -> None:
         """Flips the triangle around (if needed) so that
         normal always points away from the provided hull center"""
         if np.dot(self.center - hull_center, self.normal) < 0:
@@ -135,6 +135,12 @@ class ViewpointReorienter:
     def _get_normals(self, center: NPPointType) -> Dict[OrientType, NPVectorType]:
         v_observer = f.unit_vector(np.array(self.observer) - center)
         v_ceiling = f.unit_vector(np.array(self.ceiling) - center)
+
+        # correct ceiling so that it's always at right angle with observer
+        correction = np.dot(v_ceiling, v_observer) * v_observer
+        v_ceiling -= correction
+        v_ceiling = f.unit_vector(v_ceiling)
+
         v_left = f.unit_vector(np.cross(v_observer, v_ceiling))
 
         return {
