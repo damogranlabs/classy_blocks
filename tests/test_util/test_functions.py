@@ -158,3 +158,51 @@ class TestFunctions(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             self.assertAlmostEqual(f.arc_length_3point(a, b, c), 0)
+
+    def test_mirror_yz(self):
+        point = [2, 0, 0]
+        mirrored = f.mirror(point, [1, 0, 0], [0, 0, 0])
+
+        np.testing.assert_almost_equal(mirrored, [-2, 0, 0])
+
+    def test_mirror_yz_origin(self):
+        point = [2, 0, 0]
+        mirrored = f.mirror(point, [1, 0, 0], [1, 1, 1])
+
+        np.testing.assert_almost_equal(mirrored, [0, 0, 0])
+
+    def test_mirror_xz(self):
+        point = [0, 2, 0]
+        mirrored = f.mirror(point, [0, 1, 0], [0, 0, 0])
+
+        np.testing.assert_almost_equal(mirrored, [0, -2, 0])
+
+    def test_mirror_xz_origin(self):
+        point = [0, 2, 0]
+        mirrored = f.mirror(point, [0, 1, 0], [0, 1, 0])
+
+        np.testing.assert_almost_equal(mirrored, [0, 0, 0])
+
+    def test_mirror_xy(self):
+        point = [0, 0, 2]
+        mirrored = f.mirror(point, [0, 0, 1], [0, 0, 0])
+
+        np.testing.assert_almost_equal(mirrored, [0, 0, -2])
+
+    def test_mirror_xy_origin(self):
+        point = [0, 0, 2]
+        mirrored = f.mirror(point, [0, 0, 1], [0, 0, 1])
+
+        np.testing.assert_almost_equal(mirrored, [0, 0, 0])
+
+    def test_mirror_arbitrary(self):
+        point = [2, 2, 2]
+        mirrored = f.mirror(point, [1, 1, 1], [0, 0, 0])
+
+        np.testing.assert_almost_equal(mirrored, [-2, -2, -2])
+
+    def test_mirror_arbitrary_origin(self):
+        point = [2, 2, 2]
+        mirrored = f.mirror(point, [1, 1, 1], [1, 1, 1])
+
+        np.testing.assert_almost_equal(mirrored, [0, 0, 0])
