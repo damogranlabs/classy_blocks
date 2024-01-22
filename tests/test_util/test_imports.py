@@ -33,6 +33,7 @@ class ImportsTests(unittest.TestCase):
         _ = cb.Extrude
         _ = cb.Revolve
         _ = cb.Wedge
+        _ = cb.Connector
 
     def test_import_shapes(self):
         """Import Shapes"""

@@ -4,6 +4,7 @@ from .construct.curves.interpolated import LinearInterpolatedCurve, SplineInterp
 from .construct.edges import Angle, Arc, OnCurve, Origin, PolyLine, Project, Spline
 from .construct.flat.face import Face
 from .construct.operations.box import Box
+from .construct.operations.connector import Connector
 from .construct.operations.extrude import Extrude
 from .construct.operations.loft import Loft
 from .construct.operations.revolve import Revolve
@@ -46,6 +47,7 @@ __all__ = [
     "Revolve",
     "Box",
     "Wedge",
+    "Connector",
     # construct shapes
     "Elbow",
     "Frustum",

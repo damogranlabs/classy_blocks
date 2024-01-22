@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, TypeVar, Union
+from typing import Dict, List, Optional, TypeVar, Union, get_args
 
 import numpy as np
 
@@ -8,8 +8,9 @@ from classy_blocks.construct.edges import EdgeData, Line, Project
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.point import Point
 from classy_blocks.grading.chop import Chop
-from classy_blocks.types import AxisType, NPPointType, OrientType, ProjectToType
+from classy_blocks.types import AxisType, NPPointType, OrientType, PointType, ProjectToType
 from classy_blocks.util import constants
+from classy_blocks.util import functions as f
 from classy_blocks.util.constants import SIDES_MAP
 from classy_blocks.util.frame import Frame
 from classy_blocks.util.tools import edge_map
@@ -216,8 +217,34 @@ class Operation(ElementBase):
     def get_face(self, side: OrientType) -> Face:
         """Returns a new Face on specified side of the Operation.
         Warning: bottom, left and front faces must be inverted prior
-        to using them for a loft/extrude etc."""
+        to using them for a loft/extrude etc (they point inside the operation by default)."""
         return Face([self.point_array[i] for i in constants.FACE_MAP[side]])
+
+    def get_all_faces(self) -> Dict[OrientType, Face]:
+        """Returns a list of all faces"""
+        return {orient: self.get_face(orient) for orient in get_args(OrientType)}
+
+    def get_closest_face(self, point: PointType) -> Face:
+        """Returns a Face that has a center nearest to given point"""
+        point = np.array(point)
+        faces = list(self.get_all_faces().values())
+        centers = [f.norm(point - face.center) for face in faces]
+
+        return faces[np.argmin(centers)]
+
+    def get_normal_face(self, point: PointType) -> Face:
+        """Returns a Face that has normal closest to
+        vector that connects returned face and 'point' (viewer)."""
+        point = np.array(point)
+        faces = self.get_all_faces()
+        orients: List[OrientType] = ["bottom", "left", "front"]
+
+        for orient in orients:
+            faces[orient].invert()
+        face_list = list(faces.values())
+
+        dotps = [np.dot(f.unit_vector(point - face.center), face.normal) for face in face_list]
+        return face_list[np.argmax(dotps)]
 
     @property
     def patch_names(self) -> Dict[OrientType, str]:
