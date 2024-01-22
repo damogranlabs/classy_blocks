@@ -201,6 +201,12 @@ class TestFunctions(unittest.TestCase):
 
         np.testing.assert_almost_equal(mirrored, [-2, -2, -2])
 
+    def test_mirror_arbitrary_inverted(self):
+        point = [2, 2, 2]
+        mirrored = f.mirror(point, [-1, -1, -1], [0, 0, 0])
+
+        np.testing.assert_almost_equal(mirrored, [-2, -2, -2])
+
     def test_mirror_arbitrary_origin(self):
         point = [2, 2, 2]
         mirrored = f.mirror(point, [1, 1, 1], [1, 1, 1])

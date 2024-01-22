@@ -43,6 +43,17 @@ class ElementBase(abc.ABC):
 
         return self
 
+    def mirror(self: ElementBaseT, normal: VectorType, origin: Optional[PointType] = None) -> ElementBaseT:
+        """Mirror around a plane, defined by a normal vector and passing through origin;
+        if origin is not given, [0, 0, 0] is assumed"""
+        if origin is None:
+            origin = [0, 0, 0]
+
+        for component in self.parts:
+            component.mirror(normal, origin)
+
+        return self
+
     def copy(self: ElementBaseT) -> ElementBaseT:
         """Returns a copy of this object"""
         return copy.deepcopy(self)
@@ -96,6 +107,14 @@ class ElementBase(abc.ABC):
                         origin = center
 
                     part.scale(t7m.ratio, origin=origin)
+                    continue
+
+                if isinstance(t7m, tr.Mirror):
+                    origin = t7m.origin
+                    if origin is None:
+                        origin = [0, 0, 0]
+
+                    part.mirror(t7m.normal, origin=origin)
                     continue
 
         return self
