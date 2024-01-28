@@ -228,7 +228,7 @@ class Operation(ElementBase):
         """Returns a Face that has a center nearest to given point"""
         point = np.array(point)
         faces = list(self.get_all_faces().values())
-        centers = [f.norm(point - face.center) for face in faces]
+        centers = np.array([f.norm(point - face.center) for face in faces])
 
         return faces[np.argmin(centers)]
 

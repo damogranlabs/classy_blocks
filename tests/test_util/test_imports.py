@@ -39,6 +39,7 @@ class ImportsTests(unittest.TestCase):
         """Import Shapes"""
         _ = cb.Elbow
         _ = cb.Frustum
+        _ = cb.SemiCylinder
         _ = cb.Cylinder
         _ = cb.ExtrudedRing
         _ = cb.RevolvedRing
