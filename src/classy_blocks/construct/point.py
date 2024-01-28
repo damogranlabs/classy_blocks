@@ -4,7 +4,7 @@ import numpy as np
 
 from classy_blocks.base.element import ElementBase
 from classy_blocks.base.exceptions import PointCreationError
-from classy_blocks.types import NPVectorType, PointType, ProjectToType
+from classy_blocks.types import NPVectorType, PointType, ProjectToType, VectorType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import DTYPE, TOL, vector_format
 
@@ -48,6 +48,13 @@ class Point(ElementBase):
 
         self.position = f.scale(self.position, ratio, origin)
         return self
+
+    def mirror(self, normal: VectorType, origin: Optional[PointType] = None):
+        """Mirror (reflect) the point around a plane, defined by normal vector and a passing point"""
+        if origin is None:
+            origin = f.vector(0, 0, 0)
+
+        self.position = f.mirror(self.position, normal, origin)
 
     def project(self, label: ProjectToType) -> None:
         """Project this vertex to a single or multiple geometries"""

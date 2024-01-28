@@ -8,7 +8,7 @@ from classy_blocks.construct.edges import EdgeData, Line, Project
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.point import Point
 from classy_blocks.grading.chop import Chop
-from classy_blocks.types import AxisType, NPPointType, OrientType, PointType, ProjectToType
+from classy_blocks.types import AxisType, NPPointType, OrientType, PointType, ProjectToType, VectorType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import SIDES_MAP
@@ -286,3 +286,14 @@ class Operation(ElementBase):
             raise RuntimeError("Use self.top_face()/self.bottom_face() for actions on top and bottom face")
 
         return SIDES_MAP.index(side)
+
+    def mirror(self, normal: VectorType, origin: Optional[PointType] = None):
+        """Mirroring an operation will create an inside-out block but automatic
+        reordering of all vertices would create confusion.
+        To avoid both, bottom and top face are swapped after mirroring
+        so that original and mirrored lofts face the same z-direction."""
+        super().mirror(normal, origin)
+
+        self.top_face, self.bottom_face = self.bottom_face, self.top_face
+
+        return self

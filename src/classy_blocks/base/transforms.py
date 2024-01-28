@@ -34,3 +34,12 @@ class Scaling(Transformation):
 
     ratio: float
     origin: Optional[PointType] = None
+
+
+@dataclasses.dataclass
+class Mirror(Transformation):
+    """Parameters required to mirror an entity around an
+    arbitrary plane"""
+
+    normal: VectorType
+    origin: Optional[PointType] = None

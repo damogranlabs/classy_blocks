@@ -361,6 +361,27 @@ class OperationTransformTests(unittest.TestCase):
             f.angle_between(extrude_direction(original_op), extrude_direction(rotated_op)), angle
         )
 
+    def test_mirror_bottom(self):
+        original_loft = self.loft
+        mirrored_loft = self.loft.copy().mirror([0, 0, 1])
+
+        for i in range(4):
+            # bottom faces are coincident
+            np.testing.assert_almost_equal(
+                original_loft.bottom_face.point_array[i], mirrored_loft.top_face.point_array[i]
+            )
+
+    def test_mirror_top(self):
+        original_loft = self.loft
+        mirrored_loft = self.loft.copy().mirror([0, 0, 1])
+
+        for i in range(4):
+            # top and bottom faces are exactly 2 units apart
+            orig_pos = original_loft.top_face.point_array[i]
+            mirrored_pos = mirrored_loft.bottom_face.point_array[i]
+
+            np.testing.assert_almost_equal(f.norm(orig_pos - mirrored_pos), 2)
+
     def test_index_from_side(self):
         with self.assertRaises(RuntimeError):
             _ = self.loft.get_index_from_side("top")
