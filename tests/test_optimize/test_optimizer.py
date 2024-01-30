@@ -7,8 +7,9 @@ from classy_blocks.construct.operations.box import Box
 from classy_blocks.mesh import Mesh
 from classy_blocks.modify.clamps.free import FreeClamp
 from classy_blocks.modify.clamps.links import TranslationLink
+from classy_blocks.modify.clamps.surface import PlaneClamp
 from classy_blocks.modify.find.geometric import GeometricFinder
-from classy_blocks.modify.optimizer import IterationData, IterationDriver, Optimizer
+from classy_blocks.modify.optimizer import ClampExistsError, IterationData, IterationDriver, Optimizer
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import VBIG
 
@@ -164,6 +165,16 @@ class OptimizerTests(unittest.TestCase):
         self.optimizer = Optimizer(self.mesh)
 
         self.vertex = next(iter(self.finder.find_in_sphere([0, 0, 0])))
+
+    def test_raise_existing(self):
+        """Raise an exception when adding a duplicated clamp/vertex"""
+        first_clamp = FreeClamp(self.vertex)
+        self.optimizer.release_vertex(first_clamp)
+
+        second_clamp = PlaneClamp(self.vertex, self.vertex.position, [0, 0, 1])
+
+        with self.assertRaises(ClampExistsError):
+            self.optimizer.release_vertex(second_clamp)
 
     def test_optimize(self):
         # move a point, then optimize it back to

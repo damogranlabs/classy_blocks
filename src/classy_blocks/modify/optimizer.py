@@ -20,6 +20,10 @@ class NoClampError(Exception):
     """Raised when there's no junction defined for a given Clamp"""
 
 
+class ClampExistsError(Exception):
+    """Raised when attempting to add a vertex that's already among existing clamps"""
+
+
 @dataclasses.dataclass
 class IterationData:
     """Data about a single iteration's progress"""
@@ -128,6 +132,10 @@ class Optimizer:
         self.clamps: List[ClampBase] = []
 
     def release_vertex(self, clamp: ClampBase) -> None:
+        """Adds a clamp to optimization. Raises an exception if it already exists"""
+        for existing in self.clamps:
+            if existing.vertex == clamp.vertex:
+                raise ClampExistsError(f"A clamp has already been defined for vertex {existing}")
         self.clamps.append(clamp)
 
     def _get_junction(self, clamp: ClampBase) -> Junction:
