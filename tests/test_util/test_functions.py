@@ -1,6 +1,7 @@
 import unittest
 
 import numpy as np
+from parameterized import parameterized
 
 from classy_blocks.util import functions as f
 
@@ -212,3 +213,27 @@ class TestFunctions(unittest.TestCase):
         mirrored = f.mirror(point, [1, 1, 1], [1, 1, 1])
 
         np.testing.assert_almost_equal(mirrored, [0, 0, 0])
+
+    @parameterized.expand(
+        (
+            ([1, 0, 0], [0, 0, 1], [2, 0, 0]),
+            ([0, 0, 0], [0, 0, 1], [1, 0, 0]),
+            ([0, 0, 0], [0, 0, 1], [0, 1, 0]),
+            ([0, 0, 0], [0, 0, 1], [1, 1, 0]),
+            ([0, 0, 0], [0, 0, 1], [0, 0, 0]),
+        )
+    )
+    def test_is_point_on_plane_true(self, origin, normal, point):
+        self.assertTrue(f.is_point_on_plane(origin, normal, point))
+
+    @parameterized.expand(
+        (
+            ([1, 0, 0], [0, 0, 1], [2, 0, 1]),
+            ([0, 0, 0], [0, 0, 1], [1, 0, 1]),
+            ([0, 0, 0], [0, 0, 1], [0, 1, 1]),
+            ([0, 0, 0], [0, 0, 1], [1, 1, 1]),
+            ([0, 0, 0], [0, 0, 1], [0, 0, 1]),
+        )
+    )
+    def test_is_point_on_plane_false(self, origin, normal, point):
+        self.assertFalse(f.is_point_on_plane(origin, normal, point))

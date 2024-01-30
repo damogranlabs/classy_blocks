@@ -250,3 +250,15 @@ def mirror(point: PointType, normal: VectorType, origin: PointType):
     rotated += origin
 
     return rotated
+
+
+def is_point_on_plane(origin: PointType, normal: VectorType, point: PointType) -> float:
+    """Calculated distance between a point and a plane, defined by origin and normal vector"""
+    origin = np.asarray(origin)
+    normal = unit_vector(normal)
+    point = np.asarray(point)
+
+    if norm(origin - point) < constants.TOL:
+        return True
+
+    return abs(np.dot(unit_vector(point - origin), normal)) < constants.TOL

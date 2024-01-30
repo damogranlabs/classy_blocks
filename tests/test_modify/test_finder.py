@@ -43,6 +43,17 @@ class GeometricFinderTests(BlockTestCase):
 
         self.assertEqual(len(found_vertices), 8)
 
+    def test_on_plane_bottom(self):
+        found_vertices = self.finder.find_on_plane([0, 0, 0], [0, 0, 1])
+
+        self.assertEqual(len(found_vertices), 4)
+
+    def test_on_plane_top(self):
+        found_vertices = self.finder.find_on_plane([0, 0, 1], [0, 0, 1])
+        print(self.mesh.vertices, found_vertices)
+
+        self.assertEqual(len(found_vertices), 4)
+
 
 class RoundSolidShapeFinderTests(BlockTestCase):
     def setUp(self):
