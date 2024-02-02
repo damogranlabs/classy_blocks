@@ -1,4 +1,5 @@
 """Mathematical functions for general everyday household use"""
+
 from typing import Literal, Optional, Union
 
 import numpy as np
@@ -262,3 +263,12 @@ def is_point_on_plane(origin: PointType, normal: VectorType, point: PointType) -
         return True
 
     return abs(np.dot(unit_vector(point - origin), normal)) < constants.TOL
+
+
+def point_to_line_distance(origin: PointType, direction: VectorType, point: PointType) -> float:
+    """Calculates distance from a line, defined by a point and normal, and an arbitrary point in 3D space"""
+    origin = np.asarray(origin)
+    point = np.asarray(point)
+    direction = np.asarray(direction)
+
+    return norm(np.cross(point - origin, direction)) / norm(direction)

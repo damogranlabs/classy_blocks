@@ -167,15 +167,14 @@ class Optimizer:
 
             if clamp.is_linked:
                 return self.grid.quality
-            else:
-                return junction.quality
+            return junction.quality
 
         scipy.optimize.minimize(
             fquality,
             clamp.params,
             bounds=clamp.bounds,
             method="L-BFGS-B",
-            options={"maxiter": 20, "ftol": 1, "eps": junction.delta / 10},
+            options={"maxiter": 20, "ftol": 1, "eps": junction.delta / 10 / (iteration.index + 1)},
         )
         # alas, works well with this kind of problem but does not support bounds
         # method="COBYLA",
