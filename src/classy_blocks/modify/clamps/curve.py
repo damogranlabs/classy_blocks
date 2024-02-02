@@ -41,13 +41,13 @@ class LineClamp(ClampBase):
     """Clamp that restricts point movement
     during optimization to a line, defined by 2 points;
 
-    Parameter 't' goes from 0 at point_1 to 1 at point_2
+    Parameter 't' goes from 0 at point_1 to <d> at point_2
+    where <d> is the distance between the two points
     (and beyond if different bounds are specified)."""
 
     def __init__(
         self, vertex: Vertex, point_1: PointType, point_2: PointType, bounds: Optional[Tuple[float, float]] = None
     ):
-        # curve = LineCurve(point_1, point_2, bounds)
         point_1 = np.array(point_1)
         point_2 = np.array(point_2)
 
@@ -71,8 +71,8 @@ class RadialClamp(ClampBase):
     to a circular trajectory, defined by center, normal and
     vertex position at clamp initialization.
 
-    Parameter t goes from 0 at initial vertex position to 2*pi
-    at the same position all the way around the circle"""
+    Parameter t goes from 0 at initial vertex position to 2*<r>*pi
+    at the same position all the way around the circle (with radius <r>)"""
 
     def __init__(self, vertex: Vertex, center: PointType, normal: VectorType, bounds: Optional[List[float]] = None):
         initial_point = copy.copy(vertex.position)
@@ -86,7 +86,7 @@ class RadialClamp(ClampBase):
         # <delta_params> - <delta_position>.
         # With rotation, this strongly depends on the radius of the point.
         # To conquer that, divide params by radius
-        radius = f.norm(np.cross(vertex.position - center, normal)) / f.norm(normal)
+        radius = f.point_to_line_distance(center, normal, vertex.position)
 
         super().__init__(
             vertex, lambda params: f.rotate(initial_point, params[0] / radius, normal, center), clamp_bounds

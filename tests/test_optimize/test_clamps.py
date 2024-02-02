@@ -78,12 +78,12 @@ class CurveClampTests(ClampTestsBase):
         """Initialization that will yield t < 0"""
         clamp = LineClamp(self.vertex, [1, 1, 1], [2, 2, 2], (-100, 100))
 
-        self.assertAlmostEqual(clamp.params[0], -1)
+        self.assertAlmostEqual(clamp.params[0], -(3**0.5))
 
     def test_line_value(self):
         clamp = LineClamp(self.vertex, [0, 0, 0], [1, 1, 1])
 
-        clamp.update_params([0.5])
+        clamp.update_params([3**0.5 / 2])
 
         np.testing.assert_array_almost_equal(clamp.point, [0.5, 0.5, 0.5])
 
@@ -102,7 +102,7 @@ class CurveClampTests(ClampTestsBase):
     def test_line_relaxation(self):
         clamp = LineClamp(self.vertex, [0, 0, 0], [1, 1, 1])
 
-        clamp.update_params([0.5], relaxation=0.5)
+        clamp.update_params([3**0.5 / 2], relaxation=0.5)
 
         np.testing.assert_array_almost_equal(clamp.point, [0.25, 0.25, 0.25])
 

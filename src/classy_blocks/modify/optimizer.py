@@ -169,16 +169,15 @@ class Optimizer:
                 return self.grid.quality
             return junction.quality
 
+        tol_scale = 2**iteration.index
+
         scipy.optimize.minimize(
             fquality,
             clamp.params,
             bounds=clamp.bounds,
-            method="L-BFGS-B",
-            options={"maxiter": 20, "ftol": 1, "eps": junction.delta / 10 / (iteration.index + 1)},
+            method="SLSQP",
+            options={"ftol": 10 / tol_scale, "eps": junction.delta / tol_scale / 2},
         )
-        # alas, works well with this kind of problem but does not support bounds
-        # method="COBYLA",
-        # options={"maxiter": 20, "tol": 1, "rhobeg": junction.delta / 10},
 
         current_grid_quality = self.grid.quality
 
