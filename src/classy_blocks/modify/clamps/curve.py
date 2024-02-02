@@ -1,7 +1,8 @@
 import copy
 from typing import List, Optional, Tuple
 
-from classy_blocks.construct.curves.analytic import LineCurve
+import numpy as np
+
 from classy_blocks.construct.curves.curve import CurveBase
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.modify.clamps.clamp import ClampBase
@@ -43,10 +44,20 @@ class LineClamp(ClampBase):
     Parameter 't' goes from 0 at point_1 to 1 at point_2
     (and beyond if different bounds are specified)."""
 
-    def __init__(self, vertex: Vertex, point_1: PointType, point_2: PointType, bounds: Tuple[float, float] = (0, 1)):
-        curve = LineCurve(point_1, point_2, bounds)
+    def __init__(
+        self, vertex: Vertex, point_1: PointType, point_2: PointType, bounds: Optional[Tuple[float, float]] = None
+    ):
+        # curve = LineCurve(point_1, point_2, bounds)
+        point_1 = np.array(point_1)
+        point_2 = np.array(point_2)
 
-        super().__init__(vertex, lambda t: curve.get_point(t[0]), [list(bounds)])
+        def function(t):
+            return point_1 + t[0] * f.unit_vector(point_2 - point_1)
+
+        if bounds is None:
+            bounds = (0, f.norm(point_2 - point_1))
+
+        super().__init__(vertex, function, [list(bounds)])
 
     @property
     def initial_guess(self) -> List[float]:
@@ -71,7 +82,15 @@ class RadialClamp(ClampBase):
         else:
             clamp_bounds = None
 
-        super().__init__(vertex, lambda params: f.rotate(initial_point, params[0], normal, center), clamp_bounds)
+        # Clamps that move points linearly have a clear connection
+        # <delta_params> - <delta_position>.
+        # With rotation, this strongly depends on the radius of the point.
+        # To conquer that, divide params by radius
+        radius = f.norm(np.cross(vertex.position - center, normal)) / f.norm(normal)
+
+        super().__init__(
+            vertex, lambda params: f.rotate(initial_point, params[0] / radius, normal, center), clamp_bounds
+        )
 
     @property
     def initial_guess(self):
