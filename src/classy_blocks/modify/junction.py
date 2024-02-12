@@ -32,4 +32,4 @@ class Junction:
         """Initial delta for optimization algorithm"""
         lengths = [cell.reference_size for cell in self.cells]
 
-        return min(lengths)
+        return min(lengths) * min(lengths) / max(lengths)

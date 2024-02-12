@@ -169,14 +169,11 @@ class Optimizer:
                 return self.grid.quality
             return junction.quality
 
-        tol_scale = 2**iteration.index
-
         scipy.optimize.minimize(
             fquality,
             clamp.params,
             bounds=clamp.bounds,
-            method="SLSQP",
-            options={"ftol": 10 / tol_scale, "eps": junction.delta / tol_scale / 2},
+            options={"maxiter": 3},
         )
 
         current_grid_quality = self.grid.quality
