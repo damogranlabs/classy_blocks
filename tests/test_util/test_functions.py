@@ -237,3 +237,10 @@ class TestFunctions(unittest.TestCase):
     )
     def test_is_point_on_plane_false(self, origin, normal, point):
         self.assertFalse(f.is_point_on_plane(origin, normal, point))
+
+    def test_point_to_line_distance(self):
+        point = [1, 0, 0]
+        direction = [1, 1, 0]
+        origin = [1, 1, 0]
+
+        self.assertAlmostEqual(f.point_to_line_distance(origin, direction, point), 2**0.5 / 2)
