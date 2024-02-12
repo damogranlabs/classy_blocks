@@ -224,13 +224,21 @@ class Operation(ElementBase):
         """Returns a list of all faces"""
         return {orient: self.get_face(orient) for orient in get_args(OrientType)}
 
-    def get_closest_face(self, point: PointType) -> Face:
-        """Returns a Face that has a center nearest to given point"""
+    def get_closest_side(self, point: PointType) -> OrientType:
+        """Returns side (bottom/top/left/right/front/back) of the closest face to given point"""
+        # TODO: TEST
         point = np.array(point)
-        faces = list(self.get_all_faces().values())
+        all_faces = self.get_all_faces()
+        sides = list(all_faces.keys())
+        faces = list(all_faces.values())
         centers = np.array([f.norm(point - face.center) for face in faces])
 
-        return faces[np.argmin(centers)]
+        return sides[np.argmin(centers)]
+
+    def get_closest_face(self, point: PointType) -> Face:
+        """Returns a Face that has a center nearest to given point"""
+        # TODO: TEST
+        return self.get_face(self.get_closest_side(point))
 
     def get_normal_face(self, point: PointType) -> Face:
         """Returns a Face that has normal closest to
