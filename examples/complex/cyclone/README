@@ -1,0 +1,12 @@
+An advanced example with optimization, custom shapes, sketches and regions.
+Work in progress, report bugs promptly!
+
+Usage
+1. Edit dimensions and meshing parameters in parameters.py
+2. Read through comments in cyclone.py.
+3. Run python cyclone.py
+
+Comments
+- To see initial blocking without optimization, comment out the optimizer.optimize(...) line in cyclone.py.
+- To visualize blocks as they are constructed, call mesh.write() after the desired step (that is, added Region) and call sys.exit(), then open debug.vtk.
+- To (hopefully) see blocking better, you can try the Shrink filter in paraview, set it to 0.99 then view it as Wireframe. Under Display tab, tick Render Lines As Tubes and set Line Witdh to 5 or so.

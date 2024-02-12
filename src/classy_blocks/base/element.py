@@ -1,6 +1,6 @@
 import abc
 import copy
-from typing import Dict, List, Optional, TypeVar
+from typing import Dict, List, Optional, Sequence, TypeVar
 
 from classy_blocks.base import transforms as tr
 from classy_blocks.types import NPPointType, PointType, VectorType
@@ -79,7 +79,7 @@ class ElementBase(abc.ABC):
         projected to an ad-hoc defined searchableSphere"""
         return None
 
-    def transform(self: ElementBaseT, transforms: List[tr.Transformation]) -> ElementBaseT:
+    def transform(self: ElementBaseT, transforms: Sequence[tr.Transformation]) -> ElementBaseT:
         """A function that transforms  to sketch_2;
         a Loft will be made from those"""
 

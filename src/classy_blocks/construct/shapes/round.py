@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Sequence
 
 from classy_blocks.base import transforms as tr
 from classy_blocks.construct.flat.sketches.annulus import Annulus
@@ -22,8 +22,8 @@ class RoundSolidShape(SketchedShape):
     def __init__(
         self,
         sketch_1: Sketch,
-        sketch_2_transform: List[tr.Transformation],
-        sketch_mid_transform: Optional[List[tr.Transformation]] = None,
+        sketch_2_transform: Sequence[tr.Transformation],
+        sketch_mid_transform: Optional[Sequence[tr.Transformation]] = None,
     ):
         super().__init__(sketch_1, sketch_2_transform, sketch_mid_transform)
 

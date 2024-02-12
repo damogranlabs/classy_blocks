@@ -335,6 +335,8 @@ Airfoil core with blunt trailing edge (imported points from NACA generator) and 
 A parametric, Low-Re mesh of a real-life impeller *(not included in examples)*
 ![Impeller - Low Re](showcase/impeller_full.png "Low-Re Impeller")
 
+A complex example: parametric, Low-Re mesh of a cyclone
+![Cyclone](showcase/cyclone.png "Cyclone")
 
 # Prerequisites
 

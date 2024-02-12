@@ -1,6 +1,7 @@
 """Abstract base classes for different Shape types"""
+
 import abc
-from typing import Generic, List, Optional, TypeVar
+from typing import Generic, List, Optional, Sequence, TypeVar
 
 import numpy as np
 
@@ -55,8 +56,8 @@ class SketchedShape(Shape, Generic[SketchT]):
     def __init__(
         self,
         sketch_1: SketchT,
-        sketch_2_transform: List[tr.Transformation],
-        sketch_mid_transform: Optional[List[tr.Transformation]] = None,
+        sketch_2_transform: Sequence[tr.Transformation],
+        sketch_mid_transform: Optional[Sequence[tr.Transformation]] = None,
     ):
         # start with sketch_1 and transform it
         # using the _transform function(transform_2_args) to obtain sketch_2;

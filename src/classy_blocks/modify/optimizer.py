@@ -169,12 +169,7 @@ class Optimizer:
                 return self.grid.quality
             return junction.quality
 
-        scipy.optimize.minimize(
-            fquality,
-            clamp.params,
-            bounds=clamp.bounds,
-            options={"maxiter": 3},
-        )
+        scipy.optimize.minimize(fquality, clamp.params, bounds=clamp.bounds, method="SLSQP", options={"maxiter": 10})
 
         current_grid_quality = self.grid.quality
 
