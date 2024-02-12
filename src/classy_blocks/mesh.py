@@ -1,4 +1,5 @@
 """The Mesh object ties everything together and writes the blockMeshDict in the end."""
+
 from typing import List, Optional, Union, get_args
 
 from classy_blocks.construct.operations.operation import Operation

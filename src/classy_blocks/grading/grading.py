@@ -33,6 +33,7 @@ division: an entry in simpleGrading specification in blockMeshDict
 calculations meticulously transcribed from the blockmesh grading calculator:
 https://gitlab.com/herpes-free-engineer-hpe/blockmeshgradingweb/-/blob/master/calcBlockMeshGrading.coffee
 (since block length is always known, there's less wrestling but the calculation principle is similar) """
+
 import copy
 import math
 import warnings

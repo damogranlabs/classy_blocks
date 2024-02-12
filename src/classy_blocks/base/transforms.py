@@ -1,5 +1,6 @@
 """Dataclasses for packing combinations of transforms of <anything>
 into an easily digestable function/method arguments"""
+
 import dataclasses
 from typing import Optional
 

@@ -1,4 +1,5 @@
 """Misc utilities"""
+
 import dataclasses
 
 from classy_blocks.base.exceptions import CornerPairError
