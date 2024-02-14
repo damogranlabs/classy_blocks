@@ -147,14 +147,6 @@ class Optimizer:
 
         raise NoJunctionError
 
-    def _get_clamp(self, junction: Junction) -> ClampBase:
-        """Returns a Clamp that corresponds to given Junction"""
-        for clamp in self.clamps:
-            if clamp.vertex == junction.vertex:
-                return clamp
-
-        raise NoClampError
-
     def optimize_clamp(self, clamp: ClampBase, iteration: IterationData) -> float:
         """Move clamp.vertex so that quality at junction is improved;
         rollback changes if grid quality decreased after optimization"""
@@ -199,7 +191,7 @@ class Optimizer:
             clamp.update_params(params)
             return junction.quality
 
-        sensitivities = np.array(
+        sensitivities = np.asarray(
             scipy.optimize.approx_fprime(clamp.params, lambda p: fquality(clamp, junction, p), epsilon=10 * TOL)
         )
         return np.max(np.abs(sensitivities.flatten()))

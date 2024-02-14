@@ -26,10 +26,3 @@ class Junction:
         this serves as an indicator of which junction to optimize,
         not a measurement of overall mesh quality"""
         return sum([cell.quality for cell in self.cells]) / len(self.cells)
-
-    @property
-    def delta(self) -> float:
-        """Initial delta for optimization algorithm"""
-        lengths = [cell.reference_size for cell in self.cells]
-
-        return min(lengths) * min(lengths) / max(lengths)

@@ -6,6 +6,7 @@ from parameterized import parameterized
 from classy_blocks.base.exceptions import EdgeCreationError
 from classy_blocks.construct.edges import Arc, Project
 from classy_blocks.construct.flat.face import Face
+from classy_blocks.construct.operations.extrude import Extrude
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.util import functions as f
 from tests.fixtures.block import BlockTestCase
@@ -108,6 +109,49 @@ class OperationTests(BlockTestCase):
         self.loft.set_patch(side, "test")
 
         self.assertEqual(self.loft.patch_names[side], "test")
+
+    @parameterized.expand(
+        (
+            ([0, 0, 10], "top"),
+            ([0, 0, -10], "bottom"),
+            ([-10, 0, 0], "left"),
+            ([10, 0, 0], "right"),
+            ([0, -10, 0], "front"),
+            ([0, 10, 0], "back"),
+        )
+    )
+    def test_get_closest_side(self, point, orient):
+        self.assertEqual(self.loft.get_closest_side(point), orient)
+
+    @parameterized.expand(
+        (
+            ([0, 0, 10],),
+            ([0, 0, -10],),
+            ([-10, 0, 0],),
+            ([10, 0, 0],),
+            ([0, -10, 0],),
+            ([0, 10, 0],),
+        )
+    )
+    def test_get_closest_face(self, point):
+        face = self.loft.get_face(self.loft.get_closest_side(point))
+
+        np.testing.assert_array_equal(face.point_array, self.loft.get_closest_face(point).point_array)
+
+    @parameterized.expand(
+        (
+            ([0, 0, 10], "top"),
+            ([0, 0, -10], "bottom"),
+            ([-10, 0, 0], "left"),
+            ([10, 0, 0], "right"),
+            ([0, -10, 0], "front"),
+            ([0, 10, 0], "back"),
+        )
+    )
+    def test_get_normal_face(self, point, orient):
+        normal_face = self.loft.get_normal_face(point)
+
+        np.testing.assert_array_equal(normal_face.center, self.loft.get_face(orient).center)
 
 
 class OperationProjectionTests(BlockTestCase):
@@ -385,3 +429,9 @@ class OperationTransformTests(unittest.TestCase):
     def test_index_from_side(self):
         with self.assertRaises(RuntimeError):
             _ = self.loft.get_index_from_side("top")
+
+    def test_mirror(self):
+        extrude = Extrude(self.loft.bottom_face, [0, 0, 1])
+        mirror = extrude.copy().mirror([0, 0, 1], [0, 0, 0])
+
+        np.testing.assert_equal(extrude.bottom_face.center, mirror.top_face.center)

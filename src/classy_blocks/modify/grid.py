@@ -1,5 +1,3 @@
-from typing import List
-
 from classy_blocks.mesh import Mesh
 from classy_blocks.modify.cell import Cell
 from classy_blocks.modify.junction import Junction
@@ -33,7 +31,3 @@ class Grid:
     def quality(self) -> float:
         """Returns summed qualities of all cells in this grid"""
         return sum([cell.quality for cell in self.cells])
-
-    def get_ordered_junctions(self) -> List[Junction]:
-        """Returns a list of Junctions, ordered by worst quality first"""
-        return list(reversed(sorted(self.junctions, key=lambda j: j.quality)))
