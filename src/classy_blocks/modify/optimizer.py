@@ -2,13 +2,14 @@ import copy
 import dataclasses
 from typing import ClassVar, List
 
+import numpy as np
 import scipy.optimize
 
 from classy_blocks.mesh import Mesh
 from classy_blocks.modify.clamps.clamp import ClampBase
 from classy_blocks.modify.grid import Grid
 from classy_blocks.modify.junction import Junction
-from classy_blocks.util.constants import VBIG, VSMALL
+from classy_blocks.util.constants import TOL, VBIG, VSMALL
 from classy_blocks.util.tools import report
 
 
@@ -198,17 +199,16 @@ class Optimizer:
             clamp.update_params(params)
             return junction.quality
 
-        sensitivities = scipy.optimize.approx_fprime(clamp.params, lambda p: fquality(clamp, junction, p), epsilon=1e-6)
-        return max([abs(s) for s in sensitivities])
+        sensitivities = np.array(
+            scipy.optimize.approx_fprime(clamp.params, lambda p: fquality(clamp, junction, p), epsilon=10 * TOL)
+        )
+        return np.max(np.abs(sensitivities.flatten()))
 
     def optimize_iteration(self, iteration: IterationData) -> None:
-        # gather points that can be moved with optimization
-        # for junction in self.grid.get_ordered_junctions():
-        #     try:
-        #         clamp = self._get_clamp(junction)
-        #         self.optimize_clamp(clamp, iteration)
-        #     except NoClampError:
-        #         continue
+        self.clamps.sort(key=lambda c: self._get_sensitivity(c), reverse=True)
+
+        for clamp in self.clamps:
+            self.optimize_clamp(clamp, iteration)
         self.clamps.sort(key=lambda c: self._get_sensitivity(c), reverse=True)
 
         for clamp in self.clamps:
