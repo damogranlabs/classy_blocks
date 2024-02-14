@@ -169,7 +169,7 @@ class Optimizer:
                 return self.grid.quality
             return junction.quality
 
-        scipy.optimize.minimize(fquality, clamp.params, bounds=clamp.bounds, method="SLSQP", options={"maxiter": 10})
+        scipy.optimize.minimize(fquality, clamp.params, bounds=clamp.bounds, method="SLSQP")
 
         current_grid_quality = self.grid.quality
 
@@ -190,14 +190,29 @@ class Optimizer:
 
         return initial_grid_quality / current_grid_quality
 
+    def _get_sensitivity(self, clamp):
+        """Returns maximum partial derivative at current params"""
+        junction = self._get_junction(clamp)
+
+        def fquality(clamp, junction, params):
+            clamp.update_params(params)
+            return junction.quality
+
+        sensitivities = scipy.optimize.approx_fprime(clamp.params, lambda p: fquality(clamp, junction, p), epsilon=1e-6)
+        return max([abs(s) for s in sensitivities])
+
     def optimize_iteration(self, iteration: IterationData) -> None:
         # gather points that can be moved with optimization
-        for junction in self.grid.get_ordered_junctions():
-            try:
-                clamp = self._get_clamp(junction)
-                self.optimize_clamp(clamp, iteration)
-            except NoClampError:
-                continue
+        # for junction in self.grid.get_ordered_junctions():
+        #     try:
+        #         clamp = self._get_clamp(junction)
+        #         self.optimize_clamp(clamp, iteration)
+        #     except NoClampError:
+        #         continue
+        self.clamps.sort(key=lambda c: self._get_sensitivity(c), reverse=True)
+
+        for clamp in self.clamps:
+            self.optimize_clamp(clamp, iteration)
 
     def optimize(self, max_iterations: int = 20, relaxed_iterations: int = 2, tolerance: float = 0.1) -> None:
         """Move vertices, defined and restrained with Clamps
