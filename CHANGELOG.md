@@ -4,6 +4,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# [1.4.0]
+### Added
+- Channel example
+- Cyclone example
+- Mirror transform on points, operations, shapes, mirror example
+- Operation:
+  - `get_closest_face()`, `get_closest_side()`, `get_normal_face()`
+  - Connector operation
+- Geometric finders: find_on_plane()
+- functions.point_to_line_distance()
+
+### Changed
+- Optimization improvements:
+  - Default parameters for clamp optimization
+  - Clamps are sorted by sensitivity, not "junction quality" as before (improves optimization speed)
+  - Clamp parameters follow domain scale (Read more below)
+  - Raise an Exception when adding more than one Clamp for the same vertex
+
+#### Clamp Parameters:
+Previously:
+- RadialClamp had a single parameter, the _angle_ of the point (and change thereof)
+- In Linelamp the parameter _t_ went from 0 to 1 regardless of the distance between points
+
+This created difficulties with optimization algorithms with extra large or very small domains.
+Optimization speed also drastically changing with simply scaling the dimensions.
+
+This has been changed:
+- RadialClamp's parameter is now multiplied with radius so it means actual _distance_
+- LineClamp's parameter now goes from 0 to _distance between points_
+When working with CurveClamps, this kind of _automatic_ correction cannot be made so it is advisable
+that parameter is of a similar magnitudes than points' coordinates.
+
+### Removed
+- Junction.delta() is now handled by optimization automatically
+
 # [1.3.3]
 ### Added
 - Airfoil example
