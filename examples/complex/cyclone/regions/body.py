@@ -16,12 +16,10 @@ from classy_blocks.util.constants import TOL
 class ChainSketch(Sketch):
     """Collects bottom-most faces of given regions and creates a sketch from them"""
 
-    def __init__(self, regions: List[Region]):
-        # gather faces
-        ops: Sequence[Operation] = []
-        for region in regions:
-            ops = [*ops, *region.elements]
-
+    @staticmethod
+    def _get_faces(ops: Sequence[Operation]) -> List[cb.Face]:
+        """Skims faces from given operations and reorders them so
+        that they are ready for extruding or whatever"""
         faces: List[cb.Face] = []
 
         for operation in ops:
@@ -38,6 +36,12 @@ class ChainSketch(Sketch):
 
             faces.append(face)
 
+        return faces
+
+    @staticmethod
+    def _add_arcs(faces: List[cb.Face]) -> None:
+        """Adds arc edges between outermost points of outermost faces
+        to create round shape"""
         # add arcs to outermost radius (body and cone)
         max_radius = 0
         for face in faces:
@@ -51,6 +55,15 @@ class ChainSketch(Sketch):
 
                 if abs(polar_1[0] - max_radius) < 2 * TOL and abs(polar_2[0] - max_radius) < 2 * TOL:
                     face.add_edge(i, cb.Origin([0, 0, polar_1[2]]))
+
+    def __init__(self, regions: List[Region]):
+        # gather faces
+        ops: Sequence[Operation] = []
+        for region in regions:
+            ops += region.elements
+
+        faces = self._get_faces(ops)
+        self._add_arcs(faces)
 
         self._faces = faces
 

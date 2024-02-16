@@ -8,7 +8,7 @@ import classy_blocks as cb
 from classy_blocks.base.transforms import Transformation, Translation
 from classy_blocks.construct.flat.sketches.sketch import Sketch
 from classy_blocks.construct.shapes.round import RoundSolidShape
-from classy_blocks.types import NPVectorType, PointListType, PointType
+from classy_blocks.types import NPPointListType, NPVectorType, PointListType, PointType
 from classy_blocks.util import functions as f
 
 
@@ -19,7 +19,7 @@ class DozenBlockDisk(Sketch):
     layer_1_ratio = 0.25
     layer_2_ratio = 0.55
 
-    face_map = [
+    face_map = [  # for creating blocks from points-by-layer
         [[0, 0], [0, 1], [0, 2], [0, 3]],  # core: 0
         [[0, 0], [1, 11], [1, 0], [1, 1]],  # layer 1: 1
         [[0, 0], [1, 1], [1, 2], [0, 1]],  # 2
@@ -43,6 +43,33 @@ class DozenBlockDisk(Sketch):
         [[1, 11], [2, 11], [2, 0], [1, 0]],  #  20
     ]
 
+    neighbours = [  # for laplacian smoothing of the inside
+        [15, 5, 1, 3],  # 0
+        [0, 6, 8, 2],  # 1
+        [9, 1, 11, 3],  # 2
+        [14, 0, 2, 12],  # 3
+        [16, 5, 15],  # 4
+        [4, 17, 6, 0],  # 5
+        [18, 7, 1, 5],  # 6
+        [6, 19, 8],  # 7
+        [1, 7, 20, 9],  # 8
+        [2, 8, 21, 10],  # 9
+        [22, 11, 9],  # 10
+        [23, 10, 2, 12],  # 11
+        [11, 24, 13, 3],  # 12
+        [25, 12, 14],  # 13
+        [13, 3, 15, 26],  # 14
+        [14, 27, 4, 0],  # 15
+    ]
+
+    def _smooth_points(self, points: NPPointListType):
+        # A very rudimentary 2D laplacian smoothing;
+        # to be replaced with automatic neighbour search,
+        # removing the need for this 'neighbours' map
+        for i, nei_indexes in enumerate(self.neighbours):
+            nei_points = np.take(points, nei_indexes, axis=0)
+            points[i] = np.average(nei_points, axis=0)
+
     def __init__(self, perimeter: PointListType, center_point: PointType):
         self.perimeter = np.array(perimeter)
         center_point = np.asarray(center_point)
@@ -51,17 +78,23 @@ class DozenBlockDisk(Sketch):
         # 1st layer, square, 4 points
         # 2nd layer, 3x3 squares, 9 points
         # 3rd layer, 12 shell faces, 12 points
-        layer_2 = [center_point + self.layer_2_ratio * (p - center_point) for p in self.perimeter]
+        layer_2 = np.array([center_point + self.layer_2_ratio * (p - center_point) for p in self.perimeter])
+        layer_1 = np.array([center_point + self.layer_1_ratio * (layer_2[i] - center_point) for i in (0, 3, 6, 9)])
 
-        layer_1 = [center_point + self.layer_1_ratio * (layer_2[i] - center_point) for i in (0, 3, 6, 9)]
+        # Assemble a full list for smoothing:
+        points_by_index = np.concatenate((layer_1, layer_2, self.perimeter))
 
-        points = [layer_1, layer_2, self.perimeter]
+        for _ in range(5):
+            self._smooth_points(points_by_index)
+
+        # reconstruct the list back to layer_1, layer_2, layer_3 for face creation
+        points_by_layer = [points_by_index[:4], points_by_index[4:16], points_by_index[16:]]
 
         # the first point is layer index, the second is the point within layer
         self._faces: List[cb.Face] = []
 
         for face_indexes in self.face_map:
-            face = cb.Face([points[i[0]][i[1]] for i in face_indexes])
+            face = cb.Face([points_by_layer[i[0]][i[1]] for i in face_indexes])
             self._faces.append(face)
 
         self.core = self._faces[:10]
