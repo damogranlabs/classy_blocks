@@ -24,6 +24,6 @@ MESH_SCALE = 0.001  # goes into blockMeshDict.scale
 
 # Mesh
 # (use same dimensions as for geometry)
-BULK_SIZE = 10
-BL_THICKNESS = 0.5
+BULK_SIZE = DIM_SCALE * 10
+BL_THICKNESS = DIM_SCALE * 0.5
 C2C_EXPANSION = 1.2

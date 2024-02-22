@@ -55,15 +55,12 @@ optimizer = cb.Optimizer(mesh)
 
 clamps = []
 for region in optimize_regions:
-    clamps += region.get_clamps(mesh)
+    for clamp in region.get_clamps(mesh):
+        optimizer.release_vertex(clamp)
 
-for clamp in clamps:
-    optimizer.release_vertex(clamp)
-
-optimizer.optimize(tolerance=1e-6)
-# Now Block objects contain optimization results but not
-# user-created Operations. Mesh.backport() will copy the
-# data back.
+optimizer.optimize(tolerance=1e-5)
+# Now Block objects contain optimization results but those are not reflected in
+# user-created Operations. Mesh.backport() will copy the data back.
 mesh.backport()
 # We'll add new stuff so we don't need those half-finished Blocks.
 mesh.clear()
@@ -89,7 +86,7 @@ add_regions([upper, lower, pipe])
 
 # Core is a 12-block cylinder, created from 12 points of pipe ring.
 # Again, instead of finding those 12 points (which are difficult to find and sort)
-# it is easier to re-assemble the mesh and get the points from ParaView > debug.vtk.
+# it is easier to re-assemble the mesh and get the points from debug.vtk in ParaView.
 mesh.assemble()
 vindexes = [173, 169, 170, 179, 180, 182, 184, 186, 188, 190, 177, 175]
 vindexes.reverse()

@@ -1,6 +1,7 @@
 """Misc utilities"""
 
 import dataclasses
+import os
 
 from classy_blocks.base.exceptions import CornerPairError
 from classy_blocks.types import OrientType
@@ -8,9 +9,12 @@ from classy_blocks.util.constants import SIDES_MAP
 from classy_blocks.util.frame import Frame
 
 
-def report(text):
+def report(text, end=None):
     """TODO: improve (verbosity, logging, ...)"""
-    print(text)
+    if end is None:
+        end = os.linesep
+
+    print(text, end=end)
 
 
 def indent(text: str, levels: int) -> str:

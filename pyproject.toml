@@ -29,7 +29,7 @@ line_length = 120
 src_paths = ["src", "tests"]
 
 [tool.ruff]
-lint.select = ["E", "F", "N", "UP", "YTT", "B", "A", "ARG", "RUF"]
+select = ["E", "F", "N", "UP", "YTT", "B", "A", "ARG", "RUF"]
 target-version = "py38"
 line-length = 120
 
