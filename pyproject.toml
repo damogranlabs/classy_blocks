@@ -7,7 +7,7 @@ license = { file = "LICENSE" }
 keywords = ["classy_blocks", "OpenFOAM", "blockMesh"]
 authors = [{ name = "Nejc Jurkovic", email = "kandelabr@gmail.com" }]
 requires-python = ">=3.8"
-dependencies = ["numpy", "scipy", "nptyping"]
+dependencies = ["numpy", "scipy", "nptyping", "numpy-stl"]
 
 [project.urls]
 "Homepage" = "https://github.com/damogranlabs/classy_blocks"
@@ -29,7 +29,6 @@ line_length = 120
 src_paths = ["src", "tests"]
 
 [tool.ruff]
-select = ["E", "F", "N", "UP", "YTT", "B", "A", "ARG", "RUF"]
 target-version = "py38"
 line-length = 120
 
