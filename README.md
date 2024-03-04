@@ -104,6 +104,12 @@ After blocks have been placed, it is possible to create new geometry based on pl
 - [x] Face merging as described by [blockMesh user guide](https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-470004.3.2). Breaks the pure-hexahedral-mesh rule but can often save the day for trickier geometries. Automatic duplication of points on merged block faces
 - [ ] Auto grading for Low-Re meshes: boundary layer with specified cell-to-cell expansion, transition with 2:1 expansion, and specified 'bulk' cell size
 
+## Meshing Generation
+- [x] Mesh generation of the classy blocks mesh
+- [ ] Mesh generation with all searchable surface type (currently only stl, plane and sphere)
+- [ ] Mesh generation with multiple projections on edge or face
+
+
 # Examples
 
 How to run:
@@ -134,6 +140,9 @@ inlet.set_start_patch('inlet')
 inlet.set_outer_patch('wall')
 inlet.set_end_patch('outlet')
 mesh.add(inlet)
+
+hexmesh = cb.HexMesh(mesh, quality_metrics=True)
+hexmesh.write_vtk(os.path.join("cylinder.vtk"))
 ```
 
 > See `examples/shape` for use of each _shape_
@@ -360,6 +369,7 @@ There's no official documentation yet so here are some tips for easier navigatio
 
 # TODO
 - Unchecked list items from [Features](#features)
+- Full implementation of searchable surfaces in the HexMesh extension
 - Usability
     - Frustum with any profile, not just arc
     - Joining two blocks by moving vertices/creating new blocks
