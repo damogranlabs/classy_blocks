@@ -5,6 +5,7 @@ import numpy as np
 
 from classy_blocks.construct.curves.curve import PointCurveBase
 from classy_blocks.types import NPPointListType, NPPointType, PointListType, PointType
+from classy_blocks.util import functions as f
 
 
 class DiscreteCurve(PointCurveBase):
@@ -40,10 +41,7 @@ class DiscreteCurve(PointCurveBase):
 
     def get_length(self, param_from: Optional[float] = None, param_to: Optional[float] = None) -> float:
         """Returns the length of this curve between specified params."""
-
-        # TODO: use the same function as items.edges.spline
-        discretized = self.discretize(param_from, param_to)
-        return np.sum(np.sqrt(np.sum((discretized[:-1] - discretized[1:]) ** 2, axis=1)))
+        return f.polyline_length(self.discretize(param_from, param_to))
 
     def get_closest_param(self, point: PointType) -> float:
         """Returns the index of point on this curve where distance to supplied

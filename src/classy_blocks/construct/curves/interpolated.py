@@ -6,6 +6,7 @@ import numpy as np
 from classy_blocks.construct.curves.curve import FunctionCurveBase
 from classy_blocks.construct.curves.interpolators import InterpolatorBase, LinearInterpolator, SplineInterpolator
 from classy_blocks.types import PointListType
+from classy_blocks.util import functions as f
 
 
 class InterpolatedCurveBase(FunctionCurveBase, abc.ABC):
@@ -42,14 +43,9 @@ class InterpolatedCurveBase(FunctionCurveBase, abc.ABC):
 
         return self.points
 
-
-class LinearInterpolatedCurve(InterpolatedCurveBase):
-    _interpolator = LinearInterpolator
-
     def get_length(self, param_from: Optional[float] = None, param_to: Optional[float] = None) -> float:
         """Returns the length of this curve by summing distance between
         points. The 'count' parameter is ignored as the original points are taken."""
-        # TODO: use the same function as items.edges.spline
         param_from, param_to = self._get_params(param_from, param_to)
 
         index_from = int(param_from * self.segments) + 1
@@ -61,8 +57,11 @@ class LinearInterpolatedCurve(InterpolatedCurveBase):
             indexes = []
 
         params = [param_from, *[i / self.segments for i in indexes], param_to]
-        discretized = np.array([self.function(t) for t in params])
-        return np.sum(np.sqrt(np.sum((discretized[:-1] - discretized[1:]) ** 2, axis=1)))
+        return f.polyline_length(np.array([self.function(t) for t in params]))
+
+
+class LinearInterpolatedCurve(InterpolatedCurveBase):
+    _interpolator = LinearInterpolator
 
 
 class SplineInterpolatedCurve(InterpolatedCurveBase):

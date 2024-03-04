@@ -8,7 +8,7 @@ import scipy.linalg
 import scipy.optimize
 import scipy.spatial
 
-from classy_blocks.types import NPPointType, NPVectorType, PointListType, PointType, VectorType
+from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, PointListType, PointType, VectorType
 from classy_blocks.util import constants
 
 
@@ -272,3 +272,13 @@ def point_to_line_distance(origin: PointType, direction: VectorType, point: Poin
     direction = np.asarray(direction)
 
     return norm(np.cross(point - origin, direction)) / norm(direction)
+
+
+def polyline_length(points: NPPointListType) -> float:
+    """Calculates length of a polyline, given by a list of points"""
+    if len(np.shape(points)) != 2:
+        raise ValueError("Provide a list of points in 3D space!")
+    if np.shape(points)[1] < 2:
+        raise ValueError("Use at least 2 points for a polyline!")
+
+    return np.sum(np.sqrt(np.sum((points[:-1] - points[1:]) ** 2, axis=1)))
