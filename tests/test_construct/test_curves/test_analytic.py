@@ -23,13 +23,14 @@ class AnalyticCurveTests(unittest.TestCase):
         self.places = int(np.log10(1 / TOL)) - 1
 
     def test_arc_length_halfcircle(self):
-        self.assertAlmostEqual(self.curve.get_length(0, np.pi), self.radius * np.pi, places=self.places)
+        # use less strict checking because of discretization error
+        self.assertAlmostEqual(self.curve.get_length(0, np.pi), self.radius * np.pi, places=2)
 
     def test_arc_length_quartercircle(self):
-        self.assertAlmostEqual(self.curve.get_length(0, np.pi / 2), self.radius * np.pi / 2, places=self.places)
+        self.assertAlmostEqual(self.curve.get_length(0, np.pi / 2), self.radius * np.pi / 2, places=2)
 
     def test_length_property(self):
-        self.assertAlmostEqual(self.curve.length, self.radius * np.pi, places=self.places)
+        self.assertAlmostEqual(self.curve.length, self.radius * np.pi, places=2)
 
     @parameterized.expand(
         (

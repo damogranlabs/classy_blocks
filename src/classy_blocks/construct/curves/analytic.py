@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 
@@ -20,6 +20,12 @@ class AnalyticCurve(FunctionCurveBase):
     @property
     def parts(self):
         raise NotImplementedError("Transforming arbitrary analytic curves is currently not supported")
+
+    def get_length(self, param_from: Optional[float] = None, param_to: Optional[float] = None) -> float:
+        # simply discretize the curve and sum up the segments;
+        # numerical integration is not reliable and can often yield totally wrong results
+        # (like a negative length or similar)
+        return f.polyline_length(self.discretize(param_from, param_to, count=100))
 
 
 class LineCurve(AnalyticCurve):

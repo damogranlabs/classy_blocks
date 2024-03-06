@@ -9,7 +9,7 @@ from classy_blocks.base.element import ElementBase
 from classy_blocks.construct.point import Point
 from classy_blocks.types import NPPointListType, NPPointType, ParamCurveFuncType, PointListType, PointType
 from classy_blocks.util import functions as f
-from classy_blocks.util.constants import DTYPE, TOL
+from classy_blocks.util.constants import DTYPE
 
 
 class CurveBase(ElementBase):
@@ -133,12 +133,3 @@ class FunctionCurveBase(PointCurveBase):
     def get_point(self, param: float) -> NPPointType:
         self._check_param(param)
         return self.function(param)
-
-    def get_length(self, param_from: Optional[float] = None, param_to: Optional[float] = None) -> float:
-        """Returns the length of this curve by numerical
-        integration of segments."""
-
-        def dr_dt_mag(t):
-            return f.norm(self.get_point(t + TOL / 2) - self.get_point(t - TOL / 2)) / TOL
-
-        return scipy.integrate.quad(dr_dt_mag, param_from, param_to, epsabs=TOL)[0]
