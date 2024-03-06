@@ -3,15 +3,10 @@
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.wordBasedSuggestions": "off",
-        "gitlens.codeLens.symbolScopes": [
-            "!Module"
-        ],
         "editor.codeActionsOnSave": {
             "source.organizeImports": "explicit"
         },
     },
-    "python.linting.enabled": true,
-    "python.linting.lintOnSave": true,
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.diagnosticMode": "openFilesOnly",
     "python.testing.pytestEnabled": false,
