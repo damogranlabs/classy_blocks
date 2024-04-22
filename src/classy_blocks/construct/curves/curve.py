@@ -7,9 +7,9 @@ import scipy.optimize
 
 from classy_blocks.base.element import ElementBase
 from classy_blocks.construct.point import Point
-from classy_blocks.types import NPPointListType, NPPointType, ParamCurveFuncType, PointListType, PointType
+from classy_blocks.types import NPPointListType, NPPointType, ParamCurveFuncType, PointListType, PointType, VectorType
 from classy_blocks.util import functions as f
-from classy_blocks.util.constants import DTYPE
+from classy_blocks.util.constants import DTYPE, TOL
 
 
 class CurveBase(ElementBase):
@@ -78,6 +78,13 @@ class CurveBase(ElementBase):
 
         i_distance = np.argmin(distances)
         return params[i_distance]
+
+    def get_tangent(self, param: float, delta: float = TOL) -> VectorType:
+        """Returns a normalized tangent to the curve at given parameter"""
+        prev_point = self.get_point(param - delta / 2)
+        next_point = self.get_point(param + delta / 2)
+
+        return f.unit_vector(next_point - prev_point)
 
 
 class PointCurveBase(CurveBase):

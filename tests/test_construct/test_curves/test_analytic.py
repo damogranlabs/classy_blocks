@@ -55,6 +55,16 @@ class AnalyticCurveTests(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             self.curve.translate([1, 1, 1])
 
+    @parameterized.expand(
+        (
+            (0, [0, 1, 0]),
+            (np.pi / 2, [-1, 0, 0]),
+            (np.pi, [0, -1, 0]),
+        )
+    )
+    def test_tangent(self, param, tangent):
+        np.testing.assert_almost_equal(self.curve.get_tangent(param), tangent)
+
 
 class LineCurveTests(unittest.TestCase):
     def setUp(self):
