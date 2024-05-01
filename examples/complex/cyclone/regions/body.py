@@ -8,7 +8,7 @@ import classy_blocks as cb
 from classy_blocks.base.transforms import Scaling, Translation
 from classy_blocks.construct.flat.sketches.sketch import Sketch
 from classy_blocks.construct.operations.operation import Operation
-from classy_blocks.construct.shapes.shape import SketchedShape
+from classy_blocks.construct.shapes.shape import LoftedShape
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
 
@@ -80,7 +80,7 @@ class ChainSketch(Sketch):
         return 12
 
 
-class BodyShape(SketchedShape):
+class BodyShape(LoftedShape):
     def chop_axial(self, **kwargs):
         self.operations[0].chop(2, **kwargs)
 

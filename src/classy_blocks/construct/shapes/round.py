@@ -5,11 +5,11 @@ from classy_blocks.construct.flat.sketches.annulus import Annulus
 from classy_blocks.construct.flat.sketches.disk import Disk
 from classy_blocks.construct.flat.sketches.sketch import Sketch
 from classy_blocks.construct.operations.loft import Loft
-from classy_blocks.construct.shapes.shape import SketchedShape
-from classy_blocks.types import OrientType
+from classy_blocks.construct.shapes.shape import LoftedShape
+from classy_blocks.types import AxisType, OrientType
 
 
-class RoundSolidShape(SketchedShape):
+class RoundSolidShape(LoftedShape):
     """An object, lofted between 2 or more sketches;
     to form blocks, sketches are transformed with specified
     functions (and so are side edges) and loft operations
@@ -19,13 +19,36 @@ class RoundSolidShape(SketchedShape):
     they are created using an OH-grid (see Disk), have a
     'start' and 'end' sketch and an 'outer' surface."""
 
+    axial_axis: AxisType = 2  # Axis along which 'outer sides' run
+    radial_axis: AxisType = 0  # Axis that goes from center to 'outer side'
+    tangential_axis: AxisType = 1  # Axis that goes around the circumference of the shape
+
+    start_patch: OrientType = "bottom"  # Sides of blocks that define the start patch
+    end_patch: OrientType = "top"  # Sides of blocks that define the end patch"""
+    outer_patch: OrientType = "right"  # Sides of blocks that define the outer surface
+
     def __init__(
         self,
         sketch_1: Sketch,
         sketch_2_transform: Sequence[tr.Transformation],
         sketch_mid_transform: Optional[Sequence[tr.Transformation]] = None,
     ):
-        super().__init__(sketch_1, sketch_2_transform, sketch_mid_transform)
+        # start with sketch_1 and transform it
+        # using the _transform function(transform_2_args) to obtain sketch_2;
+        # use _transform function(transform_mid_args) to obtain mid sketch
+        # (only if applicable)
+        sketch_1 = sketch_1
+        sketch_2 = sketch_1.copy().transform(sketch_2_transform)
+
+        sketch_mid: Optional[Sketch] = None
+        if sketch_mid_transform is not None:
+            sketch_mid = sketch_1.copy().transform(sketch_mid_transform)
+
+        super().__init__(sketch_1, sketch_2, sketch_mid)
+
+    def chop_axial(self, **kwargs):
+        """Chop the shape between start and end face"""
+        self.operations[0].chop(self.axial_axis, **kwargs)
 
     @property
     def core(self):

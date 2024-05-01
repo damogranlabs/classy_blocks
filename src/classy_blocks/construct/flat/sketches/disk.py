@@ -59,6 +59,10 @@ class QuarterDisk(Sketch):
         return self.core + self.shell
 
     @property
+    def grid(self):
+        return [self.core, self.shell]
+
+    @property
     def radius_vector(self) -> NPVectorType:
         """Vector that points from center of this
         *Circle to its (first) radius point"""

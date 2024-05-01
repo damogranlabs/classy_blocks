@@ -61,6 +61,10 @@ class Annulus(Sketch):
         return self.shell
 
     @property
+    def grid(self):
+        return [self.shell]
+
+    @property
     def center(self) -> NPPointType:
         return np.average([f.center for f in self.faces], axis=0)
 

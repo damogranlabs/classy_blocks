@@ -1,6 +1,6 @@
 """Mathematical functions for general everyday household use"""
 
-from typing import Literal, Optional, Union
+from typing import List, Literal, Optional, Union
 
 import numpy as np
 import scipy
@@ -282,3 +282,8 @@ def polyline_length(points: NPPointListType) -> float:
         raise ValueError("Use at least 2 points for a polyline!")
 
     return np.sum(np.sqrt(np.sum((points[:-1] - points[1:]) ** 2, axis=1)))
+
+
+def flatten_2d_list(twodim: List[List]) -> List:
+    """Flattens a list of lists to a 1d-list"""
+    return [item for sublist in twodim for item in sublist]
