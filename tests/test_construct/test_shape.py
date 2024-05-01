@@ -55,7 +55,7 @@ class ShapeTests(unittest.TestCase):
         ring.set_inner_patch("test")
 
         for operation in ring.shell:
-            self.assertEqual(operation.patch_names[ring.inner_patch], "test")
+            self.assertEqual(operation.patch_names["left"], "test")
 
     def test_inner_patch_revolved(self):
         face = Face([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]])
@@ -65,7 +65,7 @@ class ShapeTests(unittest.TestCase):
         ring.set_inner_patch("test")
 
         for operation in ring.shell:
-            self.assertEqual(operation.patch_names[ring.inner_patch], "test")
+            self.assertEqual(operation.patch_names["front"], "test")
 
 
 class ElbowTests(unittest.TestCase):
