@@ -43,11 +43,6 @@ class Sketch(ElementBase):
         """Normal of this sketch"""
         return self.faces[0].normal
 
-    # @property
-    # @abc.abstractmethod
-    # def n_segments(self) -> int:
-    #     """Number of outer faces"""
-
     @property
     def parts(self):
         return self.faces

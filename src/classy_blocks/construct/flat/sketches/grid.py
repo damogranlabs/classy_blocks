@@ -5,6 +5,7 @@ import numpy as np
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketches.sketch import Sketch
 from classy_blocks.types import PointType
+from classy_blocks.util import functions as f
 from classy_blocks.util.constants import DTYPE
 
 
@@ -26,9 +27,11 @@ class Grid(Sketch):
         coords_1 = np.linspace(point_1[0], point_2[0], num=count_1)
         coords_2 = np.linspace(point_1[1], point_2[1], num=count_2)
 
-        self.grid: List[Face] = []
+        self.grid: List[List[Face]] = []
 
         for iy in range(count_2 - 1):
+            self.grid.append([])
+
             for ix in range(count_1 - 1):
                 points = [
                     coords_1[ix],
@@ -37,11 +40,11 @@ class Grid(Sketch):
                     coords_1[iy],
                 ]
 
-                self.grid.append(Face(points))
+                self.grid[-1].append(Face(points))
 
     @property
     def faces(self):
-        return self.grid
+        return f.flatten_2d_list(self.grid)
 
     @property
     def center(self):

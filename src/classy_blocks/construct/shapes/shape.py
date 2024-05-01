@@ -72,7 +72,7 @@ class LoftedShape(Shape, abc.ABC, Generic[SketchT]):
 
                 # add edges, if applicable
                 if self.sketch_mid:
-                    face_mid = self.sketch_mid.faces[j]
+                    face_mid = self.sketch_mid.grid[i][j]
 
                     for k, point in enumerate(face_mid.points):
                         loft.add_side_edge(k, Arc(point.position))

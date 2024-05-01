@@ -10,15 +10,6 @@ from classy_blocks.types import AxisType, OrientType
 
 
 class RoundSolidShape(LoftedShape):
-    """An object, lofted between 2 or more sketches;
-    to form blocks, sketches are transformed with specified
-    functions (and so are side edges) and loft operations
-    are created between.
-
-    Solid round shapes: Elbow, Frustum, Cylinder;
-    they are created using an OH-grid (see Disk), have a
-    'start' and 'end' sketch and an 'outer' surface."""
-
     axial_axis: AxisType = 2  # Axis along which 'outer sides' run
     radial_axis: AxisType = 0  # Axis that goes from center to 'outer side'
     tangential_axis: AxisType = 1  # Axis that goes around the circumference of the shape
@@ -84,17 +75,6 @@ class RoundSolidShape(LoftedShape):
 
 
 class RoundHollowShape(RoundSolidShape):
-    """An object, lofted between 2 or more sketches;
-    to form blocks, sketches are transformed with specified
-    functions (and so are side edges) and loft operations
-    are created between.
-
-    Hollow round shapes: ExtrudedRing (more to come)
-    they are created using an OH-grid (see Disk), have a
-    'start' and 'end' sketch and an 'outer' surface."""
-
-    inner_patch: OrientType = "left"
-
     def __init__(
         self,
         sketch_1: Annulus,
@@ -121,4 +101,4 @@ class RoundHollowShape(RoundSolidShape):
     def set_inner_patch(self, name: str) -> None:
         """Assign the faces of inside surface to a named patch"""
         for operation in self.shell:
-            operation.set_patch(self.inner_patch, name)
+            operation.set_patch("left", name)
