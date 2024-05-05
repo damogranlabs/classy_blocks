@@ -11,7 +11,8 @@
             "linspace",
             "Pylance",
             "scipy"
-        ]
+        ],
+        "editor.autoClosingBrackets": "never"
     },
     "extensions": {
         "recommendations": [

@@ -19,28 +19,29 @@ class Quad:
         self.face = Face(np.take(positions, list(indexes), axis=0))
 
     @property
-    def connections(self) -> List[List[int]]:
-        return [[self.indexes[i], self.indexes[(i + 1) % 4]] for i in range(4)]
+    def connections(self) -> List[Set[int]]:
+        return [{self.indexes[i], self.indexes[(i + 1) % 4]} for i in range(4)]
 
 
-def get_connections(quad: QuadType) -> List[List[int]]:
-    return [[quad[i], quad[(i + 1) % 4]] for i in range(4)]
+def get_connections(quad: QuadType) -> List[Set[int]]:
+    return [{quad[i], quad[(i + 1) % 4]} for i in range(4)]
 
 
-def get_all_connections(quads) -> List[List[int]]:
+def get_all_connections(quads) -> List[Set[int]]:
     return f.flatten_2d_list([get_connections(quad) for quad in quads])
 
 
-def find_neighbours(quads: List[QuadType]) -> Dict[int, List[int]]:
+def find_neighbours(quads: List[QuadType]) -> Dict[int, Set[int]]:
     """Returns a dictionary point:[neighbour points] as defined by quads"""
     length = int(max(np.array(quads, dtype=DTYPE).ravel())) + 1
 
-    neighbours: Dict[int, List[int]] = {i: [] for i in range(length)}
+    neighbours: Dict[int, Set[int]] = {i: set() for i in range(length)}
     connections = get_all_connections(quads)
 
     for connection in connections:
-        neighbours[connection[0]].append(connection[1])
-        neighbours[connection[1]].append(connection[0])
+        clist = list(connection)
+        neighbours[clist[0]].add(clist[1])
+        neighbours[clist[1]].add(clist[0])
 
     return neighbours
 
