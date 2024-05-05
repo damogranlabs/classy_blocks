@@ -94,11 +94,6 @@ class LoftedShape(Shape, abc.ABC, Generic[SketchT]):
         return f.flatten_2d_list(self.lofts)
 
     @property
-    @abc.abstractmethod
-    def shell(self) -> List[Loft]:
-        """Operations on the outside of the shape"""
-
-    @property
     def grid(self):
         """Analogous to Sketch's grid but corresponsing operations are returned"""
         return self.lofts
