@@ -1,6 +1,6 @@
 import unittest
 
-from classy_blocks.construct.flat.sketches.mapped import find_neighbours, get_fixed_points
+from classy_blocks.construct.flat.quad import find_neighbours, get_fixed_points
 
 
 class MappedSketchTests(unittest.TestCase):

@@ -6,7 +6,7 @@ from regions.region import Region
 
 import classy_blocks as cb
 from classy_blocks.base.transforms import Transformation, Translation
-from classy_blocks.construct.flat.sketches.sketch import Sketch
+from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.construct.shapes.round import RoundSolidShape
 from classy_blocks.types import NPPointListType, NPVectorType, PointListType, PointType
 from classy_blocks.util import functions as f

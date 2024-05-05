@@ -3,8 +3,7 @@ from typing import Dict, List, Set, Tuple
 import numpy as np
 
 from classy_blocks.construct.flat.face import Face
-from classy_blocks.construct.flat.sketches.sketch import Sketch
-from classy_blocks.types import NPPointListType, NPPointType, PointListType
+from classy_blocks.types import NPPointListType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import DTYPE
 
@@ -71,36 +70,3 @@ def smooth(positions, quads, iterations: int) -> NPPointListType:
             positions[point_index] = np.average(nei_positions, axis=0)
 
     return positions
-
-
-class MappedSketch(Sketch):
-    """A sketch that is created from predefined points.
-    The points are connected to form quads which define Faces.
-    There is only a single grid 'tier' in these sketches (faces = grid[0])."""
-
-    def __init__(self, positions: PointListType, quads: List[Tuple[int, int, int, int]], smooth_iter: int = 0):
-        positions = np.array(positions, dtype=DTYPE)
-
-        if smooth_iter > 0:
-            positions = smooth(positions, quads, smooth_iter)
-
-        self.quads = [Quad(positions, quad) for quad in quads]
-
-        self.add_edges()
-
-    def add_edges(self) -> None:
-        """An optional method that will add edges to wherever they need to be."""
-
-    @property
-    def faces(self):
-        """A 'flattened' grid"""
-        return [quad.face for quad in self.quads]
-
-    @property
-    def grid(self):
-        return [self.faces]
-
-    @property
-    def center(self) -> NPPointType:
-        """Center of this sketch"""
-        return np.average([face.center for face in self.faces], axis=0)

@@ -7,7 +7,7 @@ import numpy as np
 
 from classy_blocks.base.element import ElementBase
 from classy_blocks.construct.edges import Arc
-from classy_blocks.construct.flat.sketches.sketch import SketchT
+from classy_blocks.construct.flat.sketch import SketchT
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.types import NPPointType
