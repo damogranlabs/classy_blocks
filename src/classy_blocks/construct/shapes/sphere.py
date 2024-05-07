@@ -223,3 +223,7 @@ class Hemisphere(EighthSphere):
             normal = source.sketch_2.normal
 
         return cls(center_point, radius_point, normal)
+
+    def set_outer_patch(self, name):
+        for operation in self.shell:
+            operation.set_patch("right", name)
