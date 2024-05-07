@@ -5,6 +5,7 @@ import numpy as np
 from parameterized import parameterized
 
 from classy_blocks.construct.flat.sketches.disk import QuarterDisk
+from classy_blocks.construct.shapes.sphere import get_named_points
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
 
@@ -76,7 +77,7 @@ class QuarterDiskTests(unittest.TestCase):
 
     def test_points_keys(self):
         """Check positions of points in the @points property"""
-        self.assertSetEqual({"O", "S1", "P1", "D", "P2", "S2", "P3"}, set(self.qdisk.points.keys()))
+        self.assertSetEqual({"O", "S1", "P1", "D", "P2", "S2", "P3"}, set(get_named_points(self.qdisk).keys()))
 
     @parameterized.expand(
         (
@@ -89,11 +90,11 @@ class QuarterDiskTests(unittest.TestCase):
             ("S2", [0, 0.5, 0]),
         )
     )
-    @patch("classy_blocks.construct.flat.sketches.disk.QuarterDisk.side_ratio", new=0.5)
-    @patch("classy_blocks.construct.flat.sketches.disk.QuarterDisk.diagonal_ratio", new=0.5)
+    @patch("classy_blocks.construct.flat.sketches.disk.DiskBase.side_ratio", new=0.5)
+    @patch("classy_blocks.construct.flat.sketches.disk.DiskBase.diagonal_ratio", new=0.5)
     def test_point_position(self, key, position):
-        """Check that the points are symmetrical with respect to
-        diagonal"""
+        """Check that the points are symmetrical with respect to diagonal"""
         qdisk = QuarterDisk([0, 0, 0], [1, 0, 0], [0, 0, 1])
+        points = get_named_points(qdisk)
 
-        self.assertTrue(f.norm(qdisk.points[key].position - position) < TOL)
+        self.assertTrue(f.norm(points[key] - position) < TOL)
