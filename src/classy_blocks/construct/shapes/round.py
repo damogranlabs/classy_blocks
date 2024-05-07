@@ -5,7 +5,7 @@ from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.construct.flat.sketches.annulus import Annulus
 from classy_blocks.construct.flat.sketches.disk import Disk
 from classy_blocks.construct.operations.loft import Loft
-from classy_blocks.construct.shapes.shape import LoftedShape
+from classy_blocks.construct.shape import LoftedShape
 from classy_blocks.types import AxisType, OrientType
 
 

@@ -8,7 +8,7 @@ import classy_blocks as cb
 from classy_blocks.base.transforms import Scaling, Translation
 from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.construct.operations.operation import Operation
-from classy_blocks.construct.shapes.shape import LoftedShape
+from classy_blocks.construct.shape import LoftedShape
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
 

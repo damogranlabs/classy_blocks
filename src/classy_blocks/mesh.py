@@ -3,7 +3,7 @@
 from typing import List, Optional, Union, get_args
 
 from classy_blocks.construct.operations.operation import Operation
-from classy_blocks.construct.shapes.shape import Shape
+from classy_blocks.construct.shape import Shape
 from classy_blocks.items.block import Block
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.lists.block_list import BlockList
