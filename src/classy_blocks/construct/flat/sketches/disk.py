@@ -205,3 +205,43 @@ class FourCoreDisk(DiskBase):
 
 
 Disk = FourCoreDisk
+
+
+class WrappedDisk(DiskBase):
+    """A OneCoreDisk but with four additional blocks surrounding it,
+    making the sketch a square"""
+
+    quad_map: ClassVar = [
+        # Just the normal quad map
+        *OneCoreDisk.quad_map,
+        (4, 8, 9, 5),
+        (5, 9, 10, 6),
+        (6, 10, 11, 7),
+        (7, 11, 8, 4),
+    ]
+
+    def __init__(self, center_point: PointType, corner_point: PointType, radius: float, normal: VectorType):
+        # TODO: make pattern a property, ready to be adjusted by subclasses
+        pattern = FanPattern(center_point, corner_point, normal)
+        angles = np.linspace(0, 2 * np.pi, num=4, endpoint=False)
+
+        radius_ratio = radius / f.norm(pattern.radius_vector)
+        square_ratio = self.diagonal_ratio * radius_ratio
+
+        square_points = pattern.get_inner_points(angles, [square_ratio])
+        arc_points = pattern.get_inner_points(angles, [radius_ratio])
+        outer_points = pattern.get_outer_points(angles)
+
+        super().__init__([*square_points, *arc_points, *outer_points], self.quad_map)
+
+    @property
+    def grid(self):
+        return [[self.faces[0]], self.faces[1:5], self.faces[5:]]
+
+    def add_edges(self):
+        for face in self.grid[1]:
+            face.add_edge(1, Origin(self.center))
+
+    @property
+    def center(self):
+        return self.faces[0].center
