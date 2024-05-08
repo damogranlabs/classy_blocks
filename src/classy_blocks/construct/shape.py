@@ -10,7 +10,7 @@ from classy_blocks.construct.edges import Angle, Arc
 from classy_blocks.construct.flat.sketch import Sketch, SketchT
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.operations.operation import Operation
-from classy_blocks.types import NPPointType, VectorType
+from classy_blocks.types import AxisType, NPPointType, VectorType
 from classy_blocks.util import functions as f
 
 ShapeT = TypeVar("ShapeT", bound="Shape")
@@ -97,6 +97,15 @@ class LoftedShape(Shape, abc.ABC, Generic[SketchT]):
     def grid(self):
         """Analogous to Sketch's grid but corresponsing operations are returned"""
         return self.lofts
+
+    def chop(self, axis: AxisType, **kwargs) -> None:
+        """Chops operations along given axis.
+        Only axis 0 and 1 are allowed as defined in sketch_1"""
+        if axis == 2:
+            self.operations[0].chop(2, **kwargs)
+        else:
+            for index in self.sketch_1.chops[axis]:
+                self.operations[index].chop(axis, **kwargs)
 
 
 class ExtrudedShape(LoftedShape):

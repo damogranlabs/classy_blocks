@@ -1,6 +1,6 @@
 import abc
 import copy
-from typing import List, Tuple, TypeVar
+from typing import ClassVar, List, Tuple, TypeVar
 
 import numpy as np
 
@@ -15,6 +15,10 @@ SketchT = TypeVar("SketchT", bound="Sketch")
 
 class Sketch(ElementBase):
     """A collection of Faces that form the basis of a 3D Shape."""
+
+    # indexes of faces that are to be chopped (within a Shape)
+    # for axis 0 and axis 1; axis 2 is the 3rd dimension
+    chops: ClassVar[List[List[int]]] = []
 
     @property
     @abc.abstractmethod

@@ -220,6 +220,11 @@ class WrappedDisk(DiskBase):
         (7, 11, 8, 4),
     ]
 
+    chops: ClassVar = [
+        [1, 5],
+        [1, 2],
+    ]
+
     def __init__(self, center_point: PointType, corner_point: PointType, radius: float, normal: VectorType):
         # TODO: make pattern a property, ready to be adjusted by subclasses
         pattern = FanPattern(center_point, corner_point, normal)
