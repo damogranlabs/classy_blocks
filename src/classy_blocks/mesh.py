@@ -1,6 +1,6 @@
 """The Mesh object ties everything together and writes the blockMeshDict in the end."""
 
-from typing import List, Optional, Union, get_args
+from typing import List, Optional, Set, Union, get_args
 
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.shape import Shape
@@ -26,6 +26,7 @@ class Mesh:
     def __init__(self) -> None:
         # List of all added operations/shapes
         self.depot: List[AdditiveType] = []
+        self.deleted: Set[Operation] = set()
 
         self.vertex_list = VertexList()
         self.edge_list = EdgeList()
@@ -89,6 +90,11 @@ class Mesh:
         See examples/advanced/project for an example."""
         self.geometry_list.add(geometry)
 
+    def delete(self, operation: Operation) -> None:
+        """Excludes the given operation from any processing;
+        the data remains but it will not contribute to the mesh"""
+        self.deleted.add(operation)
+
     def assemble(self) -> None:
         """Converts classy_blocks entities (operations and shapes) to
         actual vertices, edges, blocks and other stuff to be inserted into
@@ -102,6 +108,9 @@ class Mesh:
                 operations = entity.operations
 
             for operation in operations:
+                if operation in self.deleted:
+                    continue
+
                 vertices = self._add_vertices(operation)
 
                 block = Block(len(self.block_list.blocks), vertices)

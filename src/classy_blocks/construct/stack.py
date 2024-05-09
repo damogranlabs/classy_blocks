@@ -1,4 +1,4 @@
-from typing import ClassVar, List
+from typing import ClassVar, List, Union
 
 import numpy as np
 
@@ -6,7 +6,7 @@ from classy_blocks.base.element import ElementBase
 from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.operations.operation import Operation
-from classy_blocks.construct.shape import LoftedShape, RevolvedShape
+from classy_blocks.construct.shape import ExtrudedShape, LoftedShape, RevolvedShape
 from classy_blocks.types import PointType, VectorType
 from classy_blocks.util import functions as f
 
@@ -40,6 +40,21 @@ class Stack(ElementBase):
     @property
     def center(self):
         return np.average([op.center for op in self.operations], axis=0)
+
+
+class ExtrudedStack(Stack):
+    """Extruded shapes, stacked on top of each other"""
+
+    def __init__(self, base: Sketch, amount: Union[float, VectorType], repeats: int):
+        if isinstance(amount, float) or isinstance(amount, int):
+            extrude_vector = base.normal * amount
+        else:
+            extrude_vector = np.asarray(amount)
+
+        for _ in range(repeats):
+            shape = ExtrudedShape(base, extrude_vector / repeats)
+            self.shapes.append(shape)
+            base = shape.sketch_2
 
 
 class RevolvedStack(Stack):

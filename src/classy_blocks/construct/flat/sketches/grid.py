@@ -24,23 +24,23 @@ class Grid(Sketch):
         point_1 = np.asarray(point_1, dtype=DTYPE)
         point_2 = np.asarray(point_2, dtype=DTYPE)
 
-        coords_1 = np.linspace(point_1[0], point_2[0], num=count_1)
-        coords_2 = np.linspace(point_1[1], point_2[1], num=count_2)
+        coords_1 = np.linspace(point_1[0], point_2[0], num=count_1 + 1)
+        coords_2 = np.linspace(point_1[1], point_2[1], num=count_2 + 1)
 
-        self.grid: List[List[Face]] = []
+        self._grid: List[List[Face]] = []
 
-        for iy in range(count_2 - 1):
+        for iy in range(count_2):
             self.grid.append([])
 
-            for ix in range(count_1 - 1):
+            for ix in range(count_1):
                 points = [
-                    coords_1[ix],
-                    coords_1[ix + 1],
-                    coords_2[iy + 1],
-                    coords_1[iy],
+                    [coords_1[ix], coords_2[iy], 0],
+                    [coords_1[ix + 1], coords_2[iy], 0],
+                    [coords_1[ix + 1], coords_2[iy + 1], 0],
+                    [coords_1[ix], coords_2[iy + 1], 0],
                 ]
 
-                self.grid[-1].append(Face(points))
+                self._grid[-1].append(Face(points))
 
     @property
     def faces(self):
@@ -49,3 +49,7 @@ class Grid(Sketch):
     @property
     def center(self):
         return (self.faces[0].points[0].position + self.faces[-1].points[2].position) / 2
+
+    @property
+    def grid(self):
+        return self._grid
