@@ -319,9 +319,6 @@ Venturi tube
 2D mesh for studying Karman Vortex Street
 ![Karman Vortex Street](showcase/karman.png "Karman vortex street")
 
-Helmholtz nozzle, a resonator with sharp edges. See [this sketch](https://www.researchgate.net/figure/Schematic-diagram-of-a-Helmholtz-oscillator-and-its-operating-principles_fig6_305275686).
-![Helmholtz nozzle](showcase/resonator.png "Helmholtz resonator")
-
 Edges and faces, projected to an STL surface
 ![Projected](showcase/projected.png "Projected edges and faces")
 
@@ -331,6 +328,9 @@ Mesh for studying flow around a sphere, with projected edges and faces
 Airfoil core with blunt trailing edge (imported points from NACA generator) and adjustable angle of attack. Exact blocking is determined by in-situ optimization
 (see `examples/complex/airfoil.py`). A simulation-ready mesh needs additional blocks to expand domain further away from the airfoil.
 ![Airfoil](showcase/airfoil.png "Airfoil core mesh")
+
+An electric heater in water, a mesh with two cellZones.
+![Heater](showcase/heater.png "Heater")
 
 A parametric, Low-Re mesh of a real-life impeller *(not included in examples)*
 ![Impeller - Low Re](showcase/impeller_full.png "Low-Re Impeller")
