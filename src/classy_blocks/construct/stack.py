@@ -4,10 +4,9 @@ import numpy as np
 
 from classy_blocks.base.element import ElementBase
 from classy_blocks.construct.flat.sketch import Sketch
-from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.shape import ExtrudedShape, LoftedShape, RevolvedShape
-from classy_blocks.types import PointType, VectorType
+from classy_blocks.types import AxisType, PointType, VectorType
 from classy_blocks.util import functions as f
 
 
@@ -18,10 +17,29 @@ class Stack(ElementBase):
     shapes: ClassVar[List[LoftedShape]] = []
 
     @property
-    def grid(self) -> List[List[List[Loft]]]:
-        """Returns a 3-dimensional list of operations;
-        first two dimensions within a shape, the third along the stack"""
-        return [shape.grid for shape in self.shapes]
+    def grid(self) -> List[List[List[Operation]]]:
+        """Returns all operations as a 3-dimensional list;
+        first two dimensions within a shape, the third along the stack."""
+        # TODO: convert this to typed numpy array to support all indexing,
+        # slicing and iterating, available on numpy arrays
+        # Currently, the problem is typing support (Numpy arrays of exact object)
+
+        # Invert the list so that z-value is the last
+        shapes = np.asarray([shape.grid for shape in self.shapes], dtype="object")
+
+        return np.swapaxes(shapes, 0, 2).tolist()
+
+    def get_slice(self, axis: AxisType, index: int) -> List[Operation]:
+        """Returns all operations along given axis;
+        2 - same as shapes[index]
+        0, 1 - like shape[axis][index] for each shape"""
+        if axis == 0:
+            return np.asarray(self.grid, dtype="object")[index, :, :].ravel().tolist()
+
+        if axis == 1:
+            return np.asarray(self.grid, dtype="object")[:, index, :].ravel().tolist()
+
+        return self.shapes[index].operations
 
     def chop(self, **kwargs) -> None:
         """Adds a chop in lofted/extruded/revolved direction to one operation

@@ -76,12 +76,12 @@ class MappedSketch(Sketch):
     @property
     def faces(self):
         """A 'flattened' grid"""
-        return [quad.face for quad in self.quads]
+        return np.array([quad.face for quad in self.quads])
 
     @property
     def grid(self):
         """Use a single-tier grid by default; override the method for more sophistication."""
-        return [self.faces]
+        return np.expand_dims(self.faces, axis=0)
 
     @property
     def center(self) -> NPPointType:

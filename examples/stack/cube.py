@@ -18,6 +18,10 @@ downstream = 5
 width = 3
 height = 3
 
+# cell sizing
+wall_size = 0.05
+far_size = 0.5
+
 mesh = cb.Mesh()
 
 # first, create cubic blocks all around
@@ -50,13 +54,39 @@ move_side(point_2, [1, 0, 0], 0, downstream * side + side / 2)  # downstream
 mesh.backport()
 mesh.clear()
 
+# chop relevant blocks
+stack.grid[0][1][0].chop(0, start_size=far_size, end_size=wall_size)
+stack.grid[2][1][0].chop(0, start_size=wall_size, end_size=far_size)
+stack.grid[1][1][1].chop(0, start_size=wall_size)
+
+stack.grid[1][0][0].chop(1, start_size=far_size, end_size=wall_size)
+stack.grid[1][2][0].chop(1, start_size=wall_size, end_size=far_size)
+stack.grid[1][1][1].chop(1, start_size=wall_size)
+
+stack.grid[0][0][0].chop(2, start_size=wall_size)
+stack.grid[1][1][1].chop(2, start_size=wall_size, end_size=far_size)
+
+# Set patches
+
+for operation in stack.get_slice(0, 0):
+    operation.set_patch("left", "inlet")
+
+for operation in stack.get_slice(0, -1):
+    operation.set_patch("right", "outlet")
+
+for operation in stack.get_slice(2, 0):
+    operation.set_patch("bottom", "floor")
+
+stack.grid[0][1][0].set_patch("right", "cube")
+stack.grid[1][0][0].set_patch("back", "cube")
+stack.grid[1][2][0].set_patch("front", "cube")
+stack.grid[2][1][0].set_patch("left", "cube")
+stack.grid[1][1][1].set_patch("bottom", "cube")
+
+
 # Delete the block we're studying;
 # TODO: BUG: it matters when this is deleted (but should not be the case?)
-mesh.delete(stack.grid[0][1][1])
+mesh.delete(stack.grid[1][1][0])
 
-for shape in stack.shapes:
-    for operation in shape.operations:
-        for i in range(3):
-            operation.chop(i, count=10)
-
+mesh.set_default_patch("freestream", "patch")
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")
