@@ -17,11 +17,8 @@ class Quad:
         self.indexes = indexes
         self.face = Face(np.take(positions, list(indexes), axis=0))
 
-    @property
-    def connections(self) -> List[Set[int]]:
-        return [{self.indexes[i], self.indexes[(i + 1) % 4]} for i in range(4)]
 
-
+# TODO: move functions into Quad or remove Quad at all
 def get_connections(quad: QuadType) -> List[Set[int]]:
     return [{quad[i], quad[(i + 1) % 4]} for i in range(4)]
 

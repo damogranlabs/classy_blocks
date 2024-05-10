@@ -4,6 +4,8 @@ import numpy as np
 
 from classy_blocks.base.exceptions import CylinderCreationError, FrustumCreationError
 from classy_blocks.construct.flat.face import Face
+from classy_blocks.construct.flat.sketches.disk import Disk, OneCoreDisk
+from classy_blocks.construct.shape import ExtrudedShape, LoftedShape, RevolvedShape, ShapeCreationError
 from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.construct.shapes.elbow import Elbow
 from classy_blocks.construct.shapes.frustum import Frustum
@@ -241,3 +243,69 @@ class CylinderTests(unittest.TestCase):
         self.cylinder.chop_radial(end_size=0.1)
 
         self.assertNotEqual(self.cylinder.shell[0].chops[0][0].end_size, 0.1)
+
+    def test_mirror(self):
+        cyl_1 = self.cylinder
+        cyl_2 = self.cylinder.copy().mirror(-cyl_1.sketch_1.normal, cyl_1.sketch_1.center)
+
+        print(cyl_2)
+
+        np.testing.assert_almost_equal(
+            cyl_2.sketch_2.center - cyl_2.sketch_1.center, cyl_1.sketch_1.center - cyl_1.sketch_2.center
+        )
+
+
+class LoftedShapeTests(unittest.TestCase):
+    @property
+    def sketch(self):
+        return OneCoreDisk([0, 0, 1], [1, 0, 1], [0, 0, 1])
+
+    def test_end_sketch_exception(self):
+        sketch_1 = self.sketch
+        sketch_2 = Disk([0, 0, 1], [1, 0, 1], [0, 0, 1])
+
+        with self.assertRaises(ShapeCreationError):
+            _ = LoftedShape(sketch_1, sketch_2)
+
+    def test_test_mid_sketch_exception(self):
+        sketch_1 = self.sketch
+        sketch_mid = Disk([0, 0, 0.5], [1, 0, 0.5], [0, 0, 0.5])
+        sketch_2 = self.sketch.copy().translate([0, 0, 1])
+
+        with self.assertRaises(ShapeCreationError):
+            _ = LoftedShape(sketch_1, sketch_2, sketch_mid=sketch_mid)
+
+    def test_grid(self):
+        shape = LoftedShape(self.sketch, self.sketch.copy().translate([0, 0, 1]))
+
+        for i in (0, 1):
+            self.assertEqual(len(shape.grid[i]), len(self.sketch.grid[i]))
+
+    def test_chop_0(self):
+        shape = LoftedShape(self.sketch, self.sketch.copy().translate([0, 0, 1]))
+
+        shape.chop(0, start_size=0.1)
+
+        for i in self.sketch.chops[0]:
+            self.assertEqual(len(shape.operations[i].chops[0]), 1)
+
+    def test_chop_2(self):
+        shape = LoftedShape(self.sketch, self.sketch.copy().translate([0, 0, 1]))
+
+        shape.chop(2, start_size=0.1)
+        self.assertEqual(len(shape.operations[0].chops[2]), 1)
+
+    def test_extruded_shape_scalar(self):
+        shape = ExtrudedShape(self.sketch, 1)
+
+        np.testing.assert_almost_equal(shape.sketch_2.center, shape.sketch_1.center + f.vector(0, 0, 1))
+
+    def test_extruded_shape_vector(self):
+        shape = ExtrudedShape(self.sketch, [0, 0, 1])
+
+        np.testing.assert_almost_equal(shape.sketch_2.center, shape.sketch_1.center + f.vector(0, 0, 1))
+
+    def test_revolved_shape(self):
+        shape = RevolvedShape(self.sketch, np.pi / 2, [0, 1, 0], [2, 0, 0])
+
+        np.testing.assert_almost_equal(shape.sketch_2.normal, [1, 0, 0])

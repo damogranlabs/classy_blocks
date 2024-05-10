@@ -244,3 +244,25 @@ class TestFunctions(unittest.TestCase):
         origin = [1, 1, 0]
 
         self.assertAlmostEqual(f.point_to_line_distance(origin, direction, point), 2**0.5 / 2)
+
+    def test_polyline_1dim(self):
+        with self.assertRaises(ValueError):
+            points = np.array([0, 1, 2, 3, 4, 5])
+            f.polyline_length(points)
+
+    def test_polyline_2dim(self):
+        with self.assertRaises(ValueError):
+            points = np.array([[0, 0], [1, 1], [2, 1]])
+            f.polyline_length(points)
+
+    def test_polyline_3dim(self):
+        points = np.array(
+            [
+                [0, 0, 0],
+                [0, 1, 0],
+                [1, 1, 0],
+                [1, 0, 0],
+            ]
+        )
+
+        self.assertAlmostEqual(f.polyline_length(points), 3)

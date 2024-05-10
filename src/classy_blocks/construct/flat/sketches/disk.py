@@ -100,6 +100,11 @@ class OneCoreDisk(DiskBase):
         (3, 7, 4, 0),
     ]
 
+    chops: ClassVar = [
+        [0],  # axis 0
+        [1, 2],  # axis 1
+    ]
+
     def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
         pattern = FanPattern(center_point, radius_point, normal)
         ratios = [self.diagonal_ratio]
@@ -125,6 +130,11 @@ class QuarterDisk(DiskBase):
         # shell
         (1, 4, 5, 2),
         (2, 5, 6, 3),
+    ]
+
+    chops: ClassVar = [
+        [0],  # axis 0
+        [1, 2],  # axis 1
     ]
 
     def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
@@ -153,6 +163,11 @@ class HalfDisk(DiskBase):
         (2, 7, 8, 3),
         (3, 8, 9, 4),
         (4, 9, 10, 5),
+    ]
+
+    chops: ClassVar = [
+        [2],  # axis 0
+        [2, 3, 4],  # axis 1
     ]
 
     def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
@@ -189,6 +204,8 @@ class FourCoreDisk(DiskBase):
         (7, 15, 16, 8),
         (8, 16, 9, 1),
     ]
+
+    chops: ClassVar = [[4], [4, 5, 6, 8]]
 
     def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
         pattern = FanPattern(center_point, radius_point, normal)

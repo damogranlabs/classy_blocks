@@ -39,17 +39,7 @@ class RoundSolidShape(LoftedShape):
 
     def chop_axial(self, **kwargs):
         """Chop the shape between start and end face"""
-        self.operations[0].chop(self.axial_axis, **kwargs)
-
-    @property
-    def core(self):
-        """Operations in the center of the shape"""
-        return self.operations[: len(self.sketch_1.core)]
-
-    @property
-    def shell(self):
-        """Operations on the outside of the shape"""
-        return self.operations[len(self.sketch_1.core) :]
+        super().chop(self.axial_axis, **kwargs)
 
     def chop_radial(self, **kwargs):
         """Chop the outer 'ring', or 'shell';
@@ -62,12 +52,21 @@ class RoundSolidShape(LoftedShape):
         if "end_size" in kwargs:
             kwargs["end_size"] *= c2s_ratio
 
-        self.shell[0].chop(self.radial_axis, **kwargs)
+        super().chop(self.radial_axis, **kwargs)
 
     def chop_tangential(self, **kwargs):
         """Circumferential chop; also defines core sizes"""
-        for i in (0, 1, 2, -1):  # minimal number of blocks that need to be set
-            self.shell[i].chop(self.tangential_axis, **kwargs)
+        super().chop(self.tangential_axis, **kwargs)
+
+    @property
+    def core(self):
+        """Operations in the center of the shape"""
+        return self.operations[: len(self.sketch_1.core)]
+
+    @property
+    def shell(self):
+        """Operations on the outside of the shape"""
+        return self.operations[len(self.sketch_1.core) :]
 
     def set_outer_patch(self, name: str) -> None:
         for operation in self.shell:

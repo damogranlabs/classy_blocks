@@ -153,3 +153,6 @@ class RevolvedRing(ExtrudedRing):
     @property
     def operations(self) -> List[Operation]:
         return self.revolves
+
+    def chop_axial(self, **kwargs):
+        self.operations[0].chop(self.axial_axis, **kwargs)

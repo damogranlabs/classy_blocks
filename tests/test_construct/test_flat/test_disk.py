@@ -4,7 +4,7 @@ from unittest.mock import patch
 import numpy as np
 from parameterized import parameterized
 
-from classy_blocks.construct.flat.sketches.disk import QuarterDisk
+from classy_blocks.construct.flat.sketches.disk import HalfDisk, OneCoreDisk, QuarterDisk, WrappedDisk
 from classy_blocks.construct.shapes.sphere import get_named_points
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
@@ -98,3 +98,24 @@ class QuarterDiskTests(unittest.TestCase):
         points = get_named_points(qdisk)
 
         self.assertTrue(f.norm(points[key] - position) < TOL)
+
+
+class DisksTests(unittest.TestCase):
+    def test_one_core_disk(self):
+        disk = OneCoreDisk([0, 0, 0], [1, 0, 0], [0, 0, 1])
+
+        self.assertEqual(len(disk.grid[0]), 1)
+        self.assertEqual(len(disk.grid[1]), 4)
+
+    def test_half_disk(self):
+        disk = HalfDisk([0, 0, 0], [1, 0, 0], [0, 0, 1])
+
+        self.assertEqual(len(disk.grid[0]), 2)
+        self.assertEqual(len(disk.grid[1]), 4)
+
+    def test_wrapped_disk(self):
+        disk = WrappedDisk([0, 0, 0], [2, 0, 0], 1, [0, 0, 1])
+
+        self.assertEqual(len(disk.grid[0]), 1)
+        self.assertEqual(len(disk.grid[1]), 4)
+        self.assertEqual(len(disk.grid[2]), 4)
