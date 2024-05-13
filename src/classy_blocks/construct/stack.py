@@ -1,11 +1,12 @@
-from typing import ClassVar, List, Union
+from typing import ClassVar, List, Optional, Sequence, Union
 
 import numpy as np
 
+from classy_blocks.base import transforms as tr
 from classy_blocks.base.element import ElementBase
 from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.construct.operations.operation import Operation
-from classy_blocks.construct.shape import ExtrudedShape, LoftedShape, RevolvedShape
+from classy_blocks.construct.shape import LoftedShape
 from classy_blocks.types import AxisType, PointType, VectorType
 from classy_blocks.util import functions as f
 
@@ -60,26 +61,56 @@ class Stack(ElementBase):
         return np.average([op.center for op in self.operations], axis=0)
 
 
-class ExtrudedStack(Stack):
-    """Extruded shapes, stacked on top of each other"""
+class TransformedStack(Stack):
+    """A stack where each next tier's sketch is transformed according to a list
+    of transformations, passed to constructor. Arc edges can be created by specifying
+    a mid_transforms list. The transformations there refer to base sketch - its vertices
+    will be used as arc points for all lofted edges."""
+
+    def __init__(
+        self,
+        base: Sketch,
+        end_transforms: Sequence[tr.Transformation],
+        repeats: int,
+        mid_transforms: Optional[Sequence[tr.Transformation]] = None,
+    ):
+        sketch_1 = base
+
+        for _ in range(repeats):
+            sketch_2 = sketch_1.copy().transform(end_transforms)
+
+            if mid_transforms is not None:
+                sketch_mid = sketch_1.copy().transform(mid_transforms)
+            else:
+                sketch_mid = None
+
+            shape = LoftedShape(sketch_1, sketch_2, sketch_mid)
+
+            self.shapes.append(shape)
+            sketch_1 = sketch_2
+
+
+class ExtrudedStack(TransformedStack):
+    """Extruded shapes, stacked on top of each other.
+    Amount is overall 'height' of the stack."""
 
     def __init__(self, base: Sketch, amount: Union[float, VectorType], repeats: int):
         if isinstance(amount, float) or isinstance(amount, int):
-            extrude_vector = base.normal * amount
+            extrude_vector = base.normal * amount / repeats
         else:
-            extrude_vector = np.asarray(amount)
+            extrude_vector = np.asarray(amount) / repeats
 
-        for _ in range(repeats):
-            shape = ExtrudedShape(base, extrude_vector / repeats)
-            self.shapes.append(shape)
-            base = shape.sketch_2
+        super().__init__(base, [tr.Translation(extrude_vector)], repeats)
 
 
-class RevolvedStack(Stack):
-    """Revolved shapes, stacked around the given center"""
+class RevolvedStack(TransformedStack):
+    """Revolved shapes, stacked around the given center.
+    Angle given is overall and is divided by repeats for each tier."""
 
     def __init__(self, base: Sketch, angle: float, axis: VectorType, origin: PointType, repeats: int):
-        for _ in range(repeats):
-            shape = RevolvedShape(base, angle, axis, origin)
-            self.shapes.append(shape)
-            base = shape.sketch_2
+        super().__init__(
+            base,
+            [tr.Rotation(axis, angle / repeats, origin)],
+            repeats,
+            [tr.Rotation(axis, angle / repeats / 2, origin)],
+        )

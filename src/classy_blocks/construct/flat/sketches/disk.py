@@ -229,8 +229,9 @@ class WrappedDisk(DiskBase):
     making the sketch a square"""
 
     quad_map: ClassVar = [
-        # Just the normal quad map
+        # Just the normal map
         *OneCoreDisk.quad_map,
+        # with added outer quads
         (4, 8, 9, 5),
         (5, 9, 10, 6),
         (6, 10, 11, 7),
@@ -238,7 +239,7 @@ class WrappedDisk(DiskBase):
     ]
 
     chops: ClassVar = [
-        [1, 5],
+        [6],
         [1, 2],
     ]
 
@@ -267,3 +268,82 @@ class WrappedDisk(DiskBase):
     @property
     def center(self):
         return self.faces[0].center
+
+
+class Oval(DiskBase):
+    quad_map: ClassVar = [
+        # the core
+        (0, 1, 2, 3),  # 0
+        (5, 0, 3, 4),  # 1
+        (7, 6, 0, 5),  # 2
+        (8, 9, 6, 7),  # 3
+        (9, 10, 11, 6),  # 4
+        (6, 11, 1, 0),  # 5
+        # the shell
+        (1, 12, 13, 2),  # 6
+        (2, 13, 14, 3),  # 7
+        (3, 14, 15, 4),  # 8
+        (4, 15, 16, 5),  # 9
+        (5, 16, 17, 7),  # 10
+        (7, 17, 18, 8),  # 11
+        (8, 18, 19, 9),  # 12
+        (9, 19, 20, 10),  # 13
+        (10, 20, 21, 11),  # 14
+        (11, 21, 12, 1),  # 15
+    ]
+
+    chops: ClassVar = [
+        [6],
+        [6, 7, 8, 10, 11],
+    ]
+
+    def __init__(self, center_point_1: PointType, center_point_2: PointType, normal: VectorType, radius: float):
+        center_point_1 = np.asarray(center_point_1)
+        center_point_2 = np.asarray(center_point_2)
+        normal = f.unit_vector(np.asarray(normal))
+
+        ratios = [self.side_ratio, self.diagonal_ratio]
+        angles = np.linspace(0, np.pi, num=5)
+
+        center_delta = center_point_2 - center_point_1
+        radius_vector_1 = f.unit_vector(np.cross(normal, center_delta)) * radius
+        radius_point_1 = center_point_1 + radius_vector_1  # point 12 on the sketch
+
+        pattern_1 = FanPattern(center_point_1, radius_point_1, normal)
+
+        radius_vector_2 = f.unit_vector(np.cross(normal, -center_delta)) * radius
+        radius_point_2 = center_point_2 + radius_vector_2  # point 17 on the sketch
+        pattern_2 = FanPattern(center_point_2, radius_point_2, normal)
+
+        inner_points_1 = pattern_1.get_inner_points(angles, ratios)
+        inner_points_2 = pattern_2.get_inner_points(angles, ratios)
+
+        outer_points_1 = pattern_1.get_outer_points(angles)
+        outer_points_2 = pattern_2.get_outer_points(angles)
+
+        locations = [center_point_1, *inner_points_1, center_point_2, *inner_points_2, *outer_points_1, *outer_points_2]
+
+        super().__init__(locations, self.quad_map)
+
+    @property
+    def center_1(self) -> NPPointType:
+        return self.faces[0].points[0].position
+
+    @property
+    def center_2(self) -> NPPointType:
+        return self.faces[5].points[0].position
+
+    @property
+    def center(self):
+        return np.average(self.center_1 + self.center_2)
+
+    def add_edges(self):
+        for i in (6, 7, 8, 9):
+            self.faces[i].add_edge(1, Origin(self.center_1))
+
+        for i in (11, 12, 13, 14):
+            self.faces[i].add_edge(1, Origin(self.center_2))
+
+    @property
+    def grid(self):
+        return [self.faces[:6], self.faces[6:]]
