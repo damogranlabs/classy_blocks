@@ -1,8 +1,12 @@
+from .base.transforms import Mirror, Rotation, Scaling, Translation
 from .construct.curves.analytic import AnalyticCurve
 from .construct.curves.discrete import DiscreteCurve
 from .construct.curves.interpolated import LinearInterpolatedCurve, SplineInterpolatedCurve
 from .construct.edges import Angle, Arc, OnCurve, Origin, PolyLine, Project, Spline
 from .construct.flat.face import Face
+from .construct.flat.sketch import MappedSketch
+from .construct.flat.sketches.disk import FourCoreDisk, HalfDisk, OneCoreDisk, Oval, WrappedDisk
+from .construct.flat.sketches.grid import Grid
 from .construct.operations.box import Box
 from .construct.operations.connector import Connector
 from .construct.operations.extrude import Extrude
@@ -15,6 +19,7 @@ from .construct.shapes.frustum import Frustum
 from .construct.shapes.rings import ExtrudedRing, RevolvedRing
 from .construct.shapes.shell import Shell
 from .construct.shapes.sphere import Hemisphere
+from .construct.stack import ExtrudedStack, RevolvedStack, TransformedStack
 from .mesh import Mesh
 from .modify.clamps.clamp import ClampBase
 from .modify.clamps.curve import CurveClamp, LineClamp, RadialClamp
@@ -27,6 +32,11 @@ from .modify.optimizer import Optimizer
 from .modify.reorient.viewpoint import ViewpointReorienter
 
 __all__ = [
+    # Base
+    "Mirror",
+    "Rotation",
+    "Scaling",
+    "Translation",
     # curves
     "DiscreteCurve",
     "LinearInterpolatedCurve",
@@ -48,6 +58,14 @@ __all__ = [
     "Box",
     "Wedge",
     "Connector",
+    # Sketches
+    "MappedSketch",
+    "Grid",
+    "OneCoreDisk",
+    "FourCoreDisk",
+    "HalfDisk",
+    "WrappedDisk",
+    "Oval",
     # construct shapes
     "Elbow",
     "Frustum",
@@ -57,6 +75,11 @@ __all__ = [
     "RevolvedRing",
     "Hemisphere",
     "Shell",
+    # Stacks
+    "TransformedStack",
+    "ExtrudedStack",
+    "RevolvedStack",
+    # The Mesh
     "Mesh",
     # Modification of assembled meshes
     "GeometricFinder",

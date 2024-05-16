@@ -153,6 +153,10 @@ class EighthSphere(Shape):
         return self.lofts[self.n_cores :]
 
     @property
+    def grid(self):
+        return [self.core, self.shell]
+
+    @property
     def radius(self) -> float:
         """Radius of this sphere"""
         return f.norm(self.radius_point - self.center_point)

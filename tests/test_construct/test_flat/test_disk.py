@@ -4,7 +4,7 @@ from unittest.mock import patch
 import numpy as np
 from parameterized import parameterized
 
-from classy_blocks.construct.flat.sketches.disk import HalfDisk, OneCoreDisk, QuarterDisk, WrappedDisk
+from classy_blocks.construct.flat.sketches.disk import HalfDisk, OneCoreDisk, Oval, QuarterDisk, WrappedDisk
 from classy_blocks.construct.shapes.sphere import get_named_points
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
@@ -119,3 +119,32 @@ class DisksTests(unittest.TestCase):
         self.assertEqual(len(disk.grid[0]), 1)
         self.assertEqual(len(disk.grid[1]), 4)
         self.assertEqual(len(disk.grid[2]), 4)
+
+
+class OvalTests(unittest.TestCase):
+    @property
+    def oval(self) -> Oval:
+        center_1 = [0, 0, 0]
+        center_2 = [0, 1, 0]
+        normal = [0, 0, 1]
+
+        return Oval(center_1, center_2, normal, 0.5)
+
+    def test_construct(self):
+        self.assertEqual(len(self.oval.faces), 16)
+
+    def test_planar(self):
+        for face in self.oval.faces:
+            for point in face.point_array:
+                self.assertEqual(point[2], 0)
+
+    def test_centers(self):
+        oval = self.oval
+
+        np.testing.assert_almost_equal(oval.center, (np.array(oval.center_1) + np.array(oval.center_2)) / 2)
+
+    def test_grid(self):
+        oval = self.oval
+
+        self.assertEqual(len(oval.grid[0]), 6)
+        self.assertEqual(len(oval.grid[1]), 10)

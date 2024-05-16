@@ -18,7 +18,6 @@ normal = [0, 0, 1]
 
 mesh = cb.Mesh()
 
-
 base = Oval(oval_point_1, oval_point_2, normal, oval_radius)
 
 stack = TransformedStack(

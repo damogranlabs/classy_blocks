@@ -266,3 +266,13 @@ class TestFunctions(unittest.TestCase):
         )
 
         self.assertAlmostEqual(f.polyline_length(points), 3)
+
+    def test_polyline_singlepoint(self):
+        points = np.array(
+            [
+                [0, 0, 0],
+            ]
+        )
+
+        with self.assertRaises(ValueError):
+            _ = f.polyline_length(points)

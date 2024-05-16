@@ -298,8 +298,8 @@ class Oval(DiskBase):
     ]
 
     def __init__(self, center_point_1: PointType, center_point_2: PointType, normal: VectorType, radius: float):
-        center_point_1 = np.asarray(center_point_1)
-        center_point_2 = np.asarray(center_point_2)
+        center_point_1 = np.array(center_point_1)
+        center_point_2 = np.array(center_point_2)
         normal = f.unit_vector(np.asarray(normal))
 
         ratios = [self.side_ratio, self.diagonal_ratio]
@@ -335,7 +335,7 @@ class Oval(DiskBase):
 
     @property
     def center(self):
-        return np.average(self.center_1 + self.center_2)
+        return (self.center_1 + self.center_2) / 2
 
     def add_edges(self):
         for i in (6, 7, 8, 9):

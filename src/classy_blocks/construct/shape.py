@@ -43,6 +43,12 @@ class Shape(ElementBase, abc.ABC):
         """Geometric mean of centers of all operations"""
         return np.average([operation.center for operation in self.operations], axis=0)
 
+    @property
+    @abc.abstractmethod
+    def grid(self) -> List[List[Operation]]:
+        """A 2-dimensional array consisting of Operations, grouped by their position
+        (like [[core], [shell]] or [[rows], [columns]])"""
+
 
 class LoftedShape(Shape, abc.ABC, Generic[SketchT]):
     """A Shape, obtained by taking a two and transforming it once

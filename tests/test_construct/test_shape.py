@@ -69,6 +69,26 @@ class ShapeTests(unittest.TestCase):
         for operation in ring.shell:
             self.assertEqual(operation.patch_names["front"], "test")
 
+    def test_start_patch_revolved(self):
+        face = Face([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]])
+        face.translate([0, 1, 0])
+        ring = RevolvedRing([0, 0, 0], [1, 0, 0], face)
+
+        ring.set_start_patch("test")
+
+        for operation in ring.shell:
+            self.assertEqual(operation.patch_names["left"], "test")
+
+    def test_end_patch_revolved(self):
+        face = Face([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]])
+        face.translate([0, 1, 0])
+        ring = RevolvedRing([0, 0, 0], [1, 0, 0], face)
+
+        ring.set_end_patch("test")
+
+        for operation in ring.shell:
+            self.assertEqual(operation.patch_names["right"], "test")
+
 
 class ElbowTests(unittest.TestCase):
     """Tests of the Elbow shape"""
@@ -189,6 +209,13 @@ class SphereTests(unittest.TestCase):
 
         self.assertEqual(n_patches, 12)
 
+    def test_outer_patch(self):
+        sphere = Hemisphere([0, 0, 0], [1, 0, 0], [0, 0, 1])
+        sphere.set_outer_patch("dome")
+
+        for operation in sphere.grid[1]:
+            self.assertEqual(operation.patch_names["right"], "dome")
+
     def test_core(self):
         sphere = EighthSphere([0, 0, 0], [1, 0, 0], [0, 0, 1])
 
@@ -247,8 +274,6 @@ class CylinderTests(unittest.TestCase):
     def test_mirror(self):
         cyl_1 = self.cylinder
         cyl_2 = self.cylinder.copy().mirror(-cyl_1.sketch_1.normal, cyl_1.sketch_1.center)
-
-        print(cyl_2)
 
         np.testing.assert_almost_equal(
             cyl_2.sketch_2.center - cyl_2.sketch_1.center, cyl_1.sketch_1.center - cyl_1.sketch_2.center

@@ -4,6 +4,7 @@ import numpy as np
 
 from classy_blocks.construct.flat.quad import find_neighbours, get_fixed_points
 from classy_blocks.construct.flat.sketch import MappedSketch
+from classy_blocks.construct.flat.sketches.grid import Grid
 
 
 class MappedSketchTests(unittest.TestCase):
@@ -89,3 +90,15 @@ class MappedSketchTests(unittest.TestCase):
         sketch = MappedSketch(self.positions, self.quads, smooth_iter=10)
 
         np.testing.assert_almost_equal(sketch.center, [1, 1, 0])
+
+
+class GridSketchTests(unittest.TestCase):
+    def test_construct(self):
+        grid = Grid([0, 0, 0], [1, 1, 0], 3, 3)
+
+        self.assertEqual(len(grid.faces), 9)
+
+    def test_center(self):
+        grid = Grid([0, 0, 0], [1, 1, 0], 3, 3)
+
+        np.testing.assert_almost_equal(grid.center, [0.5, 0.5, 0])
