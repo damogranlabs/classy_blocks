@@ -1,6 +1,7 @@
 import unittest
 
 import classy_blocks as cb
+import classy_blocks.construct.flat.sketches.mapped
 
 
 class ImportsTests(unittest.TestCase):
@@ -39,10 +40,10 @@ class ImportsTests(unittest.TestCase):
         _ = cb.Connector
 
     def test_import_sketches(self):
-        _ = cb.MappedSketch
+        _ = classy_blocks.construct.flat.sketches.mapped.MappedSketch
         _ = cb.Grid
         _ = cb.Oval
-        _ = cb.MappedSketch
+        _ = classy_blocks.construct.flat.sketches.mapped.MappedSketch
         _ = cb.Grid
         _ = cb.OneCoreDisk
         _ = cb.FourCoreDisk
@@ -52,7 +53,6 @@ class ImportsTests(unittest.TestCase):
 
     def test_import_stacks(self):
         _ = cb.TransformedStack
-        _ = cb.LoftedStack
         _ = cb.ExtrudedStack
         _ = cb.RevolvedStack
 

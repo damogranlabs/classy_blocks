@@ -284,3 +284,8 @@ class ShellTests(ShellTestsBase):
 
         with self.assertRaises(DisconnectedChopError):
             shell.chop(coun=10)
+
+    def test_grid(self):
+        shell = self.get_shell(["front", "right", "left"])
+
+        self.assertListEqual(shell.operations, shell.grid[0])

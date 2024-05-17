@@ -5,7 +5,7 @@ import numpy as np
 
 from classy_blocks.construct.edges import Origin
 from classy_blocks.construct.flat.face import Face
-from classy_blocks.construct.flat.sketch import MappedSketch
+from classy_blocks.construct.flat.sketches.mapped import MappedSketch
 from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, PointType, VectorType
 from classy_blocks.util import functions as f
 
@@ -118,7 +118,7 @@ class OneCoreDisk(DiskBase):
 
     @property
     def grid(self):
-        return [[self.faces[0]], self.faces[1:]]
+        return [self.faces[:1], self.faces[1:]]
 
 
 class QuarterDisk(DiskBase):

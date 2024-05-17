@@ -1,5 +1,6 @@
 """Mathematical functions for general everyday household use"""
 
+from itertools import chain
 from typing import List, Literal, Optional, Union
 
 import numpy as np
@@ -287,4 +288,4 @@ def polyline_length(points: NPPointListType) -> float:
 
 def flatten_2d_list(twodim: List[List]) -> List:
     """Flattens a list of lists to a 1d-list"""
-    return [item for sublist in twodim for item in sublist]
+    return list(chain.from_iterable(twodim))

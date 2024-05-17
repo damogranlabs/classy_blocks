@@ -1,4 +1,4 @@
-from typing import ClassVar, List, Optional, Sequence, Union
+from typing import List, Optional, Sequence, Union
 
 import numpy as np
 
@@ -15,32 +15,40 @@ class Stack(ElementBase):
     """A collection of topologically similar Shapes,
     stacked on top of each other."""
 
-    shapes: ClassVar[List[LoftedShape]] = []
+    def __init__(self):
+        self.shapes: List[LoftedShape] = []
 
     @property
-    def grid(self) -> List[List[List[Operation]]]:
+    def grid(self):
         """Returns all operations as a 3-dimensional list;
         first two dimensions within a shape, the third along the stack."""
-        # TODO: convert this to typed numpy array to support all indexing,
-        # slicing and iterating, available on numpy arrays
-        # Currently, the problem is typing support (Numpy arrays of exact object)
-
-        # Invert the list so that z-value is the last
-        shapes = np.asarray([shape.grid for shape in self.shapes], dtype="object")
-
-        return np.swapaxes(shapes, 0, 2).tolist()
+        return [shape.grid for shape in self.shapes]
 
     def get_slice(self, axis: AxisType, index: int) -> List[Operation]:
-        """Returns all operations along given axis;
-        2 - same as shapes[index]
-        0, 1 - like shape[axis][index] for each shape"""
+        """Returns all operation with given index in specified axis.
+        For cartesian grids this is equivalent to 'lofts on the same plane';
+        This does not work with custom/mapped sketches that do not have
+        conform to a cartesian grid.
+
+        Example:
+        A stack that consists of 3 shapes, created from a 2x5 grid.
+        - get_slice(0, i) will return 15 operations (5x3, all operations with the same x-coordinate),
+        - get_slice(1, i) will return 6 operations (2x3, all with the same y-coordinate),
+        - get_slice(2, i) will return 10 operations (2x5, all with the same z-coordinate)."""
+
+        if axis == 2:
+            return self.shapes[index].operations
+
+        operations: List[Operation] = []
+
         if axis == 0:
-            return np.asarray(self.grid, dtype="object")[index, :, :].ravel().tolist()
+            for shape in self.shapes:
+                operations += [shape.grid[x][index] for x in range(len(shape.grid))]
+        else:
+            for shape in self.shapes:
+                operations += [shape.grid[index][y] for y in range(len(shape.grid[index]))]
 
-        if axis == 1:
-            return np.asarray(self.grid, dtype="object")[:, index, :].ravel().tolist()
-
-        return self.shapes[index].operations
+        return operations
 
     def chop(self, **kwargs) -> None:
         """Adds a chop in lofted/extruded/revolved direction to one operation
@@ -74,6 +82,8 @@ class TransformedStack(Stack):
         repeats: int,
         mid_transforms: Optional[Sequence[tr.Transformation]] = None,
     ):
+        super().__init__()
+
         sketch_1 = base
 
         for _ in range(repeats):

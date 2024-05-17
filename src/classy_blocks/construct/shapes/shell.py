@@ -185,6 +185,10 @@ class Shell(Shape):
     def operations(self):
         return self.lofts
 
+    @property
+    def grid(self):
+        return [self.operations]
+
     def chop(self, **kwargs) -> None:
         """Chop in offset direction"""
         # The lofts should be of approximately the same 'height';

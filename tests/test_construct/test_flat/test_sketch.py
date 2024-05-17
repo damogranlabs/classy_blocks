@@ -3,8 +3,8 @@ import unittest
 import numpy as np
 
 from classy_blocks.construct.flat.quad import find_neighbours, get_fixed_points
-from classy_blocks.construct.flat.sketch import MappedSketch
 from classy_blocks.construct.flat.sketches.grid import Grid
+from classy_blocks.construct.flat.sketches.mapped import MappedSketch
 
 
 class MappedSketchTests(unittest.TestCase):

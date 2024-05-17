@@ -4,9 +4,9 @@ from .construct.curves.discrete import DiscreteCurve
 from .construct.curves.interpolated import LinearInterpolatedCurve, SplineInterpolatedCurve
 from .construct.edges import Angle, Arc, OnCurve, Origin, PolyLine, Project, Spline
 from .construct.flat.face import Face
-from .construct.flat.sketch import MappedSketch
 from .construct.flat.sketches.disk import FourCoreDisk, HalfDisk, OneCoreDisk, Oval, WrappedDisk
 from .construct.flat.sketches.grid import Grid
+from .construct.flat.sketches.mapped import MappedSketch
 from .construct.operations.box import Box
 from .construct.operations.connector import Connector
 from .construct.operations.extrude import Extrude
