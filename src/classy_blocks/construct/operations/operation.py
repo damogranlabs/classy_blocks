@@ -1,9 +1,11 @@
+import warnings
 from typing import Dict, List, Optional, TypeVar, Union, get_args
 
 import numpy as np
 
 from classy_blocks.base.element import ElementBase
 from classy_blocks.base.exceptions import EdgeCreationError
+from classy_blocks.base.transforms import Mirror
 from classy_blocks.construct.edges import EdgeData, Line, Project
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.point import Point
@@ -295,6 +297,11 @@ class Operation(ElementBase):
 
         return SIDES_MAP.index(side)
 
+    def invert(self) -> "Operation":
+        """Flips top and bottom face"""
+        self.top_face, self.bottom_face = self.bottom_face, self.top_face
+        return self
+
     def mirror(self, normal: VectorType, origin: Optional[PointType] = None):
         """Mirroring an operation will create an inside-out block but automatic
         reordering of all vertices would create confusion.
@@ -302,6 +309,17 @@ class Operation(ElementBase):
         so that original and mirrored lofts face the same z-direction."""
         super().mirror(normal, origin)
 
-        self.top_face, self.bottom_face = self.bottom_face, self.top_face
+        self.invert()
 
         return self
+
+    def transform(self, transforms):
+        mirrors = [isinstance(part, Mirror) for part in transforms]
+        if any(mirrors):
+            warnings.warn(
+                "Using a transform with a Mirror on an Operation; "
+                "this will invert it - use Operation.invert() to put it back in shape",
+                stacklevel=1,
+            )
+
+        return super().transform(transforms)
