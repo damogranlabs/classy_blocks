@@ -4,6 +4,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# [1.5.0]
+### Added
+- Curves:
+  - get_tangent()
+  - get_normal()
+  - get_binormal()
+- Mapped sketch
+ - Definition of any fixed-blocking sketch
+ - Automatic laplacian smoothing (fixed outer edges, movable inner vertices)
+- Sketches
+ - OneCoreDisk
+ - FourCoreDisk (the default Disk for Shapes)
+ - WrappedDisk
+ - Oval
+ - WrappedDisk
+ - Grid (A cartesian array of rectangular faces in XY plane)
+- grid property of Sketch/Shape/Stack
+- Stacks
+- LoftedShape: a generic shape from 2 Sketches with the same number of faces
+- Examples: Heater, Fusilli
+- Mesh.delete() will omit given operation from blockMeshDict but its data stays in mesh (chops, patches, etc.)
+
+### Changed
+- Definitions of Disks sketches
+- All off-the-shelf Shapes are now a LoftedShape
+- Calling .transform() with a Mirror transformation will warn about creating an inverted block
+
+
 # [1.4.1]
 ### Changed
 - Improved optimization output

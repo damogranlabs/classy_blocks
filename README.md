@@ -59,6 +59,7 @@ _Unchecked items are not implemented yet but are on a TODO list_
     - [x] Extrude
     - [x] Revolve
     - [x] Wedge (a shortcut to Revolve for 2D axisymmetric cases)
+    - [x] Connector (A Loft between two existing Operations)
 - [x] Sketches of common cross-sections
     - [x] Quarter and Semi circle
     - [x] Circle
@@ -395,13 +396,10 @@ There's no official documentation yet so here are some tips for easier navigatio
 1. Modification of placed geometry, either by manually moving vertices or by utilizing some sort of optimization algorithm.
 1. Output of optimized/modified mesh.
 
-# TODO
-- Unchecked list items from [Features](#features)
-- Usability
-    - Frustum with any profile, not just arc
-    - Joining two blocks by moving vertices/creating new blocks
-- Technical stuff:
-    - Skew transform
-    - Debugging: connection between block and Shapes, naming
-    - 101% test coverage
-    - Documentation
+## Support?
+
+If you are stuck, try reading the [classy_blocks tutorial on damogranlabs.com](https://damogranlabs.com/2023/04/classy_blocks-tutorial-part-1-the-basics/).
+
+You are free to join the [OpenFOAM Discord channel](https://discord.gg/P9p9eHn) where classy_blocks users and developers hang out.
+
+If you have collosal plans for meshing but no resources, write an email to [Nejc Jurkovic](mailto:kandelabr@gmail.com) and we'll discuss your options.
