@@ -62,7 +62,7 @@ class Stack(ElementBase):
 
     @property
     def parts(self):
-        return self.operations
+        return self.shapes
 
     @property
     def center(self):
@@ -97,7 +97,7 @@ class TransformedStack(Stack):
             shape = LoftedShape(sketch_1, sketch_2, sketch_mid)
 
             self.shapes.append(shape)
-            sketch_1 = sketch_2
+            sketch_1 = sketch_2.copy()
 
 
 class ExtrudedStack(TransformedStack):

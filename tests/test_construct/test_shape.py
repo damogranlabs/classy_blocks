@@ -26,6 +26,12 @@ class ShapeTests(unittest.TestCase):
 
         np.testing.assert_array_equal(self.cylinder.sketch_1.center, [1, 0, 0])
 
+    def test_translate_sketches(self):
+        """Translate the cylinder and see what happens to sketches"""
+        cyl = self.cylinder.translate([1, 0, 0])
+
+        np.testing.assert_almost_equal(cyl.sketch_1.center, [1, 0, 0])
+
     def test_cylinder_center(self):
         """Center of a cylinder"""
         np.testing.assert_almost_equal(self.cylinder.center, [0.5, 0, 0])

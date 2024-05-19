@@ -442,3 +442,9 @@ class OperationTransformTests(unittest.TestCase):
 
         with self.assertWarns(Warning):
             extrude.copy().transform([Mirror([0, 0, 1], [0, 0, 0])])
+
+    def test_mirror_transform_no_origin(self):
+        extrude = Extrude(self.loft.bottom_face, [0, 0, 1])
+        mirror = extrude.copy().transform([Mirror([0, 0, 1])]).invert()
+
+        np.testing.assert_equal(extrude.bottom_face.center, mirror.top_face.center)

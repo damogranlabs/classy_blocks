@@ -263,3 +263,20 @@ class MeshTests(BlockTestCase):
 
         with self.assertRaises(RuntimeError):
             self.mesh.backport()
+
+    def test_delete(self):
+        boxes = [
+            Box([0, 0, 0], [1, 1, 1]),
+            Box([1, 0, 0], [2, 1, 1]),
+            Box([0, 1, 0], [1, 2, 1]),
+            Box([1, 1, 0], [2, 2, 1]),
+        ]
+
+        for box in boxes:
+            self.mesh.add(box)
+
+        self.mesh.delete(boxes[0])
+
+        self.mesh.assemble()
+
+        self.assertEqual(len(self.mesh.blocks), 3)

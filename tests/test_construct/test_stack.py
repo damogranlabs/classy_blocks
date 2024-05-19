@@ -15,10 +15,17 @@ class StackTests(unittest.TestCase):
     def square_base(self) -> cb.Grid:
         return cb.Grid([0, 0, 0], [1, 1, 0], 2, 5)
 
-    def test_construct_extruded(self):
+    def test_construct_extruded_vector(self):
+        stack = cb.ExtrudedStack(self.round_base, [0, 0, 1], 4)
+
+        self.assertEqual(len(stack.grid), 4)
+        self.assertEqual(stack.shapes[-1].operations[0].top_face.center[2], 1)
+
+    def test_construct_extruded_amount(self):
         stack = cb.ExtrudedStack(self.round_base, 1, 4)
 
         self.assertEqual(len(stack.grid), 4)
+        self.assertEqual(stack.shapes[-1].operations[0].top_face.center[2], 1)
 
     def test_construct_revolved(self):
         _ = cb.RevolvedStack(self.round_base, np.pi / 6, [0, 1, 0], [2, 0, 0], 4)
@@ -38,6 +45,18 @@ class StackTests(unittest.TestCase):
 
         for shape in stack.shapes:
             self.assertEqual(len(shape.grid[0][0].chops[2]), 1)
+
+    def test_center(self):
+        stack = cb.ExtrudedStack(self.round_base, 1, 4)
+
+        np.testing.assert_almost_equal(stack.center, [0, 0, 0.5])
+
+    def test_stack_transform(self):
+        stack = cb.ExtrudedStack(self.round_base, 1, 4)
+
+        stack.translate([0, 0, 1])
+
+        np.testing.assert_almost_equal(stack.center, [0, 0, 1.5])
 
     def test_grid_square_axis0(self):
         stack = cb.ExtrudedStack(self.square_base, 1, 3)
