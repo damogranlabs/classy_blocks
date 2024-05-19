@@ -1,15 +1,15 @@
 import abc
 import warnings
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import scipy.optimize
 
 from classy_blocks.base.element import ElementBase
 from classy_blocks.construct.point import Point
-from classy_blocks.types import NPPointListType, NPPointType, ParamCurveFuncType, PointListType, PointType
+from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, ParamCurveFuncType, PointListType, PointType
 from classy_blocks.util import functions as f
-from classy_blocks.util.constants import DTYPE
+from classy_blocks.util.constants import DTYPE, TOL
 
 
 class CurveBase(ElementBase):
@@ -17,11 +17,9 @@ class CurveBase(ElementBase):
 
     bounds: Tuple[float, float]
 
-    def _check_param(self, param: float) -> int:
+    def _check_param(self, param: Union[int, float]) -> Union[int, float]:
         """Checks that the passed parameter is legit for the given set of points"""
-        param = int(param)
-
-        if not self.bounds[0] <= param <= self.bounds[1]:
+        if not (self.bounds[0] <= param <= self.bounds[1]):
             raise ValueError(f"Invalid parameter {param} (0...{self.bounds[1]})")
 
         return param
@@ -79,9 +77,39 @@ class CurveBase(ElementBase):
         i_distance = np.argmin(distances)
         return params[i_distance]
 
+    def _diff(self, param: float, order: int, delta: float = TOL) -> NPVectorType:
+        params = np.linspace(param - order * delta / 2, param + order * delta / 2, num=order + 1)
+
+        if params[0] < self.bounds[0]:
+            params += self.bounds[0] - params[0]
+
+        if params[-1] > self.bounds[1]:
+            params -= params[-1] - self.bounds[1]
+
+        points = np.array([self.get_point(p) for p in params])
+
+        return np.diff(points, n=order, axis=0)[0]
+
+    def get_tangent(self, param: float, delta: float = TOL) -> NPVectorType:
+        """Returns an approximate, normalized tangent to the curve at given parameter"""
+        return f.unit_vector(self._diff(param, 1, delta))
+
+    def get_normal(self, param: float, delta: float = TOL) -> NPVectorType:
+        """Returns an approximated normal vector at given parameter"""
+        # Using Frenet-Serret formula https://en.wikipedia.org/wiki/Curvature
+        return f.unit_vector(self._diff(param, 2, delta))
+
+    def get_binormal(self, param: float, delta: float = TOL) -> NPVectorType:
+        """Returns the binormal vector from Frenet-Serret TNB frame
+        (https://en.wikipedia.org/wiki/Frenet%E2%80%93Serret_formulas)"""
+        return f.unit_vector(np.cross(self.get_tangent(param, delta), self.get_normal(param, delta)))
+
 
 class PointCurveBase(CurveBase):
     """A base object for curves, defined by a list of points"""
+
+    def _check_param(self, param):
+        return int(super()._check_param(param))
 
     @staticmethod
     def _check_points(points: PointListType) -> List[Point]:

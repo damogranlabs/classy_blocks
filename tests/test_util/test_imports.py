@@ -1,10 +1,17 @@
 import unittest
 
 import classy_blocks as cb
+import classy_blocks.construct.flat.sketches.mapped
 
 
 class ImportsTests(unittest.TestCase):
     """Import all objects relevant to the user directly from cb"""
+
+    def test_import_transforms(self):
+        _ = cb.Translation
+        _ = cb.Rotation
+        _ = cb.Scaling
+        _ = cb.Mirror
 
     def test_import_curves(self):
         _ = cb.DiscreteCurve
@@ -13,11 +20,9 @@ class ImportsTests(unittest.TestCase):
         _ = cb.AnalyticCurve
 
     def test_import_flat(self):
-        """Flat stuff"""
         _ = cb.Face
 
     def test_import_edges(self):
-        """Import edge data"""
         _ = cb.Arc
         _ = cb.Angle
         _ = cb.Origin
@@ -27,7 +32,6 @@ class ImportsTests(unittest.TestCase):
         _ = cb.OnCurve
 
     def test_import_operations(self):
-        """Import Operations"""
         _ = cb.Loft
         _ = cb.Box
         _ = cb.Extrude
@@ -35,8 +39,24 @@ class ImportsTests(unittest.TestCase):
         _ = cb.Wedge
         _ = cb.Connector
 
+    def test_import_sketches(self):
+        _ = classy_blocks.construct.flat.sketches.mapped.MappedSketch
+        _ = cb.Grid
+        _ = cb.Oval
+        _ = classy_blocks.construct.flat.sketches.mapped.MappedSketch
+        _ = cb.Grid
+        _ = cb.OneCoreDisk
+        _ = cb.FourCoreDisk
+        _ = cb.HalfDisk
+        _ = cb.WrappedDisk
+        _ = cb.Oval
+
+    def test_import_stacks(self):
+        _ = cb.TransformedStack
+        _ = cb.ExtrudedStack
+        _ = cb.RevolvedStack
+
     def test_import_shapes(self):
-        """Import Shapes"""
         _ = cb.Elbow
         _ = cb.Frustum
         _ = cb.SemiCylinder
@@ -47,7 +67,6 @@ class ImportsTests(unittest.TestCase):
         _ = cb.Shell
 
     def test_import_mesh(self):
-        """The core stuff"""
         _ = cb.Mesh
 
     def test_import_finders(self):

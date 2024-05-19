@@ -55,6 +55,36 @@ class AnalyticCurveTests(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             self.curve.translate([1, 1, 1])
 
+    @parameterized.expand(
+        (
+            (0, [0, 1, 0]),
+            (np.pi / 2, [-1, 0, 0]),
+            (np.pi, [0, -1, 0]),
+        )
+    )
+    def test_tangent(self, param, tangent):
+        np.testing.assert_almost_equal(self.curve.get_tangent(param), tangent, decimal=self.places)
+
+    @parameterized.expand(
+        (
+            (0, [-1, 0, 0]),
+            (np.pi / 2, [0, -1, 0]),
+            (np.pi, [1, 0, 0]),
+        )
+    )
+    def test_normal(self, param, normal):
+        np.testing.assert_almost_equal(self.curve.get_normal(param), normal)
+
+    @parameterized.expand(
+        (
+            (0,),
+            (np.pi / 2,),
+            (np.pi,),
+        )
+    )
+    def test_binormal(self, param):
+        np.testing.assert_almost_equal(self.curve.get_binormal(param), [0, 0, 1])
+
 
 class LineCurveTests(unittest.TestCase):
     def setUp(self):

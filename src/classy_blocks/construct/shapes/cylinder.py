@@ -1,4 +1,4 @@
-from typing import List
+from typing import ClassVar, List, Type, Union
 
 import numpy as np
 
@@ -21,7 +21,7 @@ class SemiCylinder(RoundSolidShape):
     axis_point_2: position of end face
     radius_point_1: defines starting point and radius"""
 
-    sketch_class = HalfDisk
+    sketch_class: ClassVar[Union[Type[Disk], Type[HalfDisk]]] = HalfDisk
 
     def __init__(self, axis_point_1: PointType, axis_point_2: PointType, radius_point_1: PointType):
         axis_point_1 = np.asarray(axis_point_1)

@@ -4,6 +4,7 @@ import numpy as np
 from parameterized import parameterized
 
 from classy_blocks.base.exceptions import EdgeCreationError
+from classy_blocks.base.transforms import Mirror
 from classy_blocks.construct.edges import Arc, Project
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.extrude import Extrude
@@ -433,5 +434,17 @@ class OperationTransformTests(unittest.TestCase):
     def test_mirror(self):
         extrude = Extrude(self.loft.bottom_face, [0, 0, 1])
         mirror = extrude.copy().mirror([0, 0, 1], [0, 0, 0])
+
+        np.testing.assert_equal(extrude.bottom_face.center, mirror.top_face.center)
+
+    def test_mirror_transform(self):
+        extrude = Extrude(self.loft.bottom_face, [0, 0, 1])
+
+        with self.assertWarns(Warning):
+            extrude.copy().transform([Mirror([0, 0, 1], [0, 0, 0])])
+
+    def test_mirror_transform_no_origin(self):
+        extrude = Extrude(self.loft.bottom_face, [0, 0, 1])
+        mirror = extrude.copy().transform([Mirror([0, 0, 1])]).invert()
 
         np.testing.assert_equal(extrude.bottom_face.center, mirror.top_face.center)

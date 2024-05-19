@@ -80,9 +80,6 @@ class ElementBase(abc.ABC):
         return None
 
     def transform(self: ElementBaseT, transforms: Sequence[tr.Transformation]) -> ElementBaseT:
-        """A function that transforms  to sketch_2;
-        a Loft will be made from those"""
-
         for t7m in transforms:
             # remember center or it will change during transformation
             # of each self.part

@@ -4,6 +4,8 @@ import numpy as np
 
 from classy_blocks.base.exceptions import CylinderCreationError, FrustumCreationError
 from classy_blocks.construct.flat.face import Face
+from classy_blocks.construct.flat.sketches.disk import Disk, OneCoreDisk
+from classy_blocks.construct.shape import ExtrudedShape, LoftedShape, RevolvedShape, ShapeCreationError
 from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.construct.shapes.elbow import Elbow
 from classy_blocks.construct.shapes.frustum import Frustum
@@ -23,6 +25,12 @@ class ShapeTests(unittest.TestCase):
         self.cylinder.translate([1, 0, 0])
 
         np.testing.assert_array_equal(self.cylinder.sketch_1.center, [1, 0, 0])
+
+    def test_translate_sketches(self):
+        """Translate the cylinder and see what happens to sketches"""
+        cyl = self.cylinder.translate([1, 0, 0])
+
+        np.testing.assert_almost_equal(cyl.sketch_1.center, [1, 0, 0])
 
     def test_cylinder_center(self):
         """Center of a cylinder"""
@@ -55,7 +63,7 @@ class ShapeTests(unittest.TestCase):
         ring.set_inner_patch("test")
 
         for operation in ring.shell:
-            self.assertEqual(operation.patch_names[ring.inner_patch], "test")
+            self.assertEqual(operation.patch_names["left"], "test")
 
     def test_inner_patch_revolved(self):
         face = Face([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]])
@@ -65,7 +73,27 @@ class ShapeTests(unittest.TestCase):
         ring.set_inner_patch("test")
 
         for operation in ring.shell:
-            self.assertEqual(operation.patch_names[ring.inner_patch], "test")
+            self.assertEqual(operation.patch_names["front"], "test")
+
+    def test_start_patch_revolved(self):
+        face = Face([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]])
+        face.translate([0, 1, 0])
+        ring = RevolvedRing([0, 0, 0], [1, 0, 0], face)
+
+        ring.set_start_patch("test")
+
+        for operation in ring.shell:
+            self.assertEqual(operation.patch_names["left"], "test")
+
+    def test_end_patch_revolved(self):
+        face = Face([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]])
+        face.translate([0, 1, 0])
+        ring = RevolvedRing([0, 0, 0], [1, 0, 0], face)
+
+        ring.set_end_patch("test")
+
+        for operation in ring.shell:
+            self.assertEqual(operation.patch_names["right"], "test")
 
 
 class ElbowTests(unittest.TestCase):
@@ -187,6 +215,13 @@ class SphereTests(unittest.TestCase):
 
         self.assertEqual(n_patches, 12)
 
+    def test_outer_patch(self):
+        sphere = Hemisphere([0, 0, 0], [1, 0, 0], [0, 0, 1])
+        sphere.set_outer_patch("dome")
+
+        for operation in sphere.grid[1]:
+            self.assertEqual(operation.patch_names["right"], "dome")
+
     def test_core(self):
         sphere = EighthSphere([0, 0, 0], [1, 0, 0], [0, 0, 1])
 
@@ -241,3 +276,67 @@ class CylinderTests(unittest.TestCase):
         self.cylinder.chop_radial(end_size=0.1)
 
         self.assertNotEqual(self.cylinder.shell[0].chops[0][0].end_size, 0.1)
+
+    def test_mirror(self):
+        cyl_1 = self.cylinder
+        cyl_2 = self.cylinder.copy().mirror(-cyl_1.sketch_1.normal, cyl_1.sketch_1.center)
+
+        np.testing.assert_almost_equal(
+            cyl_2.sketch_2.center - cyl_2.sketch_1.center, cyl_1.sketch_1.center - cyl_1.sketch_2.center
+        )
+
+
+class LoftedShapeTests(unittest.TestCase):
+    @property
+    def sketch(self):
+        return OneCoreDisk([0, 0, 1], [1, 0, 1], [0, 0, 1])
+
+    def test_end_sketch_exception(self):
+        sketch_1 = self.sketch
+        sketch_2 = Disk([0, 0, 1], [1, 0, 1], [0, 0, 1])
+
+        with self.assertRaises(ShapeCreationError):
+            _ = LoftedShape(sketch_1, sketch_2)
+
+    def test_test_mid_sketch_exception(self):
+        sketch_1 = self.sketch
+        sketch_mid = Disk([0, 0, 0.5], [1, 0, 0.5], [0, 0, 0.5])
+        sketch_2 = self.sketch.copy().translate([0, 0, 1])
+
+        with self.assertRaises(ShapeCreationError):
+            _ = LoftedShape(sketch_1, sketch_2, sketch_mid=sketch_mid)
+
+    def test_grid(self):
+        shape = LoftedShape(self.sketch, self.sketch.copy().translate([0, 0, 1]))
+
+        for i in (0, 1):
+            self.assertEqual(len(shape.grid[i]), len(self.sketch.grid[i]))
+
+    def test_chop_0(self):
+        shape = LoftedShape(self.sketch, self.sketch.copy().translate([0, 0, 1]))
+
+        shape.chop(0, start_size=0.1)
+
+        for i in self.sketch.chops[0]:
+            self.assertEqual(len(shape.operations[i].chops[0]), 1)
+
+    def test_chop_2(self):
+        shape = LoftedShape(self.sketch, self.sketch.copy().translate([0, 0, 1]))
+
+        shape.chop(2, start_size=0.1)
+        self.assertEqual(len(shape.operations[0].chops[2]), 1)
+
+    def test_extruded_shape_scalar(self):
+        shape = ExtrudedShape(self.sketch, 1)
+
+        np.testing.assert_almost_equal(shape.sketch_2.center, shape.sketch_1.center + f.vector(0, 0, 1))
+
+    def test_extruded_shape_vector(self):
+        shape = ExtrudedShape(self.sketch, [0, 0, 1])
+
+        np.testing.assert_almost_equal(shape.sketch_2.center, shape.sketch_1.center + f.vector(0, 0, 1))
+
+    def test_revolved_shape(self):
+        shape = RevolvedShape(self.sketch, np.pi / 2, [0, 1, 0], [2, 0, 0])
+
+        np.testing.assert_almost_equal(shape.sketch_2.normal, [1, 0, 0])

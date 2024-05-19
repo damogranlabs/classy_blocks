@@ -1,62 +1,66 @@
-from typing import Dict, List
+import abc
+from typing import ClassVar, List, Tuple
 
 import numpy as np
 
 from classy_blocks.construct.edges import Origin
 from classy_blocks.construct.flat.face import Face
-from classy_blocks.construct.flat.sketches.sketch import Sketch
-from classy_blocks.construct.point import Point
-from classy_blocks.types import NPPointType, NPVectorType, PointType, VectorType
+from classy_blocks.construct.flat.sketches.mapped import MappedSketch
+from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, PointType, VectorType
 from classy_blocks.util import functions as f
 
 
-class QuarterDisk(Sketch):
-    """A base for shapes with quarter-circular
-    cross-sections; a helper for creating SemiCircle and Circle;
-    see description of Circle object for more details"""
-
-    # ratios between core and outer points;
-    # see docstring of Disk class
-    diagonal_ratio = 0.7
-    side_ratio = 0.62
+class FanPattern:
+    """A helper class for calculation of cylinder points"""
 
     def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
-        center_point = np.asarray(center_point)
-        radius_point = np.asarray(radius_point)
-        normal = f.unit_vector(np.asarray(normal))
-        radius_vector = radius_point - center_point
+        self.center_point = np.asarray(center_point)
+        self.normal = f.unit_vector(np.asarray(normal))
+        self.radius_point = np.asarray(radius_point)
 
-        # calculate points needed to construct faces:
-        # these points must not be remembered because they will not change
-        # when transforming this sketch; they must be taken from the faces themselves
-        points: Dict[str, NPPointType] = {
-            "O": center_point,
-            "S1": center_point + radius_vector * self.side_ratio,
-            "P1": center_point + radius_vector,
-            "D": center_point + radius_vector * self.diagonal_ratio,
-        }
-        points["D"] = f.rotate(points["D"], np.pi / 4, normal, center_point)
-        points["P2"] = f.rotate(points["P1"], np.pi / 4, normal, center_point)
-        points["S2"] = f.rotate(points["S1"], np.pi / 2, normal, center_point)
-        points["P3"] = f.rotate(points["P1"], np.pi / 2, normal, center_point)
+        self.radius_vector = self.radius_point - self.center_point
 
-        def make_face(keys, edges):
-            return Face([points[k] for k in keys], edges, check_coplanar=True)
+    def get_outer_points(self, angles) -> NPPointListType:
+        return np.array([f.rotate(self.radius_point, a, self.normal, self.center_point) for a in angles])
 
-        # core: 0-S-D-S
-        self.core = [make_face(["O", "S1", "D", "S2"], None)]
+    def get_inner_points(self, angles, ratios: List[float]) -> NPPointListType:
+        """Inner points are scaled back by defined ratios
+        that repeat over the circumference"""
+        points = self.get_outer_points(angles)
 
-        # shell 1: S1-P1-P2-D
-        shell_face_1 = make_face(["S1", "P1", "P2", "D"], [None, Origin(center_point), None, None])
+        for i, point in enumerate(points):
+            ratio = ratios[i % len(ratios)]
+            points[i] = self.center_point + (point - self.center_point) * ratio
 
-        # shell 2: D-P2-P3-S
-        shell_face_2 = make_face(["D", "P2", "P3", "S2"], [None, Origin(center_point), None, None])
+        return points
 
-        self.shell = [shell_face_1, shell_face_2]
+
+class DiskBase(MappedSketch, abc.ABC):
+    quad_map: ClassVar[List[Tuple[int, int, int, int]]]
+
+    # Ratios between core and outer points:
+    # Relative size of the inner square (O-1-2-3), diagonal_ratio:
+    # - too small will cause unnecessary high number of small cells in the square;
+    # - too large will prevent creating large numbers of boundary layers
+    diagonal_ratio = 0.7
+    # Relative size of lines 0-1 and 0-4 (in QuarterDisk, others analogously):
+    # Just the right value will yield the lowest non-orthogonality and skewness;
+    # determined empirically
+    side_ratio = 0.62
+
+    def add_edges(self):
+        for face in self.grid[-1]:
+            face.add_edge(1, Origin(self.center))
 
     @property
-    def faces(self) -> List[Face]:
-        return self.core + self.shell
+    def center(self) -> NPPointType:
+        """Center point of this sketch"""
+        return self.faces[0].points[0].position
+
+    @property
+    def radius_point(self) -> NPPointType:
+        """Point at outer radius"""
+        return self.grid[1][0].points[1].position
 
     @property
     def radius_vector(self) -> NPVectorType:
@@ -70,75 +74,276 @@ class QuarterDisk(Sketch):
         return float(f.norm(self.radius_vector))
 
     @property
-    def radius_point(self) -> NPPointType:
-        """Point at outer radius"""
-        return self.points["P1"].position
-
-    @property
-    def center(self) -> NPPointType:
-        """Center point of this sketch"""
-        return self.points["O"].position
-
-    @property
-    def points(self) -> Dict[str, Point]:
-        """Returns points as named during construction of a QuarterDisk"""
-        # Refer to core and shell because SemiDisk and Disk will add new faces
-        # to self.faces[]
-        return {
-            "O": self.core[0].points[0],
-            "S1": self.core[0].points[1],
-            "D": self.core[0].points[2],
-            "S2": self.core[0].points[3],
-            "P1": self.shell[0].points[1],
-            "P2": self.shell[0].points[2],
-            "P3": self.shell[1].points[2],
-        }
-
-    @property
     def n_segments(self):
-        return len(self.shell)
+        return len(self.grid[1])
+
+    @property
+    def core(self) -> List[Face]:
+        return self.grid[0]
+
+    @property
+    def shell(self) -> List[Face]:
+        return self.grid[-1]
 
 
-class HalfDisk(QuarterDisk):
-    """A base for shapes with semi-circular
-    cross-sections; a helper for creating Circle;
-    see description of Circle object for more details"""
+class OneCoreDisk(DiskBase):
+    """A disk with a single block in  the center and four blocks around;
+    see docs/blocking for point numbers and faces/grid indexing."""
 
-    def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
-        super().__init__(center_point, radius_point, normal)
-        # rotate core and shell faces
-        other_quarter = self.copy().rotate(np.pi / 2, self.normal, self.center)
+    quad_map: ClassVar = [
+        # core
+        (0, 1, 2, 3),
+        # shell
+        (0, 4, 5, 1),
+        (1, 5, 6, 2),
+        (2, 6, 7, 3),
+        (3, 7, 4, 0),
+    ]
 
-        self.core = self.core + other_quarter.core
-        self.shell = self.shell + other_quarter.shell
-
-
-class Disk(HalfDisk):
-    """A 2D sketch of an H-grid disk; to be used for
-    all solid round shapes (cylinder, frustum, elbow, ...
-
-    H-grid parameters:
-    A quarter of a circle is created from 3 blocks;
-    Central 'square' (0) and two curved 'rectangles' (1 and 2)
-
-    P3
-    |******* P2
-    |  2    /**
-    |      /    *
-    S2----D      *
-    |  0  |   1   *
-    |_____S1______*
-    O              P1
-
-    Relative size of the inner square (O-D), diagonal_ratio:
-    - too small will cause unnecessary high number of small cells in the square;
-    - too large will prevent creating large numbers of boundary layers
-    """
+    chops: ClassVar = [
+        [0],  # axis 0
+        [1, 2],  # axis 1
+    ]
 
     def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
-        super().__init__(center_point, radius_point, normal)
-        # rotate core and shell faces
-        other_half = self.copy().rotate(np.pi, self.normal, self.center)
+        pattern = FanPattern(center_point, radius_point, normal)
+        ratios = [self.diagonal_ratio]
+        angles = np.linspace(0, 2 * np.pi, num=4, endpoint=False)
 
-        self.core = self.core + other_half.core
-        self.shell = self.shell + other_half.shell
+        super().__init__([*pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], self.quad_map)
+
+    @property
+    def center(self):
+        return self.faces[0].center
+
+    @property
+    def grid(self):
+        return [self.faces[:1], self.faces[1:]]
+
+
+class QuarterDisk(DiskBase):
+    """A quarter of a four-core disk; see docs/blocking for point numbers and faces/grid indexing"""
+
+    quad_map: ClassVar = [
+        # core
+        (0, 1, 2, 3),
+        # shell
+        (1, 4, 5, 2),
+        (2, 5, 6, 3),
+    ]
+
+    chops: ClassVar = [
+        [0],  # axis 0
+        [1, 2],  # axis 1
+    ]
+
+    def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
+        pattern = FanPattern(center_point, radius_point, normal)
+        ratios = [self.side_ratio, self.diagonal_ratio]
+        angles = np.linspace(0, np.pi / 2, num=3)
+
+        super().__init__(
+            [center_point, *pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], self.quad_map
+        )
+
+    @property
+    def grid(self):
+        return [[self.faces[0]], self.faces[1:]]
+
+
+class HalfDisk(DiskBase):
+    """One half of a four-core disk"""
+
+    quad_map: ClassVar = [
+        # core
+        (0, 1, 2, 3),
+        (5, 0, 3, 4),
+        # shell
+        (1, 6, 7, 2),
+        (2, 7, 8, 3),
+        (3, 8, 9, 4),
+        (4, 9, 10, 5),
+    ]
+
+    chops: ClassVar = [
+        [2],  # axis 0
+        [2, 3, 4],  # axis 1
+    ]
+
+    def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
+        pattern = FanPattern(center_point, radius_point, normal)
+        ratios = [self.side_ratio, self.diagonal_ratio]
+        angles = np.linspace(0, np.pi, num=5)
+
+        super().__init__(
+            [center_point, *pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], self.quad_map
+        )
+
+    @property
+    def grid(self):
+        return [self.faces[:2], self.faces[2:]]
+
+
+class FourCoreDisk(DiskBase):
+    """A disk with four quads in the core and 8 in shell;
+    the most versatile base for round objects."""
+
+    quad_map: ClassVar = [
+        # core
+        (0, 1, 2, 3),
+        (5, 0, 3, 4),
+        (6, 7, 0, 5),
+        (7, 8, 1, 0),
+        # shell
+        (1, 9, 10, 2),
+        (2, 10, 11, 3),
+        (3, 11, 12, 4),
+        (4, 12, 13, 5),
+        (5, 13, 14, 6),
+        (6, 14, 15, 7),
+        (7, 15, 16, 8),
+        (8, 16, 9, 1),
+    ]
+
+    chops: ClassVar = [[4], [4, 5, 6, 8]]
+
+    def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
+        pattern = FanPattern(center_point, radius_point, normal)
+        ratios = [self.side_ratio, self.diagonal_ratio]
+        angles = np.linspace(0, 2 * np.pi, num=8, endpoint=False)
+
+        super().__init__(
+            [center_point, *pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], self.quad_map
+        )
+
+    @property
+    def grid(self):
+        return [self.faces[:4], self.faces[4:]]
+
+
+Disk = FourCoreDisk
+
+
+class WrappedDisk(DiskBase):
+    """A OneCoreDisk but with four additional blocks surrounding it,
+    making the sketch a square"""
+
+    quad_map: ClassVar = [
+        # Just the normal map
+        *OneCoreDisk.quad_map,
+        # with added outer quads
+        (4, 8, 9, 5),
+        (5, 9, 10, 6),
+        (6, 10, 11, 7),
+        (7, 11, 8, 4),
+    ]
+
+    chops: ClassVar = [
+        [6],
+        [1, 2],
+    ]
+
+    def __init__(self, center_point: PointType, corner_point: PointType, radius: float, normal: VectorType):
+        # TODO: make pattern a property, ready to be adjusted by subclasses
+        pattern = FanPattern(center_point, corner_point, normal)
+        angles = np.linspace(0, 2 * np.pi, num=4, endpoint=False)
+
+        radius_ratio = radius / f.norm(pattern.radius_vector)
+        square_ratio = self.diagonal_ratio * radius_ratio
+
+        square_points = pattern.get_inner_points(angles, [square_ratio])
+        arc_points = pattern.get_inner_points(angles, [radius_ratio])
+        outer_points = pattern.get_outer_points(angles)
+
+        super().__init__([*square_points, *arc_points, *outer_points], self.quad_map)
+
+    @property
+    def grid(self):
+        return [[self.faces[0]], self.faces[1:5], self.faces[5:]]
+
+    def add_edges(self):
+        for face in self.grid[1]:
+            face.add_edge(1, Origin(self.center))
+
+    @property
+    def center(self):
+        return self.faces[0].center
+
+
+class Oval(DiskBase):
+    quad_map: ClassVar = [
+        # the core
+        (0, 1, 2, 3),  # 0
+        (5, 0, 3, 4),  # 1
+        (7, 6, 0, 5),  # 2
+        (8, 9, 6, 7),  # 3
+        (9, 10, 11, 6),  # 4
+        (6, 11, 1, 0),  # 5
+        # the shell
+        (1, 12, 13, 2),  # 6
+        (2, 13, 14, 3),  # 7
+        (3, 14, 15, 4),  # 8
+        (4, 15, 16, 5),  # 9
+        (5, 16, 17, 7),  # 10
+        (7, 17, 18, 8),  # 11
+        (8, 18, 19, 9),  # 12
+        (9, 19, 20, 10),  # 13
+        (10, 20, 21, 11),  # 14
+        (11, 21, 12, 1),  # 15
+    ]
+
+    chops: ClassVar = [
+        [6],
+        [6, 7, 8, 10, 11],
+    ]
+
+    def __init__(self, center_point_1: PointType, center_point_2: PointType, normal: VectorType, radius: float):
+        center_point_1 = np.array(center_point_1)
+        center_point_2 = np.array(center_point_2)
+        normal = f.unit_vector(np.asarray(normal))
+
+        ratios = [self.side_ratio, self.diagonal_ratio]
+        angles = np.linspace(0, np.pi, num=5)
+
+        center_delta = center_point_2 - center_point_1
+        radius_vector_1 = f.unit_vector(np.cross(normal, center_delta)) * radius
+        radius_point_1 = center_point_1 + radius_vector_1  # point 12 on the sketch
+
+        pattern_1 = FanPattern(center_point_1, radius_point_1, normal)
+
+        radius_vector_2 = f.unit_vector(np.cross(normal, -center_delta)) * radius
+        radius_point_2 = center_point_2 + radius_vector_2  # point 17 on the sketch
+        pattern_2 = FanPattern(center_point_2, radius_point_2, normal)
+
+        inner_points_1 = pattern_1.get_inner_points(angles, ratios)
+        inner_points_2 = pattern_2.get_inner_points(angles, ratios)
+
+        outer_points_1 = pattern_1.get_outer_points(angles)
+        outer_points_2 = pattern_2.get_outer_points(angles)
+
+        locations = [center_point_1, *inner_points_1, center_point_2, *inner_points_2, *outer_points_1, *outer_points_2]
+
+        super().__init__(locations, self.quad_map)
+
+    @property
+    def center_1(self) -> NPPointType:
+        return self.faces[0].points[0].position
+
+    @property
+    def center_2(self) -> NPPointType:
+        return self.faces[5].points[0].position
+
+    @property
+    def center(self):
+        return (self.center_1 + self.center_2) / 2
+
+    def add_edges(self):
+        for i in (6, 7, 8, 9):
+            self.faces[i].add_edge(1, Origin(self.center_1))
+
+        for i in (11, 12, 13, 14):
+            self.faces[i].add_edge(1, Origin(self.center_2))
+
+    @property
+    def grid(self):
+        return [self.faces[:6], self.faces[6:]]

@@ -200,4 +200,4 @@ if OPTIMIZE:
 ### Write the mesh
 mesh.modify_patch("topAndBottom", "empty")
 mesh.set_default_patch("freestream", "patch")
-mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")
+mesh.write(os.path.join("..", "..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

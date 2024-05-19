@@ -6,7 +6,7 @@ from regions.region import Region
 
 import classy_blocks as cb
 from classy_blocks.base.transforms import Transformation, Translation
-from classy_blocks.construct.flat.sketches.sketch import Sketch
+from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.construct.shapes.round import RoundSolidShape
 from classy_blocks.types import NPPointListType, NPVectorType, PointListType, PointType
 from classy_blocks.util import functions as f
@@ -43,6 +43,7 @@ class DozenBlockDisk(Sketch):
         [[1, 11], [2, 11], [2, 0], [1, 0]],  #  20
     ]
 
+    # TODO: drop this and inherit from MappedSketch
     neighbours = [  # for laplacian smoothing of the inside
         [15, 5, 1, 3],  # 0
         [0, 6, 8, 2],  # 1
@@ -71,6 +72,7 @@ class DozenBlockDisk(Sketch):
             points[i] = np.average(nei_points, axis=0)
 
     def __init__(self, perimeter: PointListType, center_point: PointType):
+        # TODO: add a class method that creates this kind of shapes from perimeter
         self.perimeter = np.array(perimeter)
         center_point = np.asarray(center_point)
 
@@ -106,6 +108,10 @@ class DozenBlockDisk(Sketch):
     @property
     def faces(self):
         return self._faces
+
+    @property
+    def grid(self):
+        return [self.faces]
 
     @property
     def center(self):

@@ -118,9 +118,6 @@ class RevolvedRing(ExtrudedRing):
     radial_axis = 1
     tangential_axis = 2
 
-    start_patch: OrientType = "left"
-    end_patch: OrientType = "right"
-    inner_patch: OrientType = "front"
     outer_patch: OrientType = "back"
 
     def __init__(self, axis_point_1: PointType, axis_point_2: PointType, cross_section: Face, n_segments: int = 8):
@@ -140,9 +137,22 @@ class RevolvedRing(ExtrudedRing):
     def set_inner_patch(self, name: str) -> None:
         """Assign the faces of inside surface to a named patch"""
         for operation in self.operations:
-            operation.set_patch(self.inner_patch, name)
+            operation.set_patch("front", name)
+
+    def set_start_patch(self, name: str) -> None:
+        """Assign the faces of start sketch to a named patch"""
+        for operation in self.operations:
+            operation.set_patch("left", name)
+
+    def set_end_patch(self, name: str) -> None:
+        """Assign the faces of end sketch to a named patch"""
+        for operation in self.operations:
+            operation.set_patch("right", name)
 
     # methods/properties that differ from a lofted-sketch type of shape
     @property
     def operations(self) -> List[Operation]:
         return self.revolves
+
+    def chop_axial(self, **kwargs):
+        self.operations[0].chop(self.axial_axis, **kwargs)

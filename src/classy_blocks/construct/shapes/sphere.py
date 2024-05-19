@@ -1,14 +1,39 @@
-from typing import List
+from typing import Dict, List
 
 import numpy as np
 
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketches.disk import QuarterDisk
 from classy_blocks.construct.operations.loft import Loft
-from classy_blocks.construct.shapes.round import RoundSolidShape
+from classy_blocks.construct.shape import Shape
 from classy_blocks.types import NPPointType, NPVectorType, PointType, VectorType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
+
+
+def get_named_points(qdisk: QuarterDisk) -> Dict[str, NPPointType]:
+    """Returns a dictionary of named points for easier construction of sphere;
+    points refer to QuarterDisk:
+
+    P3
+    |******* P2
+    |  2    /**
+    |      /    *
+    S2----D      *
+    |  0  |   1   *
+    |_____S1______*
+    O              P1
+    """
+    points = [face.point_array for face in qdisk.faces]
+    return {
+        "O": points[0][0],
+        "P1": points[1][1],
+        "P2": points[1][2],
+        "P3": points[2][2],
+        "S1": points[0][1],
+        "S2": points[0][3],
+        "D": points[0][2],
+    }
 
 
 def eighth_sphere_lofts(
@@ -17,29 +42,32 @@ def eighth_sphere_lofts(
     normal: NPVectorType,
     geometry_label: str,
     diagonal_angle: float = np.pi / 5,
-):
+) -> List[Loft]:
     """A collection of 4 lofts for an eighth of a sphere;
     used to construct all other sphere pieces and derivatives"""
     # An 8th of a sphere has 3 equal flat sides and one round;
     # the 'bottom' is the one perpendicular to given normal
     bottom = QuarterDisk(center_point, radius_point, normal)
 
+    bpoints = get_named_points(bottom)
+
     # rotate a QuarterDisk twice around 'bottom' two edges to get them;
     axes = {
         # around 'O-P1', 'front':
-        "front": bottom.points["P1"].position - bottom.points["O"].position,
+        "front": bpoints["P1"] - bpoints["O"],
         # around 'O-P3', 'left':
-        "left": bottom.points["P3"].position - bottom.points["O"].position,
+        "left": bpoints["P3"] - bpoints["O"],
         # diagonal O-D is obtained by rotating around an at 45 degrees
-        "diagonal": f.rotate(bottom.points["P3"].position, np.pi / 4, normal, center_point)
-        - bottom.points["O"].position,
+        "diagonal": f.rotate(bpoints["P3"], np.pi / 4, normal, center_point) - bpoints["O"],
     }
 
     front = bottom.copy().rotate(np.pi / 2, axes["front"], center_point)
+    fpoints = get_named_points(front)
     left = bottom.copy().rotate(-np.pi / 2, axes["left"], center_point)
+    lpoints = get_named_points(left)
 
-    point_du = f.rotate(bottom.points["D"].position, -diagonal_angle, axes["diagonal"], center_point)
-    point_p2u = f.rotate(bottom.points["P2"].position, -diagonal_angle, axes["diagonal"], center_point)
+    point_du = f.rotate(bpoints["D"], -diagonal_angle, axes["diagonal"], center_point)
+    point_p2u = f.rotate(bpoints["P2"], -diagonal_angle, axes["diagonal"], center_point)
 
     # 4 lofts for an eighth sphere, 1 core and 3 shell
     lofts: List[Loft] = []
@@ -47,17 +75,15 @@ def eighth_sphere_lofts(
     # core
     core = Loft(
         bottom.core[0],
-        Face([front.points["S2"].position, front.points["D"].position, point_du, left.points["D"].position]),
+        Face([fpoints["S2"], fpoints["D"], point_du, lpoints["D"]]),
     )
     lofts.append(core)
 
     # shell
-    shell_1 = Loft(
-        bottom.shell[0], Face([front.points["D"].position, front.points["P2"].position, point_p2u, point_du])
-    )
+    shell_1 = Loft(bottom.shell[0], Face([fpoints["D"], fpoints["P2"], point_p2u, point_du]))
     shell_1.project_side("right", geometry_label, edges=True)
 
-    shell_2 = Loft(bottom.faces[2], Face([point_du, point_p2u, left.points["P2"].position, left.points["D"].position]))
+    shell_2 = Loft(bottom.faces[2], Face([point_du, point_p2u, lpoints["P2"], lpoints["D"]]))
     shell_2.project_side("right", geometry_label, edges=True)
 
     shell_3 = Loft(shell_1.top_face, left.faces[1])
@@ -67,7 +93,7 @@ def eighth_sphere_lofts(
     return lofts
 
 
-class EighthSphere(RoundSolidShape):
+class EighthSphere(Shape):
     """One eighth of a sphere, the base shape for half and whole spheres"""
 
     n_cores: int = 1
@@ -125,6 +151,10 @@ class EighthSphere(RoundSolidShape):
     @property
     def shell(self):
         return self.lofts[self.n_cores :]
+
+    @property
+    def grid(self):
+        return [self.core, self.shell]
 
     @property
     def radius(self) -> float:
@@ -197,3 +227,7 @@ class Hemisphere(EighthSphere):
             normal = source.sketch_2.normal
 
         return cls(center_point, radius_point, normal)
+
+    def set_outer_patch(self, name):
+        for operation in self.shell:
+            operation.set_patch("right", name)

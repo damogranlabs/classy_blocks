@@ -1,6 +1,7 @@
 """Mathematical functions for general everyday household use"""
 
-from typing import Literal, Optional, Union
+from itertools import chain
+from typing import List, Literal, Optional, Union
 
 import numpy as np
 import scipy
@@ -276,9 +277,15 @@ def point_to_line_distance(origin: PointType, direction: VectorType, point: Poin
 
 def polyline_length(points: NPPointListType) -> float:
     """Calculates length of a polyline, given by a list of points"""
-    if len(np.shape(points)) != 2:
+    if len(np.shape(points)) != 2 or len(points[0]) != 3:
         raise ValueError("Provide a list of points in 3D space!")
-    if np.shape(points)[1] < 2:
+
+    if np.shape(points)[0] < 2:
         raise ValueError("Use at least 2 points for a polyline!")
 
     return np.sum(np.sqrt(np.sum((points[:-1] - points[1:]) ** 2, axis=1)))
+
+
+def flatten_2d_list(twodim: List[List]) -> List:
+    """Flattens a list of lists to a 1d-list"""
+    return list(chain.from_iterable(twodim))

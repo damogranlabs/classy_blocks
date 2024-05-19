@@ -5,7 +5,7 @@ import numpy as np
 from classy_blocks.base.exceptions import AnnulusCreationError
 from classy_blocks.construct.edges import Origin
 from classy_blocks.construct.flat.face import Face
-from classy_blocks.construct.flat.sketches.sketch import Sketch
+from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.types import NPPointType, PointType, VectorType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
@@ -59,6 +59,10 @@ class Annulus(Sketch):
     @property
     def faces(self) -> List[Face]:
         return self.shell
+
+    @property
+    def grid(self):
+        return [self.shell]
 
     @property
     def center(self) -> NPPointType:
