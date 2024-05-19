@@ -4,14 +4,8 @@
 
 Python classes for easier creation of OpenFOAM's blockMesh dictionaries.
 
-> Warning! This project is currently under development and is not yet very user-friendly. It still lacks some important features and probably features a lot of bugs. However, you're welcome to suggest features, improvements, and point out bugs.
-
-> Note: version 1.0.0 introduced backwards-incompatible changes in API. Use [latest 0.0.1 commit](https://github.com/damogranlabs/classy_blocks/tree/30d12834194313c6243a921267aabf3233454280) for your old scripts. However, you might want to give the new version a try...
-
 # About
-_blockMesh_ is a very powerful mesher but the amount of manual labour it requires to make even the simplest
-meshes makes it mostly useless. Even attempts to simplify or parametrize blockMeshDicts with `#calc` or even
-the dreadful `m4` quickly become unmanageable and cryptic.
+_blockMesh_ is a very powerful mesher but the amount of manual labour it requires to make even the simplest meshes makes it mostly useless. Even attempts to simplify or parametrize blockMeshDicts with `#calc` or even the dreadful `m4` quickly become unmanageable and cryptic.
 
 classy_blocks' aim is to minimize the amount of meticulous work by providing a
 more intuitive workflow, off-the-shelf parts and some automatic helpers for building and optimization of block-structured hexahedral meshes.
@@ -65,6 +59,14 @@ _Unchecked items are not implemented yet but are on a TODO list_
     - [x] Extrude
     - [x] Revolve
     - [x] Wedge (a shortcut to Revolve for 2D axisymmetric cases)
+- [x] Sketches of common cross-sections
+    - [x] Quarter and Semi circle
+    - [x] Circle
+    - [x] Boxed circle
+    - [x] Oval
+    - [x] Cartesian grid
+- [x] Simple way of creating custom Sketches
+- [x] Easy shape creation from Sketches
 - [x] Predefined Shapes
     - [x] Box (shortcut to Block aligned with coordinate system)
     - [x] Elbow (bent pipe of various diameters/cross-sections)
@@ -72,12 +74,11 @@ _Unchecked items are not implemented yet but are on a TODO list_
     - [x] Cylinder
     - [x] Ring (annulus)
     - [x] Hemisphere
+- [x] Stacks (collections of similar Shapes stacked on top of each other)
 - [ ] Predefined parametric Objects
     - [ ] T-joint (round pipes)
     - [ ] X-joint
     - [ ] N-joint (multiple pipes)
-    - [ ] Box with hole (radial)
-    - [ ] Box with hole (cartesian)
 - [ ] Other building tools
     - [x] Use existing Operation's Face to generate a new Operation
     - [x] Chain Shape's start/end surface to generate a new Shape
@@ -90,7 +91,7 @@ _Unchecked items are not implemented yet but are on a TODO list_
 After blocks have been placed, it is possible to create new geometry based on placed blocks or to modify them.
 
 - [x] Move Vertex/Edge/Face
-- [ ] Delete a Block created by a Shape or Object
+- [x] Delete a Block created by a Shape or Object
 - [x] Project Vertex/Edge/Face
 - [x] Optimize Vertex positions
 
@@ -121,28 +122,10 @@ python tank.py
 blockMesh -case ../case
 ```
 
-## Shapes
-A simple Cylinder:
-
-```python
-inlet = cb.Cylinder([x_start, 0, 0], [x_end, 0, 0], [0, 0, radius])
-inlet.chop_radial(count=n_cells_radial, end_size=boundary_layer_thickness)
-inlet.chop_axial(start_size=axial_cell_size, end_size=2*axial_cell_size)
-inlet.chop_tangential(count=n_cells_tangential)
-
-inlet.set_start_patch('inlet')
-inlet.set_outer_patch('wall')
-inlet.set_end_patch('outlet')
-mesh.add(inlet)
-```
-
-> See `examples/shape` for use of each _shape_
-> and `examples/complex` for a more real-life example usage of shapes.
-
 ## Operations
 
 Analogous to a sketch in 3D CAD software, a Face is a set of 4 vertices and 4 edges.
-An _Operation_ is a 3D shape obtained by swiping a Face into 3rd dimension by a specified rule; an example of Revolve:
+An _Operation_ is a 3D shape obtained by swiping a Face into 3rd dimension by a specified rule. Here is a Revolve as an example:
 
 ```python
 # a quadrangle with one curved side
@@ -153,7 +136,7 @@ base = cb.Face(
         [1, 1, 0],
         [0, 1, 0]
     ],
-    [ # edges: None specifies straight edge
+    [ # edges: None specifies a straight edge
         cb.Arc([0.5, -0.2, 0]),
         None,
         None,
@@ -174,7 +157,89 @@ revolve.chop(2, start_size=0.05) # revolve direction
 mesh.add(revolve)
 ```
 
+![Ducts](showcase/elbows.png "Ducts")
+
 > See `examples/operations` for an example of each operation.
+
+
+## Shapes
+A simple Cylinder:
+
+```python
+inlet = cb.Cylinder([x_start, 0, 0], [x_end, 0, 0], [0, 0, radius])
+inlet.chop_radial(count=n_cells_radial, end_size=boundary_layer_thickness)
+inlet.chop_axial(start_size=axial_cell_size, end_size=2*axial_cell_size)
+inlet.chop_tangential(count=n_cells_tangential)
+
+inlet.set_start_patch('inlet')
+inlet.set_outer_patch('wall')
+inlet.set_end_patch('outlet')
+mesh.add(inlet)
+```
+
+> See `examples/shape` for use of each _shape_
+
+3D pipes with twists and turns (chained Elbow and Cylinder Shapes)
+![Piping](showcase/piping.png "Piping")
+
+### Chaining and Expanding/Contracting
+
+Useful for Shapes, mostly for piping and rotational geometry; An existing Shape's start or end sketch can be reused as a
+starting sketch for a new Shape, as long as they are compatible.
+For instance, an `Elbow` can be _chained_ to a `Cylinder` just like joining pipes in plumbing.
+
+Moreover, most shapes* can be expanded to form a _wall_ version of the same shape. For instance, expanding a `Cylinder` creates an `ExtrudedRing` or an `ExtrudedRing` can be filled to obtain a `Cylinder` that fills it.
+
+A simple tank with rounded edges
+![Tank](showcase/tank.png "Tank")
+
+A flywheel in a case. Construction starts with a Cylinder which is then expanded and chained from left towards right. VTK Blocking output for debug is shown in the middle
+![Flywheel](showcase/flywheel.png "Flywheel")
+
+Venturi tube
+![Venturi tube](showcase/venturi_tube.png "Venturi tube")
+
+> See `examples/chaining` for an example of each operation.
+
+## Custom Sketches and Shapes
+A Sketch is a collection of faces - essentially a 2D geometric object, split into quadrangles. Each Face in a Sketch is transformed into 3D space, creating a Shape.
+
+A number of predefined Sketches is available to choose from but it's easy to create a custom one.
+
+```python
+disk_in_square = cb.WrappedDisk(start_point, corner_point, disk_diameter/2, normal)
+shape = cb.ExtrudedShape(disk_in_square, length)
+```
+
+> See `examples/operations` for an example of each operation.
+
+
+
+## Stacks
+A collection of similar Shapes; a Stack is created by starting with a Sketch, then transforming it a number of times, obtaining Shapes, stacked on top of each other.
+
+An Oval sketch, translated and rotated to obtain a Shape from which a Stack is made.
+![Stack](showcase/fusilli.png "Fusilli stack")
+
+A `Grid` sketch, consisting of 3x3 faces is Extruded 2 times to obtain a Stack. The bottom-middle box is removed from the mesh so that flow around a cube can be studied:
+
+```python
+base = Grid(point_1, point_2, 3, 3)
+
+stack = ExtrudedStack(base, side * 2, 2)
+
+# ...
+mesh.delete(stack.grid[0][1][1])
+```
+![Cube](showcase/cube.png "Flow around a Cube")
+
+> See `examples/stack/cube.py` for the full script.
+
+
+An electric heater in water, a mesh with two cellZones. The heater zone with surrounding fuild of square cross-section is an extruded `WrappedDisk` followed by a `RevolvedStack` of the same cross-sections. The center is then filled with a `SemiCylinder`.
+![Heater](showcase/heater.png "Heater")
+
+> See `examples/complex/heater` for the full script.
 
 ## Projection To Geometry
 
@@ -208,6 +273,12 @@ box.project_edge(0, 1, 'terrain')
 box.project_edge(3, 0, ['terrain', 'left_wall'])
 ```
 
+Edges and faces, projected to an STL surface
+![Projected](showcase/projected.png "Projected edges and faces")
+
+Mesh for studying flow around a sphere. Edges and faces of inner ('wall') and outer ('prismatic layers') cells are projected to a searchableSphere, adding no additional requirements for STL geometry.
+![Sphere](showcase/sphere.png "Flow around a sphere")
+
 ## Face Merging
 
 Simply provide names of patches to be merged and call `mesh.merge_patches(<master>, <slave>)`.
@@ -234,17 +305,6 @@ mesh.add(cylinder)
 
 mesh.merge_patches('box_top', 'cylinder_bottom')
 ```
-
-## Chaining and Expanding/Contracting
-
-Useful for Shapes, mostly for piping and rotational geometry; An existing Shape's start or end sketch can be reused as a
-starting sketch for a new Shape, as long as they are compatible.
-For instance, an `Elbow` can be _chained_ to a `Cylinder` just like joining pipes in plumbing.
-
-Moreover, most shapes* can be expanded to form a _wall_ version of the same shape. For instance, expanding a `Cylinder`
-creates an `ExtrudedRing`.
-
-> See `examples/chaining` for an example of each operation.
 
 ## Offsetting Faces
 
@@ -290,6 +350,11 @@ The result (basic blocking > optimized):
 
 > See `examples/optimization` for the diffuser example.
 
+Airfoil core with blunt trailing edge (imported points from NACA generator) and adjustable angle of attack. Exact blocking is determined by in-situ optimization
+(see `examples/complex/airfoil.py`). A simulation-ready mesh needs additional blocks to expand domain further away from the airfoil.
+![Airfoil](showcase/airfoil.png "Airfoil core mesh")
+
+
 ## Debugging
 
 By default, a `debug.vtk` file is created where each block represents a hexahedral cell.
@@ -297,40 +362,10 @@ By showing `block_ids` with a proper color scale the blocking can be visualized.
 This is useful when blockMesh fails with errors reporting invalid/inside-out blocks but VTK will
 happily show anything.
 
-## Showcase
-
-These are some screenshots of parametric models, built with classy_blocks.
-
-Rectangular ducts (Extrude and Revolve Operations)
-![Ducts](showcase/elbows.png "Ducts")
-
-3D pipes with twists and turns (chained Elbow and Cylinder Shapes)
-![Piping](showcase/piping.png "Piping")
-
-A simple tank with rounded edges
-![Tank](showcase/tank.png "Tank")
-
-A flywheel in a case. VTK Blocking output for debug is shown in the middle
-![Flywheel](showcase/flywheel.png "Flywheel")
-
-Venturi tube
-![Venturi tube](showcase/venturi_tube.png "Venturi tube")
+## Also!
 
 2D mesh for studying Karman Vortex Street
 ![Karman Vortex Street](showcase/karman.png "Karman vortex street")
-
-Edges and faces, projected to an STL surface
-![Projected](showcase/projected.png "Projected edges and faces")
-
-Mesh for studying flow around a sphere, with projected edges and faces
-![Sphere](showcase/sphere.png "Flow around a sphere")
-
-Airfoil core with blunt trailing edge (imported points from NACA generator) and adjustable angle of attack. Exact blocking is determined by in-situ optimization
-(see `examples/complex/airfoil.py`). A simulation-ready mesh needs additional blocks to expand domain further away from the airfoil.
-![Airfoil](showcase/airfoil.png "Airfoil core mesh")
-
-An electric heater in water, a mesh with two cellZones.
-![Heater](showcase/heater.png "Heater")
 
 A parametric, Low-Re mesh of a real-life impeller *(not included in examples)*
 ![Impeller - Low Re](showcase/impeller_full.png "Low-Re Impeller")
@@ -338,12 +373,14 @@ A parametric, Low-Re mesh of a real-life impeller *(not included in examples)*
 A complex example: parametric, Low-Re mesh of a cyclone
 ![Cyclone](showcase/cyclone.png "Cyclone")
 
+> See `examples/complex/cyclone` for a full example of a complex building workflow.
+
 # Prerequisites
 
 Package (python) dependencies can be found in *pyproject.toml* file.
 Other dependencies that must be installed:
 - python3.8 and higher
-- OpenFoam: .org or .com version is supported, foam-extend's blockMesh doesn't support multigrading but is otherwise also compatible.
+- OpenFoam: .org or .com version is supported, foam-extend's blockMesh doesn't support multigrading but is otherwise also compatible. BlockMesh is not required to run Python scripts. There is an ongoing effort to create VTK meshes from within classy_blocks. See the wip_mesher branch for the latest updates.
 
 # Technical Information
 
