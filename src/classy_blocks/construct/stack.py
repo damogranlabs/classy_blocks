@@ -15,7 +15,7 @@ class Stack(ElementBase):
     """A collection of topologically similar Shapes,
     stacked on top of each other."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.shapes: List[LoftedShape] = []
 
     @property

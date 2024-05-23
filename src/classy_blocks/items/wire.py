@@ -26,7 +26,7 @@ class Wire:
 
         # up to 4 wires can be at the same spot; this list holds other
         # coincident wires
-        self.coincidents: Set["Wire"] = set()
+        self.coincidents: Set[Wire] = set()
 
     @property
     def is_valid(self) -> bool:

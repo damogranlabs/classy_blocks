@@ -1,5 +1,5 @@
 import abc
-from typing import ClassVar, List, Tuple
+from typing import ClassVar, List
 
 import numpy as np
 
@@ -36,8 +36,6 @@ class FanPattern:
 
 
 class DiskBase(MappedSketch, abc.ABC):
-    quad_map: ClassVar[List[Tuple[int, int, int, int]]]
-
     # Ratios between core and outer points:
     # Relative size of the inner square (O-1-2-3), diagonal_ratio:
     # - too small will cause unnecessary high number of small cells in the square;
@@ -90,27 +88,27 @@ class OneCoreDisk(DiskBase):
     """A disk with a single block in  the center and four blocks around;
     see docs/blocking for point numbers and faces/grid indexing."""
 
-    quad_map: ClassVar = [
-        # core
-        (0, 1, 2, 3),
-        # shell
-        (0, 4, 5, 1),
-        (1, 5, 6, 2),
-        (2, 6, 7, 3),
-        (3, 7, 4, 0),
-    ]
-
     chops: ClassVar = [
         [0],  # axis 0
         [1, 2],  # axis 1
     ]
 
     def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
+        quad_map = [
+            # core
+            (0, 1, 2, 3),
+            # shell
+            (0, 4, 5, 1),
+            (1, 5, 6, 2),
+            (2, 6, 7, 3),
+            (3, 7, 4, 0),
+        ]
+
         pattern = FanPattern(center_point, radius_point, normal)
         ratios = [self.diagonal_ratio]
         angles = np.linspace(0, 2 * np.pi, num=4, endpoint=False)
 
-        super().__init__([*pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], self.quad_map)
+        super().__init__([*pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], quad_map)
 
     @property
     def center(self):
@@ -124,26 +122,27 @@ class OneCoreDisk(DiskBase):
 class QuarterDisk(DiskBase):
     """A quarter of a four-core disk; see docs/blocking for point numbers and faces/grid indexing"""
 
-    quad_map: ClassVar = [
-        # core
-        (0, 1, 2, 3),
-        # shell
-        (1, 4, 5, 2),
-        (2, 5, 6, 3),
-    ]
-
     chops: ClassVar = [
         [0],  # axis 0
         [1, 2],  # axis 1
     ]
 
     def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
+
+        quad_map = [
+            # core
+            (0, 1, 2, 3),
+            # shell
+            (1, 4, 5, 2),
+            (2, 5, 6, 3),
+        ]
+
         pattern = FanPattern(center_point, radius_point, normal)
         ratios = [self.side_ratio, self.diagonal_ratio]
         angles = np.linspace(0, np.pi / 2, num=3)
 
         super().__init__(
-            [center_point, *pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], self.quad_map
+            [center_point, *pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], quad_map
         )
 
     @property
@@ -154,29 +153,29 @@ class QuarterDisk(DiskBase):
 class HalfDisk(DiskBase):
     """One half of a four-core disk"""
 
-    quad_map: ClassVar = [
-        # core
-        (0, 1, 2, 3),
-        (5, 0, 3, 4),
-        # shell
-        (1, 6, 7, 2),
-        (2, 7, 8, 3),
-        (3, 8, 9, 4),
-        (4, 9, 10, 5),
-    ]
-
     chops: ClassVar = [
         [2],  # axis 0
         [2, 3, 4],  # axis 1
     ]
 
     def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
+        quad_map = [
+            # core
+            (0, 1, 2, 3),
+            (5, 0, 3, 4),
+            # shell
+            (1, 6, 7, 2),
+            (2, 7, 8, 3),
+            (3, 8, 9, 4),
+            (4, 9, 10, 5),
+        ]
+
         pattern = FanPattern(center_point, radius_point, normal)
         ratios = [self.side_ratio, self.diagonal_ratio]
         angles = np.linspace(0, np.pi, num=5)
 
         super().__init__(
-            [center_point, *pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], self.quad_map
+            [center_point, *pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], quad_map
         )
 
     @property
@@ -188,32 +187,32 @@ class FourCoreDisk(DiskBase):
     """A disk with four quads in the core and 8 in shell;
     the most versatile base for round objects."""
 
-    quad_map: ClassVar = [
-        # core
-        (0, 1, 2, 3),
-        (5, 0, 3, 4),
-        (6, 7, 0, 5),
-        (7, 8, 1, 0),
-        # shell
-        (1, 9, 10, 2),
-        (2, 10, 11, 3),
-        (3, 11, 12, 4),
-        (4, 12, 13, 5),
-        (5, 13, 14, 6),
-        (6, 14, 15, 7),
-        (7, 15, 16, 8),
-        (8, 16, 9, 1),
-    ]
-
     chops: ClassVar = [[4], [4, 5, 6, 8]]
 
     def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
+        quad_map = [
+            # core
+            (0, 1, 2, 3),
+            (5, 0, 3, 4),
+            (6, 7, 0, 5),
+            (7, 8, 1, 0),
+            # shell
+            (1, 9, 10, 2),
+            (2, 10, 11, 3),
+            (3, 11, 12, 4),
+            (4, 12, 13, 5),
+            (5, 13, 14, 6),
+            (6, 14, 15, 7),
+            (7, 15, 16, 8),
+            (8, 16, 9, 1),
+        ]
+
         pattern = FanPattern(center_point, radius_point, normal)
         ratios = [self.side_ratio, self.diagonal_ratio]
         angles = np.linspace(0, 2 * np.pi, num=8, endpoint=False)
 
         super().__init__(
-            [center_point, *pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], self.quad_map
+            [center_point, *pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], quad_map
         )
 
     @property
@@ -227,16 +226,6 @@ Disk = FourCoreDisk
 class WrappedDisk(DiskBase):
     """A OneCoreDisk but with four additional blocks surrounding it,
     making the sketch a square"""
-
-    quad_map: ClassVar = [
-        # Just the normal map
-        *OneCoreDisk.quad_map,
-        # with added outer quads
-        (4, 8, 9, 5),
-        (5, 9, 10, 6),
-        (6, 10, 11, 7),
-        (7, 11, 8, 4),
-    ]
 
     chops: ClassVar = [
         [6],
@@ -255,7 +244,22 @@ class WrappedDisk(DiskBase):
         arc_points = pattern.get_inner_points(angles, [radius_ratio])
         outer_points = pattern.get_outer_points(angles)
 
-        super().__init__([*square_points, *arc_points, *outer_points], self.quad_map)
+        quad_map = [
+            # core
+            (0, 1, 2, 3),
+            # shell
+            (0, 4, 5, 1),
+            (1, 5, 6, 2),
+            (2, 6, 7, 3),
+            (3, 7, 4, 0),
+            # with added outer quads
+            (4, 8, 9, 5),
+            (5, 9, 10, 6),
+            (6, 10, 11, 7),
+            (7, 11, 8, 4),
+        ]
+
+        super().__init__([*square_points, *arc_points, *outer_points], quad_map)
 
     @property
     def grid(self):
@@ -271,33 +275,33 @@ class WrappedDisk(DiskBase):
 
 
 class Oval(DiskBase):
-    quad_map: ClassVar = [
-        # the core
-        (0, 1, 2, 3),  # 0
-        (5, 0, 3, 4),  # 1
-        (7, 6, 0, 5),  # 2
-        (8, 9, 6, 7),  # 3
-        (9, 10, 11, 6),  # 4
-        (6, 11, 1, 0),  # 5
-        # the shell
-        (1, 12, 13, 2),  # 6
-        (2, 13, 14, 3),  # 7
-        (3, 14, 15, 4),  # 8
-        (4, 15, 16, 5),  # 9
-        (5, 16, 17, 7),  # 10
-        (7, 17, 18, 8),  # 11
-        (8, 18, 19, 9),  # 12
-        (9, 19, 20, 10),  # 13
-        (10, 20, 21, 11),  # 14
-        (11, 21, 12, 1),  # 15
-    ]
-
     chops: ClassVar = [
         [6],
         [6, 7, 8, 10, 11],
     ]
 
     def __init__(self, center_point_1: PointType, center_point_2: PointType, normal: VectorType, radius: float):
+        quad_map = [
+            # the core
+            (0, 1, 2, 3),  # 0
+            (5, 0, 3, 4),  # 1
+            (7, 6, 0, 5),  # 2
+            (8, 9, 6, 7),  # 3
+            (9, 10, 11, 6),  # 4
+            (6, 11, 1, 0),  # 5
+            # the shell
+            (1, 12, 13, 2),  # 6
+            (2, 13, 14, 3),  # 7
+            (3, 14, 15, 4),  # 8
+            (4, 15, 16, 5),  # 9
+            (5, 16, 17, 7),  # 10
+            (7, 17, 18, 8),  # 11
+            (8, 18, 19, 9),  # 12
+            (9, 19, 20, 10),  # 13
+            (10, 20, 21, 11),  # 14
+            (11, 21, 12, 1),  # 15
+        ]
+
         center_point_1 = np.array(center_point_1)
         center_point_2 = np.array(center_point_2)
         normal = f.unit_vector(np.asarray(normal))
@@ -323,7 +327,7 @@ class Oval(DiskBase):
 
         locations = [center_point_1, *inner_points_1, center_point_2, *inner_points_2, *outer_points_1, *outer_points_2]
 
-        super().__init__(locations, self.quad_map)
+        super().__init__(locations, quad_map)
 
     @property
     def center_1(self) -> NPPointType:
