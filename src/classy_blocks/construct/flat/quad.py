@@ -1,69 +1,62 @@
-from typing import Dict, List, Set, Tuple
+from typing import List, Set
 
 import numpy as np
 
 from classy_blocks.construct.flat.face import Face
-from classy_blocks.types import NPPointListType
+from classy_blocks.types import NPPointListType, QuadIndexType
 from classy_blocks.util import functions as f
-from classy_blocks.util.constants import DTYPE
-
-QuadType = Tuple[int, int, int, int]
 
 
 class Quad:
     """A helper class for tracking positions-faces-indexes-neighbours-whatnot"""
 
-    def __init__(self, positions: NPPointListType, indexes: Tuple[int, int, int, int]):
+    def __init__(self, positions: NPPointListType, indexes: QuadIndexType):
         self.indexes = indexes
-        self.face = Face(np.take(positions, list(indexes), axis=0))
+        self.positions = positions
+        self.face = Face([self.positions[i] for i in self.indexes])
 
+    def update(self) -> None:
+        """Update Face position"""
+        self.face.update([self.positions[i] for i in self.indexes])
 
-# TODO: move functions into Quad or remove Quad at all
-def get_connections(quad: QuadType) -> List[Set[int]]:
-    return [{quad[i], quad[(i + 1) % 4]} for i in range(4)]
+    @property
+    def points(self) -> NPPointListType:
+        return self.face.point_array
 
+    @property
+    def connections(self) -> List[Set[int]]:
+        return [{self.indexes[i], self.indexes[(i + 1) % 4]} for i in range(4)]
 
-def get_all_connections(quads) -> List[Set[int]]:
-    return f.flatten_2d_list([get_connections(quad) for quad in quads])
+    @property
+    def perimeter(self):
+        return sum([f.norm(self.points[i] - self.points[(i + 1) % 4]) for i in range(4)])
 
+    @property
+    def center(self):
+        return np.average(self.points)
 
-def find_neighbours(quads: List[QuadType]) -> Dict[int, Set[int]]:
-    """Returns a dictionary point:[neighbour points] as defined by quads"""
-    length = int(max(np.array(quads, dtype=DTYPE).ravel())) + 1
+    @property
+    def e1(self):
+        return f.unit_vector(self.points[1] - self.points[0])
 
-    neighbours: Dict[int, Set[int]] = {i: set() for i in range(length)}
-    connections = get_all_connections(quads)
+    @property
+    def normal(self):
+        return f.unit_vector(np.cross(self.points[1] - self.points[0], self.points[3] - self.points[0]))
 
-    for connection in connections:
-        clist = list(connection)
-        neighbours[clist[0]].add(clist[1])
-        neighbours[clist[1]].add(clist[0])
+    @property
+    def e2(self):
+        return f.unit_vector(-np.cross(self.e1, self.normal))
 
-    return neighbours
+    @property
+    def energy(self):
+        e = 0
 
+        ideal_side = self.perimeter / 2
+        ideal_diagonal = 2**0.5 * ideal_side / 2
+        center = self.center
 
-def get_fixed_points(quads) -> Set[int]:
-    """Returns indexes of points that can be smoothed"""
-    connections = get_all_connections(quads)
-    fixed_points: Set[int] = set()
+        for i in range(4):
+            e += (f.norm(self.points[i] - self.points[(i + 1) % 4]) - ideal_side) ** 2
+            e += (f.norm(center - self.points[i]) - ideal_diagonal) ** 2
 
-    for edge in connections:
-        if connections.count(edge) == 1:
-            fixed_points.update(edge)
-
-    return fixed_points
-
-
-def smooth(positions, quads, iterations: int) -> NPPointListType:
-    neighbours = find_neighbours(quads)
-    fixed_points = get_fixed_points(quads)
-
-    for _ in range(iterations):
-        for point_index, point_neighbours in neighbours.items():
-            if point_index in fixed_points:
-                continue
-
-            nei_positions = np.take(positions, list(point_neighbours), axis=0)
-            positions[point_index] = np.average(nei_positions, axis=0)
-
-    return positions
+        return e

@@ -1,10 +1,10 @@
-from typing import List, Tuple
+from typing import List
 
 import numpy as np
 
-from classy_blocks.construct.flat.quad import Quad, smooth
+from classy_blocks.construct.flat.map import QuadMap
 from classy_blocks.construct.flat.sketch import Sketch
-from classy_blocks.types import NPPointType, PointListType
+from classy_blocks.types import NPPointType, PointListType, QuadIndexType
 from classy_blocks.util.constants import DTYPE
 
 
@@ -12,13 +12,11 @@ class MappedSketch(Sketch):
     """A sketch that is created from predefined points.
     The points are connected to form quads which define Faces."""
 
-    def __init__(self, positions: PointListType, quads: List[Tuple[int, int, int, int]], smooth_iter: int = 0):
-        positions = np.array(positions, dtype=DTYPE)
+    def __init__(self, positions: PointListType, quads: List[QuadIndexType], smooth_iter: int = 0):
+        self.map = QuadMap(np.array(positions, dtype=DTYPE), quads)
 
         if smooth_iter > 0:
-            positions = smooth(positions, quads, smooth_iter)
-
-        self.quads = [Quad(positions, quad) for quad in quads]
+            self.map.smooth_laplacian(smooth_iter)
 
         self.add_edges()
 
@@ -28,7 +26,7 @@ class MappedSketch(Sketch):
     @property
     def faces(self):
         """A 'flattened' grid"""
-        return [quad.face for quad in self.quads]
+        return [quad.face for quad in self.map.quads]
 
     @property
     def grid(self):

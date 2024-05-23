@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Literal, Sequence, Union
+from typing import Any, Callable, List, Literal, Sequence, Tuple, Union
 
 from nptyping import NDArray, Shape
 
@@ -31,3 +31,6 @@ ChopTakeType = Literal["min", "max", "avg"]
 
 # Project vertex/edge to one or multiple geometries
 ProjectToType = Union[str, List[str]]
+
+# A list of indexes that define a quad
+QuadIndexType = Tuple[int, int, int, int]
