@@ -1,6 +1,7 @@
 from typing import Dict, List, Set
 
 import numpy as np
+import scipy.optimize
 
 from classy_blocks.construct.flat.quad import Quad
 from classy_blocks.types import NPPointListType, QuadIndexType
@@ -66,8 +67,48 @@ class QuadMap:
 
         self.update()
 
+    def get_nearby_quads(self) -> Dict[int, List[Quad]]:
+        """Returns a list of quads that contain each movable point"""
+        corner_points: Dict[int, List[Quad]] = {}
+
+        fixed_points = self.fixed_points
+
+        for i, point in enumerate(self.positions):
+            if i in fixed_points:
+                continue
+
+            corner_points[i] = []
+
+            for quad in self.quads:
+                if quad.contains(point):
+                    corner_points[i].append(quad)
+
+        return corner_points
+
     def optimize_energy(self):
-        """Replace quad edges by springs and move spositions o that
-        all springs are in the most relaxed state possible,
+        """Replace quad edges by springs and moves their positions
+        so that all springs are in the most relaxed state possible,
         minimizing the energy of the system"""
-        raise NotImplementedError
+        # get quads that are defined by each point
+        fixed_points = self.fixed_points
+
+        e1 = self.quads[0].e1
+        e2 = self.quads[0].e2
+
+        def energy(i, x) -> float:
+            e = 0
+
+            self.positions[i] = x[0] * e1 + x[1] * e2
+
+            for quad in self.quads:
+                quad.update()
+                e += quad.energy
+
+            return e
+
+        for i in range(len(self.positions)):
+            if i in fixed_points:
+                continue
+
+            initial = [1, 1]
+            scipy.optimize.minimize(lambda x, i=i: energy(i, x), initial)

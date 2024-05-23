@@ -3,8 +3,9 @@ from typing import List, Set
 import numpy as np
 
 from classy_blocks.construct.flat.face import Face
-from classy_blocks.types import NPPointListType, QuadIndexType
+from classy_blocks.types import NPPointListType, NPPointType, QuadIndexType
 from classy_blocks.util import functions as f
+from classy_blocks.util.constants import TOL
 
 
 class Quad:
@@ -18,6 +19,14 @@ class Quad:
     def update(self) -> None:
         """Update Face position"""
         self.face.update([self.positions[i] for i in self.indexes])
+
+    def contains(self, point: NPPointType) -> bool:
+        """Returns True if the given point is a part of this quad"""
+        for this_point in self.points:
+            if f.norm(point - this_point) < TOL:
+                return True
+
+        return False
 
     @property
     def points(self) -> NPPointListType:
@@ -33,7 +42,21 @@ class Quad:
 
     @property
     def center(self):
-        return np.average(self.points)
+        return np.average(self.points, axis=0)
+
+    @property
+    def energy(self):
+        e = 0
+
+        ideal_side = self.perimeter / 4
+        ideal_diagonal = (ideal_side / 2) * 2**0.5
+        center = self.center
+
+        for i in range(4):
+            e += (f.norm(self.points[i] - self.points[(i + 1) % 4]) - ideal_side) ** 2
+            e += (f.norm(center - self.points[i]) - ideal_diagonal) ** 2
+
+        return e / 8
 
     @property
     def e1(self):
@@ -46,17 +69,3 @@ class Quad:
     @property
     def e2(self):
         return f.unit_vector(-np.cross(self.e1, self.normal))
-
-    @property
-    def energy(self):
-        e = 0
-
-        ideal_side = self.perimeter / 2
-        ideal_diagonal = 2**0.5 * ideal_side / 2
-        center = self.center
-
-        for i in range(4):
-            e += (f.norm(self.points[i] - self.points[(i + 1) % 4]) - ideal_side) ** 2
-            e += (f.norm(center - self.points[i]) - ideal_diagonal) ** 2
-
-        return e

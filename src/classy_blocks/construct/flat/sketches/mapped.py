@@ -38,3 +38,8 @@ class MappedSketch(Sketch):
     def smooth(self, n_iter: int = 5) -> None:
         """Smooth the internal points using laplacian smoothing"""
         self.quad_map.smooth_laplacian(n_iter)
+
+    def optimize(self, n_iter: int = 3) -> None:
+        """Optimize internal vertices using the spring analogy"""
+        for _ in range(n_iter):
+            self.quad_map.optimize_energy()
