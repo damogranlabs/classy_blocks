@@ -27,7 +27,7 @@ class Stack(ElementBase):
     def get_slice(self, axis: AxisType, index: int) -> List[Operation]:
         """Returns all operation with given index in specified axis.
         For cartesian grids this is equivalent to 'lofts on the same plane';
-        This does not work with custom/mapped sketches that do not have
+        This does not work with custom/mapped sketches that do not
         conform to a cartesian grid.
 
         Example:

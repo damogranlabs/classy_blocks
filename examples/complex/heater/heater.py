@@ -6,12 +6,6 @@ import parameters as p
 
 import classy_blocks as cb
 from classy_blocks.construct.flat.sketch import Sketch
-from classy_blocks.construct.flat.sketches.disk import WrappedDisk
-from classy_blocks.construct.operations.operation import Operation
-
-# TODO: direct imports!
-from classy_blocks.construct.shape import ExtrudedShape, Shape
-from classy_blocks.construct.stack import RevolvedStack
 
 mesh = cb.Mesh()
 
@@ -21,7 +15,7 @@ ylv = p.ylv
 zlv = p.zlv
 
 
-def set_cell_zones(shape: Shape):
+def set_cell_zones(shape: cb.Shape):
     solid_indexes = list(range(5))
     fluid_indexes = list(range(5, 9))
 
@@ -33,11 +27,11 @@ def set_cell_zones(shape: Shape):
 
 
 # Cross-section of heater and fluid around it
-WrappedDisk.chops[0] = [1]  # the solid part, chop the fluid zone manually
-heater_xs = WrappedDisk(p.heater_start_point, p.wrapping_corner_point, p.heater_diameter / 2, [1, 0, 0])
+cb.WrappedDisk.chops[0] = [1]  # the solid part, chop the fluid zone manually
+heater_xs = cb.WrappedDisk(p.heater_start_point, p.wrapping_corner_point, p.heater_diameter / 2, [1, 0, 0])
 
 # The straight part of the heater, part 1: bottom
-straight_1 = ExtrudedShape(heater_xs, p.heater_length)
+straight_1 = cb.ExtrudedShape(heater_xs, p.heater_length)
 
 straight_1.chop(0, start_size=p.solid_cell_size)
 straight_1.chop(1, start_size=p.solid_cell_size)
@@ -48,7 +42,7 @@ mesh.add(straight_1)
 
 
 # The curved part of heater (and fluid around it); constructed from 4 revolves
-heater_arch = RevolvedStack(straight_1.sketch_2, np.pi, [0, 0, 1], [0, 0, 0], 4)
+heater_arch = cb.RevolvedStack(straight_1.sketch_2, np.pi, [0, 0, 1], [0, 0, 0], 4)
 heater_arch.chop(start_size=p.solid_cell_size, take="min")
 for shape in heater_arch.shapes:
     set_cell_zones(shape)
@@ -56,7 +50,7 @@ mesh.add(heater_arch)
 
 
 # The straight part of heater, part 2: after the arch
-straight_2 = ExtrudedShape(heater_arch.shapes[-1].sketch_2, p.heater_length)
+straight_2 = cb.ExtrudedShape(heater_arch.shapes[-1].sketch_2, p.heater_length)
 set_cell_zones(straight_2)
 mesh.add(straight_2)
 
@@ -70,7 +64,7 @@ arch_fill.chop_radial(start_size=p.solid_cell_size)
 # A custom sketch that takes the closest faces from given operations;
 # They will definitely be wrongly oriented but we'll sort that out later
 class NearestSketch(Sketch):
-    def __init__(self, operations: List[Operation], far_point):
+    def __init__(self, operations: List[cb.Operation], far_point):
         far_point = np.array(far_point)
         self._faces = [op.get_closest_face(far_point) for op in operations]
 
@@ -88,7 +82,7 @@ class NearestSketch(Sketch):
 
 
 cylinder_xs = NearestSketch([arch_fill.operations[i] for i in (0, 1, 2, 5)], [-2 * p.heater_length, 0, 0])
-pipe_fill = ExtrudedShape(cylinder_xs, [-p.heater_length, 0, 0])
+pipe_fill = cb.ExtrudedShape(cylinder_xs, [-p.heater_length, 0, 0])
 
 # reorient the operations in the shape
 reorienter = cb.ViewpointReorienter([-2 * p.heater_length, 0, 0], [0, p.heater_length, 0])

@@ -37,7 +37,8 @@ class MappedSketchTests(unittest.TestCase):
     def test_smooth(self):
         # a grid of vertices 3x3
 
-        sketch = MappedSketch(self.positions, self.quads, smooth_iter=10)
+        sketch = MappedSketch(self.positions, self.quads)
+        sketch.smooth(10)
 
         np.testing.assert_almost_equal(sketch.faces[0].point_array[2], [1, 1, 0])
 
@@ -48,7 +49,8 @@ class MappedSketchTests(unittest.TestCase):
         self.assertEqual(len(self.sketch.grid), 1)
 
     def test_center(self):
-        sketch = MappedSketch(self.positions, self.quads, smooth_iter=10)
+        sketch = MappedSketch(self.positions, self.quads)
+        sketch.smooth(10)
 
         np.testing.assert_almost_equal(sketch.center, [1, 1, 0])
 

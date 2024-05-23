@@ -12,11 +12,8 @@ class MappedSketch(Sketch):
     """A sketch that is created from predefined points.
     The points are connected to form quads which define Faces."""
 
-    def __init__(self, positions: PointListType, quads: List[QuadIndexType], smooth_iter: int = 0):
-        self.map = QuadMap(np.array(positions, dtype=DTYPE), quads)
-
-        if smooth_iter > 0:
-            self.map.smooth_laplacian(smooth_iter)
+    def __init__(self, positions: PointListType, quads: List[QuadIndexType]):
+        self.quad_map = QuadMap(np.array(positions, dtype=DTYPE), quads)
 
         self.add_edges()
 
@@ -26,7 +23,7 @@ class MappedSketch(Sketch):
     @property
     def faces(self):
         """A 'flattened' grid"""
-        return [quad.face for quad in self.map.quads]
+        return [quad.face for quad in self.quad_map.quads]
 
     @property
     def grid(self):
@@ -37,3 +34,7 @@ class MappedSketch(Sketch):
     def center(self) -> NPPointType:
         """Center of this sketch"""
         return np.average([face.center for face in self.faces], axis=0)
+
+    def smooth(self, n_iter: int = 5) -> None:
+        """Smooth the internal points using laplacian smoothing"""
+        self.quad_map.smooth_laplacian(n_iter)
