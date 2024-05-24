@@ -15,7 +15,7 @@ class Stack(ElementBase):
     """A collection of topologically similar Shapes,
     stacked on top of each other."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.shapes: List[LoftedShape] = []
 
     @property
@@ -27,7 +27,7 @@ class Stack(ElementBase):
     def get_slice(self, axis: AxisType, index: int) -> List[Operation]:
         """Returns all operation with given index in specified axis.
         For cartesian grids this is equivalent to 'lofts on the same plane';
-        This does not work with custom/mapped sketches that do not have
+        This does not work with custom/mapped sketches that do not
         conform to a cartesian grid.
 
         Example:

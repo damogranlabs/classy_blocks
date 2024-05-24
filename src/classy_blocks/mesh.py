@@ -95,7 +95,7 @@ class Mesh:
         the data remains but it will not contribute to the mesh"""
         self.deleted.add(operation)
 
-    def assemble(self) -> None:
+    def assemble(self, skip_edges: bool = True) -> None:
         """Converts classy_blocks entities (operations and shapes) to
         actual vertices, edges, blocks and other stuff to be inserted into
         blockMeshDict. After this has been done, the above objects
@@ -114,8 +114,9 @@ class Mesh:
                 vertices = self._add_vertices(operation)
 
                 block = Block(len(self.block_list.blocks), vertices)
-                for data in self.edge_list.add_from_operation(vertices, operation):
-                    block.add_edge(*data)
+                if not skip_edges:
+                    for data in self.edge_list.add_from_operation(vertices, operation):
+                        block.add_edge(*data)
 
                 for axis in get_args(AxisType):
                     for chop in operation.chops[axis]:
@@ -161,7 +162,7 @@ class Mesh:
             op.top_face.update(vertices[4:])
 
         self.clear()
-        self.assemble()
+        self.assemble(True)
 
     def format_settings(self) -> str:
         """Put self.settings in a proper, blockMesh-readable format"""
@@ -180,7 +181,7 @@ class Mesh:
         a VTK file is created first where each block is a single cell, to see simplified
         blocking in case blockMesh fails with an unfriendly error message."""
         if not self.is_assembled:
-            self.assemble()
+            self.assemble(False)
 
         if debug_path is not None:
             write_vtk(debug_path, self.vertex_list.vertices, self.block_list.blocks)

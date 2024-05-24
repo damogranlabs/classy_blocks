@@ -14,7 +14,7 @@ class Axis:
         self.wires = wires
 
         # will be added as blocks are added to mesh
-        self.neighbours: Set["Axis"] = set()
+        self.neighbours: Set[Axis] = set()
         self.chops: List[Chop] = []
 
         self._grading: Optional[Grading] = None

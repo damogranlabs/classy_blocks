@@ -11,8 +11,10 @@ from .construct.operations.box import Box
 from .construct.operations.connector import Connector
 from .construct.operations.extrude import Extrude
 from .construct.operations.loft import Loft
+from .construct.operations.operation import Operation
 from .construct.operations.revolve import Revolve
 from .construct.operations.wedge import Wedge
+from .construct.shape import ExtrudedShape, LoftedShape, RevolvedShape, Shape
 from .construct.shapes.cylinder import Cylinder, SemiCylinder
 from .construct.shapes.elbow import Elbow
 from .construct.shapes.frustum import Frustum
@@ -52,6 +54,7 @@ __all__ = [
     "OnCurve",
     "Face",
     # construct operations
+    "Operation",
     "Loft",
     "Extrude",
     "Revolve",
@@ -67,6 +70,10 @@ __all__ = [
     "WrappedDisk",
     "Oval",
     # construct shapes
+    "Shape",
+    "ExtrudedShape",
+    "LoftedShape",
+    "RevolvedShape",
     "Elbow",
     "Frustum",
     "Cylinder",

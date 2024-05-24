@@ -41,7 +41,7 @@ Check out the [classy_blocks tutorial on damogranlabs.com](https://damogranlabs.
 
 # How To Use It
 - To install the current _stable_ version from pypi, use `pip install classy_blocks`
-- To download the cutting-edge development version, unstall the development branch from github:  `pip install git+https://github.com/damogranlabs/classy_blocks.git@development`
+- To download the cutting-edge development version, install the development branch from github: `pip install git+https://github.com/damogranlabs/classy_blocks.git@development`
 - If you want to run examples, follow instructions in [Examples](#examples)
 - If you want to contribute, follow instructions in [CONTRIBUTING.rst](CONTRIBUTING.rst)
 
