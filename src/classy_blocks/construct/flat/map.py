@@ -1,7 +1,6 @@
-from typing import Dict, List, Set
+from typing import Dict, List, Optional, Set
 
 import numpy as np
-import scipy.optimize
 
 from classy_blocks.construct.flat.quad import Quad
 from classy_blocks.types import NPPointListType, QuadIndexType
@@ -11,13 +10,25 @@ from classy_blocks.util import functions as f
 class QuadMap:
     def __init__(self, positions: NPPointListType, indexes: List[QuadIndexType]):
         self.indexes = indexes
-        self.positions = positions
 
-        self.quads = [Quad(self.positions, quad_indexes) for quad_indexes in indexes]
+        self.quads = [Quad(positions, quad_indexes) for quad_indexes in indexes]
 
-    def update(self) -> None:
+    def update(self, positions: Optional[NPPointListType] = None) -> None:
+        if positions is None:
+            positions = self.positions
+
         for quad in self.quads:
-            quad.update()
+            quad.update(positions)
+
+    @property
+    def positions(self) -> NPPointListType:
+        """Reconstructs positions back from faces so they are always up-to-date,
+        even after transforms"""
+        indexes = list(np.array(self.indexes).flatten())
+        max_index = max(indexes)
+        all_points = f.flatten_2d_list([quad.face.point_array.tolist() for quad in self.quads])
+
+        return np.array([all_points[indexes.index(i)] for i in range(max_index + 1)])
 
     @property
     def connections(self) -> List[Set[int]]:
@@ -39,7 +50,7 @@ class QuadMap:
         return neighbours
 
     @property
-    def fixed_points(self) -> Set[int]:
+    def boundary_points(self) -> Set[int]:
         """Returns indexes of points that can be smoothed"""
         connections = self.connections
         fixed_points: Set[int] = set()
@@ -50,65 +61,42 @@ class QuadMap:
 
         return fixed_points
 
-    def smooth_laplacian(self, iterations: int = 5) -> None:
+    def get_nearby_quads(self, index: int) -> Set[int]:
+        """Returns a list of quads that contain each movable point"""
+        indexes = set()
+
+        for i, quad in enumerate(self.quads):
+            if index in quad.indexes:
+                indexes.add(i)
+
+        return indexes
+
+    def smooth_laplacian(
+        self,
+        fix_points: Optional[Set[int]] = None,
+    ) -> None:
         """Smooth the points using laplacian smoothing;
         each point is moved to the average of its neighbours"""
-        neighbours = self.neighbours
-        fixed_points = self.fixed_points
+        if fix_points is None:
+            fix_points = set()
 
-        for _ in range(iterations):
-            for point_index, point_neighbours in neighbours.items():
-                if point_index in fixed_points:
-                    continue
+        fixed_points = self.boundary_points.union(fix_points)
+        positions = self.positions
 
-                nei_positions = [self.positions[i] for i in point_neighbours]
-
-                self.positions[point_index] = np.average(nei_positions, axis=0)
-
-        self.update()
-
-    def get_nearby_quads(self) -> Dict[int, List[Quad]]:
-        """Returns a list of quads that contain each movable point"""
-        corner_points: Dict[int, List[Quad]] = {}
-
-        fixed_points = self.fixed_points
-
-        for i, point in enumerate(self.positions):
-            if i in fixed_points:
+        for point_index, point_neighbours in self.neighbours.items():
+            if point_index in fixed_points:
                 continue
 
-            corner_points[i] = []
+            nei_positions = [positions[i] for i in point_neighbours]
+            corner_center = np.average(nei_positions, axis=0)
 
-            for quad in self.quads:
-                if quad.contains(point):
-                    corner_points[i].append(quad)
+            nei_quads = [self.quads[i] for i in self.get_nearby_quads(point_index)]
+            quad_center = np.average([quad.center for quad in nei_quads], axis=0)
 
-        return corner_points
+            # distances = np.array([f.norm(pos - center) for pos in nei_positions])
+            # ratios = distances / np.average(distances)
+            # weights = ratios
 
-    def optimize_energy(self):
-        """Replace quad edges by springs and moves their positions
-        so that all springs are in the most relaxed state possible,
-        minimizing the energy of the system"""
-        # get quads that are defined by each point
-        fixed_points = self.fixed_points
+            positions[point_index] = (corner_center + quad_center) / 2
 
-        e1 = self.quads[0].e1
-        e2 = self.quads[0].e2
-
-        def energy(i, x) -> float:
-            e = 0
-
-            self.positions[i] = x[0] * e1 + x[1] * e2
-
-            for quad in self.quads:
-                quad.update()
-                e += quad.energy
-
-            return e
-
-        for i in range(len(self.positions)):
-            if i in fixed_points:
-                continue
-
-            initial = [1, 1]
-            scipy.optimize.minimize(lambda x, i=i: energy(i, x), initial)
+        self.update(positions)

@@ -13,12 +13,11 @@ class Quad:
 
     def __init__(self, positions: NPPointListType, indexes: QuadIndexType):
         self.indexes = indexes
-        self.positions = positions
-        self.face = Face([self.positions[i] for i in self.indexes])
+        self.face = Face([positions[i] for i in self.indexes])
 
-    def update(self) -> None:
+    def update(self, positions: NPPointListType) -> None:
         """Update Face position"""
-        self.face.update([self.positions[i] for i in self.indexes])
+        self.face.update([positions[i] for i in self.indexes])
 
     def contains(self, point: NPPointType) -> bool:
         """Returns True if the given point is a part of this quad"""
@@ -45,18 +44,17 @@ class Quad:
         return np.average(self.points, axis=0)
 
     @property
-    def energy(self):
-        e = 0
-
-        ideal_side = self.perimeter / 4
-        ideal_diagonal = (ideal_side / 2) * 2**0.5
+    def area(self):
         center = self.center
+        sum_area = 0
 
         for i in range(4):
-            e += (f.norm(self.points[i] - self.points[(i + 1) % 4]) - ideal_side) ** 2
-            e += (f.norm(center - self.points[i]) - ideal_diagonal) ** 2
+            side_1 = self.points[i] - center
+            side_2 = self.points[(i + 1) % 4] - center
 
-        return e / 8
+            sum_area += 0.5 * f.norm(np.cross(side_1, side_2))
+
+        return sum_area
 
     @property
     def e1(self):

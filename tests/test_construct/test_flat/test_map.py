@@ -20,7 +20,7 @@ class QuadTests(unittest.TestCase):
         new_position = [-1, -1, 0]
 
         self.positions[0] = new_position
-        quad.update()
+        quad.update(self.positions)
 
         np.testing.assert_equal(quad.points, self.positions)
 
@@ -38,20 +38,12 @@ class QuadTests(unittest.TestCase):
         self.positions[1] += delta
         self.positions[2] += delta
 
-        self.quad.update()
+        self.quad.update(self.positions)
 
         self.assertEqual(self.quad.perimeter, 6)
 
     def test_center(self):
         np.testing.assert_equal(self.quad.center, [0.5, 0.5, 0])
-
-    def test_energy_zero(self):
-        self.assertAlmostEqual(self.quad.energy, 0)
-
-    def test_energy_nonzero(self):
-        self.positions[0] += f.vector(-1, 0, 0)
-
-        self.assertGreater(self.quad.energy, 0)
 
     def test_e1(self):
         np.testing.assert_almost_equal(self.quad.e1, [1, 0, 0])
@@ -93,6 +85,9 @@ class QuadMapTests(unittest.TestCase):
     def quad_map(self):
         return QuadMap(self.positions, self.quads)
 
+    def test_positions(self):
+        np.testing.assert_equal(self.quad_map.positions, self.positions)
+
     def test_find_neighbours(self):
         # A random blocking (quadding)
         positions = np.zeros((9, 3))
@@ -128,25 +123,26 @@ class QuadMapTests(unittest.TestCase):
 
         quad_map = QuadMap(positions, indexes)
 
-        fixed_points = quad_map.fixed_points
+        fixed_points = quad_map.boundary_points
 
         self.assertSetEqual(
             fixed_points,
             {4, 5, 6, 7},
         )
 
+    def test_update(self):
+        positions = self.positions
+        positions[0] = [0.5, 0.5, 0]
+
+        quad_map = self.quad_map
+        quad_map.update(positions)
+
+        np.testing.assert_equal(quad_map.quads[0].points[0], [0.5, 0.5, 0])
+
     def test_smooth(self):
         # a grid of vertices 3x3
         quad_map = QuadMap(self.positions, self.quads)
-        quad_map.smooth_laplacian(10)
+        for _ in range(10):
+            quad_map.smooth_laplacian()
 
-        np.testing.assert_almost_equal(quad_map.positions[4], [1, 1, 0])
-
-    def test_optimize(self):
-        quad_map = QuadMap(self.positions, self.quads)
-
-        self.assertGreater(quad_map.quads[0].energy, 0)
-
-        quad_map.optimize_energy()
-
-        self.assertAlmostEqual(quad_map.quads[0].energy, 0)
+        np.testing.assert_almost_equal(quad_map.positions[4], [1, 1, 0], decimal=5)
