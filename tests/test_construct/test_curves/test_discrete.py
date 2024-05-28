@@ -30,7 +30,7 @@ class DiscreteCurveTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             _ = DiscreteCurve([[0, 0], [1, 0]])
 
-    @parameterized.expand(((-1, 1), (0, 5), (0, 0)))
+    @parameterized.expand(((-1, 1), (0, 5)))
     def test_discretize_wrong_params(self, param_from, param_to):
         """Invalid params passed to discretize() method"""
         with self.assertRaises(ValueError):

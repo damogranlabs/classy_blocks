@@ -56,7 +56,7 @@ class InterpolatedCurveBase(FunctionCurveBase, abc.ABC):
         else:
             indexes = []
 
-        params = [param_from, *[i / self.segments for i in indexes], param_to]
+        params = [param_from, *[i / self.segments for i in indexes[:-1]], param_to]
         return f.polyline_length(np.array([self.function(t) for t in params]))
 
 

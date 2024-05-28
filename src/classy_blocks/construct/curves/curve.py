@@ -34,9 +34,6 @@ class CurveBase(ElementBase):
         self._check_param(param_from)
         self._check_param(param_to)
 
-        if param_from == param_to:
-            raise ValueError("Provide two different parameters for discretization (or use get_point())")
-
         return param_from, param_to
 
     @abc.abstractmethod
@@ -79,13 +76,7 @@ class CurveBase(ElementBase):
 
     def get_param_at_length(self, length: float) -> float:
         """Returns parameter at specified length along the curve"""
-        # for a curve, made from equally-spaced points (or certain analytic ones),
-        # this holds:
-        param = length / self.length
-
-        result = scipy.optimize.root_scalar(lambda p: self.get_length(0, p) - length, x0=param)
-
-        return result.root
+        return scipy.optimize.brentq(lambda p: self.get_length(0, p) - length, self.bounds[0], self.bounds[1])
 
     def _diff(self, param: float, order: int, delta: float = TOL) -> NPVectorType:
         params = np.linspace(param - order * delta / 2, param + order * delta / 2, num=order + 1)
