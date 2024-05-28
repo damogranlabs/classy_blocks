@@ -77,6 +77,16 @@ class CurveBase(ElementBase):
         i_distance = np.argmin(distances)
         return params[i_distance]
 
+    def get_param_at_length(self, length: float) -> float:
+        """Returns parameter at specified length along the curve"""
+        # for a curve, made from equally-spaced points (or certain analytic ones),
+        # this holds:
+        param = length / self.length
+
+        result = scipy.optimize.root_scalar(lambda p: self.get_length(0, p) - length, x0=param)
+
+        return result.root
+
     def _diff(self, param: float, order: int, delta: float = TOL) -> NPVectorType:
         params = np.linspace(param - order * delta / 2, param + order * delta / 2, num=order + 1)
 

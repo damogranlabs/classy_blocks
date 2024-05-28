@@ -65,6 +65,9 @@ class LinearInterpolatedCurveTests(unittest.TestCase):
 
         np.testing.assert_array_equal(curve.get_point(0), [1, 1, 1])
 
+    def test_param_at_length(self):
+        self.assertAlmostEqual(self.curve.get_param_at_length(1), 0.25)
+
 
 class SplineInterpolatedCurveTests(unittest.TestCase):
     def setUp(self):

@@ -147,6 +147,9 @@ class LineCurveTests(unittest.TestCase):
     def test_center(self):
         np.testing.assert_almost_equal(self.curve.center, [0.5, 0.5, 0])
 
+    def test_get_param_at_length(self):
+        self.assertAlmostEqual(self.curve.get_param_at_length(0.5 * 2**0.5), 0.5)
+
 
 class CircleCurveTests(unittest.TestCase):
     def setUp(self):
