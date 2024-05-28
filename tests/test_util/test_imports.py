@@ -17,6 +17,8 @@ class ImportsTests(unittest.TestCase):
         _ = cb.LinearInterpolatedCurve
         _ = cb.SplineInterpolatedCurve
         _ = cb.AnalyticCurve
+        _ = cb.LineCurve
+        _ = cb.CircleCurve
 
     def test_import_flat(self):
         _ = cb.Face

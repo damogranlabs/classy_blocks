@@ -1,5 +1,5 @@
 from .base.transforms import Mirror, Rotation, Scaling, Translation
-from .construct.curves.analytic import AnalyticCurve
+from .construct.curves.analytic import AnalyticCurve, CircleCurve, LineCurve
 from .construct.curves.discrete import DiscreteCurve
 from .construct.curves.interpolated import LinearInterpolatedCurve, SplineInterpolatedCurve
 from .construct.edges import Angle, Arc, OnCurve, Origin, PolyLine, Project, Spline
@@ -44,6 +44,8 @@ __all__ = [
     "LinearInterpolatedCurve",
     "SplineInterpolatedCurve",
     "AnalyticCurve",
+    "LineCurve",
+    "CircleCurve",
     # edges
     "Arc",
     "Origin",
