@@ -9,7 +9,8 @@ from classy_blocks.modify.clamps.links import TranslationLink
 from classy_blocks.modify.clamps.surface import PlaneClamp
 from classy_blocks.modify.find.geometric import GeometricFinder
 from classy_blocks.modify.iteration import IterationDriver
-from classy_blocks.modify.optimizer import ClampExistsError, Optimizer
+from classy_blocks.modify.junction import ClampExistsError
+from classy_blocks.modify.optimizer import Optimizer
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import VBIG
 

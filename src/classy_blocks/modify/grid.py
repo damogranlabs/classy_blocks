@@ -1,8 +1,15 @@
+from typing import List
+
 import numpy as np
 
 from classy_blocks.mesh import Mesh
 from classy_blocks.modify.cell import Cell
+from classy_blocks.modify.clamps.clamp import ClampBase
 from classy_blocks.modify.junction import Junction
+
+
+class NoJunctionError(Exception):
+    """Raised when there's a clamp defined for a vertex that doesn't exist"""
 
 
 class Grid:
@@ -34,13 +41,45 @@ class Grid:
             for cell_2 in self.cells:
                 cell_1.add_neighbour(cell_2)
 
+    def get_junction_from_clamp(self, clamp: ClampBase) -> Junction:
+        for junction in self.junctions:
+            if junction.clamp == clamp:
+                return junction
+
+        raise NoJunctionError
+
     def update(self, junction: Junction) -> None:
         self.points[junction.vertex.index] = junction.vertex.position
-
         for cell in junction.cells:
             cell.invalidate()
 
+        # also update linked stuff
+        if junction.clamp is not None:
+            if junction.clamp.is_linked:
+                linked_junction = self.get_junction_from_clamp(junction.clamp)
+                for cell in linked_junction.cells:
+                    cell.invalidate()
+
+    def clear_cache(self):
+        for cell in self.cells:
+            cell._quality = None
+
+    def add_clamp(self, clamp: ClampBase) -> None:
+        for junction in self.junctions:
+            if junction.vertex == clamp.vertex:
+                junction.add_clamp(clamp)
+
+    @property
+    def clamps(self) -> List[ClampBase]:
+        clamps: List[ClampBase] = []
+
+        for junction in self.junctions:
+            if junction.clamp is not None:
+                clamps.append(junction.clamp)
+
+        return clamps
+
     @property
     def quality(self) -> float:
-        """Returns summed qualities of all cells in this grid"""
-        return sum([cell.quality for cell in self.cells])
+        """Returns summed qualities of all junctions"""
+        return sum([junction.quality for junction in self.junctions])

@@ -166,7 +166,7 @@ def make_link(leader):
 
 
 # Points that slide along airfoil curve
-for index in (10, 11, 13, 14):
+for index in (10, 11, 12, 13, 14):
     opt_vertex = find_vertex(index)
     clamp = cb.CurveClamp(opt_vertex, foil_curve)
     clamp.add_link(make_link(opt_vertex))
@@ -195,7 +195,7 @@ optimize_along_line(4, 3, 6)
 optimize_along_line(5, 3, 6)
 
 if OPTIMIZE:
-    optimizer.optimize(tolerance=1e-5, method="SLSQP")
+    optimizer.optimize(tolerance=1e-7, method="SLSQP")
 
 ### Write the mesh
 mesh.modify_patch("topAndBottom", "empty")
