@@ -5,10 +5,6 @@ from classy_blocks.modify.cell import Cell
 from classy_blocks.modify.clamps.clamp import ClampBase
 
 
-class ClampExistsError(Exception):
-    """Raised when attempting to add a vertex that's already among existing clamps"""
-
-
 class Junction:
     """A class that collects Cells/Blocks that
     share the same Vertex"""
@@ -28,9 +24,6 @@ class Junction:
                 return
 
     def add_clamp(self, clamp: ClampBase) -> None:
-        if self.clamp is not None:
-            raise ClampExistsError(f"A clamp has already been defined for vertex {self.vertex}")
-
         self.clamp = clamp
 
     @property

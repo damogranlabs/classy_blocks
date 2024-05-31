@@ -57,6 +57,7 @@ class Grid:
         if junction.clamp is not None:
             if junction.clamp.is_linked:
                 linked_junction = self.get_junction_from_clamp(junction.clamp)
+                self.points[linked_junction.vertex.index] = linked_junction.vertex.position
                 for cell in linked_junction.cells:
                     cell.invalidate()
 
@@ -82,4 +83,4 @@ class Grid:
     @property
     def quality(self) -> float:
         """Returns summed qualities of all junctions"""
-        return sum([junction.quality for junction in self.junctions])
+        return sum([cell.quality for cell in self.cells])
