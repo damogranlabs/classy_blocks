@@ -26,3 +26,8 @@ class Junction:
         this serves as an indicator of which junction to optimize,
         not a measurement of overall mesh quality"""
         return sum([cell.quality for cell in self.cells]) / len(self.cells)
+
+    @property
+    def delta(self) -> float:
+        """Defining length for calculation of gradients, displacements, etc."""
+        return min(cell.min_length for cell in self.cells)

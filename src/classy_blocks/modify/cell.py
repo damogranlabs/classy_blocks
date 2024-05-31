@@ -6,7 +6,8 @@ import numpy as np
 from classy_blocks.items.block import Block
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.types import NPPointListType, NPPointType, OrientType
-from classy_blocks.util.constants import FACE_MAP, VSMALL
+from classy_blocks.util import functions as f
+from classy_blocks.util.constants import EDGE_PAIRS, FACE_MAP, VSMALL
 
 
 class NoCommonSidesError(Exception):
@@ -18,8 +19,10 @@ class Cell:
     its quality metrics can then be transcribed directly
     from checkMesh."""
 
-    def __init__(self, block: Block):
+    def __init__(self, block: Block, mesh_points: NPPointListType):
         self.block = block
+        self.mesh_points = mesh_points
+
         self.neighbours: Dict[OrientType, Optional[Cell]] = {
             "bottom": None,
             "top": None,
@@ -40,9 +43,15 @@ class Cell:
         q_map["right"] = (6, 2, 1, 5)
         q_map["front"] = (0, 4, 5, 1)
         q_map["back"] = (7, 3, 2, 6)
-        self.q_map = q_map
+
         self.side_indexes = [item[0] for item in q_map.items()]
         self.face_indexes = [item[1] for item in q_map.items()]
+
+        self._quality: Optional[float] = None
+
+    def invalidate(self) -> None:
+        """Returns True if a cached quality/center can be returned"""
+        self._quality = None
 
     def get_common_vertices(self, candidate: "Cell") -> Set[int]:
         """Returns indexes of common vertices between this and provided cell"""
@@ -94,7 +103,7 @@ class Cell:
     @property
     def points(self) -> NPPointListType:
         """A list of points defining this cell, as a numpy array"""
-        return np.asarray([vertex.position for vertex in self.vertices])
+        return np.take(self.mesh_points, self.vertex_indexes, axis=0)
 
     @property
     def center(self) -> NPPointType:
@@ -112,6 +121,9 @@ class Cell:
 
     @property
     def quality(self) -> float:
+        if self._quality is not None:
+            return self._quality
+
         quality = 0
 
         center = self.center
@@ -175,4 +187,13 @@ class Cell:
 
             quality += np.sum(q_scale(3, 2.5, 3, aspect_factor))
 
+        self._quality = quality
+
         return quality
+
+    @property
+    def min_length(self) -> float:
+        """Length of the shortest edge"""
+        points = self.points
+
+        return min([f.norm(points[edge[1]] - points[edge[0]]) for edge in EDGE_PAIRS])

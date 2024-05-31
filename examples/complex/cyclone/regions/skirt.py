@@ -9,7 +9,7 @@ from classy_blocks.modify.clamps.clamp import ClampBase
 class Skirt(Region):
     """A region that connects inlet pipe's top faces to a ring on the outside of cyclone"""
 
-    radial_clamps = {28, 24}
+    radial_clamps = {28, 24, 23, 30}
     plane_clamps = {22, 25, 27, 29, 31}
 
     def __init__(self, inlet_shell: List[cb.Loft]):
