@@ -14,10 +14,6 @@ from classy_blocks.util.constants import TOL
 MinimizationMethodType = Literal["SLSQP", "L-BFGS-B", "Nelder-Mead", "Powell"]
 
 
-class NoClampError(Exception):
-    """Raised when there's no junction defined for a given Clamp"""
-
-
 class Optimizer:
     """Provides tools for blocking optimization"""
 

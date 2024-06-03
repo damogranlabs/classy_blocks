@@ -25,7 +25,7 @@ class Grid:
         self.points = np.array([vertex.position for vertex in self.mesh.vertices], dtype=DTYPE)
 
         self.cells = [Cell(block, self.points) for block in self.mesh.blocks]
-        self.junctions = [Junction(vertex) for vertex in self.mesh.vertices]
+        self.junctions = [Junction(vertex, self.points) for vertex in self.mesh.vertices]
 
         self._bind_junctions()
         self._bind_cell_neighbours()

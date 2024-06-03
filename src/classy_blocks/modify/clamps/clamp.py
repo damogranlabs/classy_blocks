@@ -67,3 +67,8 @@ class ClampBase(abc.ABC):
     @property
     def is_linked(self) -> bool:
         return len(self.links) > 0
+
+    @property
+    def dof(self) -> int:
+        """Returns number of degrees of freedom of this clamp"""
+        return len(self.initial_guess)

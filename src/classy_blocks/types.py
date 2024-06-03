@@ -2,6 +2,8 @@ from typing import Any, Callable, List, Literal, Sequence, Tuple, Union
 
 from nptyping import NDArray, Shape
 
+FloatListType = NDArray[Shape["*, 1"], Any]
+
 # A single point can be specified as a list of floats or as a numpy array
 NPPointType = NDArray[Shape["3, 1"], Any]
 PointType = Union[Sequence[Union[int, float]], NPPointType]
