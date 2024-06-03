@@ -197,3 +197,7 @@ class Cell:
         points = self.points
 
         return min([f.norm(points[edge[1]] - points[edge[0]]) for edge in EDGE_PAIRS])
+
+    def __hash__(self):
+        # to be able to use this object as a dictionary key
+        return id(self)

@@ -12,6 +12,7 @@ class Junction:
     def __init__(self, vertex: Vertex):
         self.vertex = vertex
         self.cells: Set[Cell] = set()
+        self.neighbours: Set[Junction] = set()
 
         self.clamp: Optional[ClampBase] = None
 
@@ -22,6 +23,20 @@ class Junction:
             if vertex == self.vertex:
                 self.cells.add(cell)
                 return
+
+    def add_neighbour(self, junction: "Junction") -> bool:
+        """Adds a junction to the list of neighbours
+        if both have at least one common cell;
+        returns False otherwise"""
+        if junction == self:
+            return False
+
+        for cell in junction.cells:
+            if cell in self.cells:
+                self.neighbours.add(junction)
+                return True
+
+        return False
 
     def add_clamp(self, clamp: ClampBase) -> None:
         self.clamp = clamp
@@ -37,3 +52,7 @@ class Junction:
     def delta(self) -> float:
         """Defining length for calculation of gradients, displacements, etc."""
         return min(cell.min_length for cell in self.cells)
+
+    def __hash__(self):
+        # to be able to use this object as a dictionary key
+        return id(self)

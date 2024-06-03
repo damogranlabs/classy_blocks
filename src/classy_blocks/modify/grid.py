@@ -6,6 +6,7 @@ from classy_blocks.mesh import Mesh
 from classy_blocks.modify.cell import Cell
 from classy_blocks.modify.clamps.clamp import ClampBase
 from classy_blocks.modify.junction import Junction
+from classy_blocks.util.constants import DTYPE
 
 
 class NoJunctionError(Exception):
@@ -21,13 +22,14 @@ class Grid:
         # store all mesh points in a numpy array for faster
         # calculations; when a vertex position is modified, update the
         # array using update()
-        self.points = np.array([vertex.position for vertex in self.mesh.vertices])
+        self.points = np.array([vertex.position for vertex in self.mesh.vertices], dtype=DTYPE)
 
         self.cells = [Cell(block, self.points) for block in self.mesh.blocks]
         self.junctions = [Junction(vertex) for vertex in self.mesh.vertices]
 
         self._bind_junctions()
-        self._bind_neighbours()
+        self._bind_cell_neighbours()
+        self._bind_junction_neighbours()
 
     def _bind_junctions(self) -> None:
         """Adds cells to junctions"""
@@ -35,11 +37,17 @@ class Grid:
             for junction in self.junctions:
                 junction.add_cell(cell)
 
-    def _bind_neighbours(self) -> None:
+    def _bind_cell_neighbours(self) -> None:
         """Adds neighbours to cells"""
         for cell_1 in self.cells:
             for cell_2 in self.cells:
                 cell_1.add_neighbour(cell_2)
+
+    def _bind_junction_neighbours(self) -> None:
+        """Adds neighbours to junctions"""
+        for junction_1 in self.junctions:
+            for junction_2 in self.junctions:
+                junction_1.add_neighbour(junction_2)
 
     def get_junction_from_clamp(self, clamp: ClampBase) -> Junction:
         for junction in self.junctions:

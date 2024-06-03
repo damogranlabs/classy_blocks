@@ -1,6 +1,7 @@
 import unittest
 
 import numpy as np
+from parameterized import parameterized
 
 from classy_blocks.construct.operations.box import Box
 from classy_blocks.mesh import Mesh
@@ -131,6 +132,10 @@ class OptimizerTests(unittest.TestCase):
         self.optimizer = Optimizer(self.mesh)
 
         self.vertex = next(iter(self.finder.find_in_sphere([0, 0, 0])))
+
+    @parameterized.expand(((0, 7), (1, 11), (2, 17), (3, 11), (6, 26), (7, 17)))
+    def test_junction_neighbours(self, junction, neighbours):
+        self.assertEqual(len(self.optimizer.grid.junctions[junction].neighbours), neighbours)
 
     def test_optimize(self):
         # move a point, then optimize it back to
