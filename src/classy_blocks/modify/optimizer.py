@@ -9,6 +9,7 @@ from classy_blocks.mesh import Mesh
 from classy_blocks.modify.clamps.clamp import ClampBase
 from classy_blocks.modify.grid import Grid
 from classy_blocks.modify.iteration import ClampOptimizationData, IterationDriver
+from classy_blocks.modify.junction import Junction
 from classy_blocks.util.constants import TOL
 
 MinimizationMethodType = Literal["SLSQP", "L-BFGS-B", "Nelder-Mead", "Powell"]
@@ -27,11 +28,14 @@ class Optimizer:
         """Adds a clamp to optimization. Raises an exception if it already exists"""
         self.grid.add_clamp(clamp)
 
-    def optimize_clamp(self, clamp: ClampBase, method: MinimizationMethodType) -> None:
+    def optimize_junction(self, junction: Junction, method: MinimizationMethodType) -> None:
         """Move clamp.vertex so that quality at junction is improved;
         rollback changes if grid quality decreased after optimization"""
+        if junction.clamp is None:
+            raise ValueError(f"No clamp at this junction {junction.vertex.index}")
+
+        clamp = junction.clamp
         initial_params = copy.copy(clamp.params)
-        junction = self.grid.get_junction_from_clamp(clamp)
 
         reporter = ClampOptimizationData(clamp.vertex.index, self.grid.quality, junction.quality)
         reporter.report_start()
@@ -39,7 +43,6 @@ class Optimizer:
         def fquality(params):
             # move all vertices according to X
             clamp.update_params(params)
-            self.grid.update(junction)
 
             if clamp.is_linked:
                 return self.grid.quality
@@ -53,7 +56,6 @@ class Optimizer:
 
         if reporter.rollback:
             clamp.update_params(initial_params)
-            self.grid.update(junction)
 
     def _get_sensitivity(self, clamp):
         """Returns maximum partial derivative at current params"""
@@ -61,22 +63,25 @@ class Optimizer:
 
         def fquality(clamp, junction, params):
             clamp.update_params(params)
-            self.grid.update(junction)
             return junction.quality
 
         sensitivities = np.asarray(
             scipy.optimize.approx_fprime(clamp.params, lambda p: fquality(clamp, junction, p), epsilon=10 * TOL)
         )
         return np.linalg.norm(sensitivities)
-        # return np.max(np.abs(sensitivities.flatten()))
 
     def optimize_iteration(self, method: MinimizationMethodType) -> None:
-        self.grid.clear_cache()
+        junctions = []
 
-        clamps = sorted(self.grid.clamps, key=lambda c: self._get_sensitivity(c), reverse=True)
+        for junction in self.grid.junctions:
+            if junction.clamp is None:
+                continue
+            junctions.append(junction)
 
-        for clamp in clamps:
-            self.optimize_clamp(clamp, method)
+        junctions.sort(key=lambda j: self._get_sensitivity(j.clamp), reverse=True)
+
+        for junction in junctions:
+            self.optimize_junction(junction, method)
 
     def optimize(
         self, max_iterations: int = 20, tolerance: float = 0.1, method: MinimizationMethodType = "SLSQP"

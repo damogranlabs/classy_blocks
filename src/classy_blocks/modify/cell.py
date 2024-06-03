@@ -7,7 +7,7 @@ from classy_blocks.items.block import Block
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.types import NPPointListType, NPPointType, OrientType
 from classy_blocks.util import functions as f
-from classy_blocks.util.constants import EDGE_PAIRS, FACE_MAP, VSMALL
+from classy_blocks.util.constants import DTYPE, EDGE_PAIRS, FACE_MAP, VSMALL
 
 
 class NoCommonSidesError(Exception):
@@ -19,9 +19,12 @@ class Cell:
     its quality metrics can then be transcribed directly
     from checkMesh."""
 
-    def __init__(self, block: Block, mesh_points: NPPointListType):
+    def __init__(self, block: Block):
         self.block = block
-        self.mesh_points = mesh_points
+
+        # The slowest thing in numpy is calling np.array(); keep this array
+        # in memory and update positions from vertices dynamically when needed
+        self.point_array = np.zeros((8, 3), dtype=DTYPE)
 
         self.neighbours: Dict[OrientType, Optional[Cell]] = {
             "bottom": None,
@@ -46,12 +49,6 @@ class Cell:
 
         self.side_indexes = [item[0] for item in q_map.items()]
         self.face_indexes = [item[1] for item in q_map.items()]
-
-        self._quality: Optional[float] = None
-
-    def invalidate(self) -> None:
-        """Returns True if a cached quality/center can be returned"""
-        self._quality = None
 
     def get_common_vertices(self, candidate: "Cell") -> Set[int]:
         """Returns indexes of common vertices between this and provided cell"""
@@ -103,7 +100,10 @@ class Cell:
     @property
     def points(self) -> NPPointListType:
         """A list of points defining this cell, as a numpy array"""
-        return np.take(self.mesh_points, self.vertex_indexes, axis=0)
+        for i, vertex in enumerate(self.block.vertices):
+            self.point_array[i] = vertex.position
+
+        return self.point_array
 
     @property
     def center(self) -> NPPointType:
@@ -121,9 +121,6 @@ class Cell:
 
     @property
     def quality(self) -> float:
-        if self._quality is not None:
-            return self._quality
-
         quality = 0
 
         center = self.center
@@ -186,8 +183,6 @@ class Cell:
             aspect_factor = np.log10(side_max / side_min)
 
             quality += np.sum(q_scale(3, 2.5, 3, aspect_factor))
-
-        self._quality = quality
 
         return quality
 

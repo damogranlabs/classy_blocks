@@ -3,21 +3,22 @@ from typing import Optional, Set
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.modify.cell import Cell
 from classy_blocks.modify.clamps.clamp import ClampBase
-from classy_blocks.types import NPPointListType
 
 
 class NoClampError(Exception):
     """Raised when this junction has no clamp defined but slope calculation is requested"""
 
 
+class ClampExistsError(Exception):
+    """Raised when a clamp is added to a junction that already has one defined"""
+
+
 class Junction:
     """A class that collects Cells/Blocks that
     share the same Vertex"""
 
-    def __init__(self, vertex: Vertex, points: NPPointListType):
+    def __init__(self, vertex: Vertex):
         self.vertex = vertex
-        self.points = points
-        self.index = self.vertex.index
 
         self.cells: Set[Cell] = set()
         self.neighbours: Set[Junction] = set()
@@ -47,6 +48,9 @@ class Junction:
         return False
 
     def add_clamp(self, clamp: ClampBase) -> None:
+        if self.clamp is not None:
+            raise NoClampError(f"A clamp is already defined on junction {self.vertex.index}")
+
         self.clamp = clamp
 
     @property

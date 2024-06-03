@@ -1,12 +1,9 @@
 from typing import List
 
-import numpy as np
-
 from classy_blocks.mesh import Mesh
 from classy_blocks.modify.cell import Cell
 from classy_blocks.modify.clamps.clamp import ClampBase
 from classy_blocks.modify.junction import Junction
-from classy_blocks.util.constants import DTYPE
 
 
 class NoJunctionError(Exception):
@@ -19,13 +16,8 @@ class Grid:
     def __init__(self, mesh: Mesh):
         self.mesh = mesh
 
-        # store all mesh points in a numpy array for faster
-        # calculations; when a vertex position is modified, update the
-        # array using update()
-        self.points = np.array([vertex.position for vertex in self.mesh.vertices], dtype=DTYPE)
-
-        self.cells = [Cell(block, self.points) for block in self.mesh.blocks]
-        self.junctions = [Junction(vertex, self.points) for vertex in self.mesh.vertices]
+        self.cells = [Cell(block) for block in self.mesh.blocks]
+        self.junctions = [Junction(vertex) for vertex in self.mesh.vertices]
 
         self._bind_junctions()
         self._bind_cell_neighbours()
@@ -55,23 +47,6 @@ class Grid:
                 return junction
 
         raise NoJunctionError
-
-    def update(self, junction: Junction) -> None:
-        self.points[junction.vertex.index] = junction.vertex.position
-        for cell in junction.cells:
-            cell.invalidate()
-
-        # also update linked stuff
-        if junction.clamp is not None:
-            if junction.clamp.is_linked:
-                linked_junction = self.get_junction_from_clamp(junction.clamp)
-                self.points[linked_junction.vertex.index] = linked_junction.vertex.position
-                for cell in linked_junction.cells:
-                    cell.invalidate()
-
-    def clear_cache(self):
-        for cell in self.cells:
-            cell._quality = None
 
     def add_clamp(self, clamp: ClampBase) -> None:
         for junction in self.junctions:
