@@ -61,10 +61,6 @@ class Grid:
                 for cell in linked_junction.cells:
                     cell.invalidate()
 
-    def clear_cache(self):
-        for cell in self.cells:
-            cell._quality = None
-
     def add_clamp(self, clamp: ClampBase) -> None:
         for junction in self.junctions:
             if junction.vertex == clamp.vertex:
@@ -83,4 +79,9 @@ class Grid:
     @property
     def quality(self) -> float:
         """Returns summed qualities of all junctions"""
+        # It is only called when optimizing linked clamps
+        # or at the end of an iteration.
+        for cell in self.cells:
+            cell.invalidate()
+
         return sum([cell.quality for cell in self.cells])

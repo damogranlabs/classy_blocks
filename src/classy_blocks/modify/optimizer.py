@@ -75,8 +75,6 @@ class Optimizer:
         # return np.max(np.abs(sensitivities.flatten()))
 
     def optimize_iteration(self, method: MinimizationMethodType) -> None:
-        self.grid.clear_cache()
-
         clamps = sorted(self.grid.clamps, key=lambda c: self._get_sensitivity(c), reverse=True)
 
         for clamp in clamps:

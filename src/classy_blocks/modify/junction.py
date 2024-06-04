@@ -31,6 +31,9 @@ class Junction:
         """Returns average quality of all cells at this junction;
         this serves as an indicator of which junction to optimize,
         not a measurement of overall mesh quality"""
+        for cell in self.cells:
+            cell.invalidate()
+
         return sum([cell.quality for cell in self.cells]) / len(self.cells)
 
     @property
