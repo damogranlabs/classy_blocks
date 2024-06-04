@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# [1.5.1]
+### Added
+- Optimization:
+  - Choice of solver (different problems require - work best - with different solvers)
+  - Richer output (timing, relative improvement) for easier choice of solver
+- Curves:
+  - get_param_at_length()
+  - Direct imports of various classes
+- A new example: custom sketch
+- Mesh:
+  - assemble(): an option to skip creating edges; most useful when assembling mesh before optimization but later a backport() will be called
+
+### Changed
+- Improved optimization speed
+
 # [1.5.0]
 ### Added
 - Curves:
