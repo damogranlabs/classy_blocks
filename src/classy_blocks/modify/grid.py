@@ -67,3 +67,7 @@ class Grid:
     def quality(self) -> float:
         """Returns summed qualities of all junctions"""
         return sum([cell.quality for cell in self.cells])
+
+    def clear_cache(self):
+        for cell in self.cells:
+            cell._quality = 0

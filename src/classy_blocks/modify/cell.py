@@ -50,6 +50,9 @@ class Cell:
         self.side_indexes = [item[0] for item in q_map.items()]
         self.face_indexes = [item[1] for item in q_map.items()]
 
+        # caching
+        self._quality = 0
+
     def get_common_vertices(self, candidate: "Cell") -> Set[int]:
         """Returns indexes of common vertices between this and provided cell"""
         this_indexes = set(self.vertex_indexes)
@@ -121,6 +124,9 @@ class Cell:
 
     @property
     def quality(self) -> float:
+        if self._quality > 0:
+            return self._quality
+
         quality = 0
 
         center = self.center
@@ -183,6 +189,8 @@ class Cell:
             aspect_factor = np.log10(side_max / side_min)
 
             quality += np.sum(q_scale(3, 2.5, 3, aspect_factor))
+
+        self._quality = quality
 
         return quality
 
