@@ -8,6 +8,7 @@ from classy_blocks.modify.clamps.free import FreeClamp
 from classy_blocks.modify.clamps.links import TranslationLink
 from classy_blocks.modify.find.geometric import GeometricFinder
 from classy_blocks.modify.iteration import IterationDriver
+from classy_blocks.modify.junction import ClampExistsError
 from classy_blocks.modify.optimizer import Optimizer
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import VBIG
@@ -131,6 +132,12 @@ class OptimizerTests(unittest.TestCase):
         self.optimizer = Optimizer(self.mesh)
 
         self.vertex = next(iter(self.finder.find_in_sphere([0, 0, 0])))
+
+    def test_add_junction_existing(self):
+        self.optimizer.release_vertex(FreeClamp(self.mesh.vertices[0]))
+
+        with self.assertRaises(ClampExistsError):
+            self.optimizer.release_vertex(FreeClamp(self.mesh.vertices[0]))
 
     def test_optimize(self):
         # move a point, then optimize it back to
