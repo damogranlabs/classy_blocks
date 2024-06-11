@@ -3,7 +3,7 @@ from typing import ClassVar, List
 
 import numpy as np
 
-from classy_blocks.construct.edges import Origin
+from classy_blocks.construct.edges import Origin, Spline
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketches.mapped import MappedSketch
 from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, PointType, VectorType
@@ -37,14 +37,33 @@ class FanPattern:
 
 class DiskBase(MappedSketch, abc.ABC):
     # Ratios between core and outer points:
-    # Relative size of the inner square (O-1-2-3), diagonal_ratio:
-    # - too small will cause unnecessary high number of small cells in the square;
-    # - too large will prevent creating large numbers of boundary layers
-    diagonal_ratio = 0.7
     # Relative size of lines 0-1 and 0-4 (in QuarterDisk, others analogously):
     # Just the right value will yield the lowest non-orthogonality and skewness;
     # determined empirically
-    side_ratio = 0.62
+    side_ratio = 0.8
+
+    # Spline points for optimized round meshes
+    # As ratio of radius
+    spline1_ratio = 0.112269 / 0.8 * side_ratio
+    spline2_ratio = 0.222463 / 0.8 * side_ratio
+    spline3_ratio = 0.326692 / 0.8 * side_ratio
+    spline4_ratio = 0.421177 / 0.8 * side_ratio
+    spline5_ratio = 0.502076 / 0.8 * side_ratio
+    spline6_ratio = 0.566526 / 0.8 * side_ratio
+    spline7_ratio = 0.610535 / 0.8 * side_ratio
+    spline8_ratio = 0.610532 / 0.8 * side_ratio
+    spline9_ratio = 0.625913 / 0.8 * side_ratio
+    spline10_ratio = 0.652300 / 0.8 * side_ratio
+    spline11_ratio = 0.686516 / 0.8 * side_ratio
+    spline12_ratio = 0.724996 / 0.8 * side_ratio
+    spline13_ratio = 0.762587 / 0.8 * side_ratio
+    spline14_ratio = 0.792025 / 0.8 * side_ratio
+
+    # Ratios between core and outer points:
+    # Relative size of the inner square (O-1-2-3), diagonal_ratio:
+    # - too small will cause unnecessary high number of small cells in the square;
+    # - too large will prevent creating large numbers of boundary layers
+    diagonal_ratio = np.sqrt(2) * spline8_ratio
 
     def add_edges(self):
         for face in self.grid[-1]:
@@ -65,6 +84,12 @@ class DiskBase(MappedSketch, abc.ABC):
         """Vector that points from center of this
         *Circle to its (first) radius point"""
         return self.radius_point - self.center
+
+    @property
+    def perp_radius_vector(self) -> NPVectorType:
+        """Vector that points from center of this
+        *Circle to its (second) radius point"""
+        return self.perp_radius_point - self.center
 
     @property
     def radius(self) -> float:
@@ -115,6 +140,11 @@ class OneCoreDisk(DiskBase):
         return self.faces[0].center
 
     @property
+    def perp_radius_point(self) -> NPPointType:
+        """Point at outer radius perpendicular to radius"""
+        raise NotImplementedError("The mesh is not optimized for the OneCoreDisk. Hence this function is not needed.")
+
+    @property
     def grid(self):
         return [self.faces[:1], self.faces[1:]]
 
@@ -128,7 +158,6 @@ class QuarterDisk(DiskBase):
     ]
 
     def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
-
         quad_map = [
             # core
             (0, 1, 2, 3),
@@ -144,6 +173,44 @@ class QuarterDisk(DiskBase):
         super().__init__(
             [center_point, *pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], quad_map
         )
+
+    def add_edges(self):
+        """Add a spline to the core blocks for an optimized mesh."""
+
+        # Spline points for segment 2
+        spline1 = self.center + self.radius_vector * self.spline1_ratio + self.perp_radius_vector * self.spline14_ratio
+        spline2 = self.center + self.radius_vector * self.spline2_ratio + self.perp_radius_vector * self.spline13_ratio
+        spline3 = self.center + self.radius_vector * self.spline3_ratio + self.perp_radius_vector * self.spline12_ratio
+        spline4 = self.center + self.radius_vector * self.spline4_ratio + self.perp_radius_vector * self.spline11_ratio
+        spline5 = self.center + self.radius_vector * self.spline5_ratio + self.perp_radius_vector * self.spline10_ratio
+        spline6 = self.center + self.radius_vector * self.spline6_ratio + self.perp_radius_vector * self.spline9_ratio
+        spline7 = self.center + self.radius_vector * self.spline7_ratio + self.perp_radius_vector * self.spline8_ratio
+        spline_list_2 = [spline7, spline6, spline5, spline4, spline3, spline2, spline1]
+
+        # Spline points for segment 1
+        spline8 = self.center + self.radius_vector * self.spline8_ratio + self.perp_radius_vector * self.spline7_ratio
+        spline9 = self.center + self.radius_vector * self.spline9_ratio + self.perp_radius_vector * self.spline6_ratio
+        spline10 = self.center + self.radius_vector * self.spline10_ratio + self.perp_radius_vector * self.spline5_ratio
+        spline11 = self.center + self.radius_vector * self.spline11_ratio + self.perp_radius_vector * self.spline4_ratio
+        spline12 = self.center + self.radius_vector * self.spline12_ratio + self.perp_radius_vector * self.spline3_ratio
+        spline13 = self.center + self.radius_vector * self.spline13_ratio + self.perp_radius_vector * self.spline2_ratio
+        spline14 = self.center + self.radius_vector * self.spline14_ratio + self.perp_radius_vector * self.spline1_ratio
+        spline_list_1 = [spline14, spline13, spline12, spline11, spline10, spline9, spline8]
+
+        normal = self.grid[0][0].normal
+        # Add spline to core
+        angle = 0
+        spline_curve1 = Spline([f.rotate(sp, angle, normal, self.center) for sp in spline_list_1])
+        spline_curve2 = Spline([f.rotate(sp, angle, normal, self.center) for sp in spline_list_2])
+        self.grid[0][0].add_edge(1, spline_curve1)
+        self.grid[0][0].add_edge(2, spline_curve2)
+
+        super().add_edges()
+
+    @property
+    def perp_radius_point(self) -> NPPointType:
+        """Point at outer radius perpendicular to radius"""
+        return self.grid[1][1].points[2].position
 
     @property
     def grid(self):
@@ -177,6 +244,50 @@ class HalfDisk(DiskBase):
         super().__init__(
             [center_point, *pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], quad_map
         )
+
+    def add_edges(self):
+        """Add a spline to the core blocks for an optimized mesh."""
+
+        # Spline points for segment 2
+        spline1 = self.center + self.radius_vector * self.spline1_ratio + self.perp_radius_vector * self.spline14_ratio
+        spline2 = self.center + self.radius_vector * self.spline2_ratio + self.perp_radius_vector * self.spline13_ratio
+        spline3 = self.center + self.radius_vector * self.spline3_ratio + self.perp_radius_vector * self.spline12_ratio
+        spline4 = self.center + self.radius_vector * self.spline4_ratio + self.perp_radius_vector * self.spline11_ratio
+        spline5 = self.center + self.radius_vector * self.spline5_ratio + self.perp_radius_vector * self.spline10_ratio
+        spline6 = self.center + self.radius_vector * self.spline6_ratio + self.perp_radius_vector * self.spline9_ratio
+        spline7 = self.center + self.radius_vector * self.spline7_ratio + self.perp_radius_vector * self.spline8_ratio
+        spline_list_2 = [spline7, spline6, spline5, spline4, spline3, spline2, spline1]
+
+        # Spline points for segment 1
+        spline8 = self.center + self.radius_vector * self.spline8_ratio + self.perp_radius_vector * self.spline7_ratio
+        spline9 = self.center + self.radius_vector * self.spline9_ratio + self.perp_radius_vector * self.spline6_ratio
+        spline10 = self.center + self.radius_vector * self.spline10_ratio + self.perp_radius_vector * self.spline5_ratio
+        spline11 = self.center + self.radius_vector * self.spline11_ratio + self.perp_radius_vector * self.spline4_ratio
+        spline12 = self.center + self.radius_vector * self.spline12_ratio + self.perp_radius_vector * self.spline3_ratio
+        spline13 = self.center + self.radius_vector * self.spline13_ratio + self.perp_radius_vector * self.spline2_ratio
+        spline14 = self.center + self.radius_vector * self.spline14_ratio + self.perp_radius_vector * self.spline1_ratio
+        spline_list_1 = [spline14, spline13, spline12, spline11, spline10, spline9, spline8]
+
+        normal = self.grid[0][0].normal
+        # Add spline to core
+        angle = 0
+        spline_curve1 = Spline([f.rotate(sp, angle, normal, self.center) for sp in spline_list_1])
+        spline_curve2 = Spline([f.rotate(sp, angle, normal, self.center) for sp in spline_list_2])
+        self.grid[0][0].add_edge(1, spline_curve1)
+        self.grid[0][0].add_edge(2, spline_curve2)
+
+        angle = np.pi / 2
+        spline_curve1 = Spline([f.rotate(sp, angle, normal, self.center) for sp in spline_list_1])
+        spline_curve2 = Spline([f.rotate(sp, angle, normal, self.center) for sp in spline_list_2[::-1]])
+        self.grid[0][1].add_edge(2, spline_curve1)
+        self.grid[0][1].add_edge(3, spline_curve2)
+
+        super().add_edges()
+
+    @property
+    def perp_radius_point(self) -> NPPointType:
+        """Point at outer radius perpendicular to radius"""
+        return self.grid[1][1].points[2].position
 
     @property
     def grid(self):
@@ -214,6 +325,62 @@ class FourCoreDisk(DiskBase):
         super().__init__(
             [center_point, *pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], quad_map
         )
+
+    def add_edges(self):
+        """Add a spline to the core blocks for an optimized mesh."""
+
+        # Spline points for segment 2
+        spline1 = self.center + self.radius_vector * self.spline1_ratio + self.perp_radius_vector * self.spline14_ratio
+        spline2 = self.center + self.radius_vector * self.spline2_ratio + self.perp_radius_vector * self.spline13_ratio
+        spline3 = self.center + self.radius_vector * self.spline3_ratio + self.perp_radius_vector * self.spline12_ratio
+        spline4 = self.center + self.radius_vector * self.spline4_ratio + self.perp_radius_vector * self.spline11_ratio
+        spline5 = self.center + self.radius_vector * self.spline5_ratio + self.perp_radius_vector * self.spline10_ratio
+        spline6 = self.center + self.radius_vector * self.spline6_ratio + self.perp_radius_vector * self.spline9_ratio
+        spline7 = self.center + self.radius_vector * self.spline7_ratio + self.perp_radius_vector * self.spline8_ratio
+        spline_list_2 = [spline7, spline6, spline5, spline4, spline3, spline2, spline1]
+
+        # Spline points for segment 1
+        spline8 = self.center + self.radius_vector * self.spline8_ratio + self.perp_radius_vector * self.spline7_ratio
+        spline9 = self.center + self.radius_vector * self.spline9_ratio + self.perp_radius_vector * self.spline6_ratio
+        spline10 = self.center + self.radius_vector * self.spline10_ratio + self.perp_radius_vector * self.spline5_ratio
+        spline11 = self.center + self.radius_vector * self.spline11_ratio + self.perp_radius_vector * self.spline4_ratio
+        spline12 = self.center + self.radius_vector * self.spline12_ratio + self.perp_radius_vector * self.spline3_ratio
+        spline13 = self.center + self.radius_vector * self.spline13_ratio + self.perp_radius_vector * self.spline2_ratio
+        spline14 = self.center + self.radius_vector * self.spline14_ratio + self.perp_radius_vector * self.spline1_ratio
+        spline_list_1 = [spline14, spline13, spline12, spline11, spline10, spline9, spline8]
+
+        normal = self.grid[0][0].normal
+        # Add spline to core
+        angle = 0
+        spline_curve1 = Spline([f.rotate(sp, angle, normal, self.center) for sp in spline_list_1])
+        spline_curve2 = Spline([f.rotate(sp, angle, normal, self.center) for sp in spline_list_2])
+        self.grid[0][0].add_edge(1, spline_curve1)
+        self.grid[0][0].add_edge(2, spline_curve2)
+
+        angle = np.pi / 2
+        spline_curve1 = Spline([f.rotate(sp, angle, normal, self.center) for sp in spline_list_1])
+        spline_curve2 = Spline([f.rotate(sp, angle, normal, self.center) for sp in spline_list_2[::-1]])
+        self.grid[0][1].add_edge(2, spline_curve1)
+        self.grid[0][1].add_edge(3, spline_curve2)
+
+        angle = np.pi
+        spline_curve1 = Spline([f.rotate(sp, angle, normal, self.center) for sp in spline_list_1[::-1]])
+        spline_curve2 = Spline([f.rotate(sp, angle, normal, self.center) for sp in spline_list_2])
+        self.grid[0][2].add_edge(3, spline_curve1)
+        self.grid[0][2].add_edge(0, spline_curve2)
+
+        angle = 3 * np.pi / 2
+        spline_curve1 = Spline([f.rotate(sp, angle, normal, self.center) for sp in spline_list_1])
+        spline_curve2 = Spline([f.rotate(sp, angle, normal, self.center) for sp in spline_list_2])
+        self.grid[0][3].add_edge(0, spline_curve1)
+        self.grid[0][3].add_edge(1, spline_curve2)
+
+        super().add_edges()
+
+    @property
+    def perp_radius_point(self) -> NPPointType:
+        """Point at outer radius perpendicular to radius"""
+        return self.grid[1][1].points[2].position
 
     @property
     def grid(self):
