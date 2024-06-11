@@ -189,3 +189,24 @@ class FaceTests(unittest.TestCase):
 
         with self.assertRaises(FaceCreationError):
             _ = Face(self.points, check_coplanar=True)
+
+    def test_remove_edge(self):
+        face = Face(self.points)
+        face.add_edge(0, edges.Project("test1"))
+        face.add_edge(1, edges.Project("test2"))
+        face.add_edge(2, edges.Project("test3"))
+
+        face.remove_edges([1])
+
+        self.assertIsInstance(face.edges[1], edges.Line)
+
+    def test_remove_edges(self):
+        face = Face(self.points)
+        face.add_edge(0, edges.Project("test1"))
+        face.add_edge(1, edges.Project("test2"))
+        face.add_edge(2, edges.Project("test3"))
+
+        face.remove_edges()
+
+        for i in range(4):
+            self.assertIsInstance(face.edges[i], edges.Line)

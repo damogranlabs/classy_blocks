@@ -82,6 +82,16 @@ class Face(ElementBase):
         else:
             self.edges[corner] = edge_data
 
+    def remove_edges(self, corners: Optional[List[int]] = None) -> None:
+        """Removes edges (replaces with Lines) from given corners
+        (edges <corner>-<corner+1>).
+        If no corners are provided, all are cleared."""
+        if corners is None:
+            corners = list(range(4))
+
+        for corner in corners:
+            self.edges[corner] = Line()
+
     def project_edge(self, corner: int, label: ProjectToType) -> None:
         """Adds a Project edge or add the label to an existing one"""
         edge = self.edges[corner]
