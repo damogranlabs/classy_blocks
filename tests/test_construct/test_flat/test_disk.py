@@ -90,7 +90,7 @@ class QuarterDiskTests(unittest.TestCase):
             ("S2", [0, 0.5, 0]),
         )
     )
-    @patch("classy_blocks.construct.flat.sketches.disk.DiskBase.side_ratio", new=0.5)
+    @patch("classy_blocks.construct.flat.sketches.disk.DiskBase.core_ratio", new=0.5)
     @patch("classy_blocks.construct.flat.sketches.disk.DiskBase.diagonal_ratio", new=0.5)
     def test_point_position(self, key, position):
         """Check that the points are symmetrical with respect to diagonal"""

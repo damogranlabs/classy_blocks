@@ -1,10 +1,9 @@
 import os
 
 import classy_blocks as cb
-from classy_blocks.construct.flat.sketches.disk import QuarterDisk
+from classy_blocks.construct.flat.sketches.disk import DiskBase
 
-# QuarterDisk.diagonal_ratio = 0.8 Is defined from side_ratio
-QuarterDisk.side_ratio = 0.8  # Default is 0.8
+DiskBase.core_ratio = 0.7  # Default is 0.8
 
 mesh = cb.Mesh()
 

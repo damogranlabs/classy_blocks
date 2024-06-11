@@ -3,7 +3,6 @@ from typing import List, Optional, Sequence
 from classy_blocks.base import transforms as tr
 from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.construct.flat.sketches.annulus import Annulus
-from classy_blocks.construct.flat.sketches.disk import Disk
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.shape import LoftedShape
 from classy_blocks.types import AxisType, OrientType
@@ -46,7 +45,7 @@ class RoundSolidShape(LoftedShape):
         core blocks will be defined by tangential chops"""
         # scale all radial sizes to this ratio or core cells will be
         # smaller than shell's
-        c2s_ratio = max(Disk.diagonal_ratio, Disk.side_ratio)
+        c2s_ratio = max(self.sketch_1.diagonal_ratio, self.sketch_1.core_ratio)
         if "start_size" in kwargs:
             kwargs["start_size"] *= c2s_ratio
         if "end_size" in kwargs:
