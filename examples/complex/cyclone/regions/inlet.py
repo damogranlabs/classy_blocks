@@ -40,9 +40,8 @@ class InletPipe(Region):
         )
 
         for op in inlet.operations:
-            # TODO: remove edges from face/operation
-            op.top_face.edges = [Line(), Line(), Line(), Line()]
-            op.bottom_face.edges = [Line(), Line(), Line(), Line()]
+            op.top_face.remove_edges()
+            op.bottom_face.remove_edges()
 
             for point in op.top_face.points:
                 # move points on inlet's end face so that they touch cyclone body,

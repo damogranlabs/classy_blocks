@@ -10,6 +10,7 @@ size = 0.1
 # The setup is the same as the diffuser_free example
 # except that here vertices are only allowed to move
 # axially in a straight line.
+# See diffuser_free for comments.
 
 small_pipe = cb.Cylinder([0, 0, 0], [2, 0, 0], [0, 1, 0])
 small_pipe.chop_axial(start_size=size)
@@ -23,19 +24,22 @@ mesh.add(diffuser)
 
 big_pipe = cb.Cylinder.chain(diffuser, 5)
 big_pipe.chop_axial(start_size=size)
+
 mesh.add(big_pipe)
 
 mesh.set_default_patch("walls", "wall")
 
-# Assemble the mesh before making changes
+diffuser.remove_inner_edges()
+small_pipe.remove_inner_edges()
+big_pipe.remove_inner_edges()
+
 mesh.assemble()
 
-# Find inside vertices
 finder = cb.RoundSolidFinder(mesh, diffuser)
 inner_vertices = finder.find_core(True)
 inner_vertices.update(finder.find_core(False))
 
-# Release those vertices so that optimization can find a better position for them
+
 optimizer = cb.Optimizer(mesh)
 
 for vertex in inner_vertices:

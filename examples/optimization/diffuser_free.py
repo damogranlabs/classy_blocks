@@ -26,6 +26,14 @@ mesh.add(big_pipe)
 
 mesh.set_default_patch("walls", "wall")
 
+# Internal edges in Cylinders are Splines by default;
+# In this case their endpoints will be moved ('optimized') but not
+# the points in between; this will create bad cells. Either re-define these edges after optimization
+# or remove them altogether.
+diffuser.remove_inner_edges()
+small_pipe.remove_inner_edges()
+big_pipe.remove_inner_edges()
+
 # Assemble the mesh before making changes
 mesh.assemble()
 
