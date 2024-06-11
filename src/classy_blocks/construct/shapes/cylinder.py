@@ -4,7 +4,7 @@ import numpy as np
 
 from classy_blocks.base import transforms as tr
 from classy_blocks.base.exceptions import CylinderCreationError
-from classy_blocks.construct.flat.sketches.disk import Disk, HalfDisk, OneCoreDisk
+from classy_blocks.construct.flat.sketches.disk import Disk, HalfDisk
 from classy_blocks.construct.shapes.rings import ExtrudedRing
 from classy_blocks.construct.shapes.round import RoundSolidShape
 from classy_blocks.types import PointType
@@ -21,7 +21,7 @@ class SemiCylinder(RoundSolidShape):
     axis_point_2: position of end face
     radius_point_1: defines starting point and radius"""
 
-    sketch_class: ClassVar[Union[Type[Disk], Type[HalfDisk], Type[OneCoreDisk]]] = HalfDisk
+    sketch_class: ClassVar[Union[Type[Disk], Type[HalfDisk]]] = HalfDisk
 
     def __init__(self, axis_point_1: PointType, axis_point_2: PointType, radius_point_1: PointType):
         axis_point_1 = np.asarray(axis_point_1)
