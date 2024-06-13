@@ -71,19 +71,22 @@ class DiskBase(MappedSketch, abc.ABC):
     def add_spline_edges(self) -> None:
         """Add a spline to the core blocks for an optimized mesh."""
         spline_ratios = np.array(self.spline_ratios) / 0.8 * self.core_ratio
-        spline_ratios_reversed = np.flip(spline_ratios)
+        spl_len = len(spline_ratios)
 
         spline_points = [
-            self.center + self.radius_vector * spline_ratios[i] + self.perp_radius_vector * spline_ratios_reversed[i]
-            for i in range(len(spline_ratios))
+            self.center
+            + self.radius_vector * spline_ratios[i]
+            + self.perp_radius_vector * spline_ratios[spl_len - i - 1]
+            for i in range(spl_len)
         ]
+        spline_points.reverse()
 
         for i in range(len(self.core)):
             angle = i * np.pi / 2
             points = [f.rotate(p, angle, self.normal, self.center) for p in spline_points]
 
-            points_1 = points[14:7:-1]
-            points_2 = points[7::-1]
+            points_1 = points[: spl_len // 2 - 1]
+            points_2 = points[1 + spl_len // 2 :]
 
             if i == 2:
                 points_1.reverse()
