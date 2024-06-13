@@ -17,6 +17,10 @@ cylinder.set_start_patch("inlet")
 cylinder.set_end_patch("outlet")
 cylinder.set_outer_patch("walls")
 
+# if curved core edges get in the way (when moving vertices, optimization, ...),
+# remove them with this method:
+cylinder.remove_inner_edges(start=False, end=True)
+
 bl_thickness = 0.05
 core_size = 0.2
 
