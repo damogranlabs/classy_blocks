@@ -1,6 +1,6 @@
 from parameterized import parameterized
 
-from classy_blocks.modify.grid import Grid
+from classy_blocks.optimize.grid import Grid
 from tests.fixtures.mesh import MeshTestCase
 
 

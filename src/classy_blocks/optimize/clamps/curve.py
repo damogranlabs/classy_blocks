@@ -5,7 +5,7 @@ import numpy as np
 
 from classy_blocks.construct.curves.curve import CurveBase
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.modify.clamps.clamp import ClampBase
+from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.types import PointType, VectorType
 from classy_blocks.util import functions as f
 

@@ -3,9 +3,9 @@ from typing import List
 import numpy as np
 
 from classy_blocks.mesh import Mesh
-from classy_blocks.modify.cell import Cell
-from classy_blocks.modify.clamps.clamp import ClampBase
-from classy_blocks.modify.junction import Junction
+from classy_blocks.optimize.cell import Cell
+from classy_blocks.optimize.clamps.clamp import ClampBase
+from classy_blocks.optimize.junction import Junction
 
 
 class NoJunctionError(Exception):

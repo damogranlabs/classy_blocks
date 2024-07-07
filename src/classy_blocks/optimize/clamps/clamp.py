@@ -4,7 +4,7 @@ from typing import Callable, List, Optional
 import scipy.optimize
 
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.modify.clamps.links import LinkBase
+from classy_blocks.optimize.clamps.links import LinkBase
 from classy_blocks.types import NPPointType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL

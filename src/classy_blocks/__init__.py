@@ -23,15 +23,15 @@ from .construct.shapes.shell import Shell
 from .construct.shapes.sphere import Hemisphere
 from .construct.stack import ExtrudedStack, RevolvedStack, TransformedStack
 from .mesh import Mesh
-from .modify.clamps.clamp import ClampBase
-from .modify.clamps.curve import CurveClamp, LineClamp, RadialClamp
-from .modify.clamps.free import FreeClamp
-from .modify.clamps.links import LinkBase, RotationLink, TranslationLink
-from .modify.clamps.surface import ParametricSurfaceClamp, PlaneClamp
 from .modify.find.geometric import GeometricFinder
 from .modify.find.shape import RoundSolidFinder
-from .modify.optimizer import Optimizer
 from .modify.reorient.viewpoint import ViewpointReorienter
+from .optimize.clamps.clamp import ClampBase
+from .optimize.clamps.curve import CurveClamp, LineClamp, RadialClamp
+from .optimize.clamps.free import FreeClamp
+from .optimize.clamps.links import LinkBase, RotationLink, TranslationLink
+from .optimize.clamps.surface import ParametricSurfaceClamp, PlaneClamp
+from .optimize.optimizer import Optimizer
 
 __all__ = [
     # Base

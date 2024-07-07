@@ -4,8 +4,8 @@ import numpy as np
 from parameterized import parameterized
 
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.modify.clamps.free import FreeClamp
-from classy_blocks.modify.clamps.links import RotationLink, TranslationLink
+from classy_blocks.optimize.clamps.free import FreeClamp
+from classy_blocks.optimize.clamps.links import RotationLink, TranslationLink
 from classy_blocks.util import functions as f
 
 

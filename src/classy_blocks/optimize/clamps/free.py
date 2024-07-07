@@ -1,7 +1,7 @@
 import numpy as np
 
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.modify.clamps.clamp import ClampBase
+from classy_blocks.optimize.clamps.clamp import ClampBase
 
 
 class FreeClamp(ClampBase):

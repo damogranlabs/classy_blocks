@@ -1,8 +1,8 @@
 import os
 
 import classy_blocks as cb
-from classy_blocks.modify.clamps.free import FreeClamp
-from classy_blocks.modify.optimizer import Optimizer
+from classy_blocks.optimize.clamps.free import FreeClamp
+from classy_blocks.optimize.optimizer import Optimizer
 
 mesh = cb.Mesh()
 

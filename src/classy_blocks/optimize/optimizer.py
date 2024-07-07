@@ -6,9 +6,9 @@ import numpy as np
 import scipy.optimize
 
 from classy_blocks.mesh import Mesh
-from classy_blocks.modify.clamps.clamp import ClampBase
-from classy_blocks.modify.grid import Grid
-from classy_blocks.modify.iteration import ClampOptimizationData, IterationDriver
+from classy_blocks.optimize.clamps.clamp import ClampBase
+from classy_blocks.optimize.grid import Grid
+from classy_blocks.optimize.iteration import ClampOptimizationData, IterationDriver
 from classy_blocks.util.constants import TOL
 
 MinimizationMethodType = Literal["SLSQP", "L-BFGS-B", "Nelder-Mead", "Powell"]

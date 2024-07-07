@@ -1,7 +1,7 @@
 import numpy as np
 from parameterized import parameterized
 
-from classy_blocks.modify.cell import Cell, NoCommonSidesError
+from classy_blocks.optimize.cell import Cell, NoCommonSidesError
 from tests.fixtures.mesh import MeshTestCase
 
 

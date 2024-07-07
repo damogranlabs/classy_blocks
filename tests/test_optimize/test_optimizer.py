@@ -4,12 +4,12 @@ import numpy as np
 
 from classy_blocks.construct.operations.box import Box
 from classy_blocks.mesh import Mesh
-from classy_blocks.modify.clamps.free import FreeClamp
-from classy_blocks.modify.clamps.links import TranslationLink
 from classy_blocks.modify.find.geometric import GeometricFinder
-from classy_blocks.modify.iteration import IterationDriver
-from classy_blocks.modify.junction import ClampExistsError
-from classy_blocks.modify.optimizer import Optimizer
+from classy_blocks.optimize.clamps.free import FreeClamp
+from classy_blocks.optimize.clamps.links import TranslationLink
+from classy_blocks.optimize.iteration import IterationDriver
+from classy_blocks.optimize.junction import ClampExistsError
+from classy_blocks.optimize.optimizer import Optimizer
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import VBIG
 

@@ -3,7 +3,7 @@ from typing import List, Set
 from regions.region import Region
 
 import classy_blocks as cb
-from classy_blocks.modify.clamps.clamp import ClampBase
+from classy_blocks.optimize.clamps.clamp import ClampBase
 
 
 class Skirt(Region):

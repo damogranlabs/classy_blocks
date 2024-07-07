@@ -1,8 +1,8 @@
 from typing import Optional, Set
 
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.modify.cell import Cell
-from classy_blocks.modify.clamps.clamp import ClampBase
+from classy_blocks.optimize.cell import Cell
+from classy_blocks.optimize.clamps.clamp import ClampBase
 
 
 class ClampExistsError(Exception):
