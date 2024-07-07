@@ -1,3 +1,4 @@
+import numpy as np
 from parameterized import parameterized
 
 from classy_blocks.optimize.grid import Grid
@@ -7,7 +8,10 @@ from tests.fixtures.mesh import MeshTestCase
 class GridTests(MeshTestCase):
     def setUp(self):
         super().setUp()
-        self.grid = Grid(self.mesh)
+
+        points = np.array([vertex.position for vertex in self.mesh.vertices])
+        addresses = [block.indexes for block in self.mesh.blocks]
+        self.grid = Grid(points, addresses)
 
     def test_cells_quantity(self):
         self.assertEqual(len(self.grid.cells), len(self.mesh.blocks))

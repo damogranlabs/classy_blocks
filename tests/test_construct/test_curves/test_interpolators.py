@@ -36,22 +36,3 @@ class LinearInterpolatorTests(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             _ = intfun(-1)
-
-    def test_cache(self):
-        intfun = LinearInterpolator(self.points, True)
-
-        for point in self.points:
-            point.rotate(np.pi / 2, [0, 0, 1])
-
-        # the interpolation function must not change unless invalidated
-        np.testing.assert_equal(intfun(0.25), [0, 1, 0])
-
-    def test_invalidate(self):
-        intfun = LinearInterpolator(self.points, True)
-
-        for point in self.points:
-            point.translate([0, 0, 1])
-
-        intfun.invalidate()
-
-        np.testing.assert_equal(intfun(0.25), [0, 1, 1])

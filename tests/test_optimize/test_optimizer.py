@@ -129,24 +129,26 @@ class OptimizerTests(unittest.TestCase):
         self.mesh.assemble()
 
         self.finder = GeometricFinder(self.mesh)
-        self.optimizer = Optimizer(self.mesh)
 
         self.vertex = next(iter(self.finder.find_in_sphere([0, 0, 0])))
 
     def test_add_junction_existing(self):
-        self.optimizer.release_vertex(FreeClamp(self.mesh.vertices[0]))
+        optimizer = Optimizer(self.mesh)
+        optimizer.release_vertex(FreeClamp(self.mesh.vertices[0]))
 
         with self.assertRaises(ClampExistsError):
-            self.optimizer.release_vertex(FreeClamp(self.mesh.vertices[0]))
+            optimizer.release_vertex(FreeClamp(self.mesh.vertices[0]))
 
     def test_optimize(self):
         # move a point, then optimize it back to
         # its initial-ish position
         self.vertex.move_to([0.3, 0.3, 0.3])
 
+        optimizer = Optimizer(self.mesh)
+
         clamp = FreeClamp(self.vertex)
-        self.optimizer.release_vertex(clamp)
-        self.optimizer.optimize()
+        optimizer.release_vertex(clamp)
+        optimizer.optimize()
 
         np.testing.assert_almost_equal(self.vertex.position, [0, 0, 0], decimal=1)
 
@@ -159,8 +161,9 @@ class OptimizerTests(unittest.TestCase):
         clamp = FreeClamp(self.vertex)
         clamp.add_link(link)
 
-        self.optimizer.release_vertex(clamp)
-        self.optimizer.optimize()
+        optimizer = Optimizer(self.mesh)
+        optimizer.release_vertex(clamp)
+        optimizer.optimize()
 
         self.assertGreater(f.norm(follower.position - f.vector(0, 1, 0)), 0)
         np.testing.assert_almost_equal(self.vertex.position, [0, 0, 0], decimal=1)

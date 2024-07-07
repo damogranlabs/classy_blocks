@@ -25,7 +25,10 @@ class Optimizer:
         self.mesh = mesh
         self.report = report
 
-        self.grid = Grid(mesh)
+        points = np.array([vertex.position for vertex in mesh.vertices])
+        addressing = [block.indexes for block in self.mesh.blocks]
+
+        self.grid = Grid(points, addressing)
 
     def release_vertex(self, clamp: ClampBase) -> None:
         """Adds a clamp to optimization. Raises an exception if it already exists"""
@@ -43,10 +46,13 @@ class Optimizer:
         def fquality(params):
             # move all vertices according to X
             clamp.update_params(params)
-            self.grid.update(junction)
+            self.grid.points[clamp.vertex.index] = clamp.vertex.position
 
             if clamp.is_linked:
+                for link in clamp.links:
+                    self.grid.points[link.follower.index] = link.follower.position
                 return self.grid.quality
+
             return junction.quality
 
         scipy.optimize.minimize(fquality, clamp.params, bounds=clamp.bounds, method=method)
@@ -57,7 +63,6 @@ class Optimizer:
 
         if reporter.rollback:
             clamp.update_params(initial_params)
-            self.grid.update(junction)
 
     def _get_sensitivity(self, clamp):
         """Returns maximum partial derivative at current params"""
@@ -65,7 +70,6 @@ class Optimizer:
 
         def fquality(clamp, junction, params):
             clamp.update_params(params)
-            self.grid.update(junction)
             return junction.quality
 
         sensitivities = np.asarray(

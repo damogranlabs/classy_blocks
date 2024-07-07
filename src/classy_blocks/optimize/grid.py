@@ -1,11 +1,9 @@
 from typing import List
 
-import numpy as np
-
-from classy_blocks.mesh import Mesh
 from classy_blocks.optimize.cell import Cell
 from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.junction import Junction
+from classy_blocks.types import IndexType, NPPointListType
 
 
 class NoJunctionError(Exception):
@@ -15,16 +13,13 @@ class NoJunctionError(Exception):
 class Grid:
     """A list of cells and junctions"""
 
-    def __init__(self, mesh: Mesh):
-        self.mesh = mesh
+    def __init__(self, points: NPPointListType, addressing: List[IndexType]):
+        # work on a fixed point array and only refer to it instead of building
+        # new numpy arrays for every calculation
+        self.points = points
 
-        # store all mesh points in a numpy array for faster
-        # calculations; when a vertex position is modified, update the
-        # array using update()
-        self.points = np.array([vertex.position for vertex in self.mesh.vertices])
-
-        self.cells = [Cell(block, self.points) for block in self.mesh.blocks]
-        self.junctions = [Junction(vertex) for vertex in self.mesh.vertices]
+        self.cells = [Cell(self.points, indexes) for indexes in addressing]
+        self.junctions = [Junction(self.points[index], index) for index in range(len(self.points))]
 
         self._bind_junctions()
         self._bind_neighbours()
@@ -48,22 +43,9 @@ class Grid:
 
         raise NoJunctionError
 
-    def update(self, junction: Junction) -> None:
-        self.points[junction.vertex.index] = junction.vertex.position
-        for cell in junction.cells:
-            cell.invalidate()
-
-        # also update linked stuff
-        if junction.clamp is not None:
-            if junction.clamp.is_linked:
-                linked_junction = self.get_junction_from_clamp(junction.clamp)
-                self.points[linked_junction.vertex.index] = linked_junction.vertex.position
-                for cell in linked_junction.cells:
-                    cell.invalidate()
-
     def add_clamp(self, clamp: ClampBase) -> None:
         for junction in self.junctions:
-            if junction.vertex == clamp.vertex:
+            if junction.index == clamp.vertex.index:
                 junction.add_clamp(clamp)
 
     @property
@@ -81,7 +63,4 @@ class Grid:
         """Returns summed qualities of all junctions"""
         # It is only called when optimizing linked clamps
         # or at the end of an iteration.
-        for cell in self.cells:
-            cell.invalidate()
-
         return sum([cell.quality for cell in self.cells])

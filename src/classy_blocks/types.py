@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Literal, Sequence, Tuple, Union
+from typing import Any, Callable, List, Literal, Sequence, Union
 
 from nptyping import NDArray, Shape
 
@@ -33,4 +33,4 @@ ChopTakeType = Literal["min", "max", "avg"]
 ProjectToType = Union[str, List[str]]
 
 # A list of indexes that define a quad
-QuadIndexType = Tuple[int, int, int, int]
+IndexType = List[int]

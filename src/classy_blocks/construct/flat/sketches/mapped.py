@@ -4,7 +4,7 @@ import numpy as np
 
 from classy_blocks.construct.flat.map import QuadMap
 from classy_blocks.construct.flat.sketch import Sketch
-from classy_blocks.types import NPPointType, PointListType, QuadIndexType
+from classy_blocks.types import IndexType, NPPointType, PointListType
 from classy_blocks.util.constants import DTYPE
 
 
@@ -12,7 +12,7 @@ class MappedSketch(Sketch):
     """A sketch that is created from predefined points.
     The points are connected to form quads which define Faces."""
 
-    def __init__(self, positions: PointListType, quads: List[QuadIndexType]):
+    def __init__(self, positions: PointListType, quads: List[IndexType]):
         self.quad_map = QuadMap(np.array(positions, dtype=DTYPE), quads)
 
         self.add_edges()

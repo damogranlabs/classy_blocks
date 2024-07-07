@@ -1,11 +1,9 @@
 from collections import OrderedDict
-from typing import Dict, List, Optional, Set
+from typing import Dict, Optional, Set
 
 import numpy as np
 
-from classy_blocks.items.block import Block
-from classy_blocks.items.vertex import Vertex
-from classy_blocks.types import NPPointListType, NPPointType, OrientType
+from classy_blocks.types import IndexType, NPPointListType, NPPointType, OrientType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import EDGE_PAIRS, FACE_MAP, VSMALL
 
@@ -19,9 +17,9 @@ class Cell:
     its quality metrics can then be transcribed directly
     from checkMesh."""
 
-    def __init__(self, block: Block, mesh_points: NPPointListType):
-        self.block = block
-        self.mesh_points = mesh_points
+    def __init__(self, grid_points: NPPointListType, cell_indexes: IndexType):
+        self.grid_points = grid_points
+        self.cell_indexes = cell_indexes
 
         self.neighbours: Dict[OrientType, Optional[Cell]] = {
             "bottom": None,
@@ -31,8 +29,6 @@ class Cell:
             "front": None,
             "back": None,
         }
-
-        self.vertex_indexes = [self.block.vertices[i].index for i in range(8)]
 
         # FACE_MAP, ordered and modified so that all faces point towards cell center;
         # provided their points are visited in an anti-clockwise manner
@@ -47,23 +43,17 @@ class Cell:
         self.side_indexes = [item[0] for item in q_map.items()]
         self.face_indexes = [item[1] for item in q_map.items()]
 
-        self._quality: Optional[float] = None
-
-    def invalidate(self) -> None:
-        """Returns True if a cached quality/center can be returned"""
-        self._quality = None
-
     def get_common_vertices(self, candidate: "Cell") -> Set[int]:
         """Returns indexes of common vertices between this and provided cell"""
-        this_indexes = set(self.vertex_indexes)
-        cnd_indexes = {vertex.index for vertex in candidate.block.vertices}
+        this_indexes = set(self.cell_indexes)
+        cnd_indexes = set(candidate.cell_indexes)
 
         return this_indexes.intersection(cnd_indexes)
 
-    def get_corner(self, vertex_index: int) -> int:
+    def get_corner(self, index: int) -> int:
         """Converts vertex index to local index
         (position of this vertex in the list)"""
-        return self.vertex_indexes.index(vertex_index)
+        return self.cell_indexes.index(index)
 
     def get_common_side(self, candidate: "Cell") -> OrientType:
         """Returns orient of this cell that is shared with candidate"""
@@ -97,13 +87,9 @@ class Cell:
             return False
 
     @property
-    def vertices(self) -> List[Vertex]:
-        return self.block.vertices
-
-    @property
     def points(self) -> NPPointListType:
         """A list of points defining this cell, as a numpy array"""
-        return np.take(self.mesh_points, self.vertex_indexes, axis=0)
+        return np.take(self.grid_points, self.cell_indexes, axis=0)
 
     @property
     def center(self) -> NPPointType:
@@ -121,9 +107,6 @@ class Cell:
 
     @property
     def quality(self) -> float:
-        if self._quality is not None:
-            return self._quality
-
         quality = 0
 
         center = self.center
@@ -186,8 +169,6 @@ class Cell:
             aspect_factor = np.log10(side_max / side_min)
 
             quality += np.sum(q_scale(3, 2.5, 3, aspect_factor))
-
-        self._quality = quality
 
         return quality
 

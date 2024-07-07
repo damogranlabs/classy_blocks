@@ -3,12 +3,12 @@ from typing import Dict, List, Optional, Set
 import numpy as np
 
 from classy_blocks.construct.flat.quad import Quad
-from classy_blocks.types import NPPointListType, QuadIndexType
+from classy_blocks.types import IndexType, NPPointListType
 from classy_blocks.util import functions as f
 
 
 class QuadMap:
-    def __init__(self, positions: NPPointListType, indexes: List[QuadIndexType]):
+    def __init__(self, positions: NPPointListType, indexes: List[IndexType]):
         self.indexes = indexes
 
         self.quads = [Quad(positions, quad_indexes) for quad_indexes in indexes]

@@ -3,7 +3,7 @@ from typing import List, Set
 import numpy as np
 
 from classy_blocks.construct.flat.face import Face
-from classy_blocks.types import NPPointListType, NPPointType, QuadIndexType
+from classy_blocks.types import IndexType, NPPointListType, NPPointType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
 
@@ -11,7 +11,7 @@ from classy_blocks.util.constants import TOL
 class Quad:
     """A helper class for tracking positions-faces-indexes-neighbours-whatnot"""
 
-    def __init__(self, positions: NPPointListType, indexes: QuadIndexType):
+    def __init__(self, positions: NPPointListType, indexes: IndexType):
         self.indexes = indexes
         self.face = Face([positions[i] for i in self.indexes])
 
