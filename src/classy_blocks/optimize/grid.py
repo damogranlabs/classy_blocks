@@ -3,11 +3,18 @@ from typing import List
 from classy_blocks.optimize.cell import Cell
 from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.junction import Junction
+from classy_blocks.optimize.links import LinkBase
 from classy_blocks.types import IndexType, NPPointListType
+from classy_blocks.util import functions as f
+from classy_blocks.util.constants import TOL
 
 
 class NoJunctionError(Exception):
     """Raised when there's a clamp defined for a vertex that doesn't exist"""
+
+
+class InvalidLinkError(Exception):
+    """Raised when a link has been added that doesn't connect two actual points"""
 
 
 class Grid:
@@ -19,7 +26,7 @@ class Grid:
         self.points = points
 
         self.cells = [Cell(self.points, indexes) for indexes in addressing]
-        self.junctions = [Junction(self.points[index], index) for index in range(len(self.points))]
+        self.junctions = [Junction(self.points, index) for index in range(len(self.points))]
 
         self._bind_junctions()
         self._bind_neighbours()
@@ -45,8 +52,28 @@ class Grid:
 
     def add_clamp(self, clamp: ClampBase) -> None:
         for junction in self.junctions:
-            if junction.index == clamp.vertex.index:
+            if f.norm(junction.point - clamp.position) < TOL:
                 junction.add_clamp(clamp)
+                return
+
+        raise NoJunctionError(f"No junction found for clamp {clamp}")
+
+    def add_link(self, link: LinkBase) -> None:
+        leader_index = -1
+        follower_index = -1
+
+        for i, junction in enumerate(self.junctions):
+            if f.norm(link.leader - junction.point) < TOL:
+                leader_index = i
+                continue
+            if f.norm(link.follower - junction.point) < TOL:
+                follower_index = i
+
+        if leader_index == -1 or follower_index == -1:
+            # TODO: prettier output
+            raise InvalidLinkError(f"Invalid link: {link}")
+
+        self.junctions[leader_index].add_link(link, follower_index)
 
     @property
     def clamps(self) -> List[ClampBase]:

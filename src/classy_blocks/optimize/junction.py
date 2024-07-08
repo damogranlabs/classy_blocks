@@ -1,12 +1,20 @@
-from typing import Optional, Set
+import dataclasses
+from typing import List, Optional, Set
 
 from classy_blocks.optimize.cell import Cell
 from classy_blocks.optimize.clamps.clamp import ClampBase
-from classy_blocks.types import NPPointListType
+from classy_blocks.optimize.links import LinkBase
+from classy_blocks.types import NPPointListType, NPPointType
 
 
 class ClampExistsError(Exception):
     """Raised when adding a clamp to a junction that already has one defined"""
+
+
+@dataclasses.dataclass
+class IndexedLink:
+    link: LinkBase
+    follower_index: int
 
 
 class Junction:
@@ -19,6 +27,11 @@ class Junction:
         self.cells: Set[Cell] = set()
 
         self.clamp: Optional[ClampBase] = None
+        self.links: List[IndexedLink] = []
+
+    @property
+    def point(self) -> NPPointType:
+        return self.points[self.index]
 
     def add_cell(self, cell: Cell) -> None:
         """Adds the given cell to the list if it is
@@ -30,9 +43,12 @@ class Junction:
 
     def add_clamp(self, clamp: ClampBase) -> None:
         if self.clamp is not None:
-            raise ClampExistsError(f"Clamp already defined for junctoin {self.index}")
+            raise ClampExistsError(f"Clamp already defined for junction {self.index}")
 
         self.clamp = clamp
+
+    def add_link(self, link: LinkBase, follower_index: int) -> None:
+        self.links.append(IndexedLink(link, follower_index))
 
     @property
     def quality(self) -> float:

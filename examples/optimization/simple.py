@@ -2,7 +2,7 @@ import os
 
 import classy_blocks as cb
 from classy_blocks.optimize.clamps.free import FreeClamp
-from classy_blocks.optimize.optimizer import Optimizer
+from classy_blocks.optimize.optimizer import MeshOptimizer
 
 mesh = cb.Mesh()
 
@@ -26,7 +26,7 @@ mid_vertex = list(finder.find_in_sphere([0, 0, 0]))[0]
 mid_vertex.translate([0.6, 0.6, 0.6])
 
 # find a better spot for the above point using automatic optimization
-optimizer = Optimizer(mesh)
+optimizer = MeshOptimizer(mesh)
 
 # define which vertices can move during optimization, and in which DoF
 mid_clamp = FreeClamp(mid_vertex)

@@ -13,7 +13,7 @@ class QuadTests(unittest.TestCase):
 
     @property
     def quad(self) -> Quad:
-        return Quad(self.positions, (0, 1, 2, 3))
+        return Quad(self.positions, [0, 1, 2, 3])
 
     def test_quad_update(self):
         quad = self.quad

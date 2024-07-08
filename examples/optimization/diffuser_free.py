@@ -43,7 +43,7 @@ inner_vertices = finder.find_core(True)
 inner_vertices.update(finder.find_core(False))
 
 # Release those vertices so that optimization can find a better position for them
-optimizer = cb.Optimizer(mesh)
+optimizer = cb.MeshOptimizer(mesh)
 
 for vertex in inner_vertices:
     clamp = cb.FreeClamp(vertex)

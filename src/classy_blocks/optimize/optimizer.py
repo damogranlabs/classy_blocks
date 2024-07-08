@@ -1,6 +1,6 @@
 import copy
 import time
-from typing import Literal
+from typing import List, Literal
 
 import numpy as np
 import scipy.optimize
@@ -9,6 +9,8 @@ from classy_blocks.mesh import Mesh
 from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.grid import Grid
 from classy_blocks.optimize.iteration import ClampOptimizationData, IterationDriver
+from classy_blocks.optimize.links import LinkBase
+from classy_blocks.types import IndexType, PointListType
 from classy_blocks.util.constants import TOL
 
 MinimizationMethodType = Literal["SLSQP", "L-BFGS-B", "Nelder-Mead", "Powell"]
@@ -18,21 +20,20 @@ class NoClampError(Exception):
     """Raised when there's no junction defined for a given Clamp"""
 
 
-class Optimizer:
-    """Provides tools for blocking optimization"""
+class OptimizerBase:
+    """Provides tools for 2D (sketch) or 3D (mesh blocking) optimization"""
 
-    def __init__(self, mesh: Mesh, report: bool = True):
-        self.mesh = mesh
+    def __init__(self, points: PointListType, addressing: List[IndexType], report: bool = True):
+        self.grid = Grid(np.array(points), addressing)
+
         self.report = report
-
-        points = np.array([vertex.position for vertex in mesh.vertices])
-        addressing = [block.indexes for block in self.mesh.blocks]
-
-        self.grid = Grid(points, addressing)
 
     def release_vertex(self, clamp: ClampBase) -> None:
         """Adds a clamp to optimization. Raises an exception if it already exists"""
         self.grid.add_clamp(clamp)
+
+    def add_link(self, link: LinkBase) -> None:
+        self.grid.add_link(link)
 
     def optimize_clamp(self, clamp: ClampBase, method: MinimizationMethodType) -> None:
         """Move clamp.vertex so that quality at junction is improved;
@@ -40,17 +41,20 @@ class Optimizer:
         initial_params = copy.copy(clamp.params)
         junction = self.grid.get_junction_from_clamp(clamp)
 
-        reporter = ClampOptimizationData(clamp.vertex.index, self.grid.quality, junction.quality)
+        reporter = ClampOptimizationData(junction.index, self.grid.quality, junction.quality)
         reporter.report_start()
 
         def fquality(params):
             # move all vertices according to X
             clamp.update_params(params)
-            self.grid.points[clamp.vertex.index] = clamp.vertex.position
+            self.grid.points[junction.index] = clamp.position
 
-            if clamp.is_linked:
-                for link in clamp.links:
-                    self.grid.points[link.follower.index] = link.follower.position
+            if len(junction.links) > 0:
+                for indexed_link in junction.links:
+                    indexed_link.link.leader = clamp.position
+                    indexed_link.link.update()
+                    self.grid.points[indexed_link.follower_index] = indexed_link.link.follower
+
                 return self.grid.quality
 
             return junction.quality
@@ -63,6 +67,7 @@ class Optimizer:
 
         if reporter.rollback:
             clamp.update_params(initial_params)
+            # TODO: rollback grid and links
 
     def _get_sensitivity(self, clamp):
         """Returns maximum partial derivative at current params"""
@@ -114,3 +119,27 @@ class Optimizer:
                 f"({abs_improvement:.3e}, {rel_improvement*100:.0f}%)"
             )
             print(f"Elapsed time: {end_time - start_time:.0f}s")
+
+
+class MeshOptimizer(OptimizerBase):
+
+    def __init__(self, mesh: Mesh, report: bool = True):
+        self.mesh = mesh
+
+        points = np.array([vertex.position for vertex in mesh.vertices])
+        addressing = [block.indexes for block in self.mesh.blocks]
+
+        super().__init__(points, addressing, report)
+
+    def optimize(
+        self, max_iterations: int = 20, tolerance: float = 0.1, method: MinimizationMethodType = "SLSQP"
+    ) -> None:
+        super().optimize(max_iterations, tolerance, method)
+
+        # copy the stuff back to mesh
+        for i, point in enumerate(self.grid.points):
+            self.mesh.vertices[i].move_to(point)
+
+
+# For backwards compatibility and ease-of-use
+Optimizer = MeshOptimizer

@@ -29,9 +29,9 @@ from .modify.reorient.viewpoint import ViewpointReorienter
 from .optimize.clamps.clamp import ClampBase
 from .optimize.clamps.curve import CurveClamp, LineClamp, RadialClamp
 from .optimize.clamps.free import FreeClamp
-from .optimize.clamps.links import LinkBase, RotationLink, TranslationLink
 from .optimize.clamps.surface import ParametricSurfaceClamp, PlaneClamp
-from .optimize.optimizer import Optimizer
+from .optimize.links import LinkBase, RotationLink, TranslationLink
+from .optimize.optimizer import MeshOptimizer
 
 __all__ = [
     # Base
@@ -106,7 +106,7 @@ __all__ = [
     "TranslationLink",
     "RotationLink",
     # Optimization: optimizer
-    "Optimizer",
+    "MeshOptimizer",
     # Auto-orientation
     "ViewpointReorienter",
 ]

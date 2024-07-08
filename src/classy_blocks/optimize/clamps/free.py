@@ -1,18 +1,18 @@
 import numpy as np
 
-from classy_blocks.items.vertex import Vertex
 from classy_blocks.optimize.clamps.clamp import ClampBase
+from classy_blocks.types import PointType
 
 
 class FreeClamp(ClampBase):
-    def __init__(self, vertex: Vertex):
-        super().__init__(vertex, np.asarray)
+    def __init__(self, position: PointType):
+        super().__init__(position, np.asarray)
 
     def get_params_from_vertex(self):
         """Returns parameters from initial vertex position"""
         # there's no need for all that math in super()
-        return self.vertex.position
+        return self.position
 
     @property
     def initial_guess(self):
-        return self.vertex.position
+        return self.position

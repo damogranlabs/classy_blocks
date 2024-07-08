@@ -6,10 +6,10 @@ from classy_blocks.construct.operations.box import Box
 from classy_blocks.mesh import Mesh
 from classy_blocks.modify.find.geometric import GeometricFinder
 from classy_blocks.optimize.clamps.free import FreeClamp
-from classy_blocks.optimize.clamps.links import TranslationLink
 from classy_blocks.optimize.iteration import IterationDriver
 from classy_blocks.optimize.junction import ClampExistsError
-from classy_blocks.optimize.optimizer import Optimizer
+from classy_blocks.optimize.links import TranslationLink
+from classy_blocks.optimize.optimizer import MeshOptimizer
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import VBIG
 
@@ -133,38 +133,36 @@ class OptimizerTests(unittest.TestCase):
         self.vertex = next(iter(self.finder.find_in_sphere([0, 0, 0])))
 
     def test_add_junction_existing(self):
-        optimizer = Optimizer(self.mesh)
-        optimizer.release_vertex(FreeClamp(self.mesh.vertices[0]))
+        optimizer = MeshOptimizer(self.mesh)
+        optimizer.release_vertex(FreeClamp(self.mesh.vertices[0].position))
 
         with self.assertRaises(ClampExistsError):
-            optimizer.release_vertex(FreeClamp(self.mesh.vertices[0]))
+            optimizer.release_vertex(FreeClamp(self.mesh.vertices[0].position))
 
     def test_optimize(self):
         # move a point, then optimize it back to
         # its initial-ish position
         self.vertex.move_to([0.3, 0.3, 0.3])
 
-        optimizer = Optimizer(self.mesh)
+        optimizer = MeshOptimizer(self.mesh)
 
-        clamp = FreeClamp(self.vertex)
+        clamp = FreeClamp(self.vertex.position)
         optimizer.release_vertex(clamp)
         optimizer.optimize()
 
         np.testing.assert_almost_equal(self.vertex.position, [0, 0, 0], decimal=1)
 
     def test_optimize_linked(self):
-        follower = next(iter(self.finder.find_in_sphere([0, 1, 0])))
-        link = TranslationLink(self.vertex, follower)
-
         self.vertex.move_to([0.3, 0.3, 0.3])
+        follower_vertex = next(iter(self.finder.find_in_sphere([0, 1, 0])))
 
-        clamp = FreeClamp(self.vertex)
-        clamp.add_link(link)
+        link = TranslationLink(self.vertex.position, follower_vertex.position)
+        clamp = FreeClamp(self.vertex.position)
 
-        optimizer = Optimizer(self.mesh)
+        optimizer = MeshOptimizer(self.mesh)
         optimizer.release_vertex(clamp)
+        optimizer.add_link(link)
         optimizer.optimize()
 
-        self.assertGreater(f.norm(follower.position - f.vector(0, 1, 0)), 0)
+        self.assertGreater(f.norm(follower_vertex.position - f.vector(0, 1, 0)), 0)
         np.testing.assert_almost_equal(self.vertex.position, [0, 0, 0], decimal=1)
-        np.testing.assert_almost_equal(follower.position - self.vertex.position, [0, 1, 0])

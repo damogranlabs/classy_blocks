@@ -51,7 +51,7 @@ mesh.assemble()
 # Also, when Mesh is assembled, vertices are created that have
 # consistent indexes; those are used in Region.get_clamps() to quickly
 # fetch points (no need for cb.*Finders)
-optimizer = cb.Optimizer(mesh)
+optimizer = cb.MeshOptimizer(mesh)
 
 clamps = []
 for region in optimize_regions:

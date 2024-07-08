@@ -147,7 +147,7 @@ for loft in lofts:
 ### Optimize:
 mesh.assemble()
 finder = cb.GeometricFinder(mesh)
-optimizer = cb.Optimizer(mesh)
+optimizer = cb.MeshOptimizer(mesh)
 
 
 # Some helper functions

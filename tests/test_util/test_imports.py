@@ -86,4 +86,4 @@ class ImportsTests(unittest.TestCase):
         _ = cb.RotationLink
 
     def test_import_optimizer(self):
-        _ = cb.Optimizer
+        _ = cb.MeshOptimizer

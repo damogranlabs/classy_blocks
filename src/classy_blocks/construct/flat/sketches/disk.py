@@ -160,12 +160,12 @@ class OneCoreDisk(DiskBase):
     def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
         quad_map = [
             # core
-            (0, 1, 2, 3),
+            [0, 1, 2, 3],
             # shell
-            (0, 4, 5, 1),
-            (1, 5, 6, 2),
-            (2, 6, 7, 3),
-            (3, 7, 4, 0),
+            [0, 4, 5, 1],
+            [1, 5, 6, 2],
+            [2, 6, 7, 3],
+            [3, 7, 4, 0],
         ]
 
         pattern = FanPattern(center_point, radius_point, normal)
@@ -197,10 +197,10 @@ class QuarterDisk(DiskBase):
     def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
         quad_map = [
             # core
-            (0, 1, 2, 3),
+            [0, 1, 2, 3],
             # shell
-            (1, 4, 5, 2),
-            (2, 5, 6, 3),
+            [1, 4, 5, 2],
+            [2, 5, 6, 3],
         ]
 
         pattern = FanPattern(center_point, radius_point, normal)
@@ -227,13 +227,13 @@ class HalfDisk(DiskBase):
     def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
         quad_map = [
             # core
-            (0, 1, 2, 3),
-            (5, 0, 3, 4),
+            [0, 1, 2, 3],
+            [5, 0, 3, 4],
             # shell
-            (1, 6, 7, 2),
-            (2, 7, 8, 3),
-            (3, 8, 9, 4),
-            (4, 9, 10, 5),
+            [1, 6, 7, 2],
+            [2, 7, 8, 3],
+            [3, 8, 9, 4],
+            [4, 9, 10, 5],
         ]
 
         pattern = FanPattern(center_point, radius_point, normal)
@@ -258,19 +258,19 @@ class FourCoreDisk(DiskBase):
     def __init__(self, center_point: PointType, radius_point: PointType, normal: VectorType):
         quad_map = [
             # core
-            (0, 1, 2, 3),
-            (5, 0, 3, 4),
-            (6, 7, 0, 5),
-            (7, 8, 1, 0),
+            [0, 1, 2, 3],
+            [5, 0, 3, 4],
+            [6, 7, 0, 5],
+            [7, 8, 1, 0],
             # shell
-            (1, 9, 10, 2),
-            (2, 10, 11, 3),
-            (3, 11, 12, 4),
-            (4, 12, 13, 5),
-            (5, 13, 14, 6),
-            (6, 14, 15, 7),
-            (7, 15, 16, 8),
-            (8, 16, 9, 1),
+            [1, 9, 10, 2],
+            [2, 10, 11, 3],
+            [3, 11, 12, 4],
+            [4, 12, 13, 5],
+            [5, 13, 14, 6],
+            [6, 14, 15, 7],
+            [7, 15, 16, 8],
+            [8, 16, 9, 1],
         ]
 
         pattern = FanPattern(center_point, radius_point, normal)
@@ -312,17 +312,17 @@ class WrappedDisk(DiskBase):
 
         quad_map = [
             # core
-            (0, 1, 2, 3),
+            [0, 1, 2, 3],
             # shell
-            (0, 4, 5, 1),
-            (1, 5, 6, 2),
-            (2, 6, 7, 3),
-            (3, 7, 4, 0),
+            [0, 4, 5, 1],
+            [1, 5, 6, 2],
+            [2, 6, 7, 3],
+            [3, 7, 4, 0],
             # with added outer quads
-            (4, 8, 9, 5),
-            (5, 9, 10, 6),
-            (6, 10, 11, 7),
-            (7, 11, 8, 4),
+            [4, 8, 9, 5],
+            [5, 9, 10, 6],
+            [6, 10, 11, 7],
+            [7, 11, 8, 4],
         ]
 
         super().__init__([*square_points, *arc_points, *outer_points], quad_map)
@@ -349,23 +349,23 @@ class Oval(DiskBase):
     def __init__(self, center_point_1: PointType, center_point_2: PointType, normal: VectorType, radius: float):
         quad_map = [
             # the core
-            (0, 1, 2, 3),  # 0
-            (5, 0, 3, 4),  # 1
-            (7, 6, 0, 5),  # 2
-            (8, 9, 6, 7),  # 3
-            (9, 10, 11, 6),  # 4
-            (6, 11, 1, 0),  # 5
+            [0, 1, 2, 3],  # 0
+            [5, 0, 3, 4],  # 1
+            [7, 6, 0, 5],  # 2
+            [8, 9, 6, 7],  # 3
+            [9, 10, 11, 6],  # 4
+            [6, 11, 1, 0],  # 5
             # the shell
-            (1, 12, 13, 2),  # 6
-            (2, 13, 14, 3),  # 7
-            (3, 14, 15, 4),  # 8
-            (4, 15, 16, 5),  # 9
-            (5, 16, 17, 7),  # 10
-            (7, 17, 18, 8),  # 11
-            (8, 18, 19, 9),  # 12
-            (9, 19, 20, 10),  # 13
-            (10, 20, 21, 11),  # 14
-            (11, 21, 12, 1),  # 15
+            [1, 12, 13, 2],  # 6
+            [2, 13, 14, 3],  # 7
+            [3, 14, 15, 4],  # 8
+            [4, 15, 16, 5],  # 9
+            [5, 16, 17, 7],  # 10
+            [7, 17, 18, 8],  # 11
+            [8, 18, 19, 9],  # 12
+            [9, 19, 20, 10],  # 13
+            [10, 20, 21, 11],  # 14
+            [11, 21, 12, 1],  # 15
         ]
 
         center_point_1 = np.array(center_point_1)
