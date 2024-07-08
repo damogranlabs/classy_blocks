@@ -35,7 +35,7 @@ class Region(abc.ABC):
 
             delta_x = f.vector(self.geo.r["inlet"] / 2, 0, 0)
 
-            clamp = cb.LineClamp(vertex, vertex.position, vertex.position + delta_x, (-100, 100))
+            clamp = cb.LineClamp(vertex.position, vertex.position, vertex.position + delta_x, (-100, 100))
             clamps.add(clamp)
 
         return clamps
@@ -45,7 +45,7 @@ class Region(abc.ABC):
 
         for index in self.free_clamps:
             vertex = mesh.vertices[index]
-            clamps.add(cb.FreeClamp(vertex))
+            clamps.add(cb.FreeClamp(vertex.position))
 
         return clamps
 
@@ -54,7 +54,7 @@ class Region(abc.ABC):
 
         for index in self.plane_clamps:
             vertex = mesh.vertices[index]
-            clamp = cb.PlaneClamp(vertex, vertex.position, [0, 0, 1])
+            clamp = cb.PlaneClamp(vertex.position, vertex.position, [0, 0, 1])
             clamps.add(clamp)
 
         return clamps
@@ -64,7 +64,7 @@ class Region(abc.ABC):
 
         for index in self.radial_clamps:
             vertex = mesh.vertices[index]
-            clamp = cb.RadialClamp(vertex, [0, 0, 0], [0, 0, 1])
+            clamp = cb.RadialClamp(vertex.position, [0, 0, 0], [0, 0, 1])
             clamps.add(clamp)
 
         return clamps

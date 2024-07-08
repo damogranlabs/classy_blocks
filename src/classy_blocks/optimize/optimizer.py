@@ -67,7 +67,12 @@ class OptimizerBase:
 
         if reporter.rollback:
             clamp.update_params(initial_params)
-            # TODO: rollback grid and links
+
+            if len(junction.links) > 0:
+                for indexed_link in junction.links:
+                    indexed_link.link.leader = clamp.position
+                    indexed_link.link.update()
+                    self.grid.points[indexed_link.follower_index] = indexed_link.link.follower
 
     def _get_sensitivity(self, clamp):
         """Returns maximum partial derivative at current params"""

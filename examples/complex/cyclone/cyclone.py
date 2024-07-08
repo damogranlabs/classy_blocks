@@ -47,7 +47,6 @@ add_regions(optimize_regions)
 # This bad blocking needs to be improved before
 # making further blocks. It is done on a semi-finished mesh:
 mesh.assemble()
-
 # Also, when Mesh is assembled, vertices are created that have
 # consistent indexes; those are used in Region.get_clamps() to quickly
 # fetch points (no need for cb.*Finders)

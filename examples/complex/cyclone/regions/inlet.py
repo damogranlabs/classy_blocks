@@ -10,8 +10,8 @@ from classy_blocks.util import functions as f
 
 class InletPipe(Region):
     line_clamps = {20, 18, 16, 13, 12}
-    plane_clamps = {0, 1, 9, 5, 4, 11}
-    free_clamps = {8, 3, 2, 6, 7, 10}
+    plane_clamps = {0, 1, 8, 9, 5, 4, 11, 10}
+    free_clamps = {3, 2, 6, 7}
 
     def __init__(self):
         self.inlet = self.create_inlet()

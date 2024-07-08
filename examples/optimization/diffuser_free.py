@@ -46,7 +46,7 @@ inner_vertices.update(finder.find_core(False))
 optimizer = cb.MeshOptimizer(mesh)
 
 for vertex in inner_vertices:
-    clamp = cb.FreeClamp(vertex)
+    clamp = cb.FreeClamp(vertex.position)
     optimizer.release_vertex(clamp)
 
 optimizer.optimize()

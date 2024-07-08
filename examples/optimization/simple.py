@@ -29,7 +29,7 @@ mid_vertex.translate([0.6, 0.6, 0.6])
 optimizer = MeshOptimizer(mesh)
 
 # define which vertices can move during optimization, and in which DoF
-mid_clamp = FreeClamp(mid_vertex)
+mid_clamp = FreeClamp(mid_vertex.position)
 optimizer.release_vertex(mid_clamp)
 
 

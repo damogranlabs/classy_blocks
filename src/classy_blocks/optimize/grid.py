@@ -56,7 +56,7 @@ class Grid:
                 junction.add_clamp(clamp)
                 return
 
-        raise NoJunctionError(f"No junction found for clamp {clamp}")
+        raise NoJunctionError(f"No junction found for clamp at {clamp.position}")
 
     def add_link(self, link: LinkBase) -> None:
         leader_index = -1

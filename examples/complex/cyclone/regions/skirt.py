@@ -9,7 +9,7 @@ from classy_blocks.optimize.clamps.clamp import ClampBase
 class Skirt(Region):
     """A region that connects inlet pipe's top faces to a ring on the outside of cyclone"""
 
-    radial_clamps = {28, 24, 23, 30}
+    radial_clamps = {28, 23, 24, 30}
     plane_clamps = {22, 25, 27, 29, 31}
 
     def __init__(self, inlet_shell: List[cb.Loft]):
@@ -35,14 +35,6 @@ class Skirt(Region):
     @property
     def elements(self):
         return self.lofts
-
-    def get_radial_clamps(self, mesh: cb.Mesh) -> Set[ClampBase]:
-        # Vertex 30 will be adjusted manually because
-        # the round edge of inlet pipe at that spot will not be taken into consideration
-        # when optimizing.
-        angle = (self.geo.r["inlet"] + self.geo.l["skirt"]) / self.geo.r["body"]
-        mesh.vertices[30].rotate(-angle, [0, 0, 1], [0, 0, 0])
-        return super().get_radial_clamps(mesh)
 
     def project(self):
         for operation in self.elements:
