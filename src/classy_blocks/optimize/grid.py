@@ -1,6 +1,6 @@
-from typing import List
+from typing import List, Type
 
-from classy_blocks.optimize.cell import Cell
+from classy_blocks.optimize.cell import CellBase, HexCell, QuadCell
 from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.junction import Junction
 from classy_blocks.optimize.links import LinkBase
@@ -17,15 +17,17 @@ class InvalidLinkError(Exception):
     """Raised when a link has been added that doesn't connect two actual points"""
 
 
-class Grid:
+class GridBase:
     """A list of cells and junctions"""
+
+    cell_class: Type[CellBase]
 
     def __init__(self, points: NPPointListType, addressing: List[IndexType]):
         # work on a fixed point array and only refer to it instead of building
         # new numpy arrays for every calculation
         self.points = points
 
-        self.cells = [Cell(self.points, indexes) for indexes in addressing]
+        self.cells = [self.cell_class(self.points, indexes) for indexes in addressing]
         self.junctions = [Junction(self.points, index) for index in range(len(self.points))]
 
         self._bind_junctions()
@@ -91,3 +93,14 @@ class Grid:
         # It is only called when optimizing linked clamps
         # or at the end of an iteration.
         return sum([cell.quality for cell in self.cells])
+
+
+class QuadGrid(GridBase):
+    cell_class = QuadCell
+
+
+class HexGrid(GridBase):
+    cell_class = HexCell
+
+
+Grid = HexGrid

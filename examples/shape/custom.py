@@ -55,7 +55,7 @@ class RoundSquare(cb.MappedSketch):
 
 
 base_1 = RoundSquare([0, 0, 0], 1, 0.5)
-base_1.smooth(5)
+# base_1.smooth(5)
 shape = cb.ExtrudedShape(base_1, 1)
 
 for op in shape.operations:

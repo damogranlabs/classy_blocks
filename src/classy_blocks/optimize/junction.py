@@ -1,7 +1,7 @@
 import dataclasses
 from typing import List, Optional, Set
 
-from classy_blocks.optimize.cell import Cell
+from classy_blocks.optimize.cell import CellBase
 from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.links import LinkBase
 from classy_blocks.types import NPPointListType, NPPointType
@@ -24,7 +24,7 @@ class Junction:
     def __init__(self, points: NPPointListType, index: int):
         self.points = points
         self.index = index
-        self.cells: Set[Cell] = set()
+        self.cells: Set[CellBase] = set()
 
         self.clamp: Optional[ClampBase] = None
         self.links: List[IndexedLink] = []
@@ -33,10 +33,10 @@ class Junction:
     def point(self) -> NPPointType:
         return self.points[self.index]
 
-    def add_cell(self, cell: Cell) -> None:
+    def add_cell(self, cell: CellBase) -> None:
         """Adds the given cell to the list if it is
         a part of this junction (one common vertex)"""
-        for index in cell.cell_indexes:
+        for index in cell.indexes:
             if index == self.index:
                 self.cells.add(cell)
                 return

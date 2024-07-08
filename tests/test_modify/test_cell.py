@@ -28,7 +28,7 @@ class CellTests(MeshTestCase):
         cell_1 = self.get_cell(index_1)
         cell_2 = self.get_cell(index_2)
 
-        self.assertEqual(len(cell_1.get_common_vertices(cell_2)), count)
+        self.assertEqual(len(cell_1.get_common_indexes(cell_2)), count)
 
     @parameterized.expand(((0, 0, 0), (0, 1, 1), (1, 1, 0), (1, 8, 1)))
     def test_get_corner(self, block, vertex, corner):

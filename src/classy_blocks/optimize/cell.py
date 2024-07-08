@@ -1,5 +1,5 @@
-from collections import OrderedDict
-from typing import Dict, Optional, Set
+import abc
+from typing import ClassVar, Dict, List, Optional, Set
 
 import numpy as np
 
@@ -12,16 +12,15 @@ class NoCommonSidesError(Exception):
     """Raised when two cells don't share a side"""
 
 
-class Cell:
-    """A block, treated as a single cell;
-    its quality metrics can then be transcribed directly
-    from checkMesh."""
+class CellBase(abc.ABC):
+    side_names: ClassVar[List[str]]
+    side_indexes: ClassVar[List[IndexType]]
 
-    def __init__(self, grid_points: NPPointListType, cell_indexes: IndexType):
+    def __init__(self, grid_points: NPPointListType, indexes: IndexType):
         self.grid_points = grid_points
-        self.cell_indexes = cell_indexes
+        self.indexes = indexes
 
-        self.neighbours: Dict[OrientType, Optional[Cell]] = {
+        self.neighbours: Dict[OrientType, Optional[CellBase]] = {
             "bottom": None,
             "top": None,
             "left": None,
@@ -30,34 +29,21 @@ class Cell:
             "back": None,
         }
 
-        # FACE_MAP, ordered and modified so that all faces point towards cell center;
-        # provided their points are visited in an anti-clockwise manner
-        q_map = OrderedDict()
-        q_map["bottom"] = (0, 1, 2, 3)
-        q_map["top"] = (7, 6, 5, 4)
-        q_map["left"] = (4, 0, 3, 7)
-        q_map["right"] = (6, 2, 1, 5)
-        q_map["front"] = (0, 4, 5, 1)
-        q_map["back"] = (7, 3, 2, 6)
-
-        self.side_indexes = [item[0] for item in q_map.items()]
-        self.face_indexes = [item[1] for item in q_map.items()]
-
-    def get_common_vertices(self, candidate: "Cell") -> Set[int]:
+    def get_common_indexes(self, candidate: "CellBase") -> Set[int]:
         """Returns indexes of common vertices between this and provided cell"""
-        this_indexes = set(self.cell_indexes)
-        cnd_indexes = set(candidate.cell_indexes)
+        this_indexes = set(self.indexes)
+        cnd_indexes = set(candidate.indexes)
 
         return this_indexes.intersection(cnd_indexes)
 
     def get_corner(self, index: int) -> int:
         """Converts vertex index to local index
         (position of this vertex in the list)"""
-        return self.cell_indexes.index(index)
+        return self.indexes.index(index)
 
-    def get_common_side(self, candidate: "Cell") -> OrientType:
+    def get_common_side(self, candidate: "CellBase") -> OrientType:
         """Returns orient of this cell that is shared with candidate"""
-        common_vertices = self.get_common_vertices(candidate)
+        common_vertices = self.get_common_indexes(candidate)
 
         if len(common_vertices) != 4:
             raise NoCommonSidesError
@@ -70,7 +56,7 @@ class Cell:
 
         raise NoCommonSidesError
 
-    def add_neighbour(self, candidate: "Cell") -> bool:
+    def add_neighbour(self, candidate: "CellBase") -> bool:
         """Adds the provided block to appropriate
         location in self.neighbours and returns True if
         this and provided block share a face;
@@ -89,7 +75,7 @@ class Cell:
     @property
     def points(self) -> NPPointListType:
         """A list of points defining this cell, as a numpy array"""
-        return np.take(self.grid_points, self.cell_indexes, axis=0)
+        return np.take(self.grid_points, self.indexes, axis=0)
 
     @property
     def center(self) -> NPPointType:
@@ -98,7 +84,7 @@ class Cell:
 
     @property
     def face_points(self) -> NPPointListType:
-        return np.take(self.points, self.face_indexes, axis=0)
+        return np.take(self.points, self.side_indexes, axis=0)
 
     @property
     def face_centers(self) -> NPPointListType:
@@ -115,7 +101,7 @@ class Cell:
             return factor * base ** (exponent * value) - factor
 
         for orient, neighbour in self.neighbours.items():
-            i = self.side_indexes.index(orient)
+            i = self.side_names.index(orient)
             # quality calculation for a single cell, transcribed from
             # OpenFOAM checkMesh utility.
             # Chosen criteria are transformed with a rapidly increasing
@@ -173,8 +159,43 @@ class Cell:
         return quality
 
     @property
+    @abc.abstractmethod
+    def min_length(self) -> float:
+        pass
+
+
+class QuadCell(CellBase):
+    # FACE_MAP, ordered and modified so that all faces point towards cell center;
+    # provided their points are visited in an anti-clockwise manner
+    # names and indexes must correspond (both must be in the same order)
+    side_names: ClassVar = ["front", "right", "back", "left"]
+    side_indexes: ClassVar = [[0, 1], [1, 2], [2, 3], [3, 0]]
+
+    @property
+    def min_length(self) -> float:
+        points = self.points
+
+        return min([f.norm(points[edge[1]] - points[edge[0]]) for edge in self.side_indexes])
+
+
+class HexCell(CellBase):
+    """A block, treated as a single cell;
+    its quality metrics can then be transcribed directly
+    from checkMesh."""
+
+    # FACE_MAP, ordered and modified so that all faces point towards cell center;
+    # provided their points are visited in an anti-clockwise manner
+    # names and indexes must correspond (both must be in the same order)
+    side_names: ClassVar = ["bottom", "top", "left", "right", "front", "back"]
+    side_indexes: ClassVar = [[0, 1, 2, 3], [7, 6, 5, 4], [4, 0, 3, 7], [6, 2, 1, 5], [0, 4, 5, 1], [7, 3, 2, 6]]
+
+    @property
     def min_length(self) -> float:
         """Length of the shortest edge"""
         points = self.points
 
         return min([f.norm(points[edge[1]] - points[edge[0]]) for edge in EDGE_PAIRS])
+
+
+# For backwards compatibility
+Cell = HexCell
