@@ -27,3 +27,7 @@ class GridTests(MeshTestCase):
     @parameterized.expand(((0, "right", 1), (1, "left", 0), (1, "back", 2), (2, "front", 1)))
     def test_cell_neighbours(self, parent, orient, neighbour):
         self.assertEqual(self.grid.cells[parent].neighbours[orient], self.grid.cells[neighbour])
+
+    @parameterized.expand(((0, 3), (1, 4), (2, 5), (3, 3)))
+    def test_connections(self, junction, count):
+        self.assertEqual(len(self.grid.junctions[junction].connections), count)

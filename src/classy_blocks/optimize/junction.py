@@ -13,6 +13,7 @@ class ClampExistsError(Exception):
 
 @dataclasses.dataclass
 class IndexedLink:
+    # TODO: refactor / deuglify
     link: LinkBase
     follower_index: int
 
@@ -24,7 +25,10 @@ class Junction:
     def __init__(self, points: NPPointListType, index: int):
         self.points = points
         self.index = index
+
         self.cells: Set[CellBase] = set()
+
+        self.connections: List[Junction] = []
 
         self.clamp: Optional[ClampBase] = None
         self.links: List[IndexedLink] = []
@@ -40,6 +44,25 @@ class Junction:
             if index == self.index:
                 self.cells.add(cell)
                 return
+
+    def add_connection(self, to: "Junction") -> bool:
+        """Returns True if this Junction is connected to passed one"""
+        if to == self:
+            return False
+
+        # if any of connections within a cell is equal to
+        # the connection between these two junctions,
+        # they are connected
+        junction_indexes = {self.index, to.index}
+
+        for cell in self.cells:
+            for connection in cell.connections:
+                if connection.indexes == junction_indexes:
+                    if to not in self.connections:
+                        self.connections.append(to)
+                        return True
+
+        return False
 
     def add_clamp(self, clamp: ClampBase) -> None:
         if self.clamp is not None:

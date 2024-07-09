@@ -27,23 +27,30 @@ class GridBase:
         # new numpy arrays for every calculation
         self.points = points
 
-        self.cells = [self.cell_class(self.points, indexes) for indexes in addressing]
         self.junctions = [Junction(self.points, index) for index in range(len(self.points))]
+        self.cells = [self.cell_class(self.points, indexes) for indexes in addressing]
 
-        self._bind_junctions()
-        self._bind_neighbours()
+        self._bind_cell_neighbours()
+        self._bind_junction_cells()
+        self._bind_junction_connections()
 
-    def _bind_junctions(self) -> None:
+    def _bind_cell_neighbours(self) -> None:
+        """Adds neighbours to cells"""
+        for cell_1 in self.cells:
+            for cell_2 in self.cells:
+                cell_1.add_neighbour(cell_2)
+
+    def _bind_junction_cells(self) -> None:
         """Adds cells to junctions"""
         for cell in self.cells:
             for junction in self.junctions:
                 junction.add_cell(cell)
 
-    def _bind_neighbours(self) -> None:
-        """Adds neighbours to cells"""
-        for cell_1 in self.cells:
-            for cell_2 in self.cells:
-                cell_1.add_neighbour(cell_2)
+    def _bind_junction_connections(self) -> None:
+        """Adds connections to junctions"""
+        for junction_1 in self.junctions:
+            for junction_2 in self.junctions:
+                junction_1.add_connection(junction_2)
 
     def get_junction_from_clamp(self, clamp: ClampBase) -> Junction:
         for junction in self.junctions:

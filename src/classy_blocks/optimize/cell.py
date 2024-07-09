@@ -1,8 +1,9 @@
 import abc
-from typing import ClassVar, Dict, List, Optional, Set
+from typing import ClassVar, Dict, List, Optional, Set, Tuple
 
 import numpy as np
 
+from classy_blocks.optimize.connection import CellConnection
 from classy_blocks.types import IndexType, NPPointListType, NPPointType, OrientType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import EDGE_PAIRS, FACE_MAP, VSMALL
@@ -15,6 +16,7 @@ class NoCommonSidesError(Exception):
 class CellBase(abc.ABC):
     side_names: ClassVar[List[str]]
     side_indexes: ClassVar[List[IndexType]]
+    edge_pairs: ClassVar[List[Tuple[int, int]]]
 
     def __init__(self, grid_points: NPPointListType, indexes: IndexType):
         self.grid_points = grid_points
@@ -28,6 +30,7 @@ class CellBase(abc.ABC):
             "front": None,
             "back": None,
         }
+        self.connections = [CellConnection(set(pair), {indexes[pair[0]], indexes[pair[1]]}) for pair in self.edge_pairs]
 
     def get_common_indexes(self, candidate: "CellBase") -> Set[int]:
         """Returns indexes of common vertices between this and provided cell"""
@@ -83,13 +86,14 @@ class CellBase(abc.ABC):
         return np.average(self.points, axis=0)
 
     @property
-    def face_points(self) -> NPPointListType:
+    def side_points(self) -> NPPointListType:
+        """In 2D, a 'side' is a line segment but in 3D it is a quadrangle"""
         return np.take(self.points, self.side_indexes, axis=0)
 
     @property
-    def face_centers(self) -> NPPointListType:
+    def side_centers(self) -> NPPointListType:
         """Center point of each face"""
-        return np.average(self.face_points, axis=1)
+        return np.average(self.side_points, axis=1)
 
     @property
     def quality(self) -> float:
@@ -112,8 +116,8 @@ class CellBase(abc.ABC):
             ### non-orthogonality
             # angles between faces and self.center-neighbour.center or, if there's no neighbour
             # on this face, between face and self.center-face_center
-            face_points = self.face_points[i]
-            face_center = self.face_centers[i]
+            face_points = self.side_points[i]
+            face_center = self.side_centers[i]
 
             side_1 = face_points - face_center
             side_2 = np.roll(face_points, -1, axis=0) - face_center
@@ -165,11 +169,10 @@ class CellBase(abc.ABC):
 
 
 class QuadCell(CellBase):
-    # FACE_MAP, ordered and modified so that all faces point towards cell center;
-    # provided their points are visited in an anti-clockwise manner
-    # names and indexes must correspond (both must be in the same order)
+    # Like constants.FACE_MAP but for quadrangle sides as line segments
     side_names: ClassVar = ["front", "right", "back", "left"]
     side_indexes: ClassVar = [[0, 1], [1, 2], [2, 3], [3, 0]]
+    edge_pairs: ClassVar = [(0, 1), (1, 2), (2, 3), (3, 0)]
 
     @property
     def min_length(self) -> float:
@@ -188,6 +191,7 @@ class HexCell(CellBase):
     # names and indexes must correspond (both must be in the same order)
     side_names: ClassVar = ["bottom", "top", "left", "right", "front", "back"]
     side_indexes: ClassVar = [[0, 1, 2, 3], [7, 6, 5, 4], [4, 0, 3, 7], [6, 2, 1, 5], [0, 4, 5, 1], [7, 3, 2, 6]]
+    edge_pairs: ClassVar = EDGE_PAIRS
 
     @property
     def min_length(self) -> float:
