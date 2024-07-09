@@ -14,7 +14,7 @@ class NoCommonSidesError(Exception):
 
 
 class CellBase(abc.ABC):
-    side_names: ClassVar[List[str]]
+    side_names: ClassVar[List[OrientType]]
     side_indexes: ClassVar[List[IndexType]]
     edge_pairs: ClassVar[List[Tuple[int, int]]]
 
@@ -74,6 +74,19 @@ class CellBase(abc.ABC):
             return True
         except NoCommonSidesError:
             return False
+
+    @property
+    def boundary(self) -> Set[int]:
+        """Returns a list of indexes that define sides on boundary"""
+        boundary = set()
+
+        for i, side_name in enumerate(self.side_names):
+            side_indexes = self.side_indexes[i]
+
+            if self.neighbours[side_name] is None:
+                boundary.update({self.indexes[si] for si in side_indexes})
+
+        return boundary
 
     @property
     def points(self) -> NPPointListType:

@@ -19,7 +19,7 @@ class IndexedLink:
 
 
 class Junction:
-    """A class that collects Cells/Blocks that
+    """A class that collects Cells that
     share the same Vertex"""
 
     def __init__(self, points: NPPointListType, index: int):
@@ -28,7 +28,7 @@ class Junction:
 
         self.cells: Set[CellBase] = set()
 
-        self.connections: List[Junction] = []
+        self.neighbours: List[Junction] = []
 
         self.clamp: Optional[ClampBase] = None
         self.links: List[IndexedLink] = []
@@ -58,8 +58,8 @@ class Junction:
         for cell in self.cells:
             for connection in cell.connections:
                 if connection.indexes == junction_indexes:
-                    if to not in self.connections:
-                        self.connections.append(to)
+                    if to not in self.neighbours:
+                        self.neighbours.append(to)
                         return True
 
         return False
@@ -72,6 +72,15 @@ class Junction:
 
     def add_link(self, link: LinkBase, follower_index: int) -> None:
         self.links.append(IndexedLink(link, follower_index))
+
+    @property
+    def is_boundary(self) -> bool:
+        """Returns True if this junction lies on boundary"""
+        for cell in self.cells:
+            if self.index in cell.boundary:
+                return True
+
+        return False
 
     @property
     def quality(self) -> float:
