@@ -2,6 +2,7 @@ from typing import List, Type
 
 import numpy as np
 
+from classy_blocks.construct.flat.sketches.mapped import MappedSketch
 from classy_blocks.mesh import Mesh
 from classy_blocks.optimize.cell import CellBase, HexCell, QuadCell
 from classy_blocks.optimize.clamps.clamp import ClampBase
@@ -107,6 +108,11 @@ class GridBase:
 
 class QuadGrid(GridBase):
     cell_class = QuadCell
+
+    @classmethod
+    def from_sketch(cls, sketch: MappedSketch) -> "QuadGrid":
+        # TODO: make grids from ANY sketch
+        return QuadGrid(sketch.positions, sketch.indexes)
 
 
 class HexGrid(GridBase):

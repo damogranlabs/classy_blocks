@@ -4,7 +4,8 @@ import numpy as np
 
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketch import Sketch
-from classy_blocks.types import IndexType, NPPointType, PointListType
+from classy_blocks.types import IndexType, NPPointListType, NPPointType, PointListType
+from classy_blocks.util import functions as f
 
 
 class MappedSketch(Sketch):
@@ -13,8 +14,9 @@ class MappedSketch(Sketch):
 
     def __init__(self, positions: PointListType, quads: List[IndexType]):
         self._faces: List[Face] = []
+        self.indexes = quads
 
-        for quad in quads:
+        for quad in self.indexes:
             face = Face([positions[iq] for iq in quad])
             self._faces.append(face)
 
@@ -39,7 +41,12 @@ class MappedSketch(Sketch):
         """Center of this sketch"""
         return np.average([face.center for face in self.faces], axis=0)
 
-    # def smooth(self, n_iter: int = 5) -> None:
-    #    """Smooth the internal points using laplacian smoothing"""
-    #    for _ in range(n_iter):
-    #        self.quad_map.smooth_laplacian()
+    @property
+    def positions(self) -> NPPointListType:
+        """Reconstructs positions back from faces so they are always up-to-date,
+        even after transforms"""
+        indexes = list(np.array(self.indexes).flatten())
+        max_index = max(indexes)
+        all_points = f.flatten_2d_list([face.point_array.tolist() for face in self.faces])
+
+        return np.array([all_points[indexes.index(i)] for i in range(max_index + 1)])

@@ -1,11 +1,45 @@
 import unittest
 from typing import get_args
 
+import numpy as np
+
 from classy_blocks.construct.operations.box import Box
 from classy_blocks.mesh import Mesh
 from classy_blocks.modify.find.geometric import GeometricFinder
-from classy_blocks.optimize.grid import Grid
+from classy_blocks.optimize.grid import Grid, QuadGrid
 from classy_blocks.types import AxisType
+
+
+class SketchTestsBase(unittest.TestCase):
+
+    @property
+    def positions(self):
+        return np.array(
+            [
+                [0, 0, 0],
+                [1, 0, 0],
+                [2, 0, 0],
+                [0, 1, 0],
+                [1.5, 1.5, 0],  # a moved vertex
+                [2, 1, 0],
+                [0, 2, 0],
+                [1, 2, 0],
+                [2, 2, 0],
+            ]
+        )
+
+    @property
+    def quads(self):
+        return [
+            [0, 1, 4, 3],
+            [1, 2, 5, 4],
+            [3, 4, 7, 6],
+            [4, 5, 8, 7],
+        ]
+
+    @property
+    def grid(self):
+        return QuadGrid(self.positions, self.quads)
 
 
 class BoxTestsBase(unittest.TestCase):

@@ -6,7 +6,7 @@ import numpy as np
 from classy_blocks.optimize.connection import CellConnection
 from classy_blocks.types import IndexType, NPPointListType, NPPointType, OrientType
 from classy_blocks.util import functions as f
-from classy_blocks.util.constants import EDGE_PAIRS, FACE_MAP, VSMALL
+from classy_blocks.util.constants import EDGE_PAIRS, VSMALL
 
 
 class NoCommonSidesError(Exception):
@@ -48,14 +48,14 @@ class CellBase(abc.ABC):
         """Returns orient of this cell that is shared with candidate"""
         common_vertices = self.get_common_indexes(candidate)
 
-        if len(common_vertices) != 4:
+        if len(common_vertices) != len(self.side_indexes[0]):
             raise NoCommonSidesError
 
         corners = {self.get_corner(i) for i in common_vertices}
 
-        for orient, indexes in FACE_MAP.items():
+        for i, indexes in enumerate(self.side_indexes):
             if set(indexes) == corners:
-                return orient
+                return self.side_names[i]
 
         raise NoCommonSidesError
 
