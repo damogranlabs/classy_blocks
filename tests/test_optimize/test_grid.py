@@ -1,6 +1,7 @@
 import numpy as np
 from parameterized import parameterized
 
+from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.construct.flat.sketches.grid import Grid as GridSketch
 from classy_blocks.construct.stack import ExtrudedStack
 from classy_blocks.mesh import Mesh
@@ -40,7 +41,7 @@ class GridTests(MeshTestCase):
 
         try:
             mesh.assemble()  # will fail because there are no chops
-        except:
+        except UndefinedGradingsError:
             pass
 
         grid = self.get_grid(mesh)
@@ -62,5 +63,5 @@ class GridTests(MeshTestCase):
         self.assertEqual(self.grid.cells[parent].neighbours[orient], self.grid.cells[neighbour])
 
     @parameterized.expand(((0, 3), (1, 4), (2, 5), (3, 3)))
-    def test_connections(self, junction, count):
-        self.assertEqual(len(self.grid.junctions[junction].connections), count)
+    def test_neighbours(self, junction, count):
+        self.assertEqual(len(self.grid.junctions[junction].neighbours), count)

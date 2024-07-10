@@ -4,7 +4,7 @@ from typing import List, Optional, Set
 from classy_blocks.optimize.cell import CellBase
 from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.links import LinkBase
-from classy_blocks.types import NPPointListType, NPPointType
+from classy_blocks.types import NPPointListType, NPPointType, PointType
 
 
 class ClampExistsError(Exception):
@@ -45,7 +45,7 @@ class Junction:
                 self.cells.add(cell)
                 return
 
-    def add_connection(self, to: "Junction") -> bool:
+    def add_neighbour(self, to: "Junction") -> bool:
         """Returns True if this Junction is connected to passed one"""
         if to == self:
             return False
@@ -81,6 +81,9 @@ class Junction:
                 return True
 
         return False
+
+    def move_to(self, position: PointType) -> None:
+        self.points[self.index] = position
 
     @property
     def quality(self) -> float:

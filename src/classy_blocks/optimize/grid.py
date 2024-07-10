@@ -1,5 +1,8 @@
 from typing import List, Type
 
+import numpy as np
+
+from classy_blocks.mesh import Mesh
 from classy_blocks.optimize.cell import CellBase, HexCell, QuadCell
 from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.junction import Junction
@@ -32,7 +35,7 @@ class GridBase:
 
         self._bind_cell_neighbours()
         self._bind_junction_cells()
-        self._bind_junction_connections()
+        self._bind_junction_neighbours()
 
     def _bind_cell_neighbours(self) -> None:
         """Adds neighbours to cells"""
@@ -46,11 +49,11 @@ class GridBase:
             for junction in self.junctions:
                 junction.add_cell(cell)
 
-    def _bind_junction_connections(self) -> None:
+    def _bind_junction_neighbours(self) -> None:
         """Adds connections to junctions"""
         for junction_1 in self.junctions:
             for junction_2 in self.junctions:
-                junction_1.add_connection(junction_2)
+                junction_1.add_neighbour(junction_2)
 
     def get_junction_from_clamp(self, clamp: ClampBase) -> Junction:
         for junction in self.junctions:
@@ -108,6 +111,13 @@ class QuadGrid(GridBase):
 
 class HexGrid(GridBase):
     cell_class = HexCell
+
+    @classmethod
+    def from_mesh(cls, mesh: Mesh) -> "HexGrid":
+        points = np.array([vertex.position for vertex in mesh.vertices])
+        addresses = [block.indexes for block in mesh.blocks]
+
+        return cls(points, addresses)
 
 
 Grid = HexGrid
