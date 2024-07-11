@@ -4,7 +4,7 @@ from typing import ClassVar, Dict, List, Optional, Set, Tuple
 import numpy as np
 
 from classy_blocks.optimize.connection import CellConnection
-from classy_blocks.types import IndexType, NPPointListType, NPPointType, OrientType
+from classy_blocks.types import FloatListType, IndexType, NPPointListType, NPPointType, OrientType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import EDGE_PAIRS, VSMALL
 
@@ -22,14 +22,7 @@ class CellBase(abc.ABC):
         self.grid_points = grid_points
         self.indexes = indexes
 
-        self.neighbours: Dict[OrientType, Optional[CellBase]] = {
-            "bottom": None,
-            "top": None,
-            "left": None,
-            "right": None,
-            "front": None,
-            "back": None,
-        }
+        self.neighbours: Dict[OrientType, Optional[CellBase]] = {name: None for name in self.side_names}
         self.connections = [CellConnection(set(pair), {indexes[pair[0]], indexes[pair[1]]}) for pair in self.edge_pairs]
 
     def get_common_indexes(self, candidate: "CellBase") -> Set[int]:
@@ -108,8 +101,25 @@ class CellBase(abc.ABC):
         """Center point of each face"""
         return np.average(self.side_points, axis=1)
 
+    @abc.abstractmethod
+    def get_side_normals(self, side_points: NPPointListType, side_center: NPPointType) -> NPPointListType:
+        pass
+
+    @abc.abstractmethod
+    def get_inner_angles(self, side_points: NPPointListType) -> Tuple[FloatListType, FloatListType]:
+        pass
+
     @property
-    def quality(self) -> float:
+    def quality(self):
+        # quality calculation for a single cell, transcribed from
+        # OpenFOAM checkMesh utility.
+        # Chosen criteria are transformed with a rapidly increasing
+        # function and summed up so that a single value is obtained
+        # for optimization algorithm to minimize.
+        # See documentation for in-depth explanation.
+
+        # both 3D (cell) and 2d (face) use the same calculation but elements are different.
+
         quality = 0
 
         center = self.center
@@ -119,56 +129,39 @@ class CellBase(abc.ABC):
 
         for orient, neighbour in self.neighbours.items():
             i = self.side_names.index(orient)
-            # quality calculation for a single cell, transcribed from
-            # OpenFOAM checkMesh utility.
-            # Chosen criteria are transformed with a rapidly increasing
-            # function and summed up so that a single value is obtained
-            # for optimization algorithm to minimize.
-            # See documentation for in-depth explanation.
 
             ### non-orthogonality
-            # angles between faces and self.center-neighbour.center or, if there's no neighbour
+            # angles between sides and self.center-neighbour.center or, if there's no neighbour
             # on this face, between face and self.center-face_center
-            face_points = self.side_points[i]
-            face_center = self.side_centers[i]
+            side_points = self.side_points[i]
+            side_center = self.side_centers[i]
 
-            side_1 = face_points - face_center
-            side_2 = np.roll(face_points, -1, axis=0) - face_center
-            face_normals = np.cross(side_1, side_2)
+            side_normals = self.get_side_normals(side_points, side_center)
 
             if neighbour is None:
                 # Cells at the wall simply use center of the face on the wall
                 # instead of their neighbour's center
-                c2c = center - face_center
+                c2c = center - side_center
             else:
                 c2c = center - neighbour.center
 
             c2cn = c2c / np.linalg.norm(c2c)
 
-            nnorms = np.linalg.norm(face_normals, axis=1) + VSMALL
-            normals = face_normals / nnorms[:, np.newaxis]
+            nnorms = np.linalg.norm(side_normals, axis=1) + VSMALL
+            normals = side_normals / nnorms[:, np.newaxis]
 
             angles = 180 * np.arccos(np.dot(normals, c2cn)) / np.pi
 
             quality += np.sum(q_scale(1.25, 0.35, 0.8, angles))
 
             ### cell inner angles
-            sides_1 = np.roll(face_points, -1, axis=0) - face_points
-            side_1_norms = np.linalg.norm(sides_1, axis=1) + VSMALL
-            sides_1 = sides_1 / side_1_norms[:, np.newaxis]
+            inner_angles, side_lengths = self.get_inner_angles(side_points)
 
-            sides_2 = np.roll(face_points, 1, axis=0) - face_points
-            side_2_norms = np.linalg.norm(sides_2, axis=1) + VSMALL
-            sides_2 = sides_2 / side_2_norms[:, np.newaxis]
-
-            angles = np.sum(sides_1 * sides_2, axis=1)
-            angles = 180 * np.arccos(angles) / np.pi - 90
-
-            quality += np.sum(q_scale(1.5, 0.25, 0.15, abs(angles)))
+            quality += np.sum(q_scale(1.5, 0.25, 0.15, abs(inner_angles)))
 
             ### aspect ratio
-            side_max = max(side_1_norms)
-            side_min = min(side_1_norms) + VSMALL
+            side_max = max(side_lengths)
+            side_min = min(side_lengths) + VSMALL
             aspect_factor = np.log10(side_max / side_min)
 
             quality += np.sum(q_scale(3, 2.5, 3, aspect_factor))
@@ -176,9 +169,10 @@ class CellBase(abc.ABC):
         return quality
 
     @property
-    @abc.abstractmethod
     def min_length(self) -> float:
-        pass
+        points = self.points
+
+        return min([f.norm(points[edge[1]] - points[edge[0]]) for edge in self.side_indexes])
 
 
 class QuadCell(CellBase):
@@ -188,10 +182,18 @@ class QuadCell(CellBase):
     edge_pairs: ClassVar = [(0, 1), (1, 2), (2, 3), (3, 0)]
 
     @property
-    def min_length(self) -> float:
+    def normal(self):
         points = self.points
 
-        return min([f.norm(points[edge[1]] - points[edge[0]]) for edge in self.side_indexes])
+        return np.cross(points[1] - points[0], points[3] - points[0])
+
+    def get_side_normals(self, side_points, _):
+        return [np.cross(self.normal, side_points[1] - side_points[0])]
+
+    def get_inner_angles(self, side_points):
+        # this metric does not make sense for a line segment
+        # so only return side length
+        return np.zeros(2), np.linalg.norm([side_points[1] - side_points[0]], axis=1)
 
 
 class HexCell(CellBase):
@@ -206,12 +208,23 @@ class HexCell(CellBase):
     side_indexes: ClassVar = [[0, 1, 2, 3], [7, 6, 5, 4], [4, 0, 3, 7], [6, 2, 1, 5], [0, 4, 5, 1], [7, 3, 2, 6]]
     edge_pairs: ClassVar = EDGE_PAIRS
 
-    @property
-    def min_length(self) -> float:
-        """Length of the shortest edge"""
-        points = self.points
+    def get_side_normals(self, side_points, side_center):
+        side_1 = side_points - side_center
+        side_2 = np.roll(side_points, -1, axis=0) - side_center
 
-        return min([f.norm(points[edge[1]] - points[edge[0]]) for edge in EDGE_PAIRS])
+        return np.cross(side_1, side_2)
+
+    def get_inner_angles(self, side_points: NPPointListType):
+        sides_1 = np.roll(side_points, -1, axis=0) - side_points
+        side_1_norms = np.linalg.norm(sides_1, axis=1) + VSMALL
+        sides_1 = sides_1 / side_1_norms[:, np.newaxis]
+
+        sides_2 = np.roll(side_points, 1, axis=0) - side_points
+        side_2_norms = np.linalg.norm(sides_2, axis=1) + VSMALL
+        sides_2 = sides_2 / side_2_norms[:, np.newaxis]
+
+        angles = np.sum(sides_1 * sides_2, axis=1)
+        return 180 * np.arccos(angles) / np.pi - 90, side_1_norms
 
 
 # For backwards compatibility

@@ -1,16 +1,17 @@
+import abc
 import copy
 import time
-from typing import List, Literal
+from typing import Literal
 
 import numpy as np
 import scipy.optimize
 
+from classy_blocks.construct.flat.sketches.mapped import MappedSketch
 from classy_blocks.mesh import Mesh
 from classy_blocks.optimize.clamps.clamp import ClampBase
-from classy_blocks.optimize.grid import Grid
+from classy_blocks.optimize.grid import GridBase, HexGrid, QuadGrid
 from classy_blocks.optimize.iteration import ClampOptimizationData, IterationDriver
 from classy_blocks.optimize.links import LinkBase
-from classy_blocks.types import IndexType, PointListType
 from classy_blocks.util.constants import TOL
 
 MinimizationMethodType = Literal["SLSQP", "L-BFGS-B", "Nelder-Mead", "Powell"]
@@ -20,12 +21,11 @@ class NoClampError(Exception):
     """Raised when there's no junction defined for a given Clamp"""
 
 
-class OptimizerBase:
+class OptimizerBase(abc.ABC):
     """Provides tools for 2D (sketch) or 3D (mesh blocking) optimization"""
 
-    def __init__(self, points: PointListType, addressing: List[IndexType], report: bool = True):
-        self.grid = Grid(np.array(points), addressing)
-
+    def __init__(self, grid: GridBase, report: bool = True):
+        self.grid = grid
         self.report = report
 
     def release_vertex(self, clamp: ClampBase) -> None:
@@ -125,22 +125,22 @@ class OptimizerBase:
             )
             print(f"Elapsed time: {end_time - start_time:.0f}s")
 
+        self.backport()
+
+    @abc.abstractmethod
+    def backport(self) -> None:
+        """Reflect optimization results back to the original mesh/sketch"""
+
 
 class MeshOptimizer(OptimizerBase):
 
     def __init__(self, mesh: Mesh, report: bool = True):
         self.mesh = mesh
+        grid = HexGrid.from_mesh(self.mesh)
 
-        points = np.array([vertex.position for vertex in mesh.vertices])
-        addressing = [block.indexes for block in self.mesh.blocks]
+        super().__init__(grid, report)
 
-        super().__init__(points, addressing, report)
-
-    def optimize(
-        self, max_iterations: int = 20, tolerance: float = 0.1, method: MinimizationMethodType = "SLSQP"
-    ) -> None:
-        super().optimize(max_iterations, tolerance, method)
-
+    def backport(self):
         # copy the stuff back to mesh
         for i, point in enumerate(self.grid.points):
             self.mesh.vertices[i].move_to(point)
@@ -148,3 +148,14 @@ class MeshOptimizer(OptimizerBase):
 
 # For backwards compatibility and ease-of-use
 Optimizer = MeshOptimizer
+
+
+class SketchOptimizer(OptimizerBase):
+    def __init__(self, sketch: MappedSketch, report: bool = True):
+        self.sketch = sketch
+        grid = QuadGrid.from_sketch(self.sketch)
+
+        super().__init__(grid, report)
+
+    def backport(self):
+        self.sketch.update(self.grid.points)

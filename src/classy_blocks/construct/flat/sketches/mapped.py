@@ -22,6 +22,13 @@ class MappedSketch(Sketch):
 
         self.add_edges()
 
+    def update(self, positions: PointListType) -> None:
+        """Update faces with updated positions"""
+        for i, quad in enumerate(self.indexes):
+            points = [positions[iq] for iq in quad]
+
+            self.faces[i].update(points)
+
     def add_edges(self) -> None:
         """An optional method that will add edges to faces;
         use `sketch.faces` property to access them."""

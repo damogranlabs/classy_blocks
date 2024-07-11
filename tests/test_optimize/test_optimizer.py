@@ -1,14 +1,16 @@
 import numpy as np
 
+from classy_blocks.construct.flat.sketches.mapped import MappedSketch
 from classy_blocks.optimize.clamps.free import FreeClamp
+from classy_blocks.optimize.clamps.surface import PlaneClamp
 from classy_blocks.optimize.junction import ClampExistsError
 from classy_blocks.optimize.links import TranslationLink
-from classy_blocks.optimize.optimizer import MeshOptimizer
+from classy_blocks.optimize.optimizer import MeshOptimizer, SketchOptimizer
 from classy_blocks.util import functions as f
-from tests.test_optimize.optimize_fixtures import BoxTestsBase
+from tests.test_optimize.optimize_fixtures import BoxTestsBase, SketchTestsBase
 
 
-class OptimizerTests(BoxTestsBase):
+class MeshOptimizerTests(BoxTestsBase):
     def test_add_junction_existing(self):
         optimizer = MeshOptimizer(self.mesh)
         optimizer.release_vertex(FreeClamp(self.mesh.vertices[0].position))
@@ -45,3 +47,16 @@ class OptimizerTests(BoxTestsBase):
 
         self.assertGreater(f.norm(follower_vertex.position - f.vector(0, 1, 0)), 0)
         np.testing.assert_almost_equal(vertex.position, [0, 0, 0], decimal=1)
+
+
+class SketchOptimizerTests(SketchTestsBase):
+    def test_optimize_manual(self):
+        sketch = MappedSketch(self.positions, self.quads)
+        clamp = PlaneClamp([1.5, 1.5, 0], [0, 0, 0], [0, 0, 1])
+
+        optimizer = SketchOptimizer(sketch)
+        optimizer.release_vertex(clamp)
+
+        optimizer.optimize(method="L-BFGS-B")
+
+        np.testing.assert_almost_equal(sketch.positions[4], [1, 1, 0], decimal=3)

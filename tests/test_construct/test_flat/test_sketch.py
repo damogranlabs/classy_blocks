@@ -40,6 +40,15 @@ class MappedSketchTests(unittest.TestCase):
     def test_grid(self):
         self.assertEqual(len(self.sketch.grid), 1)
 
+    def test_update(self):
+        sketch = MappedSketch(self.positions, self.quads)
+
+        updated_positions = self.positions
+        updated_positions[0] = [0.1, 0.1, 0.1]
+        sketch.update(updated_positions)
+
+        np.testing.assert_equal(sketch.faces[0].point_array[0], [0.1, 0.1, 0.1])
+
 
 class GridSketchTests(unittest.TestCase):
     def test_construct(self):
