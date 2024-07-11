@@ -60,3 +60,11 @@ class SketchOptimizerTests(SketchTestsBase):
         optimizer.optimize(method="L-BFGS-B")
 
         np.testing.assert_almost_equal(sketch.positions[4], [1, 1, 0], decimal=3)
+
+    def test_optimize_auto(self):
+        sketch = MappedSketch(self.positions, self.quads)
+
+        optimizer = SketchOptimizer(sketch)
+        optimizer.auto_optimize(method="L-BFGS-B")
+
+        np.testing.assert_almost_equal(sketch.positions[4], [1, 1, 0], decimal=3)

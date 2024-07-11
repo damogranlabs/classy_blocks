@@ -3,7 +3,6 @@ from typing import Set
 import numpy as np
 from parameterized import parameterized
 
-from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.construct.flat.sketches.disk import OneCoreDisk
 from classy_blocks.construct.flat.sketches.grid import Grid as GridSketch
 from classy_blocks.construct.stack import ExtrudedStack
@@ -43,10 +42,7 @@ class HexGridTests(MeshTestCase):
         mesh = Mesh()
         mesh.add(stack)
 
-        try:
-            mesh.assemble()  # will fail because there are no chops
-        except UndefinedGradingsError:
-            pass
+        mesh.assemble()
 
         grid = self.get_grid(mesh)
 

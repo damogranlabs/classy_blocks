@@ -9,6 +9,7 @@ import scipy.optimize
 from classy_blocks.construct.flat.sketches.mapped import MappedSketch
 from classy_blocks.mesh import Mesh
 from classy_blocks.optimize.clamps.clamp import ClampBase
+from classy_blocks.optimize.clamps.surface import PlaneClamp
 from classy_blocks.optimize.grid import GridBase, HexGrid, QuadGrid
 from classy_blocks.optimize.iteration import ClampOptimizationData, IterationDriver
 from classy_blocks.optimize.links import LinkBase
@@ -159,3 +160,18 @@ class SketchOptimizer(OptimizerBase):
 
     def backport(self):
         self.sketch.update(self.grid.points)
+
+    def auto_optimize(
+        self, max_iterations: int = 20, tolerance: float = 0.1, method: MinimizationMethodType = "SLSQP"
+    ) -> None:
+        """Adds a PlaneClamp to all non-boundary points and optimize the sketch.
+        To include boundary points (those that can be moved along a line or a curve),
+        add clamps manually before calling this method."""
+        normal = self.sketch.normal
+
+        for junction in self.grid.junctions:
+            if not junction.is_boundary:
+                clamp = PlaneClamp(junction.point, junction.point, normal)
+                self.release_vertex(clamp)
+
+        super().optimize(max_iterations, tolerance, method)
