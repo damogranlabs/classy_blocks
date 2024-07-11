@@ -29,7 +29,7 @@ class OptimizerBase(abc.ABC):
         self.grid = grid
         self.report = report
 
-    def release_vertex(self, clamp: ClampBase) -> None:
+    def add_clamp(self, clamp: ClampBase) -> None:
         """Adds a clamp to optimization. Raises an exception if it already exists"""
         self.grid.add_clamp(clamp)
 
@@ -39,6 +39,7 @@ class OptimizerBase(abc.ABC):
     def optimize_clamp(self, clamp: ClampBase, method: MinimizationMethodType) -> None:
         """Move clamp.vertex so that quality at junction is improved;
         rollback changes if grid quality decreased after optimization"""
+        # TODO! do something with this updating/rollback junk
         initial_params = copy.copy(clamp.params)
         junction = self.grid.get_junction_from_clamp(clamp)
 
@@ -68,6 +69,7 @@ class OptimizerBase(abc.ABC):
 
         if reporter.rollback:
             clamp.update_params(initial_params)
+            self.grid.points[junction.index] = clamp.position
 
             if len(junction.links) > 0:
                 for indexed_link in junction.links:
@@ -147,10 +149,6 @@ class MeshOptimizer(OptimizerBase):
             self.mesh.vertices[i].move_to(point)
 
 
-# For backwards compatibility and ease-of-use
-Optimizer = MeshOptimizer
-
-
 class SketchOptimizer(OptimizerBase):
     def __init__(self, sketch: MappedSketch, report: bool = True):
         self.sketch = sketch
@@ -172,6 +170,6 @@ class SketchOptimizer(OptimizerBase):
         for junction in self.grid.junctions:
             if not junction.is_boundary:
                 clamp = PlaneClamp(junction.point, junction.point, normal)
-                self.release_vertex(clamp)
+                self.add_clamp(clamp)
 
         super().optimize(max_iterations, tolerance, method)

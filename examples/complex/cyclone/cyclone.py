@@ -55,7 +55,7 @@ optimizer = cb.MeshOptimizer(mesh)
 clamps = []
 for region in optimize_regions:
     for clamp in region.get_clamps(mesh):
-        optimizer.release_vertex(clamp)
+        optimizer.add_clamp(clamp)
 
 optimizer.optimize(tolerance=1e-3, method="SLSQP")
 

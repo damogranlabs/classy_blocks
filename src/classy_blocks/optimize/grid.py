@@ -124,6 +124,3 @@ class HexGrid(GridBase):
         addresses = [block.indexes for block in mesh.blocks]
 
         return cls(points, addresses)
-
-
-Grid = HexGrid

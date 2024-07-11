@@ -6,7 +6,7 @@ import numpy as np
 from classy_blocks.construct.operations.box import Box
 from classy_blocks.mesh import Mesh
 from classy_blocks.modify.find.geometric import GeometricFinder
-from classy_blocks.optimize.grid import Grid, QuadGrid
+from classy_blocks.optimize.grid import HexGrid, QuadGrid
 from classy_blocks.types import AxisType
 
 
@@ -63,5 +63,5 @@ class BoxTestsBase(unittest.TestCase):
     def get_vertex(self, position):
         return next(iter(self.finder.find_in_sphere(position)))
 
-    def get_grid(self, mesh: Mesh) -> Grid:
-        return Grid.from_mesh(mesh)
+    def get_grid(self, mesh: Mesh) -> HexGrid:
+        return HexGrid.from_mesh(mesh)

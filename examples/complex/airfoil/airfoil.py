@@ -171,14 +171,14 @@ for index in (10, 11, 12, 13, 14):
     clamp = cb.CurveClamp(opt_vertex.position, foil_curve)
     optimizer.add_link(make_link(opt_vertex))
 
-    optimizer.release_vertex(clamp)
+    optimizer.add_clamp(clamp)
 
 # Points that move in their X-Y plane
 for index in (16, 17):
     opt_vertex = find_vertex(index)
     clamp = cb.PlaneClamp(opt_vertex.position, [0, 0, 0], [0, 0, 1])
     optimizer.add_link(make_link(opt_vertex))
-    optimizer.release_vertex(clamp)
+    optimizer.add_clamp(clamp)
 
 
 # Points that move along domain edges
@@ -186,7 +186,7 @@ def optimize_along_line(point_index, line_index_1, line_index_2):
     opt_vertex = find_vertex(point_index)
     clamp = cb.LineClamp(opt_vertex.position, points[line_index_1], points[line_index_2])
     optimizer.add_link(make_link(opt_vertex))
-    optimizer.release_vertex(clamp)
+    optimizer.add_clamp(clamp)
 
 
 optimize_along_line(2, 1, 3)

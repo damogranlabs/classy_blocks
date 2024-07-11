@@ -44,7 +44,7 @@ optimizer = cb.MeshOptimizer(mesh)
 
 for vertex in inner_vertices:
     clamp = cb.LineClamp(vertex.position, vertex.position, vertex.position + f.vector(1, 0, 0))
-    optimizer.release_vertex(clamp)
+    optimizer.add_clamp(clamp)
 
 optimizer.optimize()
 

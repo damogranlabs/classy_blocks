@@ -30,7 +30,7 @@ optimizer = MeshOptimizer(mesh)
 
 # define which vertices can move during optimization, and in which DoF
 mid_clamp = FreeClamp(mid_vertex.position)
-optimizer.release_vertex(mid_clamp)
+optimizer.add_clamp(mid_clamp)
 
 
 optimizer.optimize()

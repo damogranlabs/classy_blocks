@@ -13,10 +13,10 @@ from tests.test_optimize.optimize_fixtures import BoxTestsBase, SketchTestsBase
 class MeshOptimizerTests(BoxTestsBase):
     def test_add_junction_existing(self):
         optimizer = MeshOptimizer(self.mesh)
-        optimizer.release_vertex(FreeClamp(self.mesh.vertices[0].position))
+        optimizer.add_clamp(FreeClamp(self.mesh.vertices[0].position))
 
         with self.assertRaises(ClampExistsError):
-            optimizer.release_vertex(FreeClamp(self.mesh.vertices[0].position))
+            optimizer.add_clamp(FreeClamp(self.mesh.vertices[0].position))
 
     def test_optimize(self):
         # move a point, then optimize it back to
@@ -27,7 +27,7 @@ class MeshOptimizerTests(BoxTestsBase):
         optimizer = MeshOptimizer(self.mesh)
 
         clamp = FreeClamp(vertex.position)
-        optimizer.release_vertex(clamp)
+        optimizer.add_clamp(clamp)
         optimizer.optimize()
 
         np.testing.assert_almost_equal(vertex.position, [0, 0, 0], decimal=1)
@@ -41,7 +41,7 @@ class MeshOptimizerTests(BoxTestsBase):
         clamp = FreeClamp(vertex.position)
 
         optimizer = MeshOptimizer(self.mesh)
-        optimizer.release_vertex(clamp)
+        optimizer.add_clamp(clamp)
         optimizer.add_link(link)
         optimizer.optimize()
 
@@ -55,7 +55,7 @@ class SketchOptimizerTests(SketchTestsBase):
         clamp = PlaneClamp([1.5, 1.5, 0], [0, 0, 0], [0, 0, 1])
 
         optimizer = SketchOptimizer(sketch)
-        optimizer.release_vertex(clamp)
+        optimizer.add_clamp(clamp)
 
         optimizer.optimize(method="L-BFGS-B")
 

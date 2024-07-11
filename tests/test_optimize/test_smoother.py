@@ -2,26 +2,12 @@ import numpy as np
 
 from classy_blocks.construct.flat.sketches.disk import OneCoreDisk
 from classy_blocks.construct.flat.sketches.mapped import MappedSketch
-from classy_blocks.optimize.smoother import MeshSmoother, SketchSmoother, SmootherBase
+from classy_blocks.optimize.smoother import MeshSmoother, SketchSmoother
 from classy_blocks.util import functions as f
 from tests.test_optimize.optimize_fixtures import BoxTestsBase, SketchTestsBase
 
 
 class HexSmootherTests(BoxTestsBase):
-
-    def test_smooth(self):
-        vertex = self.get_vertex([0, 0, 0])
-        vertex.move_to([0.3, 0.3, 0.3])
-
-        grid = self.get_grid(self.mesh)
-
-        np.testing.assert_almost_equal(grid.points[vertex.index], [0.3, 0.3, 0.3])
-
-        smoother = SmootherBase(grid)
-        smoother.smooth()
-
-        np.testing.assert_almost_equal(grid.points[vertex.index], [0, 0, 0])
-
     def test_smooth_mesh(self):
         vertex = self.get_vertex([0, 0, 0])
         vertex.move_to([0.3, 0.3, 0.3])
@@ -30,6 +16,26 @@ class HexSmootherTests(BoxTestsBase):
         smoother.smooth()
 
         np.testing.assert_almost_equal(self.mesh.vertices[vertex.index].position, [0, 0, 0])
+
+    def test_fix_index(self):
+        vertex = self.get_vertex([0, 0, 0])
+        vertex.move_to([0.3, 0.3, 0.3])
+
+        smoother = MeshSmoother(self.mesh)
+        smoother.fix_indexes([vertex.index])
+        smoother.smooth()
+
+        np.testing.assert_equal(vertex.position, [0.3, 0.3, 0.3])
+
+    def test_fix_point(self):
+        vertex = self.get_vertex([0, 0, 0])
+        vertex.move_to([0.3, 0.3, 0.3])
+
+        smoother = MeshSmoother(self.mesh)
+        smoother.fix_points([vertex.position])
+        smoother.smooth()
+
+        np.testing.assert_equal(vertex.position, [0.3, 0.3, 0.3])
 
 
 class QuadSmootherTests(SketchTestsBase):

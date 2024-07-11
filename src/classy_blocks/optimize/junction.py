@@ -4,7 +4,7 @@ from typing import List, Optional, Set
 from classy_blocks.optimize.cell import CellBase
 from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.links import LinkBase
-from classy_blocks.types import NPPointListType, NPPointType, PointType
+from classy_blocks.types import NPPointListType, NPPointType
 
 
 class ClampExistsError(Exception):
@@ -81,9 +81,6 @@ class Junction:
                 return True
 
         return False
-
-    def move_to(self, position: PointType) -> None:
-        self.points[self.index] = position
 
     @property
     def quality(self) -> float:
