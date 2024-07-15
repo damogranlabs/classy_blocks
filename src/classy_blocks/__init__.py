@@ -30,7 +30,7 @@ from .optimize.clamps.clamp import ClampBase
 from .optimize.clamps.curve import CurveClamp, LineClamp, RadialClamp
 from .optimize.clamps.free import FreeClamp
 from .optimize.clamps.surface import ParametricSurfaceClamp, PlaneClamp
-from .optimize.links import LinkBase, RotationLink, TranslationLink
+from .optimize.links import LinkBase, RotationLink, SymmetryLink, TranslationLink
 from .optimize.optimizer import MeshOptimizer, SketchOptimizer
 from .optimize.smoother import MeshSmoother, SketchSmoother
 
@@ -106,6 +106,7 @@ __all__ = [
     "LinkBase",
     "TranslationLink",
     "RotationLink",
+    "SymmetryLink",
     # Optimization: optimizers and smoothers
     "MeshOptimizer",
     "SketchOptimizer",

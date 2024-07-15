@@ -1,7 +1,7 @@
 import numpy as np
 from parameterized import parameterized
 
-from classy_blocks.optimize.cell import Cell, NoCommonSidesError
+from classy_blocks.optimize.cell import HexCell, NoCommonSidesError
 from tests.fixtures.mesh import MeshTestCase
 
 
@@ -13,8 +13,8 @@ class CellTests(MeshTestCase):
     def mesh_points(self):
         return np.array([vertex.position for vertex in self.mesh.vertices])
 
-    def get_cell(self, index: int) -> Cell:
-        return Cell(self.mesh_points, self.mesh.blocks[index].indexes)
+    def get_cell(self, index: int) -> HexCell:
+        return HexCell(self.mesh_points, self.mesh.blocks[index].indexes)
 
     @parameterized.expand(
         (

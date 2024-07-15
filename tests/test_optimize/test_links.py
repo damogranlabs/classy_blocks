@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 from parameterized import parameterized
 
-from classy_blocks.optimize.links import RotationLink, TranslationLink
+from classy_blocks.optimize.links import RotationLink, SymmetryLink, TranslationLink
 from classy_blocks.util import functions as f
 
 
@@ -99,3 +99,13 @@ class RotationLinkTests(unittest.TestCase):
     def test_coincident(self):
         with self.assertRaises(ValueError):
             _ = RotationLink(self.leader, self.follower, [0, 0, 1], [1, 0, 0])
+
+
+class SymmetryLinkTests(unittest.TestCase):
+    def test_move(self):
+        link = SymmetryLink([0, 0, 1], [0, 0, -1], [0, 0, 1], [0, 0, 0])
+
+        link.leader = np.array([0, 0, 2])
+        link.update()
+
+        np.testing.assert_equal(link.follower, [0, 0, -2])

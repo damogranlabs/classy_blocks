@@ -77,3 +77,20 @@ class RotationLink(LinkBase):
     def _get_radius(self, point: NPPointType) -> NPVectorType:
         """Returns projection of the point to plane, given by origin and axis"""
         return (point - self.origin) - self._get_height(point)
+
+
+class SymmetryLink(LinkBase):
+    """A link that mirrors follower over a given plane."""
+
+    def __init__(self, leader: PointType, follower: PointType, normal: VectorType, origin: PointType):
+        self.normal = np.array(normal)
+        self.origin = np.array(origin)
+
+        super().__init__(leader, follower)
+        self.transform()
+
+    def _get_follower(self) -> NPPointType:
+        return f.mirror(self.leader, self.normal, self.origin)
+
+    def transform(self) -> NPPointType:
+        return self._get_follower()

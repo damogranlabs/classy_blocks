@@ -190,10 +190,12 @@ class QuadCell(CellBase):
     def get_side_normals(self, side_points, _):
         return [np.cross(self.normal, side_points[1] - side_points[0])]
 
-    def get_inner_angles(self, side_points):
+    def get_inner_angles(self, _):
         # this metric does not make sense for a line segment
         # so only return side length
-        return np.zeros(2), np.linalg.norm([side_points[1] - side_points[0]], axis=1)
+        points = self.points
+        lengths = [f.norm(points[(i + 1) % 4] - points[i]) for i in range(4)]
+        return np.zeros(2), lengths
 
 
 class HexCell(CellBase):
@@ -225,7 +227,3 @@ class HexCell(CellBase):
 
         angles = np.sum(sides_1 * sides_2, axis=1)
         return 180 * np.arccos(angles) / np.pi - 90, side_1_norms
-
-
-# For backwards compatibility
-Cell = HexCell
