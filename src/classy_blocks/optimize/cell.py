@@ -91,23 +91,28 @@ class CellBase(abc.ABC):
         """Center of this cell"""
         return np.average(self.points, axis=0)
 
-    @property
-    def side_points(self) -> NPPointListType:
+    def get_side_points(self, i: int) -> NPPointListType:
         """In 2D, a 'side' is a line segment but in 3D it is a quadrangle"""
-        return np.take(self.points, self.side_indexes, axis=0)
+        return np.take(self.points, self.side_indexes[i], axis=0)
 
-    @property
-    def side_centers(self) -> NPPointListType:
-        """Center point of each face"""
-        return np.average(self.side_points, axis=1)
-
-    @abc.abstractmethod
-    def get_side_normals(self, side_points: NPPointListType, side_center: NPPointType) -> NPPointListType:
-        pass
+    def get_side_center(self, i: int) -> NPPointType:
+        """Center point of each face (3D) or edge (2D)"""
+        return np.average(self.get_side_points(i), axis=0)
 
     @abc.abstractmethod
-    def get_inner_angles(self, side_points: NPPointListType) -> Tuple[FloatListType, FloatListType]:
-        pass
+    def get_side_normals(self, i: int) -> NPPointListType:
+        """4 normals, each for every triangle of decomposed given face in 3D
+        or a single normal of an edge in 2D"""
+
+    @abc.abstractmethod
+    def get_inner_angles(self, i: int) -> FloatListType:
+        """Angles of 4 corners of given face (3D) or angle at
+        the first corner of given edge (2D)"""
+
+    def get_edge_lengths(self) -> FloatListType:
+        points = self.points
+
+        return np.array([f.norm(points[edge[1]] - points[edge[0]]) for edge in self.side_indexes])
 
     @property
     def quality(self):
@@ -133,46 +138,34 @@ class CellBase(abc.ABC):
             ### non-orthogonality
             # angles between sides and self.center-neighbour.center or, if there's no neighbour
             # on this face, between face and self.center-face_center
-            side_points = self.side_points[i]
-            side_center = self.side_centers[i]
-
-            side_normals = self.get_side_normals(side_points, side_center)
-
             if neighbour is None:
                 # Cells at the wall simply use center of the face on the wall
                 # instead of their neighbour's center
-                c2c = center - side_center
+                c2c = center - self.get_side_center(i)
             else:
                 c2c = center - neighbour.center
 
             c2cn = c2c / np.linalg.norm(c2c)
 
-            nnorms = np.linalg.norm(side_normals, axis=1) + VSMALL
-            normals = side_normals / nnorms[:, np.newaxis]
-
-            angles = 180 * np.arccos(np.dot(normals, c2cn)) / np.pi
-
+            angles = 180 * np.arccos(np.dot(self.get_side_normals(i), c2cn)) / np.pi
             quality += np.sum(q_scale(1.25, 0.35, 0.8, angles))
 
             ### cell inner angles
-            inner_angles, side_lengths = self.get_inner_angles(side_points)
+            quality += np.sum(q_scale(1.5, 0.25, 0.15, abs(self.get_inner_angles(i))))
 
-            quality += np.sum(q_scale(1.5, 0.25, 0.15, abs(inner_angles)))
+        ### aspect ratio: one number for the whole cell (not per side)
+        edge_lengths = self.get_edge_lengths()
+        side_max = max(edge_lengths)
+        side_min = min(edge_lengths) + VSMALL
+        aspect_factor = np.log10(side_max / side_min)
 
-            ### aspect ratio
-            side_max = max(side_lengths)
-            side_min = min(side_lengths) + VSMALL
-            aspect_factor = np.log10(side_max / side_min)
-
-            quality += np.sum(q_scale(3, 2.5, 3, aspect_factor))
+        quality += np.sum(q_scale(3, 2.5, 3, aspect_factor))
 
         return quality
 
     @property
     def min_length(self) -> float:
-        points = self.points
-
-        return min([f.norm(points[edge[1]] - points[edge[0]]) for edge in self.side_indexes])
+        return min(self.get_edge_lengths())
 
 
 class QuadCell(CellBase):
@@ -187,15 +180,14 @@ class QuadCell(CellBase):
 
         return np.cross(points[1] - points[0], points[3] - points[0])
 
-    def get_side_normals(self, side_points, _):
-        return [np.cross(self.normal, side_points[1] - side_points[0])]
+    def get_side_normals(self, i):
+        side_points = self.get_side_points(i)
+        return [f.unit_vector(np.cross(self.normal, side_points[1] - side_points[0]))]
 
     def get_inner_angles(self, _):
         # this metric does not make sense for a line segment
         # so only return side length
-        points = self.points
-        lengths = [f.norm(points[(i + 1) % 4] - points[i]) for i in range(4)]
-        return np.zeros(2), lengths
+        return np.zeros(2)
 
 
 class HexCell(CellBase):
@@ -210,13 +202,21 @@ class HexCell(CellBase):
     side_indexes: ClassVar = [[0, 1, 2, 3], [7, 6, 5, 4], [4, 0, 3, 7], [6, 2, 1, 5], [0, 4, 5, 1], [7, 3, 2, 6]]
     edge_pairs: ClassVar = EDGE_PAIRS
 
-    def get_side_normals(self, side_points, side_center):
+    def get_side_normals(self, i: int):
+        side_center = self.get_side_center(i)
+        side_points = self.get_side_points(i)
+
         side_1 = side_points - side_center
         side_2 = np.roll(side_points, -1, axis=0) - side_center
 
-        return np.cross(side_1, side_2)
+        side_normals = np.cross(side_1, side_2)
 
-    def get_inner_angles(self, side_points: NPPointListType):
+        nnorms = np.linalg.norm(side_normals, axis=1) + VSMALL
+        return side_normals / nnorms[:, np.newaxis]
+
+    def get_inner_angles(self, i: int):
+        side_points = self.get_side_points(i)
+
         sides_1 = np.roll(side_points, -1, axis=0) - side_points
         side_1_norms = np.linalg.norm(sides_1, axis=1) + VSMALL
         sides_1 = sides_1 / side_1_norms[:, np.newaxis]
@@ -226,4 +226,4 @@ class HexCell(CellBase):
         sides_2 = sides_2 / side_2_norms[:, np.newaxis]
 
         angles = np.sum(sides_1 * sides_2, axis=1)
-        return 180 * np.arccos(angles) / np.pi - 90, side_1_norms
+        return 180 * np.arccos(angles) / np.pi - 90
