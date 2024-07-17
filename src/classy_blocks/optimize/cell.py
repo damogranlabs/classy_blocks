@@ -182,7 +182,19 @@ class QuadCell(CellBase):
 
     def get_side_normals(self, i):
         side_points = self.get_side_points(i)
-        return [f.unit_vector(np.cross(self.normal, side_points[1] - side_points[0]))]
+        side_vector = side_points[1] - side_points[0]
+
+        if f.norm(side_vector) < VSMALL:
+            # two coincident points
+            return f.unit_vector(self.center - side_points[0])
+
+        normal = np.cross(self.normal, side_vector)
+
+        if f.norm(normal) < VSMALL:
+            # a 180-degree angle
+            return f.unit_vector(self.center - side_points[0])
+
+        return [f.unit_vector(normal)]
 
     def get_inner_angles(self, _):
         # this metric does not make sense for a line segment
