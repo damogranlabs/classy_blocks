@@ -49,17 +49,7 @@ class OptimizerBase(abc.ABC):
         def fquality(params):
             # move all vertices according to X
             clamp.update_params(params)
-            self.grid.points[junction.index] = clamp.position
-
-            if len(junction.links) > 0:
-                for indexed_link in junction.links:
-                    indexed_link.link.leader = clamp.position
-                    indexed_link.link.update()
-                    self.grid.points[indexed_link.follower_index] = indexed_link.link.follower
-
-                return self.grid.quality
-
-            return junction.quality
+            return self.grid.update(junction.index, clamp.position)
 
         scipy.optimize.minimize(fquality, clamp.params, bounds=clamp.bounds, method=method)
 
@@ -69,13 +59,7 @@ class OptimizerBase(abc.ABC):
 
         if reporter.rollback:
             clamp.update_params(initial_params)
-            self.grid.points[junction.index] = clamp.position
-
-            if len(junction.links) > 0:
-                for indexed_link in junction.links:
-                    indexed_link.link.leader = clamp.position
-                    indexed_link.link.update()
-                    self.grid.points[indexed_link.follower_index] = indexed_link.link.follower
+            self.grid.update(junction.index, clamp.position)
 
     def _get_sensitivity(self, clamp):
         """Returns maximum partial derivative at current params"""
@@ -136,7 +120,6 @@ class OptimizerBase(abc.ABC):
 
 
 class MeshOptimizer(OptimizerBase):
-
     def __init__(self, mesh: Mesh, report: bool = True):
         self.mesh = mesh
         grid = HexGrid.from_mesh(self.mesh)

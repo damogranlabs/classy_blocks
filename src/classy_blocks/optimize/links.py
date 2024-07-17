@@ -25,6 +25,9 @@ class LinkBase(abc.ABC):
         """Determine the new vertex position
         according to the type of link"""
 
+    def __str__(self):
+        return f"Link {self.leader} - {self.follower}"
+
 
 class TranslationLink(LinkBase):
     """A link that maintains the same translation vector

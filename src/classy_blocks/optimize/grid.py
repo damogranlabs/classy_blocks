@@ -8,7 +8,7 @@ from classy_blocks.optimize.cell import CellBase, HexCell, QuadCell
 from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.junction import Junction
 from classy_blocks.optimize.links import LinkBase
-from classy_blocks.types import IndexType, NPPointListType
+from classy_blocks.types import IndexType, NPPointListType, NPPointType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
 
@@ -82,9 +82,14 @@ class GridBase:
             if f.norm(link.follower - junction.point) < TOL:
                 follower_index = i
 
-        if leader_index == -1 or follower_index == -1:
-            # TODO: prettier output
-            raise InvalidLinkError(f"Invalid link: {link}")
+        if leader_index == -1:
+            raise InvalidLinkError(f"Leader not found for link: {link} (follower: {follower_index})")
+
+        if follower_index == -1:
+            raise InvalidLinkError(f"Follower not found for link {link} (leader: {leader_index}")
+
+        if leader_index == follower_index:
+            raise InvalidLinkError(f"Leader and follower are the same for link {link} ({leader_index})")
 
         self.junctions[leader_index].add_link(link, follower_index)
 
@@ -104,6 +109,20 @@ class GridBase:
         # It is only called when optimizing linked clamps
         # or at the end of an iteration.
         return sum([cell.quality for cell in self.cells])
+
+    def update(self, index: int, position: NPPointType) -> float:
+        self.points[index] = position
+
+        junction = self.junctions[index]
+        if len(junction.links) > 0:
+            for indexed_link in junction.links:
+                indexed_link.link.leader = position
+                indexed_link.link.update()
+                self.points[indexed_link.follower_index] = indexed_link.link.follower
+
+            return self.quality
+
+        return junction.quality
 
 
 class QuadGrid(GridBase):
