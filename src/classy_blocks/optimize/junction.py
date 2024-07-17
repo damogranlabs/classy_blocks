@@ -73,6 +73,10 @@ class Junction:
     def add_link(self, link: LinkBase, follower_index: int) -> None:
         self.links.append(IndexedLink(link, follower_index))
 
+    def invalidate(self) -> None:
+        for cell in self.cells:
+            cell.invalidate()
+
     @property
     def is_boundary(self) -> bool:
         """Returns True if this junction lies on boundary"""

@@ -114,7 +114,7 @@ class GridBase:
         self.points[index] = position
 
         junction = self.junctions[index]
-        quality = junction.quality
+        junction.invalidate()
 
         if len(junction.links) > 0:
             for indexed_link in junction.links:
@@ -122,7 +122,7 @@ class GridBase:
                 indexed_link.link.update()
 
                 self.points[indexed_link.follower_index] = indexed_link.link.follower
-                quality += self.junctions[indexed_link.follower_index].quality
+                self.junctions[indexed_link.follower_index].invalidate()
 
             return self.quality
 

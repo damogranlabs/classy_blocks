@@ -25,6 +25,9 @@ class CellBase(abc.ABC):
         self.neighbours: Dict[OrientType, Optional[CellBase]] = {name: None for name in self.side_names}
         self.connections = [CellConnection(set(pair), {indexes[pair[0]], indexes[pair[1]]}) for pair in self.edge_pairs]
 
+        # cache
+        self._quality: Optional[float] = None
+
     def get_common_indexes(self, candidate: "CellBase") -> Set[int]:
         """Returns indexes of common vertices between this and provided cell"""
         this_indexes = set(self.indexes)
@@ -125,8 +128,10 @@ class CellBase(abc.ABC):
 
         # both 3D (cell) and 2d (face) use the same calculation but elements are different.
 
-        quality = 0
+        if self._quality is not None:
+            return self._quality
 
+        quality = 0
         center = self.center
 
         def q_scale(base, exponent, factor, value):
@@ -161,7 +166,11 @@ class CellBase(abc.ABC):
 
         quality += np.sum(q_scale(3, 2.5, 3, aspect_factor))
 
+        self._quality = quality
         return quality
+
+    def invalidate(self) -> None:
+        self._quality = None
 
     @property
     def min_length(self) -> float:
