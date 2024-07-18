@@ -3,20 +3,22 @@ import unittest
 import numpy as np
 from parameterized import parameterized
 
+from classy_blocks.construct.array import Array
 from classy_blocks.construct.curves.interpolators import LinearInterpolator
-from classy_blocks.construct.point import Point
 
 
 class LinearInterpolatorTests(unittest.TestCase):
     def setUp(self):
         # a simple square wave
-        self.points = [
-            Point([0, 0, 0]),
-            Point([0, 1, 0]),
-            Point([1, 1, 0]),
-            Point([1, 0, 0]),
-            Point([2, 0, 0]),
-        ]
+        self.points = Array(
+            [
+                [0, 0, 0],
+                [0, 1, 0],
+                [1, 1, 0],
+                [1, 0, 0],
+                [2, 0, 0],
+            ]
+        )
 
     @parameterized.expand(
         (

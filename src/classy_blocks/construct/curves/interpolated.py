@@ -3,6 +3,7 @@ from typing import Optional, Type
 
 import numpy as np
 
+from classy_blocks.construct.array import Array
 from classy_blocks.construct.curves.curve import FunctionCurveBase
 from classy_blocks.construct.curves.interpolators import InterpolatorBase, LinearInterpolator, SplineInterpolator
 from classy_blocks.types import PointListType
@@ -25,14 +26,14 @@ class InterpolatedCurveBase(FunctionCurveBase, abc.ABC):
     _interpolator: Type[InterpolatorBase]
 
     def __init__(self, points: PointListType):
-        self.points = self._check_points(points)
-        self.function = self._interpolator(self.points, False)
+        self.array = Array(points)
+        self.function = self._interpolator(self.array, False)
         self.bounds = (0, 1)
 
     @property
     def segments(self) -> int:
         """Returns number of points this curve was created from"""
-        return len(self.points) - 1
+        return len(self.array) - 1
 
     @property
     def parts(self):
@@ -41,7 +42,7 @@ class InterpolatedCurveBase(FunctionCurveBase, abc.ABC):
         # is no longer valid and needs to be rebuilt
         self.function.invalidate()
 
-        return self.points
+        return [self.array]
 
     def get_length(self, param_from: Optional[float] = None, param_to: Optional[float] = None) -> float:
         """Returns the length of this curve by summing distance between

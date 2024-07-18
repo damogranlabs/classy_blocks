@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 from parameterized import parameterized
 
+from classy_blocks.base.exceptions import ArrayCreationError
 from classy_blocks.construct.curves.discrete import DiscreteCurve
 
 
@@ -22,12 +23,12 @@ class DiscreteCurveTests(unittest.TestCase):
 
     def test_single_point(self):
         """Only one point was provided"""
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ArrayCreationError):
             _ = DiscreteCurve([[0, 0, 0]])
 
     def test_wrong_shape(self):
         """Points are not in 3-dimensions"""
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ArrayCreationError):
             _ = DiscreteCurve([[0, 0], [1, 0]])
 
     @parameterized.expand(((-1, 1), (0, 5)))

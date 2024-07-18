@@ -216,18 +216,12 @@ def arc_mid(axis: VectorType, center: PointType, radius: float, point_1: PointTy
     return center + unit_vector(sec_ort) * radius
 
 
-def mirror(point: PointType, normal: VectorType, origin: PointType):
-    """Mirror a point around a plane, given by a normal and origin"""
-    # brainlessly copied from https://gamemath.com/book/matrixtransforms.html
-    point = np.asarray(point)
-    normal = unit_vector(normal)
-    origin = np.asarray(origin)
-
+def mirror_matrix(normal: VectorType):
     n_x = normal[0]
     n_y = normal[1]
     n_z = normal[2]
 
-    matrix = np.array(
+    return np.array(
         [
             [
                 1 - 2 * n_x**2,
@@ -247,8 +241,16 @@ def mirror(point: PointType, normal: VectorType, origin: PointType):
         ]
     )
 
+
+def mirror(point: PointType, normal: VectorType, origin: PointType):
+    """Mirror a point around a plane, given by a normal and origin"""
+    # brainlessly copied from https://gamemath.com/book/matrixtransforms.html
+    point = np.asarray(point)
+    normal = unit_vector(normal)
+    origin = np.asarray(origin)
+
     point -= origin
-    rotated = point.dot(matrix)
+    rotated = point.dot(mirror_matrix(normal))
     rotated += origin
 
     return rotated

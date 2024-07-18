@@ -1,12 +1,11 @@
 import abc
-from typing import List
 
 import numpy as np
 import scipy.interpolate
 from numpy.typing import NDArray
 
-from classy_blocks.construct.point import Point
-from classy_blocks.types import NPPointListType, NPPointType, ParamCurveFuncType
+from classy_blocks.construct.array import Array
+from classy_blocks.types import NPPointType, ParamCurveFuncType
 
 
 class InterpolatorBase(abc.ABC):
@@ -20,7 +19,7 @@ class InterpolatorBase(abc.ABC):
     def _get_function(self) -> ParamCurveFuncType:
         """Returns an interpolation function from stored points"""
 
-    def __init__(self, points: List[Point], extrapolate: bool):
+    def __init__(self, points: Array, extrapolate: bool):
         self.points = points
         self.extrapolate = extrapolate
 
@@ -41,10 +40,6 @@ class InterpolatorBase(abc.ABC):
     def params(self) -> NDArray:
         return np.linspace(0, 1, num=len(self.points))
 
-    @property
-    def positions(self) -> NPPointListType:
-        return np.array([point.position for point in self.points])
-
 
 class LinearInterpolator(InterpolatorBase):
     def _get_function(self):
@@ -56,7 +51,7 @@ class LinearInterpolator(InterpolatorBase):
             fill_value = np.nan
 
         function = scipy.interpolate.interp1d(
-            self.params, self.positions, bounds_error=bounds_error, fill_value=fill_value, axis=0  # type: ignore
+            self.params, self.points.points, bounds_error=bounds_error, fill_value=fill_value, axis=0  # type: ignore
         )
 
         return lambda param: function(param)
@@ -64,6 +59,6 @@ class LinearInterpolator(InterpolatorBase):
 
 class SplineInterpolator(InterpolatorBase):
     def _get_function(self):
-        spline = scipy.interpolate.make_interp_spline(self.params, self.positions, check_finite=False)
+        spline = scipy.interpolate.make_interp_spline(self.params, self.points.points, check_finite=False)
 
         return lambda t: spline(t, extrapolate=self.extrapolate)
