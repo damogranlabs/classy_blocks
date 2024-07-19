@@ -94,7 +94,7 @@ After blocks have been placed, it is possible to create new geometry based on pl
 - [x] Move Vertex/Edge/Face
 - [x] Delete a Block created by a Shape or Object
 - [x] Project Vertex/Edge/Face
-- [x] Optimize Vertex positions
+- [x] Optimize point position of a Sketch or mesh vertices
 
 ## Meshing Specification
 - [x] Simple definition of all supported kinds of edges with a dedicated class (Arc/Origin/Angle/Spline/PolyLine/Project)
@@ -164,6 +164,8 @@ mesh.add(revolve)
 
 
 ## Shapes
+Some basic shapes are ready-made so that there's no need for workout with Operations.
+
 A simple Cylinder:
 
 ```python
@@ -212,9 +214,11 @@ disk_in_square = cb.WrappedDisk(start_point, corner_point, disk_diameter/2, norm
 shape = cb.ExtrudedShape(disk_in_square, length)
 ```
 
-> See `examples/operations` for an example of each operation.
+### Sketch Smoothing and Optimization
 
+Points that define a custom sketch can only be placed approximately. Their positions can then be defined by Laplacian smoothing or optimization to obtain best face quality.
 
+> See `examples/shape/custom` for an example with a custom sketch.
 
 ## Stacks
 A collection of similar Shapes; a Stack is created by starting with a Sketch, then transforming it a number of times, obtaining Shapes, stacked on top of each other.
@@ -321,7 +325,7 @@ Once an approximate blocking is established, one can fetch specific vertices and
 
 Block is treated as a single cell for which OpenFOAM's cell quality criteria are calculated and optimized per user's instructions.
 
-Vertices can move freely (3 degrees of freedom), along a specified line/curve (1 DoF) or surface (2 DoF).
+Points can move freely (3 degrees of freedom), along a specified line/curve (1 DoF) or surface (2 DoF).
 
 ```python
 # [...] A simple setup with two cylinders of different radii,
@@ -370,6 +374,10 @@ happily show anything.
 
 A parametric, Low-Re mesh of a real-life impeller *(not included in examples)*
 ![Impeller - Low Re](showcase/impeller_full.png "Low-Re Impeller")
+
+A gear, made from a curve of a single tooth, calculated by
+[py_gear_gen](https://github.com/heartworm/py_gear_gen)
+![Gear](showcase/gear.png "Gear")
 
 A complex example: parametric, Low-Re mesh of a cyclone
 ![Cyclone](showcase/cyclone.png "Cyclone")
