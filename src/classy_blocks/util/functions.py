@@ -256,16 +256,21 @@ def mirror(point: PointType, normal: VectorType, origin: PointType):
     return rotated
 
 
-def is_point_on_plane(origin: PointType, normal: VectorType, point: PointType) -> float:
-    """Calculated distance between a point and a plane, defined by origin and normal vector"""
+def point_to_plane_distance(origin: PointType, normal: VectorType, point: PointType) -> float:
     origin = np.asarray(origin)
     normal = unit_vector(normal)
     point = np.asarray(point)
 
     if norm(origin - point) < constants.TOL:
-        return True
+        # point and origin are coincident
+        return norm(origin - point)
 
-    return abs(np.dot(unit_vector(point - origin), normal)) < constants.TOL
+    return abs(np.dot(point - origin, normal))
+
+
+def is_point_on_plane(origin: PointType, normal: VectorType, point: PointType) -> bool:
+    """Calculated distance between a point and a plane, defined by origin and normal vector"""
+    return point_to_plane_distance(origin, normal, point) < constants.TOL
 
 
 def point_to_line_distance(origin: PointType, direction: VectorType, point: PointType) -> float:

@@ -44,3 +44,14 @@ class Mirror(Transformation):
 
     normal: VectorType
     origin: Optional[PointType] = None
+
+
+@dataclasses.dataclass
+class Shear(Transformation):
+    """Parameters required for a shear transform"""
+
+    normal: VectorType
+    origin: PointType
+
+    direction: VectorType
+    angle: float
