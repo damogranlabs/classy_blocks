@@ -73,7 +73,7 @@ def arc_from_origin(
         return arc_from_origin(p1, p3, new_center, False)
 
     # done, return the calculated point
-    return f.arc_mid(axis, center, radius, edge_point_1, edge_point_2)
+    return f.arc_mid(axis, center, edge_point_1, edge_point_2)
 
 
 @dataclasses.dataclass

@@ -74,7 +74,7 @@ class Array(ElementBase):
             if f.point_to_plane_distance(origin, normal, point) > TOL:
                 distance = f.point_to_plane_distance(origin, normal, point)
                 direction = f.unit_vector(direction)
-                amount = distance * np.tan(angle)
+                amount = distance / np.tan(angle)
 
                 self.points[i] += direction * amount
         return self

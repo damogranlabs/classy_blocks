@@ -201,19 +201,27 @@ def arc_length_3point(p_start: NPPointType, p_btw: NPPointType, p_end: NPPointTy
     return angle * norm(radius)
 
 
-def arc_mid(axis: VectorType, center: PointType, radius: float, point_1: PointType, point_2: PointType) -> PointType:
-    """Returns the midpoint of the specified arc in 3D space"""
+def divide_arc(
+    axis: VectorType, center: PointType, point_1: PointType, point_2: PointType, count: int
+) -> NPPointListType:
     # Kudos to this guy for his shrewd solution
     # https://math.stackexchange.com/questions/3717427
+    # (extended here to create more than 1 point)
     axis = np.asarray(axis, dtype=constants.DTYPE)
     center = np.asarray(center, dtype=constants.DTYPE)
     point_1 = np.asarray(point_1, dtype=constants.DTYPE)
     point_2 = np.asarray(point_2, dtype=constants.DTYPE)
+    radius = norm(center - point_1)
 
-    sec = point_2 - point_1
-    sec_ort = np.cross(sec, axis)
+    secant_points = np.linspace(point_1, point_2, num=count + 2)[1:-1]
+    secant_vectors = [unit_vector(point - center) for point in secant_points]
 
-    return center + unit_vector(sec_ort) * radius
+    return np.array([center + vector * radius for vector in secant_vectors])
+
+
+def arc_mid(axis: VectorType, center: PointType, point_1: PointType, point_2: PointType) -> PointType:
+    """Returns the midpoint of the specified arc in 3D space"""
+    return divide_arc(axis, center, point_1, point_2, 1)[0]
 
 
 def mirror_matrix(normal: VectorType):

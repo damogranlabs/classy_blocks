@@ -39,34 +39,6 @@ class SemiCylinder(RoundSolidShape):
         super().__init__(self.sketch_class(axis_point_1, radius_point_1, axis), transform_2, None)
 
 
-class SlashedCylinder(RoundSolidShape):
-    sketch_class = HalfDisk
-
-    def __init__(
-        self, axis_point_1: PointType, axis_point_2: PointType, radius_point_1: PointType, end_angle: float = np.pi / 4
-    ):
-        axis_point_1 = np.asarray(axis_point_1)
-        axis_point_2 = np.asarray(axis_point_2)
-        axis = axis_point_2 - axis_point_1
-        radius_point_1 = np.asarray(radius_point_1)
-        radius_vector = radius_point_1 - axis_point_1
-
-        shear_normal = np.cross(-axis, radius_vector)
-
-        diff = np.dot(axis, radius_point_1 - axis_point_1)
-        if diff > TOL:
-            raise CylinderCreationError(
-                "Axis and radius vectors are not perpendicular", f"Difference: {diff}, tolerance: {TOL}"
-            )
-
-        transform_2: List[tr.Transformation] = [
-            tr.Translation(axis),
-            tr.Shear(shear_normal, axis_point_2, -axis, end_angle),
-        ]
-
-        super().__init__(self.sketch_class(axis_point_1, radius_point_1, axis), transform_2, None)
-
-
 class Cylinder(SemiCylinder):
     sketch_class = Disk
 

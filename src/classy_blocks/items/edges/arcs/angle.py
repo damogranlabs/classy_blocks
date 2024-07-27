@@ -36,9 +36,8 @@ def arc_from_theta(edge_point_1: PointType, edge_point_2: PointType, angle: floa
     mag_chord = f.norm(chord)
 
     center = pm - length * axis / 2 - rm * mag_chord / 2 / np.tan(angle / 2)
-    radius = f.norm(edge_point_1 - center)
 
-    return f.arc_mid(axis, center, radius, edge_point_1, edge_point_2)
+    return f.arc_mid(axis, center, edge_point_1, edge_point_2)
 
 
 @dataclasses.dataclass
