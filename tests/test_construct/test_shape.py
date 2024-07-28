@@ -227,6 +227,11 @@ class SphereTests(unittest.TestCase):
 
         self.assertEqual(len(sphere.core), 1)
 
+    def test_center(self):
+        sphere = EighthSphere([0, 0, 0], [1, 0, 0], [0, 0, 1])
+
+        np.testing.assert_equal(sphere.center, [0, 0, 0])
+
 
 class FrustumTests(unittest.TestCase):
     def test_non_perpendicular_axis_radius(self):

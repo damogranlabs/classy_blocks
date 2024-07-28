@@ -1,4 +1,5 @@
 from .base.transforms import Mirror, Rotation, Scaling, Translation
+from .construct.assemblies.joints import LJoint, NJoint, TJoint
 from .construct.curves.analytic import AnalyticCurve, CircleCurve, LineCurve
 from .construct.curves.discrete import DiscreteCurve
 from .construct.curves.interpolated import LinearInterpolatedCurve, SplineInterpolatedCurve
@@ -113,4 +114,8 @@ __all__ = [
     "MeshSmoother",
     "SketchSmoother",
     "ViewpointReorienter",
+    # Assemblies
+    "NJoint",
+    "TJoint",
+    "LJoint",
 ]

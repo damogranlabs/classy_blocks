@@ -79,7 +79,7 @@ class DiscreteCurveTests(unittest.TestCase):
     def test_get_closest_param(self, point, index):
         self.assertEqual(self.curve.get_closest_param(point), index)
 
-    def test_transform(self):
+    def test_translate(self):
         """A simple translation to test .parts property"""
         curve = self.curve
         curve.translate([0, 0, 1])

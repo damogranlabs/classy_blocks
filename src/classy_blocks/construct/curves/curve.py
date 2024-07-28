@@ -119,10 +119,6 @@ class PointCurveBase(CurveBase):
         warnings.warn("Using an approximate default curve center (average)!", stacklevel=2)
         return np.average(self.discretize(), axis=0)
 
-    @property
-    def parts(self):
-        return [self.array]
-
 
 class FunctionCurveBase(PointCurveBase):
     """A base object for curves, driven by functions"""
