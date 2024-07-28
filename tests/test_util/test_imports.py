@@ -11,17 +11,16 @@ class ImportsTests(unittest.TestCase):
         _ = cb.Rotation
         _ = cb.Scaling
         _ = cb.Mirror
+        _ = cb.Shear
 
     def test_import_curves(self):
+        _ = cb.CurveBase
         _ = cb.DiscreteCurve
         _ = cb.LinearInterpolatedCurve
         _ = cb.SplineInterpolatedCurve
         _ = cb.AnalyticCurve
         _ = cb.LineCurve
         _ = cb.CircleCurve
-
-    def test_import_flat(self):
-        _ = cb.Face
 
     def test_import_edges(self):
         _ = cb.Arc
@@ -31,6 +30,9 @@ class ImportsTests(unittest.TestCase):
         _ = cb.PolyLine
         _ = cb.Project
         _ = cb.OnCurve
+
+    def test_import_flat(self):
+        _ = cb.Face
 
     def test_import_operations(self):
         _ = cb.Loft
@@ -42,8 +44,6 @@ class ImportsTests(unittest.TestCase):
 
     def test_import_sketches(self):
         _ = cb.MappedSketch
-        _ = cb.Grid
-        _ = cb.Oval
         _ = cb.Grid
         _ = cb.OneCoreDisk
         _ = cb.FourCoreDisk
@@ -57,10 +57,14 @@ class ImportsTests(unittest.TestCase):
         _ = cb.RevolvedStack
 
     def test_import_shapes(self):
+        _ = cb.Shape
+        _ = cb.ExtrudedShape
+        _ = cb.LoftedShape
+        _ = cb.RevolvedShape
         _ = cb.Elbow
         _ = cb.Frustum
-        _ = cb.SemiCylinder
         _ = cb.Cylinder
+        _ = cb.SemiCylinder
         _ = cb.ExtrudedRing
         _ = cb.RevolvedRing
         _ = cb.Hemisphere
@@ -84,6 +88,15 @@ class ImportsTests(unittest.TestCase):
         _ = cb.LinkBase
         _ = cb.TranslationLink
         _ = cb.RotationLink
+        _ = cb.SymmetryLink
 
     def test_import_optimizer(self):
         _ = cb.MeshOptimizer
+        _ = cb.SketchOptimizer
+        _ = cb.MeshSmoother
+        _ = cb.SketchSmoother
+
+    def test_import_assemblies(self):
+        _ = cb.NJoint
+        _ = cb.TJoint
+        _ = cb.LJoint

@@ -1,6 +1,7 @@
-from .base.transforms import Mirror, Rotation, Scaling, Translation
+from .base.transforms import Mirror, Rotation, Scaling, Shear, Translation
 from .construct.assemblies.joints import LJoint, NJoint, TJoint
 from .construct.curves.analytic import AnalyticCurve, CircleCurve, LineCurve
+from .construct.curves.curve import CurveBase
 from .construct.curves.discrete import DiscreteCurve
 from .construct.curves.interpolated import LinearInterpolatedCurve, SplineInterpolatedCurve
 from .construct.edges import Angle, Arc, OnCurve, Origin, PolyLine, Project, Spline
@@ -41,7 +42,9 @@ __all__ = [
     "Rotation",
     "Scaling",
     "Translation",
+    "Shear",
     # curves
+    "CurveBase",
     "DiscreteCurve",
     "LinearInterpolatedCurve",
     "SplineInterpolatedCurve",
@@ -56,6 +59,7 @@ __all__ = [
     "PolyLine",
     "Project",
     "OnCurve",
+    # Face
     "Face",
     # construct operations
     "Operation",
@@ -92,9 +96,10 @@ __all__ = [
     "RevolvedStack",
     # The Mesh
     "Mesh",
-    # Modification of assembled meshes
+    # Modification
     "GeometricFinder",
     "RoundSolidFinder",
+    "ViewpointReorienter",
     # Optimization: Clamps
     "ClampBase",
     "FreeClamp",
@@ -113,7 +118,6 @@ __all__ = [
     "SketchOptimizer",
     "MeshSmoother",
     "SketchSmoother",
-    "ViewpointReorienter",
     # Assemblies
     "NJoint",
     "TJoint",

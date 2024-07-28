@@ -114,6 +114,11 @@ class JointBase(Assembly, abc.ABC):
     def _get_angles(self, count: int) -> FloatListType:
         """Returns angles at which CuspCylinders must be rotated"""
 
+    @property
+    def center(self):
+        # "center" is the start point
+        return self.shapes[0].operations[0].top_face.points[0].position
+
     def chop_axial(self, **kwargs):
         for asm in self.assemblies:
             asm.chop_axial(**kwargs)
@@ -139,10 +144,16 @@ class NJoint(JointBase):
 
 
 class TJoint(JointBase):
+    def __init__(self, start_point: PointType, center_point: PointType, radius_point: PointType):
+        super().__init__(start_point, center_point, radius_point)
+
     def _get_angles(self, _):
         return [0, np.pi / 2, 3 * np.pi / 2]
 
 
 class LJoint(JointBase):
+    def __init__(self, start_point: PointType, center_point: PointType, radius_point: PointType):
+        super().__init__(start_point, center_point, radius_point)
+
     def _get_angles(self, _):
         return [0, np.pi / 2]

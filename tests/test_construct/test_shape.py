@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from classy_blocks.base.exceptions import CylinderCreationError, FrustumCreationError
+from classy_blocks.construct.edges import Line
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketches.disk import Disk, OneCoreDisk
 from classy_blocks.construct.shape import ExtrudedShape, LoftedShape, RevolvedShape, ShapeCreationError
@@ -289,6 +290,16 @@ class CylinderTests(unittest.TestCase):
         np.testing.assert_almost_equal(
             cyl_2.sketch_2.center - cyl_2.sketch_1.center, cyl_1.sketch_1.center - cyl_1.sketch_2.center
         )
+
+    def test_remove_inner_edges(self):
+        cylinder = self.cylinder
+        cylinder.remove_inner_edges()
+
+        for operation in cylinder.core:
+            for edge in operation.bottom_face.edges:
+                self.assertIsInstance(edge, Line)
+            for edge in operation.top_face.edges:
+                self.assertIsInstance(edge, Line)
 
 
 class LoftedShapeTests(unittest.TestCase):
