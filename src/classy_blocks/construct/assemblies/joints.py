@@ -141,3 +141,8 @@ class NJoint(JointBase):
 class TJoint(JointBase):
     def _get_angles(self, _):
         return [0, np.pi / 2, 3 * np.pi / 2]
+
+
+class LJoint(JointBase):
+    def _get_angles(self, _):
+        return [0, np.pi / 2]
