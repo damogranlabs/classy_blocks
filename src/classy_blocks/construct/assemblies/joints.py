@@ -1,3 +1,4 @@
+import abc
 from typing import List
 
 import numpy as np
@@ -7,11 +8,13 @@ from classy_blocks.construct.edges import Spline
 from classy_blocks.construct.flat.sketches.disk import HalfDisk
 from classy_blocks.construct.shape import Shape
 from classy_blocks.construct.shapes.cylinder import SemiCylinder
-from classy_blocks.types import PointType
+from classy_blocks.types import FloatListType, PointType
 from classy_blocks.util import functions as f
 
 
 class CuspSemiCylinder(SemiCylinder):
+    """A cylinder with one slanted/inclined end face"""
+
     sketch_class = HalfDisk
 
     def __init__(
@@ -64,49 +67,77 @@ class CuspCylinder(Assembly):
     def shapes(self):
         return [self.cusp_right, self.cusp_left]
 
+    def chop_axial(self, **kwargs):
+        self.cusp_right.chop_axial(**kwargs)
 
-class TJoint(Assembly):
-    def __init__(self, start_point: PointType, center_point: PointType, right_point: PointType, radius: float):
-        start_point = np.array(start_point)
-        center_point = np.array(center_point)
-        right_point = np.array(right_point)
+    def chop_radial(self, **kwargs):
+        self.cusp_right.chop_radial(**kwargs)
+        self.cusp_left.chop_radial(**kwargs)
 
-        start_vector = center_point - start_point
-        right_vector = right_point - center_point
+    def chop_tangential(self, **kwargs):
+        self.cusp_right.chop_tangential(**kwargs)
+        self.cusp_left.chop_tangential(**kwargs)
 
-        left_point = center_point - right_vector
+    def set_outer_patch(self, patch_name: str) -> None:
+        self.cusp_left.set_outer_patch(patch_name)
+        self.cusp_right.set_outer_patch(patch_name)
 
-        radius_vector = radius * f.unit_vector(np.cross(right_vector, start_vector))
-
-        # middle
-        self.middle = CuspCylinder(start_point, center_point, start_point + radius_vector, np.pi / 4, np.pi / 4)
-
-        # the right 'arm'
-        self.right = CuspCylinder(right_point, center_point, right_point + radius_vector, np.pi / 4, np.pi / 2)
-
-        # the left 'arm'
-        self.left = CuspCylinder(left_point, center_point, left_point - radius_vector, np.pi / 4, np.pi / 2)
-
-        super().__init__([*self.middle.shapes, *self.right.shapes, *self.left.shapes])
+    def set_start_patch(self, patch_name: str) -> None:
+        self.cusp_left.set_start_patch(patch_name)
+        self.cusp_right.set_start_patch(patch_name)
 
 
-class NJoint(Assembly):
+class JointBase(Assembly, abc.ABC):
     def __init__(self, start_point: PointType, center_point: PointType, radius_point: PointType, branches: int = 4):
         start_point = np.asarray(start_point)
         center_point = np.asarray(center_point)
         radius_point = np.asarray(radius_point)
 
-        self.assemblies: List[Assembly] = []
+        self.assemblies: List[CuspCylinder] = []
         shapes: List[Shape] = []
 
-        cusp_angle = np.pi / branches
-        base_asm = CuspCylinder(start_point, center_point, radius_point, cusp_angle, cusp_angle)
-        rotate_angles = np.linspace(0, 2 * np.pi, num=branches, endpoint=False)
+        rotate_angles = self._get_angles(branches)
         rotation_axis = radius_point - start_point
 
-        for angle in rotate_angles:
-            asm = base_asm.copy().rotate(angle, rotation_axis, center_point)
-            self.assemblies.append(asm)
-            shapes += asm.shapes
+        for i, angle in enumerate(rotate_angles):
+            angle_right = (rotate_angles[(i + 1) % len(rotate_angles)] - angle) / 2
+            angle_left = ((angle - rotate_angles[i - 1]) % (2 * np.pi)) / 2
+
+            cylinder = CuspCylinder(start_point, center_point, radius_point, angle_left, angle_right)
+            cylinder.rotate(angle, rotation_axis, center_point)
+            self.assemblies.append(cylinder)
+            shapes += cylinder.shapes
 
         super().__init__(shapes)
+
+    @abc.abstractmethod
+    def _get_angles(self, count: int) -> FloatListType:
+        """Returns angles at which CuspCylinders must be rotated"""
+
+    def chop_axial(self, **kwargs):
+        for asm in self.assemblies:
+            asm.chop_axial(**kwargs)
+
+    def chop_radial(self, **kwargs):
+        self.assemblies[0].chop_radial(**kwargs)
+
+    def chop_tangential(self, **kwargs):
+        self.assemblies[0].chop_tangential(**kwargs)
+        self.assemblies[1].chop_tangential(**kwargs)
+
+    def set_outer_patch(self, patch_name: str) -> None:
+        for asm in self.assemblies:
+            asm.set_outer_patch(patch_name)
+
+    def set_hole_patch(self, hole: int, patch_name: str) -> None:
+        self.assemblies[hole].set_start_patch(patch_name)
+
+
+class NJoint(JointBase):
+    def _get_angles(self, count):
+        return np.linspace(0, 2 * np.pi, num=count, endpoint=False)
+
+
+class TJoint(JointBase):
+    def _get_angles(self, _):
+        return [0, np.pi / 2, 3 * np.pi / 2]
