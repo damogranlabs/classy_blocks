@@ -4,6 +4,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# [1.6.1]
+### Added
+- Assemblies and *Joints
+  - Examples thereof
+
+### Changed
+- Some bugfixes
+
+# [1.6.0]
+### Added
+- Array element; handling multiple points at once (makes transforms faster)
+- Complete overhaul of Optimization:
+  - Optimizer has become SketchOptimizer or MeshOptimizer
+  - MappedSketch is now smoothed by SketchSmoother
+  - Mesh can also be smoothed by MeshSmoother
+- Gear example
+
+### Changed
+- Cell quality: adjusted calculation so that it works for quadrangles and hexahedrons
+- Clamps no longer refer to Vertex objects but only store points as locations
+- Links same as clamps above, locations only
+
+### Removed
+- QuadMap is no longer needed (handled by Grid classes)
+
+# [1.5.3]
+### Added
+- RoundSolidShape.remove_inner_edges() can now remove edges from a specific face (start, end or both)
+
+### Changed
+- Bugfix: invalid cells in round shapes (due to wrong spline point calculation)
+
 # [1.5.2]
 ### Added
 - Spline edges on QuarterDisk, HalfDisk and Disk (FourCoreDisk) to improve mesh quality

@@ -54,6 +54,14 @@ class ElementBase(abc.ABC):
 
         return self
 
+    def shear(
+        self: ElementBaseT, normal: VectorType, origin: PointType, direction: VectorType, angle: float
+    ) -> ElementBaseT:
+        for component in self.parts:
+            component.shear(normal, origin, direction, angle)
+
+        return self
+
     def copy(self: ElementBaseT) -> ElementBaseT:
         """Returns a copy of this object"""
         return copy.deepcopy(self)
@@ -112,6 +120,10 @@ class ElementBase(abc.ABC):
                         origin = [0, 0, 0]
 
                     part.mirror(t7m.normal, origin=origin)
+                    continue
+
+                if isinstance(t7m, tr.Shear):
+                    part.shear(t7m.normal, t7m.origin, t7m.direction, t7m.angle)
                     continue
 
         return self

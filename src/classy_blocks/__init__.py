@@ -1,5 +1,7 @@
-from .base.transforms import Mirror, Rotation, Scaling, Translation
+from .base.transforms import Mirror, Rotation, Scaling, Shear, Translation
+from .construct.assemblies.joints import LJoint, NJoint, TJoint
 from .construct.curves.analytic import AnalyticCurve, CircleCurve, LineCurve
+from .construct.curves.curve import CurveBase
 from .construct.curves.discrete import DiscreteCurve
 from .construct.curves.interpolated import LinearInterpolatedCurve, SplineInterpolatedCurve
 from .construct.edges import Angle, Arc, OnCurve, Origin, PolyLine, Project, Spline
@@ -23,15 +25,16 @@ from .construct.shapes.shell import Shell
 from .construct.shapes.sphere import Hemisphere
 from .construct.stack import ExtrudedStack, RevolvedStack, TransformedStack
 from .mesh import Mesh
-from .modify.clamps.clamp import ClampBase
-from .modify.clamps.curve import CurveClamp, LineClamp, RadialClamp
-from .modify.clamps.free import FreeClamp
-from .modify.clamps.links import LinkBase, RotationLink, TranslationLink
-from .modify.clamps.surface import ParametricSurfaceClamp, PlaneClamp
 from .modify.find.geometric import GeometricFinder
 from .modify.find.shape import RoundSolidFinder
-from .modify.optimizer import Optimizer
 from .modify.reorient.viewpoint import ViewpointReorienter
+from .optimize.clamps.clamp import ClampBase
+from .optimize.clamps.curve import CurveClamp, LineClamp, RadialClamp
+from .optimize.clamps.free import FreeClamp
+from .optimize.clamps.surface import ParametricSurfaceClamp, PlaneClamp
+from .optimize.links import LinkBase, RotationLink, SymmetryLink, TranslationLink
+from .optimize.optimizer import MeshOptimizer, SketchOptimizer
+from .optimize.smoother import MeshSmoother, SketchSmoother
 
 __all__ = [
     # Base
@@ -39,7 +42,9 @@ __all__ = [
     "Rotation",
     "Scaling",
     "Translation",
+    "Shear",
     # curves
+    "CurveBase",
     "DiscreteCurve",
     "LinearInterpolatedCurve",
     "SplineInterpolatedCurve",
@@ -54,6 +59,7 @@ __all__ = [
     "PolyLine",
     "Project",
     "OnCurve",
+    # Face
     "Face",
     # construct operations
     "Operation",
@@ -90,9 +96,10 @@ __all__ = [
     "RevolvedStack",
     # The Mesh
     "Mesh",
-    # Modification of assembled meshes
+    # Modification
     "GeometricFinder",
     "RoundSolidFinder",
+    "ViewpointReorienter",
     # Optimization: Clamps
     "ClampBase",
     "FreeClamp",
@@ -105,8 +112,14 @@ __all__ = [
     "LinkBase",
     "TranslationLink",
     "RotationLink",
-    # Optimization: optimizer
-    "Optimizer",
-    # Auto-orientation
-    "ViewpointReorienter",
+    "SymmetryLink",
+    # Optimization: optimizers and smoothers
+    "MeshOptimizer",
+    "SketchOptimizer",
+    "MeshSmoother",
+    "SketchSmoother",
+    # Assemblies
+    "NJoint",
+    "TJoint",
+    "LJoint",
 ]

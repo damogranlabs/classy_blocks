@@ -2,7 +2,6 @@ import abc
 
 import numpy as np
 
-from classy_blocks.items.vertex import Vertex
 from classy_blocks.types import NPPointType, NPVectorType, PointType, VectorType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
@@ -13,30 +12,33 @@ class LinkBase(abc.ABC):
     other vertices can be linked to it so that they move
     together with optimized vertex."""
 
-    def __init__(self, leader: Vertex, follower: Vertex):
-        self.leader = leader
-        self.follower = follower
+    def __init__(self, leader: PointType, follower: PointType):
+        self.leader = np.array(leader)
+        self.follower = np.array(follower)
 
     def update(self) -> None:
         new_position = self.transform()
-        self.follower.move_to(new_position)
+        self.follower = new_position
 
     @abc.abstractmethod
     def transform(self) -> NPPointType:
         """Determine the new vertex position
         according to the type of link"""
 
+    def __str__(self):
+        return f"Link {self.leader} - {self.follower}"
+
 
 class TranslationLink(LinkBase):
     """A link that maintains the same translation vector
     between parent clamp/vertex and the linked one."""
 
-    def __init__(self, leader: Vertex, follower: Vertex):
+    def __init__(self, leader: PointType, follower: PointType):
         super().__init__(leader, follower)
-        self.vector = self.follower.position - self.leader.position
+        self.vector = self.follower - self.leader
 
     def transform(self) -> NPPointType:
-        return self.leader.position + self.vector
+        return self.leader + self.vector
 
 
 class RotationLink(LinkBase):
@@ -47,21 +49,21 @@ class RotationLink(LinkBase):
     It will only work correctly when leader is rotated
     around given axis and origin."""
 
-    def __init__(self, leader: Vertex, follower: Vertex, axis: VectorType, origin: PointType):
+    def __init__(self, leader: PointType, follower: PointType, axis: VectorType, origin: PointType):
         super().__init__(leader, follower)
 
         self.origin = np.array(origin)
         self.axis = f.unit_vector(axis)
 
-        self.orig_leader_radius = self._get_radius(leader.position)
-        self.orig_follower_pos = np.copy(self.follower.position)
+        self.orig_leader_radius = self._get_radius(self.leader)
+        self.orig_follower_pos = np.copy(self.follower)
 
         if f.norm(self.orig_leader_radius) < constants.TOL:
             raise ValueError("Leader and rotation axis are coincident!")
 
     def transform(self) -> NPPointType:
         prev_radius = self.orig_leader_radius
-        this_radius = self._get_radius(self.leader.position)
+        this_radius = self._get_radius(self.leader)
 
         angle = f.angle_between(prev_radius, this_radius)
 
@@ -78,3 +80,20 @@ class RotationLink(LinkBase):
     def _get_radius(self, point: NPPointType) -> NPVectorType:
         """Returns projection of the point to plane, given by origin and axis"""
         return (point - self.origin) - self._get_height(point)
+
+
+class SymmetryLink(LinkBase):
+    """A link that mirrors follower over a given plane."""
+
+    def __init__(self, leader: PointType, follower: PointType, normal: VectorType, origin: PointType):
+        self.normal = np.array(normal)
+        self.origin = np.array(origin)
+
+        super().__init__(leader, follower)
+        self.transform()
+
+    def _get_follower(self) -> NPPointType:
+        return f.mirror(self.leader, self.normal, self.origin)
+
+    def transform(self) -> NPPointType:
+        return self._get_follower()

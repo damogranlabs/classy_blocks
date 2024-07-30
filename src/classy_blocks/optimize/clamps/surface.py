@@ -1,7 +1,6 @@
 import numpy as np
 
-from classy_blocks.items.vertex import Vertex
-from classy_blocks.modify.clamps.clamp import ClampBase
+from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.types import NPPointType, PointType, VectorType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import DTYPE
@@ -13,7 +12,7 @@ class PlaneClamp(ClampBase):
 
     Bounds are not supported."""
 
-    def __init__(self, vertex: Vertex, point: PointType, normal: VectorType):
+    def __init__(self, position: PointType, point: PointType, normal: VectorType):
         point = np.array(point, dtype=DTYPE)
         normal = f.unit_vector(normal)
 
@@ -26,7 +25,7 @@ class PlaneClamp(ClampBase):
         def position_function(params) -> NPPointType:
             return point + params[0] * u_dir + params[1] * v_dir
 
-        super().__init__(vertex, position_function)
+        super().__init__(position, position_function)
 
     @property
     def initial_guess(self):

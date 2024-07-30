@@ -101,16 +101,11 @@ class EighthSphere(Shape):
     def __init__(
         self, center_point: PointType, radius_point: PointType, normal: VectorType, diagonal_angle: float = np.pi / 5
     ):
-        # TODO: move these to properties
-        # BUG: move these to properties
-        # (will not change with transforms!)
-        self.center_point = np.asarray(center_point)
-        self.radius_point = np.asarray(radius_point)
-        self.normal = f.unit_vector(np.asarray(normal))
+        center_point = np.asarray(center_point)
+        radius_point = np.asarray(radius_point)
+        normal = f.unit_vector(np.asarray(normal))
 
-        self.lofts = eighth_sphere_lofts(
-            self.center_point, self.radius_point, self.normal, self.geometry_label, diagonal_angle
-        )
+        self.lofts = eighth_sphere_lofts(center_point, radius_point, normal, self.geometry_label, diagonal_angle)
 
     ### Chopping
     def chop_axial(self, **kwargs):
@@ -157,6 +152,18 @@ class EighthSphere(Shape):
         return [self.core, self.shell]
 
     @property
+    def radius_point(self) -> NPPointType:
+        return self.lofts[1].bottom_face.points[1].position
+
+    @property
+    def center_point(self) -> NPPointType:
+        return self.lofts[0].bottom_face.points[0].position
+
+    @property
+    def normal(self) -> NPVectorType:
+        return self.lofts[0].bottom_face.normal
+
+    @property
     def radius(self) -> float:
         """Radius of this sphere"""
         return f.norm(self.radius_point - self.center_point)
@@ -165,6 +172,10 @@ class EighthSphere(Shape):
     def geometry_label(self) -> str:
         """Name of a unique geometry this will project to"""
         return f"sphere_{id(self)}"
+
+    @property
+    def center(self):
+        return self.center_point
 
     @property
     def geometry(self):

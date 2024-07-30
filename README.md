@@ -77,9 +77,10 @@ _Unchecked items are not implemented yet but are on a TODO list_
     - [x] Hemisphere
 - [x] Stacks (collections of similar Shapes stacked on top of each other)
 - [ ] Predefined parametric Objects
-    - [ ] T-joint (round pipes)
-    - [ ] X-joint
-    - [ ] N-joint (multiple pipes)
+    - [x] T-joint (round pipes)
+    - [x] X-joint
+    - [x] N-joint (multiple pipes)
+    - [ ] Collector (a barrel with multiple radial outlets)
 - [ ] Other building tools
     - [x] Use existing Operation's Face to generate a new Operation
     - [x] Chain Shape's start/end surface to generate a new Shape
@@ -94,7 +95,7 @@ After blocks have been placed, it is possible to create new geometry based on pl
 - [x] Move Vertex/Edge/Face
 - [x] Delete a Block created by a Shape or Object
 - [x] Project Vertex/Edge/Face
-- [x] Optimize Vertex positions
+- [x] Optimize point position of a Sketch or mesh vertices
 
 ## Meshing Specification
 - [x] Simple definition of all supported kinds of edges with a dedicated class (Arc/Origin/Angle/Spline/PolyLine/Project)
@@ -164,6 +165,8 @@ mesh.add(revolve)
 
 
 ## Shapes
+Some basic shapes are ready-made so that there's no need for workout with Operations.
+
 A simple Cylinder:
 
 ```python
@@ -212,9 +215,11 @@ disk_in_square = cb.WrappedDisk(start_point, corner_point, disk_diameter/2, norm
 shape = cb.ExtrudedShape(disk_in_square, length)
 ```
 
-> See `examples/operations` for an example of each operation.
+### Sketch Smoothing and Optimization
 
+Points that define a custom sketch can only be placed approximately. Their positions can then be defined by Laplacian smoothing or optimization to obtain best face quality.
 
+> See `examples/shape/custom` for an example with a custom sketch.
 
 ## Stacks
 A collection of similar Shapes; a Stack is created by starting with a Sketch, then transforming it a number of times, obtaining Shapes, stacked on top of each other.
@@ -241,6 +246,12 @@ An electric heater in water, a mesh with two cellZones. The heater zone with sur
 ![Heater](showcase/heater.png "Heater")
 
 > See `examples/complex/heater` for the full script.
+
+## Assemblies
+A collection of pre-assembled parametric Shapes, ready to be used for further construction.
+
+Three pipes, joined in a single point.
+![N-Joint](showcase/n_joint.png)
 
 ## Projection To Geometry
 
@@ -321,7 +332,7 @@ Once an approximate blocking is established, one can fetch specific vertices and
 
 Block is treated as a single cell for which OpenFOAM's cell quality criteria are calculated and optimized per user's instructions.
 
-Vertices can move freely (3 degrees of freedom), along a specified line/curve (1 DoF) or surface (2 DoF).
+Points can move freely (3 degrees of freedom), along a specified line/curve (1 DoF) or surface (2 DoF).
 
 ```python
 # [...] A simple setup with two cylinders of different radii,
@@ -339,7 +350,7 @@ optimizer = cb.Optimizer(mesh)
 # Move chosen vertices along a line, parallel to x-axis
 for vertex in inner_vertices:
     clamp = cb.LineClamp(vertex, vertex.position, vertex.position + f.vector(1, 0, 0))
-    optimizer.release_vertex(clamp)
+    optimizer.add_clamp(clamp)
 
 optimizer.optimize()
 
@@ -370,6 +381,10 @@ happily show anything.
 
 A parametric, Low-Re mesh of a real-life impeller *(not included in examples)*
 ![Impeller - Low Re](showcase/impeller_full.png "Low-Re Impeller")
+
+A gear, made from a curve of a single tooth, calculated by
+[py_gear_gen](https://github.com/heartworm/py_gear_gen)
+![Gear](showcase/gear.png "Gear")
 
 A complex example: parametric, Low-Re mesh of a cyclone
 ![Cyclone](showcase/cyclone.png "Cyclone")

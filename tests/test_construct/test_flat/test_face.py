@@ -210,3 +210,9 @@ class FaceTests(unittest.TestCase):
 
         for i in range(4):
             self.assertIsInstance(face.edges[i], edges.Line)
+
+    def test_shear(self):
+        face = Face(self.points)
+        face.shear([0, 1, 0], [0, 0, 0], [1, 0, 0], np.pi / 4)
+
+        np.testing.assert_almost_equal(face.point_array, [[0, 0, 0], [1, 0, 0], [2, 1, 0], [1, 1, 0]])

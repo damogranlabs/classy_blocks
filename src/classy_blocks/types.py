@@ -1,6 +1,9 @@
-from typing import Any, Callable, List, Literal, Sequence, Tuple, Union
+from typing import Any, Callable, List, Literal, Sequence, Union
 
 from nptyping import NDArray, Shape
+
+# A plain list of floats
+FloatListType = NDArray[Shape["1, *"], Any]
 
 # A single point can be specified as a list of floats or as a numpy array
 NPPointType = NDArray[Shape["3, 1"], Any]
@@ -33,4 +36,4 @@ ChopTakeType = Literal["min", "max", "avg"]
 ProjectToType = Union[str, List[str]]
 
 # A list of indexes that define a quad
-QuadIndexType = Tuple[int, int, int, int]
+IndexType = List[int]

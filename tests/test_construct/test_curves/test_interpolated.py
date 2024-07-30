@@ -68,6 +68,21 @@ class LinearInterpolatedCurveTests(unittest.TestCase):
     def test_param_at_length(self):
         self.assertAlmostEqual(self.curve.get_param_at_length(1), 0.25)
 
+    def test_shear(self):
+        curve = self.curve
+
+        curve.shear([0, 1, 0], [0, 0, 0], [1, 0, 0], np.pi / 4)
+
+        expected = [
+            [0, 0, 0],
+            [1, 1, 0],
+            [2, 1, 0],
+            [1, 0, 0],
+            [2, 0, 0],
+        ]
+
+        np.testing.assert_almost_equal(curve.discretize(count=5), expected)
+
 
 class SplineInterpolatedCurveTests(unittest.TestCase):
     def setUp(self):

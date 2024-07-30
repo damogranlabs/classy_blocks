@@ -276,3 +276,12 @@ class TestFunctions(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             _ = f.polyline_length(points)
+
+    @parameterized.expand(
+        (
+            ([1, 1, 0], [0, 1, 0], [0, 0, 0], 1),
+            ([1, 1, 0], [-1, 1, 0], [0, 0, 0], 0),
+        )
+    )
+    def test_point_to_plane_distance(self, point, normal, origin, distance):
+        self.assertAlmostEqual(f.point_to_plane_distance(origin, normal, point), distance)

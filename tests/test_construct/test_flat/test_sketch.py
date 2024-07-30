@@ -24,23 +24,15 @@ class MappedSketchTests(unittest.TestCase):
     @property
     def quads(self):
         return [
-            (0, 1, 4, 3),
-            (1, 2, 5, 4),
-            (3, 4, 7, 6),
-            (4, 5, 8, 7),
+            [0, 1, 4, 3],
+            [1, 2, 5, 4],
+            [3, 4, 7, 6],
+            [4, 5, 8, 7],
         ]
 
     @property
     def sketch(self):
         return MappedSketch(self.positions, self.quads)
-
-    def test_smooth(self):
-        # a grid of vertices 3x3
-
-        sketch = MappedSketch(self.positions, self.quads)
-        sketch.smooth(10)
-
-        np.testing.assert_almost_equal(sketch.faces[0].point_array[2], [1, 1, 0])
 
     def test_faces(self):
         self.assertEqual(len(self.sketch.faces), 4)
@@ -48,11 +40,14 @@ class MappedSketchTests(unittest.TestCase):
     def test_grid(self):
         self.assertEqual(len(self.sketch.grid), 1)
 
-    def test_center(self):
+    def test_update(self):
         sketch = MappedSketch(self.positions, self.quads)
-        sketch.smooth(10)
 
-        np.testing.assert_almost_equal(sketch.center, [1, 1, 0])
+        updated_positions = self.positions
+        updated_positions[0] = [0.1, 0.1, 0.1]
+        sketch.update(updated_positions)
+
+        np.testing.assert_equal(sketch.faces[0].point_array[0], [0.1, 0.1, 0.1])
 
 
 class GridSketchTests(unittest.TestCase):

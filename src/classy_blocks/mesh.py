@@ -2,6 +2,7 @@
 
 from typing import List, Optional, Set, Union, get_args
 
+from classy_blocks.construct.assemblies.assembly import Assembly
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.shape import Shape
 from classy_blocks.construct.stack import Stack
@@ -17,7 +18,7 @@ from classy_blocks.types import AxisType
 from classy_blocks.util import constants
 from classy_blocks.util.vtk_writer import write_vtk
 
-AdditiveType = Union[Operation, Shape, Stack]
+AdditiveType = Union[Operation, Shape, Stack, Assembly]
 
 
 class Mesh:

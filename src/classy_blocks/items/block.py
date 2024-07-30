@@ -5,7 +5,7 @@ from classy_blocks.items.axis import Axis
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wire import Wire
-from classy_blocks.types import AxisType
+from classy_blocks.types import AxisType, IndexType
 from classy_blocks.util import constants
 from classy_blocks.util.frame import Frame
 
@@ -134,6 +134,10 @@ class Block:
                 updated = axis.copy_grading() or updated
 
         return updated
+
+    @property
+    def indexes(self) -> IndexType:
+        return [vertex.index for vertex in self.vertices]
 
     @property
     def description(self) -> str:

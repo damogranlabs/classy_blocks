@@ -1,15 +1,15 @@
 import abc
 import warnings
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Tuple, Union
 
 import numpy as np
 import scipy.optimize
 
 from classy_blocks.base.element import ElementBase
-from classy_blocks.construct.point import Point
-from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, ParamCurveFuncType, PointListType, PointType
+from classy_blocks.construct.array import Array
+from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, ParamCurveFuncType, PointType
 from classy_blocks.util import functions as f
-from classy_blocks.util.constants import DTYPE, TOL
+from classy_blocks.util.constants import TOL
 
 
 class CurveBase(ElementBase):
@@ -109,22 +109,10 @@ class CurveBase(ElementBase):
 class PointCurveBase(CurveBase):
     """A base object for curves, defined by a list of points"""
 
+    array: Array
+
     def _check_param(self, param):
         return int(super()._check_param(param))
-
-    @staticmethod
-    def _check_points(points: PointListType) -> List[Point]:
-        """Check that provided points are sufficient for a curve"""
-        points = np.array(points, dtype=DTYPE)
-        shape = np.shape(points)
-
-        if shape[0] < 2:
-            raise ValueError("Provide at least 2 points that represent a curve")
-
-        if shape[1] != 3:
-            raise ValueError("Provide points in 3D space")
-
-        return [Point(p) for p in points]
 
     @property
     def center(self):

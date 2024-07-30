@@ -37,6 +37,10 @@ class PointCreationError(ShapeCreationError):
     pass
 
 
+class ArrayCreationError(ShapeCreationError):
+    pass
+
+
 class AnnulusCreationError(ShapeCreationError):
     pass
 

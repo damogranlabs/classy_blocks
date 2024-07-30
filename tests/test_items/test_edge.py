@@ -269,13 +269,10 @@ class AlternativeArcTests(unittest.TestCase):
     def test_arc_mid(self):
         axis = f.vector(0, 0, 1)
         center = f.vector(0, 0, 0)
-        radius = 1
         edge_point_1 = f.vector(1, 0, 0)
         edge_point_2 = f.vector(0, 1, 0)
 
-        np.testing.assert_array_almost_equal(
-            f.arc_mid(axis, center, radius, edge_point_1, edge_point_2), self.unit_sq_corner
-        )
+        np.testing.assert_array_almost_equal(f.arc_mid(axis, center, edge_point_1, edge_point_2), self.unit_sq_corner)
 
     def test_arc_from_theta(self):
         edge_point_1 = f.vector(0, 1, 0)

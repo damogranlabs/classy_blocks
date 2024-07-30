@@ -147,7 +147,7 @@ for loft in lofts:
 ### Optimize:
 mesh.assemble()
 finder = cb.GeometricFinder(mesh)
-optimizer = cb.Optimizer(mesh)
+optimizer = cb.MeshOptimizer(mesh)
 
 
 # Some helper functions
@@ -162,31 +162,31 @@ def make_link(leader):
     follower_position = leader.position + thickness
     follower = list(finder.find_in_sphere(follower_position))[0]
 
-    return cb.TranslationLink(leader, follower)
+    return cb.TranslationLink(leader.position, follower.position)
 
 
 # Points that slide along airfoil curve
 for index in (10, 11, 12, 13, 14):
     opt_vertex = find_vertex(index)
-    clamp = cb.CurveClamp(opt_vertex, foil_curve)
-    clamp.add_link(make_link(opt_vertex))
+    clamp = cb.CurveClamp(opt_vertex.position, foil_curve)
+    optimizer.add_link(make_link(opt_vertex))
 
-    optimizer.release_vertex(clamp)
+    optimizer.add_clamp(clamp)
 
 # Points that move in their X-Y plane
 for index in (16, 17):
     opt_vertex = find_vertex(index)
-    clamp = cb.PlaneClamp(opt_vertex, [0, 0, 0], [0, 0, 1])
-    clamp.add_link(make_link(opt_vertex))
-    optimizer.release_vertex(clamp)
+    clamp = cb.PlaneClamp(opt_vertex.position, [0, 0, 0], [0, 0, 1])
+    optimizer.add_link(make_link(opt_vertex))
+    optimizer.add_clamp(clamp)
 
 
 # Points that move along domain edges
 def optimize_along_line(point_index, line_index_1, line_index_2):
     opt_vertex = find_vertex(point_index)
-    clamp = cb.LineClamp(opt_vertex, points[line_index_1], points[line_index_2])
-    clamp.add_link(make_link(opt_vertex))
-    optimizer.release_vertex(clamp)
+    clamp = cb.LineClamp(opt_vertex.position, points[line_index_1], points[line_index_2])
+    optimizer.add_link(make_link(opt_vertex))
+    optimizer.add_clamp(clamp)
 
 
 optimize_along_line(2, 1, 3)

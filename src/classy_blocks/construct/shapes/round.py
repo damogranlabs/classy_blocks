@@ -71,12 +71,17 @@ class RoundSolidShape(LoftedShape):
         for operation in self.shell:
             operation.set_patch(self.outer_patch, name)
 
-    def remove_inner_edges(self) -> None:
+    def remove_inner_edges(self, start: bool = True, end: bool = True) -> None:
         """Removes spline edges from cylinders.
         This needs to be done in cases where any of the start/end plane points will move
         (due to optimization or manual adjustments)."""
-        for face in (*self.sketch_1.core, *self.sketch_2.core):
-            face.remove_edges()
+        if start:
+            for face in self.sketch_1.core:
+                face.remove_edges()
+
+        if end:
+            for face in self.sketch_2.core:
+                face.remove_edges()
 
 
 class RoundHollowShape(RoundSolidShape):

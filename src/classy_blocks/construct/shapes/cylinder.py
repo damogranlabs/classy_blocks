@@ -40,13 +40,6 @@ class SemiCylinder(RoundSolidShape):
 
 
 class Cylinder(SemiCylinder):
-    """A Cylinder.
-
-    Args:
-    axis_point_1: position of start face
-    axis_point_2: position of end face
-    radius_point_1: defines starting point and radius"""
-
     sketch_class = Disk
 
     @classmethod

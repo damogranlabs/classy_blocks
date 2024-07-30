@@ -1,6 +1,6 @@
 [project]
 name = "classy_blocks"
-version = "1.5.2"
+version = "1.6.1"
 description = "Python classes for easier creation of openFoam's blockMesh dictionaries."
 readme = "README.md"
 license = { file = "LICENSE" }

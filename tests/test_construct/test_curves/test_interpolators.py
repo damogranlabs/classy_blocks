@@ -3,20 +3,22 @@ import unittest
 import numpy as np
 from parameterized import parameterized
 
+from classy_blocks.construct.array import Array
 from classy_blocks.construct.curves.interpolators import LinearInterpolator
-from classy_blocks.construct.point import Point
 
 
 class LinearInterpolatorTests(unittest.TestCase):
     def setUp(self):
         # a simple square wave
-        self.points = [
-            Point([0, 0, 0]),
-            Point([0, 1, 0]),
-            Point([1, 1, 0]),
-            Point([1, 0, 0]),
-            Point([2, 0, 0]),
-        ]
+        self.points = Array(
+            [
+                [0, 0, 0],
+                [0, 1, 0],
+                [1, 1, 0],
+                [1, 0, 0],
+                [2, 0, 0],
+            ]
+        )
 
     @parameterized.expand(
         (
@@ -36,22 +38,3 @@ class LinearInterpolatorTests(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             _ = intfun(-1)
-
-    def test_cache(self):
-        intfun = LinearInterpolator(self.points, True)
-
-        for point in self.points:
-            point.rotate(np.pi / 2, [0, 0, 1])
-
-        # the interpolation function must not change unless invalidated
-        np.testing.assert_equal(intfun(0.25), [0, 1, 0])
-
-    def test_invalidate(self):
-        intfun = LinearInterpolator(self.points, True)
-
-        for point in self.points:
-            point.translate([0, 0, 1])
-
-        intfun.invalidate()
-
-        np.testing.assert_equal(intfun(0.25), [0, 1, 1])

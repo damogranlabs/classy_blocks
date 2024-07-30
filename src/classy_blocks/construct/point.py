@@ -55,6 +55,22 @@ class Point(ElementBase):
             origin = f.vector(0, 0, 0)
 
         self.position = f.mirror(self.position, normal, origin)
+        return self
+
+    def shear(self, normal: VectorType, origin: PointType, direction: VectorType, angle: float):
+        """Move point along the plane, given by origin and normal"""
+        # if the point is on the plane, do nothing
+        normal = np.asarray(normal, dtype=DTYPE)
+        origin = np.asarray(origin, dtype=DTYPE)
+
+        distance = f.point_to_plane_distance(origin, normal, self.position)
+
+        if distance > TOL:
+            direction = f.unit_vector(direction)
+            amount = distance / np.tan(angle)
+
+            self.position += direction * amount
+        return self
 
     def project(self, label: ProjectToType) -> None:
         """Project this vertex to a single or multiple geometries"""

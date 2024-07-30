@@ -201,33 +201,35 @@ def arc_length_3point(p_start: NPPointType, p_btw: NPPointType, p_end: NPPointTy
     return angle * norm(radius)
 
 
-def arc_mid(axis: VectorType, center: PointType, radius: float, point_1: PointType, point_2: PointType) -> PointType:
-    """Returns the midpoint of the specified arc in 3D space"""
+def divide_arc(
+    axis: VectorType, center: PointType, point_1: PointType, point_2: PointType, count: int
+) -> NPPointListType:
     # Kudos to this guy for his shrewd solution
     # https://math.stackexchange.com/questions/3717427
+    # (extended here to create more than 1 point)
     axis = np.asarray(axis, dtype=constants.DTYPE)
     center = np.asarray(center, dtype=constants.DTYPE)
     point_1 = np.asarray(point_1, dtype=constants.DTYPE)
     point_2 = np.asarray(point_2, dtype=constants.DTYPE)
+    radius = norm(center - point_1)
 
-    sec = point_2 - point_1
-    sec_ort = np.cross(sec, axis)
+    secant_points = np.linspace(point_1, point_2, num=count + 2)[1:-1]
+    secant_vectors = [unit_vector(point - center) for point in secant_points]
 
-    return center + unit_vector(sec_ort) * radius
+    return np.array([center + vector * radius for vector in secant_vectors])
 
 
-def mirror(point: PointType, normal: VectorType, origin: PointType):
-    """Mirror a point around a plane, given by a normal and origin"""
-    # brainlessly copied from https://gamemath.com/book/matrixtransforms.html
-    point = np.asarray(point)
-    normal = unit_vector(normal)
-    origin = np.asarray(origin)
+def arc_mid(axis: VectorType, center: PointType, point_1: PointType, point_2: PointType) -> PointType:
+    """Returns the midpoint of the specified arc in 3D space"""
+    return divide_arc(axis, center, point_1, point_2, 1)[0]
 
+
+def mirror_matrix(normal: VectorType):
     n_x = normal[0]
     n_y = normal[1]
     n_z = normal[2]
 
-    matrix = np.array(
+    return np.array(
         [
             [
                 1 - 2 * n_x**2,
@@ -247,23 +249,36 @@ def mirror(point: PointType, normal: VectorType, origin: PointType):
         ]
     )
 
+
+def mirror(point: PointType, normal: VectorType, origin: PointType):
+    """Mirror a point around a plane, given by a normal and origin"""
+    # brainlessly copied from https://gamemath.com/book/matrixtransforms.html
+    point = np.asarray(point)
+    normal = unit_vector(normal)
+    origin = np.asarray(origin)
+
     point -= origin
-    rotated = point.dot(matrix)
+    rotated = point.dot(mirror_matrix(normal))
     rotated += origin
 
     return rotated
 
 
-def is_point_on_plane(origin: PointType, normal: VectorType, point: PointType) -> float:
-    """Calculated distance between a point and a plane, defined by origin and normal vector"""
+def point_to_plane_distance(origin: PointType, normal: VectorType, point: PointType) -> float:
     origin = np.asarray(origin)
     normal = unit_vector(normal)
     point = np.asarray(point)
 
     if norm(origin - point) < constants.TOL:
-        return True
+        # point and origin are coincident
+        return norm(origin - point)
 
-    return abs(np.dot(unit_vector(point - origin), normal)) < constants.TOL
+    return abs(np.dot(point - origin, normal))
+
+
+def is_point_on_plane(origin: PointType, normal: VectorType, point: PointType) -> bool:
+    """Calculated distance between a point and a plane, defined by origin and normal vector"""
+    return point_to_plane_distance(origin, normal, point) < constants.TOL
 
 
 def point_to_line_distance(origin: PointType, direction: VectorType, point: PointType) -> float:
