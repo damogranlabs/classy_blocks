@@ -17,7 +17,6 @@ VectorType = PointType
 
 # parametric curve
 ParamCurveFuncType = Callable[[float], NPPointType]
-ParamCurveListType = NDArray[Shape["3, *"], Any]  # TODO: really necessary?
 
 # edge kinds as per blockMesh's definition
 EdgeKindType = Literal["line", "arc", "origin", "angle", "spline", "polyLine", "project", "curve"]

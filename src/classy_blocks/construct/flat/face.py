@@ -159,7 +159,6 @@ class Face(ElementBase):
         in Mesh object."""
         self.projected_to = label
 
-        # TODO: TEST
         if edges:
             for i in range(4):
                 self.project_edge(i, label)

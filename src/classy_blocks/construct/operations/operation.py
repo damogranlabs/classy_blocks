@@ -228,7 +228,6 @@ class Operation(ElementBase):
 
     def get_closest_side(self, point: PointType) -> OrientType:
         """Returns side (bottom/top/left/right/front/back) of the closest face to given point"""
-        # TODO: TEST
         point = np.array(point)
         all_faces = self.get_all_faces()
         sides = list(all_faces.keys())
@@ -239,7 +238,6 @@ class Operation(ElementBase):
 
     def get_closest_face(self, point: PointType) -> Face:
         """Returns a Face that has a center nearest to given point"""
-        # TODO: TEST
         return self.get_face(self.get_closest_side(point))
 
     def get_normal_face(self, point: PointType) -> Face:

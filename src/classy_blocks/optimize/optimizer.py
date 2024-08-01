@@ -39,7 +39,6 @@ class OptimizerBase(abc.ABC):
     def optimize_clamp(self, clamp: ClampBase, method: MinimizationMethodType) -> None:
         """Move clamp.vertex so that quality at junction is improved;
         rollback changes if grid quality decreased after optimization"""
-        # TODO! do something with this updating/rollback junk
         initial_params = copy.copy(clamp.params)
         junction = self.grid.get_junction_from_clamp(clamp)
 

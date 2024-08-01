@@ -3,10 +3,6 @@ import os
 
 import classy_blocks as cb
 
-# TODO! direct imports
-from classy_blocks.construct.flat.sketches.grid import Grid
-from classy_blocks.construct.stack import ExtrudedStack
-
 # cube side;
 # it sits in the coordinate system origin
 # (center of the cube is [0, 0, side/2])
@@ -28,9 +24,9 @@ mesh = cb.Mesh()
 point_1 = [-1.5 * side, -1.5 * side, 0]
 point_2 = [1.5 * side, 1.5 * side, 0]
 
-base = Grid(point_1, point_2, 3, 3)
+base = cb.Grid(point_1, point_2, 3, 3)
 
-stack = ExtrudedStack(base, side * 2, 2)
+stack = cb.ExtrudedStack(base, side * 2, 2)
 
 # add all blocks to mesh
 mesh.add(stack)
