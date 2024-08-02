@@ -56,15 +56,18 @@ class LoftedShape(Shape, abc.ABC, Generic[SketchT]):
     or twice (middle/end cross-section), then making profiled Lofts
     from calculated cross-sections (Elbow, Cylinder, Ring, ..."""
 
-    def __init__(self, sketch_1: SketchT, sketch_2: SketchT, sketch_mid: Optional[SketchT, List[SketchT]] = None):
+    def __init__(
+        self, sketch_1: SketchT, sketch_2: SketchT, sketch_mid: Optional[Union[SketchT, List[SketchT]]] = None
+    ):
         if len(sketch_1.faces) != len(sketch_2.faces):
             raise ShapeCreationError("Start and end sketch have different number of faces!")
 
-        if sketch_mid is not None:
-            try:
-                sketch_mid = list(sketch_mid)
-            except TypeError:
+        if sketch_mid is None:
+            sketch_mid = []
+        else:
+            if not isinstance(sketch_mid, list):
                 sketch_mid = [sketch_mid]
+
             if any([len(sketch_mid_i.faces) != len(sketch_1.faces) for sketch_mid_i in sketch_mid]):
                 raise ShapeCreationError("Mid sketch has a different number of faces from start/end!")
 
@@ -83,7 +86,7 @@ class LoftedShape(Shape, abc.ABC, Generic[SketchT]):
                 loft = Loft(face_1, face_2)
 
                 # add edges, if applicable
-                if self.sketch_mid:
+                if len(sketch_mid) > 0:
                     # Create arc from sketch_mid if only one present
                     if len(self.sketch_mid) == 1:
                         face_mid = self.sketch_mid[0].grid[i][j]

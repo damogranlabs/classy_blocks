@@ -2,13 +2,12 @@ from typing import ClassVar, List, Optional
 
 import numpy as np
 
-from classy_blocks.base.element import ElementBase
 from classy_blocks.construct.edges import Origin, Spline
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketches.disk import DiskBase
 from classy_blocks.construct.flat.sketches.mapped import MappedSketch
 from classy_blocks.construct.point import Point
-from classy_blocks.types import PointType, VectorType
+from classy_blocks.types import NPPointType, NPVectorType, PointType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
@@ -31,9 +30,6 @@ class SplineRound(MappedSketch):
 
     def __init__(
         self,
-        center_point: PointType,
-        corner_1_point: PointType,
-        corner_2_point: PointType,
         side_1: float,
         side_2: float,
     ):
@@ -47,75 +43,20 @@ class SplineRound(MappedSketch):
             side_1: Straight length for oval shape
             side_2: Straight length for oval shape
         """
-        self.center = np.asarray(center_point)
-        self.corner_1 = np.asarray(corner_1_point)
-        self.corner_2 = np.asarray(corner_2_point)
-
-        self.side_1 = float(side_1)
-        self.side_2 = float(side_2)
+        self.side_1 = side_1
+        self.side_2 = side_2
 
     @property
-    def center(self) -> PointType:
-        """
-        Returns center point defined as center_point in __init__ in stable way after transforms.
-
-        Ensure correct face and point is used when subclassing!
-        """
-        try:
-            return np.asarray(self.faces[0].points[3].position)
-        # Fall back to return value set in __init__
-        except AttributeError:
-            return self._center
-
-    @center.setter
-    def center(self, center_point: PointType):
-        """
-        Setter method for center point.
-        Used prior initialization of MappedSketch.
-        """
-        self._center = np.asarray(center_point)
+    def center(self):
+        return self.faces[0].points[3].position
 
     @property
-    def corner_1(self) -> PointType:
-        """
-        Returns corner 1 defined as corner_1_point in __init__ in stable way after transforms.
-
-        Ensure correct face and point is used when subclassing!
-        """
-        try:
-            return np.asarray(self.faces[2].points[1].position)
-        # Fall back to return value set in __init__
-        except AttributeError:
-            return self._corner_1
-
-    @corner_1.setter
-    def corner_1(self, corner_1_point: PointType):
-        """
-        Setter method for corner point.
-        Used prior initialization of MappedSketch.
-        """
-        self._corner_1 = np.asarray(corner_1_point)
+    def corner_1(self) -> NPPointType:
+        return self.faces[2].points[1].position
 
     @property
-    def corner_2(self) -> PointType:
-        """
-        Returns corner 2 defined as corner_2_point in __init__ in stable way after transforms.
-
-        Ensure correct face and point is used when subclassing!
-        """
-        try:
-            return np.asarray(self.faces[1].points[2].position)
-        # Fall back to return value set in __init__
-        except AttributeError:
-            return self._corner_2
-
-    @corner_2.setter
-    def corner_2(self, corner_2_point: PointType):
-        """
-        Setter method for corner point.
-        Used prior initialization of MappedSketch.
-        """
-        self._corner_2 = np.asarray(corner_2_point)
+    def corner_2(self) -> NPPointType:
+        return self.faces[1].points[2].position
 
     @property
     def r_1(self) -> float:
@@ -128,39 +69,39 @@ class SplineRound(MappedSketch):
         return f.norm(self.corner_2 - self.center) - self.side_2
 
     @property
-    def u_0(self) -> VectorType:
+    def u_0(self) -> NPVectorType:
         """Returns unit vector 0 in stable way after transforms."""
         return f.unit_vector(np.cross(self.u_1, self.u_2))
 
     @property
-    def normal(self) -> VectorType:
+    def normal(self) -> NPVectorType:
         return self.u_0
 
     @property
-    def u_1(self) -> VectorType:
+    def u_1(self) -> NPVectorType:
         """Returns unit vector 1 in stable way after transforms."""
         return f.unit_vector(self.corner_1 - self.center)
 
     @property
-    def u_2(self) -> VectorType:
+    def u_2(self) -> NPVectorType:
         """Returns unit vector 2 in stable way after transforms."""
         return f.unit_vector(self.corner_2 - self.center)
 
-    def scale(self: ElementBase, ratio: float, origin: Optional[PointType] = None) -> ElementBase:
+    def scale(self, ratio: float, origin: Optional[PointType] = None):
         """Reimplementation of scale to include side_1 and side_2."""
 
         self.side_1 = ratio * self.side_1
         self.side_2 = ratio * self.side_2
 
-        return super().scale(ratio, Origin)
+        return super().scale(ratio, origin)
 
-    @classmethod
-    def init_from_radius(cls, center_point, corner_1_point, corner_2_point, r_1, r_2):
-        """Calcluate the side lengths based on the radius and return sketch"""
-        side_1 = f.norm(corner_1_point - center_point) - r_1
-        side_2 = f.norm(corner_2_point - center_point) - r_2
+    # @classmethod
+    # def init_from_radius(cls, center_point, corner_1_point, corner_2_point, r_1, r_2):
+    #     """Calcluate the side lengths based on the radius and return sketch"""
+    #     side_1 = f.norm(corner_1_point - center_point) - r_1
+    #     side_2 = f.norm(corner_2_point - center_point) - r_2
 
-        return cls(center_point, corner_1_point, corner_2_point, side_1, side_2)
+    #     return cls(center_point, corner_1_point, corner_2_point, side_1, side_2)
 
 
 class QuarterSplineRound(SplineRound):
@@ -184,67 +125,41 @@ class QuarterSplineRound(SplineRound):
             side_1: Straight length for oval shape
             side_2: Straight length for oval shape
         """
-        super().__init__(center_point, corner_1_point, corner_2_point, side_1, side_2)
+        super().__init__(side_1, side_2)
+
+        center = np.array(center_point)
+        corner_1 = np.array(corner_1_point)
+        corner_2 = np.array(corner_2_point)
+
+        u_1 = f.unit_vector(corner_1 - center)
+        u_2 = f.unit_vector(corner_2 - center)
+
+        r_1 = f.norm(corner_1 - center) - self.side_1
+        r_2 = f.norm(corner_2 - center) - self.side_2
+
         # Points
-        p0 = self.center
-        p1 = self.center + (self.side_2 + self.core_ratio * self.r_2) * self.u_2
-        p2 = self.corner_2
-        p3 = self.center + (self.side_1 + self.core_ratio * self.r_1) * self.u_1
+        p0 = center
+        p1 = center + (side_2 + self.core_ratio * r_2) * u_2
+        p2 = corner_2
+        p3 = center + (self.side_1 + self.core_ratio * r_1) * u_1
         p4 = (
-            self.center
-            + (self.side_1 + self.spline_ratios[7] * self.r_1) * self.u_1
-            + (self.side_2 + self.spline_ratios[7] * self.r_2) * self.u_2
+            center
+            + (self.side_1 + self.spline_ratios[7] * r_1) * u_1
+            + (self.side_2 + self.spline_ratios[7] * r_2) * u_2
         )
-        p5 = self.corner_1
-        p6 = (
-            self.center
-            + (self.side_1 + 2 ** (-1 / 2) * self.r_1) * self.u_1
-            + (self.side_2 + 2 ** (-1 / 2) * self.r_2) * self.u_2
-        )
+        p5 = corner_1
+        p6 = center + (side_1 + 2 ** (-1 / 2) * r_1) * u_1 + (side_2 + 2 ** (-1 / 2) * r_2) * u_2
 
         quad_map = [
             # core
-            (3, 4, 1, 0),
+            [3, 4, 1, 0],
             # Shell
-            (4, 6, 2, 1),
-            (3, 5, 6, 4),
+            [4, 6, 2, 1],
+            [3, 5, 6, 4],
         ]
 
         positions = [p0, p1, p2, p3, p4, p5, p6]
         super(SplineRound, self).__init__(positions, quad_map)
-
-    @SplineRound.center.getter
-    def center(self) -> PointType:
-        """
-        Returns center point defined as center_point in __init__ in stable way after transforms.
-        """
-        try:
-            return np.asarray(self.faces[0].points[3].position)
-        # Fall back to return value set in __init__
-        except AttributeError:
-            return self._center
-
-    @SplineRound.corner_1.getter
-    def corner_1(self) -> PointType:
-        """
-        Returns corner 1 defined as corner_1_point in __init__ in stable way after transforms.
-        """
-        try:
-            return np.asarray(self.faces[2].points[1].position)
-        # Fall back to return value set in __init__
-        except AttributeError:
-            return self._corner_1
-
-    @SplineRound.corner_2.getter
-    def corner_2(self) -> PointType:
-        """
-        Returns corner 2 defined as corner_2_point in __init__ in stable way after transforms.
-        """
-        try:
-            return np.asarray(self.faces[1].points[2].position)
-        # Fall back to return value set in __init__
-        except AttributeError:
-            return self._corner_2
 
     @property
     def grid(self) -> List[List[Face]]:
@@ -362,63 +277,53 @@ class QuarterSplineRoundRing(SplineRound):
             width_1: Width of shell
             width_2: Width of shell
         """
-        super().__init__(center_point, corner_1_point, corner_2_point, side_1, side_2)
+        super().__init__(side_1, side_2)
+
+        center = np.array(center_point)
+        self._center = Point(center)
+        corner_1 = np.array(corner_1_point)
+        corner_2 = np.array(corner_2_point)
+
         self.width_1 = float(width_1)
         self.width_2 = float(width_2)
+        self._center = Point(center_point)
 
-        p2 = self.corner_2
-        p2_2 = self.corner_2 + self.width_2 * self.u_2
-        p5 = self.corner_1
-        p5_2 = self.corner_1 + self.width_1 * self.u_1
-        p6 = (
-            self.center
-            + (self.side_1 + 2 ** (-1 / 2) * self.r_1) * self.u_1
-            + (self.side_2 + 2 ** (-1 / 2) * self.r_2) * self.u_2
-        )
-        p6_2 = (
-            self.center
-            + (self.side_1 + 2 ** (-1 / 2) * self.r_1_outer) * self.u_1
-            + (self.side_2 + 2 ** (-1 / 2) * self.r_2_outer) * self.u_2
-        )
+        # TODO: DRY
+        u_1 = f.unit_vector(corner_1 - center)
+        u_2 = f.unit_vector(corner_2 - center)
 
-        quad_map = [(2, 3, 1, 0), (4, 5, 3, 2)]
+        r_1 = f.norm(corner_1 - center) - side_1
+        r_2 = f.norm(corner_2 - center) - side_2
+
+        r_1_outer = f.norm(corner_1 - center) - side_1 + width_1
+        r_2_outer = f.norm(corner_2 - center) - side_2 + width_2
+
+        p2 = corner_2
+        p2_2 = corner_2 + width_2 * u_2
+        p5 = corner_1
+        p5_2 = corner_1 + self.width_1 * u_1
+        p6 = center + (side_1 + 2 ** (-1 / 2) * r_1) * u_1 + (side_2 + 2 ** (-1 / 2) * r_2) * u_2
+        p6_2 = center + (side_1 + 2 ** (-1 / 2) * r_1_outer) * u_1 + (side_2 + 2 ** (-1 / 2) * r_2_outer) * u_2
+
+        quad_map = [
+            [2, 3, 1, 0],
+            [4, 5, 3, 2],
+        ]
 
         positions = [p2, p2_2, p6, p6_2, p5, p5_2]
         super(SplineRound, self).__init__(positions, quad_map)
 
     @property
-    def center(self) -> PointType:
-        """
-        Returns center point defined as center_point in __init__.
-        Note for this to be stable it has to be handled under transformation.
-        """
+    def center(self):
         return self._center.position
 
-    @center.setter
-    def center(self, center_point: PointType):
-        self._center = Point(center_point)
+    @property
+    def corner_1(self) -> NPPointType:
+        return self.faces[1].points[0].position
 
-    @SplineRound.corner_1.getter
-    def corner_1(self) -> PointType:
-        """
-        Returns corner 1 defined as corner_1_point in __init__ in stable way after transforms.
-        """
-        try:
-            return np.asarray(self.faces[1].points[0].position)
-        # Fall back to return value set in __init__
-        except AttributeError:
-            return self._corner_1
-
-    @SplineRound.corner_2.getter
-    def corner_2(self) -> PointType:
-        """
-        Returns corner 2 defined as corner_2_point in __init__ in stable way after transforms.
-        """
-        try:
-            return np.asarray(self.faces[0].points[3].position)
-        # Fall back to return value set in __init__
-        except AttributeError:
-            return self._corner_2
+    @property
+    def corner_2(self) -> NPPointType:
+        return self.faces[0].points[3].position
 
     @property
     def r_1_outer(self) -> float:
@@ -431,22 +336,22 @@ class QuarterSplineRoundRing(SplineRound):
         return f.norm(self.corner_2 - self.center) - self.side_2 + self.width_2
 
     @property
-    def grid(self) -> List[Face]:
+    def grid(self):
         return [self.faces]
 
     @property
-    def core(self) -> List[Face]:
+    def core(self):
         return self.grid[0]
 
     @property
-    def shell(self) -> List[Face]:
+    def shell(self):
         return self.grid[-1]
 
     @property
     def parts(self):
-        return [*super(SplineRound, self).parts, self._center]
+        return [*super().parts, self._center]
 
-    def scale(self: ElementBase, ratio: float, origin: Optional[PointType] = None) -> ElementBase:
+    def scale(self, ratio: float, origin: Optional[PointType] = None):
         """Reimplementation of scale to include side_1 and side_2."""
 
         self.side_1 = ratio * self.side_1
@@ -455,7 +360,7 @@ class QuarterSplineRoundRing(SplineRound):
         self.width_1 = ratio * self.width_1
         self.width_2 = ratio * self.width_2
 
-        return super().scale(ratio, Origin)
+        return super().scale(ratio, origin)
 
     def add_edges(self) -> None:
         # Shell 1
