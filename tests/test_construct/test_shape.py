@@ -247,6 +247,13 @@ class SphereTests(unittest.TestCase):
 
         np.testing.assert_equal(sphere.center, [0, 0, 0])
 
+    def test_geometry(self):
+        sphere = Hemisphere([0, 0, 0], [1, 0, 0], [0, 0, 1])
+        geometry = sphere.geometry
+        keys = list(geometry.keys())
+
+        self.assertEqual(sphere.geometry[keys[0]][-1], "radius 1.0")
+
 
 class FrustumTests(unittest.TestCase):
     def test_non_perpendicular_axis_radius(self):

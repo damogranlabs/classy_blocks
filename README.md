@@ -64,7 +64,8 @@ _Unchecked items are not implemented yet but are on a TODO list_
     - [x] Quarter and Semi circle
     - [x] Circle
     - [x] Boxed circle
-    - [x] Oval
+    - [x] Oval with straight sides
+    - [x] Ellipse (and ovals in various configurations)
     - [x] Cartesian grid
 - [x] Simple way of creating custom Sketches
 - [x] Easy shape creation from Sketches

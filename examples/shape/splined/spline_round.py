@@ -24,4 +24,3 @@ for axis in range(3):
 
 mesh.add(extrude)
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")
-mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")
