@@ -64,7 +64,8 @@ _Unchecked items are not implemented yet but are on a TODO list_
     - [x] Quarter and Semi circle
     - [x] Circle
     - [x] Boxed circle
-    - [x] Oval
+    - [x] Oval with straight sides
+    - [x] Ellipse (and ovals in various configurations)
     - [x] Cartesian grid
 - [x] Simple way of creating custom Sketches
 - [x] Easy shape creation from Sketches
@@ -77,9 +78,10 @@ _Unchecked items are not implemented yet but are on a TODO list_
     - [x] Hemisphere
 - [x] Stacks (collections of similar Shapes stacked on top of each other)
 - [ ] Predefined parametric Objects
-    - [ ] T-joint (round pipes)
-    - [ ] X-joint
-    - [ ] N-joint (multiple pipes)
+    - [x] T-joint (round pipes)
+    - [x] X-joint
+    - [x] N-joint (multiple pipes)
+    - [ ] Collector (a barrel with multiple radial outlets)
 - [ ] Other building tools
     - [x] Use existing Operation's Face to generate a new Operation
     - [x] Chain Shape's start/end surface to generate a new Shape
@@ -245,6 +247,12 @@ An electric heater in water, a mesh with two cellZones. The heater zone with sur
 ![Heater](showcase/heater.png "Heater")
 
 > See `examples/complex/heater` for the full script.
+
+## Assemblies
+A collection of pre-assembled parametric Shapes, ready to be used for further construction.
+
+Three pipes, joined in a single point.
+![N-Joint](showcase/n_joint.png)
 
 ## Projection To Geometry
 

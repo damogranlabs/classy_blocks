@@ -6,7 +6,7 @@ import numpy as np
 from classy_blocks.base.element import ElementBase
 from classy_blocks.base.exceptions import EdgeCreationError
 from classy_blocks.base.transforms import Mirror
-from classy_blocks.construct.edges import EdgeData, Line, Project
+from classy_blocks.construct.edges import Arc, EdgeData, Line, Project, Spline
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.point import Point
 from classy_blocks.grading.chop import Chop
@@ -321,3 +321,40 @@ class Operation(ElementBase):
             )
 
         return super().transform(transforms)
+
+    @classmethod
+    def from_series(cls, faces: List[Face]) -> "Operation":
+        """Creates a Loft from a list of faces.
+        At least two are required.
+        From faces in between, side edges are created:
+        - 2 faces: no side edges
+        - 3: Arcs
+        - 4 or more: Splines"""
+        if len(faces) < 2:
+            raise ValueError("Provide at least two faces!")
+
+        loft = cls(faces[0], faces[-1])
+
+        if len(faces) == 2:
+            return loft
+
+        edge_points: List[List[NPPointType]] = []
+
+        # collect points for splines on each side
+        for i in range(4):
+            points = []
+
+            for face in faces[1:-1]:
+                points.append(face.points[i].position)
+
+            edge_points.append(points)
+
+        # add edges according to collected points
+        for i in range(4):
+            if len(edge_points[i]) == 1:
+                loft.add_side_edge(i, Arc(edge_points[i][0]))
+                continue
+
+            loft.add_side_edge(i, Spline(edge_points[i]))
+
+        return loft

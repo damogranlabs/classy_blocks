@@ -153,7 +153,7 @@ class EighthSphere(Shape):
 
     @property
     def radius_point(self) -> NPPointType:
-        return self.lofts[1].bottom_face.points[1].position
+        return self.shell[0].bottom_face.points[1].position
 
     @property
     def center_point(self) -> NPPointType:
@@ -198,17 +198,19 @@ class Hemisphere(EighthSphere):
     def __init__(
         self, center_point: PointType, radius_point: PointType, normal: VectorType, diagonal_angle: float = np.pi / 5
     ):
+        center_point = np.asarray(center_point)
+        radius_point = np.asarray(radius_point)
+        normal = np.asarray(normal)
+
         super().__init__(center_point, radius_point, normal, diagonal_angle)
 
         rotated_core = []
         rotated_shell = []
 
         for i in range(1, self.n_cores + 1):
-            rotated_radius_point = f.rotate(self.radius_point, i * np.pi / 2, self.normal, self.center_point)
+            rotated_radius_point = f.rotate(radius_point, i * np.pi / 2, normal, center_point)
 
-            rotated_eighth = eighth_sphere_lofts(
-                self.center_point, rotated_radius_point, self.normal, self.geometry_label
-            )
+            rotated_eighth = eighth_sphere_lofts(self.center_point, rotated_radius_point, normal, self.geometry_label)
 
             rotated_core.append(rotated_eighth[0])
             rotated_shell += rotated_eighth[1:]
