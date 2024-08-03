@@ -6,12 +6,11 @@ from typing import Generic, List, Optional, TypeVar, Union
 import numpy as np
 
 from classy_blocks.base.element import ElementBase
-from classy_blocks.construct.edges import Angle, Arc, Spline
+from classy_blocks.construct.edges import Angle
 from classy_blocks.construct.flat.sketch import Sketch, SketchT
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.types import AxisType, NPPointType, VectorType
-from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
 ShapeT = TypeVar("ShapeT", bound="Shape")
@@ -83,51 +82,8 @@ class LoftedShape(Shape, abc.ABC, Generic[SketchT]):
             for j, face_1 in enumerate(list_1):
                 face_2 = self.sketch_2.grid[i][j]
 
-                loft = Loft(face_1, face_2)
-
-                # add edges, if applicable
-                if len(sketch_mid) > 0:
-                    # Create arc from sketch_mid if only one present
-                    if len(self.sketch_mid) == 1:
-                        face_mid = self.sketch_mid[0].grid[i][j]
-                        for k, point in enumerate(face_mid.points):
-                            sketch_1_point = self.sketch_1.grid[i][j].points[k].position
-                            sketch_2_point = self.sketch_2.grid[i][j].points[k].position
-                            # If not linear, make arc
-                            if (
-                                abs(
-                                    abs(
-                                        np.dot(sketch_1_point - point.position, sketch_1_point - sketch_2_point)
-                                        / f.norm(sketch_1_point - point.position)
-                                    )
-                                    - 1
-                                )
-                                > constants.TOL
-                            ):
-                                loft.add_side_edge(k, Arc(point.position))
-
-                    # Create spline from multiple sketch_mid
-                    else:
-                        face_mid = [sketch_mid_i.grid[i][j] for sketch_mid_i in self.sketch_mid]
-                        for k in range(len(face_mid[0].points)):
-                            sketch_1_point = self.sketch_1.grid[i][j].points[k].position
-                            sketch_2_point = self.sketch_2.grid[i][j].points[k].position
-                            points = [face_mid_i.points[k].position for face_mid_i in face_mid]
-                            # If not linear, make spline
-                            if any(
-                                [
-                                    abs(
-                                        abs(
-                                            np.dot(sketch_1_point - p, sketch_1_point - sketch_2_point)
-                                            / f.norm(sketch_1_point - p)
-                                        )
-                                        - 1
-                                    )
-                                    > constants.TOL
-                                    for p in points
-                                ]
-                            ):
-                                loft.add_side_edge(k, Spline(points))
+                mid_faces = [sketch.grid[i][j] for sketch in sketch_mid]
+                loft = Loft.from_series([face_1, *mid_faces, face_2])
 
                 self.lofts[-1].append(loft)
 

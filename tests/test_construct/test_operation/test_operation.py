@@ -5,7 +5,7 @@ from parameterized import parameterized
 
 from classy_blocks.base.exceptions import EdgeCreationError
 from classy_blocks.base.transforms import Mirror
-from classy_blocks.construct.edges import Arc, Project
+from classy_blocks.construct.edges import Arc, Project, Spline
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.extrude import Extrude
 from classy_blocks.construct.operations.loft import Loft
@@ -153,6 +153,40 @@ class OperationTests(BlockTestCase):
         normal_face = self.loft.get_normal_face(point)
 
         np.testing.assert_array_equal(normal_face.center, self.loft.get_face(orient).center)
+
+    def test_from_series_error(self):
+        """Raise an error when creating from a single face"""
+        with self.assertRaises(ValueError):
+            Loft.from_series([self.loft.top_face])
+
+    def test_from_series_2(self):
+        loft_1 = self.loft
+        loft_2 = Loft.from_series([loft_1.bottom_face, loft_1.top_face])
+
+        np.testing.assert_equal(loft_1.center, loft_2.center)
+
+    def test_from_series_3(self):
+        loft = self.loft
+        faces = [loft.bottom_face, loft.bottom_face.copy().translate([0, 0, 0.5]), loft.top_face]
+
+        new_loft = Loft.from_series(faces)
+
+        for i in range(4):
+            self.assertIsInstance(new_loft.side_edges[i], Arc)
+
+    def test_from_series_4(self):
+        loft = self.loft
+        faces = [
+            loft.bottom_face,
+            loft.bottom_face.copy().translate([0, 0, 0.33]),
+            loft.bottom_face.copy().translate([0, 0, 0.66]),
+            loft.top_face,
+        ]
+
+        new_loft = Loft.from_series(faces)
+
+        for i in range(4):
+            self.assertIsInstance(new_loft.side_edges[i], Spline)
 
 
 class OperationProjectionTests(BlockTestCase):
