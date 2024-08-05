@@ -145,7 +145,7 @@ class QuarterSplineRound(SplineRound):
 
         # Points
         p0 = center
-        p1 = center + (side_2 + self.core_ratio * r_2) * u_2
+        p1 = center + (self.side_2 + self.core_ratio * r_2) * u_2
         p2 = corner_2
         p3 = center + (self.side_1 + self.core_ratio * r_1) * u_1
         p4 = (
@@ -154,7 +154,7 @@ class QuarterSplineRound(SplineRound):
             + (self.side_2 + self.spline_ratios[7] * r_2) * u_2
         )
         p5 = corner_1
-        p6 = center + (side_1 + 2 ** (-1 / 2) * r_1) * u_1 + (side_2 + 2 ** (-1 / 2) * r_2) * u_2
+        p6 = center + (self.side_1 + 2 ** (-1 / 2) * r_1) * u_1 + (self.side_2 + 2 ** (-1 / 2) * r_2) * u_2
 
         quad_map = [
             # core
@@ -307,18 +307,18 @@ class QuarterSplineRoundRing(SplineRound):
         u_1 = f.unit_vector(corner_1 - center)
         u_2 = f.unit_vector(corner_2 - center)
 
-        r_1 = f.norm(corner_1 - center) - side_1
-        r_2 = f.norm(corner_2 - center) - side_2
+        r_1 = f.norm(corner_1 - center) - self.side_1
+        r_2 = f.norm(corner_2 - center) - self.side_2
 
-        r_1_outer = f.norm(corner_1 - center) - side_1 + width_1
-        r_2_outer = f.norm(corner_2 - center) - side_2 + width_2
+        r_1_outer = f.norm(corner_1 - center) - self.side_1 + self.width_1
+        r_2_outer = f.norm(corner_2 - center) - self.side_2 + self.width_2
 
         p2 = corner_2
-        p2_2 = corner_2 + width_2 * u_2
+        p2_2 = corner_2 + self.width_2 * u_2
         p5 = corner_1
         p5_2 = corner_1 + self.width_1 * u_1
-        p6 = center + (side_1 + 2 ** (-1 / 2) * r_1) * u_1 + (side_2 + 2 ** (-1 / 2) * r_2) * u_2
-        p6_2 = center + (side_1 + 2 ** (-1 / 2) * r_1_outer) * u_1 + (side_2 + 2 ** (-1 / 2) * r_2_outer) * u_2
+        p6 = center + (self.side_1 + 2 ** (-1 / 2) * r_1) * u_1 + (self.side_2 + 2 ** (-1 / 2) * r_2) * u_2
+        p6_2 = center + (self.side_1 + 2 ** (-1 / 2) * r_1_outer) * u_1 + (self.side_2 + 2 ** (-1 / 2) * r_2_outer) * u_2
 
         quad_map = [
             [2, 3, 1, 0],
