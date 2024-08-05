@@ -22,6 +22,7 @@ class SplineRound(MappedSketch):
     core_ratio = DiskBase.core_ratio
 
     n_outer_spline_points = 20
+    n_straight_spline_points = 10
 
     chops: ClassVar = [
         [1],  # axis 0
@@ -32,19 +33,23 @@ class SplineRound(MappedSketch):
         self,
         side_1: float,
         side_2: float,
+        **kwargs
     ):
         """
         With a normal in x direction corner 1 will be in the y direction and corner 2 the z direction.
         note the vectors from the center to corner 1 and 2 should be perpendicular.
         Args:
             center_point: Center of round shape
-            corner_1_point: Radius for circular and eliptical shape
-            corner_2_point: Radius for circular and eliptical  shape
+            corner_1_point: Radius for circular and elliptical shape
+            corner_2_point: Radius for circular and elliptical  shape
             side_1: Straight length for oval shape
             side_2: Straight length for oval shape
         """
         self.side_1 = side_1
         self.side_2 = side_2
+
+        self.n_outer_spline_points = kwargs.get('n_outer_spline_points', self.n_outer_spline_points)
+        self.n_straight_spline_points = kwargs.get('n_straight_spline_points', self.n_straight_spline_points)
 
     @property
     def center(self):
@@ -97,7 +102,7 @@ class SplineRound(MappedSketch):
 
     # @classmethod
     # def init_from_radius(cls, center_point, corner_1_point, corner_2_point, r_1, r_2):
-    #     """Calcluate the side lengths based on the radius and return sketch"""
+    #     """Calculate the side lengths based on the radius and return sketch"""
     #     side_1 = f.norm(corner_1_point - center_point) - r_1
     #     side_2 = f.norm(corner_2_point - center_point) - r_2
 
@@ -105,7 +110,7 @@ class SplineRound(MappedSketch):
 
 
 class QuarterSplineRound(SplineRound):
-    """Sketch for Quater oval, eliptical and circular shapes"""
+    """Sketch for Quarter oval, elliptical and circular shapes"""
 
     def __init__(
         self,
@@ -114,18 +119,19 @@ class QuarterSplineRound(SplineRound):
         corner_2_point: PointType,
         side_1: float,
         side_2: float,
+        **kwargs
     ) -> None:
         """
         With a normal in x direction corner 1 will be in the y direction and corner 2 the z direction.
         note the vectors from the center to corner 1 and 2 should be perpendicular.
         Args:
             center_point: Center of round shape
-            corner_1_point: Radius for circular and eliptical shape
-            corner_2_point: Radius for circular and eliptical  shape
+            corner_1_point: Radius for circular and elliptical shape
+            corner_2_point: Radius for circular and elliptical  shape
             side_1: Straight length for oval shape
             side_2: Straight length for oval shape
         """
-        super().__init__(side_1, side_2)
+        super().__init__(side_1, side_2, **kwargs)
 
         center = np.array(center_point)
         corner_1 = np.array(corner_1_point)
@@ -191,19 +197,19 @@ class QuarterSplineRound(SplineRound):
             + self.r_1 * np.sin(theta) * self.u_1
         )
 
-        # If oval shape 3 spline points are added to ensure a straight line
+        # If oval shape n_straight_spline_points spline points are added to ensure a straight line
         if self.side_1 > constants.TOL:
             core_side_points = np.linspace(
                 self.center + (self.side_2 + self.core_ratio * self.r_2) * self.u_2 + 0.95 * self.side_1 * self.u_1,
                 self.center + (self.side_2 + self.core_ratio * self.r_2) * self.u_2 + self.side_1 * self.u_1,
-                3,
+                self.n_straight_spline_points,
             )
             core_spline_1_points = np.insert(core_spline_1_points, 0, core_side_points, axis=0)
 
             shell_side_points = np.linspace(
                 self.center + (self.side_2 + self.r_2) * self.u_2 + 0.95 * self.side_1 * self.u_1,
                 self.center + (self.side_2 + self.r_2) * self.u_2 + self.side_1 * self.u_1,
-                3,
+                self.n_straight_spline_points,
             )
             shell_curve_points = np.insert(shell_curve_points, 0, shell_side_points, axis=0)
 
@@ -228,19 +234,19 @@ class QuarterSplineRound(SplineRound):
             + self.r_2 * np.cos(theta) * self.u_2
             + self.r_1 * np.sin(theta) * self.u_1
         )
-        # If oval shape 3 spline points are added to ensure a straight line
+        # If oval shape n_straight_spline_points spline points are added to ensure a straight line
         if self.side_2 > constants.TOL:
             core_side_points = np.linspace(
                 self.center + 0.95 * self.side_2 * self.u_2 + (self.side_1 + self.core_ratio * self.r_1) * self.u_1,
                 self.center + self.side_2 * self.u_2 + (self.side_1 + self.core_ratio * self.r_1) * self.u_1,
-                3,
+                self.n_straight_spline_points,
             )
             core_spline_2_points = np.append(core_spline_2_points, core_side_points[::-1], axis=0)
 
             shell_side_points = np.linspace(
                 self.center + (self.side_1 + self.r_1) * self.u_1 + 0.95 * self.side_2 * self.u_2,
                 self.center + (self.side_1 + self.r_1) * self.u_1 + self.side_2 * self.u_2,
-                3,
+                self.n_straight_spline_points,
             )
 
             shell_curve_points = np.append(shell_curve_points, shell_side_points[::-1], axis=0)
@@ -263,21 +269,30 @@ class QuarterSplineRoundRing(SplineRound):
         [0, 1],  # axis 1
     ]
 
-    def __init__(self, center_point, corner_1_point, corner_2_point, side_1, side_2, width_1, width_2):
+    def __init__(
+        self,
+        center_point: PointType,
+        corner_1_point: PointType,
+        corner_2_point: PointType,
+        side_1: float,
+        side_2: float,
+        width_1: float,
+        width_2:float,
+        **kwargs):
         """
         With a normal in x direction corner 1 will be in the y direction and corner 2 the z direction.
         Note the vectors from the center to corner 1 and 2 should be perpendicular.
         The ring is defined such it will fit around a QuaterSplineRound defined with the same center, corners and sides.
         Args:
             center_point: Center of round shape
-            corner_1_point: Radius for circular and eliptical shape
-            corner_2_point: Radius for circular and eliptical  shape
+            corner_1_point: Radius for circular and elliptical shape
+            corner_2_point: Radius for circular and elliptical  shape
             side_1: Straight length for oval shape
             side_2: Straight length for oval shape
             width_1: Width of shell
             width_2: Width of shell
         """
-        super().__init__(side_1, side_2)
+        super().__init__(side_1, side_2, **kwargs)
 
         center = np.array(center_point)
         self._center = Point(center)
