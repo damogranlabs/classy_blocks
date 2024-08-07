@@ -6,7 +6,8 @@ import classy_blocks as cb
 from classy_blocks.types import PointType
 from classy_blocks.util import functions as f
 
-# an example with a custom sketch, yielding a custom shape
+# an example with a custom sketch, yielding a custom shape (square with rounded corners);
+# see custom.svg for a sketch of blocking scheme
 mesh = cb.Mesh()
 
 

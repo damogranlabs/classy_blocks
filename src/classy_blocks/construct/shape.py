@@ -6,7 +6,7 @@ from typing import Generic, List, Optional, TypeVar, Union
 import numpy as np
 
 from classy_blocks.base.element import ElementBase
-from classy_blocks.construct.edges import Angle, Arc
+from classy_blocks.construct.edges import Angle
 from classy_blocks.construct.flat.sketch import Sketch, SketchT
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.operations.operation import Operation
@@ -55,12 +55,20 @@ class LoftedShape(Shape, abc.ABC, Generic[SketchT]):
     or twice (middle/end cross-section), then making profiled Lofts
     from calculated cross-sections (Elbow, Cylinder, Ring, ..."""
 
-    def __init__(self, sketch_1: SketchT, sketch_2: SketchT, sketch_mid: Optional[SketchT] = None):
+    def __init__(
+        self, sketch_1: SketchT, sketch_2: SketchT, sketch_mid: Optional[Union[SketchT, List[SketchT]]] = None
+    ):
         if len(sketch_1.faces) != len(sketch_2.faces):
             raise ShapeCreationError("Start and end sketch have different number of faces!")
 
-        if sketch_mid is not None and len(sketch_mid.faces) != len(sketch_1.faces):
-            raise ShapeCreationError("Mid sketch has a different number of faces from start/end!")
+        if sketch_mid is None:
+            sketch_mid = []
+        else:
+            if not isinstance(sketch_mid, list):
+                sketch_mid = [sketch_mid]
+
+            if any([len(sketch_mid_i.faces) != len(sketch_1.faces) for sketch_mid_i in sketch_mid]):
+                raise ShapeCreationError("Mid sketch has a different number of faces from start/end!")
 
         self.sketch_1 = sketch_1
         self.sketch_2 = sketch_2
@@ -74,14 +82,8 @@ class LoftedShape(Shape, abc.ABC, Generic[SketchT]):
             for j, face_1 in enumerate(list_1):
                 face_2 = self.sketch_2.grid[i][j]
 
-                loft = Loft(face_1, face_2)
-
-                # add edges, if applicable
-                if self.sketch_mid:
-                    face_mid = self.sketch_mid.grid[i][j]
-
-                    for k, point in enumerate(face_mid.points):
-                        loft.add_side_edge(k, Arc(point.position))
+                mid_faces = [sketch.grid[i][j] for sketch in sketch_mid]
+                loft = Loft.from_series([face_1, *mid_faces, face_2])
 
                 self.lofts[-1].append(loft)
 

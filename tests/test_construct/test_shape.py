@@ -141,13 +141,13 @@ class ElbowTests(unittest.TestCase):
     def test_radius_mid_nonuniform(self):
         """Radius of the middle sketch"""
         # should be between 1 and 2
-        self.assertAlmostEqual(self.elbow.sketch_mid.radius, (self.radius_1 + self.radius_2) / 2)
+        self.assertAlmostEqual(self.elbow.sketch_mid[0].radius, (self.radius_1 + self.radius_2) / 2)
 
     def test_radius_mid_uniform(self):
         """Radius of the middle sketch with a uniform cross-section"""
         # should be the same as 1 and 2
         self.radius_2 = f.norm(self.center_point_1 - self.radius_point_1)
-        self.assertAlmostEqual(self.elbow.sketch_mid.radius, self.radius_2)
+        self.assertAlmostEqual(self.elbow.sketch_mid[0].radius, self.radius_2)
 
     def test_sketch_positions(self):
         """Sketch positions after Elbow transforms"""
@@ -192,6 +192,20 @@ class RevolvedRingTests(unittest.TestCase):
         for operation in self.ring.operations:
             self.assertEqual(operation.chops[self.ring.tangential_axis][0].count, 10)
 
+    def test_transform(self):
+        ring_1 = self.ring
+        ring_2 = ring_1.copy().translate([1, 0, 0])
+
+        np.testing.assert_almost_equal(ring_2.center - ring_1.center, [1, 0, 0])
+
+
+class ExtrudedRingTests(unittest.TestCase):
+    def test_transform(self):
+        ring_1 = ExtrudedRing([0, 0, 0], [1, 0, 0], [0, 1, 0], 0.8)
+        ring_2 = ring_1.copy().translate([1, 0, 0])
+
+        np.testing.assert_almost_equal(ring_2.center - ring_1.center, [1, 0, 0])
+
 
 class SphereTests(unittest.TestCase):
     def test_sphere_radii(self):
@@ -232,6 +246,13 @@ class SphereTests(unittest.TestCase):
         sphere = EighthSphere([0, 0, 0], [1, 0, 0], [0, 0, 1])
 
         np.testing.assert_equal(sphere.center, [0, 0, 0])
+
+    def test_geometry(self):
+        sphere = Hemisphere([0, 0, 0], [1, 0, 0], [0, 0, 1])
+        geometry = sphere.geometry
+        keys = list(geometry.keys())
+
+        self.assertEqual(sphere.geometry[keys[0]][-1], "radius 1.0")
 
 
 class FrustumTests(unittest.TestCase):
