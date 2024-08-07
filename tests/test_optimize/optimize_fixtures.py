@@ -19,7 +19,7 @@ class SketchTestsBase(unittest.TestCase):
                 [1, 0, 0],
                 [2, 0, 0],
                 [0, 1, 0],
-                [1.5, 1.5, 0],  # a moved vertex, should be [1, 1, 0]
+                [1.2, 1.6, 0],  # a moved vertex, should be [1, 1, 0]
                 [2, 1, 0],
                 [0, 2, 0],
                 [1, 2, 0],
