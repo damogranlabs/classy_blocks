@@ -83,8 +83,8 @@ class MappedSketch(Sketch):
             # Change sketch_2 indexes to new position list.
             for i, face in enumerate(sketch_2.faces):
                 for j, pos in enumerate(face.point_array):
-                    sketch_2_ind[i, j] = np.argwhere(np.linalg.norm(all_pos - pos.reshape((1, 3)),
-                                                                    axis=1 < constants.TOL))[0][0]
+                    sketch_2_ind[i, j] = np.argwhere(np.linalg.norm(all_pos - pos.reshape((1, 3)), axis=1)
+                                                     < constants.TOL)[0][0]
 
             # Append indexes and faces to sketch_1
             sketch_1.indexes = [*list(sketch_1.indexes), *sketch_2_ind.tolist()]
