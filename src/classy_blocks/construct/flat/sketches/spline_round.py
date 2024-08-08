@@ -1,7 +1,8 @@
 from typing import ClassVar, List, Optional
-import inspect
+
 import numpy as np
 
+from classy_blocks.base import transforms as tr
 from classy_blocks.construct.edges import Origin, Spline
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketches.disk import DiskBase
@@ -10,7 +11,6 @@ from classy_blocks.construct.point import Point
 from classy_blocks.types import NPPointType, NPVectorType, PointType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
-from classy_blocks.base import transforms as tr
 
 
 class SplineRound(MappedSketch):
@@ -30,12 +30,7 @@ class SplineRound(MappedSketch):
         [1, 2],  # axis 1
     ]
 
-    def __init__(
-        self,
-        side_1: float,
-        side_2: float,
-        **kwargs
-    ):
+    def __init__(self, side_1: float, side_2: float, **kwargs):
         """
         With a normal in x direction corner 1 will be in the y direction and corner 2 the z direction.
         note the vectors from the center to corner 1 and 2 should be perpendicular.
@@ -49,8 +44,8 @@ class SplineRound(MappedSketch):
         self.side_1 = side_1
         self.side_2 = side_2
 
-        self.n_outer_spline_points = kwargs.get('n_outer_spline_points', self.n_outer_spline_points)
-        self.n_straight_spline_points = kwargs.get('n_straight_spline_points', self.n_straight_spline_points)
+        self.n_outer_spline_points = kwargs.get("n_outer_spline_points", self.n_outer_spline_points)
+        self.n_straight_spline_points = kwargs.get("n_straight_spline_points", self.n_straight_spline_points)
 
     @property
     def center(self):
@@ -120,7 +115,7 @@ class QuarterSplineDisk(SplineRound):
         corner_2_point: PointType,
         side_1: float,
         side_2: float,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         With a normal in x direction corner 1 will be in the y direction and corner 2 the z direction.
@@ -264,6 +259,7 @@ class QuarterSplineDisk(SplineRound):
 
 class HalfSplineDisk(QuarterSplineDisk):
     """Sketch for Half oval, elliptical and circular shapes"""
+
     chops: ClassVar = [
         [1],  # axis 0
         [1, 2, 5],  # axis 1
@@ -276,7 +272,7 @@ class HalfSplineDisk(QuarterSplineDisk):
         corner_2_point: PointType,
         side_1: float,
         side_2: float,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         With a normal in x direction corner 1 will be in the y direction and corner 2 the z direction.
@@ -291,8 +287,9 @@ class HalfSplineDisk(QuarterSplineDisk):
 
         super().__init__(center_point, corner_1_point, corner_2_point, side_1, side_2, **kwargs)
         # Create quarter mirrored arround u_1
-        other_quarter = QuarterSplineDisk(self.center, self.corner_2, 2 * self.center - self.corner_1,
-                                          side_2, side_1, **kwargs)
+        other_quarter = QuarterSplineDisk(
+            self.center, self.corner_2, 2 * self.center - self.corner_1, side_2, side_1, **kwargs
+        )
         # Merge other_quarter to this quarter.
         self.merge(other_quarter)
 
@@ -306,10 +303,12 @@ class HalfSplineDisk(QuarterSplineDisk):
 
 class SplineDisk(HalfSplineDisk):
     """Sketch for full oval, elliptical and circular shapes"""
+
     chops: ClassVar = [
         [1],  # axis 0
         [1, 2, 5, 7, 8, 11],  # axis 1
     ]
+
     def __init__(
         self,
         center_point: PointType,
@@ -317,7 +316,7 @@ class SplineDisk(HalfSplineDisk):
         corner_2_point: PointType,
         side_1: float,
         side_2: float,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         With a normal in x direction corner 1 will be in the y direction and corner 2 the z direction.
@@ -359,9 +358,8 @@ class QuarterSplineRing(SplineRound):
         side_2: float,
         width_1: float,
         width_2: float,
-        **kwargs
+        **kwargs,
     ):
-
         """
         With a normal in x direction corner 1 will be in the y direction and corner 2 the z direction.
         Note the vectors from the center to corner 1 and 2 should be perpendicular.
@@ -401,7 +399,9 @@ class QuarterSplineRing(SplineRound):
         p5 = corner_1
         p5_2 = corner_1 + self.width_1 * u_1
         p6 = center + (self.side_1 + 2 ** (-1 / 2) * r_1) * u_1 + (self.side_2 + 2 ** (-1 / 2) * r_2) * u_2
-        p6_2 = center + (self.side_1 + 2 ** (-1 / 2) * r_1_outer) * u_1 + (self.side_2 + 2 ** (-1 / 2) * r_2_outer) * u_2
+        p6_2 = (
+            center + (self.side_1 + 2 ** (-1 / 2) * r_1_outer) * u_1 + (self.side_2 + 2 ** (-1 / 2) * r_2_outer) * u_2
+        )
 
         quad_map = [
             [2, 3, 1, 0],
@@ -542,8 +542,10 @@ class QuarterSplineRing(SplineRound):
             self.shell[0].add_edge(3, Origin(self.center))
             self.shell[1].add_edge(3, Origin(self.center))
 
+
 class HalfSplineRing(QuarterSplineRing):
     """Sketch for Half oval, elliptical and circular ring"""
+
     chops: ClassVar = [
         [0],  # axis 0
         [0, 1, 2, 3],  # axis 1
@@ -558,7 +560,7 @@ class HalfSplineRing(QuarterSplineRing):
         side_2: float,
         width_1: float,
         width_2: float,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         With a normal in x direction corner 1 will be in the y direction and corner 2 the z direction.
@@ -574,13 +576,15 @@ class HalfSplineRing(QuarterSplineRing):
         """
 
         super().__init__(center_point, corner_1_point, corner_2_point, side_1, side_2, width_1, width_2, **kwargs)
-        other_quarter = QuarterSplineRing(self.center, self.corner_2, 2 * self.center - self.corner_1,
-                                          side_2, side_1, width_2, width_1, **kwargs)
+        other_quarter = QuarterSplineRing(
+            self.center, self.corner_2, 2 * self.center - self.corner_1, side_2, side_1, width_2, width_1, **kwargs
+        )
         self.merge(other_quarter)
 
 
 class SplineRing(HalfSplineRing):
     """Sketch for full oval, elliptical and circular shapes"""
+
     chops: ClassVar = [
         [0],  # axis 0
         [0, 1, 2, 3, 4, 5, 6, 7],  # axis 1
@@ -595,7 +599,7 @@ class SplineRing(HalfSplineRing):
         side_2: float,
         width_1: float,
         width_2: float,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         With a normal in x direction corner 1 will be in the y direction and corner 2 the z direction.

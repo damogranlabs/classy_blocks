@@ -9,8 +9,14 @@ from .construct.flat.face import Face
 from .construct.flat.sketches.disk import FourCoreDisk, HalfDisk, OneCoreDisk, Oval, WrappedDisk
 from .construct.flat.sketches.grid import Grid
 from .construct.flat.sketches.mapped import MappedSketch
-from .construct.flat.sketches.spline_round import QuarterSplineDisk, HalfSplineDisk, SplineDisk
-from .construct.flat.sketches.spline_round import QuarterSplineRing, HalfSplineRing, SplineRing
+from .construct.flat.sketches.spline_round import (
+    HalfSplineDisk,
+    HalfSplineRing,
+    QuarterSplineDisk,
+    QuarterSplineRing,
+    SplineDisk,
+    SplineRing,
+)
 from .construct.operations.box import Box
 from .construct.operations.connector import Connector
 from .construct.operations.extrude import Extrude

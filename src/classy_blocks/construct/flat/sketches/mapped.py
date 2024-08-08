@@ -1,14 +1,12 @@
-from typing import List, Union, TypeVar
+from typing import List, Union
 
 import numpy as np
 
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.types import IndexType, NPPointListType, NPPointType, PointListType
-from classy_blocks.util import functions as f
 from classy_blocks.util import constants
-
-MappedSketchT = TypeVar("MappedSketchT", bound="MappedSketch")
+from classy_blocks.util import functions as f
 
 
 class MappedSketch(Sketch):
@@ -61,37 +59,48 @@ class MappedSketch(Sketch):
 
         return np.array([all_points[indexes.index(i)] for i in range(max_index + 1)])
 
-    def merge(self, other: Union[List[MappedSketchT], MappedSketchT]):
+    def merge(self, other: Union[List["MappedSketch"], "MappedSketch"]):
         """Adds a sketch or list of sketches to itself.
         New faces and indexes are appended and all duplicate points are removed."""
-        def merge_two_sketches(sketch_1: MappedSketchT, sketch_2: MappedSketchT) -> None:
+
+        def merge_two_sketches(sketch_1: MappedSketch, sketch_2: MappedSketch) -> None:
             """Add sketch_2 to sketch_1"""
 
             # Check planes are oriented the same
             if not abs(f.angle_between(sketch_1.normal, sketch_2.normal)) < constants.TOL:
-                print(f.angle_between(sketch_1.normal, sketch_2.normal)/np.pi, sketch_1.normal, sketch_2.normal)
-                raise Warning(f"Sketch {sketch_2} with normal {sketch_2.normal} is not oriented as "
-                              f"sketch {sketch_1} with normal {sketch_1.normal}")
+                print(f.angle_between(sketch_1.normal, sketch_2.normal) / np.pi, sketch_1.normal, sketch_2.normal)
+                raise Warning(
+                    f"Sketch {sketch_2} with normal {sketch_2.normal} is not oriented as "
+                    f"sketch {sketch_1} with normal {sketch_1.normal}"
+                )
 
             # All unique points
             sketch_1_pos = sketch_1.positions
-            all_pos = np.asarray([*sketch_1_pos.tolist(),
-                                  *[pos for pos in sketch_2.positions if
-                                    all(np.linalg.norm(sketch_1_pos - pos.reshape((1, 3)), axis=1) >= constants.TOL)]])
+            all_pos = np.asarray(
+                [
+                    *sketch_1_pos.tolist(),
+                    *[
+                        pos
+                        for pos in sketch_2.positions
+                        if all(np.linalg.norm(sketch_1_pos - pos.reshape((1, 3)), axis=1) >= constants.TOL)
+                    ],
+                ]
+            )
 
             sketch_2_ind = np.asarray(sketch_2.indexes)
             # Change sketch_2 indexes to new position list.
             for i, face in enumerate(sketch_2.faces):
                 for j, pos in enumerate(face.point_array):
-                    sketch_2_ind[i, j] = np.argwhere(np.linalg.norm(all_pos - pos.reshape((1, 3)),
-                                                                    axis=1 < constants.TOL))[0][0]
+                    sketch_2_ind[i, j] = np.argwhere(
+                        np.linalg.norm(all_pos - pos.reshape((1, 3)), axis=1 < constants.TOL)
+                    )[0][0]
 
             # Append indexes and faces to sketch_1
             sketch_1.indexes = [*list(sketch_1.indexes), *sketch_2_ind.tolist()]
             sketch_1._faces = [*sketch_1.faces, *sketch_2.faces]
 
         # If list of sketches
-        if hasattr(other, '__iter__'):
+        if isinstance(other, list):
             for o in other:
                 merge_two_sketches(self, o)
         else:
