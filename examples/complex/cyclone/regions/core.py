@@ -1,4 +1,4 @@
-from typing import List, Sequence
+from typing import ClassVar, List, Sequence
 
 import numpy as np
 import parameters as params
@@ -6,120 +6,88 @@ from regions.region import Region
 
 import classy_blocks as cb
 from classy_blocks.base.transforms import Transformation, Translation
-from classy_blocks.construct.flat.sketch import Sketch
+from classy_blocks.construct.point import Point
 from classy_blocks.construct.shapes.round import RoundSolidShape
-from classy_blocks.types import NPPointListType, NPVectorType, PointListType, PointType
-from classy_blocks.util import functions as f
+from classy_blocks.types import NPVectorType, PointListType, PointType
 
 
-class DozenBlockDisk(Sketch):
-    """A disk that has 3x3 inside quads and 12 outer
-    See sketch for explanations"""
+class NineCoreDisk(cb.MappedSketch):
+    """A disk that has 3x3 inside quads and 12 outer;
+    see docs/cylinder.svg for a sketch"""
 
-    layer_1_ratio = 0.25
-    layer_2_ratio = 0.55
-
-    face_map = [  # for creating blocks from points-by-layer
-        [[0, 0], [0, 1], [0, 2], [0, 3]],  # core: 0
-        [[0, 0], [1, 11], [1, 0], [1, 1]],  # layer 1: 1
-        [[0, 0], [1, 1], [1, 2], [0, 1]],  # 2
-        [[0, 1], [1, 2], [1, 3], [1, 4]],  # 3
-        [[0, 1], [1, 4], [1, 5], [0, 2]],  # 4
-        [[0, 2], [1, 5], [1, 6], [1, 7]],  # 5
-        [[0, 2], [1, 7], [1, 8], [0, 3]],  # 6
-        [[0, 3], [1, 8], [1, 9], [1, 10]],  # 7
-        [[0, 3], [1, 10], [1, 11], [0, 0]],  # 8
-        [[1, 0], [2, 0], [2, 1], [1, 1]],  # layer 3: 9
-        [[1, 1], [2, 1], [2, 2], [1, 2]],  # 10
-        [[1, 2], [2, 2], [2, 3], [1, 3]],  # 11
-        [[1, 3], [2, 3], [2, 4], [1, 4]],  # 12
-        [[1, 4], [2, 4], [2, 5], [1, 5]],  # 13
-        [[1, 5], [2, 5], [2, 6], [1, 6]],  # 14
-        [[1, 6], [2, 6], [2, 7], [1, 7]],  # 15
-        [[1, 7], [2, 7], [2, 8], [1, 8]],  # 16
-        [[1, 8], [2, 8], [2, 9], [1, 9]],  # 17
-        [[1, 9], [2, 9], [2, 10], [1, 10]],  # 18
-        [[1, 10], [2, 10], [2, 11], [1, 11]],  # 19
-        [[1, 11], [2, 11], [2, 0], [1, 0]],  #  20
+    quads: ClassVar = [
+        # core
+        [0, 1, 2, 3],  # 0
+        # layer 1
+        [0, 15, 4, 5],  # 1
+        [0, 5, 6, 1],  # 2
+        [1, 6, 7, 8],  # 3
+        [1, 8, 9, 2],  # 4
+        [2, 9, 10, 11],  # 5
+        [2, 11, 12, 3],  # 6
+        [3, 12, 13, 14],  # 7
+        [3, 14, 15, 0],  # 8
+        # layer 2
+        [4, 16, 17, 5],  # 9
+        [5, 17, 18, 6],  # 10
+        [6, 18, 19, 7],  # 11
+        [7, 19, 20, 8],  # 12
+        [8, 20, 21, 9],  # 13
+        [9, 21, 22, 10],  # 14
+        [10, 22, 23, 11],  # 15
+        [11, 23, 24, 12],  # 16
+        [12, 24, 25, 13],  # 17
+        [13, 25, 26, 14],  # 18
+        [14, 26, 27, 15],  # 19
+        [15, 27, 16, 4],  # 20
     ]
-
-    # TODO: drop this and inherit from MappedSketch
-    neighbours = [  # for laplacian smoothing of the inside
-        [15, 5, 1, 3],  # 0
-        [0, 6, 8, 2],  # 1
-        [9, 1, 11, 3],  # 2
-        [14, 0, 2, 12],  # 3
-        [16, 5, 15],  # 4
-        [4, 17, 6, 0],  # 5
-        [18, 7, 1, 5],  # 6
-        [6, 19, 8],  # 7
-        [1, 7, 20, 9],  # 8
-        [2, 8, 21, 10],  # 9
-        [22, 11, 9],  # 10
-        [23, 10, 2, 12],  # 11
-        [11, 24, 13, 3],  # 12
-        [25, 12, 14],  # 13
-        [13, 3, 15, 26],  # 14
-        [14, 27, 4, 0],  # 15
-    ]
-
-    def _smooth_points(self, points: NPPointListType):
-        # A very rudimentary 2D laplacian smoothing;
-        # to be replaced with automatic neighbour search,
-        # removing the need for this 'neighbours' map
-        for i, nei_indexes in enumerate(self.neighbours):
-            nei_points = np.take(points, nei_indexes, axis=0)
-            points[i] = np.average(nei_points, axis=0)
 
     def __init__(self, perimeter: PointListType, center_point: PointType):
-        # TODO: add a class method that creates this kind of shapes from perimeter
-        self.perimeter = np.array(perimeter)
         center_point = np.asarray(center_point)
 
-        # calculate 3 layers of points;
-        # 1st layer, square, 4 points
-        # 2nd layer, 3x3 squares, 9 points
-        # 3rd layer, 12 shell faces, 12 points
-        layer_2 = np.array([center_point + self.layer_2_ratio * (p - center_point) for p in self.perimeter])
-        layer_1 = np.array([center_point + self.layer_1_ratio * (layer_2[i] - center_point) for i in (0, 3, 6, 9)])
+        # inner points will be determined with smoothing;
+        # a good enough starting estimate is the center
+        # (anything in the same plane as other points)
+        outer_points = np.asarray(perimeter)
+        inner_points = np.ones((16, 3)) * np.average(outer_points, axis=0)
 
-        # Assemble a full list for smoothing:
-        points_by_index = np.concatenate((layer_1, layer_2, self.perimeter))
+        positions = np.concatenate((inner_points, outer_points))
 
-        for _ in range(5):
-            self._smooth_points(points_by_index)
+        self.center_point = Point(center_point)
 
-        # reconstruct the list back to layer_1, layer_2, layer_3 for face creation
-        points_by_layer = [points_by_index[:4], points_by_index[4:16], points_by_index[16:]]
+        super().__init__(positions, self.quads)
 
-        # the first point is layer index, the second is the point within layer
-        self._faces: List[cb.Face] = []
+        # smooth the inner_points (which are all invalid) into position
+        smoother = cb.SketchSmoother(self)
+        smoother.smooth()
 
-        for face_indexes in self.face_map:
-            face = cb.Face([points_by_layer[i[0]][i[1]] for i in face_indexes])
-            self._faces.append(face)
+    @property
+    def core(self) -> List[cb.Face]:
+        return self.faces[:9]
 
-        self.core = self._faces[:10]
-        self.shell = self._faces[10:]
+    @property
+    def shell(self) -> List[cb.Face]:
+        return self.faces[9:]
 
+    def add_edges(self):
         for face in self.shell:
-            face.add_edge(1, cb.Origin(center_point))
+            face.add_edge(1, cb.Origin(self.center_point.position))
 
     @property
-    def faces(self):
-        return self._faces
-
-    @property
-    def grid(self):
-        return [self.faces]
+    def parts(self):
+        return [*super().parts, self.center_point]
 
     @property
     def center(self):
-        return self.faces[0].center
+        return self.center_point.position
+
+    @property
+    def grid(self):
+        return [[self.faces[0]], self.faces[1:9], self.faces[9:]]
 
     @property
     def normal(self) -> NPVectorType:
-        return f.unit_vector(np.cross(self.perimeter[0] - self.center, self.perimeter[1] - self.center))
+        return self.faces[0].normal
 
     @property
     def n_segments(self):
@@ -127,10 +95,10 @@ class DozenBlockDisk(Sketch):
 
 
 class DozenBlockCylinder(RoundSolidShape):
-    sketch_class = DozenBlockDisk
+    sketch_class = NineCoreDisk
 
     def __init__(self, perimeter: PointListType, center_point: PointType, length: float):
-        sketch = DozenBlockDisk(perimeter, center_point)
+        sketch = NineCoreDisk(perimeter, center_point)
         transforms: Sequence[Transformation] = [Translation(sketch.normal * length)]
         super().__init__(sketch, transforms)
 

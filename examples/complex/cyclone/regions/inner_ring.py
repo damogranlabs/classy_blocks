@@ -11,11 +11,17 @@ from classy_blocks.util import functions as f
 class InnerRing(Region):
     """A ring, created by extruding innermost faces of given shapes"""
 
-    radial_clamps = {60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70}
+    radial_clamps = {60, 61, 62, 63, 64, 65}
 
     def _move_to_radius(self, point):
         polar = f.to_polar(point, axis="z")
         polar[0] = self.geo.r["pipe"]
+
+        return f.to_cartesian(polar, axis="z")
+
+    def _move_to_angle(self, point, angle):
+        polar = f.to_polar(point, axis="z")
+        polar[1] = angle
 
         return f.to_cartesian(polar, axis="z")
 

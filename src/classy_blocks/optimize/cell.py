@@ -164,7 +164,7 @@ class CellBase(abc.ABC):
         side_min = min(edge_lengths) + VSMALL
         aspect_factor = np.log10(side_max / side_min)
 
-        quality += np.sum(q_scale(3, 2.5, 3, aspect_factor))
+        quality += np.sum(q_scale(3, 2, 3, aspect_factor))
 
         self._quality = quality
         return quality
