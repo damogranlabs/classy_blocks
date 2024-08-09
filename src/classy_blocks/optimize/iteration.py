@@ -9,14 +9,17 @@ from classy_blocks.util.tools import report
 class ClampOptimizationData:
     """Quality tracking pre/post iteration"""
 
-    vertex_index: int
+    index: int
     grid_initial: float
     junction_initial: float
     junction_final: float = VBIG
     grid_final: float = VBIG
 
+    skipped: bool = False
+    rolled_back: bool = False
+
     def report_start(self) -> None:
-        report(f"{self.vertex_index:>6}", end="   ")
+        report(f"{self.index:>6}", end="   ")
         report(f"{self.grid_initial:.3e}", end="   ")
         report(f"{self.junction_initial:.3e}", end="   ")
 
@@ -24,16 +27,29 @@ class ClampOptimizationData:
         report(f"{self.improvement: >11.0f}", end="   ")
         report(f"{self.grid_final:.3e}", end="   ")
 
-        rollback = "X" if self.rollback else ""
-        report(rollback)
+        comment = ""
+        if self.skipped:
+            comment = "Skip"
+        elif self.rolled_back:
+            comment = "Rollback"
+
+        report(comment)
+
+    def undo(self) -> None:
+        self.junction_final = self.junction_initial
+        self.grid_final = self.grid_initial
+
+    def rollback(self) -> None:
+        self.rolled_back = True
+        self.undo()
+
+    def skip(self) -> None:
+        self.skipped = True
+        self.undo()
 
     @property
     def improvement(self) -> float:
         return self.grid_initial - self.grid_final
-
-    @property
-    def rollback(self) -> bool:
-        return self.grid_final >= self.grid_initial
 
 
 class IterationData:
@@ -54,7 +70,7 @@ class IterationData:
     def report_begin(self):
         report(f"Optimization iteration {self.index+1}:")
         # headers
-        report("Vertex     Initial       Local   Improvement       Final   Rollback")
+        report("Vertex     Initial       Local   Improvement       Final   Status")
 
     def report_end(self):
         report(f"Iteration {self.index+1} finished.", end=" ")

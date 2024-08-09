@@ -1,4 +1,5 @@
 import abc
+import warnings
 from typing import ClassVar, Dict, List, Optional, Set, Tuple
 
 import numpy as np
@@ -128,49 +129,49 @@ class CellBase(abc.ABC):
 
         # both 3D (cell) and 2d (face) use the same calculation but elements are different.
 
-        if self._quality is not None:
-            return self._quality
-
         quality = 0
         center = self.center
 
         def q_scale(base, exponent, factor, value):
             return factor * base ** (exponent * value) - factor
 
-        for orient, neighbour in self.neighbours.items():
-            i = self.side_names.index(orient)
+        try:
+            warnings.filterwarnings("error")
 
-            ### non-orthogonality
-            # angles between sides and self.center-neighbour.center or, if there's no neighbour
-            # on this face, between face and self.center-face_center
-            if neighbour is None:
-                # Cells at the wall simply use center of the face on the wall
-                # instead of their neighbour's center
-                c2c = center - self.get_side_center(i)
-            else:
-                c2c = center - neighbour.center
+            for orient, neighbour in self.neighbours.items():
+                i = self.side_names.index(orient)
 
-            c2cn = c2c / np.linalg.norm(c2c)
+                ### non-orthogonality
+                # angles between sides and self.center-neighbour.center or, if there's no neighbour
+                # on this face, between face and self.center-face_center
+                if neighbour is None:
+                    # Cells at the wall simply use center of the face on the wall
+                    # instead of their neighbour's center
+                    c2c = center - self.get_side_center(i)
+                else:
+                    c2c = center - neighbour.center
 
-            angles = 180 * np.arccos(np.dot(self.get_side_normals(i), c2cn)) / np.pi
-            quality += np.sum(q_scale(1.25, 0.35, 0.8, angles))
+                c2cn = c2c / np.linalg.norm(c2c)
 
-            ### cell inner angles
-            quality += np.sum(q_scale(1.5, 0.25, 0.15, abs(self.get_inner_angles(i))))
+                angles = 180 * np.arccos(np.dot(self.get_side_normals(i), c2cn)) / np.pi
+                quality += np.sum(q_scale(1.25, 0.35, 0.8, angles))
+                ### cell inner angles
+                quality += np.sum(q_scale(1.5, 0.25, 0.15, abs(self.get_inner_angles(i))))
 
-        ### aspect ratio: one number for the whole cell (not per side)
-        edge_lengths = self.get_edge_lengths()
-        side_max = max(edge_lengths)
-        side_min = min(edge_lengths) + VSMALL
-        aspect_factor = np.log10(side_max / side_min)
+            ### aspect ratio: one number for the whole cell (not per side)
+            edge_lengths = self.get_edge_lengths()
+            side_max = max(edge_lengths)
+            side_min = min(edge_lengths) + VSMALL
+            aspect_factor = np.log10(side_max / side_min)
 
-        quality += np.sum(q_scale(3, 2, 3, aspect_factor))
+            quality += np.sum(q_scale(3, 2.5, 3, aspect_factor))
 
-        self._quality = quality
+        except RuntimeWarning:
+            raise ValueError("Degenerate Cell") from RuntimeWarning
+        finally:
+            warnings.resetwarnings()
+
         return quality
-
-    def invalidate(self) -> None:
-        self._quality = None
 
     @property
     def min_length(self) -> float:
@@ -193,22 +194,17 @@ class QuadCell(CellBase):
         side_points = self.get_side_points(i)
         side_vector = side_points[1] - side_points[0]
 
-        if f.norm(side_vector) < VSMALL:
-            # two coincident points
-            return f.unit_vector(self.center - side_points[0])
-
         normal = np.cross(self.normal, side_vector)
-
-        if f.norm(normal) < VSMALL:
-            # a 180-degree angle
-            return f.unit_vector(self.center - side_points[0])
 
         return [f.unit_vector(normal)]
 
-    def get_inner_angles(self, _):
-        # this metric does not make sense for a line segment
-        # so only return side length
-        return np.zeros(2)
+    def get_inner_angles(self, i):
+        points = np.take(self.points, ((i - 1) % 4, i, (i + 1) % 4), axis=0)
+
+        side_1 = f.unit_vector(points[2] - points[1])
+        side_2 = f.unit_vector(points[0] - points[1])
+
+        return np.expand_dims(180 * np.arccos(np.dot(side_1, side_2)) / np.pi - 90, axis=0)
 
 
 class HexCell(CellBase):

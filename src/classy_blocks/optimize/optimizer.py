@@ -50,29 +50,44 @@ class OptimizerBase(abc.ABC):
             clamp.update_params(params)
             return self.grid.update(junction.index, clamp.position)
 
-        scipy.optimize.minimize(fquality, clamp.params, bounds=clamp.bounds, method=method)
+        try:
+            scipy.optimize.minimize(fquality, clamp.params, bounds=clamp.bounds, method=method)
 
-        reporter.junction_final = junction.quality
-        reporter.grid_final = self.grid.quality
-        reporter.report_end()
+            reporter.junction_final = junction.quality
+            reporter.grid_final = self.grid.quality
 
-        if reporter.rollback:
+            if reporter.improvement <= 0:
+                reporter.rollback()
+
+                clamp.update_params(initial_params)
+                self.grid.update(junction.index, clamp.position)
+        except ValueError:
+            # a degenerate cell (currently) cannot be untangled;
+            # try with a different junction
+            reporter.skip()
             clamp.update_params(initial_params)
             self.grid.update(junction.index, clamp.position)
+
+        reporter.report_end()
 
     def _get_sensitivity(self, clamp):
         """Returns maximum partial derivative at current params"""
         junction = self.grid.get_junction_from_clamp(clamp)
+        initial_params = copy.copy(clamp.params)
 
         def fquality(clamp, junction, params):
             clamp.update_params(params)
+            self.grid.update(junction.index, clamp.position)
             return junction.quality
 
         sensitivities = np.asarray(
             scipy.optimize.approx_fprime(clamp.params, lambda p: fquality(clamp, junction, p), epsilon=10 * TOL)
         )
+
+        clamp.update_params(initial_params)
+        self.grid.update(junction.index, clamp.position)
+
         return np.linalg.norm(sensitivities)
-        # return np.max(np.abs(sensitivities.flatten()))
 
     def optimize_iteration(self, method: MinimizationMethodType) -> None:
         clamps = sorted(self.grid.clamps, key=lambda c: self._get_sensitivity(c), reverse=True)
@@ -82,7 +97,7 @@ class OptimizerBase(abc.ABC):
 
     def optimize(
         self, max_iterations: int = 20, tolerance: float = 0.1, method: MinimizationMethodType = "SLSQP"
-    ) -> None:
+    ) -> IterationDriver:
         """Move vertices, defined and restrained with Clamps
         so that better mesh quality is obtained.
 
@@ -112,6 +127,8 @@ class OptimizerBase(abc.ABC):
             print(f"Elapsed time: {end_time - start_time:.0f}s")
 
         self.backport()
+
+        return driver
 
     @abc.abstractmethod
     def backport(self) -> None:
@@ -143,7 +160,7 @@ class SketchOptimizer(OptimizerBase):
 
     def auto_optimize(
         self, max_iterations: int = 20, tolerance: float = 0.1, method: MinimizationMethodType = "SLSQP"
-    ) -> None:
+    ) -> IterationDriver:
         """Adds a PlaneClamp to all non-boundary points and optimize the sketch.
         To include boundary points (those that can be moved along a line or a curve),
         add clamps manually before calling this method."""
@@ -154,4 +171,4 @@ class SketchOptimizer(OptimizerBase):
                 clamp = PlaneClamp(junction.point, junction.point, normal)
                 self.add_clamp(clamp)
 
-        super().optimize(max_iterations, tolerance, method)
+        return super().optimize(max_iterations, tolerance, method)
