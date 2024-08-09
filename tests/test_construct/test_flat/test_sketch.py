@@ -52,14 +52,16 @@ class MappedSketchTests(unittest.TestCase):
     def test_merge(self):
         sketch_1_pos = self.positions[:6]
         sketch_2_pos = self.positions[3:]
-        sketch_2_quad = (np.asarray(self.quads[2:])-3).tolist()
+        sketch_2_quad = (np.asarray(self.quads[2:]) - 3).tolist()
 
         sketch_1 = MappedSketch(sketch_1_pos, self.quads[:2])
         sketch_2 = MappedSketch(sketch_2_pos, sketch_2_quad)
         sketch_1.merge(sketch_2)
 
-        np.testing.assert_equal(np.asarray([face.point_array for face in sketch_1.faces]),
-                                np.asarray([face.point_array for face in self.sketch.faces]))
+        np.testing.assert_equal(
+            np.asarray([face.point_array for face in sketch_1.faces]),
+            np.asarray([face.point_array for face in self.sketch.faces]),
+        )
         self.assertEqual(sketch_1.indexes, self.sketch.indexes)
 
 
