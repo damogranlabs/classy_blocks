@@ -92,7 +92,7 @@ class MappedSketch(Sketch):
             for i, face in enumerate(sketch_2.faces):
                 for j, pos in enumerate(face.point_array):
                     sketch_2_ind[i, j] = np.argwhere(
-                        np.linalg.norm(all_pos - pos.reshape((1, 3)), axis=1 < constants.TOL)
+                        np.linalg.norm(all_pos - pos.reshape((1, 3)), axis=1) < constants.TOL
                     )[0][0]
 
             # Append indexes and faces to sketch_1

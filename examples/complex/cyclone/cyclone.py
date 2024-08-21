@@ -2,6 +2,7 @@
 import os
 from typing import List
 
+import numpy as np
 import parameters as params
 from geometry import geometry
 from regions.body import ChainSketch, Cone, LowerBody, UpperBody
@@ -14,6 +15,7 @@ from regions.region import Region
 from regions.skirt import Skirt
 
 import classy_blocks as cb
+from classy_blocks.util import functions as f
 
 mesh = cb.Mesh()
 
@@ -47,9 +49,30 @@ add_regions(optimize_regions)
 # This bad blocking needs to be improved before
 # making further blocks. It is done on a semi-finished mesh:
 mesh.assemble()
-# Also, when Mesh is assembled, vertices are created that have
-# consistent indexes; those are used in Region.get_clamps() to quickly
-# fetch points (no need for cb.*Finders)
+
+# Now coincident points have been merged into Vertices and each got its own index.
+# We do mesh.write(..., debug_path="debug.vtk") and view debug.vtk's points in ParaView.
+# We'll redistribute (and fix) inner ring points evenly or optimization
+# will find a better solution with a thin block in the
+vindexes = [68, 69, 70, 84, 82, 80, 78, 76, 74, 71, 67, 66]
+current_angles = [f.to_polar(mesh.vertices[i].position, axis="z")[1] for i in vindexes]
+angle_offset = current_angles[0]
+uniform_angles = np.linspace(2 * np.pi, 0, num=len(current_angles), endpoint=False) + angle_offset
+
+for i, vindex in enumerate(vindexes):
+    position = mesh.vertices[vindex].position
+    polar = f.to_polar(position, axis="z")
+    polar[1] = uniform_angles[i]
+    mesh.vertices[vindex].move_to(f.to_cartesian(polar, axis="z"))
+
+# correct points that created invalid cells
+neighbours = [mesh.vertices[i].position for i in (30, 57, 84, 70)]
+mesh.vertices[31].move_to(np.average(neighbours, axis=0))
+
+neighbours = [mesh.vertices[i].position for i in (25, 67, 71, 33)]
+mesh.vertices[22].move_to(np.average(neighbours, axis=0))
+
+# Now, optimize the bad blocks in the inlet.
 optimizer = cb.MeshOptimizer(mesh)
 
 clamps = []
@@ -84,7 +107,7 @@ pipe = Pipe(lower)
 
 add_regions([upper, lower, pipe])
 
-# Core is a 12-block cylinder, created from 12 points of pipe ring.
+# Core is a 9-block-core cylinder, created from 12 points of pipe ring.
 # Again, instead of finding those 12 points (which are difficult to find and sort)
 # it is easier to re-assemble the mesh and get the points from debug.vtk in ParaView.
 mesh.assemble()

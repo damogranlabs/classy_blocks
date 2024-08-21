@@ -3,9 +3,11 @@ import parameters as params
 from regions.region import Region
 
 import classy_blocks as cb
-from classy_blocks.construct.edges import Line
 from classy_blocks.construct.point import Point
 from classy_blocks.util import functions as f
+
+# Helps with optimization of this tricky part
+cb.HalfDisk.core_ratio = 0.6
 
 
 class InletPipe(Region):
