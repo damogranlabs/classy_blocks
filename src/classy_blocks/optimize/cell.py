@@ -167,7 +167,7 @@ class CellBase(abc.ABC):
             quality += np.sum(q_scale(3, 2.5, 3, aspect_factor))
 
         except RuntimeWarning:
-            raise ValueError("Degenerate Cell") from RuntimeWarning
+            raise ValueError(f"Degenerate Cell: {self}") from RuntimeWarning
         finally:
             warnings.resetwarnings()
 
@@ -176,6 +176,9 @@ class CellBase(abc.ABC):
     @property
     def min_length(self) -> float:
         return min(self.get_edge_lengths())
+
+    def __str__(self):
+        return "-".join([str(index) for index in self.indexes])
 
 
 class QuadCell(CellBase):
