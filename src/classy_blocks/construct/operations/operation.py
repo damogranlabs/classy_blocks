@@ -1,7 +1,8 @@
 import warnings
-from typing import Dict, List, Optional, TypeVar, Union, get_args
+from typing import Dict, List, Optional, Union, get_args
 
 import numpy as np
+from typing_extensions import Unpack
 
 from classy_blocks.base.element import ElementBase
 from classy_blocks.base.exceptions import EdgeCreationError
@@ -10,14 +11,12 @@ from classy_blocks.construct.edges import Arc, EdgeData, Line, Project, Spline
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.point import Point
 from classy_blocks.grading.chop import Chop
-from classy_blocks.types import AxisType, NPPointType, OrientType, PointType, ProjectToType, VectorType
+from classy_blocks.types import AxisType, ChopArgs, NPPointType, OrientType, PointType, ProjectToType, VectorType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import SIDES_MAP
 from classy_blocks.util.frame import Frame
 from classy_blocks.util.tools import edge_map
-
-OperationT = TypeVar("OperationT", bound="Operation")
 
 
 class Operation(ElementBase):
@@ -59,7 +58,7 @@ class Operation(ElementBase):
 
         self.side_edges[corner_idx] = edge_data
 
-    def chop(self, axis: AxisType, **kwargs) -> None:
+    def chop(self, axis: AxisType, **kwargs: Unpack[ChopArgs]) -> None:
         """Chop the operation (count/grading) in given axis:
         0: along first edge of a face
         1: along second edge of a face

@@ -57,7 +57,7 @@ class BlockList:
             for i in list(undefined_blocks):
                 message += f"{i}: "
                 for axis in (0, 1, 2):
-                    message += str(self.blocks[i].axes[axis].grading.count) + " "
+                    message += str(self.blocks[i].axes[axis].count) + " "
                 message += "\n"
 
             raise UndefinedGradingsError(message)

@@ -1,10 +1,10 @@
 from typing import List, get_args
 
 from classy_blocks.grading.chop import Chop
-from classy_blocks.items.axis import Axis
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.items.wire import Wire
+from classy_blocks.items.wires.axis import Axis
+from classy_blocks.items.wires.wire import Wire
 from classy_blocks.types import AxisType, IndexType
 from classy_blocks.util import constants
 from classy_blocks.util.frame import Frame
@@ -102,7 +102,8 @@ class Block:
     @property
     def wire_list(self) -> List[Wire]:
         """A flat list of all wires"""
-        return self.axes[0].wires + self.axes[1].wires + self.axes[2].wires
+        # TODO: no daisy chaining!
+        return self.axes[0].wires.wires + self.axes[1].wires.wires + self.axes[2].wires.wires
 
     @property
     def edge_list(self) -> List[Edge]:
@@ -122,11 +123,7 @@ class Block:
 
     def copy_grading(self) -> bool:
         """Attempts to copy grading from a neighbouring block;
-        Returns True if the block is/has been defined, False
-        if the block still has missing data"""
-        if self.is_defined:
-            return False
-
+        returns True if the grading was copied and False in all other cases"""
         updated = False
 
         if not self.is_defined:
@@ -143,15 +140,15 @@ class Block:
     def description(self) -> str:
         """hex definition for blockMesh"""
         fmt_vertices = "( " + " ".join(str(v.index) for v in self.vertices) + " )"
-        fmt_count = "( " + " ".join([str(axis.grading.count) for axis in self.axes]) + " )"
-        # FIXME: no daisy.object.chaining
+        fmt_count = "( " + " ".join([str(axis.count) for axis in self.axes]) + " )"
+
         fmt_grading = (
-            "simpleGrading ( "
-            + self.axes[0].grading.description
+            "edgeGrading ( "
+            + self.axes[0].format_grading()
             + " "
-            + self.axes[1].grading.description
+            + self.axes[1].format_grading()
             + " "
-            + self.axes[2].grading.description
+            + self.axes[2].format_grading()
             + " )"
         )
         fmt_comments = f"// {self.index} {self.comment}\n"

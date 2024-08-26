@@ -5,7 +5,7 @@ from classy_blocks.construct.edges import Arc
 from classy_blocks.grading.chop import Chop
 from classy_blocks.items.block import Block
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.items.wire import Wire
+from classy_blocks.items.wires.wire import Wire
 from classy_blocks.util import functions as f
 from tests.fixtures.block import BlockTestCase
 
@@ -197,9 +197,9 @@ class BlockTests(BlockTestCase):
         block_1 = self.make_block(1)
 
         # clear chops from block_1
-        block_1.axes[0].chops = []
-        block_1.axes[1].chops = []
-        block_1.axes[2].chops = []
+        block_1.axes[0].wires.chops = []
+        block_1.axes[1].wires.chops = []
+        block_1.axes[2].wires.chops = []
 
         block_0.add_neighbour(block_1)
 
@@ -218,7 +218,7 @@ class BlockTests(BlockTestCase):
         """Output of a simple block"""
         # just to make sure it works
         block_0 = self.make_block(0)
-        block_0.axes[0].chops = []
+        block_0.axes[0].wires.chops = []
 
         block_0.chop(0, Chop(count=10))
         block_0.chop(1, Chop(count=10))
@@ -227,8 +227,12 @@ class BlockTests(BlockTestCase):
         block_0.cell_zone = "test_zone"
         block_0.comment = "test_comment"
 
+        for axis in block_0.axes:
+            axis.wires.grade()
+
         expected_description = (
-            "\thex ( 0 1 2 3 4 5 6 7 ) test_zone ( 10 10 10 )" " simpleGrading ( 1 1 1 ) // 0 test_comment\n"
+            "\thex ( 0 1 2 3 4 5 6 7 ) test_zone ( 10 10 10 )"
+            " edgeGrading ( 1 1 1 1 1 1 1 1 1 1 1 1 ) // 0 test_comment\n"
         )
 
         self.assertEqual(block_0.description, expected_description)
@@ -269,7 +273,7 @@ class WireframeTests(BlockTestCase):
     def test_axis_count(self):
         """Check that each axis has exactly 4 wires"""
         for axis in range(3):
-            self.assertEqual(len(self.block.axes[axis].wires), 4)
+            self.assertEqual(len(self.block.axes[axis].wires.wires), 4)
 
     @parameterized.expand(((0, 2), (1, 3), (0, 6), (1, 7)))
     def test_find_wire_fail(self, corner_1, corner_2):

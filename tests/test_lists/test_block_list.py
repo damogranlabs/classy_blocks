@@ -29,7 +29,7 @@ class BlockListTests(BlockTestCase):
         """Raise an exception when there's not enough grading data"""
         blocks = [self.make_block(i) for i in (0, 1, 2)]
 
-        blocks[0].axes[0].chops = []
+        blocks[0].axes[0].wires.chops = []
 
         for block in blocks:
             self.bl.add(block)

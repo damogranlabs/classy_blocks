@@ -174,7 +174,7 @@ class MeshTests(BlockTestCase):
         self.mesh.block_list.propagate_gradings()
 
         for block in self.mesh.block_list.blocks:
-            self.assertEqual(block.axes[2].grading.count, 10)
+            self.assertEqual(block.axes[2].count, 10)
 
     def test_chop_cylinder_tangential(self):
         """Cylinder chops differently from rings"""
@@ -188,7 +188,7 @@ class MeshTests(BlockTestCase):
         self.mesh.block_list.propagate_gradings()
 
         for block in self.mesh.block_list.blocks:
-            self.assertEqual(block.axes[1].grading.count, 10)
+            self.assertEqual(block.axes[1].count, 10)
 
     def test_set_default_patch(self):
         with mock.patch.object(PatchList, "set_default") as mock_default:

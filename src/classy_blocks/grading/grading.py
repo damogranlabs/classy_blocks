@@ -49,9 +49,9 @@ class Grading:
     def __init__(self, length: float):
         # "multi-grading" specification according to:
         # https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
-        self.specification: List[List] = []  # a list of lists [length ratio, count ratio, total expansion]
-
         self.length = length
+
+        self.specification: List[List] = []  # a list of lists [length ratio, count ratio, total expansion]
 
     def add_chop(self, chop: Chop) -> None:
         """Add a grading division to block specification.
@@ -102,9 +102,14 @@ class Grading:
         return g_inv
 
     @property
+    def counts(self) -> List[int]:
+        """Counts per chop"""
+        return [d[1] for d in self.specification]
+
+    @property
     def count(self) -> int:
         """Return number of cells, summed over all sub-divisions"""
-        return sum(d[1] for d in self.specification)
+        return sum(self.counts)
 
     @property
     def is_defined(self) -> bool:

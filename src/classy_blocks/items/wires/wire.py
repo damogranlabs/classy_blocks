@@ -1,6 +1,7 @@
-from typing import List, Optional, Set
+from typing import List, Set
 
 from classy_blocks.construct.edges import Line
+from classy_blocks.grading.chop import Chop
 from classy_blocks.grading.grading import Grading
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
@@ -21,12 +22,16 @@ class Wire:
         # (that is, not included in edge.factory.registry)
         self.edge: Edge = factory.create(self.vertices[0], self.vertices[1], Line())
 
-        # grading/counts of this wire (edgeGrading only)
-        self.grading: Optional[Grading] = None
+        # grading/counts of this wire
+        self.grading = Grading(self.length)
 
-        # up to 4 wires can be at the same spot; this list holds other
+        # multiple wires can be at the same spot; this list holds other
         # coincident wires
         self.coincidents: Set[Wire] = set()
+
+    @property
+    def length(self) -> float:
+        return self.edge.length
 
     @property
     def is_valid(self) -> bool:
@@ -50,6 +55,10 @@ class Wire:
         """Adds a reference to a coincident wire, if it's aligned"""
         if self.is_coincident(wire):
             self.coincidents.add(wire)
+
+    def add_chop(self, chop: Chop) -> None:
+        """Adds Chops to this Wire's Grading object"""
+        self.grading.add_chop(chop)
 
     def __repr__(self):
         return f"Wire {self.corners[0]}-{self.corners[1]}"

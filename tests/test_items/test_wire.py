@@ -1,7 +1,7 @@
 import copy
 
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.items.wire import Wire
+from classy_blocks.items.wires.wire import Wire
 from tests.fixtures.data import DataTestCase
 
 
