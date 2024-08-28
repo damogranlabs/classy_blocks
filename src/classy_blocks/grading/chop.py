@@ -57,7 +57,6 @@ class Chop:
     count: Optional[int] = None
     end_size: Optional[float] = None
     total_expansion: Optional[float] = None
-    invert: bool = False
     preserve: ChopPreserveType = "c2c_expansion"
 
     def __post_init__(self) -> None:
@@ -92,9 +91,6 @@ class Chop:
             if {"count", "total_expansion", "c2c_expansion", "start_size", "end_size"}.issubset(calculated):
                 self.results["count"] = int(self.results["count"])
 
-                if self.invert:
-                    data["total_expansion"] = 1 / data["total_expansion"]
-
                 return data["count"], data["total_expansion"]
 
             for chop_rel in ChopRelation.get_possible_combinations():
@@ -113,6 +109,17 @@ class Chop:
 
         raise ValueError(f"Could not calculate count and grading for given parameters: {data}")
 
+    def invert(self) -> None:
+        """Modifies this chop so that grading will have an opposite orientation,
+        a.k.a. start -> end and c2c -> 1/c2c."""
+        self.end_size, self.start_size = self.start_size, self.end_size
+
+        if self.c2c_expansion is not None:
+            self.c2c_expansion = 1 / self.c2c_expansion
+
+        if self.total_expansion is not None:
+            self.total_expansion = 1 / self.total_expansion
+
     def copy_preserving(self, inverted: bool = False) -> "Chop":
         """Creates a copy of this Chop with equal count but
         sets other parameters from current data so that
@@ -123,21 +130,10 @@ class Chop:
         for arg in ["total_expansion", "c2c_expansion", "start_size", "end_size"]:
             args[arg] = None
 
-        # TODO: get rid of if-ing
-        if self.preserve == "start_size":
-            if inverted:
-                args["end_size"] = self.results["start_size"]
-            else:
-                args["start_size"] = self.results["start_size"]
-        elif self.preserve == "end_size":
-            if inverted:
-                args["start_size"] = self.results["end_size"]
-            else:
-                args["end_size"] = self.results["end_size"]
-        else:
-            if inverted:
-                args["c2c_expansion"] = 1 / self.results["c2c_expansion"]
-            else:
-                args["c2c_expansion"] = self.results["c2c_expansion"]
+        args[self.preserve] = self.results[self.preserve]
+        chop = Chop(**args)
 
-        return Chop(**args)
+        if inverted:
+            chop.invert()
+
+        return chop

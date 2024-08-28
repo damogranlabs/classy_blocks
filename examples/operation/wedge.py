@@ -28,7 +28,7 @@ wedges[0].set_patch("left", "inlet")
 wedges[-1].set_patch("right", "outlet")
 
 # this will be copied to all next blocks
-wedges[0].chop(1, c2c_expansion=1.2, start_size=0.01, invert=True)
+wedges[0].chop(1, end_size=0.01, c2c_expansion=1 / 1.2)
 
 # Once an entity is added to the mesh,
 # its modifications will not be reflected there;

@@ -57,7 +57,7 @@ class Block:
             Optionally, this can be the only provided argument;
             in that case c2c_expansion will be set to 1.
         * *start_size:
-            size of the first cell (last if invert==True)
+            size of the first cell
         * *end_size:
             size of the last cell
         * *c2c_expansion:
@@ -66,12 +66,12 @@ class Block:
             ratio between first and last cell size
 
         :Optional keyword arguments:
-        * *invert:
-            reverses grading if True
-        * *take:
-            must be 'min', 'max', or 'avg'; takes minimum or maximum edge
-            length for block size calculation, or average of all edges in given direction.
-            With multigrading only the first 'take' argument is used, others are copied.
+        * *preserve:
+            which of the specified values should be preserved. Must be one of
+            "start_size", "end_size" or "c2c_expansion". The last is default and will produce
+            regular simpleGrading with 3 values for each axis. When start or end size
+            is to be kept, grading will switch to edgeGrading so that cells on each edge
+            will stay consistent start/end size regardless of edge length.
         * *length_ratio:
             in case the block is graded using multiple gradings, specify
             length of current division; see

@@ -39,7 +39,6 @@ class ChopArgs(TypedDict, total=False):
     count: int
     end_size: float
     total_expansion: float
-    invert: bool
     preserve: ChopPreserveType
 
 
