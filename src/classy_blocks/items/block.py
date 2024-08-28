@@ -136,21 +136,36 @@ class Block:
     def indexes(self) -> IndexType:
         return [vertex.index for vertex in self.vertices]
 
+    def format_grading(self) -> str:
+        """Returns the simple/edgeGrading string"""
+        if all([axis.wires.is_simple for axis in self.axes]):  # is_simple
+            return (
+                "simpleGrading ( "
+                + self.axes[0].wires.format_single()
+                + " "
+                + self.axes[1].wires.format_single()
+                + " "
+                + self.axes[2].wires.format_single()
+                + " )"
+            )
+        else:
+            return (
+                "edgeGrading ( "
+                + self.axes[0].wires.format_all()
+                + " "
+                + self.axes[1].wires.format_all()
+                + " "
+                + self.axes[2].wires.format_all()
+                + " )"
+            )
+
     @property
     def description(self) -> str:
         """hex definition for blockMesh"""
         fmt_vertices = "( " + " ".join(str(v.index) for v in self.vertices) + " )"
         fmt_count = "( " + " ".join([str(axis.count) for axis in self.axes]) + " )"
 
-        fmt_grading = (
-            "edgeGrading ( "
-            + self.axes[0].format_grading()
-            + " "
-            + self.axes[1].format_grading()
-            + " "
-            + self.axes[2].format_grading()
-            + " )"
-        )
+        fmt_grading = self.format_grading()
         fmt_comments = f"// {self.index} {self.comment}\n"
 
         return f"\thex {fmt_vertices} {self.cell_zone} {fmt_count} {fmt_grading} {fmt_comments}"

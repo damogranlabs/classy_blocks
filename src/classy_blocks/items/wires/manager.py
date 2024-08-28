@@ -35,8 +35,12 @@ class WireManagerBase(abc.ABC):
     def count(self) -> int:
         """Returns cell count"""
 
-    @property
-    def description(self) -> str:
+    def format_single(self) -> str:
+        """Returns a single formatted grading specification for simpleGrading"""
+        return self.wires[0].grading.description
+
+    def format_all(self) -> str:
+        """Returns all grading specifications, formatted for edgeGrading"""
         return " ".join([wire.grading.description for wire in self.wires])
 
     @property
@@ -44,6 +48,18 @@ class WireManagerBase(abc.ABC):
         """Returns length for each wire of this axis; to be used
         for grading calculation"""
         return sum(wire.edge.length for wire in self.wires) / 4
+
+    @property
+    def is_simple(self) -> bool:
+        """Returns True if only simpleGrading is required for this axis"""
+        # That means all gradings are the same
+        first_grading = self.wires[0].grading
+
+        for wire in self.wires[1:]:
+            if wire.grading != first_grading:
+                return False
+
+        return True
 
 
 class WireChopManager(WireManagerBase):

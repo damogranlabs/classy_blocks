@@ -95,10 +95,10 @@ class Axis:
 
         return False
 
-    def format_grading(self) -> str:
-        """Returns formatted grading information, ready to be written to output"""
-        return self.wires.description
-
     @property
     def count(self) -> int:
         return self.wires.count
+
+    @property
+    def is_simple(self) -> bool:
+        return self.wires.is_simple
