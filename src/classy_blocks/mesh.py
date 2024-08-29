@@ -132,6 +132,14 @@ class Mesh:
             if entity.geometry is not None:
                 self.add_geometry(entity.geometry)
 
+    def grade(self) -> None:
+        if not self.is_assembled:
+            raise RuntimeError("Cannot grade a mesh before it is assembled")
+
+        self.block_list.grade_blocks()
+        self.block_list.propagate_gradings()
+        self.block_list.check_consistency()
+
     def clear(self) -> None:
         """Undoes the assemble() method; clears created blocks and other lists
         but leaves added depot items intact"""
@@ -189,7 +197,7 @@ class Mesh:
 
         # gradings: define after writing VTK;
         # if it is not specified correctly, this will raise an exception
-        self.block_list.propagate_gradings()
+        self.grade()
 
         with open(output_path, "w", encoding="utf-8") as output:
             output.write(constants.MESH_HEADER)

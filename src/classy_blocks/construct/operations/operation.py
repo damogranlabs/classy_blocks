@@ -64,7 +64,21 @@ class Operation(ElementBase):
         1: along second edge of a face
         2: between faces / along operation path
 
-        Kwargs: see arguments for Chop object"""
+        kwargs:
+        Available grading parameters are:
+         - start_size: width of start cell
+         - end_size: width of end cell
+         - count: cell count in given direction
+         - c2c_expansion: cell-to-cell expansion ratio (default=1)
+         - total_expansion: ratio between first and last cell size
+
+        You must specify start_size and/or count.
+        c2c_expansion is optional - will be used to create graded cells
+        and will default to 1 if not provided.
+
+        Use length_ratio for multigrading (see documentation):
+        https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading"""
+
         self.chops[axis].append(Chop(**kwargs))
 
     def unchop(self, axis: AxisType) -> None:

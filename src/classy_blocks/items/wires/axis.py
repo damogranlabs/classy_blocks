@@ -90,10 +90,13 @@ class Axis:
                     for chop in reversed(neighbour.wires.chops):
                         self.wires.add_chop(chop.copy_preserving(inverted=True))
 
-                self.wires.grade()
+                self.grade()
                 return True
 
         return False
+
+    def grade(self) -> None:
+        self.wires.grade()
 
     @property
     def count(self) -> int:
@@ -102,3 +105,6 @@ class Axis:
     @property
     def is_simple(self) -> bool:
         return self.wires.is_simple
+
+    def check_consistency(self) -> None:
+        self.wires.check_consistency()

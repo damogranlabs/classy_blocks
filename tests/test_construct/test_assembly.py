@@ -75,6 +75,7 @@ class AssemblyTests(unittest.TestCase):
 
         mesh.add(joint)
         mesh.assemble()
+        mesh.block_list.grade_blocks()
         mesh.block_list.propagate_gradings()
 
     def test_set_patches(self):

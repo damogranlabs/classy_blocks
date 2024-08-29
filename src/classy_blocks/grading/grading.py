@@ -54,23 +54,6 @@ class Grading:
         self.specification: List[List] = []  # a list of lists [length ratio, count ratio, total expansion]
 
     def add_chop(self, chop: Chop) -> None:
-        """Add a grading division to block specification.
-        Use length_ratio for multigrading (see documentation).
-        Available grading parameters are:
-         - start_size: width of start cell
-         - end_size: width of end cell
-         - count: cell count in given direction
-         - c2c_expansion: cell-to-cell expansion ratio (default=1)
-         - total_expansion: ratio between first and last cell size
-
-        You must specify start_size and/or count.
-        c2c_expansion is optional - will be used to create graded cells
-        and will default to 1 if not provided.
-
-        To reverse grading, use invert=True.
-
-        Documentation:
-        https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading"""
         if not (0 < chop.length_ratio <= 1):
             raise ValueError(f"Length ratio must be between 0 and (including) 1, got {chop.length_ratio}")
 
@@ -160,3 +143,6 @@ class Grading:
                     return False
 
         return True
+
+    def __repr__(self) -> str:
+        return str(self.specification)

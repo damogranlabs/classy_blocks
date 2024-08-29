@@ -121,6 +121,10 @@ class Block:
         """Returns True if counts and gradings are defined for all axes"""
         return all(axis.is_defined for axis in self.axes)
 
+    def grade(self):
+        for axis in self.axes:
+            axis.grade()
+
     def copy_grading(self) -> bool:
         """Attempts to copy grading from a neighbouring block;
         returns True if the grading was copied and False in all other cases"""
@@ -132,13 +136,17 @@ class Block:
 
         return updated
 
+    def check_consistency(self) -> None:
+        for axis in self.axes:
+            axis.check_consistency()
+
     @property
     def indexes(self) -> IndexType:
         return [vertex.index for vertex in self.vertices]
 
     def format_grading(self) -> str:
         """Returns the simple/edgeGrading string"""
-        if all([axis.wires.is_simple for axis in self.axes]):  # is_simple
+        if all(axis.is_simple for axis in self.axes):  # is_simple
             return (
                 "simpleGrading ( "
                 + self.axes[0].wires.format_single()

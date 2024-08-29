@@ -22,13 +22,19 @@ class WireManagerBase(abc.ABC):
         self.chops.append(chop)
 
     @abc.abstractmethod
+    def update(self) -> None:
+        """Re-set grading and wires' lengths"""
+        for wire in self.wires:
+            wire.grading.length = wire.length
+
+    @abc.abstractmethod
     def grade(self) -> None:
         """Convert data from user or neighbour to Grading objects on wires"""
 
     @property
-    @abc.abstractmethod
     def is_defined(self) -> bool:
-        """Returns True if there's enough data to define a grading on this axis"""
+        """Returns True if all gradings are defined on this axis"""
+        return all(wire.grading.is_defined for wire in self.wires)
 
     @property
     @abc.abstractmethod
@@ -61,6 +67,13 @@ class WireManagerBase(abc.ABC):
 
         return True
 
+    def check_consistency(self) -> None:
+        """Raises an error if not all wires have the same count"""
+        counts = [wire.grading.count for wire in self.wires]
+        if len(set(counts)) != 1:
+            wire_descriptions = [str(wire) for wire in self.wires]
+            raise InconsistentGradingsError(f"Inconsistent counts on wires {wire_descriptions} ({counts})")
+
 
 class WireChopManager(WireManagerBase):
     """Responsible for conversion of user-specified Chops
@@ -71,21 +84,16 @@ class WireChopManager(WireManagerBase):
 
         # Chops and Grading that is done on the whole axis;
         # Cell count is defined here. Other values are a matter of each individual Wire.
-        self.grading = Grading(self.length)
+        self.grading = Grading(0)
 
-    @property
-    def is_defined(self) -> bool:
-        """True if chops have been delegated to each wire and gradings calculated"""
-        if len(self.chops) == 0:
-            return False
+    def update(self):
+        self.grading.length = self.length
 
-        # either all wires are defined or none is
-        if not self.wires[0].grading.is_defined:
-            self.grade()
-
-        return True
+        super().update()
 
     def grade(self) -> None:
+        self.update()
+
         # Create a proper Grading from chops
         for chop in self.chops:
             self.grading.add_chop(chop)
@@ -108,9 +116,8 @@ class WirePropagateManager(WireManagerBase):
     def __init__(self, wires: List[Wire]):
         super().__init__(wires)
 
-    @property
-    def is_defined(self):
-        return self.wires[0].grading.is_defined
+    def update(self):
+        super().update()
 
     def grade(self):
         """Checks each wire whether their coincidents (wires from other blocks)
@@ -118,7 +125,6 @@ class WirePropagateManager(WireManagerBase):
         Returns False otherwise"""
         self.copy_neighbours()
         self.propagate_grading()
-        self.check_consistency()
 
     def copy_neighbours(self) -> None:
         """Checks for defined neighbours and copies grading from them"""
@@ -147,13 +153,6 @@ class WirePropagateManager(WireManagerBase):
             if not wire.grading.is_defined:
                 for chop in self.chops:
                     wire.grading.add_chop(chop)
-
-    def check_consistency(self):
-        """Raises an error if not all wires have the same count"""
-        counts = [wire.grading.count for wire in self.wires]
-        if len(set(counts)) != 1:
-            wire_descriptions = [str(wire) for wire in self.wires]
-            raise InconsistentGradingsError(f"Inconsistent counts on wires {wire_descriptions} ({counts})")
 
     @property
     def count(self):

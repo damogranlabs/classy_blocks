@@ -131,8 +131,8 @@ class Chop:
             args[arg] = None
 
         args[self.preserve] = self.results[self.preserve]
-        chop = Chop(**args)
 
+        chop = Chop(**args)
         if inverted:
             chop.invert()
 

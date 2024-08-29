@@ -136,6 +136,17 @@ class TestGrading(unittest.TestCase):
 
         self.assertAlmostEqual(self.g.specification[0][2], 1 / self.g.specification[1][2])
 
+    def test_invert_chop(self):
+        """Inverted chop, different result"""
+        chop_1 = Chop(0.5, count=10, total_expansion=4)
+        chop_2 = Chop(0.5, count=10, total_expansion=4)
+        chop_2.invert()
+
+        chop_1.calculate(1)
+        chop_2.calculate(1)
+
+        self.assertAlmostEqual(chop_1.results["total_expansion"], 1 / chop_2.results["total_expansion"])
+
     def test_add_wrong_ratio(self):
         """Add a chop with an invalid length ratio"""
         with self.assertRaises(ValueError):

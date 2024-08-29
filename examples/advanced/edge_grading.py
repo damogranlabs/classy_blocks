@@ -1,7 +1,5 @@
 import os
 
-import numpy as np
-
 import classy_blocks as cb
 
 mesh = cb.Mesh()
@@ -24,11 +22,8 @@ contract = cb.Loft(contract_start, contract_start.copy().translate([1, 0, 0]).sc
 contract.chop(2, start_size=0.1)
 mesh.add(contract)
 
-# rotate the end block to demonstrate grading propagation on non-aligned blocks
 end = cb.Extrude(contract.get_face("top"), 1)
-end.rotate(np.pi, [0, 0, 1])
 end.chop(2, start_size=0.1)
-
 mesh.add(end)
 
 mesh.set_default_patch("walls", "wall")

@@ -170,6 +170,7 @@ class BlockSimpleGradingTests(BlockTestCase):
         block_0.chop(0, Chop(count=10))
         block_0.chop(1, Chop(count=10))
         block_0.chop(2, Chop(count=10))
+        block_0.grade()
 
         self.assertTrue(block_0.is_defined)
 
@@ -180,6 +181,7 @@ class BlockSimpleGradingTests(BlockTestCase):
         block_0.chop(0, Chop(count=10))
         block_0.chop(1, Chop(count=10))
         block_0.chop(2, Chop(count=10))
+        block_0.grade()
 
         self.assertTrue(block_0.is_defined)
 
@@ -217,6 +219,9 @@ class BlockSimpleGradingTests(BlockTestCase):
         block_0 = self.make_block(0)
         block_1 = self.make_block(1)
 
+        block_0.grade()
+        block_1.grade()
+
         block_0.add_neighbour(block_1)
 
         self.assertTrue(block_0.copy_grading())
@@ -245,6 +250,8 @@ class BlockSimpleGradingTests(BlockTestCase):
 
 
 class BlockEdgeGradingTests(BlockTestCase):
+    """Refer to test_edge_grading.py for more involved (function) tests"""
+
     def make_vertices(self, index: int) -> List[Vertex]:
         vertices = super().make_vertices(index)
 
@@ -270,7 +277,7 @@ class BlockEdgeGradingTests(BlockTestCase):
         block.chop(axis, Chop(**kwargs))
 
     def calculate(self, block):
-        _ = block.is_defined
+        block.grade()
 
     def test_edge_grading_output(self):
         """Switch to edgeGrading when a chop is to be 'preserved'"""
@@ -302,6 +309,9 @@ class BlockEdgeGradingTests(BlockTestCase):
         self.chop(block_0, 2, count=10)
         self.chop(block_1, 0, start_size=0.1, end_size=0.01, preserve="end_size")
         self.chop(block_1, 1, count=10)
+
+        self.calculate(block_0)
+        self.calculate(block_1)
 
         block_0.add_neighbour(block_1)
         block_1.add_neighbour(block_0)
