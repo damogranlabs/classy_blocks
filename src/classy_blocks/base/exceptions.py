@@ -18,6 +18,10 @@ class UndefinedGradingsError(Exception):
     define all blocks in the mesh"""
 
 
+class InconsistentGradingsError(Exception):
+    """Raised when cell counts for edges on the same axis is not consistent"""
+
+
 class ShapeCreationError(Exception):
     """Base class for shape creation errors (invalid parameters/types to
     shape constructors)"""

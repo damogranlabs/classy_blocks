@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Literal, Sequence, Union
+from typing import Any, Callable, List, Literal, Sequence, TypedDict, Union
 
 from nptyping import NDArray, Shape
 
@@ -28,8 +28,19 @@ OrientType = Literal["left", "right", "front", "back", "top", "bottom"]
 
 AxisType = Literal[0, 1, 2]
 
-# which block size to take when chopping
-ChopTakeType = Literal["min", "max", "avg"]
+# the complete guide to chopping
+ChopPreserveType = Literal["start_size", "end_size", "c2c_expansion"]
+
+
+class ChopArgs(TypedDict, total=False):
+    length_ratio: float
+    start_size: float
+    c2c_expansion: float
+    count: int
+    end_size: float
+    total_expansion: float
+    preserve: ChopPreserveType
+
 
 # Project vertex/edge to one or multiple geometries
 ProjectToType = Union[str, List[str]]

@@ -1,5 +1,3 @@
-from typing import Set
-
 import numpy as np
 from parameterized import parameterized
 
@@ -132,7 +130,7 @@ class QuadGridTests(SketchTestsBase):
         ]
 
         grid = QuadGrid(positions, indexes)
-        fixed_points: Set[int] = set()
+        fixed_points = set()
 
         for cell in grid.cells:
             fixed_points.update(cell.boundary)

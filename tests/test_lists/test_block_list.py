@@ -20,6 +20,7 @@ class BlockListTests(BlockTestCase):
         for index in (0, 1, 2):
             self.bl.add(self.make_block(index))
 
+        self.bl.grade_blocks()
         self.bl.propagate_gradings()
 
         for block in self.bl.blocks:
@@ -29,10 +30,12 @@ class BlockListTests(BlockTestCase):
         """Raise an exception when there's not enough grading data"""
         blocks = [self.make_block(i) for i in (0, 1, 2)]
 
-        blocks[0].axes[0].chops = []
+        blocks[0].axes[0].wires.chops = []
 
         for block in blocks:
             self.bl.add(block)
+
+        self.bl.grade_blocks()
 
         with self.assertRaises(UndefinedGradingsError):
             self.bl.propagate_gradings()
@@ -44,6 +47,7 @@ class BlockListTests(BlockTestCase):
         for block in blocks:
             self.bl.add(block)
 
+        self.bl.grade_blocks()
         self.bl.propagate_gradings()
 
         expected = "blocks\n(\n"

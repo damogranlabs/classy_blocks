@@ -7,40 +7,13 @@ from tests.fixtures.block import BlockTestCase
 class AxisTests(BlockTestCase):
     """Tests of the Axis object"""
 
-    def test_lengths(self):
-        """Block dimensions"""
-        # Not all wires on this axis are of the same length
-        lengths = self.make_block(0).axes[0].lengths
-
-        self.assertAlmostEqual(len(lengths), 4)
-
-        # all edges in this axis are straight but 0-1
-        self.assertNotEqual(lengths[0], lengths[1])
-
-        self.assertAlmostEqual(lengths[1], lengths[2])
-        self.assertAlmostEqual(lengths[2], lengths[3])
-
-    def test_length_default(self):
-        """Use average length when no chops are defined"""
-        self.assertAlmostEqual(self.make_block(0).axes[0].length, 1.0397797556255037)
-
-    def test_length_min(self):
-        """Minimum length"""
-        block = self.make_block(0)
-        block.axes[0].chops[0].take = "min"
-        self.assertAlmostEqual(block.axes[0].length, 1)
-
-    def test_length_max(self):
-        """Maximum length"""
-        block = self.make_block(0)
-        block.axes[0].chops[0].take = "max"
-        self.assertAlmostEqual(block.axes[0].length, 1.1591190225020154)
-
     def test_length_avg(self):
         """Average length"""
+        # all edges are straight and of length 1,
+        # except one that has a curved edge
         block = self.make_block(0)
-        block.axes[0].chops[0].take = "avg"
-        self.assertAlmostEqual(block.axes[0].length, 1.0397797556255037)
+        length = block.axes[0].wires.length
+        self.assertAlmostEqual(length, 1.0397797556255037)
 
     def test_is_aligned_exception(self):
         """Raise an exception when axes are not aligned"""
@@ -75,9 +48,3 @@ class AxisTests(BlockTestCase):
         block_0.add_neighbour(block_1)
 
         self.assertFalse(block_1.axes[1].is_aligned(block_0.axes[1]))
-
-    def test_grading_self(self):
-        """Grading, defined on this axis"""
-        block_0 = self.make_block(0)
-
-        self.assertAlmostEqual(block_0.axes[0].grading.count, 6)

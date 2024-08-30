@@ -135,11 +135,12 @@ for i in (0, 6):
 # Keep in mind that not all blocks need exact specification as
 # chopping will propagate automatically through blocking
 lofts[0].chop(2, count=1)  # 1 cell in the 3rd dimension
-lofts[1].chop(1, start_size=BL_THICKNESS, c2c_expansion=C2C_EXPANSION, take="max")
-lofts[8].chop(1, start_size=CELL_SIZE, take="max")
+# keep consistent first cell thickness by using edge grading
+lofts[1].chop(1, start_size=BL_THICKNESS, c2c_expansion=C2C_EXPANSION, preserve="start_size")
+lofts[8].chop(1, start_size=CELL_SIZE)
 
 for i in (0, 1, 2, 3, 4, 5, 6):
-    lofts[i].chop(0, start_size=CELL_SIZE, take="max")
+    lofts[i].chop(0, start_size=CELL_SIZE)
 
 for loft in lofts:
     mesh.add(loft)
@@ -195,7 +196,9 @@ optimize_along_line(4, 3, 6)
 optimize_along_line(5, 3, 6)
 
 if OPTIMIZE:
-    optimizer.optimize(tolerance=1e-7, method="SLSQP")
+    optimizer.optimize(tolerance=1e-3, method="SLSQP")
+    mesh.backport()
+    mesh.clear()
 
 ### Write the mesh
 mesh.modify_patch("topAndBottom", "empty")

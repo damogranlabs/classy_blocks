@@ -1,5 +1,6 @@
 import unittest
 
+import numpy as np
 from parameterized import parameterized
 
 from classy_blocks.grading import relations as rel
@@ -111,27 +112,40 @@ class TestGrading(unittest.TestCase):
         self.g.length = 2
 
         self.g.add_chop(Chop(length_ratio=0.5, start_size=0.1, c2c_expansion=1.1))
-        self.g.add_chop(Chop(length_ratio=0.5, start_size=0.1, c2c_expansion=1.1, invert=True))
+        self.g.add_chop(Chop(length_ratio=0.5, end_size=0.1, c2c_expansion=1 / 1.1))
 
-        self.assertListEqual(self.g.specification, [[0.5, 8, 1.9487171000000012], [0.5, 8, 0.5131581182307065]])
+        np.testing.assert_almost_equal(
+            self.g.specification, [[0.5, 8, 1.9487171000000012], [0.5, 8, 0.5131581182307065]]
+        )
 
     def test_add_division_2(self):
         """single grading, set c2c_expansion and count"""
         self.g.add_chop(Chop(1, c2c_expansion=1.1, count=10))
-        self.assertListEqual(self.g.specification, [[1, 10, 2.357947691000002]])
+        np.testing.assert_almost_equal(self.g.specification, [[1, 10, 2.357947691000002]])
 
     def test_add_division_3(self):
         """single grading, set count and start_size"""
         self.g.add_chop(Chop(1, count=10, start_size=0.05))
 
-        self.assertListEqual(self.g.specification, [[1, 10, 3.433788027752166]])
+        np.testing.assert_almost_equal(self.g.specification, [[1, 10, 3.433788027752166]])
 
     def test_add_division_inverted(self):
         """Inverted chop, different result"""
-        self.g.add_chop(Chop(0.5, count=10, start_size=0.05, invert=False))
-        self.g.add_chop(Chop(0.5, count=10, start_size=0.05, invert=True))
+        self.g.add_chop(Chop(0.5, count=10, start_size=0.05))
+        self.g.add_chop(Chop(0.5, count=10, end_size=0.05))
 
         self.assertAlmostEqual(self.g.specification[0][2], 1 / self.g.specification[1][2])
+
+    def test_invert_chop(self):
+        """Inverted chop, different result"""
+        chop_1 = Chop(0.5, count=10, total_expansion=4)
+        chop_2 = Chop(0.5, count=10, total_expansion=4)
+        chop_2.invert()
+
+        chop_1.calculate(1)
+        chop_2.calculate(1)
+
+        self.assertAlmostEqual(chop_1.results["total_expansion"], 1 / chop_2.results["total_expansion"])
 
     def test_add_wrong_ratio(self):
         """Add a chop with an invalid length ratio"""

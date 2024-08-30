@@ -1,10 +1,10 @@
 from typing import List, get_args
 
 from classy_blocks.grading.chop import Chop
-from classy_blocks.items.axis import Axis
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.items.wire import Wire
+from classy_blocks.items.wires.axis import Axis
+from classy_blocks.items.wires.wire import Wire
 from classy_blocks.types import AxisType, IndexType
 from classy_blocks.util import constants
 from classy_blocks.util.frame import Frame
@@ -57,7 +57,7 @@ class Block:
             Optionally, this can be the only provided argument;
             in that case c2c_expansion will be set to 1.
         * *start_size:
-            size of the first cell (last if invert==True)
+            size of the first cell
         * *end_size:
             size of the last cell
         * *c2c_expansion:
@@ -66,12 +66,12 @@ class Block:
             ratio between first and last cell size
 
         :Optional keyword arguments:
-        * *invert:
-            reverses grading if True
-        * *take:
-            must be 'min', 'max', or 'avg'; takes minimum or maximum edge
-            length for block size calculation, or average of all edges in given direction.
-            With multigrading only the first 'take' argument is used, others are copied.
+        * *preserve:
+            which of the specified values should be preserved. Must be one of
+            "start_size", "end_size" or "c2c_expansion". The last is default and will produce
+            regular simpleGrading with 3 values for each axis. When start or end size
+            is to be kept, grading will switch to edgeGrading so that cells on each edge
+            will stay consistent start/end size regardless of edge length.
         * *length_ratio:
             in case the block is graded using multiple gradings, specify
             length of current division; see
@@ -102,7 +102,8 @@ class Block:
     @property
     def wire_list(self) -> List[Wire]:
         """A flat list of all wires"""
-        return self.axes[0].wires + self.axes[1].wires + self.axes[2].wires
+        # TODO: no daisy chaining!
+        return self.axes[0].wires.wires + self.axes[1].wires.wires + self.axes[2].wires.wires
 
     @property
     def edge_list(self) -> List[Edge]:
@@ -120,13 +121,13 @@ class Block:
         """Returns True if counts and gradings are defined for all axes"""
         return all(axis.is_defined for axis in self.axes)
 
+    def grade(self):
+        for axis in self.axes:
+            axis.grade()
+
     def copy_grading(self) -> bool:
         """Attempts to copy grading from a neighbouring block;
-        Returns True if the block is/has been defined, False
-        if the block still has missing data"""
-        if self.is_defined:
-            return False
-
+        returns True if the grading was copied and False in all other cases"""
         updated = False
 
         if not self.is_defined:
@@ -135,25 +136,44 @@ class Block:
 
         return updated
 
+    def check_consistency(self) -> None:
+        for axis in self.axes:
+            axis.check_consistency()
+
     @property
     def indexes(self) -> IndexType:
         return [vertex.index for vertex in self.vertices]
+
+    def format_grading(self) -> str:
+        """Returns the simple/edgeGrading string"""
+        if all(axis.is_simple for axis in self.axes):  # is_simple
+            return (
+                "simpleGrading ( "
+                + self.axes[0].wires.format_single()
+                + " "
+                + self.axes[1].wires.format_single()
+                + " "
+                + self.axes[2].wires.format_single()
+                + " )"
+            )
+        else:
+            return (
+                "edgeGrading ( "
+                + self.axes[0].wires.format_all()
+                + " "
+                + self.axes[1].wires.format_all()
+                + " "
+                + self.axes[2].wires.format_all()
+                + " )"
+            )
 
     @property
     def description(self) -> str:
         """hex definition for blockMesh"""
         fmt_vertices = "( " + " ".join(str(v.index) for v in self.vertices) + " )"
-        fmt_count = "( " + " ".join([str(axis.grading.count) for axis in self.axes]) + " )"
-        # FIXME: no daisy.object.chaining
-        fmt_grading = (
-            "simpleGrading ( "
-            + self.axes[0].grading.description
-            + " "
-            + self.axes[1].grading.description
-            + " "
-            + self.axes[2].grading.description
-            + " )"
-        )
+        fmt_count = "( " + " ".join([str(axis.count) for axis in self.axes]) + " )"
+
+        fmt_grading = self.format_grading()
         fmt_comments = f"// {self.index} {self.comment}\n"
 
         return f"\thex {fmt_vertices} {self.cell_zone} {fmt_count} {fmt_grading} {fmt_comments}"

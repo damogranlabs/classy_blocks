@@ -1,7 +1,8 @@
 import warnings
-from typing import Dict, List, Optional, TypeVar, Union, get_args
+from typing import Dict, List, Optional, Union, get_args
 
 import numpy as np
+from typing_extensions import Unpack
 
 from classy_blocks.base.element import ElementBase
 from classy_blocks.base.exceptions import EdgeCreationError
@@ -10,14 +11,12 @@ from classy_blocks.construct.edges import Arc, EdgeData, Line, Project, Spline
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.point import Point
 from classy_blocks.grading.chop import Chop
-from classy_blocks.types import AxisType, NPPointType, OrientType, PointType, ProjectToType, VectorType
+from classy_blocks.types import AxisType, ChopArgs, NPPointType, OrientType, PointType, ProjectToType, VectorType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import SIDES_MAP
 from classy_blocks.util.frame import Frame
 from classy_blocks.util.tools import edge_map
-
-OperationT = TypeVar("OperationT", bound="Operation")
 
 
 class Operation(ElementBase):
@@ -59,13 +58,27 @@ class Operation(ElementBase):
 
         self.side_edges[corner_idx] = edge_data
 
-    def chop(self, axis: AxisType, **kwargs) -> None:
+    def chop(self, axis: AxisType, **kwargs: Unpack[ChopArgs]) -> None:
         """Chop the operation (count/grading) in given axis:
         0: along first edge of a face
         1: along second edge of a face
         2: between faces / along operation path
 
-        Kwargs: see arguments for Chop object"""
+        kwargs:
+        Available grading parameters are:
+         - start_size: width of start cell
+         - end_size: width of end cell
+         - count: cell count in given direction
+         - c2c_expansion: cell-to-cell expansion ratio (default=1)
+         - total_expansion: ratio between first and last cell size
+
+        You must specify start_size and/or count.
+        c2c_expansion is optional - will be used to create graded cells
+        and will default to 1 if not provided.
+
+        Use length_ratio for multigrading (see documentation):
+        https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading"""
+
         self.chops[axis].append(Chop(**kwargs))
 
     def unchop(self, axis: AxisType) -> None:

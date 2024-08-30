@@ -18,6 +18,10 @@ class BlockList:
         self.blocks.append(block)
         self.update_neighbours(block)
 
+    def grade_blocks(self) -> None:
+        for block in self.blocks:
+            block.grade()
+
     def update_neighbours(self, new_block: Block) -> None:
         """Find and assign neighbours of a given block entry"""
         for block in self.blocks:
@@ -57,10 +61,14 @@ class BlockList:
             for i in list(undefined_blocks):
                 message += f"{i}: "
                 for axis in (0, 1, 2):
-                    message += str(self.blocks[i].axes[axis].grading.count) + " "
+                    message += str(self.blocks[i].axes[axis].count) + " "
                 message += "\n"
 
             raise UndefinedGradingsError(message)
+
+    def check_consistency(self):
+        for block in self.blocks:
+            block.check_consistency()
 
     def clear(self) -> None:
         """Removes created blocks"""

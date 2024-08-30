@@ -1,3 +1,5 @@
+from typing import List
+
 import numpy as np
 from parameterized import parameterized
 
@@ -5,7 +7,7 @@ from classy_blocks.construct.edges import Arc
 from classy_blocks.grading.chop import Chop
 from classy_blocks.items.block import Block
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.items.wire import Wire
+from classy_blocks.items.wires.wire import Wire
 from classy_blocks.util import functions as f
 from tests.fixtures.block import BlockTestCase
 
@@ -137,6 +139,11 @@ class BlockTests(BlockTestCase):
         self.assertEqual(len(block_0.axes[1].neighbours), 0)
         self.assertEqual(len(block_0.axes[2].neighbours), 0)
 
+
+class BlockSimpleGradingTests(BlockTestCase):
+    """Tests of neighbours, copying grading and whatnot simple variant;
+    edge grading is tested with use of Loft operations and so on, that is in test_edge_grading"""
+
     def test_is_defined_0(self):
         """block.is_defined with no gradings"""
         block_0 = self.make_block(0)
@@ -163,6 +170,7 @@ class BlockTests(BlockTestCase):
         block_0.chop(0, Chop(count=10))
         block_0.chop(1, Chop(count=10))
         block_0.chop(2, Chop(count=10))
+        block_0.grade()
 
         self.assertTrue(block_0.is_defined)
 
@@ -173,6 +181,7 @@ class BlockTests(BlockTestCase):
         block_0.chop(0, Chop(count=10))
         block_0.chop(1, Chop(count=10))
         block_0.chop(2, Chop(count=10))
+        block_0.grade()
 
         self.assertTrue(block_0.is_defined)
 
@@ -197,9 +206,9 @@ class BlockTests(BlockTestCase):
         block_1 = self.make_block(1)
 
         # clear chops from block_1
-        block_1.axes[0].chops = []
-        block_1.axes[1].chops = []
-        block_1.axes[2].chops = []
+        block_1.axes[0].wires.chops = []
+        block_1.axes[1].wires.chops = []
+        block_1.axes[2].wires.chops = []
 
         block_0.add_neighbour(block_1)
 
@@ -210,6 +219,9 @@ class BlockTests(BlockTestCase):
         block_0 = self.make_block(0)
         block_1 = self.make_block(1)
 
+        block_0.grade()
+        block_1.grade()
+
         block_0.add_neighbour(block_1)
 
         self.assertTrue(block_0.copy_grading())
@@ -218,7 +230,7 @@ class BlockTests(BlockTestCase):
         """Output of a simple block"""
         # just to make sure it works
         block_0 = self.make_block(0)
-        block_0.axes[0].chops = []
+        block_0.axes[0].wires.chops = []
 
         block_0.chop(0, Chop(count=10))
         block_0.chop(1, Chop(count=10))
@@ -227,11 +239,101 @@ class BlockTests(BlockTestCase):
         block_0.cell_zone = "test_zone"
         block_0.comment = "test_comment"
 
+        for axis in block_0.axes:
+            axis.wires.grade()
+
         expected_description = (
             "\thex ( 0 1 2 3 4 5 6 7 ) test_zone ( 10 10 10 )" " simpleGrading ( 1 1 1 ) // 0 test_comment\n"
         )
 
         self.assertEqual(block_0.description, expected_description)
+
+
+class BlockEdgeGradingTests(BlockTestCase):
+    """Refer to test_edge_grading.py for more involved (function) tests"""
+
+    def make_vertices(self, index: int) -> List[Vertex]:
+        vertices = super().make_vertices(index)
+
+        if index == 1:
+            # move vertices 8 and 10 away so that an irregular block shape is
+            # obtained, appropriate for edgeGrading in axes 0 and 1
+            displacement = f.vector(0.3, -0.3, 0)
+
+            vertices[1].translate(displacement)
+
+        return vertices
+
+    def make_block(self, index: int) -> Block:
+        block = super().make_block(index)
+
+        # clear chops so that they are added manually for each test
+        for axis in block.axes:
+            axis.wires.chops = []
+
+        return block
+
+    def chop(self, block: Block, axis, **kwargs):
+        block.chop(axis, Chop(**kwargs))
+
+    def calculate(self, block):
+        block.grade()
+
+    def test_edge_grading_output(self):
+        """Switch to edgeGrading when a chop is to be 'preserved'"""
+        block = self.make_block(1)
+        self.chop(block, 0, start_size=0.01, end_size=0.2, preserve="start_size")
+        self.chop(block, 1, count=10)
+        self.chop(block, 2, count=10)
+        self.calculate(block)
+
+        self.assertTrue("edgeGrading" in block.format_grading())
+
+    def test_edge_multigrading(self):
+        """Switch to edgeGrading when `preserve` keyword is provided"""
+        block = self.make_block(1)
+        self.chop(block, 0, length_ratio=0.5, start_size=0.01, end_size=0.1)
+        self.chop(block, 0, length_ratio=0.5, end_size=0.01, start_size=0.1, preserve="end_size")
+        self.chop(block, 1, count=10)
+        self.chop(block, 2, count=10)
+        self.calculate(block)
+
+        self.assertTrue("edgeGrading" in block.format_grading())
+
+    def test_copy_grading(self):
+        """Copy data from neighbours"""
+        block_0 = self.make_block(0)
+        block_1 = self.make_block(1)
+
+        self.chop(block_0, 0, count=10)
+        self.chop(block_0, 2, count=10)
+        self.chop(block_1, 0, start_size=0.1, end_size=0.01, preserve="end_size")
+        self.chop(block_1, 1, count=10)
+
+        self.calculate(block_0)
+        self.calculate(block_1)
+
+        block_0.add_neighbour(block_1)
+        block_1.add_neighbour(block_0)
+
+        block_0.copy_grading()
+        block_1.copy_grading()
+
+        # block_0 must be simpleGraded, block_1 edge
+        self.assertTrue("simpleGrading" in block_0.format_grading())
+        self.assertTrue("edgeGrading" in block_1.format_grading())
+
+    def test_single_grading(self):
+        """Output simpleGrading when there is no need for edgeGrading"""
+        block = self.make_block(2)
+        self.chop(block, 0, count=10)
+        self.chop(block, 1, count=10)
+        self.chop(block, 2, start_size=0.1, end_size=0.01, preserve="start_size")
+
+        self.calculate(block)
+
+        # block_0 must be simpleGraded, block_1 edge
+        self.assertTrue("simpleGrading" in block.format_grading())
 
 
 class WireframeTests(BlockTestCase):
@@ -269,7 +371,7 @@ class WireframeTests(BlockTestCase):
     def test_axis_count(self):
         """Check that each axis has exactly 4 wires"""
         for axis in range(3):
-            self.assertEqual(len(self.block.axes[axis].wires), 4)
+            self.assertEqual(len(self.block.axes[axis].wires.wires), 4)
 
     @parameterized.expand(((0, 2), (1, 3), (0, 6), (1, 7)))
     def test_find_wire_fail(self, corner_1, corner_2):
