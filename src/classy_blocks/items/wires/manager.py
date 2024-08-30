@@ -156,4 +156,4 @@ class WirePropagateManager(WireManagerBase):
 
     @property
     def count(self):
-        return sum(chop.results["count"] for chop in self.chops)
+        return self.wires[0].grading.count

@@ -1,13 +1,16 @@
 import unittest
+from typing import get_args
 
 import numpy as np
 
 from classy_blocks.base.exceptions import InconsistentGradingsError
 from classy_blocks.construct.edges import Arc
 from classy_blocks.construct.operations.box import Box
+from classy_blocks.construct.operations.connector import Connector
 from classy_blocks.construct.operations.extrude import Extrude
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.mesh import Mesh
+from classy_blocks.types import AxisType
 
 
 class EdgeGradingExampleTests(unittest.TestCase):
@@ -122,3 +125,25 @@ class EdgeGradingTests(unittest.TestCase):
         self.prepare()
 
         self.assertTrue(self.mesh.blocks[0].axes[2].is_simple)
+
+    def test_propagated_count(self):
+        """Count of a block where grading was copied"""
+
+        box_1 = Box([-1, -1, -1], [1, 1, 1])
+        box_2 = box_1.copy().rotate(np.pi / 4, [1, 1, 1], [0, 0, 0]).translate([4, 2, 0])
+
+        for i in get_args(AxisType):
+            box_1.chop(i, count=10)
+            box_2.chop(i, count=10)
+
+        connector = Connector(box_1, box_2)
+        connector.chop(2, count=10)
+
+        self.mesh.add(box_1)
+        self.mesh.add(box_2)
+        self.mesh.add(connector)
+
+        self.prepare()
+
+        for block in self.mesh.blocks:
+            self.assertTrue(" ( 10 10 10 ) simpleGrading" in block.description)
