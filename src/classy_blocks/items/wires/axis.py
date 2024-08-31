@@ -1,6 +1,7 @@
 from typing import List, Set
 
 from classy_blocks.grading.chop import Chop
+from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.manager import WireChopManager, WireManagerBase, WirePropagateManager
 from classy_blocks.items.wires.wire import Wire
 from classy_blocks.types import AxisType
@@ -40,7 +41,7 @@ class Axis:
         # will be replaced by a ChopManager
         self.wires: WireManagerBase = WirePropagateManager(wires)
 
-        # will be added as blocks are added to mesh
+        # will be added after blocks are added to mesh
         self.neighbours: Set[Axis] = set()
 
     def add_neighbour(self, axis: "Axis") -> None:
@@ -49,6 +50,14 @@ class Axis:
             for nei_wire in axis.wires:
                 if this_wire.is_coincident(nei_wire):
                     self.neighbours.add(axis)
+
+    def add_sequential(self, axis: "Axis") -> None:
+        """Adds an axis that comes before/after this one"""
+        # As opposed to neighbours that are 'around' this axis
+        if self.start_vertices == axis.end_vertices or self.end_vertices == axis.start_vertices:
+            for this_wire in self.wires:
+                for nei_wire in axis.wires:
+                    this_wire.add_series(nei_wire)
 
     def is_aligned(self, other: "Axis") -> bool:
         """Returns True if wires of the other axis are aligned
@@ -94,6 +103,14 @@ class Axis:
                 return True
 
         return False
+
+    @property
+    def start_vertices(self) -> Set[Vertex]:
+        return {wire.vertices[0] for wire in self.wires}
+
+    @property
+    def end_vertices(self) -> Set[Vertex]:
+        return {wire.vertices[1] for wire in self.wires}
 
     def grade(self) -> None:
         self.wires.grade()

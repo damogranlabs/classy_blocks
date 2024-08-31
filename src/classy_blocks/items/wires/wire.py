@@ -26,8 +26,12 @@ class Wire:
         self.grading = Grading(self.length)
 
         # multiple wires can be at the same spot; this list holds other
-        # coincident wires
+        # coincident wires from different blocks
         self.coincidents: Set[Wire] = set()
+        # wires that precede this (end with this wire's beginning vertex)
+        self.before: Set[Wire] = set()
+        # wires that follow this (start with this wire's end vertex)
+        self.after: Set[Wire] = set()
 
     @property
     def length(self) -> float:
@@ -55,6 +59,13 @@ class Wire:
         """Adds a reference to a coincident wire, if it's aligned"""
         if self.is_coincident(wire):
             self.coincidents.add(wire)
+
+    def add_series(self, wire):
+        """Adds a reference to a wire that is before or after this one"""
+        if wire.vertices[1] == self.vertices[0]:
+            self.before.add(wire)
+        elif wire.vertices[0] == self.vertices[1]:
+            self.after.add(wire)
 
     def add_chop(self, chop: Chop) -> None:
         """Adds Chops to this Wire's Grading object"""

@@ -93,6 +93,7 @@ class Block:
         for this_axis in self.axes:
             for cnd_axis in candidate.axes:
                 this_axis.add_neighbour(cnd_axis)
+                this_axis.add_sequential(cnd_axis)
 
         # wires
         for this_wire in self.wire_list:

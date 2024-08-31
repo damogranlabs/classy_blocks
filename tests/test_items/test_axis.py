@@ -48,3 +48,14 @@ class AxisTests(BlockTestCase):
         block_0.add_neighbour(block_1)
 
         self.assertFalse(block_1.axes[1].is_aligned(block_0.axes[1]))
+
+    @parameterized.expand(((0,), (1,), (2,), (3,)))
+    def test_sequential(self, corner):
+        block_1 = self.make_block(1)
+        block_2 = self.make_block(2)
+
+        block_1.add_neighbour(block_2)
+        block_2.add_neighbour(block_1)
+
+        self.assertListEqual(list(block_1.axes[1].wires[corner].after), [block_2.axes[1].wires[corner]])
+        self.assertListEqual(list(block_2.axes[1].wires[corner].before), [block_1.axes[1].wires[corner]])
