@@ -125,3 +125,8 @@ class Axis:
 
     def check_consistency(self) -> None:
         self.wires.check_consistency()
+
+    @property
+    def is_propagated(self) -> bool:
+        """Returns true if this block's grading was copied from another"""
+        return isinstance(self.wires, WirePropagateManager)

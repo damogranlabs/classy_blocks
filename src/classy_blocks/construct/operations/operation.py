@@ -14,6 +14,7 @@ from classy_blocks.grading.chop import Chop
 from classy_blocks.types import AxisType, ChopArgs, NPPointType, OrientType, PointType, ProjectToType, VectorType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
+from classy_blocks.util.chop_collector import ChopCollector
 from classy_blocks.util.constants import SIDES_MAP
 from classy_blocks.util.frame import Frame
 from classy_blocks.util.tools import edge_map
@@ -34,7 +35,8 @@ class Operation(ElementBase):
         self.side_patches: List[Optional[str]] = [None, None, None, None]
 
         # instructions for cell counts and gradings
-        self.chops: Dict[AxisType, List[Chop]] = {0: [], 1: [], 2: []}
+        # self.chops: Dict[AxisType, List[Chop]] = {0: [], 1: [], 2: []}
+        self.chops = ChopCollector()
 
         # optionally, put the block in a cell zone
         self.cell_zone = ""
@@ -79,12 +81,12 @@ class Operation(ElementBase):
         Use length_ratio for multigrading (see documentation):
         https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading"""
 
-        self.chops[axis].append(Chop(**kwargs))
+        self.chops.add_axis_chop(axis, Chop(**kwargs))
 
     def unchop(self, axis: AxisType) -> None:
         """Removed existing chops from an operation
         (comes handy after copying etc.)"""
-        self.chops[axis] = []
+        self.chops.clear_axis(axis)
 
     def project_corner(self, corner: int, label: ProjectToType) -> None:
         """Project the vertex at given corner (local index 0...7) to a single
