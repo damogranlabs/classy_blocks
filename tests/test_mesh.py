@@ -171,7 +171,7 @@ class MeshTests(BlockTestCase):
 
         self.mesh.add(cyl)
         self.mesh.assemble()
-        self.mesh.block_list.assemble()
+        self.mesh.block_list.propagate_gradings()
 
         for block in self.mesh.block_list.blocks:
             self.assertEqual(block.axes[2].count, 10)
@@ -185,7 +185,7 @@ class MeshTests(BlockTestCase):
 
         self.mesh.add(cyl)
         self.mesh.assemble()
-        self.mesh.block_list.assemble()
+        self.mesh.block_list.propagate_gradings()
 
         for block in self.mesh.block_list.blocks:
             self.assertEqual(block.axes[1].count, 10)

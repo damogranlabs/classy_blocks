@@ -61,37 +61,43 @@ class TestGrading(unittest.TestCase):
         self.assertAlmostEqual(chop.calculate(1)[0], count)
         self.assertAlmostEqual(chop.calculate(1)[1], total_expansion, places=5)
 
-    def add_division(self, length_ratio, count_ratio, total_expansion):
-        self.g.specification.append([length_ratio, count_ratio, total_expansion])
+    def add_chop(self, length_ratio, count, total_expansion):
+        chop = Chop(length_ratio=length_ratio, count=count, total_expansion=total_expansion)
+
+        self.g.add_chop(chop)
 
     def test_output_empty(self):
         with self.assertRaises(ValueError):
             _ = self.g.description
 
     def test_output_single(self):
-        self.add_division(1, 1, 3)
+        self.add_chop(1, 10, 3)
         self.assertEqual(str(self.g.description), "3")
 
     def test_output_multi(self):
-        self.add_division(0.25, 0.4, 2)
-        self.add_division(0.5, 0.2, 1)
-        self.add_division(0.25, 0.4, 0.5)
+        self.add_chop(0.25, 40, 2)
+        self.add_chop(0.5, 20, 1)
+        self.add_chop(0.25, 40, 0.5)
 
-        expected_output = "((0.25 0.4 2)(0.5 0.2 1)(0.25 0.4 0.5))"
+        expected_output = "((0.25 40 2)(0.5 20 1)(0.25 40 0.5))"
 
         self.assertEqual(str(self.g.description), expected_output)
 
     def test_copy_invert_simple(self):
-        self.add_division(1, 1, 5)
+        self.add_chop(1, 10, 5)
 
         self.assertAlmostEqual(self.g.specification[0][2], 5)
-        self.assertAlmostEqual(self.g.inverted.specification[0][2], 0.2)
+
+        self.g.invert()
+        self.assertAlmostEqual(self.g.specification[0][2], 0.2)
 
     def test_add_division_zero_length(self):
         """Add a chop to zero-length grading"""
         with self.assertRaises(ValueError):
             self.g.length = 0
             self.g.add_chop(Chop(count=10))
+
+            _ = self.g.specification
 
     def test_insuficient_data(self):
         """Add a chop with not enough data to calculate grading"""
@@ -101,11 +107,15 @@ class TestGrading(unittest.TestCase):
             # when specifying that as well, another parameter must be provided
             self.g.add_chop(Chop(c2c_expansion=1.1))
 
+            _ = self.g.specification
+
     def test_wrong_combination(self):
         """Add a chop with specified total_ and c2c_expansion"""
         with self.assertRaises(ValueError):
             # specified total_expansion and c2c_expansion=1 aren't compatible
             self.g.add_chop(Chop(total_expansion=5))
+
+            _ = self.g.specification
 
     def test_add_division_1(self):
         """double grading, set start_size and c2c_expansion"""
@@ -152,6 +162,8 @@ class TestGrading(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.g.add_chop(Chop(length_ratio=0, count=10))
 
+            _ = self.g.specification
+
     def test_is_defined(self):
         self.g.add_chop(Chop(1, count=10, start_size=0.05))
 
@@ -170,7 +182,9 @@ class TestGrading(unittest.TestCase):
 
     def test_invert_empty(self):
         """Invert a grading with no chops"""
-        self.assertEqual(id(self.g), id(self.g.inverted))
+        self.g.invert()
+
+        self.assertListEqual(self.g.specification, [])
 
     def test_equal(self):
         """Two different gradings with same parameters are equal"""

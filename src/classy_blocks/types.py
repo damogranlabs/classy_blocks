@@ -29,7 +29,9 @@ OrientType = Literal["left", "right", "front", "back", "top", "bottom"]
 AxisType = Literal[0, 1, 2]
 
 # the complete guide to chopping
+ChopTakeType = Literal["min", "max", "avg"]
 ChopPreserveType = Literal["start_size", "end_size", "c2c_expansion"]
+GradingSpecType = List[List[float]]
 
 
 class ChopArgs(TypedDict, total=False):
@@ -39,6 +41,7 @@ class ChopArgs(TypedDict, total=False):
     count: int
     end_size: float
     total_expansion: float
+    take: ChopTakeType
     preserve: ChopPreserveType
 
 

@@ -1,8 +1,7 @@
 from typing import List, Set
 
-from classy_blocks.grading.chop import Chop
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.items.wires.manager import WireChopManager, WireManagerBase, WirePropagateManager
+from classy_blocks.items.wires.manager import WireManager
 from classy_blocks.items.wires.wire import Wire
 from classy_blocks.types import AxisType
 
@@ -34,12 +33,7 @@ class Axis:
 
     def __init__(self, index: AxisType, wires: List[Wire]):
         self.index = index
-
-        # Most blocks/axes will not have user-specified chops;
-        # they will usually be copied from neighbours.
-        # Some of them, however, will - in those cases PropagateManager
-        # will be replaced by a ChopManager
-        self.wires: WireManagerBase = WirePropagateManager(wires)
+        self.wires = WireManager(wires)
 
         # will be added after blocks are added to mesh
         self.neighbours: Set[Axis] = set()
@@ -70,14 +64,6 @@ class Axis:
 
         raise RuntimeError("Axes are not neighbours")
 
-    def chop(self, chop: Chop) -> None:
-        """Add a chop to this axis' grading"""
-        # replace the manager on the first added chop
-        if not isinstance(self.wires, WireChopManager):
-            self.wires = WireChopManager(self.wires.wires)
-
-        self.wires.add_chop(chop)
-
     @property
     def is_defined(self) -> bool:
         """Returns True if this axis's counts and gradings are defined"""
@@ -85,24 +71,21 @@ class Axis:
 
     def copy_grading(self) -> bool:
         """Attempts to copy grading from one of the neighbours;
-        returns True if grading has been copied"""
+        returns True if grading has been copied
+
+        Determine grading of each wire in two steps:
+        1. Check coincident wires for a defined Grading object and copy it
+        2. Copy the chops to all other, undefined wires
+        In the end, check if counts are consistent"""
         if self.is_defined:
             # no need to change anything
             return False
 
-        for neighbour in self.neighbours:
-            if neighbour.is_defined:
-                if neighbour.is_aligned(self):
-                    for chop in neighbour.wires.chops:
-                        self.wires.add_chop(chop.copy_preserving())
-                else:
-                    for chop in reversed(neighbour.wires.chops):
-                        self.wires.add_chop(chop.copy_preserving(inverted=True))
+        for wire in self.wires.undefined:
+            wire.copy_from_coincident()
 
-                self.grade()
-                return True
-
-        return False
+        # if no wires were copied
+        return self.wires.propagate_gradings()
 
     @property
     def start_vertices(self) -> Set[Vertex]:
@@ -112,9 +95,6 @@ class Axis:
     def end_vertices(self) -> Set[Vertex]:
         return {wire.vertices[1] for wire in self.wires}
 
-    def grade(self) -> None:
-        self.wires.grade()
-
     @property
     def count(self) -> int:
         return self.wires.count
@@ -122,11 +102,3 @@ class Axis:
     @property
     def is_simple(self) -> bool:
         return self.wires.is_simple
-
-    def check_consistency(self) -> None:
-        self.wires.check_consistency()
-
-    @property
-    def is_propagated(self) -> bool:
-        """Returns true if this block's grading was copied from another"""
-        return isinstance(self.wires, WirePropagateManager)

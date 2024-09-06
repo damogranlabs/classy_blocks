@@ -43,7 +43,7 @@ class EdgeGradingExampleTests(unittest.TestCase):
         mesh.add(end)
 
         mesh.assemble()
-        mesh.block_list.assemble()
+        mesh.block_list.propagate_gradings()
 
         self.mesh = mesh
 
@@ -78,7 +78,7 @@ class EdgeGradingTests(unittest.TestCase):
 
     def prepare(self):
         self.mesh.assemble()
-        self.mesh.block_list.assemble()
+        self.mesh.block_list.propagate_gradings()
 
     def test_inconsistent_wires(self):
         box_left = Box([0, 0, 0], [1, 1, 1])

@@ -1,6 +1,6 @@
 """The Mesh object ties everything together and writes the blockMeshDict in the end."""
 
-from typing import List, Optional, Set, Union, get_args
+from typing import List, Optional, Set, Union
 
 from classy_blocks.construct.assemblies.assembly import Assembly
 from classy_blocks.construct.operations.operation import Operation
@@ -14,7 +14,6 @@ from classy_blocks.lists.face_list import FaceList
 from classy_blocks.lists.geometry_list import GeometryList
 from classy_blocks.lists.patch_list import PatchList
 from classy_blocks.lists.vertex_list import VertexList
-from classy_blocks.types import AxisType
 from classy_blocks.util import constants
 from classy_blocks.util.vtk_writer import write_vtk
 
@@ -96,7 +95,7 @@ class Mesh:
         the data remains but it will not contribute to the mesh"""
         self.deleted.add(operation)
 
-    def assemble(self, skip_edges: bool = False) -> None:
+    def assemble(self) -> None:
         """Converts classy_blocks entities (operations and shapes) to
         actual vertices, edges, blocks and other stuff to be inserted into
         blockMeshDict. After this has been done, the above objects
@@ -115,14 +114,10 @@ class Mesh:
                 vertices = self._add_vertices(operation)
 
                 block = Block(len(self.block_list.blocks), vertices)
-                if not skip_edges:
-                    for data in self.edge_list.add_from_operation(vertices, operation):
-                        block.add_edge(*data)
+                for data in self.edge_list.add_from_operation(vertices, operation):
+                    block.add_edge(*data)
 
-                for axis in get_args(AxisType):
-                    for chop in operation.chops[axis]:
-                        block.chop(axis, chop)
-
+                block.chop(operation.chops)
                 block.cell_zone = operation.cell_zone
 
                 self.block_list.add(block)
@@ -189,7 +184,7 @@ class Mesh:
 
         # gradings: define after writing VTK;
         # if it is not specified correctly, this will raise an exception
-        self.block_list.assemble()
+        self.block_list.propagate_gradings()
 
         with open(output_path, "w", encoding="utf-8") as output:
             output.write(constants.MESH_HEADER)

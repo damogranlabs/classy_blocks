@@ -27,12 +27,8 @@ class BlockList:
             block.add_neighbour(new_block)
             new_block.add_neighbour(block)
 
-    def grade_blocks(self) -> None:
-        for block in self.blocks:
-            block.grade()
-
-    def propagate_gradings(self):
-        """Copy references to gradings from defined blocks to their neighbours"""
+    def propagate_gradings(self) -> None:
+        """Unify gradings in each 'cluster' of coincident wires"""
         # a riddle similar to sudoku, keep traversing
         # and copying counts until there's no undefined blocks left
         undefined_blocks = set(range(len(self.blocks)))
@@ -65,20 +61,6 @@ class BlockList:
                 message += "\n"
 
             raise UndefinedGradingsError(message)
-
-    def check_consistency(self):
-        for block in self.blocks:
-            block.check_consistency()
-
-    def assemble(self) -> None:
-        # 1. set counts on user-defined axes
-        self.grade_blocks()
-        # 2. distribute counts over all blocks
-        self.propagate_gradings()
-        # 3. set gradings on missing wires
-
-        # 4. check that everything is in order
-        self.check_consistency()
 
     def clear(self) -> None:
         """Removes created blocks"""

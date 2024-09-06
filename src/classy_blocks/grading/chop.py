@@ -1,9 +1,9 @@
 import dataclasses
 from functools import lru_cache
-from typing import Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Callable, List, Optional, Set, Union
 
 from classy_blocks.grading import relations as rel
-from classy_blocks.types import ChopPreserveType
+from classy_blocks.types import ChopPreserveType, ChopTakeType
 
 
 @dataclasses.dataclass
@@ -46,10 +46,9 @@ class ChopRelation:
 
 
 @dataclasses.dataclass
-class Chop:
-    """A single 'chop' represents a division in Grading object;
-    user-provided arguments are stored in this object and used
-    for creation of Gradient object"""
+class ChopData:
+    """Data that the user inputs for chopping parameters;
+    also a collection of results from Chop.calculate()"""
 
     length_ratio: float = 1.0
     start_size: Optional[float] = None
@@ -57,7 +56,18 @@ class Chop:
     count: Optional[int] = None
     end_size: Optional[float] = None
     total_expansion: Optional[float] = None
+    take: ChopTakeType = "avg"
     preserve: ChopPreserveType = "c2c_expansion"
+
+
+@dataclasses.dataclass
+class Chop(ChopData):
+    """A single 'chop' represents a division in Grading object;
+    user-provided arguments are stored in this object and used
+    for creation of Gradient object"""
+
+    # The data inherited from ChopData is entered by the user and is never modified;
+    # whatever is calculated in .calculate() is stored in a new ChopData and returned
 
     def __post_init__(self) -> None:
         # default: take c2c_expansion=1 if there's less than 2 parameters given
@@ -70,28 +80,20 @@ class Chop:
         if self.count is not None:
             self.count = max(int(self.count), 1)
 
-        # stored results from self.calculate() method;
-        # this will be used for creating new chops taking self.preserve
-        # into account. User input (chop arguments) should not be overridden because
-        # if mesh is modified (optimization etc.) all numbers will be wrong.
-        self.results: Dict[Union[ChopPreserveType, str], Union[float, int]] = dict()
-
-    def calculate(self, length: float) -> Tuple[int, float]:
+    def calculate(self, length: float) -> ChopData:
         """Calculates cell count and total expansion ratio for this chop
         by calling functions that take known variables and return new values"""
         data = dataclasses.asdict(self)
-        self.results = data
         calculated: Set[str] = set()
 
-        for key in self.results.keys():
+        for key in data.keys():
             if data[key] is not None:
                 calculated.add(key)
 
         for _ in range(12):
             if {"count", "total_expansion", "c2c_expansion", "start_size", "end_size"}.issubset(calculated):
-                self.results["count"] = int(self.results["count"])
-
-                return data["count"], data["total_expansion"]
+                data["count"] = int(data["count"])
+                return ChopData(**data)
 
             for chop_rel in ChopRelation.get_possible_combinations():
                 output = chop_rel.output
@@ -119,21 +121,3 @@ class Chop:
 
         if self.total_expansion is not None:
             self.total_expansion = 1 / self.total_expansion
-
-    def copy_preserving(self, inverted: bool = False) -> "Chop":
-        """Creates a copy of this Chop with equal count but
-        sets other parameters from current data so that
-        the correct start/end size or c2c is maintained"""
-        args = dataclasses.asdict(self)
-        args["count"] = self.results["count"]
-
-        for arg in ["total_expansion", "c2c_expansion", "start_size", "end_size"]:
-            args[arg] = None
-
-        args[self.preserve] = self.results[self.preserve]
-
-        chop = Chop(**args)
-        if inverted:
-            chop.invert()
-
-        return chop

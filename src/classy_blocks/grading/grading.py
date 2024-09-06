@@ -34,12 +34,13 @@ calculations meticulously transcribed from the blockmesh grading calculator:
 https://gitlab.com/herpes-free-engineer-hpe/blockmeshgradingweb/-/blob/master/calcBlockMeshGrading.coffee
 (since block length is always known, there's less wrestling but the calculation principle is similar) """
 
-import copy
+import dataclasses
 import math
 import warnings
 from typing import List
 
 from classy_blocks.grading.chop import Chop
+from classy_blocks.types import GradingSpecType
 from classy_blocks.util import constants
 
 
@@ -49,45 +50,57 @@ class Grading:
     def __init__(self, length: float):
         # "multi-grading" specification according to:
         # https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
-        self.length = length
-
-        self.specification: List[List] = []  # a list of lists [length ratio, count ratio, total expansion]
-
-    def add_chop(self, chop: Chop) -> None:
-        if not (0 < chop.length_ratio <= 1):
-            raise ValueError(f"Length ratio must be between 0 and (including) 1, got {chop.length_ratio}")
-
-        length = self.length * chop.length_ratio
-
-        count, total_expansion = chop.calculate(length)
-
-        self.specification.append([chop.length_ratio, count, total_expansion])
+        self.length = length  # to be updated when adding/modifying block edges
+        self.chops: List[Chop] = []
 
     @property
-    def inverted(self) -> "Grading":
-        """Returns this grading but inverted
-        in case neighbours are defined upside-down"""
-        if len(self.specification) == 0:
-            return self  # nothing to invert
-
-        g_inv = copy.deepcopy(self)
-
-        # divisions:
+    def specification(self) -> GradingSpecType:
         # a list of lists [length ratio, count ratio, total expansion]
+        spec = []
 
-        # reverse the list first
-        g_inv.specification.reverse()
+        for chop in self.chops:
+            if not (0 < chop.length_ratio <= 1):
+                raise ValueError(f"Length ratio must be between 0 and (including) 1, got {chop.length_ratio}")
 
-        # then do 1/total_expansion
-        for i, div in enumerate(g_inv.specification):
-            g_inv.specification[i][2] = 1 / div[2]
+            length = self.length * chop.length_ratio
+            chop_data = chop.calculate(length)
+            spec.append([chop.length_ratio, chop_data.count, chop_data.total_expansion])
 
-        return g_inv
+        return spec
+
+    def add_chop(self, chop: Chop) -> None:
+        self.chops.append(chop)
+
+    def copy(self, length: float, invert: bool) -> "Grading":
+        """Creates a new grading with the same chops (counts) on a different length"""
+        new_grading = Grading(length)
+
+        for chop in self.chops:
+            # calculate chops on current grading to get the correct counts
+            old_data = chop.calculate(self.length)
+            # create a copy of this Chop with equal count but
+            # set other parameters from current data so that
+            # the correct start/end size or c2c is maintained"""
+            new_args = dataclasses.asdict(old_data)
+            new_args["count"] = old_data.count
+
+            for arg in ["total_expansion", "c2c_expansion", "start_size", "end_size"]:
+                new_args[arg] = None
+
+            new_args[old_data.preserve] = dataclasses.asdict(old_data)[old_data.preserve]
+
+            chop = Chop(**new_args)
+            if invert:
+                chop.invert()
+
+            new_grading.add_chop(chop)
+
+        return new_grading
 
     @property
     def counts(self) -> List[int]:
         """Counts per chop"""
-        return [d[1] for d in self.specification]
+        return [int(d[1]) for d in self.specification]
 
     @property
     def count(self) -> int:
@@ -98,7 +111,7 @@ class Grading:
     def is_defined(self) -> bool:
         """Return True is grading is defined;
         It is if there's at least one division added"""
-        return len(self.specification) > 0
+        return len(self.chops) > 0
 
     @property
     def description(self) -> str:

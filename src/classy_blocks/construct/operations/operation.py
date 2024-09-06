@@ -60,11 +60,18 @@ class Operation(ElementBase):
 
         self.side_edges[corner_idx] = edge_data
 
-    def chop(self, axis: AxisType, **kwargs: Unpack[ChopArgs]) -> None:
-        """Chop the operation (count/grading) in given axis:
-        0: along first edge of a face
-        1: along second edge of a face
-        2: between faces / along operation path
+    def chop(
+        self,
+        axis: Optional[AxisType] = None,
+        corner_1: Optional[int] = None,
+        corner_2: Optional[int] = None,
+        **kwargs: Unpack[ChopArgs],
+    ) -> None:
+        """Chop the operation (count/grading) either in given axis:
+            0: along first edge of a face
+            1: along second edge of a face
+            2: between faces / along operation path
+        or between the specified corners (only valid combinations apply).
 
         kwargs:
         Available grading parameters are:
@@ -74,19 +81,29 @@ class Operation(ElementBase):
          - c2c_expansion: cell-to-cell expansion ratio (default=1)
          - total_expansion: ratio between first and last cell size
 
-        You must specify start_size and/or count.
-        c2c_expansion is optional - will be used to create graded cells
-        and will default to 1 if not provided.
+        For a simple case with a uniform cell size (no grading)
+        you must specify start_size or count, default for c2c_expansion is 1.
+        To define a graded block/edge, use any valid combination of the above parameters.
+
+        For axis chops, the 'take' parameter will define which edge
+        length will be taken for cell count calculation. When an edge is chopped,
+        axis chops in edge's axis will be ignored.
 
         Use length_ratio for multigrading (see documentation):
         https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading"""
 
-        self.chops.add_axis_chop(axis, Chop(**kwargs))
+        chop = Chop(**kwargs)
 
-    def unchop(self, axis: AxisType) -> None:
-        """Removed existing chops from an operation
-        (comes handy after copying etc.)"""
-        self.chops.clear_axis(axis)
+        if axis is not None:
+            self.chops.add_axis_chop(axis, chop)
+        elif corner_1 is not None and corner_2 is not None:
+            self.chops.add_edge_chop(corner_1, corner_2, chop)
+        else:
+            raise ValueError("Provide axis or two corners for chopping")
+
+    def unchop(self) -> None:
+        """Removes all existing chops from an operation (comes handy after copying etc.)"""
+        self.chops.clear_all()
 
     def project_corner(self, corner: int, label: ProjectToType) -> None:
         """Project the vertex at given corner (local index 0...7) to a single
