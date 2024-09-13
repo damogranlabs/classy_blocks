@@ -1,39 +1,22 @@
 from typing import List, Set
 
+from classy_blocks.base.exceptions import InconsistentGradingsError
+from classy_blocks.grading.chop import Chop
+from classy_blocks.grading.grading import Grading
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.manager import WireManager
 from classy_blocks.items.wires.wire import Wire
-from classy_blocks.types import AxisType
-
-# Edge grading
-# Axis holds 4 wires, that is, edges that are defined along the same direction.
-# Wire is an object that holds data about the edge: Edge definition, grading, coincident wires etc.
-# Chop object holds all parameters for setting cell count and total expansion ratio
-#   but nothing more. An Axis/Wire can be chopped multiple times in case of multigrading, thus
-#   having multiple chop objects.
-# Grading has a defined length (of an edge) and converts a list of Chops to actual
-#   count/total_expansion numbers for meshing.
-
-# A block can be chopped by user input or chops can be copied from neighbour.
-
-# When a block is chopped by the user, a Chop is added to that axis.
-# When mesh.write() is called, all chops are fed into a Grading object that
-# calculates cell counts by taking the average length of all wires.
-# Each chop is now copied to each wire, taking into account a fixed cell count (from chop.results)
-# and desired 'keep' parameter to preserve. When a Grading is calculated from chop,
-# each corresponding wire's length is taken.
-
-# When block has no chops added, neighbours are checked for defined Chops.
-# If chops are defined, so must be gradings. Wires that are coincident copy exactly the same
-# grading (or inverted). Other wires within the same block will
+from classy_blocks.types import AxisType, ChopTakeType
 
 
 class Axis:
-    """One of block axes, numbered 0, 1, 2, and the relevant data"""
+    """One of block axes, indexed 0, 1, 2
+    and wires - edges that are defined along the same direction."""
 
     def __init__(self, index: AxisType, wires: List[Wire]):
         self.index = index
         self.wires = WireManager(wires)
+        self.chops: List[Chop] = []
 
         # will be added after blocks are added to mesh
         self.neighbours: Set[Axis] = set()
@@ -64,28 +47,70 @@ class Axis:
 
         raise RuntimeError("Axes are not neighbours")
 
+    def get_length(self, take: ChopTakeType) -> float:
+        lengths = [wire.length for wire in self.wires]
+
+        if take == "max":
+            return max(lengths)
+
+        if take == "min":
+            return min(lengths)
+
+        return sum(lengths) / len(lengths)
+
+    def grade(self) -> None:
+        if self.is_defined:
+            return
+
+        if len(self.wires.undefined) < 4:
+            # some wires have defined gradings; share those with others
+            self.wires.propagate_gradings()
+            return
+
+        # TODO: improve
+        if len(self.chops) > 0:
+            # create Grading from chops, if there are any
+            wires_by_length = list(sorted(self.wires, key=lambda w: w.length))
+            grading = Grading(0)
+            for chop in self.chops:
+                grading.add_chop(chop)
+
+            if self.chops[0].take == "max":
+                # chop the longest wire, then propagate
+                wire = wires_by_length[-1]
+                wire.grading = grading
+                wire.update()
+                # copy grading to all wires in this axis
+                self.wires.propagate_gradings()
+            elif self.chops[0].take == "min":
+                # chop the shortest wire, then propagate
+                wire = wires_by_length[0]
+                wire.grading = grading
+                wire.update()
+                # copy grading to all wires in this axis
+                self.wires.propagate_gradings()
+            else:
+                # make a fake grading with an average length,
+                # calculate count from it, then copy it with the same
+                # count to all wires
+                avg_length = sum([w.length for w in self.wires]) / 4
+                grading.length = avg_length
+                for wire in self.wires:
+                    wire.grading = grading.copy(wire.length, False)
+                    wire.copy_to_coincidents()
+
     @property
     def is_defined(self) -> bool:
         """Returns True if this axis's counts and gradings are defined"""
         return self.wires.is_defined
 
-    def copy_grading(self) -> bool:
-        """Attempts to copy grading from one of the neighbours;
-        returns True if grading has been copied
+    def check_consistency(self) -> None:
+        counts = set(wire.grading.count for wire in self.wires)
+        if len(counts) != 1:
+            raise InconsistentGradingsError(f"Axis Wires have different counts! {counts} {self}")
 
-        Determine grading of each wire in two steps:
-        1. Check coincident wires for a defined Grading object and copy it
-        2. Copy the chops to all other, undefined wires
-        In the end, check if counts are consistent"""
-        if self.is_defined:
-            # no need to change anything
-            return False
-
-        for wire in self.wires.undefined:
-            wire.copy_from_coincident()
-
-        # if no wires were copied
-        return self.wires.propagate_gradings()
+        for wire in self.wires:
+            wire.check_consistency()
 
     @property
     def start_vertices(self) -> Set[Vertex]:
@@ -102,3 +127,6 @@ class Axis:
     @property
     def is_simple(self) -> bool:
         return self.wires.is_simple
+
+    def __str__(self):
+        return f"Axis {self.index} (" + "|".join(str(wire) for wire in self.wires.wires) + ")"

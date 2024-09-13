@@ -36,9 +36,8 @@ class BlockTestCase(DataTestCase):
 
             block.add_edge(corner_1, corner_2, edge)
 
-        for axis in get_args(AxisType):
-            for chop in block_data.chops[axis]:
-                block.chop(axis, chop)
+        for i in get_args(AxisType):
+            block.add_chops(i, block_data.chops[i])
 
         return block
 

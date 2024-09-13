@@ -43,7 +43,7 @@ mesh.add(straight_1)
 
 # The curved part of heater (and fluid around it); constructed from 4 revolves
 heater_arch = cb.RevolvedStack(straight_1.sketch_2, np.pi, [0, 0, 1], [0, 0, 0], 4)
-heater_arch.chop(start_size=p.solid_cell_size)
+heater_arch.chop(start_size=p.solid_cell_size, take="min")
 for shape in heater_arch.shapes:
     set_cell_zones(shape)
 mesh.add(heater_arch)

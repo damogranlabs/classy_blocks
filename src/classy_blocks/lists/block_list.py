@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Set
 
 from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.items.block import Block
@@ -27,40 +27,66 @@ class BlockList:
             block.add_neighbour(new_block)
             new_block.add_neighbour(block)
 
-    def propagate_gradings(self) -> None:
-        """Unify gradings in each 'cluster' of coincident wires"""
-        # a riddle similar to sudoku, keep traversing
-        # and copying counts until there's no undefined blocks left
-        undefined_blocks = set(range(len(self.blocks)))
+    def assemble(self) -> None:
+        self.update()
+        self.grade()
+        self.check_definitions()
+        self.check_consistency()
+
+    def update(self) -> None:
+        """Update lengths on grading objects"""
+        # Grading on each wire was specified with length 0;
+        # after edges have been added to blocks, they now have a proper
+        # value to work with
+        for block in self.blocks:
+            for wire in block.wire_list:
+                wire.update()
+
+    def grade(self) -> None:
+        undefined_blocks = set(self.blocks)
 
         while len(undefined_blocks) > 0:
-            updated = False
+            removed: Set[Block] = set()
 
-            for i in undefined_blocks:
-                block = self.blocks[i]
+            for block in undefined_blocks:
+                if block.is_defined:
+                    continue
+
+                block.grade()
 
                 if block.is_defined:
-                    undefined_blocks.remove(i)
-                    updated = True
-                    break
+                    removed.add(block)
 
-                updated = block.copy_grading() or updated
-
-            if not updated:
+            if len(removed) == 0:
                 # All of the blocks were traversed and none was updated;
                 # it won't get any better with next iterations
                 break
 
+            undefined_blocks -= removed
+
+    def check_definitions(self) -> None:
+        undefined_blocks: List[Block] = []
+
+        for block in self.blocks:
+            if not block.is_defined:
+                undefined_blocks.append(block)
+
         if len(undefined_blocks) > 0:
             # gather more detailed information about non-defined blocks:
             message = "Blocks with non-defined counts: \n"
-            for i in list(undefined_blocks):
-                message += f"{i}: "
+            for block in undefined_blocks:
+                message += f"{block.index}: "
                 for axis in (0, 1, 2):
-                    message += str(self.blocks[i].axes[axis].count) + " "
+                    message += str(block.axes[axis].count) + " "
                 message += "\n"
 
             raise UndefinedGradingsError(message)
+
+    def check_consistency(self) -> None:
+        """Check that all wires of each block axis have the same count;
+        also check that all coincident wires have the same length and grading"""
+        for block in self.blocks:
+            block.check_consistency()
 
     def clear(self) -> None:
         """Removes created blocks"""

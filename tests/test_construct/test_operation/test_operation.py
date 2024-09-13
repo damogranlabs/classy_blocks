@@ -87,12 +87,21 @@ class OperationTests(BlockTestCase):
 
         self.assertEqual(len(self.loft.chops[0]), 1)
 
-    def test_unchop(self):
+    def test_unchop_single(self):
         """Chop, unchop and check"""
         self.loft.chop(0, count=10)
         self.loft.unchop(0)
 
         self.assertEqual(len(self.loft.chops[0]), 0)
+
+    def test_unchop_all(self):
+        """Chop, unchop and check"""
+        self.loft.chop(0, count=10)
+        self.loft.chop(1, count=10)
+        self.loft.unchop()
+
+        self.assertEqual(len(self.loft.chops[0]), 0)
+        self.assertEqual(len(self.loft.chops[1]), 0)
 
     def test_set_cell_zone(self):
         """Make sure the set_cell_zone method exists"""

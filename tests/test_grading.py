@@ -58,8 +58,8 @@ class TestGrading(unittest.TestCase):
     def test_calculate(self, keys, count, total_expansion):
         chop = Chop(1, **keys)
 
-        self.assertAlmostEqual(chop.calculate(1)[0], count)
-        self.assertAlmostEqual(chop.calculate(1)[1], total_expansion, places=5)
+        self.assertAlmostEqual(chop.calculate(1).count, count)
+        self.assertAlmostEqual(chop.calculate(1).total_expansion, total_expansion, places=5)
 
     def add_chop(self, length_ratio, count, total_expansion):
         chop = Chop(length_ratio=length_ratio, count=count, total_expansion=total_expansion)
@@ -88,8 +88,8 @@ class TestGrading(unittest.TestCase):
 
         self.assertAlmostEqual(self.g.specification[0][2], 5)
 
-        self.g.invert()
-        self.assertAlmostEqual(self.g.specification[0][2], 0.2)
+        g2 = self.g.copy(self.g.length, invert=True)
+        self.assertAlmostEqual(g2.specification[0][2], 0.2)
 
     def test_add_division_zero_length(self):
         """Add a chop to zero-length grading"""
@@ -146,17 +146,6 @@ class TestGrading(unittest.TestCase):
 
         self.assertAlmostEqual(self.g.specification[0][2], 1 / self.g.specification[1][2])
 
-    def test_invert_chop(self):
-        """Inverted chop, different result"""
-        chop_1 = Chop(0.5, count=10, total_expansion=4)
-        chop_2 = Chop(0.5, count=10, total_expansion=4)
-        chop_2.invert()
-
-        chop_1.calculate(1)
-        chop_2.calculate(1)
-
-        self.assertAlmostEqual(chop_1.results["total_expansion"], 1 / chop_2.results["total_expansion"])
-
     def test_add_wrong_ratio(self):
         """Add a chop with an invalid length ratio"""
         with self.assertRaises(ValueError):
@@ -182,9 +171,8 @@ class TestGrading(unittest.TestCase):
 
     def test_invert_empty(self):
         """Invert a grading with no chops"""
-        self.g.invert()
 
-        self.assertListEqual(self.g.specification, [])
+        self.assertListEqual(self.g.copy(1, True).specification, [])
 
     def test_equal(self):
         """Two different gradings with same parameters are equal"""
@@ -219,3 +207,34 @@ class TestGrading(unittest.TestCase):
         grad2.add_chop(Chop(length_ratio=0.5, end_size=0.1))
 
         self.assertFalse(grad1 == grad2)
+
+    def test_copy_preserve_none(self):
+        g1 = self.g
+        g1.add_chop(Chop(start_size=0.01, end_size=0.1))
+
+        g2 = g1.copy(2)
+
+        self.assertEqual(g1.count, g2.count)
+        self.assertEqual(g1.specification[0][1], g2.specification[0][1])
+
+    def test_copy_preserve_start(self):
+        g1 = self.g
+        g1.add_chop(Chop(start_size=0.01, end_size=0.1, preserve="start_size"))
+
+        g2 = g1.copy(2)
+
+        self.assertEqual(g1.count, g2.count)
+        self.assertEqual(g1.start_size, g2.start_size)
+
+        self.assertLess(g1.specification[0][2], g2.specification[0][2])
+
+    def test_copy_preserve_end(self):
+        g1 = self.g
+        g1.add_chop(Chop(start_size=0.01, end_size=0.1, preserve="end_size"))
+
+        g2 = g1.copy(2)
+
+        self.assertEqual(g1.count, g2.count)
+        self.assertEqual(g1.end_size, g2.end_size)
+
+        self.assertGreater(g1.specification[0][2], g2.specification[0][2])

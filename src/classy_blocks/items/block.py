@@ -1,12 +1,12 @@
 from typing import List, get_args
 
+from classy_blocks.grading.chop import Chop
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.axis import Axis
 from classy_blocks.items.wires.wire import Wire
 from classy_blocks.types import AxisType, IndexType
 from classy_blocks.util import constants
-from classy_blocks.util.chop_collector import ChopCollector
 from classy_blocks.util.frame import Frame
 
 
@@ -47,21 +47,6 @@ class Block:
 
         self.wires[corner_1][corner_2].edge = edge
 
-    def chop(self, collector: ChopCollector) -> None:
-        """Take chops from the collector and add them to appropriate wires"""
-        for axis in get_args(AxisType):
-            # axis chops first
-            # ...
-
-            # then edge grading
-            op_gradings = collector.edge_gradings.get_axis_beams(axis)
-            block_wires = self.wires.get_axis_beams(axis)
-
-            for i, grading in enumerate(op_gradings):
-                wire = block_wires[i]
-                wire.grading = grading
-                wire.update()
-
     def get_axis_wires(self, axis: AxisType) -> List[Wire]:
         """Returns a list of wires that run in the given axis"""
         return self.wires.get_axis_beams(axis)
@@ -81,6 +66,18 @@ class Block:
         for this_wire in self.wire_list:
             for cnd_wire in candidate.wire_list:
                 this_wire.add_coincident(cnd_wire)
+
+    def add_chops(self, axis: AxisType, chops: List[Chop]) -> None:
+        self.axes[axis].chops += chops
+
+    def update_wires(self) -> None:
+        for wire in self.wire_list:
+            # set actual grading.length after adding edges
+            wire.update()
+
+    def grade(self) -> None:
+        for axis in self.axes:
+            axis.grade()
 
     @property
     def wire_list(self) -> List[Wire]:
@@ -104,14 +101,9 @@ class Block:
         """Returns True if counts and gradings are defined for all axes"""
         return all(axis.is_defined for axis in self.axes)
 
-    def copy_grading(self) -> bool:
-        updated = False
-
-        if not self.is_defined:
-            for axis in self.axes:
-                updated = axis.copy_grading() or updated
-
-        return updated
+    def check_consistency(self) -> None:
+        for axis in self.axes:
+            axis.check_consistency()
 
     @property
     def indexes(self) -> IndexType:
@@ -150,3 +142,6 @@ class Block:
         fmt_comments = f"// {self.index} {self.comment}\n"
 
         return f"\thex {fmt_vertices} {self.cell_zone} {fmt_count} {fmt_grading} {fmt_comments}"
+
+    def __hash__(self) -> int:
+        return self.index

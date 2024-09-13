@@ -39,7 +39,7 @@ import math
 import warnings
 from typing import List
 
-from classy_blocks.grading.chop import Chop
+from classy_blocks.grading.chop import Chop, ChopData
 from classy_blocks.types import GradingSpecType
 from classy_blocks.util import constants
 
@@ -51,61 +51,90 @@ class Grading:
         # "multi-grading" specification according to:
         # https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
         self.length = length  # to be updated when adding/modifying block edges
+
+        # will change specification to match a wire from end to start
+        self.inverted: bool = False
+
+        # a list of user-input data
         self.chops: List[Chop] = []
-
-    @property
-    def specification(self) -> GradingSpecType:
-        # a list of lists [length ratio, count ratio, total expansion]
-        spec = []
-
-        for chop in self.chops:
-            if not (0 < chop.length_ratio <= 1):
-                raise ValueError(f"Length ratio must be between 0 and (including) 1, got {chop.length_ratio}")
-
-            length = self.length * chop.length_ratio
-            chop_data = chop.calculate(length)
-            spec.append([chop.length_ratio, chop_data.count, chop_data.total_expansion])
-
-        return spec
+        # results from chop.calculate():
+        self._chop_data: List[ChopData] = []
 
     def add_chop(self, chop: Chop) -> None:
+        if not (0 < chop.length_ratio <= 1):
+            raise ValueError(f"Length ratio must be between 0 and (including) 1, got {chop.length_ratio}")
+
         self.chops.append(chop)
 
-    def copy(self, length: float, invert: bool) -> "Grading":
-        """Creates a new grading with the same chops (counts) on a different length"""
+    @property
+    def chop_data(self) -> List[ChopData]:
+        if len(self._chop_data) < len(self.chops):
+            # Chops haven't been calculated yet
+            self._chop_data = []
+
+            for chop in self.chops:
+                self._chop_data.append(chop.calculate(self.length * chop.length_ratio))
+
+        return self._chop_data
+
+    def get_specification(self, inverted: bool) -> List[GradingSpecType]:
+        if inverted:
+            chops = list(reversed(self.chop_data))
+        else:
+            chops = self.chop_data
+
+        return [data.get_specification(inverted) for data in chops]
+
+    @property
+    def specification(self) -> List[GradingSpecType]:  # TODO: type this
+        # a list of [length_ratio, count, total_expansion] for each chop
+        return self.get_specification(self.inverted)
+
+    @property
+    def start_size(self) -> float:
+        if len(self.chops) == 0:
+            return 0
+
+        chop = self.chops[0]
+        return chop.calculate(self.length * chop.length_ratio).start_size
+
+    @property
+    def end_size(self) -> float:
+        if len(self.chops) == 0:
+            return 0
+
+        chop = self.chops[-1]
+        return chop.calculate(self.length * chop.length_ratio).end_size
+
+    def copy(self, length: float, invert: bool = False) -> "Grading":
+        """Creates a new grading with the same chops (counts) on a different length,
+        keeping chop.preserve quantity constant;
+
+        the 'length' parameter is the new wire's length"""
         new_grading = Grading(length)
 
-        for chop in self.chops:
-            # calculate chops on current grading to get the correct counts
-            old_data = chop.calculate(self.length)
-            # create a copy of this Chop with equal count but
-            # set other parameters from current data so that
-            # the correct start/end size or c2c is maintained"""
-            new_args = dataclasses.asdict(old_data)
-            new_args["count"] = old_data.count
+        for data in self.chop_data:
+            # take count from calculated chops;
+            # it is of utmost importance it stays the same
+            old_data = dataclasses.asdict(data)
+            new_args = {
+                "length_ratio": data.length_ratio,
+                "count": old_data["count"],
+                data.preserve: old_data[data.preserve],
+                "preserve": data.preserve,
+                "take": data.take,
+            }
 
-            for arg in ["total_expansion", "c2c_expansion", "start_size", "end_size"]:
-                new_args[arg] = None
-
-            new_args[old_data.preserve] = dataclasses.asdict(old_data)[old_data.preserve]
-
-            chop = Chop(**new_args)
+            new_grading.add_chop(Chop(**new_args))
             if invert:
-                chop.invert()
-
-            new_grading.add_chop(chop)
+                new_grading.inverted = not new_grading.inverted
 
         return new_grading
 
     @property
-    def counts(self) -> List[int]:
-        """Counts per chop"""
-        return [int(d[1]) for d in self.specification]
-
-    @property
     def count(self) -> int:
         """Return number of cells, summed over all sub-divisions"""
-        return sum(self.counts)
+        return sum(d.count for d in self.chop_data)
 
     @property
     def is_defined(self) -> bool:
@@ -125,7 +154,7 @@ class Grading:
 
         # multi-grading: make a nice list
         # FIXME: make a nicer list
-        length_ratio_sum = 0
+        length_ratio_sum = 0.0
         out = "("
 
         for spec in self.specification:
@@ -139,23 +168,23 @@ class Grading:
 
         return out
 
-    def __eq__(self, other):
+    def __eq__(self, other_grading):
         # this works theoretically but numerics will probably ruin the party:
         # return self.specification == other.specification
-        if len(self.specification) != len(other.specification):
+        this_spec = self.get_specification(False)
+        other_spec = other_grading.get_specification(False)
+
+        if len(this_spec) != len(other_spec):
             return False
 
         # so just compare number-by-number
-        for i, this_spec in enumerate(self.specification):
-            other_spec = other.specification[i]
+        for i, this in enumerate(this_spec):
+            other = other_spec[i]
 
-            for j, this_value in enumerate(this_spec):
-                other_value = other_spec[j]
+            for j, this_value in enumerate(this):
+                other_value = other[j]
 
                 if not math.isclose(this_value, other_value, rel_tol=constants.TOL):
                     return False
 
         return True
-
-    def __repr__(self) -> str:
-        return str(self.specification)

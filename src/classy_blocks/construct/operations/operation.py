@@ -14,7 +14,6 @@ from classy_blocks.grading.chop import Chop
 from classy_blocks.types import AxisType, ChopArgs, NPPointType, OrientType, PointType, ProjectToType, VectorType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
-from classy_blocks.util.chop_collector import ChopCollector
 from classy_blocks.util.constants import SIDES_MAP
 from classy_blocks.util.frame import Frame
 from classy_blocks.util.tools import edge_map
@@ -35,8 +34,7 @@ class Operation(ElementBase):
         self.side_patches: List[Optional[str]] = [None, None, None, None]
 
         # instructions for cell counts and gradings
-        # self.chops: Dict[AxisType, List[Chop]] = {0: [], 1: [], 2: []}
-        self.chops = ChopCollector()
+        self.chops: Dict[AxisType, List[Chop]] = {0: [], 1: [], 2: []}
 
         # optionally, put the block in a cell zone
         self.cell_zone = ""
@@ -60,13 +58,7 @@ class Operation(ElementBase):
 
         self.side_edges[corner_idx] = edge_data
 
-    def chop(
-        self,
-        axis: Optional[AxisType] = None,
-        corner_1: Optional[int] = None,
-        corner_2: Optional[int] = None,
-        **kwargs: Unpack[ChopArgs],
-    ) -> None:
+    def chop(self, axis: AxisType, **kwargs: Unpack[ChopArgs]) -> None:
         """Chop the operation (count/grading) either in given axis:
             0: along first edge of a face
             1: along second edge of a face
@@ -92,18 +84,16 @@ class Operation(ElementBase):
         Use length_ratio for multigrading (see documentation):
         https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading"""
 
-        chop = Chop(**kwargs)
+        self.chops[axis].append(Chop(**kwargs))
 
-        if axis is not None:
-            self.chops.add_axis_chop(axis, chop)
-        elif corner_1 is not None and corner_2 is not None:
-            self.chops.add_edge_chop(corner_1, corner_2, chop)
-        else:
-            raise ValueError("Provide axis or two corners for chopping")
+    def unchop(self, axis: Optional[AxisType] = None) -> None:
+        """Removes existing chops from an operation (comes handy after copying etc.)"""
+        if axis is None:
+            for i in get_args(AxisType):
+                self.chops[i] = []
+            return
 
-    def unchop(self) -> None:
-        """Removes all existing chops from an operation (comes handy after copying etc.)"""
-        self.chops.clear_all()
+        self.chops[axis] = []
 
     def project_corner(self, corner: int, label: ProjectToType) -> None:
         """Project the vertex at given corner (local index 0...7) to a single

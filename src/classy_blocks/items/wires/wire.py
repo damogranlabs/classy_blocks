@@ -1,5 +1,6 @@
 from typing import List, Set
 
+from classy_blocks.base.exceptions import InconsistentGradingsError
 from classy_blocks.construct.edges import Line
 from classy_blocks.grading.grading import Grading
 from classy_blocks.items.edges.edge import Edge
@@ -22,7 +23,7 @@ class Wire:
         self.edge: Edge = factory.create(self.vertices[0], self.vertices[1], Line())
 
         # grading/counts of this wire
-        self.grading = Grading(self.length)
+        self.grading = Grading(0)
 
         # multiple wires can be at the same spot; this list holds other
         # coincident wires from different blocks
@@ -70,22 +71,26 @@ class Wire:
         elif wire.vertices[0] == self.vertices[1]:
             self.after.add(wire)
 
-    def copy_from_coincident(self) -> bool:
-        """Tries to find a coincident wire with a defined Grading
-        and copy from it"""
-        if self.is_defined:
-            return False
-
+    def copy_to_coincidents(self):
+        """Copies the grading to all coincident wires"""
         for coincident in self.coincidents:
-            if coincident.is_defined:
-                self.grading = coincident.grading.copy(coincident.length, not coincident.is_aligned(self))
-                return True
+            if not coincident.is_defined:
+                coincident.grading = self.grading.copy(self.length, not coincident.is_aligned(self))
 
-        return False
+    def check_consistency(self) -> None:
+        """Check that coincident wires have the same length and grading"""
+        for wire in self.coincidents:
+            if wire.length != self.length:
+                raise InconsistentGradingsError(f"Coincident wires have different lengths! {self} - {wire}")
+
+            if self.grading != wire.grading:
+                raise InconsistentGradingsError(
+                    f"Coincident wires have different gradings! {self}:{self.grading} - {wire}:{wire.grading}"
+                )
 
     @property
     def is_defined(self) -> bool:
         return self.grading.is_defined
 
     def __repr__(self):
-        return f"Wire {self.corners[0]}-{self.corners[1]}"
+        return f"Wire {self.corners[0]}-{self.corners[1]} ({self.vertices[0].index}-{self.vertices[1].index})"

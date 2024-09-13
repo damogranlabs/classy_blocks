@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Literal, Sequence, TypedDict, Union
+from typing import Any, Callable, List, Literal, Sequence, Tuple, TypedDict, Union
 
 from nptyping import NDArray, Shape
 
@@ -25,16 +25,23 @@ EdgeDataType = Union[PointType, PointListType, str]
 
 # block sides
 OrientType = Literal["left", "right", "front", "back", "top", "bottom"]
-
 AxisType = Literal[0, 1, 2]
 
+# Project vertex/edge to one or multiple geometries
+ProjectToType = Union[str, List[str]]
+
+# A list of indexes that define a quad
+IndexType = List[int]
+
+
 # the complete guide to chopping
-ChopTakeType = Literal["min", "max", "avg"]
-ChopPreserveType = Literal["start_size", "end_size", "c2c_expansion"]
-GradingSpecType = List[List[float]]
+ChopTakeType = Literal["min", "max", "avg"]  # which wire of the block to take as reference length
+ChopPreserveType = Literal["start_size", "end_size", "c2c_expansion", "total_expansion"]  # what value to keep
 
 
 class ChopArgs(TypedDict, total=False):
+    """All chopping parameters"""
+
     length_ratio: float
     start_size: float
     c2c_expansion: float
@@ -45,8 +52,5 @@ class ChopArgs(TypedDict, total=False):
     preserve: ChopPreserveType
 
 
-# Project vertex/edge to one or multiple geometries
-ProjectToType = Union[str, List[str]]
-
-# A list of indexes that define a quad
-IndexType = List[int]
+# what goes into blockMeshDict's block grading specification
+GradingSpecType = Tuple[float, int, float]

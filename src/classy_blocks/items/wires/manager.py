@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from classy_blocks.base.exceptions import InconsistentGradingsError
+from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.grading.chop import Chop
 from classy_blocks.items.wires.wire import Wire
 
@@ -45,13 +45,6 @@ class WireManager:
 
         return True
 
-    def check_consistency(self) -> None:
-        """Raises an error if not all wires have the same count"""
-        counts = [wire.grading.count for wire in self.wires]
-        if len(set(counts)) != 1:
-            wire_descriptions = [str(wire) for wire in self.wires]
-            raise InconsistentGradingsError(f"Inconsistent counts on wires {wire_descriptions} ({counts})")
-
     @property
     def undefined(self) -> List[Wire]:
         """Returns a list of wires that have no gradings defined"""
@@ -66,20 +59,15 @@ class WireManager:
 
         return None
 
-    def propagate_gradings(self) -> bool:
-        # TODO: update start/end size to match before/after
+    def propagate_gradings(self) -> None:
         defined = self.defined
 
-        if not defined:
-            return False
-
-        updated = False
+        if defined is None:
+            raise UndefinedGradingsError("Can't propagate: no defined wires")
 
         for wire in self.undefined:
             wire.grading = defined.grading.copy(wire.length, False)
-            updated = True
-
-        return updated
+            wire.copy_to_coincidents()
 
     @property
     def count(self):

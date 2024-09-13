@@ -3,7 +3,7 @@ from functools import lru_cache
 from typing import Callable, List, Optional, Set, Union
 
 from classy_blocks.grading import relations as rel
-from classy_blocks.types import ChopPreserveType, ChopTakeType
+from classy_blocks.types import ChopPreserveType, ChopTakeType, GradingSpecType
 
 
 @dataclasses.dataclass
@@ -47,8 +47,30 @@ class ChopRelation:
 
 @dataclasses.dataclass
 class ChopData:
-    """Data that the user inputs for chopping parameters;
-    also a collection of results from Chop.calculate()"""
+    """A collection of results from Chop.calculate()"""
+
+    # TODO: combine with Chop? (not the same thing, though?)
+    length_ratio: float
+    start_size: float
+    c2c_expansion: float
+    count: int
+    end_size: float
+    total_expansion: float
+    take: ChopTakeType = "avg"
+    preserve: ChopPreserveType = "total_expansion"
+
+    def get_specification(self, invert: bool) -> GradingSpecType:
+        if invert:
+            return (self.length_ratio, self.count, 1 / self.total_expansion)
+
+        return (self.length_ratio, self.count, self.total_expansion)
+
+
+@dataclasses.dataclass
+class Chop:
+    """A single 'chop' represents a division in Grading object;
+    user-provided arguments are stored in this object and used
+    for creation of Gradient object"""
 
     length_ratio: float = 1.0
     start_size: Optional[float] = None
@@ -57,17 +79,7 @@ class ChopData:
     end_size: Optional[float] = None
     total_expansion: Optional[float] = None
     take: ChopTakeType = "avg"
-    preserve: ChopPreserveType = "c2c_expansion"
-
-
-@dataclasses.dataclass
-class Chop(ChopData):
-    """A single 'chop' represents a division in Grading object;
-    user-provided arguments are stored in this object and used
-    for creation of Gradient object"""
-
-    # The data inherited from ChopData is entered by the user and is never modified;
-    # whatever is calculated in .calculate() is stored in a new ChopData and returned
+    preserve: ChopPreserveType = "total_expansion"
 
     def __post_init__(self) -> None:
         # default: take c2c_expansion=1 if there's less than 2 parameters given
@@ -111,13 +123,23 @@ class Chop(ChopData):
 
         raise ValueError(f"Could not calculate count and grading for given parameters: {data}")
 
-    def invert(self) -> None:
-        """Modifies this chop so that grading will have an opposite orientation,
-        a.k.a. start -> end and c2c -> 1/c2c."""
-        self.end_size, self.start_size = self.start_size, self.end_size
+    def copy(self, length: float) -> "Chop":
+        """Returns a new Chop with same count but different
+        total_expansion, keeping the 'preserve'd value constant;
+        'length' argument refers to the original length (not the copied-to)"""
+        this_def = dataclasses.asdict(self)
+        this_data = dataclasses.asdict(self.calculate(length))
+        preserve_value = this_data[self.preserve]
 
-        if self.c2c_expansion is not None:
-            self.c2c_expansion = 1 / self.c2c_expansion
+        # create a copy of this Chop with equal count but
+        # set other parameters from current data so that
+        # the correct start/end size or c2c is maintained"""
+        new_args = this_data
+        new_args["count"] = this_data["count"]
 
-        if self.total_expansion is not None:
-            self.total_expansion = 1 / self.total_expansion
+        for arg in ["total_expansion", "c2c_expansion", "start_size", "end_size"]:
+            new_args[arg] = None
+
+        new_args[this_def["preserve"]] = preserve_value
+
+        return Chop(**new_args)
