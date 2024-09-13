@@ -86,7 +86,7 @@ class Grading:
         return [data.get_specification(inverted) for data in chops]
 
     @property
-    def specification(self) -> List[GradingSpecType]:  # TODO: type this
+    def specification(self) -> List[GradingSpecType]:
         # a list of [length_ratio, count, total_expansion] for each chop
         return self.get_specification(self.inverted)
 

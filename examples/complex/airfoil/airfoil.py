@@ -38,7 +38,7 @@ from classy_blocks.util import functions as f
 FILE_NAME = "naca2414.dat"
 ANGLE_OF_ATTACK = 20  # in degrees
 CHORD = 0.5  # desired chord (provided the one from points is 1)
-OPTIMIZE = False  # Set to False to skip optimization
+OPTIMIZE = True  # Set to False to skip optimization
 
 CELL_SIZE = 0.025
 BL_THICKNESS = 0.001  # thickness of boundary layer cells

@@ -49,7 +49,6 @@ class ChopRelation:
 class ChopData:
     """A collection of results from Chop.calculate()"""
 
-    # TODO: combine with Chop? (not the same thing, though?)
     length_ratio: float
     start_size: float
     c2c_expansion: float
@@ -122,24 +121,3 @@ class Chop:
                     calculated.add(output)
 
         raise ValueError(f"Could not calculate count and grading for given parameters: {data}")
-
-    def copy(self, length: float) -> "Chop":
-        """Returns a new Chop with same count but different
-        total_expansion, keeping the 'preserve'd value constant;
-        'length' argument refers to the original length (not the copied-to)"""
-        this_def = dataclasses.asdict(self)
-        this_data = dataclasses.asdict(self.calculate(length))
-        preserve_value = this_data[self.preserve]
-
-        # create a copy of this Chop with equal count but
-        # set other parameters from current data so that
-        # the correct start/end size or c2c is maintained"""
-        new_args = this_data
-        new_args["count"] = this_data["count"]
-
-        for arg in ["total_expansion", "c2c_expansion", "start_size", "end_size"]:
-            new_args[arg] = None
-
-        new_args[this_def["preserve"]] = preserve_value
-
-        return Chop(**new_args)

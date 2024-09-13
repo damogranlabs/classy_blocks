@@ -65,7 +65,7 @@ class WireManager:
         if defined is None:
             raise UndefinedGradingsError("Can't propagate: no defined wires")
 
-        for wire in self.undefined:
+        for wire in self.wires:
             wire.grading = defined.grading.copy(wire.length, False)
             wire.copy_to_coincidents()
 

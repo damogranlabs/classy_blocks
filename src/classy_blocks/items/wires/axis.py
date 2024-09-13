@@ -6,7 +6,7 @@ from classy_blocks.grading.grading import Grading
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.manager import WireManager
 from classy_blocks.items.wires.wire import Wire
-from classy_blocks.types import AxisType, ChopTakeType
+from classy_blocks.types import AxisType
 
 
 class Axis:
@@ -47,17 +47,6 @@ class Axis:
 
         raise RuntimeError("Axes are not neighbours")
 
-    def get_length(self, take: ChopTakeType) -> float:
-        lengths = [wire.length for wire in self.wires]
-
-        if take == "max":
-            return max(lengths)
-
-        if take == "min":
-            return min(lengths)
-
-        return sum(lengths) / len(lengths)
-
     def grade(self) -> None:
         if self.is_defined:
             return
@@ -67,37 +56,39 @@ class Axis:
             self.wires.propagate_gradings()
             return
 
-        # TODO: improve
-        if len(self.chops) > 0:
-            # create Grading from chops, if there are any
-            wires_by_length = list(sorted(self.wires, key=lambda w: w.length))
-            grading = Grading(0)
-            for chop in self.chops:
-                grading.add_chop(chop)
+        if len(self.chops) == 0:
+            # nothing to work with
+            return
 
+        # create Grading from chops, if there are any
+        grading = Grading(0)
+        for chop in self.chops:
+            grading.add_chop(chop)
+
+        take = self.chops[0].take
+
+        if take == "avg":
+            # make a fake grading with an average length,
+            # calculate count from it, then copy it with the same
+            # count to all wires
+            avg_length = sum([w.length for w in self.wires]) / 4
+            grading.length = avg_length
+            for wire in self.wires:
+                wire.grading = grading.copy(wire.length, False)
+        else:
+            # take a specific wire
+            wires_by_length = list(sorted(self.wires, key=lambda w: w.length))
             if self.chops[0].take == "max":
                 # chop the longest wire, then propagate
                 wire = wires_by_length[-1]
-                wire.grading = grading
-                wire.update()
-                # copy grading to all wires in this axis
-                self.wires.propagate_gradings()
-            elif self.chops[0].take == "min":
-                # chop the shortest wire, then propagate
+            else:  # "min"
                 wire = wires_by_length[0]
-                wire.grading = grading
-                wire.update()
-                # copy grading to all wires in this axis
-                self.wires.propagate_gradings()
-            else:
-                # make a fake grading with an average length,
-                # calculate count from it, then copy it with the same
-                # count to all wires
-                avg_length = sum([w.length for w in self.wires]) / 4
-                grading.length = avg_length
-                for wire in self.wires:
-                    wire.grading = grading.copy(wire.length, False)
-                    wire.copy_to_coincidents()
+
+            wire.grading = grading
+            wire.update()
+
+        # copy grading to all wires in this axis
+        self.wires.propagate_gradings()
 
     @property
     def is_defined(self) -> bool:
