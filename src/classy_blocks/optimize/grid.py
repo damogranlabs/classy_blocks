@@ -1,13 +1,19 @@
-from typing import List, Type
+from typing import List, Type, Union
 
 import numpy as np
 
+from classy_blocks.construct.assemblies.assembly import Assembly
+from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.construct.flat.sketches.mapped import MappedSketch
+from classy_blocks.construct.operations.operation import Operation
+from classy_blocks.construct.shape import Shape
+from classy_blocks.construct.stack import Stack
 from classy_blocks.mesh import Mesh
 from classy_blocks.optimize.cell import CellBase, HexCell, QuadCell
 from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.junction import Junction
 from classy_blocks.optimize.links import LinkBase
+from classy_blocks.optimize.mapper import Mapper
 from classy_blocks.types import IndexType, NPPointListType, NPPointType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
@@ -131,16 +137,41 @@ class QuadGrid(GridBase):
     cell_class = QuadCell
 
     @classmethod
-    def from_sketch(cls, sketch: MappedSketch) -> "QuadGrid":
-        # TODO: make grids from ANY sketch
-        return QuadGrid(sketch.positions, sketch.indexes)
+    def from_sketch(cls, sketch: Sketch) -> "QuadGrid":
+        if isinstance(sketch, MappedSketch):
+            # Use the mapper's indexes (provided by the user!)
+            return cls(sketch.positions, sketch.indexes)
+
+        # automatically create a mapping for arbitrary sketches
+        mapper = Mapper()
+        for face in sketch.faces:
+            mapper.add(face)
+
+        return cls(np.array(mapper.points), mapper.indexes)
 
 
 class HexGrid(GridBase):
     cell_class = HexCell
 
     @classmethod
+    def from_elements(cls, elements: List[Union[Operation, Shape, Stack, Assembly]]) -> "HexGrid":
+        """Creates a grid from a list of elements"""
+        mapper = Mapper()
+
+        for element in elements:
+            if isinstance(element, Operation):
+                operations = [element]
+            else:
+                operations = element.operations
+
+            for operation in operations:
+                mapper.add(operation)
+
+        return cls(np.array(mapper.points), mapper.indexes)
+
+    @classmethod
     def from_mesh(cls, mesh: Mesh) -> "HexGrid":
+        """Creates a grid from an assembled Mesh object"""
         points = np.array([vertex.position for vertex in mesh.vertices])
         addresses = [block.indexes for block in mesh.blocks]
 
