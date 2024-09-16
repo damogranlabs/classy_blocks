@@ -7,10 +7,6 @@ from classy_blocks.grading.chop import Chop
 from classy_blocks.types import ChopTakeType
 
 
-class AutoChopError(Exception):
-    """Raised when there's not enough space to finish a part of autochop"""
-
-
 def sum_length(start_size: float, count: int, c2c_expansion: float) -> float:
     """Returns absolute length of the chop"""
     length = 0.0
@@ -71,11 +67,11 @@ class LowReChopParams:
     def _get_boundary_chop(self, length: float) -> Tuple[Chop, float]:
         """Creates a Chop for the boundary layer; returns size of the last cell"""
         near_wall = Chop(
-            length_ratio=length / self.boundary_layer_thickness,
+            length_ratio=self.boundary_layer_thickness / length,
             start_size=self.first_cell_size,
             c2c_expansion=self.c2c_expansion,
         )
-        data = near_wall.calculate(self.first_cell_size * self.boundary_layer_thickness)
+        data = near_wall.calculate(length)
         return (near_wall, data.end_size)
 
     def _get_buffer_chop(self, start_size: float) -> Tuple[Chop, float]:
@@ -110,6 +106,7 @@ class LowReChopParams:
 
         # buffer
         buffer, buffer_size = self._get_buffer_chop(last_bl_size)
+        buffer.length_ratio = buffer_size / length
         chops.append(buffer)
         if buffer_size >= remaining_length:
             warnings.warn("Stopping chops at buffer layer (not enough space)!", stacklevel=1)
@@ -118,6 +115,7 @@ class LowReChopParams:
         # bulk
         remaining_length = remaining_length - buffer_size
         bulk = self._get_bulk_chop(remaining_length)
+        bulk.length_ratio = remaining_length / length
         chops.append(bulk)
 
         return chops
