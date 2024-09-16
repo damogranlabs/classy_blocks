@@ -73,7 +73,7 @@ class Grading:
             self._chop_data = []
 
             for chop in self.chops:
-                self._chop_data.append(chop.calculate(self.length * chop.length_ratio))
+                self._chop_data.append(chop.calculate(self.length))
 
         return self._chop_data
 

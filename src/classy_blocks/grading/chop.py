@@ -96,6 +96,7 @@ class Chop:
         by calling functions that take known variables and return new values"""
         data = dataclasses.asdict(self)
         calculated: Set[str] = set()
+        length = length * self.length_ratio
 
         for key in data.keys():
             if data[key] is not None:
