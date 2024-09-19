@@ -6,6 +6,8 @@ from classy_blocks.types import IndexType, NPPointType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
 
+ElementType = Union[Face, Operation]
+
 
 class Mapper:
     """A helper that constructs mapped sketches/shapes
@@ -32,8 +34,21 @@ class Mapper:
 
         return index
 
-    def add(self, element: Union[Face, Operation]):
+    def add(self, element: ElementType) -> None:
         """Add Face's or Operation's points to the map"""
         indexes = [self._add_point(point) for point in element.point_array]
         self.indexes.append(indexes)
         self.elements.append(element)
+
+    @classmethod
+    def from_map(cls, points: List[NPPointType], indexes: List[IndexType], elements: List[ElementType]) -> "Mapper":
+        """Creates a ready-made mapper from a sketch/shape that already has points/indexes defined"""
+        if len(indexes) != len(elements):
+            raise ValueError("Number of indexes and elements don't match!")
+
+        mapper = cls()
+        mapper.points = points
+        mapper.indexes = indexes
+        mapper.elements = elements
+
+        return mapper

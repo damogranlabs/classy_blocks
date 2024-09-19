@@ -1,18 +1,20 @@
 import abc
 import copy
 import time
-from typing import Literal
+from typing import List, Literal
 
 import numpy as np
 import scipy.optimize
 
 from classy_blocks.construct.flat.sketches.mapped import MappedSketch
+from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.mesh import Mesh
 from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.clamps.surface import PlaneClamp
 from classy_blocks.optimize.grid import GridBase, HexGrid, QuadGrid
 from classy_blocks.optimize.iteration import ClampOptimizationData, IterationDriver
 from classy_blocks.optimize.links import LinkBase
+from classy_blocks.optimize.mapper import Mapper
 from classy_blocks.util.constants import TOL
 
 MinimizationMethodType = Literal["SLSQP", "L-BFGS-B", "Nelder-Mead", "Powell"]
@@ -146,6 +148,26 @@ class MeshOptimizer(OptimizerBase):
         # copy the stuff back to mesh
         for i, point in enumerate(self.grid.points):
             self.mesh.vertices[i].move_to(point)
+
+
+class ShapeOptimizer(OptimizerBase):
+    def __init__(self, operations: List[Operation], report: bool = True):
+        self.mapper = Mapper()
+
+        for operation in operations:
+            self.mapper.add(operation)
+
+        grid = HexGrid(np.array(self.mapper.points), self.mapper.indexes)
+
+        super().__init__(grid, report)
+
+    def backport(self) -> None:
+        # Move every point of every operation to wherever it is now
+        for iop, indexes in enumerate(self.mapper.indexes):
+            operation = self.mapper.elements[iop]
+
+            for ipnt, i in enumerate(indexes):
+                operation.points[ipnt].move_to(self.grid.points[i])
 
 
 class SketchOptimizer(OptimizerBase):
