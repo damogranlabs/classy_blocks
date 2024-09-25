@@ -1,3 +1,4 @@
+import abc
 import dataclasses
 import warnings
 from typing import List, Tuple
@@ -19,8 +20,63 @@ def sum_length(start_size: float, count: int, c2c_expansion: float) -> float:
     return length
 
 
+class ChopParams(abc.ABC):
+    @abc.abstractmethod
+    def get_chops_from_length(self, length: float) -> List[Chop]:
+        """Calculates chopping parameters based on given length"""
+
+    @abc.abstractmethod
+    def adjust_chops(self, count: int, length: float) -> List[Chop]:
+        """Leaves cell count unchanged but modifies chops
+        so that proper cell sizing will be obeyed"""
+        # That depends on inherited classes' philosophy
+
+
 @dataclasses.dataclass
-class LowReChopParams:
+class SimpleChopParams(ChopParams):
+    """Parameters for the simplest possible mesh grading:
+    uses a constant cell count for all axes on all blocks;
+    useful only during mesh building and tutorial cases"""
+
+    count: int = 8
+
+    def get_chops_from_length(self, _length):
+        return [Chop(count=self.count, total_expansion=1)]
+
+    def adjust_chops(self, _count, _length) -> List[Chop]:
+        return self.get_chops_from_length(0)
+
+
+@dataclasses.dataclass
+class SimpleHighReChopParams(ChopParams):
+    """Parameters for simple mesh grading for high-Re cases.
+    A single chop is used that sets cell count based on size.
+    Cell sizes between blocks differ as blocks' sizes change."""
+
+    def get_chops_from_length(self, length: float) -> List[Chop]:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def adjust_chops(self, count: int, length: float) -> List[Chop]:
+        raise NotImplementedError
+
+
+@dataclasses.dataclass
+class HighReChopParams(ChopParams):
+    """Parameters for mesh grading for high-Re cases.
+    Two chops are added to all blocks; c2c_expansion and and length_ratio
+    are utilized to keep cell sizes between blocks consistent"""
+
+    def get_chops_from_length(self, length: float) -> List[Chop]:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def adjust_chops(self, count: int, length: float) -> List[Chop]:
+        raise NotImplementedError
+
+
+@dataclasses.dataclass
+class LowReChopParams(ChopParams):
     """Parameters for mesh grading for Low-Re cases.
     To save on cell count, only a required thickness (boundary layer)
     will be covered with thin cells (c2c_expansion in size ratio between them).
@@ -119,3 +175,6 @@ class LowReChopParams:
         chops.append(bulk)
 
         return chops
+
+    def adjust_chops(self, count: int, length: float) -> List[Chop]:
+        raise NotImplementedError("TODO!")

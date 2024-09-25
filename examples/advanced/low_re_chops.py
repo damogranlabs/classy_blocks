@@ -1,7 +1,7 @@
 import os
 
 import classy_blocks as cb
-from classy_blocks.grading.autochop.low_re import LowReChopParams
+from classy_blocks.grading.autograding.params import LowReChopParams
 
 mesh = cb.Mesh()
 

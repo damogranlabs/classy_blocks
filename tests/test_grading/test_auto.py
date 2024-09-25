@@ -2,7 +2,7 @@ import unittest
 
 from parameterized import parameterized
 
-from classy_blocks.grading.autochop.low_re import LowReChopParams
+from classy_blocks.grading.autograding.params import LowReChopParams
 
 
 class LowReChopTests(unittest.TestCase):
