@@ -121,3 +121,6 @@ class Axis:
 
     def __str__(self):
         return f"Axis {self.index} (" + "|".join(str(wire) for wire in self.wires.wires) + ")"
+
+    def __hash__(self):
+        return id(self)
