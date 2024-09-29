@@ -47,6 +47,10 @@ class Axis:
 
         raise RuntimeError("Axes are not neighbours")
 
+    @property
+    def lengths(self) -> List[float]:
+        return [w.length for w in self.wires]
+
     def grade(self) -> None:
         if self.is_defined:
             return
@@ -71,7 +75,7 @@ class Axis:
             # make a fake grading with an average length,
             # calculate count from it, then copy it with the same
             # count to all wires
-            avg_length = sum([w.length for w in self.wires]) / 4
+            avg_length = sum(self.lengths) / 4
             grading.length = avg_length
             for wire in self.wires:
                 wire.grading = grading.copy(wire.length, False)

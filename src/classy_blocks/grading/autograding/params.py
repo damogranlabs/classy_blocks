@@ -47,18 +47,20 @@ class SimpleChopParams(ChopParams):
         return self.get_chops_from_length(0)
 
 
+# TODO: rename this CentipedeCaseClassNameMonstrosity
 @dataclasses.dataclass
 class SimpleHighReChopParams(ChopParams):
     """Parameters for simple mesh grading for high-Re cases.
     A single chop is used that sets cell count based on size.
     Cell sizes between blocks differ as blocks' sizes change."""
 
-    def get_chops_from_length(self, length: float) -> List[Chop]:
-        raise NotImplementedError
+    cell_size: float
 
-    @abc.abstractmethod
-    def adjust_chops(self, count: int, length: float) -> List[Chop]:
-        raise NotImplementedError
+    def get_chops_from_length(self, length: float) -> List[Chop]:
+        return [Chop(count=int(length / self.cell_size), total_expansion=1)]
+
+    def adjust_chops(self, _count, _length) -> List[Chop]:
+        return self.get_chops_from_length(0)
 
 
 @dataclasses.dataclass

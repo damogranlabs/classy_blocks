@@ -2,7 +2,7 @@ import os
 from typing import List
 
 import classy_blocks as cb
-from classy_blocks.grading.autograding.grader import SimpleGrader
+from classy_blocks.grading.autograding.grader import FixedCountGrader
 from classy_blocks.grading.autograding.params import SimpleChopParams
 from classy_blocks.util import functions as f
 
@@ -36,7 +36,7 @@ for side in ("top", "right", "top", "top", "left", "top"):
 mesh.set_default_patch("walls", "wall")
 
 mesh.assemble()
-grader = SimpleGrader(mesh, SimpleChopParams())
+grader = FixedCountGrader(mesh, SimpleChopParams())
 grader.grade()
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

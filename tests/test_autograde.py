@@ -25,5 +25,13 @@ class ProbeTests(AutogradeTestsBase):
     def test_get_blocks_on_layer(self, block, axis):
         probe = Probe(self.mesh)
 
-        blocks = probe.get_blocks_on_layer(self.mesh.blocks[block], axis)
+        blocks = probe._get_blocks_on_layer(self.mesh.blocks[block], axis)
         self.assertEqual(len(blocks), 9)
+
+    @parameterized.expand(((0,), (1,), (2,)))
+    def test_get_layers(self, axis):
+        probe = Probe(self.mesh)
+
+        layers = probe.get_layers(axis)
+
+        self.assertEqual(len(layers), 3)
