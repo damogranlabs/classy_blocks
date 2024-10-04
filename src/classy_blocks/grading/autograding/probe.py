@@ -1,5 +1,5 @@
 import functools
-from typing import Dict, List, Set, get_args
+from typing import Dict, List, get_args
 
 from classy_blocks.items.block import Block
 from classy_blocks.items.wires.axis import Axis
@@ -41,16 +41,22 @@ class Row:
 
     def __init__(self, direction: DirectionType):
         self.direction = direction
-        self.blocks: Set[Block] = set()
 
-    def add_block(self, block: Block) -> None:
-        self.blocks.add(block)
+        # block of different orientations can belong to the same row;
+        # remember how they are oriented
+        self.blocks: List[Block] = []
+        self.headings: List[DirectionType] = []
+
+    def add_block(self, block: Block, row_direction: DirectionType) -> None:
+        self.blocks.append(block)
+        self.headings.append(row_direction)
 
     def get_length(self, take: ChopTakeType = "avg"):
         lengths: List[float] = []
 
-        for block in self.blocks:
-            lengths += block.axes[self.direction].lengths
+        for i, block in enumerate(self.blocks):
+            direction = self.headings[i]
+            lengths += block.axes[direction].lengths
 
         if take == "min":
             return min(lengths)
@@ -85,7 +91,7 @@ class Catalogue:
         raise RuntimeError(f"No instruction found for block {block}")
 
     def _add_block_to_row(self, row: Row, instruction: Instruction, direction: DirectionType) -> None:
-        row.add_block(instruction.block)
+        row.add_block(instruction.block, direction)
         instruction.directions[direction] = True
 
         block = instruction.block
@@ -110,7 +116,7 @@ class Catalogue:
             self._add_block_to_row(row, undefined_instructions[0], direction)
             self.rows[direction].append(row)
 
-    def get_row_blocks(self, block: Block, direction: DirectionType) -> Set[Block]:
+    def get_row_blocks(self, block: Block, direction: DirectionType) -> List[Block]:
         for row in self.rows[direction]:
             if block in row.blocks:
                 return row.blocks
@@ -126,7 +132,7 @@ class Probe:
         self.mesh = mesh
         self.catalogue = Catalogue(self.mesh)
 
-    def get_row_blocks(self, block: Block, direction: DirectionType) -> Set[Block]:
+    def get_row_blocks(self, block: Block, direction: DirectionType) -> List[Block]:
         return self.catalogue.get_row_blocks(block, direction)
 
     def get_rows(self, direction: DirectionType) -> List[Row]:

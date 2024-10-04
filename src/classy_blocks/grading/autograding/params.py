@@ -33,11 +33,7 @@ class ChopParams(abc.ABC):
 
 
 @dataclasses.dataclass
-class SimpleChopParams(ChopParams):
-    """Parameters for the simplest possible mesh grading:
-    uses a constant cell count for all axes on all blocks;
-    useful only during mesh building and tutorial cases"""
-
+class FixedCountParams(ChopParams):
     count: int = 8
 
     def get_chops_from_length(self, _length):
@@ -49,18 +45,14 @@ class SimpleChopParams(ChopParams):
 
 # TODO: rename this CentipedeCaseClassNameMonstrosity
 @dataclasses.dataclass
-class SimpleHighReChopParams(ChopParams):
-    """Parameters for simple mesh grading for high-Re cases.
-    A single chop is used that sets cell count based on size.
-    Cell sizes between blocks differ as blocks' sizes change."""
-
+class SimpleChopParams(ChopParams):
     cell_size: float
 
     def get_chops_from_length(self, length: float) -> List[Chop]:
         return [Chop(count=int(length / self.cell_size), total_expansion=1)]
 
-    def adjust_chops(self, _count, _length) -> List[Chop]:
-        return self.get_chops_from_length(0)
+    def adjust_chops(self, count, _length) -> List[Chop]:
+        return [Chop(count=count)]
 
 
 @dataclasses.dataclass

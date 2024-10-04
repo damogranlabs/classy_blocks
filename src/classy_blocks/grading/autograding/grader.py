@@ -1,10 +1,10 @@
 import abc
 from typing import get_args
 
-from classy_blocks.grading.autograding.params import ChopParams, SimpleChopParams, SimpleHighReChopParams
+from classy_blocks.grading.autograding.params import ChopParams, FixedCountParams, SimpleChopParams
 from classy_blocks.grading.autograding.probe import Probe
 from classy_blocks.mesh import Mesh
-from classy_blocks.types import DirectionType
+from classy_blocks.types import ChopTakeType, DirectionType
 
 
 class GraderBase(abc.ABC):
@@ -15,15 +15,18 @@ class GraderBase(abc.ABC):
         self.probe = Probe(self.mesh)
 
     @abc.abstractmethod
-    def grade(self) -> None:
+    def grade(self, take: ChopTakeType = "avg") -> None:
         self.mesh.assemble()
 
 
 class FixedCountGrader(GraderBase):
-    def __init__(self, mesh: Mesh, params: SimpleChopParams):
+    """The simplest possible mesh grading: use a constant cell count for all axes on all blocks;
+    useful during mesh building and some tutorial cases"""
+
+    def __init__(self, mesh: Mesh, params: FixedCountParams):
         super().__init__(mesh, params)
 
-    def grade(self):
+    def grade(self, _):
         super().grade()
 
         # just throw the same count into all blocks and be done
@@ -35,21 +38,24 @@ class FixedCountGrader(GraderBase):
 
 
 class SimpleGrader(GraderBase):
-    def __init__(self, mesh: Mesh, params: SimpleHighReChopParams):
+    """Simple mesh grading for high-Re cases.
+    A single chop is used that sets cell count based on size.
+    Cell sizes between blocks differ as blocks' sizes change."""
+
+    def __init__(self, mesh: Mesh, params: SimpleChopParams):
         super().__init__(mesh, params)
 
-    def grade_axis(self, axis: DirectionType) -> None:
-        for layer in self.probe.get_rows(axis):
-            # TODO: get "take" from the user
-            length = layer.get_length("max")
+    def grade_axis(self, axis: DirectionType, take: ChopTakeType) -> None:
+        for row in self.probe.get_rows(axis):
+            length = row.get_length(take)
 
             chops = self.params.get_chops_from_length(length)
 
-            for block in layer.blocks:
+            for block in row.blocks:
                 block.axes[axis].chops = chops
 
-    def grade(self):
+    def grade(self, take: ChopTakeType = "avg"):
         super().grade()
 
         for axis in get_args(DirectionType):
-            self.grade_axis(axis)
+            self.grade_axis(axis, take)

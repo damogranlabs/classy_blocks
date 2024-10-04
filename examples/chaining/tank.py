@@ -2,7 +2,7 @@ import os
 
 import classy_blocks as cb
 from classy_blocks.grading.autograding.grader import SimpleGrader
-from classy_blocks.grading.autograding.params import SimpleHighReChopParams
+from classy_blocks.grading.autograding.params import SimpleChopParams
 
 # a cylindrical tank with round end caps
 diameter = 0.5
@@ -28,7 +28,7 @@ mesh.add(end_cap)
 
 mesh.assemble()
 
-params = SimpleHighReChopParams(0.05)
+params = SimpleChopParams(0.05)
 grader = SimpleGrader(mesh, params)
 grader.grade()
 
