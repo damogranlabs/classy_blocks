@@ -15,7 +15,7 @@ from classy_blocks.lists.face_list import FaceList
 from classy_blocks.lists.geometry_list import GeometryList
 from classy_blocks.lists.patch_list import PatchList
 from classy_blocks.lists.vertex_list import VertexList
-from classy_blocks.types import AxisType
+from classy_blocks.types import DirectionType
 from classy_blocks.util import constants
 from classy_blocks.util.vtk_writer import write_vtk
 
@@ -123,6 +123,10 @@ class Mesh:
         actual vertices, edges, blocks and other stuff to be inserted into
         blockMeshDict. After this has been done, the above objects
         cease to have any function or influence on mesh."""
+        if self.is_assembled:
+            # don't assemble twice
+            return
+
         operations = self._operations
         op_vertices: List[List[Vertex]] = []
 
@@ -146,8 +150,8 @@ class Mesh:
                 except EdgeNotFoundError:
                     continue
 
-            for axis in get_args(AxisType):
-                block.add_chops(axis, operation.chops[axis])
+            for direction in get_args(DirectionType):
+                block.add_chops(direction, operation.chops[direction])
 
             block.cell_zone = operation.cell_zone
 

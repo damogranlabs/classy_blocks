@@ -7,7 +7,7 @@ from classy_blocks.base.element import ElementBase
 from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.shape import LoftedShape
-from classy_blocks.types import AxisType, PointType, VectorType
+from classy_blocks.types import DirectionType, PointType, VectorType
 from classy_blocks.util import functions as f
 
 
@@ -24,7 +24,7 @@ class Stack(ElementBase):
         first two dimensions within a shape, the third along the stack."""
         return [shape.grid for shape in self.shapes]
 
-    def get_slice(self, axis: AxisType, index: int) -> List[Operation]:
+    def get_slice(self, axis: DirectionType, index: int) -> List[Operation]:
         """Returns all operation with given index in specified axis.
         For cartesian grids this is equivalent to 'lofts on the same plane';
         This does not work with custom/mapped sketches that do not

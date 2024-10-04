@@ -1,34 +1,56 @@
 import functools
-from typing import List, Set, get_args
+from typing import Dict, List, Set, get_args
 
 from classy_blocks.items.block import Block
 from classy_blocks.items.wires.axis import Axis
 from classy_blocks.mesh import Mesh
-from classy_blocks.types import AxisType, ChopTakeType
+from classy_blocks.types import ChopTakeType, DirectionType
 
 
 @functools.lru_cache(maxsize=3000)  # that's for 1000 blocks
-def _get_block_from_axis(mesh: Mesh, axis: Axis) -> Block:
+def get_block_from_axis(mesh: Mesh, axis: Axis) -> Block:
     for block in mesh.blocks:
-        for index in get_args(AxisType):
-            if block.axes[index] == axis:
-                return block
+        if axis in block.axes:
+            return block
 
     raise RuntimeError("Block for Axis not found!")
 
 
-class Layer:
-    """A collection of all blocks on a specific AxisIndex"""
+class Instruction:
+    """A descriptor that tells in which direction the specific block can be chopped."""
 
-    def __init__(self, axis: AxisType, blocks: Set[Block]):
-        self.axis = axis
-        self.blocks = blocks
+    def __init__(self, block: Block):
+        self.block = block
+        self.directions: List[bool] = [False] * 3
+
+    @property
+    def is_defined(self):
+        return all(self.directions)
+
+    def __hash__(self) -> int:
+        return id(self)
+
+
+class Row:
+    """A string of blocks that must share the same count
+    because they sit next to each other.
+
+    This needs not be an actual 'string' of blocks because,
+    depending on blocking, a whole 'layer' of blocks can be
+    chopped by specifying a single block only (for example, direction 2 in a cylinder)"""
+
+    def __init__(self, direction: DirectionType):
+        self.direction = direction
+        self.blocks: Set[Block] = set()
+
+    def add_block(self, block: Block) -> None:
+        self.blocks.add(block)
 
     def get_length(self, take: ChopTakeType = "avg"):
         lengths: List[float] = []
 
         for block in self.blocks:
-            lengths += block.axes[self.axis].lengths
+            lengths += block.axes[self.direction].lengths
 
         if take == "min":
             return min(lengths)
@@ -40,31 +62,61 @@ class Layer:
 
 
 class Catalogue:
-    """A collection of layers on a specified axis"""
+    """A collection of rows on a specified axis"""
 
-    def __init__(self, axis: AxisType):
-        self.axis = axis
-        self.layers: List[Layer] = []
+    def __init__(self, mesh: Mesh):
+        self.mesh = mesh
 
-    def has_block(self, block: Block) -> bool:
-        for layer in self.layers:
-            if block in layer.blocks:
-                return True
+        self.rows: Dict[DirectionType, List[Row]] = {0: [], 1: [], 2: []}
+        self.instructions = [Instruction(block) for block in mesh.blocks]
 
-        return False
+        for i in get_args(DirectionType):
+            self._populate(i)
 
-    def add_layer(self, blocks: Set[Block]):
-        """Adds a block to the appropriate Layer"""
-        layer = Layer(self.axis, blocks)
-        self.layers.append(layer)
+    def _get_undefined_instructions(self, direction: DirectionType) -> List[Instruction]:
+        return [i for i in self.instructions if not i.directions[direction]]
 
-    def get_layer(self, block: Block):
-        for layer in self.layers:
-            if block in layer.blocks:
-                return layer
+    def _find_instruction(self, block: Block):
+        # TODO: perform dedumbing on this exquisite piece of code
+        for instruction in self.instructions:
+            if instruction.block == block:
+                return instruction
 
-        # TODO: create a custom exception
-        raise RuntimeError("No such layer!")
+        raise RuntimeError(f"No instruction found for block {block}")
+
+    def _add_block_to_row(self, row: Row, instruction: Instruction, direction: DirectionType) -> None:
+        row.add_block(instruction.block)
+        instruction.directions[direction] = True
+
+        block = instruction.block
+
+        for neighbour_axis in block.axes[direction].neighbours:
+            neighbour_block = get_block_from_axis(self.mesh, neighbour_axis)
+
+            if neighbour_block in row.blocks:
+                continue
+
+            instruction = self._find_instruction(neighbour_block)
+
+            self._add_block_to_row(row, instruction, neighbour_block.get_axis_direction(neighbour_axis))
+
+    def _populate(self, direction: DirectionType) -> None:
+        while True:
+            undefined_instructions = self._get_undefined_instructions(direction)
+            if len(undefined_instructions) == 0:
+                break
+
+            row = Row(direction)
+            self._add_block_to_row(row, undefined_instructions[0], direction)
+            self.rows[direction].append(row)
+
+    def get_row_blocks(self, block: Block, direction: DirectionType) -> Set[Block]:
+        for row in self.rows[direction]:
+            if block in row.blocks:
+                return row.blocks
+
+        # TODO: make a custom exception
+        raise RuntimeError(f"Direction {direction} of {block} not in catalogue")
 
 
 class Probe:
@@ -72,42 +124,10 @@ class Probe:
 
     def __init__(self, mesh: Mesh):
         self.mesh = mesh
+        self.catalogue = Catalogue(self.mesh)
 
-        self.catalogues = [Catalogue(axis) for axis in get_args(AxisType)]
+    def get_row_blocks(self, block: Block, direction: DirectionType) -> Set[Block]:
+        return self.catalogue.get_row_blocks(block, direction)
 
-        for block in self.mesh.blocks:
-            for axis in get_args(AxisType):
-                if self.catalogues[axis].has_block(block):
-                    continue
-
-                self.catalogues[axis].add_layer(self._get_blocks_on_layer(block, axis))
-
-    def _get_block_from_axis(self, axis: Axis) -> Block:
-        return _get_block_from_axis(self.mesh, axis)
-
-    def _get_blocks_on_layer(self, block: Block, axis: AxisType) -> Set[Block]:
-        """Returns all blocks on the same 'layer' as the one in arguments"""
-        # blocks to be returned
-        blocks: Set[Block] = set()
-        # blocks not to check again
-        traversed: Set[Block] = set()
-
-        def check(blk: Block):
-            if blk not in traversed:
-                traversed.add(blk)
-
-                for neighbour_axis in blk.axes[axis].neighbours:
-                    neighbour_block = self._get_block_from_axis(neighbour_axis)
-                    blocks.add(neighbour_block)
-
-                    check(self._get_block_from_axis(neighbour_axis))
-
-        check(block)
-
-        return blocks
-
-    def get_blocks_on_layer(self, block: Block, axis: AxisType):
-        return self.catalogues[axis].get_layer(block).blocks
-
-    def get_layers(self, axis: AxisType) -> List[Layer]:
-        return self.catalogues[axis].layers
+    def get_rows(self, direction: DirectionType) -> List[Row]:
+        return self.catalogue.rows[direction]

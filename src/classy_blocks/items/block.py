@@ -5,7 +5,7 @@ from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.axis import Axis
 from classy_blocks.items.wires.wire import Wire
-from classy_blocks.types import AxisType, IndexType
+from classy_blocks.types import DirectionType, IndexType
 from classy_blocks.util import constants
 from classy_blocks.util.frame import Frame
 
@@ -24,12 +24,12 @@ class Block:
         self.wires = Frame[Wire]()
 
         # create wires and connections for quicker addressing
-        for axis in range(3):
-            for pair in constants.AXIS_PAIRS[axis]:
-                wire = Wire(self.vertices, axis, pair[0], pair[1])
+        for direction in range(3):
+            for pair in constants.AXIS_PAIRS[direction]:
+                wire = Wire(self.vertices, direction, pair[0], pair[1])
                 self.wires.add_beam(pair[0], pair[1], wire)
 
-        self.axes = [Axis(i, self.wires.get_axis_beams(i)) for i in get_args(AxisType)]
+        self.axes = [Axis(i, self.wires.get_axis_beams(i)) for i in get_args(DirectionType)]
 
         # cellZone to which the block belongs to
         self.cell_zone: str = ""
@@ -47,9 +47,17 @@ class Block:
 
         self.wires[corner_1][corner_2].edge = edge
 
-    def get_axis_wires(self, axis: AxisType) -> List[Wire]:
+    def get_axis_wires(self, direction: DirectionType) -> List[Wire]:
         """Returns a list of wires that run in the given axis"""
-        return self.wires.get_axis_beams(axis)
+        return self.wires.get_axis_beams(direction)
+
+    def get_axis_direction(self, axis: Axis) -> DirectionType:
+        for i in get_args(DirectionType):
+            if self.axes[i] == axis:
+                return i
+
+        # TODO: use a custom exception
+        raise RuntimeError("Axis not in this block!")
 
     def add_neighbour(self, candidate: "Block") -> None:
         """Add a block to neighbours, if applicable"""
@@ -67,8 +75,8 @@ class Block:
             for cnd_wire in candidate.wire_list:
                 this_wire.add_coincident(cnd_wire)
 
-    def add_chops(self, axis: AxisType, chops: List[Chop]) -> None:
-        self.axes[axis].chops += chops
+    def add_chops(self, direction: DirectionType, chops: List[Chop]) -> None:
+        self.axes[direction].chops += chops
 
     def update_wires(self) -> None:
         for wire in self.wire_list:
@@ -145,3 +153,6 @@ class Block:
 
     def __hash__(self) -> int:
         return self.index
+
+    def __repr__(self) -> str:
+        return f"Block {self.index}"

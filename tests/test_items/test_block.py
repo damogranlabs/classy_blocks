@@ -8,7 +8,7 @@ from classy_blocks.grading.chop import Chop
 from classy_blocks.items.block import Block
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.wire import Wire
-from classy_blocks.types import AxisType
+from classy_blocks.types import DirectionType
 from classy_blocks.util import functions as f
 from tests.fixtures.block import BlockTestCase
 
@@ -201,7 +201,7 @@ class BlockSimpleGradingTests(BlockTestCase):
         block_0 = self.make_block(0)
         block_0.axes[0].wires.chops = []
 
-        for axis in get_args(AxisType):
+        for axis in get_args(DirectionType):
             block_0.axes[axis].chops = []
 
         block_0.add_chops(0, [Chop(count=10)])

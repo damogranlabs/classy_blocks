@@ -6,15 +6,15 @@ from classy_blocks.grading.grading import Grading
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.manager import WireManager
 from classy_blocks.items.wires.wire import Wire
-from classy_blocks.types import AxisType
+from classy_blocks.types import DirectionType
 
 
 class Axis:
     """One of block axes, indexed 0, 1, 2
     and wires - edges that are defined along the same direction."""
 
-    def __init__(self, index: AxisType, wires: List[Wire]):
-        self.index = index
+    def __init__(self, direction: DirectionType, wires: List[Wire]):
+        self.index = direction
         self.wires = WireManager(wires)
         self.chops: List[Chop] = []
 

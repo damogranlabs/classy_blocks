@@ -11,7 +11,7 @@ from classy_blocks.construct.edges import Arc, EdgeData, Line, Project, Spline
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.point import Point
 from classy_blocks.grading.chop import Chop
-from classy_blocks.types import AxisType, ChopArgs, NPPointType, OrientType, PointType, ProjectToType, VectorType
+from classy_blocks.types import ChopArgs, DirectionType, NPPointType, OrientType, PointType, ProjectToType, VectorType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import SIDES_MAP
@@ -34,7 +34,7 @@ class Operation(ElementBase):
         self.side_patches: List[Optional[str]] = [None, None, None, None]
 
         # instructions for cell counts and gradings
-        self.chops: Dict[AxisType, List[Chop]] = {0: [], 1: [], 2: []}
+        self.chops: Dict[DirectionType, List[Chop]] = {0: [], 1: [], 2: []}
 
         # optionally, put the block in a cell zone
         self.cell_zone = ""
@@ -58,7 +58,7 @@ class Operation(ElementBase):
 
         self.side_edges[corner_idx] = edge_data
 
-    def chop(self, axis: AxisType, **kwargs: Unpack[ChopArgs]) -> None:
+    def chop(self, axis: DirectionType, **kwargs: Unpack[ChopArgs]) -> None:
         """Chop the operation (count/grading) either in given axis:
             0: along first edge of a face
             1: along second edge of a face
@@ -86,10 +86,10 @@ class Operation(ElementBase):
 
         self.chops[axis].append(Chop(**kwargs))
 
-    def unchop(self, axis: Optional[AxisType] = None) -> None:
+    def unchop(self, axis: Optional[DirectionType] = None) -> None:
         """Removes existing chops from an operation (comes handy after copying etc.)"""
         if axis is None:
-            for i in get_args(AxisType):
+            for i in get_args(DirectionType):
                 self.chops[i] = []
             return
 

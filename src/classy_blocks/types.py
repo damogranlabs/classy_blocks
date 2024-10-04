@@ -25,7 +25,7 @@ EdgeDataType = Union[PointType, PointListType, str]
 
 # block sides
 OrientType = Literal["left", "right", "front", "back", "top", "bottom"]
-AxisType = Literal[0, 1, 2]
+DirectionType = Literal[0, 1, 2]
 
 # Project vertex/edge to one or multiple geometries
 ProjectToType = Union[str, List[str]]
