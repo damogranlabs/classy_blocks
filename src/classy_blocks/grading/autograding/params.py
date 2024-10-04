@@ -20,6 +20,16 @@ def sum_length(start_size: float, count: int, c2c_expansion: float) -> float:
     return length
 
 
+def sum_count(lengths: List[float], chops: List[Chop]):
+    count = 0
+
+    for i, chop in enumerate(chops):
+        length = lengths[i]
+        count += chop.calculate(length).count
+
+    return count
+
+
 class ChopParams(abc.ABC):
     @abc.abstractmethod
     def get_count(self, length: float) -> int:
@@ -154,8 +164,7 @@ class LowReChopParams(ChopParams):
 
         if remaining_length <= 0:
             warnings.warn("Stopping chops at boundary layer (not enough space)!", stacklevel=1)
-            # return chops
-            return 0
+            return sum_count([length], chops)
 
         # buffer
         buffer, buffer_size = self._get_buffer_chop(last_bl_size)
@@ -163,8 +172,8 @@ class LowReChopParams(ChopParams):
         chops.append(buffer)
         if buffer_size >= remaining_length:
             warnings.warn("Stopping chops at buffer layer (not enough space)!", stacklevel=1)
-            # return chops
-            return 1
+
+            return sum_count([self.boundary_layer_thickness, buffer_size], chops)
 
         # bulk
         remaining_length = remaining_length - buffer_size
@@ -173,7 +182,7 @@ class LowReChopParams(ChopParams):
         chops.append(bulk)
 
         # return chops
-        return 1
+        return sum_count([self.boundary_layer_thickness, buffer_size, remaining_length], chops)
 
     def get_chops(self, count: int, length: float) -> List[Chop]:
         raise NotImplementedError("TODO!")
