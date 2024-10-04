@@ -14,7 +14,7 @@ class Axis:
     and wires - edges that are defined along the same direction."""
 
     def __init__(self, direction: DirectionType, wires: List[Wire]):
-        self.index = direction
+        self.direction = direction
         self.wires = WireManager(wires)
         self.chops: List[Chop] = []
 
@@ -124,7 +124,7 @@ class Axis:
         return self.wires.is_simple
 
     def __str__(self):
-        return f"Axis {self.index} (" + "|".join(str(wire) for wire in self.wires.wires) + ")"
+        return f"Axis {self.direction} (" + "|".join(str(wire) for wire in self.wires.wires) + ")"
 
     def __hash__(self):
         return id(self)

@@ -22,13 +22,12 @@ def sum_length(start_size: float, count: int, c2c_expansion: float) -> float:
 
 class ChopParams(abc.ABC):
     @abc.abstractmethod
-    def get_chops_from_length(self, length: float) -> List[Chop]:
-        """Calculates chopping parameters based on given length"""
+    def get_count(self, length: float) -> int:
+        """Calculates count based on given length - used once only"""
 
     @abc.abstractmethod
-    def adjust_chops(self, count: int, length: float) -> List[Chop]:
-        """Leaves cell count unchanged but modifies chops
-        so that proper cell sizing will be obeyed"""
+    def get_chops(self, count: int, length: float) -> List[Chop]:
+        """Fixes cell count but modifies chops so that proper cell sizing will be obeyed"""
         # That depends on inherited classes' philosophy
 
 
@@ -36,11 +35,11 @@ class ChopParams(abc.ABC):
 class FixedCountParams(ChopParams):
     count: int = 8
 
-    def get_chops_from_length(self, _length):
-        return [Chop(count=self.count, total_expansion=1)]
+    def get_count(self, _length):
+        return self.count
 
-    def adjust_chops(self, _count, _length) -> List[Chop]:
-        return self.get_chops_from_length(0)
+    def get_chops(self, count, _length) -> List[Chop]:
+        return [Chop(count=count)]
 
 
 # TODO: rename this CentipedeCaseClassNameMonstrosity
@@ -48,25 +47,27 @@ class FixedCountParams(ChopParams):
 class SimpleChopParams(ChopParams):
     cell_size: float
 
-    def get_chops_from_length(self, length: float) -> List[Chop]:
-        return [Chop(count=int(length / self.cell_size), total_expansion=1)]
+    def get_count(self, length: float):
+        return int(length / self.cell_size)
 
-    def adjust_chops(self, count, _length) -> List[Chop]:
+    def get_chops(self, count, _length):
         return [Chop(count=count)]
 
 
 @dataclasses.dataclass
 class HighReChopParams(ChopParams):
-    """Parameters for mesh grading for high-Re cases.
-    Two chops are added to all blocks; c2c_expansion and and length_ratio
-    are utilized to keep cell sizes between blocks consistent"""
+    cell_size: float
 
-    def get_chops_from_length(self, length: float) -> List[Chop]:
-        raise NotImplementedError
+    def get_count(self, length: float):
+        # the first chop defines the count; it's a very simple one
+        return int(length / self.cell_size)
 
-    @abc.abstractmethod
-    def adjust_chops(self, count: int, length: float) -> List[Chop]:
-        raise NotImplementedError
+    def get_chops(self, count: int, _):
+        # TODO: adjust length ratio for smoothest transition in the middle of block
+        return [
+            Chop(length_ratio=0.5, count=count // 2, start_size=self.cell_size),
+            Chop(length_ratio=0.5, count=count // 2, end_size=self.cell_size),
+        ]
 
 
 @dataclasses.dataclass
@@ -139,7 +140,8 @@ class LowReChopParams(ChopParams):
         count = max(1, int(remaining_size / self.bulk_cell_size))
         return Chop(count=count)
 
-    def get_chops_from_length(self, length: float) -> List[Chop]:
+    def get_count(self, length: float):
+        # TODO! Do
         chops: List[Chop] = []
 
         if length < self.boundary_layer_thickness:
@@ -152,7 +154,8 @@ class LowReChopParams(ChopParams):
 
         if remaining_length <= 0:
             warnings.warn("Stopping chops at boundary layer (not enough space)!", stacklevel=1)
-            return chops
+            # return chops
+            return 0
 
         # buffer
         buffer, buffer_size = self._get_buffer_chop(last_bl_size)
@@ -160,7 +163,8 @@ class LowReChopParams(ChopParams):
         chops.append(buffer)
         if buffer_size >= remaining_length:
             warnings.warn("Stopping chops at buffer layer (not enough space)!", stacklevel=1)
-            return chops
+            # return chops
+            return 1
 
         # bulk
         remaining_length = remaining_length - buffer_size
@@ -168,7 +172,8 @@ class LowReChopParams(ChopParams):
         bulk.length_ratio = remaining_length / length
         chops.append(bulk)
 
-        return chops
+        # return chops
+        return 1
 
-    def adjust_chops(self, count: int, length: float) -> List[Chop]:
+    def get_chops(self, count: int, length: float) -> List[Chop]:
         raise NotImplementedError("TODO!")

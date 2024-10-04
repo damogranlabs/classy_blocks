@@ -1,22 +1,32 @@
-import abc
 from typing import get_args
 
-from classy_blocks.grading.autograding.params import ChopParams, FixedCountParams, SimpleChopParams
+from classy_blocks.grading.autograding.params import ChopParams, FixedCountParams, HighReChopParams, SimpleChopParams
 from classy_blocks.grading.autograding.probe import Probe
 from classy_blocks.mesh import Mesh
 from classy_blocks.types import ChopTakeType, DirectionType
 
 
-class GraderBase(abc.ABC):
+class GraderBase:
     def __init__(self, mesh: Mesh, params: ChopParams):
         self.mesh = mesh
         self.params = params
 
+        self.mesh.assemble()
         self.probe = Probe(self.mesh)
 
-    @abc.abstractmethod
+    def grade_axis(self, axis: DirectionType, take: ChopTakeType) -> None:
+        for row in self.probe.get_rows(axis):
+            length = row.get_length(take)
+            count = self.params.get_count(length)
+
+            for wire in row.get_wires():
+                chops = self.params.get_chops(count, wire.length)
+                for chop in chops:
+                    wire.grading.add_chop(chop)
+
     def grade(self, take: ChopTakeType = "avg") -> None:
-        self.mesh.assemble()
+        for axis in get_args(DirectionType):
+            self.grade_axis(axis, take)
 
 
 class FixedCountGrader(GraderBase):
@@ -25,16 +35,6 @@ class FixedCountGrader(GraderBase):
 
     def __init__(self, mesh: Mesh, params: FixedCountParams):
         super().__init__(mesh, params)
-
-    def grade(self, _):
-        super().grade()
-
-        # just throw the same count into all blocks and be done
-        chops = self.params.get_chops_from_length(0)
-
-        for block in self.mesh.blocks:
-            for axis in block.axes:
-                axis.chops = chops
 
 
 class SimpleGrader(GraderBase):
@@ -45,17 +45,12 @@ class SimpleGrader(GraderBase):
     def __init__(self, mesh: Mesh, params: SimpleChopParams):
         super().__init__(mesh, params)
 
-    def grade_axis(self, axis: DirectionType, take: ChopTakeType) -> None:
-        for row in self.probe.get_rows(axis):
-            length = row.get_length(take)
 
-            chops = self.params.get_chops_from_length(length)
+class HighReGrader(GraderBase):
+    """Parameters for mesh grading for high-Re cases.
+    Two chops are added to all blocks; c2c_expansion and and length_ratio
+    are utilized to keep cell sizes between blocks consistent
+    (as much as possible)"""
 
-            for block in row.blocks:
-                block.axes[axis].chops = chops
-
-    def grade(self, take: ChopTakeType = "avg"):
-        super().grade()
-
-        for axis in get_args(DirectionType):
-            self.grade_axis(axis, take)
+    def __init__(self, mesh: Mesh, params: HighReChopParams):
+        super().__init__(mesh, params)

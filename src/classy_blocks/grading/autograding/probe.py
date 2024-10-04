@@ -3,6 +3,7 @@ from typing import Dict, List, get_args
 
 from classy_blocks.items.block import Block
 from classy_blocks.items.wires.axis import Axis
+from classy_blocks.items.wires.wire import Wire
 from classy_blocks.mesh import Mesh
 from classy_blocks.types import ChopTakeType, DirectionType
 
@@ -52,11 +53,7 @@ class Row:
         self.headings.append(row_direction)
 
     def get_length(self, take: ChopTakeType = "avg"):
-        lengths: List[float] = []
-
-        for i, block in enumerate(self.blocks):
-            direction = self.headings[i]
-            lengths += block.axes[direction].lengths
+        lengths = [wire.length for wire in self.get_wires()]
 
         if take == "min":
             return min(lengths)
@@ -65,6 +62,23 @@ class Row:
             return max(lengths)
 
         return sum(lengths) / len(self.blocks) / 4  # "avg"
+
+    def get_axes(self) -> List[Axis]:
+        axes: List[Axis] = []
+
+        for i, block in enumerate(self.blocks):
+            direction = self.headings[i]
+            axes.append(block.axes[direction])
+
+        return axes
+
+    def get_wires(self) -> List[Wire]:
+        wires: List[Wire] = []
+
+        for axis in self.get_axes():
+            wires += axis.wires
+
+        return wires
 
 
 class Catalogue:

@@ -17,7 +17,7 @@ expand.chop(2, start_size=0.1)
 
 # HACK: proper usage to be defined
 low_re_chops = LowReChopParams(0.01, 0.1)
-chops = low_re_chops.get_chops_from_length(1)
+chops = low_re_chops.get_count(1)
 for chop in chops:
     expand.chops[1].append(chop)
 

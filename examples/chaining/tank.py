@@ -26,8 +26,6 @@ mesh.add(cylinder)
 mesh.add(start_cap)
 mesh.add(end_cap)
 
-mesh.assemble()
-
 params = SimpleChopParams(0.05)
 grader = SimpleGrader(mesh, params)
 grader.grade()

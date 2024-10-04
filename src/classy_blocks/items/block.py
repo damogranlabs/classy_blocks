@@ -24,7 +24,7 @@ class Block:
         self.wires = Frame[Wire]()
 
         # create wires and connections for quicker addressing
-        for direction in range(3):
+        for direction in get_args(DirectionType):
             for pair in constants.AXIS_PAIRS[direction]:
                 wire = Wire(self.vertices, direction, pair[0], pair[1])
                 self.wires.add_beam(pair[0], pair[1], wire)

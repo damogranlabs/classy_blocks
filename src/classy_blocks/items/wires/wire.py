@@ -6,17 +6,18 @@ from classy_blocks.grading.grading import Grading
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
 from classy_blocks.items.vertex import Vertex
+from classy_blocks.types import DirectionType
 
 
 class Wire:
     """Represents two vertices that define an edge;
     supplies tools to create and compare, etc"""
 
-    def __init__(self, vertices: List[Vertex], axis: int, corner_1: int, corner_2: int):
+    def __init__(self, vertices: List[Vertex], direction: DirectionType, corner_1: int, corner_2: int):
         self.corners = [corner_1, corner_2]
         self.vertices = [vertices[corner_1], vertices[corner_2]]
 
-        self.axis = axis
+        self.direction = direction
 
         # the default edge is 'line' but will be replaced if the user wishes so
         # (that is, not included in edge.factory.registry)

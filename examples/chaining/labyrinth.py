@@ -35,8 +35,7 @@ for side in ("top", "right", "top", "top", "left", "top"):
 
 mesh.set_default_patch("walls", "wall")
 
-mesh.assemble()
-grader = FixedCountGrader(mesh, FixedCountParams())
+grader = FixedCountGrader(mesh, FixedCountParams(5))
 grader.grade()
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")
