@@ -1,7 +1,8 @@
-from typing import get_args
+from typing import Set, get_args
 
 from classy_blocks.grading.autograding.params import ChopParams, FixedCountParams, HighReChopParams, SimpleChopParams
 from classy_blocks.grading.autograding.probe import Probe
+from classy_blocks.items.wires.wire import Wire
 from classy_blocks.mesh import Mesh
 from classy_blocks.types import ChopTakeType, DirectionType
 
@@ -14,13 +15,45 @@ class GraderBase:
         self.mesh.assemble()
         self.probe = Probe(self.mesh)
 
+    def _get_end_size(self, wires: Set[Wire]):
+        """Returns average size of wires' last cell"""
+        if len(wires) == 0:
+            return 0
+
+        return sum(wire.grading.end_size for wire in wires) / len(wires)
+
+    def _get_start_size(self, wires: Set[Wire]):
+        """Returns average size of wires' first cell"""
+        if len(wires) == 0:
+            return 0
+
+        return sum(wire.grading.start_size for wire in wires) / len(wires)
+
     def grade_axis(self, axis: DirectionType, take: ChopTakeType) -> None:
         for row in self.probe.get_rows(axis):
-            length = row.get_length(take)
-            count = self.params.get_count(length)
+            # determine count
+            wires = row.get_wires()
+
+            for wire in wires:
+                if wire.is_defined:
+                    # there's a wire with a defined count already, use that
+                    count = wire.grading.count
+                    break
+            else:
+                # take length from a row, as requested
+                length = row.get_length(take)
+                count = self.params.get_count(length)
 
             for wire in row.get_wires():
-                chops = self.params.get_chops(count, wire.length)
+                # don't touch defined wires
+                if wire.is_defined:
+                    # TODO: test
+                    continue
+
+                size_before = self._get_end_size(wire.before)
+                size_after = self._get_start_size(wire.after)
+                chops = self.params.get_chops(count, wire.length, size_before, size_after)
+
                 for chop in chops:
                     wire.grading.add_chop(chop)
 

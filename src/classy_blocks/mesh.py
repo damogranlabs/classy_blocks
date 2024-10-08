@@ -258,4 +258,3 @@ class Mesh:
     @property
     def blocks(self) -> List[Block]:
         return self.block_list.blocks
-        return self.block_list.blocks

@@ -3,7 +3,9 @@ import dataclasses
 import warnings
 from typing import List, Tuple
 
-from classy_blocks.grading import relations as gr
+import scipy.optimize
+
+import classy_blocks.grading.relations as gr
 from classy_blocks.grading.chop import Chop
 from classy_blocks.types import ChopTakeType
 
@@ -20,23 +22,13 @@ def sum_length(start_size: float, count: int, c2c_expansion: float) -> float:
     return length
 
 
-def sum_count(lengths: List[float], chops: List[Chop]):
-    count = 0
-
-    for i, chop in enumerate(chops):
-        length = lengths[i]
-        count += chop.calculate(length).count
-
-    return count
-
-
 class ChopParams(abc.ABC):
     @abc.abstractmethod
     def get_count(self, length: float) -> int:
         """Calculates count based on given length - used once only"""
 
     @abc.abstractmethod
-    def get_chops(self, count: int, length: float) -> List[Chop]:
+    def get_chops(self, count: int, length: float, size_before: float = 0, size_after: float = 0) -> List[Chop]:
         """Fixes cell count but modifies chops so that proper cell sizing will be obeyed"""
         # That depends on inherited classes' philosophy
 
@@ -48,7 +40,7 @@ class FixedCountParams(ChopParams):
     def get_count(self, _length):
         return self.count
 
-    def get_chops(self, count, _length) -> List[Chop]:
+    def get_chops(self, count, _length, _size_before=0, _size_after=0) -> List[Chop]:
         return [Chop(count=count)]
 
 
@@ -60,7 +52,7 @@ class SimpleChopParams(ChopParams):
     def get_count(self, length: float):
         return int(length / self.cell_size)
 
-    def get_chops(self, count, _length):
+    def get_chops(self, count, _length, _size_before=0, _size_after=0):
         return [Chop(count=count)]
 
 
@@ -69,17 +61,61 @@ class HighReChopParams(ChopParams):
     cell_size: float
 
     def get_count(self, length: float):
-        # the first chop defines the count; it's a very simple one
-        return int(length / self.cell_size)
+        # the first chop defines the count;
+        count = int(length / self.cell_size)
+        # it must be divisible by 2
+        if count % 2 != 0:
+            count += 1
 
-    def get_chops(self, count: int, _):
-        # TODO: adjust length ratio for smoothest transition in the middle of block
-        return [
-            Chop(length_ratio=0.5, count=count // 2, start_size=self.cell_size),
-            Chop(length_ratio=0.5, count=count // 2, end_size=self.cell_size),
+        return count
+
+    def get_chops(self, count, length, size_before=0, size_after=0):
+        # length of the wire that was used to set count
+        if size_before == 0:
+            size_before = self.cell_size
+        if size_after == 0:
+            size_after = self.cell_size
+
+        chops = [
+            Chop(count=count // 2),
+            Chop(count=count // 2),
         ]
 
+        def objfun(params):
+            chops[0].length_ratio = params[0]
+            chops[1].length_ratio = 1 - params[0]
 
+            chops[0].total_expansion = params[1]
+            chops[1].total_expansion = params[2]
+
+            data_1 = chops[0].calculate(length)
+            data_2 = chops[1].calculate(length)
+
+            ofstart = (size_before - data_1.start_size) ** 2
+            ofmid1 = (data_1.end_size - self.cell_size) ** 2
+            ofmid2 = (data_2.start_size - self.cell_size) ** 2
+            ofend = (data_2.end_size - size_after) ** 2
+
+            return max([ofstart, ofmid1, ofmid2, ofend])
+
+        initial = [0.5, 1, 1]
+        bounds = (
+            (0.1, 0.9),
+            (0.1, 10),
+            (0.1, 10),
+        )
+        result = scipy.optimize.minimize(objfun, initial, bounds=bounds).x
+
+        chops[0].length_ratio = result[0]
+        chops[1].length_ratio = 1 - result[0]
+
+        chops[0].total_expansion = result[1]
+        chops[1].total_expansion = result[2]
+
+        return chops
+
+
+# INVALID! Next on list
 @dataclasses.dataclass
 class LowReChopParams(ChopParams):
     """Parameters for mesh grading for Low-Re cases.
@@ -164,7 +200,8 @@ class LowReChopParams(ChopParams):
 
         if remaining_length <= 0:
             warnings.warn("Stopping chops at boundary layer (not enough space)!", stacklevel=1)
-            return sum_count([length], chops)
+            # return chops
+            return 0
 
         # buffer
         buffer, buffer_size = self._get_buffer_chop(last_bl_size)
@@ -172,8 +209,8 @@ class LowReChopParams(ChopParams):
         chops.append(buffer)
         if buffer_size >= remaining_length:
             warnings.warn("Stopping chops at buffer layer (not enough space)!", stacklevel=1)
-
-            return sum_count([self.boundary_layer_thickness, buffer_size], chops)
+            # return chops
+            return 1
 
         # bulk
         remaining_length = remaining_length - buffer_size
@@ -182,7 +219,7 @@ class LowReChopParams(ChopParams):
         chops.append(bulk)
 
         # return chops
-        return sum_count([self.boundary_layer_thickness, buffer_size, remaining_length], chops)
+        return 1
 
-    def get_chops(self, count: int, length: float) -> List[Chop]:
+    def get_chops(self, count, length, size_before=0, size_after=0) -> List[Chop]:
         raise NotImplementedError("TODO!")
