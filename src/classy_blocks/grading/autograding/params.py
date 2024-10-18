@@ -1,13 +1,15 @@
 import abc
 import dataclasses
 import warnings
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import scipy.optimize
 
 import classy_blocks.grading.relations as gr
 from classy_blocks.grading.chop import Chop
 from classy_blocks.types import ChopTakeType
+
+CellSizeType = Optional[float]
 
 
 def sum_length(start_size: float, count: int, c2c_expansion: float) -> float:
@@ -28,7 +30,7 @@ class ChopParams(abc.ABC):
         """Calculates count based on given length - used once only"""
 
     @abc.abstractmethod
-    def get_chops(self, count: int, length: float, size_before: float = 0, size_after: float = 0) -> List[Chop]:
+    def get_chops(self, count: int, length: float, size_before: CellSizeType, size_after: CellSizeType) -> List[Chop]:
         """Fixes cell count but modifies chops so that proper cell sizing will be obeyed"""
         # That depends on inherited classes' philosophy
 
@@ -44,7 +46,6 @@ class FixedCountParams(ChopParams):
         return [Chop(count=count)]
 
 
-# TODO: rename this CentipedeCaseClassNameMonstrosity
 @dataclasses.dataclass
 class SimpleChopParams(ChopParams):
     cell_size: float
@@ -69,50 +70,56 @@ class HighReChopParams(ChopParams):
 
         return count
 
-    def get_chops(self, count, length, size_before=0, size_after=0):
-        # length of the wire that was used to set count
-        if size_before == 0:
-            size_before = self.cell_size
-        if size_after == 0:
-            size_after = self.cell_size
+    def define_sizes(
+        self, count: int, length: float, size_before: CellSizeType, size_after: CellSizeType
+    ) -> Tuple[float, float]:
+        """Defines start and end cell size with respect to given circumstances"""
+        if size_before == 0 or size_after == 0:
+            # until all counts/sizes are defined
+            # (the first pass with uniform grading),
+            # there's no point in doing anything
+            raise RuntimeError("Undefined grading encountered!")
 
-        chops = [
-            Chop(count=count // 2),
-            Chop(count=count // 2),
-        ]
+        # not enough room for all cells?
+        cramped = self.cell_size * count > length
 
-        def objfun(params):
-            chops[0].length_ratio = params[0]
-            chops[1].length_ratio = 1 - params[0]
+        if size_before is None:
+            if cramped:
+                size_before = length / count
+            else:
+                size_before = self.cell_size
 
-            chops[0].total_expansion = params[1]
-            chops[1].total_expansion = params[2]
+        if size_after is None:
+            if cramped:
+                size_after = length / count
+            else:
+                size_after = self.cell_size
 
-            data_1 = chops[0].calculate(length)
-            data_2 = chops[1].calculate(length)
+        return size_before, size_after
 
-            ofstart = (size_before - data_1.start_size) ** 2
-            ofmid1 = (data_1.end_size - self.cell_size) ** 2
-            ofmid2 = (data_2.start_size - self.cell_size) ** 2
-            ofend = (data_2.end_size - size_after) ** 2
+    def get_chops(self, count, length, size_before=CellSizeType, size_after=CellSizeType):
+        size_before, size_after = self.define_sizes(count, length, size_before, size_after)
 
-            return max([ofstart, ofmid1, ofmid2, ofend])
+        # choose length ratio so that cells at the middle of blocks
+        # (between the two chops) have the same size
+        def fobj(lratio):
+            halfcount = count // 2
+            chop_1 = Chop(length_ratio=lratio, count=halfcount, start_size=size_before)
+            data_1 = chop_1.calculate(length)
 
-        initial = [0.5, 1, 1]
-        bounds = (
-            (0.1, 0.9),
-            (0.1, 10),
-            (0.1, 10),
-        )
-        result = scipy.optimize.minimize(objfun, initial, bounds=bounds).x
+            chop_2 = Chop(length_ratio=1 - lratio, count=halfcount, end_size=size_after)
+            data_2 = chop_2.calculate(length)
 
-        chops[0].length_ratio = result[0]
-        chops[1].length_ratio = 1 - result[0]
+            ratio = abs(data_1.end_size - data_2.start_size)
 
-        chops[0].total_expansion = result[1]
-        chops[1].total_expansion = result[2]
+            return ratio, [chop_1, chop_2]
 
-        return chops
+        # it's not terribly important to minimize until the last dx
+        results = scipy.optimize.minimize_scalar(lambda r: fobj(r)[0], bounds=[0.1, 0.9], options={"xatol": 0.1})
+        if not results.success:  # type:ignore
+            warnings.warn("Could not determine optimal grading", stacklevel=1)
+
+        return fobj(results.x)[1]  # type:ignore
 
 
 # INVALID! Next on list

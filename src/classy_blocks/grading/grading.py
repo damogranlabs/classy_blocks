@@ -66,6 +66,10 @@ class Grading:
 
         self.chops.append(chop)
 
+    def clear(self) -> None:
+        self.chops = []
+        self._chop_data = []
+
     @property
     def chop_data(self) -> List[ChopData]:
         if len(self._chop_data) < len(self.chops):
@@ -96,7 +100,7 @@ class Grading:
             return 0
 
         chop = self.chops[0]
-        return chop.calculate(self.length * chop.length_ratio).start_size
+        return chop.calculate(self.length).start_size
 
     @property
     def end_size(self) -> float:
@@ -104,7 +108,7 @@ class Grading:
             return 0
 
         chop = self.chops[-1]
-        return chop.calculate(self.length * chop.length_ratio).end_size
+        return chop.calculate(self.length).end_size
 
     def copy(self, length: float, invert: bool = False) -> "Grading":
         """Creates a new grading with the same chops (counts) on a different length,

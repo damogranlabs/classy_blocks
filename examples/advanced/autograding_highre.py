@@ -24,12 +24,13 @@ mesh.block_list.update()
 
 mesh.set_default_patch("walls", "wall")
 
-params = HighReChopParams(0.1)
+
+params = HighReChopParams(0.075)
 grader = HighReGrader(mesh, params)
 grader.grade(take="max")
 
-params = SimpleChopParams(0.1)
+params = SimpleChopParams(0.075)
 grader = SimpleGrader(mesh, params)
-# grader.grade()
+# grader.grade(take="max")
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")
