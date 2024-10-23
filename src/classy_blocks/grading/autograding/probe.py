@@ -1,5 +1,5 @@
 import functools
-from typing import Dict, List, get_args
+from typing import Dict, List, Optional, get_args
 
 from classy_blocks.items.block import Block
 from classy_blocks.items.wires.axis import Axis
@@ -43,7 +43,7 @@ class Row:
     def __init__(self, direction: DirectionType):
         self.direction = direction
 
-        # block of different orientations can belong to the same row;
+        # blocks of different orientations can belong to the same row;
         # remember how they are oriented
         self.blocks: List[Block] = []
         self.headings: List[DirectionType] = []
@@ -79,6 +79,13 @@ class Row:
             wires += axis.wires
 
         return wires
+
+    def get_count(self) -> Optional[int]:
+        for wire in self.get_wires():
+            if wire.is_defined:
+                return wire.grading.count
+
+        return None
 
 
 class Catalogue:

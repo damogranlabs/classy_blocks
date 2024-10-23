@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from parameterized import parameterized
 
 from classy_blocks.items.block import Block
@@ -6,6 +8,15 @@ from tests.fixtures.block import BlockTestCase
 
 class AxisTests(BlockTestCase):
     """Tests of the Axis object"""
+
+    def add_blocks(self) -> Tuple[Block, Block]:
+        block_0 = self.make_block(0)
+        block_1 = self.make_block(1)
+
+        block_0.add_neighbour(block_1)
+        block_1.add_neighbour(block_0)
+
+        return block_0, block_1
 
     def test_length_avg(self):
         """Average length"""
@@ -49,13 +60,19 @@ class AxisTests(BlockTestCase):
 
         self.assertFalse(block_1.axes[1].is_aligned(block_0.axes[1]))
 
-    @parameterized.expand(((0,), (1,), (2,), (3,)))
-    def test_sequential(self, corner):
-        block_1 = self.make_block(1)
-        block_2 = self.make_block(2)
+    def test_sequential_before(self):
+        block_0, block_1 = self.add_blocks()
 
-        block_1.add_neighbour(block_2)
-        block_2.add_neighbour(block_1)
+        calculated_before = set(before.wire for before in block_1.wires[0][1].before)
 
-        self.assertListEqual(list(block_1.axes[1].wires[corner].after), [block_2.axes[1].wires[corner]])
-        self.assertListEqual(list(block_2.axes[1].wires[corner].before), [block_1.axes[1].wires[corner]])
+        expected_before = {block_0.wires[0][1]}
+
+        self.assertSetEqual(calculated_before, expected_before)
+
+    def test_sequential_after(self):
+        block_0, block_1 = self.add_blocks()
+
+        calculated_after = set(after.wire for after in block_0.wires[0][1].after)
+        expected_after = {block_1.wires[0][1]}
+
+        self.assertSetEqual(calculated_after, expected_after)

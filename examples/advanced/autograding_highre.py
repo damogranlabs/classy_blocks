@@ -1,8 +1,8 @@
 import os
 
 import classy_blocks as cb
-from classy_blocks.grading.autograding.grader import HighReGrader, SimpleGrader
-from classy_blocks.grading.autograding.params import HighReChopParams, SimpleChopParams
+from classy_blocks.grading.autograding.grader import HighReGrader
+from classy_blocks.grading.autograding.params import HighReChopParams
 
 mesh = cb.Mesh()
 
@@ -25,12 +25,12 @@ mesh.block_list.update()
 mesh.set_default_patch("walls", "wall")
 
 
-params = HighReChopParams(0.075)
+params = HighReChopParams(0.05)
 grader = HighReGrader(mesh, params)
-grader.grade(take="max")
+grader.grade()
 
-params = SimpleChopParams(0.075)
-grader = SimpleGrader(mesh, params)
+# params = SimpleChopParams(0.05)
+# grader = SimpleGrader(mesh, params)
 # grader.grade(take="max")
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

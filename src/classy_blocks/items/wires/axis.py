@@ -31,10 +31,9 @@ class Axis:
     def add_sequential(self, axis: "Axis") -> None:
         """Adds an axis that comes before/after this one"""
         # As opposed to neighbours that are 'around' this axis
-        if self.start_vertices == axis.end_vertices or self.end_vertices == axis.start_vertices:
-            for this_wire in self.wires:
-                for nei_wire in axis.wires:
-                    this_wire.add_series(nei_wire)
+        for this_wire in self.wires:
+            for nei_wire in axis.wires:
+                this_wire.add_inline(nei_wire)
 
     def is_aligned(self, other: "Axis") -> bool:
         """Returns True if wires of the other axis are aligned

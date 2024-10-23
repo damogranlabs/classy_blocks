@@ -30,7 +30,9 @@ class ChopParams(abc.ABC):
         """Calculates count based on given length - used once only"""
 
     @abc.abstractmethod
-    def get_chops(self, count: int, length: float, size_before: CellSizeType, size_after: CellSizeType) -> List[Chop]:
+    def get_chops(
+        self, stage: int, count: int, length: float, size_before: CellSizeType, size_after: CellSizeType
+    ) -> List[Chop]:
         """Fixes cell count but modifies chops so that proper cell sizing will be obeyed"""
         # That depends on inherited classes' philosophy
 
@@ -42,7 +44,7 @@ class FixedCountParams(ChopParams):
     def get_count(self, _length):
         return self.count
 
-    def get_chops(self, count, _length, _size_before=0, _size_after=0) -> List[Chop]:
+    def get_chops(self, _stage, count, _length, _size_before=0, _size_after=0) -> List[Chop]:
         return [Chop(count=count)]
 
 
@@ -53,7 +55,7 @@ class SimpleChopParams(ChopParams):
     def get_count(self, length: float):
         return int(length / self.cell_size)
 
-    def get_chops(self, count, _length, _size_before=0, _size_after=0):
+    def get_chops(self, _stage, count, _length, _size_before=0, _size_after=0):
         return [Chop(count=count)]
 
 
@@ -73,7 +75,9 @@ class HighReChopParams(ChopParams):
     def define_sizes(
         self, count: int, length: float, size_before: CellSizeType, size_after: CellSizeType
     ) -> Tuple[float, float]:
-        """Defines start and end cell size with respect to given circumstances"""
+        """Defines start and end cell size.
+        size_before and size_after are taken from preceding/following wires;
+        when a size is None, this is the last/first wire."""
         if size_before == 0 or size_after == 0:
             # until all counts/sizes are defined
             # (the first pass with uniform grading),
@@ -82,28 +86,36 @@ class HighReChopParams(ChopParams):
 
         # not enough room for all cells?
         cramped = self.cell_size * count > length
+        base_size = length / count
+
+        if cramped:
+            return base_size, base_size
 
         if size_before is None:
-            if cramped:
-                size_before = length / count
-            else:
-                size_before = self.cell_size
+            size_before = self.cell_size
 
         if size_after is None:
-            if cramped:
-                size_after = length / count
-            else:
-                size_after = self.cell_size
+            size_after = self.cell_size
 
         return size_before, size_after
 
-    def get_chops(self, count, length, size_before=CellSizeType, size_after=CellSizeType):
+    def get_chops(self, stage, count, length, size_before, size_after):
+        halfcount = count // 2
+
+        uniform_chops = [
+            Chop(length_ratio=0.5, count=halfcount),
+            Chop(length_ratio=0.5, count=halfcount),
+        ]
+
+        if stage == 0:
+            # start with simple uniformly graded chops first
+            return uniform_chops
+
         size_before, size_after = self.define_sizes(count, length, size_before, size_after)
 
         # choose length ratio so that cells at the middle of blocks
         # (between the two chops) have the same size
         def fobj(lratio):
-            halfcount = count // 2
             chop_1 = Chop(length_ratio=lratio, count=halfcount, start_size=size_before)
             data_1 = chop_1.calculate(length)
 
@@ -228,5 +240,5 @@ class LowReChopParams(ChopParams):
         # return chops
         return 1
 
-    def get_chops(self, count, length, size_before=0, size_after=0) -> List[Chop]:
+    def get_chops(self, stage, count, length, size_before=0, size_after=0) -> List[Chop]:
         raise NotImplementedError("TODO!")

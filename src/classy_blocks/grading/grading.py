@@ -97,7 +97,7 @@ class Grading:
     @property
     def start_size(self) -> float:
         if len(self.chops) == 0:
-            return 0
+            raise RuntimeError("start_size requested but no chops defined")
 
         chop = self.chops[0]
         return chop.calculate(self.length).start_size
@@ -105,7 +105,7 @@ class Grading:
     @property
     def end_size(self) -> float:
         if len(self.chops) == 0:
-            return 0
+            raise RuntimeError("end_size requested but no chops defined")
 
         chop = self.chops[-1]
         return chop.calculate(self.length).end_size
@@ -192,3 +192,9 @@ class Grading:
                     return False
 
         return True
+
+    def __repr__(self) -> str:
+        if self.is_defined:
+            return f"Grading ({len(self.chops)} chops {self.description})"
+
+        return f"Grading ({len(self.chops)})"

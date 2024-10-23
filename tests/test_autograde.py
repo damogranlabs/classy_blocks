@@ -6,6 +6,8 @@ from parameterized import parameterized
 from classy_blocks.construct.flat.sketches.grid import Grid
 from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.construct.stack import ExtrudedStack
+from classy_blocks.grading.autograding.grader import HighReGrader
+from classy_blocks.grading.autograding.params import HighReChopParams
 from classy_blocks.grading.autograding.probe import Probe, get_block_from_axis
 from classy_blocks.mesh import Mesh
 from classy_blocks.types import DirectionType
@@ -92,3 +94,16 @@ class ProbeTests(AutogradeTestsBase):
             indexes.add(block.index)
 
         self.assertSetEqual(indexes, blocks)
+
+
+class GraderTests(AutogradeTestsBase):
+    def test_highre_cylinder(self):
+        self.mesh.add(self.get_cylinder())
+        self.mesh.assemble()
+        # TODO: Hack! Un-hack!
+        self.mesh.block_list.update()
+
+        params = HighReChopParams(0.025)
+        grader = HighReGrader(self.mesh, params)
+
+        grader.grade()
