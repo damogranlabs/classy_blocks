@@ -158,6 +158,7 @@ class Mesh:
             self.block_list.add(block)
 
         self._add_geometry()
+        self.block_list.update()
 
     def clear(self) -> None:
         """Undoes the assemble() method; clears created blocks and other lists

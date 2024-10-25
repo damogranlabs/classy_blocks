@@ -2,10 +2,10 @@ import unittest
 
 import numpy as np
 
+from classy_blocks.base.exceptions import ClampExistsError
 from classy_blocks.construct.flat.sketches.mapped import MappedSketch
 from classy_blocks.optimize.clamps.free import FreeClamp
 from classy_blocks.optimize.clamps.surface import PlaneClamp
-from classy_blocks.optimize.junction import ClampExistsError
 from classy_blocks.optimize.links import TranslationLink
 from classy_blocks.optimize.optimizer import MeshOptimizer, SketchOptimizer
 from classy_blocks.optimize.smoother import SketchSmoother

@@ -1,14 +1,11 @@
 import dataclasses
 from typing import List, Optional, Set
 
+from classy_blocks.base.exceptions import ClampExistsError
 from classy_blocks.optimize.cell import CellBase
 from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.links import LinkBase
 from classy_blocks.types import NPPointListType, NPPointType
-
-
-class ClampExistsError(Exception):
-    """Raised when adding a clamp to a junction that already has one defined"""
 
 
 @dataclasses.dataclass

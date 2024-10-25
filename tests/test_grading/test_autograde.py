@@ -5,7 +5,6 @@ from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.construct.shapes.frustum import Frustum
 from classy_blocks.construct.stack import ExtrudedStack
 from classy_blocks.grading.autograding.grader import HighReGrader
-from classy_blocks.grading.autograding.params import HighReChopParams
 from classy_blocks.mesh import Mesh
 
 
@@ -29,10 +28,10 @@ class GraderTests(AutogradeTestsBase):
     def test_highre_cylinder(self):
         self.mesh.add(self.get_cylinder())
         self.mesh.assemble()
-        # TODO: Hack! Un-hack!
-        self.mesh.block_list.update()
 
-        params = HighReChopParams(0.025)
-        grader = HighReGrader(self.mesh, params)
-
+        grader = HighReGrader(self.mesh, 0.025)
         grader.grade()
+
+        # make sure all blocks are defined
+        for block in self.mesh.blocks:
+            self.assertTrue(block.is_defined)

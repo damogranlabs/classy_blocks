@@ -39,6 +39,7 @@ import math
 import warnings
 from typing import List
 
+from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.grading.chop import Chop, ChopData
 from classy_blocks.types import GradingSpecType
 from classy_blocks.util import constants
@@ -150,7 +151,7 @@ class Grading:
     def description(self) -> str:
         """Output string for blockMeshDict"""
         if not self.is_defined:
-            raise ValueError(f"Grading not defined: {self}")
+            raise UndefinedGradingsError(f"Grading not defined: {self}")
 
         if len(self.specification) == 1:
             # its a one-number simpleGrading:

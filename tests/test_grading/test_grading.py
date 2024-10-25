@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 from parameterized import parameterized
 
+from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.grading import relations as rel
 from classy_blocks.grading.chop import Chop, ChopRelation
 from classy_blocks.grading.grading import Grading
@@ -67,7 +68,7 @@ class TestGrading(unittest.TestCase):
         self.g.add_chop(chop)
 
     def test_output_empty(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(UndefinedGradingsError):
             _ = self.g.description
 
     def test_output_single(self):
