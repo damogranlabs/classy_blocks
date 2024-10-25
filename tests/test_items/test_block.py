@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, get_args
 
 import numpy as np
 from parameterized import parameterized
@@ -8,6 +8,7 @@ from classy_blocks.grading.chop import Chop
 from classy_blocks.items.block import Block
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.wire import Wire
+from classy_blocks.types import DirectionType
 from classy_blocks.util import functions as f
 from tests.fixtures.block import BlockTestCase
 
@@ -139,6 +140,16 @@ class BlockTests(BlockTestCase):
         self.assertEqual(len(block_0.axes[1].neighbours), 0)
         self.assertEqual(len(block_0.axes[2].neighbours), 0)
 
+    def test_axis_direction(self):
+        block = self.make_block(0)
+        axis = self.make_block(1).axes[0]
+
+        with self.assertRaises(RuntimeError):
+            block.get_axis_direction(axis)
+
+    def test_repr(self):
+        self.assertEqual(str(self.make_block(0)), "Block 0")
+
 
 class BlockSimpleGradingTests(BlockTestCase):
     """Tests of neighbours, copying grading and whatnot simple variant;
@@ -147,29 +158,37 @@ class BlockSimpleGradingTests(BlockTestCase):
     def test_is_defined_0(self):
         """block.is_defined with no gradings"""
         block_0 = self.make_block(0)
+
+        block_0.grade()
+
         self.assertFalse(block_0.is_defined)
 
     def test_is_defined_1(self):
         """block.is_defined with 1 grading"""
         block_0 = self.make_block(0)
-        block_0.chop(0, Chop(count=10))
+        block_0.add_chops(0, [Chop(count=10)])
+
+        block_0.grade()
 
         self.assertFalse(block_0.is_defined)
 
     def test_is_defined_2(self):
         """block.is_defined with 2 gradings"""
         block_0 = self.make_block(0)
-        block_0.chop(0, Chop(count=10))
-        block_0.chop(1, Chop(count=10))
+        block_0.add_chops(0, [Chop(count=10)])
+        block_0.add_chops(1, [Chop(count=10)])
+
+        block_0.grade()
 
         self.assertFalse(block_0.is_defined)
 
     def test_is_defined_3(self):
         """block.is_defined with 3 gradings"""
         block_0 = self.make_block(0)
-        block_0.chop(0, Chop(count=10))
-        block_0.chop(1, Chop(count=10))
-        block_0.chop(2, Chop(count=10))
+        block_0.add_chops(0, [Chop(count=10)])
+        block_0.add_chops(1, [Chop(count=10)])
+        block_0.add_chops(2, [Chop(count=10)])
+
         block_0.grade()
 
         self.assertTrue(block_0.is_defined)
@@ -177,54 +196,14 @@ class BlockSimpleGradingTests(BlockTestCase):
     def test_is_defined_4(self):
         """block.is_defined with 4 gradings"""
         block_0 = self.make_block(0)
-        block_0.chop(0, Chop(count=10))
-        block_0.chop(0, Chop(count=10))
-        block_0.chop(1, Chop(count=10))
-        block_0.chop(2, Chop(count=10))
+        block_0.add_chops(0, [Chop(count=10)])
+        block_0.add_chops(0, [Chop(count=10)])
+        block_0.add_chops(1, [Chop(count=10)])
+        block_0.add_chops(2, [Chop(count=10)])
+
         block_0.grade()
 
         self.assertTrue(block_0.is_defined)
-
-    def test_copy_grading_defined(self):
-        """block.copy_grading when it's already defined"""
-        block_0 = self.make_block(0)
-        block_0.chop(0, Chop(count=10))
-        block_0.chop(1, Chop(count=10))
-        block_0.chop(2, Chop(count=10))
-
-        self.assertFalse(block_0.copy_grading())
-
-    def test_copy_grading_undefined(self):
-        """block.copy_grading when it's not defined and has no
-        appropriate neighbours"""
-        block_0 = self.make_block(0)
-        self.assertFalse(block_0.copy_grading())
-
-    def test_copy_grading_neighbour_undefined(self):
-        """block.copy_grading from an undefined neighbour"""
-        block_0 = self.make_block(0)
-        block_1 = self.make_block(1)
-
-        # clear chops from block_1
-        block_1.axes[0].wires.chops = []
-        block_1.axes[1].wires.chops = []
-        block_1.axes[2].wires.chops = []
-
-        block_0.add_neighbour(block_1)
-
-        self.assertFalse(block_0.copy_grading())
-
-    def test_copy_grading_neighbour_defined(self):
-        """block.copy_grading from a defined neighbour"""
-        block_0 = self.make_block(0)
-        block_1 = self.make_block(1)
-
-        block_0.grade()
-        block_1.grade()
-
-        block_0.add_neighbour(block_1)
-
-        self.assertTrue(block_0.copy_grading())
 
     def test_output(self):
         """Output of a simple block"""
@@ -232,15 +211,17 @@ class BlockSimpleGradingTests(BlockTestCase):
         block_0 = self.make_block(0)
         block_0.axes[0].wires.chops = []
 
-        block_0.chop(0, Chop(count=10))
-        block_0.chop(1, Chop(count=10))
-        block_0.chop(2, Chop(count=10))
+        for axis in get_args(DirectionType):
+            block_0.axes[axis].chops = []
+
+        block_0.add_chops(0, [Chop(count=10)])
+        block_0.add_chops(1, [Chop(count=10)])
+        block_0.add_chops(2, [Chop(count=10)])
 
         block_0.cell_zone = "test_zone"
         block_0.comment = "test_comment"
 
-        for axis in block_0.axes:
-            axis.wires.grade()
+        block_0.grade()
 
         expected_description = (
             "\thex ( 0 1 2 3 4 5 6 7 ) test_zone ( 10 10 10 )" " simpleGrading ( 1 1 1 ) // 0 test_comment\n"
@@ -274,9 +255,10 @@ class BlockEdgeGradingTests(BlockTestCase):
         return block
 
     def chop(self, block: Block, axis, **kwargs):
-        block.chop(axis, Chop(**kwargs))
+        block.add_chops(axis, [Chop(**kwargs)])
 
     def calculate(self, block):
+        block.update_wires()
         block.grade()
 
     def test_edge_grading_output(self):
@@ -306,18 +288,16 @@ class BlockEdgeGradingTests(BlockTestCase):
         block_1 = self.make_block(1)
 
         self.chop(block_0, 0, count=10)
+        self.chop(block_0, 1, count=10)
         self.chop(block_0, 2, count=10)
         self.chop(block_1, 0, start_size=0.1, end_size=0.01, preserve="end_size")
         self.chop(block_1, 1, count=10)
 
-        self.calculate(block_0)
-        self.calculate(block_1)
-
         block_0.add_neighbour(block_1)
         block_1.add_neighbour(block_0)
 
-        block_0.copy_grading()
-        block_1.copy_grading()
+        self.calculate(block_0)
+        self.calculate(block_1)
 
         # block_0 must be simpleGraded, block_1 edge
         self.assertTrue("simpleGrading" in block_0.format_grading())

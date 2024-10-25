@@ -18,10 +18,6 @@ from classy_blocks.util.constants import TOL
 MinimizationMethodType = Literal["SLSQP", "L-BFGS-B", "Nelder-Mead", "Powell"]
 
 
-class NoClampError(Exception):
-    """Raised when there's no junction defined for a given Clamp"""
-
-
 class OptimizerBase(abc.ABC):
     """Provides tools for 2D (sketch) or 3D (mesh blocking) optimization"""
 

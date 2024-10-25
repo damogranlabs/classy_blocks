@@ -10,7 +10,7 @@ from classy_blocks.construct.operations.connector import Connector
 from classy_blocks.construct.operations.extrude import Extrude
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.mesh import Mesh
-from classy_blocks.types import AxisType
+from classy_blocks.types import DirectionType
 
 
 class EdgeGradingExampleTests(unittest.TestCase):
@@ -43,7 +43,7 @@ class EdgeGradingExampleTests(unittest.TestCase):
         mesh.add(end)
 
         mesh.assemble()
-        mesh.grade()
+        mesh.block_list.assemble()
 
         self.mesh = mesh
 
@@ -78,7 +78,7 @@ class EdgeGradingTests(unittest.TestCase):
 
     def prepare(self):
         self.mesh.assemble()
-        self.mesh.grade()
+        self.mesh.block_list.assemble()
 
     def test_inconsistent_wires(self):
         box_left = Box([0, 0, 0], [1, 1, 1])
@@ -132,7 +132,7 @@ class EdgeGradingTests(unittest.TestCase):
         box_1 = Box([-1, -1, -1], [1, 1, 1])
         box_2 = box_1.copy().rotate(np.pi / 4, [1, 1, 1], [0, 0, 0]).translate([4, 2, 0])
 
-        for i in get_args(AxisType):
+        for i in get_args(DirectionType):
             box_1.chop(i, count=10)
             box_2.chop(i, count=10)
 

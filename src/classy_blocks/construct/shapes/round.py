@@ -5,13 +5,13 @@ from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.construct.flat.sketches.annulus import Annulus
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.shape import LoftedShape
-from classy_blocks.types import AxisType, OrientType
+from classy_blocks.types import DirectionType, OrientType
 
 
 class RoundSolidShape(LoftedShape):
-    axial_axis: AxisType = 2  # Axis along which 'outer sides' run
-    radial_axis: AxisType = 0  # Axis that goes from center to 'outer side'
-    tangential_axis: AxisType = 1  # Axis that goes around the circumference of the shape
+    axial_axis: DirectionType = 2  # Axis along which 'outer sides' run
+    radial_axis: DirectionType = 0  # Axis that goes from center to 'outer side'
+    tangential_axis: DirectionType = 1  # Axis that goes around the circumference of the shape
 
     start_patch: OrientType = "bottom"  # Sides of blocks that define the start patch
     end_patch: OrientType = "top"  # Sides of blocks that define the end patch"""

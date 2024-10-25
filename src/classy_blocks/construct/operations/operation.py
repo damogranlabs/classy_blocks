@@ -11,7 +11,7 @@ from classy_blocks.construct.edges import Arc, EdgeData, Line, Project, Spline
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.point import Point
 from classy_blocks.grading.chop import Chop
-from classy_blocks.types import AxisType, ChopArgs, NPPointType, OrientType, PointType, ProjectToType, VectorType
+from classy_blocks.types import ChopArgs, DirectionType, NPPointType, OrientType, PointType, ProjectToType, VectorType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import SIDES_MAP
@@ -34,7 +34,7 @@ class Operation(ElementBase):
         self.side_patches: List[Optional[str]] = [None, None, None, None]
 
         # instructions for cell counts and gradings
-        self.chops: Dict[AxisType, List[Chop]] = {0: [], 1: [], 2: []}
+        self.chops: Dict[DirectionType, List[Chop]] = {0: [], 1: [], 2: []}
 
         # optionally, put the block in a cell zone
         self.cell_zone = ""
@@ -58,11 +58,12 @@ class Operation(ElementBase):
 
         self.side_edges[corner_idx] = edge_data
 
-    def chop(self, axis: AxisType, **kwargs: Unpack[ChopArgs]) -> None:
-        """Chop the operation (count/grading) in given axis:
-        0: along first edge of a face
-        1: along second edge of a face
-        2: between faces / along operation path
+    def chop(self, axis: DirectionType, **kwargs: Unpack[ChopArgs]) -> None:
+        """Chop the operation (count/grading) either in given axis:
+            0: along first edge of a face
+            1: along second edge of a face
+            2: between faces / along operation path
+        or between the specified corners (only valid combinations apply).
 
         kwargs:
         Available grading parameters are:
@@ -72,18 +73,26 @@ class Operation(ElementBase):
          - c2c_expansion: cell-to-cell expansion ratio (default=1)
          - total_expansion: ratio between first and last cell size
 
-        You must specify start_size and/or count.
-        c2c_expansion is optional - will be used to create graded cells
-        and will default to 1 if not provided.
+        For a simple case with a uniform cell size (no grading)
+        you must specify start_size or count, default for c2c_expansion is 1.
+        To define a graded block/edge, use any valid combination of the above parameters.
+
+        For axis chops, the 'take' parameter will define which edge
+        length will be taken for cell count calculation. When an edge is chopped,
+        axis chops in edge's axis will be ignored.
 
         Use length_ratio for multigrading (see documentation):
         https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading"""
 
         self.chops[axis].append(Chop(**kwargs))
 
-    def unchop(self, axis: AxisType) -> None:
-        """Removed existing chops from an operation
-        (comes handy after copying etc.)"""
+    def unchop(self, axis: Optional[DirectionType] = None) -> None:
+        """Removes existing chops from an operation (comes handy after copying etc.)"""
+        if axis is None:
+            for i in get_args(DirectionType):
+                self.chops[i] = []
+            return
+
         self.chops[axis] = []
 
     def project_corner(self, corner: int, label: ProjectToType) -> None:

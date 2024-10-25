@@ -136,11 +136,11 @@ for i in (0, 6):
 # chopping will propagate automatically through blocking
 lofts[0].chop(2, count=1)  # 1 cell in the 3rd dimension
 # keep consistent first cell thickness by using edge grading
-lofts[1].chop(1, start_size=BL_THICKNESS, c2c_expansion=C2C_EXPANSION, preserve="start_size")
-lofts[8].chop(1, start_size=CELL_SIZE)
+lofts[1].chop(1, start_size=BL_THICKNESS, c2c_expansion=C2C_EXPANSION, take="max", preserve="start_size")
+lofts[8].chop(1, start_size=CELL_SIZE, take="max")
 
 for i in (0, 1, 2, 3, 4, 5, 6):
-    lofts[i].chop(0, start_size=CELL_SIZE)
+    lofts[i].chop(0, start_size=CELL_SIZE, take="max")
 
 for loft in lofts:
     mesh.add(loft)

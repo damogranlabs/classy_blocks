@@ -34,12 +34,14 @@ calculations meticulously transcribed from the blockmesh grading calculator:
 https://gitlab.com/herpes-free-engineer-hpe/blockmeshgradingweb/-/blob/master/calcBlockMeshGrading.coffee
 (since block length is always known, there's less wrestling but the calculation principle is similar) """
 
-import copy
+import dataclasses
 import math
 import warnings
 from typing import List
 
-from classy_blocks.grading.chop import Chop
+from classy_blocks.base.exceptions import UndefinedGradingsError
+from classy_blocks.grading.chop import Chop, ChopData
+from classy_blocks.types import GradingSpecType
 from classy_blocks.util import constants
 
 
@@ -49,62 +51,107 @@ class Grading:
     def __init__(self, length: float):
         # "multi-grading" specification according to:
         # https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
-        self.length = length
+        self.length = length  # to be updated when adding/modifying block edges
 
-        self.specification: List[List] = []  # a list of lists [length ratio, count ratio, total expansion]
+        # will change specification to match a wire from end to start
+        self.inverted: bool = False
+
+        # a list of user-input data
+        self.chops: List[Chop] = []
+        # results from chop.calculate():
+        self._chop_data: List[ChopData] = []
 
     def add_chop(self, chop: Chop) -> None:
         if not (0 < chop.length_ratio <= 1):
             raise ValueError(f"Length ratio must be between 0 and (including) 1, got {chop.length_ratio}")
 
-        length = self.length * chop.length_ratio
+        self.chops.append(chop)
 
-        count, total_expansion = chop.calculate(length)
-
-        self.specification.append([chop.length_ratio, count, total_expansion])
-
-    @property
-    def inverted(self) -> "Grading":
-        """Returns this grading but inverted
-        in case neighbours are defined upside-down"""
-        if len(self.specification) == 0:
-            return self  # nothing to invert
-
-        g_inv = copy.deepcopy(self)
-
-        # divisions:
-        # a list of lists [length ratio, count ratio, total expansion]
-
-        # reverse the list first
-        g_inv.specification.reverse()
-
-        # then do 1/total_expansion
-        for i, div in enumerate(g_inv.specification):
-            g_inv.specification[i][2] = 1 / div[2]
-
-        return g_inv
+    def clear(self) -> None:
+        self.chops = []
+        self._chop_data = []
 
     @property
-    def counts(self) -> List[int]:
-        """Counts per chop"""
-        return [d[1] for d in self.specification]
+    def chop_data(self) -> List[ChopData]:
+        if len(self._chop_data) < len(self.chops):
+            # Chops haven't been calculated yet
+            self._chop_data = []
+
+            for chop in self.chops:
+                self._chop_data.append(chop.calculate(self.length))
+
+        return self._chop_data
+
+    def get_specification(self, inverted: bool) -> List[GradingSpecType]:
+        if inverted:
+            chops = list(reversed(self.chop_data))
+        else:
+            chops = self.chop_data
+
+        return [data.get_specification(inverted) for data in chops]
+
+    @property
+    def specification(self) -> List[GradingSpecType]:
+        # a list of [length_ratio, count, total_expansion] for each chop
+        return self.get_specification(self.inverted)
+
+    @property
+    def start_size(self) -> float:
+        if len(self.chops) == 0:
+            raise RuntimeError("start_size requested but no chops defined")
+
+        chop = self.chops[0]
+        return chop.calculate(self.length).start_size
+
+    @property
+    def end_size(self) -> float:
+        if len(self.chops) == 0:
+            raise RuntimeError("end_size requested but no chops defined")
+
+        chop = self.chops[-1]
+        return chop.calculate(self.length).end_size
+
+    def copy(self, length: float, invert: bool = False) -> "Grading":
+        """Creates a new grading with the same chops (counts) on a different length,
+        keeping chop.preserve quantity constant;
+
+        the 'length' parameter is the new wire's length"""
+        new_grading = Grading(length)
+
+        for data in self.chop_data:
+            # take count from calculated chops;
+            # it is of utmost importance it stays the same
+            old_data = dataclasses.asdict(data)
+            new_args = {
+                "length_ratio": data.length_ratio,
+                "count": old_data["count"],
+                data.preserve: old_data[data.preserve],
+                "preserve": data.preserve,
+                "take": data.take,
+            }
+
+            new_grading.add_chop(Chop(**new_args))
+            if invert:
+                new_grading.inverted = not new_grading.inverted
+
+        return new_grading
 
     @property
     def count(self) -> int:
         """Return number of cells, summed over all sub-divisions"""
-        return sum(self.counts)
+        return sum(d.count for d in self.chop_data)
 
     @property
     def is_defined(self) -> bool:
         """Return True is grading is defined;
         It is if there's at least one division added"""
-        return len(self.specification) > 0
+        return len(self.chops) > 0
 
     @property
     def description(self) -> str:
         """Output string for blockMeshDict"""
         if not self.is_defined:
-            raise ValueError(f"Grading not defined: {self}")
+            raise UndefinedGradingsError(f"Grading not defined: {self}")
 
         if len(self.specification) == 1:
             # its a one-number simpleGrading:
@@ -112,7 +159,7 @@ class Grading:
 
         # multi-grading: make a nice list
         # FIXME: make a nicer list
-        length_ratio_sum = 0
+        length_ratio_sum = 0.0
         out = "("
 
         for spec in self.specification:
@@ -126,18 +173,21 @@ class Grading:
 
         return out
 
-    def __eq__(self, other):
+    def __eq__(self, other_grading):
         # this works theoretically but numerics will probably ruin the party:
         # return self.specification == other.specification
-        if len(self.specification) != len(other.specification):
+        this_spec = self.get_specification(False)
+        other_spec = other_grading.get_specification(False)
+
+        if len(this_spec) != len(other_spec):
             return False
 
         # so just compare number-by-number
-        for i, this_spec in enumerate(self.specification):
-            other_spec = other.specification[i]
+        for i, this in enumerate(this_spec):
+            other = other_spec[i]
 
-            for j, this_value in enumerate(this_spec):
-                other_value = other_spec[j]
+            for j, this_value in enumerate(this):
+                other_value = other[j]
 
                 if not math.isclose(this_value, other_value, rel_tol=constants.TOL):
                     return False
@@ -145,4 +195,7 @@ class Grading:
         return True
 
     def __repr__(self) -> str:
-        return str(self.specification)
+        if self.is_defined:
+            return f"Grading ({len(self.chops)} chops {self.description})"
+
+        return f"Grading ({len(self.chops)})"

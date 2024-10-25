@@ -15,13 +15,10 @@ from parameters import (
     T_PIPE,
 )
 
+from classy_blocks.base.exceptions import GeometryConstraintError
 from classy_blocks.types import NPPointType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import vector_format as fvect
-
-
-class GeometryConstraintError(Exception):
-    """Raised when input parameters produce an invalid geometry"""
 
 
 @dataclasses.dataclass
