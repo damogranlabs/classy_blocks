@@ -100,8 +100,6 @@ class Wire:
     def copy_to_coincidents(self):
         """Copies the grading to all coincident wires"""
         for coincident in self.coincidents:
-            # TODO: why was this 'if' here?! Investigate and cry.
-            # if not coincident.is_defined:
             coincident.grading = self.grading.copy(self.length, not coincident.is_aligned(self))
 
     def check_consistency(self) -> None:

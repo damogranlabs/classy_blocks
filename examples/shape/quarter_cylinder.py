@@ -24,5 +24,5 @@ mesh.assemble()
 grader = HighReGrader(mesh, 0.05)
 grader.grade()
 
-
+mesh.set_default_patch("walls", "wall")
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

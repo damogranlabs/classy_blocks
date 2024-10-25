@@ -4,7 +4,7 @@ from classy_blocks.construct.flat.sketches.grid import Grid
 from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.construct.shapes.frustum import Frustum
 from classy_blocks.construct.stack import ExtrudedStack
-from classy_blocks.grading.autograding.grader import HighReGrader
+from classy_blocks.grading.autograding.grader import FixedCountGrader, HighReGrader, SimpleGrader
 from classy_blocks.mesh import Mesh
 
 
@@ -25,6 +25,30 @@ class AutogradeTestsBase(unittest.TestCase):
 
 
 class GraderTests(AutogradeTestsBase):
+    def test_fixed_count_cylinder(self):
+        cylinder = self.get_cylinder()
+        self.mesh.add(cylinder)
+        self.mesh.assemble()
+
+        grader = FixedCountGrader(self.mesh, 10)
+        grader.grade()
+
+        for block in self.mesh.blocks:
+            for axis in block.axes:
+                self.assertEqual(axis.count, 10)
+
+    def test_simple_grader_stack(self):
+        stack = self.get_stack()
+        self.mesh.add(stack)
+        self.mesh.assemble()
+
+        grader = SimpleGrader(self.mesh, 0.1)
+        grader.grade()
+
+        for block in self.mesh.blocks:
+            for axis in block.axes:
+                self.assertEqual(axis.count, 3)
+
     def test_highre_cylinder(self):
         self.mesh.add(self.get_cylinder())
         self.mesh.assemble()

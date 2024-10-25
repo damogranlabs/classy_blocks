@@ -170,10 +170,6 @@ class CellBase(abc.ABC):
 
         return quality
 
-    @property
-    def min_length(self) -> float:
-        return min(self.get_edge_lengths())
-
 
 class QuadCell(CellBase):
     # Like constants.FACE_MAP but for quadrangle sides as line segments
