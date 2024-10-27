@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 from parameterized import parameterized
 
+from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.grading import relations as rel
 from classy_blocks.grading.chop import Chop, ChopRelation
 from classy_blocks.grading.grading import Grading
@@ -67,7 +68,7 @@ class TestGrading(unittest.TestCase):
         self.g.add_chop(chop)
 
     def test_output_empty(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(UndefinedGradingsError):
             _ = self.g.description
 
     def test_output_single(self):
@@ -146,12 +147,11 @@ class TestGrading(unittest.TestCase):
 
         self.assertAlmostEqual(self.g.specification[0][2], 1 / self.g.specification[1][2])
 
-    def test_add_wrong_ratio(self):
+    @parameterized.expand(((0,), (1.1,)))
+    def test_add_wrong_ratio(self, ratio):
         """Add a chop with an invalid length ratio"""
         with self.assertRaises(ValueError):
-            self.g.add_chop(Chop(length_ratio=0, count=10))
-
-            _ = self.g.specification
+            self.g.add_chop(Chop(length_ratio=ratio, count=10))
 
     def test_is_defined(self):
         self.g.add_chop(Chop(1, count=10, start_size=0.05))
@@ -238,3 +238,26 @@ class TestGrading(unittest.TestCase):
         self.assertEqual(g1.end_size, g2.end_size)
 
         self.assertGreater(g1.specification[0][2], g2.specification[0][2])
+
+    def test_start_size_exception(self):
+        grading = Grading(1)
+
+        with self.assertRaises(RuntimeError):
+            _ = grading.start_size
+
+    def test_end_size_exception(self):
+        grading = Grading(1)
+
+        with self.assertRaises(RuntimeError):
+            _ = grading.end_size
+
+    def test_grading_description_undefined(self):
+        grading = Grading(1)
+
+        self.assertEqual(str(grading), "Grading (0)")
+
+    def test_grading_description_define(self):
+        grading = Grading(1)
+        grading.add_chop(Chop(count=10))
+
+        self.assertEqual(str(grading), "Grading (1 chops 1)")

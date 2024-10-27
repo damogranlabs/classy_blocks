@@ -4,7 +4,6 @@ import numpy as np
 
 import classy_blocks as cb
 from classy_blocks.grading.autograding.grader import HighReGrader
-from classy_blocks.grading.autograding.params import HighReChopParams
 from classy_blocks.types import PointType
 from classy_blocks.util import functions as f
 
@@ -63,15 +62,10 @@ smoother.smooth()
 
 shape = cb.ExtrudedShape(base_1, 1)
 
-# for op in shape.operations:
-#     for i in range(3):
-#         op.chop(i, count=10)
 mesh.add(shape)
 mesh.assemble()
-mesh.block_list.update()
 
-params = HighReChopParams(0.03)
-grader = HighReGrader(mesh, params)
+grader = HighReGrader(mesh, 0.03)
 grader.grade(take="max")
 
 mesh.set_default_patch("walls", "wall")

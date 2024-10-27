@@ -1,32 +1,36 @@
-import unittest
 from typing import get_args
 
 from parameterized import parameterized
 
-from classy_blocks.construct.flat.sketches.grid import Grid
-from classy_blocks.construct.shapes.cylinder import Cylinder
-from classy_blocks.construct.stack import ExtrudedStack
-from classy_blocks.grading.autograding.grader import HighReGrader
-from classy_blocks.grading.autograding.params import HighReChopParams
 from classy_blocks.grading.autograding.probe import Probe, get_block_from_axis
 from classy_blocks.mesh import Mesh
 from classy_blocks.types import DirectionType
-
-
-class AutogradeTestsBase(unittest.TestCase):
-    def get_stack(self) -> ExtrudedStack:
-        # create a simple 3x3 grid for easy navigation
-        base = Grid([0, 0, 0], [1, 1, 0], 3, 3)
-        return ExtrudedStack(base, 1, 3)
-
-    def get_cylinder(self) -> Cylinder:
-        return Cylinder([0, 0, 0], [1, 0, 0], [0, 1, 0])
-
-    def setUp(self):
-        self.mesh = Mesh()
+from tests.test_grading.test_autograde import AutogradeTestsBase
 
 
 class ProbeTests(AutogradeTestsBase):
+    def test_block_from_axis_fail(self):
+        mesh_1 = self.mesh
+        mesh_1.add(self.get_stack())
+        mesh_1.assemble()
+
+        mesh_2 = Mesh()
+        mesh_2.add(self.get_stack())
+        mesh_2.assemble()
+
+        with self.assertRaises(RuntimeError):
+            get_block_from_axis(mesh_1, mesh_2.blocks[0].axes[0])
+
+    @parameterized.expand((("min", 0.196889), ("max", 0.8), ("avg", 0.470923)))
+    def test_get_row_length(self, take, length):
+        self.mesh.add(self.get_frustum())
+        self.mesh.assemble()
+
+        probe = Probe(self.mesh)
+        row = probe.get_rows(0)[0]
+
+        self.assertAlmostEqual(row.get_length(take), length, places=4)
+
     @parameterized.expand(((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (2, 2)))
     def test_get_blocks_on_layer(self, block, axis):
         self.mesh.add(self.get_stack())
@@ -94,16 +98,3 @@ class ProbeTests(AutogradeTestsBase):
             indexes.add(block.index)
 
         self.assertSetEqual(indexes, blocks)
-
-
-class GraderTests(AutogradeTestsBase):
-    def test_highre_cylinder(self):
-        self.mesh.add(self.get_cylinder())
-        self.mesh.assemble()
-        # TODO: Hack! Un-hack!
-        self.mesh.block_list.update()
-
-        params = HighReChopParams(0.025)
-        grader = HighReGrader(self.mesh, params)
-
-        grader.grade()

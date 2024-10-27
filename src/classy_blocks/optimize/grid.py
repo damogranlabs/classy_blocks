@@ -2,6 +2,7 @@ from typing import List, Type
 
 import numpy as np
 
+from classy_blocks.base.exceptions import InvalidLinkError, NoJunctionError
 from classy_blocks.construct.flat.sketches.mapped import MappedSketch
 from classy_blocks.mesh import Mesh
 from classy_blocks.optimize.cell import CellBase, HexCell, QuadCell
@@ -11,14 +12,6 @@ from classy_blocks.optimize.links import LinkBase
 from classy_blocks.types import IndexType, NPPointListType, NPPointType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
-
-
-class NoJunctionError(Exception):
-    """Raised when there's a clamp defined for a vertex that doesn't exist"""
-
-
-class InvalidLinkError(Exception):
-    """Raised when a link has been added that doesn't connect two actual points"""
 
 
 class GridBase:

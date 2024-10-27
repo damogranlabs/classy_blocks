@@ -1,6 +1,7 @@
 import functools
 from typing import Dict, List, Optional, get_args
 
+from classy_blocks.base.exceptions import BlockNotFoundError, NoInstructionError
 from classy_blocks.items.block import Block
 from classy_blocks.items.wires.axis import Axis
 from classy_blocks.items.wires.wire import Wire
@@ -109,7 +110,7 @@ class Catalogue:
             if instruction.block == block:
                 return instruction
 
-        raise RuntimeError(f"No instruction found for block {block}")
+        raise NoInstructionError(f"No instruction found for block {block}")
 
     def _add_block_to_row(self, row: Row, instruction: Instruction, direction: DirectionType) -> None:
         row.add_block(instruction.block, direction)
@@ -142,8 +143,7 @@ class Catalogue:
             if block in row.blocks:
                 return row.blocks
 
-        # TODO: make a custom exception
-        raise RuntimeError(f"Direction {direction} of {block} not in catalogue")
+        raise BlockNotFoundError(f"Direction {direction} of {block} not in catalogue")
 
 
 class Probe:

@@ -3,7 +3,6 @@ import os
 import classy_blocks as cb
 from classy_blocks.construct.flat.sketches.disk import QuarterDisk
 from classy_blocks.grading.autograding.grader import HighReGrader
-from classy_blocks.grading.autograding.params import HighReChopParams
 from classy_blocks.util import functions as f
 
 mesh = cb.Mesh()
@@ -21,12 +20,9 @@ quarter_cylinder = cb.ExtrudedShape(quarter_disk, f.norm(axis_point_2 - axis_poi
 mesh.add(quarter_cylinder)
 
 mesh.assemble()
-# TODO: automate or something
-mesh.block_list.update()
 
-params = HighReChopParams(0.05)
-grader = HighReGrader(mesh, params)
+grader = HighReGrader(mesh, 0.05)
 grader.grade()
 
-
+mesh.set_default_patch("walls", "wall")
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

@@ -70,8 +70,8 @@ class FixedCountGrader(GraderBase):
 
     stages = 1
 
-    def __init__(self, mesh: Mesh, params: FixedCountParams):
-        super().__init__(mesh, params)
+    def __init__(self, mesh: Mesh, count: int = 8):
+        super().__init__(mesh, FixedCountParams(count))
 
 
 class SimpleGrader(GraderBase):
@@ -81,8 +81,8 @@ class SimpleGrader(GraderBase):
 
     stages = 1
 
-    def __init__(self, mesh: Mesh, params: SimpleChopParams):
-        super().__init__(mesh, params)
+    def __init__(self, mesh: Mesh, cell_size: float):
+        super().__init__(mesh, SimpleChopParams(cell_size))
 
 
 class HighReGrader(GraderBase):
@@ -93,5 +93,5 @@ class HighReGrader(GraderBase):
 
     stages = 3
 
-    def __init__(self, mesh: Mesh, params: HighReChopParams):
-        super().__init__(mesh, params)
+    def __init__(self, mesh: Mesh, cell_size: float):
+        super().__init__(mesh, HighReChopParams(cell_size))

@@ -140,6 +140,16 @@ class BlockTests(BlockTestCase):
         self.assertEqual(len(block_0.axes[1].neighbours), 0)
         self.assertEqual(len(block_0.axes[2].neighbours), 0)
 
+    def test_axis_direction(self):
+        block = self.make_block(0)
+        axis = self.make_block(1).axes[0]
+
+        with self.assertRaises(RuntimeError):
+            block.get_axis_direction(axis)
+
+    def test_repr(self):
+        self.assertEqual(str(self.make_block(0)), "Block 0")
+
 
 class BlockSimpleGradingTests(BlockTestCase):
     """Tests of neighbours, copying grading and whatnot simple variant;
