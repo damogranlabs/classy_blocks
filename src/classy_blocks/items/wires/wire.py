@@ -81,11 +81,9 @@ class Wire:
     def add_inline(self, candidate: "Wire") -> None:
         """Adds a reference to a wire that is before or after this one
         in the same direction"""
+        # this assumes the lines are inline and in the same axis
         # TODO: Test
         if candidate == self:
-            return
-
-        if candidate.direction != self.direction:
             return
 
         if candidate.vertices[1] == self.vertices[0]:
