@@ -69,7 +69,7 @@ class LinearInterpolatedCurveTests(unittest.TestCase):
         self.assertAlmostEqual(self.curve.get_param_at_length(1), 0.25)
 
     def test_shear(self):
-        curve = self.curve
+        curve = LinearInterpolatedCurve(self.points, equalize=False)
 
         curve.shear([0, 1, 0], [0, 0, 0], [1, 0, 0], np.pi / 4)
 

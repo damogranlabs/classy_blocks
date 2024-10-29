@@ -367,6 +367,13 @@ Airfoil core with blunt trailing edge (imported points from NACA generator) and 
 (see `examples/complex/airfoil.py`). A simulation-ready mesh needs additional blocks to expand domain further away from the airfoil.
 ![Airfoil](showcase/airfoil.png "Airfoil core mesh")
 
+## Automatic Edge Grading
+When setting cell counts and expansion ratios, it is possible to specify which value to keep constant. Mostly this will be used for keeping thickness of the first cell at the wall consistent to maintain desired `y+` throughout the mesh. This is done by simple specifying a `preserve="..."` keyword.
+
+Example: a block chopped in a classic way where cell sizes will increase when block size increases:
+![Classic block grading](showcase/classy_classic_grading.png "Classic block grading")
+The same case but with a specified `preserve="start_size"` keyword for the bottom and `preserve="end_size"` for the top edge:
+![Grading for consistent cell size](showcase/classy_edges_grading.png "Classy block grading")
 
 ## Debugging
 

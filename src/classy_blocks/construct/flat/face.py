@@ -105,6 +105,8 @@ class Face(ElementBase):
     def invert(self) -> "Face":
         """Reverses the order of points in this face."""
         self.points.reverse()
+        self.edges.reverse()
+        self.edges = [self.edges[i] for i in (1, 2, 3, 0)]
 
         return self
 
@@ -168,8 +170,7 @@ class Face(ElementBase):
                 self.points[i].project(label)
 
     def shift(self, count: int) -> "Face":
-        """Shifts points of this face by 'count', changing its
-        starting point"""
+        """Shifts points of this face by 'count', changing its starting point"""
         indexes = collections.deque(range(4))
         indexes.rotate(count)
 
