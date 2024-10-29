@@ -8,6 +8,7 @@ from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.shape import Shape
 from classy_blocks.construct.stack import Stack
 from classy_blocks.items.block import Block
+from classy_blocks.items.patch import Patch
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.lists.block_list import BlockList
 from classy_blocks.lists.edge_list import EdgeList
@@ -242,6 +243,10 @@ class Mesh:
     @property
     def vertices(self) -> List[Vertex]:
         return self.vertex_list.vertices
+
+    @property
+    def patches(self) -> List[Patch]:
+        return list(self.patch_list.patches.values())
 
     @property
     def operations(self) -> List[Operation]:
