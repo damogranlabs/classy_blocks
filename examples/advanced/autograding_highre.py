@@ -1,7 +1,7 @@
 import os
 
 import classy_blocks as cb
-from classy_blocks.grading.autograding.grader import HighReGrader
+from classy_blocks.grading.autograding.grader import SmoothGrader
 
 mesh = cb.Mesh()
 
@@ -23,7 +23,7 @@ mesh.set_default_patch("walls", "wall")
 # TODO: Hack! mesh.assemble() won't work here but wires et. al. must be updated
 mesh.block_list.update()
 
-grader = HighReGrader(mesh, 0.05)
+grader = SmoothGrader(mesh, 0.05)
 grader.grade()
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

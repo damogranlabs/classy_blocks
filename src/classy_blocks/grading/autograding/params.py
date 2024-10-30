@@ -7,7 +7,6 @@ import scipy.optimize
 
 import classy_blocks.grading.relations as gr
 from classy_blocks.grading.chop import Chop
-from classy_blocks.types import ChopTakeType
 
 CellSizeType = Optional[float]
 
@@ -49,7 +48,7 @@ class FixedCountParams(ChopParams):
 
 
 @dataclasses.dataclass
-class SimpleChopParams(ChopParams):
+class SimpleGraderParams(ChopParams):
     cell_size: float
 
     def get_count(self, length: float):
@@ -60,7 +59,7 @@ class SimpleChopParams(ChopParams):
 
 
 @dataclasses.dataclass
-class HighReChopParams(ChopParams):
+class SmoothGraderParams(ChopParams):
     cell_size: float
 
     def get_count(self, length: float):
@@ -136,36 +135,8 @@ class HighReChopParams(ChopParams):
 
 # INVALID! Next on list
 @dataclasses.dataclass
-class LowReChopParams(ChopParams):
-    """Parameters for mesh grading for Low-Re cases.
-    To save on cell count, only a required thickness (boundary layer)
-    will be covered with thin cells (c2c_expansion in size ratio between them).
-    Then a bigger expansion ratio will be applied between the last cell of boundary layer
-    and the first cell of the bulk flow.
-
-    Example:
-     ________________
-    |
-    |                 > bulk size (cell_size=bulk, no expansion)
-    |________________
-    |
-    |________________ > buffer layer (c2c = 2)
-    |________________
-    |================ > boundary layer (cell_size=y+, c2c=1.2)
-    / / / / / / / / / wall
-
-    Args:
-        first_cell_size (float): thickness of the first cell near the wall
-        c2c_expansion (float): expansion ratio between cells in boundary layer
-        bl_thickness_factor (int): thickness of the boundary layer in y+ units (relative to first_cell_size)
-        buffer_expansion (float): expansion between cells in buffer layer
-        bulk_cell_size (float): size of cells inside the domain
-
-        Autochop will take all relevant blocks and choose one to start with - set cell counts
-        and other parameters that must stay fixed for all further blocks.
-        It will choose the longest/shortest ('max/min') block edge or something in between ('avg').
-        The finest grid will be obtained with 'max', the coarsest with 'min'.
-    """
+class InflationGraderParams(ChopParams):
+    """See description of InflationGrader"""
 
     first_cell_size: float
     bulk_cell_size: float
@@ -174,16 +145,14 @@ class LowReChopParams(ChopParams):
     bl_thickness_factor: int = 30
     buffer_expansion: float = 2
 
-    take: ChopTakeType = "avg"
-
     @property
-    def boundary_layer_thickness(self) -> float:
+    def inflation_layer_thickness(self) -> float:
         return self.first_cell_size * self.bl_thickness_factor
 
-    def _get_boundary_chop(self, length: float) -> Tuple[Chop, float]:
-        """Creates a Chop for the boundary layer; returns size of the last cell"""
+    def _get_inflation_chop(self, length: float) -> Tuple[Chop, float]:
+        """Creates a Chop for the inflation layer; returns size of the last cell"""
         near_wall = Chop(
-            length_ratio=self.boundary_layer_thickness / length,
+            length_ratio=self.inflation_layer_thickness / length,
             start_size=self.first_cell_size,
             c2c_expansion=self.c2c_expansion,
         )
@@ -191,7 +160,7 @@ class LowReChopParams(ChopParams):
         return (near_wall, data.end_size)
 
     def _get_buffer_chop(self, start_size: float) -> Tuple[Chop, float]:
-        """Creates a chop between the last cell of boundary layer
+        """Creates a chop between the last cell of inflation layer
         and the first cell of bulk flow; returns length of the chop"""
         buffer_count = gr.get_count__total_expansion__c2c_expansion(
             1, self.bulk_cell_size / start_size, self.buffer_expansion
@@ -206,19 +175,18 @@ class LowReChopParams(ChopParams):
         return Chop(count=count)
 
     def get_count(self, length: float):
-        # TODO! Do
         chops: List[Chop] = []
 
-        if length < self.boundary_layer_thickness:
-            warnings.warn("Boundary layer is thicker than block size!", stacklevel=1)
+        if length < self.inflation_layer_thickness:
+            warnings.warn("Inflation layer is thicker than block size!", stacklevel=1)
 
         # near-wall sizes:
-        near_wall, last_bl_size = self._get_boundary_chop(length)
-        remaining_length = length - self.boundary_layer_thickness
+        near_wall, last_bl_size = self._get_inflation_chop(length)
+        remaining_length = length - self.inflation_layer_thickness
         chops.append(near_wall)
 
         if remaining_length <= 0:
-            warnings.warn("Stopping chops at boundary layer (not enough space)!", stacklevel=1)
+            warnings.warn("Stopping chops at inflation layer (not enough space)!", stacklevel=1)
             # return chops
             return 0
 

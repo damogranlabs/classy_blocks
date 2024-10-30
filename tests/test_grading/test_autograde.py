@@ -4,7 +4,7 @@ from classy_blocks.construct.flat.sketches.grid import Grid
 from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.construct.shapes.frustum import Frustum
 from classy_blocks.construct.stack import ExtrudedStack
-from classy_blocks.grading.autograding.grader import FixedCountGrader, HighReGrader, SimpleGrader
+from classy_blocks.grading.autograding.grader import FixedCountGrader, SimpleGrader, SmoothGrader
 from classy_blocks.mesh import Mesh
 
 
@@ -53,7 +53,7 @@ class GraderTests(AutogradeTestsBase):
         self.mesh.add(self.get_cylinder())
         self.mesh.assemble()
 
-        grader = HighReGrader(self.mesh, 0.025)
+        grader = SmoothGrader(self.mesh, 0.025)
         grader.grade()
 
         # make sure all blocks are defined
