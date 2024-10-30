@@ -2,10 +2,9 @@ import abc
 
 import numpy as np
 import scipy.interpolate
-from numpy.typing import NDArray
 
 from classy_blocks.construct.array import Array
-from classy_blocks.types import NPPointType, ParamCurveFuncType
+from classy_blocks.types import FloatListType, NPPointType, ParamCurveFuncType
 
 
 class InterpolatorBase(abc.ABC):
@@ -19,9 +18,10 @@ class InterpolatorBase(abc.ABC):
     def _get_function(self) -> ParamCurveFuncType:
         """Returns an interpolation function from stored points"""
 
-    def __init__(self, points: Array, extrapolate: bool):
+    def __init__(self, points: Array, extrapolate: bool, equalize: bool = True):
         self.points = points
         self.extrapolate = extrapolate
+        self.equalize = equalize
 
         self.function = self._get_function()
         self._valid = True
@@ -37,7 +37,16 @@ class InterpolatorBase(abc.ABC):
         self._valid = False
 
     @property
-    def params(self) -> NDArray:
+    def params(self) -> FloatListType:
+        """A list of parameters for the interpolation curve.
+        If not equalized, it's just linearly spaced floats;
+        if equalized, scaled distances between provided points are taken so that
+        evenly spaced parameters will produce evenly spaced points even if
+        interpolation points are unequally spaced."""
+        if self.equalize:
+            lengths = np.cumsum(np.sqrt(np.sum((self.points[:-1] - self.points[1:]) ** 2, axis=1)))
+            return np.concatenate(([0], lengths / lengths[-1]))
+
         return np.linspace(0, 1, num=len(self.points))
 
 

@@ -263,7 +263,7 @@ class ShellTests(ShellTestsBase):
 
         self.assertEqual(len(shell.operations[0].chops[2]), 1)
 
-    def test_set_outer_patch(self):
+    def test_set_outer_patch(self) -> None:
         orients: List[OrientType] = ["front", "right"]
         shell = self.get_shell(orients)
         shell.set_outer_patch("roof")

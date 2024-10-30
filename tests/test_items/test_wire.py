@@ -13,7 +13,7 @@ from tests.fixtures.data import DataTestCase
 class WireTests(DataTestCase):
     """Tests of Pair object"""
 
-    def setUp(self):
+    def setUp(self) -> None:
         block = self.get_single_data(0)
 
         self.vertices = [Vertex(block.points[i], i) for i in range(8)]

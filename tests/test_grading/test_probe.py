@@ -1,9 +1,11 @@
-from typing import get_args
+from typing import Set, get_args
 
 from parameterized import parameterized
 
 from classy_blocks.grading.autograding.probe import Probe, get_block_from_axis
+from classy_blocks.items.vertex import Vertex
 from classy_blocks.mesh import Mesh
+from classy_blocks.modify.find.shape import RoundSolidFinder
 from classy_blocks.types import DirectionType
 from tests.test_grading.test_autograde import AutogradeTestsBase
 
@@ -98,3 +100,64 @@ class ProbeTests(AutogradeTestsBase):
             indexes.add(block.index)
 
         self.assertSetEqual(indexes, blocks)
+
+    def test_wall_vertices_defined(self) -> None:
+        """Catch wall vertices from explicitly defined wall patches"""
+        cylinder = self.get_cylinder()
+        cylinder.set_outer_patch("outer")
+
+        self.mesh.add(cylinder)
+        self.mesh.modify_patch("outer", "wall")
+        self.mesh.assemble()
+
+        probe = Probe(self.mesh)
+
+        finder = RoundSolidFinder(self.mesh, cylinder)
+        shell_vertices = finder.find_shell(True).union(finder.find_shell(False))
+        wall_vertices: Set[Vertex] = set()
+
+        for block in self.mesh.blocks:
+            wall_vertices.update(probe.get_explicit_wall_vertices(block))
+
+        self.assertSetEqual(shell_vertices, wall_vertices)
+
+    def test_wall_vertices_default(self) -> None:
+        """Catch wall vertices from default patch"""
+        cylinder = self.get_cylinder()
+        cylinder.set_start_patch("inlet")
+        cylinder.set_end_patch("outlet")
+
+        self.mesh.set_default_patch("outer", "wall")
+        self.mesh.assemble()
+
+        probe = Probe(self.mesh)
+
+        finder = RoundSolidFinder(self.mesh, cylinder)
+        shell_vertices = finder.find_shell(True).union(finder.find_shell(False))
+        wall_vertices: Set[Vertex] = set()
+
+        for block in self.mesh.blocks:
+            wall_vertices.update(probe.get_default_wall_vertices(block))
+
+        self.assertSetEqual(shell_vertices, wall_vertices)
+
+    def test_wall_vertices_combined(self) -> None:
+        cylinder = self.get_cylinder()
+        cylinder.set_end_patch("outlet")
+
+        cylinder.set_start_patch("bottom")
+        self.mesh.modify_patch("bottom", "wall")
+
+        self.mesh.set_default_patch("outer", "wall")
+        self.mesh.assemble()
+
+        probe = Probe(self.mesh)
+
+        finder = RoundSolidFinder(self.mesh, cylinder)
+        shell_vertices = finder.find_shell(True).union(finder.find_shell(False)).union(finder.find_core(False))
+        wall_vertices: Set[Vertex] = set()
+
+        for block in self.mesh.blocks:
+            wall_vertices.update(probe.get_default_wall_vertices(block))
+
+        self.assertSetEqual(shell_vertices, wall_vertices)

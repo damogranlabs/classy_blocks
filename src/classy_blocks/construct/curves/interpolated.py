@@ -25,9 +25,9 @@ class InterpolatedCurveBase(FunctionCurveBase, abc.ABC):
 
     _interpolator: Type[InterpolatorBase]
 
-    def __init__(self, points: PointListType):
+    def __init__(self, points: PointListType, extrapolate: bool = False, equalize: bool = True):
         self.array = Array(points)
-        self.function = self._interpolator(self.array, False)
+        self.function = self._interpolator(self.array, extrapolate, equalize)
         self.bounds = (0, 1)
 
     @property

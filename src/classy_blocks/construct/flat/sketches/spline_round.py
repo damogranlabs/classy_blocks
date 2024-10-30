@@ -336,7 +336,7 @@ class SplineDisk(HalfSplineDisk):
     @property
     def grid(self) -> List[List[Face]]:
         if len(self.faces) > 6:
-            return [self.faces[:4], self.faces[4:]]
+            return [self.faces[::3], [face for i, face in enumerate(self.faces) if not i % 3 == 0]]
         else:
             return super().grid
 
