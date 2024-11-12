@@ -3,7 +3,6 @@ import os
 import numpy as np
 
 import classy_blocks as cb
-from classy_blocks.grading.autograding.grader import HighReGrader
 from classy_blocks.types import PointType
 from classy_blocks.util import functions as f
 
@@ -33,6 +32,8 @@ class RoundSquare(cb.MappedSketch):
         [21, 22, 23, 20],
     ]
 
+    chops = [[0], [0, 1, 4, 5, 8, 12]]
+
     def __init__(self, center: PointType, side: float, corner_round: float):
         center = np.array(center)
         points = [
@@ -56,17 +57,17 @@ class RoundSquare(cb.MappedSketch):
             self.faces[i].add_edge(1, cb.Angle(np.pi / 2, [0, 0, 1]))
 
 
-base_1 = RoundSquare([0, 0, 0], 1, 0.5)
-smoother = cb.SketchSmoother(base_1)
+base = RoundSquare([0, 0, 0], 1, 0.5)
+smoother = cb.SketchSmoother(base)
 smoother.smooth()
 
-shape = cb.ExtrudedShape(base_1, 1)
+shape = cb.ExtrudedShape(base, 1)
+shape.chop(0, start_size=0.05)
+shape.chop(1, start_size=0.05)
+shape.chop(2, count=5)
 
 mesh.add(shape)
 mesh.assemble()
-
-grader = HighReGrader(mesh, 0.03)
-grader.grade(take="max")
 
 mesh.set_default_patch("walls", "wall")
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")
