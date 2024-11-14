@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from typing import Dict, List, Optional, Set
 
+from classy_blocks.base.exceptions import PatchNotFoundError
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.items.patch import Patch
 from classy_blocks.items.side import Side
@@ -27,6 +28,14 @@ class PatchList:
             self.patches[name] = Patch(name)
 
         return self.patches[name]
+
+    def find(self, vertices: Set[Vertex]) -> Patch:
+        for patch in self.patches.values():
+            for side in patch.sides:
+                if set(side.vertices) == vertices:
+                    return patch
+
+        raise PatchNotFoundError
 
     def add_side(self, patch_name: str, orient: OrientType, vertices: List[Vertex]) -> None:
         """Adds a quad to an existing patch or creates a new one"""

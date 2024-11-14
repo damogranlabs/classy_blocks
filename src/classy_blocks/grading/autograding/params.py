@@ -6,6 +6,7 @@ from typing import List, Optional, Tuple
 import scipy.optimize
 
 import classy_blocks.grading.relations as gr
+from classy_blocks.grading.autograding.probe import WireInfo
 from classy_blocks.grading.chop import Chop
 
 CellSizeType = Optional[float]
@@ -26,14 +27,15 @@ def sum_length(start_size: float, count: int, c2c_expansion: float) -> float:
 class ChopParams(abc.ABC):
     @abc.abstractmethod
     def get_count(self, length: float) -> int:
-        """Calculates count based on given length - used once only"""
+        """Calculates count based on given length and position"""
 
     @abc.abstractmethod
-    def get_chops(
-        self, stage: int, count: int, length: float, size_before: CellSizeType, size_after: CellSizeType
-    ) -> List[Chop]:
+    def is_squeezed(self, count: int, info: WireInfo) -> bool:
+        """Returns True if cells have to be 'squished' together (thinner than prescribed in params)"""
+
+    @abc.abstractmethod
+    def get_chops(self, count: int, info: WireInfo) -> List[Chop]:
         """Fixes cell count but modifies chops so that proper cell sizing will be obeyed"""
-        # That depends on inherited classes' philosophy
 
 
 @dataclasses.dataclass
@@ -43,7 +45,10 @@ class FixedCountParams(ChopParams):
     def get_count(self, _length):
         return self.count
 
-    def get_chops(self, _stage, count, _length, _size_before=0, _size_after=0) -> List[Chop]:
+    def is_squeezed(self, _count, _info) -> bool:
+        return True  # grade everything in first pass
+
+    def get_chops(self, count, _info) -> List[Chop]:
         return [Chop(count=count)]
 
 
@@ -54,7 +59,10 @@ class SimpleGraderParams(ChopParams):
     def get_count(self, length: float):
         return int(length / self.cell_size)
 
-    def get_chops(self, _stage, count, _length, _size_before=0, _size_after=0):
+    def is_squeezed(self, _count, _info) -> bool:
+        return True
+
+    def get_chops(self, count, _info: WireInfo):
         return [Chop(count=count)]
 
 
@@ -71,9 +79,10 @@ class SmoothGraderParams(ChopParams):
 
         return count
 
-    def define_sizes(
-        self, count: int, length: float, size_before: CellSizeType, size_after: CellSizeType
-    ) -> Tuple[float, float]:
+    def is_squeezed(self, count, info) -> bool:
+        return info.length <= self.cell_size * count
+
+    def define_sizes(self, size_before: CellSizeType, size_after: CellSizeType) -> Tuple[float, float]:
         """Defines start and end cell size.
         size_before and size_after are taken from preceding/following wires;
         when a size is None, this is the last/first wire."""
@@ -83,13 +92,6 @@ class SmoothGraderParams(ChopParams):
             # there's no point in doing anything
             raise RuntimeError("Undefined grading encountered!")
 
-        # not enough room for all cells?
-        cramped = self.cell_size * count > length
-        base_size = length / count
-
-        if cramped:
-            return base_size, base_size
-
         if size_before is None:
             size_before = self.cell_size
 
@@ -98,35 +100,27 @@ class SmoothGraderParams(ChopParams):
 
         return size_before, size_after
 
-    def get_chops(self, stage, count, length, size_before, size_after):
+    def get_chops(self, count, info):
         halfcount = count // 2
 
-        uniform_chops = [
-            Chop(length_ratio=0.5, count=halfcount),
-            Chop(length_ratio=0.5, count=halfcount),
-        ]
-
-        if stage == 0:
-            # start with simple uniformly graded chops first
-            return uniform_chops
-
-        size_before, size_after = self.define_sizes(count, length, size_before, size_after)
+        size_before, size_after = self.define_sizes(info.size_before, info.size_after)
 
         # choose length ratio so that cells at the middle of blocks
         # (between the two chops) have the same size
         def fobj(lratio):
             chop_1 = Chop(length_ratio=lratio, count=halfcount, start_size=size_before)
-            data_1 = chop_1.calculate(length)
+            data_1 = chop_1.calculate(info.length)
 
             chop_2 = Chop(length_ratio=1 - lratio, count=halfcount, end_size=size_after)
-            data_2 = chop_2.calculate(length)
+            data_2 = chop_2.calculate(info.length)
 
-            ratio = abs(data_1.end_size - data_2.start_size)
+            ratio = (data_1.end_size - data_2.start_size) ** 2
 
             return ratio, [chop_1, chop_2]
 
         # it's not terribly important to minimize until the last dx
-        results = scipy.optimize.minimize_scalar(lambda r: fobj(r)[0], bounds=[0.1, 0.9], options={"xatol": 0.1})
+        tol = min(size_before, size_after, self.cell_size) * 0.1
+        results = scipy.optimize.minimize_scalar(lambda r: fobj(r)[0], bounds=[0.1, 0.9], options={"xatol": tol})
         if not results.success:  # type:ignore
             warnings.warn("Could not determine optimal grading", stacklevel=1)
 
@@ -144,6 +138,9 @@ class InflationGraderParams(ChopParams):
     c2c_expansion: float = 1.2
     bl_thickness_factor: int = 30
     buffer_expansion: float = 2
+
+    def is_squeezed(self, _count: int, _info: WireInfo) -> bool:
+        return False
 
     @property
     def inflation_layer_thickness(self) -> float:
@@ -208,5 +205,5 @@ class InflationGraderParams(ChopParams):
         # return chops
         return 1
 
-    def get_chops(self, stage, count, length, size_before=0, size_after=0) -> List[Chop]:
+    def get_chops(self, count, length, size_before=0, size_after=0) -> List[Chop]:
         raise NotImplementedError("TODO!")

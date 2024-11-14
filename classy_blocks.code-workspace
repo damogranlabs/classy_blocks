@@ -12,7 +12,10 @@
             "Pylance",
             "scipy"
         ],
-        "editor.autoClosingBrackets": "never"
+        "editor.autoClosingBrackets": "never",
+        "isort.importStrategy": "fromEnvironment",
+        "editor.defaultFormatter": null,
+        "ruff.organizeImports": false
     },
     "extensions": {
         "recommendations": [

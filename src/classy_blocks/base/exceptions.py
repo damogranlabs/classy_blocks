@@ -95,6 +95,10 @@ class CornerPairError(Exception):
     """Raised when given pair of corners is not valid (for example, edge between 0 and 2)"""
 
 
+class PatchNotFoundError(Exception):
+    """Raised when searching for a non-existing Patch"""
+
+
 ### Grading
 class UndefinedGradingsError(Exception):
     """Raised when the user hasn't supplied enough grading data to

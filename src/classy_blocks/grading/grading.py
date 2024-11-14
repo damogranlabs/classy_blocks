@@ -131,8 +131,9 @@ class Grading:
             }
 
             new_grading.add_chop(Chop(**new_args))
-            if invert:
-                new_grading.inverted = not new_grading.inverted
+
+        if invert:
+            new_grading.inverted = not new_grading.inverted
 
         return new_grading
 

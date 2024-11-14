@@ -1,5 +1,7 @@
 import unittest
 
+import numpy as np
+
 from classy_blocks.construct.flat.sketches.grid import Grid
 from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.construct.shapes.frustum import Frustum
@@ -10,9 +12,17 @@ from classy_blocks.mesh import Mesh
 
 class AutogradeTestsBase(unittest.TestCase):
     def get_stack(self) -> ExtrudedStack:
-        # create a simple 3x3 grid for easy navigation
-        base = Grid([0, 0, 0], [1, 1, 0], 3, 3)
-        return ExtrudedStack(base, 1, 3)
+        # create a simple 4x4 grid for easy navigation
+        base = Grid([0, 0, 0], [1, 1, 0], 4, 4)
+        return ExtrudedStack(base, 1, 4)
+
+    def get_flipped_stack(self) -> ExtrudedStack:
+        stack = self.get_stack()
+
+        for i in (5, 6, 8, 9):
+            stack.operations[i].rotate(np.pi, [0, 1, 0])
+
+        return stack
 
     def get_cylinder(self) -> Cylinder:
         return Cylinder([0, 0, 0], [1, 0, 0], [0, 1, 0])
@@ -42,12 +52,12 @@ class GraderTests(AutogradeTestsBase):
         self.mesh.add(stack)
         self.mesh.assemble()
 
-        grader = SimpleGrader(self.mesh, 0.1)
+        grader = SimpleGrader(self.mesh, 0.05)
         grader.grade()
 
         for block in self.mesh.blocks:
             for axis in block.axes:
-                self.assertEqual(axis.count, 3)
+                self.assertEqual(axis.count, 5)
 
     def test_highre_cylinder(self):
         self.mesh.add(self.get_cylinder())

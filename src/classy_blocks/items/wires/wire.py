@@ -1,5 +1,5 @@
 import dataclasses
-from typing import List, Optional, Set
+from typing import List, Set
 
 from classy_blocks.base.exceptions import InconsistentGradingsError
 from classy_blocks.construct.edges import Line
@@ -83,6 +83,7 @@ class Wire:
         in the same direction"""
         # this assumes the lines are inline and in the same axis
         # TODO: Test
+        # TODO: one-liner, bitte
         if candidate == self:
             return
 
@@ -114,50 +115,6 @@ class Wire:
     @property
     def is_defined(self) -> bool:
         return self.grading.is_defined
-
-    @property
-    def size_after(self) -> Optional[float]:
-        """Returns average cell size in wires that come after this one (in series/inline);
-        None if this is the last wire"""
-        # TODO: merge this with size_before somehow
-        sum_size: float = 0
-        defined_count: int = 0
-
-        for joint in self.after:
-            if joint.wire.grading.is_defined:
-                defined_count += 1
-
-                if joint.same_dir:
-                    sum_size += joint.wire.grading.start_size
-                else:
-                    sum_size += joint.wire.grading.end_size
-
-        if defined_count == 0:
-            return None
-
-        return sum_size / defined_count
-
-    @property
-    def size_before(self) -> Optional[float]:
-        """Returns average cell size in wires that come before this one (in series/inline);
-        None if this is the first wire"""
-        # TODO: merge this with size_after somehow
-        sum_size: float = 0
-        defined_count: int = 0
-
-        for joint in self.before:
-            if joint.wire.grading.is_defined:
-                defined_count += 1
-
-                if joint.same_dir:
-                    sum_size += joint.wire.grading.end_size
-                else:
-                    sum_size += joint.wire.grading.start_size
-
-        if defined_count == 0:
-            return None
-
-        return sum_size / defined_count
 
     def __repr__(self):
         return f"Wire {self.corners[0]}-{self.corners[1]} ({self.vertices[0].index}-{self.vertices[1].index})"

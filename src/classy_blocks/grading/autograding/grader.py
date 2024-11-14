@@ -1,4 +1,3 @@
-import abc
 from typing import get_args
 
 from classy_blocks.grading.autograding.params import (
@@ -8,13 +7,29 @@ from classy_blocks.grading.autograding.params import (
     SimpleGraderParams,
     SmoothGraderParams,
 )
-from classy_blocks.grading.autograding.probe import Probe, Row
+from classy_blocks.grading.autograding.probe import Probe
+from classy_blocks.grading.autograding.row import Row
+from classy_blocks.grading.chop import Chop
 from classy_blocks.mesh import Mesh
 from classy_blocks.types import ChopTakeType, DirectionType
 
 
-class GraderBase(abc.ABC):
-    stages: int
+class GraderBase:
+    """One grader to rule them all. Grading procedure depends on given GraderParams object
+    that decides whether to grade a specific block (wire) or to let it pass to
+
+    Behold the most general procedure for grading _anything_.
+    For each row in every direction:
+    1. Set count
+        If there's a wire on the wall - determine 'wall' count (low-re grading etc)
+        If not, determine 'bulk' count
+
+       That involves the 'take' keyword so that appropriate block is taken as a reference;
+    2. Chop 'cramped' blocks
+        Where there's not enough space to fit graded cells, use a simple grading
+    3. Chop other blocks
+        optionally use multigrading to match neighbours' cell sizes
+    """
 
     def __init__(self, mesh: Mesh, params: ChopParams):
         self.mesh = mesh
@@ -23,37 +38,61 @@ class GraderBase(abc.ABC):
         self.mesh.assemble()
         self.probe = Probe(self.mesh)
 
-    def get_count(self, row: Row, take: ChopTakeType) -> int:
-        count = row.get_count()
+    def set_counts(self, row: Row, take: ChopTakeType) -> None:
+        if row.count > 0:
+            # stuff, pre-defined by the user
+            return
 
-        if count is None:
-            # take length from a row, as requested by 'take'
-            length = row.get_length(take)
-            # and set count from it
-            count = self.params.get_count(length)
+        # at_wall: List[Entry] = []
 
-        return count
+        # Check if there are blocks at the wall;
+        # for entry in row.entries:
+        #     for wire in entry.wires:
+        #         # TODO: cache WireInfo
+        #         info = self.probe.get_wire_info(wire, entry.block)
+        #         if info.starts_at_wall or info.ends_at_wall:
+        #             at_wall.append(entry)
 
-    def grade_axis(self, axis: DirectionType, take: ChopTakeType, stage: int) -> None:
-        handled_wires = set()
+        length = row.get_length(take)
 
-        for row in self.probe.get_rows(axis):
-            count = self.get_count(row, take)
+        # if len(at_wall) > 0:
+        #     # find out whether one or two sides are to be counted
+        #     pass
 
-            for wire in row.get_wires():
-                if wire in handled_wires:
+        row.count = self.params.get_count(length)
+
+    def grade_squeezed(self, row: Row) -> None:
+        for entry in row.entries:
+            # TODO! don't touch wires, defined by USER
+            # if wire.is_defined:
+            #    # TODO: test
+            #    continue
+            for wire in entry.wires:
+                if wire.is_defined:
                     continue
 
-                # don't touch defined wires
-                # TODO! don't touch wires, defined by USER
-                # if wire.is_defined:
-                #    # TODO: test
-                #    continue
+                info = self.probe.get_wire_info(wire, entry.block)
+                if self.params.is_squeezed(row.count, info):
+                    wire.grading.clear()
+                    wire.grading.add_chop(Chop(count=row.count))
+                    wire.copy_to_coincidents()
 
-                size_before = wire.size_before
-                size_after = wire.size_after
+    def finalize(self, row: Row) -> None:
+        count = row.count
 
-                chops = self.params.get_chops(stage, count, wire.length, size_before, size_after)
+        for entry in row.entries:
+            # TODO! don't touch wires, defined by USER
+            # if wire.is_defined:
+            #    # TODO: test
+            #    continue
+            for wire in entry.wires:
+                if wire.is_defined:
+                    continue
+
+                # TODO: cache wire info
+                info = self.probe.get_wire_info(wire, entry.block)
+
+                chops = self.params.get_chops(count, info)
 
                 wire.grading.clear()
                 for chop in chops:
@@ -61,20 +100,22 @@ class GraderBase(abc.ABC):
 
                 wire.copy_to_coincidents()
 
-                handled_wires.add(wire)
-                handled_wires.update(wire.coincidents)
-
     def grade(self, take: ChopTakeType = "avg") -> None:
-        for axis in get_args(DirectionType):
-            for stage in range(self.stages):
-                self.grade_axis(axis, take, stage)
+        for direction in get_args(DirectionType):
+            rows = self.probe.get_rows(direction)
+            for row in rows:
+                self.set_counts(row, take)
+            for row in rows:
+                self.grade_squeezed(row)
+            for row in rows:
+                self.finalize(row)
+
+        self.mesh.block_list.check_consistency()
 
 
 class FixedCountGrader(GraderBase):
     """The simplest possible mesh grading: use a constant cell count for all axes on all blocks;
     useful during mesh building and some tutorial cases"""
-
-    stages = 1
 
     def __init__(self, mesh: Mesh, count: int = 8):
         super().__init__(mesh, FixedCountParams(count))
@@ -85,8 +126,6 @@ class SimpleGrader(GraderBase):
     A single chop is used that sets cell count based on size.
     Cell sizes between blocks differ as blocks' sizes change."""
 
-    stages = 1
-
     def __init__(self, mesh: Mesh, cell_size: float):
         super().__init__(mesh, SimpleGraderParams(cell_size))
 
@@ -96,8 +135,6 @@ class SmoothGrader(GraderBase):
     Two chops are added to all blocks; c2c_expansion and and length_ratio
     are utilized to keep cell sizes between blocks consistent
     (as much as possible)"""
-
-    stages = 3
 
     def __init__(self, mesh: Mesh, cell_size: float):
         super().__init__(mesh, SmoothGraderParams(cell_size))
@@ -133,8 +170,6 @@ class InflationGrader(GraderBase):
         It will choose the longest/shortest ('max/min') block edge or something in between ('avg').
         The finest grid will be obtained with 'max', the coarsest with 'min'.
     """
-
-    stages = 3
 
     def __init__(
         self,
