@@ -1,12 +1,10 @@
-from typing import get_args
+from typing import Tuple, get_args
 
-from classy_blocks.grading.autograding.params import (
-    ChopParams,
-    FixedCountParams,
-    InflationGraderParams,
-    SimpleGraderParams,
-    SmoothGraderParams,
-)
+from classy_blocks.grading.autograding.params.base import ChopParams
+from classy_blocks.grading.autograding.params.fixed import FixedCountGraderParams
+from classy_blocks.grading.autograding.params.inflation import InflationGraderParams
+from classy_blocks.grading.autograding.params.simple import SimpleGraderParams
+from classy_blocks.grading.autograding.params.smooth import SmoothGraderParams
 from classy_blocks.grading.autograding.probe import Probe
 from classy_blocks.grading.autograding.row import Row
 from classy_blocks.grading.chop import Chop
@@ -38,28 +36,33 @@ class GraderBase:
         self.mesh.assemble()
         self.probe = Probe(self.mesh)
 
+    def check_at_wall(self, row: Row) -> Tuple[bool, bool]:
+        """Returns True if any block on given row has a wall patch
+        (at start and/or end, respectively)."""
+        start = False
+        end = False
+
+        # Check if there are blocks at the wall;
+        for entry in row.entries:
+            for wire in entry.wires:
+                # TODO: cache WireInfo
+                info = self.probe.get_wire_info(wire, entry.block)
+                if info.starts_at_wall:
+                    start = True
+                if info.ends_at_wall:
+                    end = True
+
+        return start, end
+
     def set_counts(self, row: Row, take: ChopTakeType) -> None:
         if row.count > 0:
             # stuff, pre-defined by the user
             return
 
-        # at_wall: List[Entry] = []
-
-        # Check if there are blocks at the wall;
-        # for entry in row.entries:
-        #     for wire in entry.wires:
-        #         # TODO: cache WireInfo
-        #         info = self.probe.get_wire_info(wire, entry.block)
-        #         if info.starts_at_wall or info.ends_at_wall:
-        #             at_wall.append(entry)
-
         length = row.get_length(take)
+        start_at_wall, end_at_wall = self.check_at_wall(row)
 
-        # if len(at_wall) > 0:
-        #     # find out whether one or two sides are to be counted
-        #     pass
-
-        row.count = self.params.get_count(length)
+        row.count = self.params.get_count(length, start_at_wall, end_at_wall)
 
     def grade_squeezed(self, row: Row) -> None:
         for entry in row.entries:
@@ -118,7 +121,7 @@ class FixedCountGrader(GraderBase):
     useful during mesh building and some tutorial cases"""
 
     def __init__(self, mesh: Mesh, count: int = 8):
-        super().__init__(mesh, FixedCountParams(count))
+        super().__init__(mesh, FixedCountGraderParams(count))
 
 
 class SimpleGrader(GraderBase):
