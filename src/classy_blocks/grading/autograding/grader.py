@@ -21,10 +21,11 @@ class GraderBase:
     1. Set count
         If there's a wire on the wall - determine 'wall' count (low-re grading etc)
         If not, determine 'bulk' count
-
-       That involves the 'take' keyword so that appropriate block is taken as a reference;
-    2. Chop 'cramped' blocks
+        That involves the 'take' keyword so that appropriate block is taken as a reference;
+        If there's a wire that has a count, defined by user, use that unconditionally
+    2. Chop 'squeezed' blocks
         Where there's not enough space to fit graded cells, use a simple grading
+        (or whatever the grader defines)
     3. Chop other blocks
         optionally use multigrading to match neighbours' cell sizes
     """

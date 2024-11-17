@@ -15,8 +15,9 @@ class Layer(abc.ABC):
     start_size: float
     c2c_expansion: float
 
-    def __init__(self, max_length: float):
-        self.max_length = max_length
+    def __init__(self, remainder: float):
+        # remaining length of the wire
+        self.remainder = remainder
 
     @property
     @abc.abstractmethod
@@ -26,7 +27,7 @@ class Layer(abc.ABC):
     @property
     def count(self) -> int:
         """Returns cell count in this layer"""
-        length = min(self.length, self.max_length)
+        length = min(self.length, self.remainder)
         return gr.get_count__start_size__c2c_expansion(length, self.start_size, self.c2c_expansion)
 
     @property
@@ -41,7 +42,26 @@ class Layer(abc.ABC):
     @property
     def is_final(self) -> bool:
         """Returns True if this layer is the last (no more space for additional ones)"""
-        return self.length >= self.max_length
+        return self.length >= self.remainder
+
+    def get_chop(self, total_count: int, invert: bool) -> Chop:
+        """Returns a Chop with either this layer's count or given one,
+        whichever is lower"""
+        # length ratios will be normalized later
+        if invert:
+            return Chop(
+                length_ratio=self.length,
+                end_size=self.end_size,
+                c2c_expansion=1 / self.c2c_expansion,
+                count=max(self.count, total_count),
+            )
+
+        return Chop(
+            length_ratio=self.length,
+            start_size=self.start_size,
+            c2c_expansion=self.c2c_expansion,
+            count=max(self.count, total_count),
+        )
 
     def __repr__(self):
         return f"{self.length}-{self.count}"
@@ -57,7 +77,7 @@ class InflationLayer(Layer):
 
     @property
     def length(self):
-        return min(self.max_length, self.start_size * self.thickness_factor)
+        return min(self.remainder, self.start_size * self.thickness_factor)
 
 
 class BufferLayer(Layer):
@@ -100,17 +120,17 @@ class BufferLayer(Layer):
 
 
 class BulkLayer(Layer):
-    def __init__(self, cell_size: float, remaning_length: float):
+    def __init__(self, cell_size: float, remainder: float):
         self.start_size = cell_size
 
         self.cell_size = cell_size
         self.c2c_expansion = 1
 
-        super().__init__(remaning_length)
+        super().__init__(remainder)
 
     @property
     def length(self):
-        return self.max_length
+        return self.remainder
 
     @property
     def last_size(self):
@@ -145,6 +165,26 @@ class LayerStack:
 
         return self.remaining_length <= 0
 
+    def get_chops(self, total_count: int, invert: bool) -> List[Chop]:
+        chops: List[Chop] = []
+
+        for layer in self.layers:
+            chop = layer.get_chop(total_count, invert)
+            chops.append(chop)
+
+            total_count -= layer.count
+
+            if total_count <= 0:
+                break
+
+        # normalize length_ratios
+        ratios = [chop.length_ratio for chop in chops]
+
+        for chop in chops:
+            chop.length_ratio = chop.length_ratio / sum(ratios)
+
+        return chops
+
 
 class InflationGraderParams(SmoothGraderParams):
     """See description of InflationGrader"""
@@ -165,6 +205,7 @@ class InflationGraderParams(SmoothGraderParams):
         self.bl_thickness_factor = bl_thickness_factor
         self.buffer_expansion = buffer_expansion
 
+        # use SmoothGrader's logic for bulk chops
         self.cell_size = self.bulk_cell_size
 
     def get_inflation_layer(self, max_length: float) -> InflationLayer:
@@ -195,6 +236,8 @@ class InflationGraderParams(SmoothGraderParams):
         return stack
 
     def get_count(self, length: float, starts_at_wall: bool, ends_at_wall: bool):
+        print(starts_at_wall, ends_at_wall)
+
         if not (starts_at_wall or ends_at_wall):
             return super().get_count(length, False, False)
 
@@ -211,6 +254,8 @@ class InflationGraderParams(SmoothGraderParams):
         if not (info.starts_at_wall or info.ends_at_wall):
             return super().is_squeezed(count, info)
 
+        # a squeezed wire is one that can't fit all layers
+        # or one that can't fit all cells
         stack = self.get_stack(info.length)
 
         if len(stack.layers) == 3:
@@ -222,4 +267,12 @@ class InflationGraderParams(SmoothGraderParams):
         if not (info.starts_at_wall or info.ends_at_wall):
             return super().get_chops(count, info)
 
-        raise NotImplementedError
+        stack = self.get_stack(info.length)
+
+        if info.starts_at_wall and info.ends_at_wall:
+            raise NotImplementedError
+
+        if info.ends_at_wall:
+            return list(reversed(stack.get_chops(count, True)))
+
+        return stack.get_chops(count, False)
