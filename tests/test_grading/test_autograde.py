@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from classy_blocks.construct.flat.sketches.grid import Grid
+from classy_blocks.construct.operations.box import Box
 from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.construct.shapes.frustum import Frustum
 from classy_blocks.construct.stack import ExtrudedStack
@@ -29,6 +30,9 @@ class AutogradeTestsBase(unittest.TestCase):
 
     def get_frustum(self) -> Frustum:
         return Frustum([0, 0, 0], [1, 0, 0], [0, 1, 0], 0.3)
+
+    def get_box(self) -> Box:
+        return Box([0, 0, 0], [1, 1, 1])
 
     def setUp(self):
         self.mesh = Mesh()

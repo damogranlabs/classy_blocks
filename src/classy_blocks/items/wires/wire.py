@@ -30,7 +30,7 @@ class Wire:
         self.corners = [corner_1, corner_2]
         self.vertices = [vertices[corner_1], vertices[corner_2]]
 
-        self.direction = direction
+        self.direction: DirectionType = direction
 
         # the default edge is 'line' but will be replaced if the user wishes so
         # (that is, not included in edge.factory.registry)

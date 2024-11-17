@@ -5,7 +5,7 @@ from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.axis import Axis
 from classy_blocks.items.wires.wire import Wire
-from classy_blocks.types import DirectionType, IndexType
+from classy_blocks.types import DirectionType, IndexType, OrientType
 from classy_blocks.util import constants
 from classy_blocks.util.frame import Frame
 
@@ -116,6 +116,9 @@ class Block:
     @property
     def indexes(self) -> IndexType:
         return [vertex.index for vertex in self.vertices]
+
+    def get_side_vertices(self, orient: OrientType) -> List[Vertex]:
+        return [self.vertices[i] for i in constants.FACE_MAP[orient]]
 
     def format_grading(self) -> str:
         """Returns the simple/edgeGrading string"""

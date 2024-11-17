@@ -1,6 +1,6 @@
 import dataclasses
 import functools
-from typing import List, Optional, Set
+from typing import List, Optional, Set, Tuple
 
 from classy_blocks.base.exceptions import PatchNotFoundError
 from classy_blocks.grading.autograding.catalogue import Catalogue
@@ -11,7 +11,7 @@ from classy_blocks.items.wires.wire import Wire
 from classy_blocks.mesh import Mesh
 from classy_blocks.optimize.grid import HexGrid
 from classy_blocks.types import DirectionType, OrientType
-from classy_blocks.util.constants import FACE_MAP
+from classy_blocks.util.constants import DIRECTION_MAP
 
 
 @functools.lru_cache(maxsize=2)
@@ -130,7 +130,7 @@ class Probe:
             ]
 
             for orient in boundaries:
-                side_vertices = {block.vertices[i] for i in FACE_MAP[orient]}
+                side_vertices = set(block.get_side_vertices(orient))
                 # check if they are defined elsewhere
                 try:
                     self.mesh.patch_list.find(side_vertices)
@@ -143,10 +143,28 @@ class Probe:
 
     def get_wall_vertices(self, block: Block) -> Set[Vertex]:
         """Returns vertices that are on the 'wall' patches"""
+        # TODO: delete if not needed
         return self.get_explicit_wall_vertices(block).union(self.get_default_wall_vertices(block))
 
-    def get_wire_info(self, wire: Wire, block: Block) -> WireInfo:
-        # TODO: test
-        wall_vertices = self.get_wall_vertices(block)
+    def get_wire_boundaries(self, wire: Wire, block: Block) -> Tuple[bool, bool]:
+        """Finds out whether a Wire starts or ends on a wall patch"""
+        start_orient = DIRECTION_MAP[wire.direction][0]
+        end_orient = DIRECTION_MAP[wire.direction][1]
 
-        return WireInfo(wire, wire.vertices[0] in wall_vertices, wire.vertices[1] in wall_vertices)
+        def find_patch(orient: OrientType) -> bool:
+            vertices = set(block.get_side_vertices(orient))
+
+            try:
+                patch = self.mesh.patch_list.find(vertices)
+                if patch.kind == "wall":
+                    return True
+            except PatchNotFoundError:
+                if self.mesh.patch_list.default.get("kind") == "wall":
+                    return True
+
+            return False
+
+        return (find_patch(start_orient), find_patch(end_orient))
+
+    def get_wire_info(self, wire: Wire, block: Block) -> WireInfo:
+        return WireInfo(wire, *self.get_wire_boundaries(wire, block))

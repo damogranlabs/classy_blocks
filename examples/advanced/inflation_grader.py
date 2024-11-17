@@ -35,7 +35,7 @@ for point in move_points:
 # TODO: Hack! mesh.assemble() won't work here but wires et. al. must be updated
 mesh.block_list.update()
 
-grader = InflationGrader(mesh, 1e-3, 0.1)
+grader = InflationGrader(mesh, 1e-2, 0.1)
 grader.grade()
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

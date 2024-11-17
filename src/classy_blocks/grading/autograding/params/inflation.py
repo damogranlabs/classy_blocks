@@ -35,10 +35,6 @@ class Layer(abc.ABC):
         """Size of the last cell in this layer"""
         return self.start_size * self.c2c_expansion**self.count
 
-    # @abc.abstractmethod
-    # def get_chop(self, invert: bool) -> Chop:
-    #    """Prepare a Chop for grader params"""
-
     @property
     def is_final(self) -> bool:
         """Returns True if this layer is the last (no more space for additional ones)"""
@@ -53,14 +49,14 @@ class Layer(abc.ABC):
                 length_ratio=self.length,
                 end_size=self.end_size,
                 c2c_expansion=1 / self.c2c_expansion,
-                count=max(self.count, total_count),
+                count=min(self.count, total_count),
             )
 
         return Chop(
             length_ratio=self.length,
             start_size=self.start_size,
             c2c_expansion=self.c2c_expansion,
-            count=max(self.count, total_count),
+            count=min(self.count, total_count),
         )
 
     def __repr__(self):
@@ -89,16 +85,17 @@ class BufferLayer(Layer):
         self.total_expansion = self.bulk_size / self.start_size
 
         # manually sum up those few cells that lead from start to bulk size
-        count = 1
+        count = 0
         size = self.start_size
         length = 0.0
 
         while size <= self.bulk_size:
+            length += size
+            count += 1
+
             if length > max_length:
                 break
 
-            length += size
-            count += 1
             size *= self.c2c_expansion
 
         self._count = count
@@ -236,8 +233,6 @@ class InflationGraderParams(SmoothGraderParams):
         return stack
 
     def get_count(self, length: float, starts_at_wall: bool, ends_at_wall: bool):
-        print(starts_at_wall, ends_at_wall)
-
         if not (starts_at_wall or ends_at_wall):
             return super().get_count(length, False, False)
 

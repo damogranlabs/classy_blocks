@@ -205,3 +205,65 @@ class ProbeTests(AutogradeTestsBase):
         probe = Probe(self.mesh)
 
         self.assertTrue(probe.get_rows(1)[check_row].entries[check_index].flipped)
+
+    @parameterized.expand(
+        (
+            (0, 4, True),
+            (1, 5, True),
+            (2, 6, True),
+            (3, 7, True),
+            (0, 1, True),
+            (3, 2, True),
+            (4, 5, True),
+            (7, 6, True),
+            (0, 3, False),
+            (1, 2, False),
+            (4, 7, False),
+            (5, 6, False),
+        )
+    )
+    def test_wire_boundaries_explicit(self, wire_start, wire_end, starts_at_wall):
+        box = self.get_box()
+        box.set_patch(["bottom", "left", "right"], "wallPatch")
+        self.mesh.add(box)
+
+        self.mesh.modify_patch("wallPatch", "wall")
+        self.mesh.assemble()
+
+        probe = Probe(self.mesh)
+        block = self.mesh.blocks[0]
+        info = probe.get_wire_info(block.wires[wire_start][wire_end], block)
+
+        self.assertEqual(info.starts_at_wall, starts_at_wall)
+
+    @parameterized.expand(
+        (
+            (0, 4, True),
+            (1, 5, True),
+            (2, 6, True),
+            (3, 7, True),
+            (0, 1, True),
+            (3, 2, True),
+            (4, 5, True),
+            (7, 6, True),
+            (0, 3, False),
+            (1, 2, False),
+            (4, 7, False),
+            (5, 6, False),
+        )
+    )
+    def test_wire_boundaries_default(self, wire_start, wire_end, starts_at_wall):
+        # same situation as the 'explicit' test but 'patch' patch types are defined
+        # and walls are the default
+        box = self.get_box()
+        box.set_patch(["top", "front", "back"], "patchPatch")
+        self.mesh.add(box)
+
+        self.mesh.set_default_patch("defaultFaces", "wall")
+        self.mesh.assemble()
+
+        probe = Probe(self.mesh)
+        block = self.mesh.blocks[0]
+        info = probe.get_wire_info(block.wires[wire_start][wire_end], block)
+
+        self.assertEqual(info.starts_at_wall, starts_at_wall)
