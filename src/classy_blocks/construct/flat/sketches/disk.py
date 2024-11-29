@@ -66,41 +66,57 @@ class DiskBase(MappedSketch, abc.ABC):
     # - too large will prevent creating large numbers of boundary layers
     @property
     def diagonal_ratio(self) -> float:
-        return 2**0.5 * self.spline_ratios[8] / 0.8 * self.core_ratio
+        return 2 ** 0.5 * self.spline_ratios[6] / 0.8 * self.core_ratio
+
+    def spline(self, p_core_ratio: PointType, p_diagonal_ratio: PointType, reverse: bool = False) -> NPPointListType:
+        p_0 = np.asarray(p_core_ratio)
+        p_1 = np.asarray(p_diagonal_ratio)
+
+        # Spline points in unitary coordinates
+        spline_points_u = np.array([self.spline_ratios[-1:5:-1]]).T * np.array([0, 1, 0]) + \
+                          np.array([self.spline_ratios[:7]]).T * np.array([0, 0, 1])
+
+        # p_1 and p_2 in unitary coordinates
+        p_0_u = np.array([0, 0.8, 0])
+        p_1_u = np.array([0, 6.10535e-01, 6.10535e-01])
+
+        # orthogonal vectors based on p_0_u and p_1_u
+        u_0_org = p_0_u
+        u_1_org = p_1_u - np.dot(p_1_u, f.unit_vector(u_0_org)) * f.unit_vector(u_0_org)
+
+        # Spline points in u_0_org and u_1_org
+        spline_d_0_org = np.dot(spline_points_u, f.unit_vector(u_0_org)).reshape((-1, 1)) / f.norm(u_0_org)
+        spline_d_1_org = np.dot(spline_points_u, f.unit_vector(u_1_org)).reshape((-1, 1)) / f.norm(u_1_org)
+
+        # New plane defined by new points
+        u_0 = p_0 - self.center
+        u_1 = p_1 - self.center - np.dot(p_1 - self.center, f.unit_vector(u_0)) * f.unit_vector(u_0)
+
+        spline_points_new = spline_d_0_org * u_0 + spline_d_1_org * u_1
+        if reverse:
+            return spline_points_new[::-1]
+        else:
+            return spline_points_new
 
     def add_spline_edges(self) -> None:
         """Add a spline to the core blocks for an optimized mesh."""
-        spline_ratios = np.array(self.spline_ratios) / 0.8 * self.core_ratio
-        spl_len = len(spline_ratios)
+        for i, face in enumerate(self.core):
+            p_0 = face.point_array[(i + 1) % 4]     # Core point on radius vector
+            p_1 = face.point_array[(i + 2) % 4]     # Core point on diagonal
+            p_2 = face.point_array[(i + 3) % 4]     # Core point on perpendicular radius vector
 
-        spline_points = [
-            self.center
-            + self.radius_vector * spline_ratios[i]
-            + self.perp_radius_vector * spline_ratios[spl_len - i - 1]
-            for i in range(spl_len)
-        ]
-        spline_points.reverse()
+            # Create curve splines
+            curve_0_1 = Spline(self.spline(p_0, p_1))
+            curve_1_2 = Spline(self.spline(p_2, p_1, reverse=True))
 
-        for i in range(len(self.core)):
-            angle = i * np.pi / 2
-            points = [f.rotate(p, angle, self.normal, self.center) for p in spline_points]
-
-            points_1 = points[: spl_len // 2 - 1]
-            points_2 = points[1 + spl_len // 2 :]
-
-            if i == 2:
-                points_1.reverse()
-            if i == 1:
-                points_2.reverse()
-
-            curve_1 = Spline(points_1)
-            curve_2 = Spline(points_2)
-
+            # Add curves to edges
             edge_1 = (i + 1) % 4
             edge_2 = (i + 2) % 4
-
-            self.grid[0][i].add_edge(edge_1, curve_1)
-            self.grid[0][i].add_edge(edge_2, curve_2)
+            face.add_edge(edge_1, curve_0_1)
+            face.add_edge(edge_2, curve_1_2)
+            print(face.point_array)
+            print(face.edges[edge_1].parts[0].parts[0].points)
+            print(face.edges[edge_2].parts[0].parts[0].points)
 
     def add_edges(self):
         for face in self.grid[-1]:
@@ -123,12 +139,6 @@ class DiskBase(MappedSketch, abc.ABC):
         """Vector that points from center of this
         *Circle to its (first) radius point"""
         return self.radius_point - self.center
-
-    @property
-    def perp_radius_vector(self) -> NPVectorType:
-        """Vector that points from center of this
-        *Circle to its (second) radius point"""
-        return f.unit_vector(np.cross(self.normal, self.radius_vector)) * f.norm(self.radius_vector)
 
     @property
     def radius(self) -> float:
@@ -417,3 +427,8 @@ class Oval(DiskBase):
     @property
     def grid(self):
         return [self.faces[:6], self.faces[6:]]
+
+
+if __name__ == '__main__':
+    sketch = HalfDisk([0, 0, 0], [0, 2, 0], [1, 0, 0])
+
