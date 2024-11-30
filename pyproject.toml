@@ -29,9 +29,12 @@ line_length = 120
 src_paths = ["src", "tests"]
 
 [tool.ruff]
-select = ["E", "F", "N", "UP", "YTT", "B", "A", "ARG", "RUF"]
 target-version = "py38"
 line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "N", "UP", "YTT", "B", "A", "ARG", "RUF"]
+ignore = ["RUF022"]
 
 [[tool.mypy.overrides]]
 module = "scipy,scipy.*,parameterized.*"
