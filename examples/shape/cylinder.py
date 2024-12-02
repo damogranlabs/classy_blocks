@@ -11,11 +11,12 @@ axis_point_1 = [0.0, 0.0, 0.0]
 axis_point_2 = [5.0, 5.0, 0.0]
 radius_point_1 = [0.0, 0.0, 2.0]
 
-cylinder = cb.Cylinder(axis_point_1, axis_point_2, radius_point_1)
+cylinder = cb.SemiCylinder(axis_point_1, axis_point_2, radius_point_1)
 
 cylinder.set_start_patch("inlet")
 cylinder.set_end_patch("outlet")
 cylinder.set_outer_patch("walls")
+cylinder.set_symmetry_patch('sym')
 
 # if curved core edges get in the way (when moving vertices, optimization, ...),
 # remove them with this method:
