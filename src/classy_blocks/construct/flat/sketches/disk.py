@@ -68,7 +68,8 @@ class DiskBase(MappedSketch, abc.ABC):
     def diagonal_ratio(self) -> float:
         return 2 ** 0.5 * self.spline_ratios[7] / 0.8 * self.core_ratio
 
-    def spline(self, p_core_ratio: PointType, p_diagonal_ratio: PointType, reverse: bool = False) -> NPPointListType:
+    def core_spline(self, p_core_ratio: PointType, p_diagonal_ratio: PointType, reverse: bool = False) -> NPPointListType:
+        """Creates the spline points for the core."""
         p_0 = np.asarray(p_core_ratio)
         p_1 = np.asarray(p_diagonal_ratio)
 
@@ -105,8 +106,8 @@ class DiskBase(MappedSketch, abc.ABC):
             p_1 = face.point_array[(i + 2) % 4]     # Core point on diagonal
             p_2 = face.point_array[(i + 3) % 4]     # Core point on perpendicular radius vector
 
-            curve_0_1 = Spline(self.spline(p_0, p_1, reverse=i == 2))
-            curve_1_2 = Spline(self.spline(p_2, p_1, reverse=i != 1))
+            curve_0_1 = Spline(self.core_spline(p_0, p_1, reverse=i == 2))
+            curve_1_2 = Spline(self.core_spline(p_2, p_1, reverse=i != 1))
 
             # Add curves to edges
             edge_1 = (i + 1) % 4
