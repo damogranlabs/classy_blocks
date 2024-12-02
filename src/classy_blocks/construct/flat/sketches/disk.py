@@ -51,8 +51,8 @@ class DiskBase(MappedSketch, abc.ABC):
         0.421177,
         0.502076,
         0.566526,
-        0.610535,
         0.610532,
+        0.610535,
         0.625913,
         0.652300,
         0.686516,
@@ -66,14 +66,14 @@ class DiskBase(MappedSketch, abc.ABC):
     # - too large will prevent creating large numbers of boundary layers
     @property
     def diagonal_ratio(self) -> float:
-        return 2 ** 0.5 * self.spline_ratios[6] / 0.8 * self.core_ratio
+        return 2 ** 0.5 * self.spline_ratios[7] / 0.8 * self.core_ratio
 
     def spline(self, p_core_ratio: PointType, p_diagonal_ratio: PointType, reverse: bool = False) -> NPPointListType:
         p_0 = np.asarray(p_core_ratio)
         p_1 = np.asarray(p_diagonal_ratio)
 
         # Spline points in unitary coordinates
-        spline_points_u = np.array([self.spline_ratios[-1:5:-1]]).T * np.array([0, 1, 0]) + \
+        spline_points_u = np.array([self.spline_ratios[-1:6:-1]]).T * np.array([0, 1, 0]) + \
                           np.array([self.spline_ratios[:7]]).T * np.array([0, 0, 1])
 
         # p_1 and p_2 in unitary coordinates
@@ -92,7 +92,7 @@ class DiskBase(MappedSketch, abc.ABC):
         u_0 = p_0 - self.center
         u_1 = p_1 - self.center - np.dot(p_1 - self.center, f.unit_vector(u_0)) * f.unit_vector(u_0)
 
-        spline_points_new = spline_d_0_org * u_0 + spline_d_1_org * u_1
+        spline_points_new = self.center + spline_d_0_org * u_0 + spline_d_1_org * u_1
         if reverse:
             return spline_points_new[::-1]
         else:
@@ -105,18 +105,14 @@ class DiskBase(MappedSketch, abc.ABC):
             p_1 = face.point_array[(i + 2) % 4]     # Core point on diagonal
             p_2 = face.point_array[(i + 3) % 4]     # Core point on perpendicular radius vector
 
-            # Create curve splines
-            curve_0_1 = Spline(self.spline(p_0, p_1))
-            curve_1_2 = Spline(self.spline(p_2, p_1, reverse=True))
+            curve_0_1 = Spline(self.spline(p_0, p_1, reverse=i == 2))
+            curve_1_2 = Spline(self.spline(p_2, p_1, reverse=i != 1))
 
             # Add curves to edges
             edge_1 = (i + 1) % 4
             edge_2 = (i + 2) % 4
             face.add_edge(edge_1, curve_0_1)
             face.add_edge(edge_2, curve_1_2)
-            print(face.point_array)
-            print(face.edges[edge_1].parts[0].parts[0].points)
-            print(face.edges[edge_2].parts[0].parts[0].points)
 
     def add_edges(self):
         for face in self.grid[-1]:
@@ -427,8 +423,4 @@ class Oval(DiskBase):
     @property
     def grid(self):
         return [self.faces[:6], self.faces[6:]]
-
-
-if __name__ == '__main__':
-    sketch = HalfDisk([0, 0, 0], [0, 2, 0], [1, 0, 0])
 
