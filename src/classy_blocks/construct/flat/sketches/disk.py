@@ -197,7 +197,7 @@ class QuarterDisk(DiskBase):
     """A quarter of a four-core disk; see docs/blocking for point numbers and faces/grid indexing"""
 
     chops: ClassVar = [
-        [0],  # axis 0
+        [1],  # axis 0
         [1, 2],  # axis 1
     ]
 
