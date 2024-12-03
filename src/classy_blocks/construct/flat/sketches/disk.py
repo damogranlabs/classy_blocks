@@ -68,10 +68,12 @@ class DiskBase(MappedSketch, abc.ABC):
     def diagonal_ratio(self) -> float:
         return 2 ** 0.5 * self.spline_ratios[7] / 0.8 * self.core_ratio
 
-    def core_spline(self, p_core_ratio: PointType, p_diagonal_ratio: PointType, reverse: bool = False) -> NPPointListType:
+    def core_spline(self, p_core_ratio: PointType, p_diagonal_ratio: PointType, reverse: bool = False, center: PointType=None) -> NPPointListType:
         """Creates the spline points for the core."""
         p_0 = np.asarray(p_core_ratio)
         p_1 = np.asarray(p_diagonal_ratio)
+        if center is None:
+            center = self.center
 
         # Spline points in unitary coordinates
         spline_points_u = np.array([self.spline_ratios[-1:6:-1]]).T * np.array([0, 1, 0]) + \
@@ -90,10 +92,10 @@ class DiskBase(MappedSketch, abc.ABC):
         spline_d_1_org = np.dot(spline_points_u, f.unit_vector(u_1_org)).reshape((-1, 1)) / f.norm(u_1_org)
 
         # New plane defined by new points
-        u_0 = p_0 - self.center
-        u_1 = p_1 - self.center - np.dot(p_1 - self.center, f.unit_vector(u_0)) * f.unit_vector(u_0)
+        u_0 = p_0 - center
+        u_1 = p_1 - center - np.dot(p_1 - center, f.unit_vector(u_0)) * f.unit_vector(u_0)
 
-        spline_points_new = self.center + spline_d_0_org * u_0 + spline_d_1_org * u_1
+        spline_points_new = center + spline_d_0_org * u_0 + spline_d_1_org * u_1
         if reverse:
             return spline_points_new[::-1]
         else:
