@@ -1,14 +1,15 @@
 import abc
-from typing import ClassVar, List
+from typing import ClassVar, List, Optional
 
 import numpy as np
 
 from classy_blocks.construct.edges import Origin, Spline
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketches.mapped import MappedSketch
+from classy_blocks.base.element import ElementBaseT
 from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, PointType, VectorType
 from classy_blocks.util import functions as f
-
+from classy_blocks.util import constants
 
 class FanPattern:
     """A helper class for calculation of cylinder points"""
@@ -68,7 +69,8 @@ class DiskBase(MappedSketch, abc.ABC):
     def diagonal_ratio(self) -> float:
         return 2 ** 0.5 * self.spline_ratios[7] / 0.8 * self.core_ratio
 
-    def core_spline(self, p_core_ratio: PointType, p_diagonal_ratio: PointType, reverse: bool = False, center: PointType=None) -> NPPointListType:
+    def core_spline(self, p_core_ratio: PointType, p_diagonal_ratio: PointType,
+                    reverse: bool = False, center: PointType = None) -> NPPointListType:
         """Creates the spline points for the core."""
         p_0 = np.asarray(p_core_ratio)
         p_1 = np.asarray(p_diagonal_ratio)
@@ -101,7 +103,7 @@ class DiskBase(MappedSketch, abc.ABC):
         else:
             return spline_points_new
 
-    def add_spline_edges(self) -> None:
+    def add_core_spline_edges(self) -> None:
         """Add a spline to the core blocks for an optimized mesh."""
         for i, face in enumerate(self.core):
             p_0 = face.point_array[(i + 1) % 4]     # Core point on radius vector
@@ -119,9 +121,9 @@ class DiskBase(MappedSketch, abc.ABC):
 
     def add_edges(self):
         for face in self.grid[-1]:
-            face.add_edge(1, Origin(self.center))
+            face.add_edge(1, Origin(self.origo))
 
-        self.add_spline_edges()
+        self.add_core_spline_edges()
 
     @property
     def center(self) -> NPPointType:
@@ -131,13 +133,15 @@ class DiskBase(MappedSketch, abc.ABC):
     @property
     def radius_point(self) -> NPPointType:
         """Point at outer radius"""
-        return self.grid[1][0].points[1].position
+        return self.shell[0].points[1].position
 
     @property
     def radius_vector(self) -> NPVectorType:
         """Vector that points from center of this
-        *Circle to its (first) radius point"""
-        return self.radius_point - self.center
+        *Circle to its (first) radius point
+        Origo is used instead of center to ensure outside is constant, when moving the core,
+        does not change the outer shape."""
+        return self.radius_point - self.origo
 
     @property
     def radius(self) -> float:
@@ -155,6 +159,37 @@ class DiskBase(MappedSketch, abc.ABC):
     @property
     def shell(self) -> List[Face]:
         return self.grid[-1]
+
+    def translate(self: ElementBaseT, displacement: VectorType) -> ElementBaseT:
+        """Reimplementation to ensure origo is transformed."""
+        self.origo += np.asarray(displacement)
+        super().translate(displacement)
+
+    def rotate(self: ElementBaseT, angle: float, axis: VectorType, origin: Optional[PointType] = None) -> ElementBaseT:
+        """Reimplementation to ensure origo is transformed."""
+        o = self.center if origin is None else origin
+        self.origo = f.rotate(self.origo, angle, f.unit_vector(axis), o)
+        super().rotate(angle, axis, origin)
+
+    def mirror(self: ElementBaseT, normal: VectorType, origin: Optional[PointType] = None) -> ElementBaseT:
+        """Reimplementation to ensure origo is transformed."""
+        o = np.array([0, 0, 0]) if origin is None else origin
+        self.origo = f.mirror(self.origo, normal, o)
+        super().mirror(normal, origin)
+
+    def shear(
+        self: ElementBaseT, normal: VectorType, origin: PointType, direction: VectorType, angle: float
+    ) -> ElementBaseT:
+        """Reimplementation to ensure origo is transformed."""
+        n = np.asarray(normal)
+        o = np.asarray(origin)
+        distance = f.point_to_plane_distance(o, n, self.origo)
+        if distance > constants.TOL:
+            direction = f.unit_vector(direction)
+            amount = distance / np.tan(angle)
+            self.origo += direction * amount
+
+        super().shear(normal, origin, direction, angle)
 
 
 class OneCoreDisk(DiskBase):
@@ -176,7 +211,8 @@ class OneCoreDisk(DiskBase):
             [2, 6, 7, 3],
             [3, 7, 4, 0],
         ]
-
+        # Center point as a constant.
+        self.origo = np.asarray(center_point.copy())
         pattern = FanPattern(center_point, radius_point, normal)
         ratios = [self.diagonal_ratio]
         angles = np.linspace(0, 2 * np.pi, num=4, endpoint=False)
@@ -191,7 +227,7 @@ class OneCoreDisk(DiskBase):
     def grid(self):
         return [self.faces[:1], self.faces[1:]]
 
-    def add_spline_edges(self):
+    def add_core_spline_edges(self):
         pass
 
 
@@ -211,7 +247,8 @@ class QuarterDisk(DiskBase):
             [1, 4, 5, 2],
             [2, 5, 6, 3],
         ]
-
+        # Center point as a constant.
+        self.origo = np.asarray(center_point.copy())
         pattern = FanPattern(center_point, radius_point, normal)
         ratios = [self.core_ratio, self.diagonal_ratio]
         angles = np.linspace(0, np.pi / 2, num=3)
@@ -244,7 +281,8 @@ class HalfDisk(DiskBase):
             [3, 8, 9, 4],
             [4, 9, 10, 5],
         ]
-
+        # Center point as a constant.
+        self.origo = np.asarray(center_point.copy())
         pattern = FanPattern(center_point, radius_point, normal)
         ratios = [self.core_ratio, self.diagonal_ratio]
         angles = np.linspace(0, np.pi, num=5)
@@ -281,7 +319,8 @@ class FourCoreDisk(DiskBase):
             [7, 15, 16, 8],
             [8, 16, 9, 1],
         ]
-
+        # Center point as a constant.
+        self.origo = np.asarray(center_point.copy())
         pattern = FanPattern(center_point, radius_point, normal)
         ratios = [self.core_ratio, self.diagonal_ratio]
         angles = np.linspace(0, 2 * np.pi, num=8, endpoint=False)
@@ -342,7 +381,7 @@ class WrappedDisk(DiskBase):
 
     def add_edges(self):
         for face in self.grid[1]:
-            face.add_edge(1, Origin(self.center))
+            face.add_edge(1, Origin(self.origo))
 
     @property
     def center(self):
