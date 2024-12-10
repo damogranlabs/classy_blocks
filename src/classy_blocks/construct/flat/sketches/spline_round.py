@@ -1,18 +1,11 @@
-from typing import ClassVar, List, Optional
-import inspect
+from typing import ClassVar, Optional
 import numpy as np
 
 from classy_blocks.construct.edges import Origin, Spline
-from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketches.disk import DiskBase, QuarterDisk, HalfDisk, FourCoreDisk
-from classy_blocks.construct.flat.sketches.mapped import MappedSketch
-from classy_blocks.construct.point import Point
 from classy_blocks.types import NPPointType, NPVectorType, PointType, NPPointListType
 from classy_blocks.util import constants
-from classy_blocks.util.constants import TOL
 from classy_blocks.util import functions as f
-from classy_blocks.base import transforms as tr
-
 
 class SplineRound(DiskBase):
     """
@@ -29,39 +22,44 @@ class SplineRound(DiskBase):
         side_2: float,
         **kwargs
     ):
-        """
-        With a normal in x direction corner 1 will be in the y direction and corner 2 the z direction.
-        note the vectors from the center to corner 1 and 2 should be perpendicular.
-        Args:
-            center_point: Center of round shape
-            corner_1_point: Radius for circular and elliptical shape
-            corner_2_point: Radius for circular and elliptical  shape
-            side_1: Straight length for oval shape
-            side_2: Straight length for oval shape
-        """
         self.side_1 = side_1
         self.side_2 = side_2
 
         self.n_outer_spline_points = kwargs.get('n_outer_spline_points', self.n_outer_spline_points)
         self.n_straight_spline_points = kwargs.get('n_straight_spline_points', self.n_straight_spline_points)
 
-    def core_spline(self, p_core_ratio: PointType, p_diagonal_ratio: PointType, radius_1, side_1, radius_2, side_2,
+    def remove_core(self):
+        """Remove core. Used for rings"""
+        # remove center point
+        pos = self.positions
+        pos = np.delete(pos, 0, axis=0)
+
+        # Remove core face
+        self._faces = np.delete(self._faces, slice(0, int(len(self.shell) / 2 )), axis=0)
+        self.indexes = np.delete(self.indexes, slice(0, int(len(self.shell) / 2)), axis=0) - 1
+
+        self.update(pos)
+
+    def core_spline(self, p_core_ratio: PointType, p_diagonal_ratio: PointType,
+                    radius_1: float, side_1: float, radius_2: float, side_2: float,
                     reverse: bool = False) -> NPPointListType:
         """Creates the spline points for the core."""
         p_0 = np.asarray(p_core_ratio)
         p_1 = np.asarray(p_diagonal_ratio)
 
+        # Create unitary points of p_0 and p_1
         r_1 = radius_1 - side_1
         r_2 = radius_2 - side_2
         p_0_u = np.array([0, side_1 + self.core_ratio * r_1, 0])
         p_1_u = np.array([0, side_1 + 2 ** (-1 / 2) * self.diagonal_ratio * r_1,
                           side_2 + 2 ** (-1 / 2) * self.diagonal_ratio * r_2])
 
+        # In case of oval shape the center and p_0 used to get the curvy spline are adjusted
         center_u_adj = np.array([0, side_1, side_2])
         p_0_u_adj = p_0_u + np.array([0, 0, side_2])
-
         spline_points_u = super().core_spline(p_0_u_adj, p_1_u, center=center_u_adj, reverse=reverse)
 
+        # Add straight part for ovals
         if side_2 > constants.TOL:
             if reverse:
                 side_points_u = np.linspace(p_0_u_adj, p_0_u_adj - np.array([0, 0, 0.05 * side_2]), self.n_straight_spline_points)
@@ -83,174 +81,103 @@ class SplineRound(DiskBase):
         u_1 = p_1 - self.center - np.dot(p_1 - self.center, f.unit_vector(u_0)) * f.unit_vector(u_0)
 
         spline_points_new = self.center + spline_d_0_org * u_0 + spline_d_1_org * u_1
-
         return spline_points_new
 
     def add_core_spline_edges(self) -> None:
         """Add a spline to the core blocks for an optimized mesh."""
-        shifts = [self.side_2 * self.u_2, -self.side_1 * self.u_1, -self.side_2 * self.u_2, self.side_1 * self.u_1]
+        sides = [self.side_1, self.side_2]
+        radi = [self.radius_1, self.radius_2]
         for i, face in enumerate(self.core):
             p_0 = face.point_array[(i + 1) % 4]     # Core point on radius 1
             p_1 = face.point_array[(i + 2) % 4]     # Core point on diagonal
             p_2 = face.point_array[(i + 3) % 4]     # Core point on radius 2
-            #print(i, p_0, p_1, p_2)
 
-            p_0 += shifts[i]
-            p_2 += shifts[i-1]
-            center = self.center + shifts[i-1] + shifts[i]
+            curve_0_1 = self.core_spline(p_0, p_1, radi[i%2], sides[i%2], radi[(i+1)%2], sides[(i+1)%2], reverse=i==2)
+            curve_1_2 = self.core_spline(p_2, p_1, radi[(i+1)%2], sides[(i+1)%2], radi[i%2], sides[i%2], reverse=i!=1)
 
-            """
-            if i == 0:
-                center = self.center + self.side_1 * self.u_1 + self.side_2 * self.u_2
-                p_0 += self.side_2 * self.u_2
-                p_2 += self.side_1 * self.u_1
-            elif i == 1:
-                center = self.center - self.side_1 * self.u_1 + self.side_2 * self.u_2
-                p_0 += - self.side_1 * self.u_1
-                p_2 += self.side_2 * self.u_2
-            elif i == 2:
-                center = self.center - self.side_1 * self.u_1 - self.side_2 * self.u_2
-                p_0 += - self.side_2 * self.u_2
-                p_2 += - self.side_1 * self.u_1
-            elif i == 3:
-                center = self.center + self.side_1 * self.u_1 - self.side_2 * self.u_2
-                p_0 += + self.side_1 * self.u_1
-                p_2 += - self.side_2 * self.u_2
-            """
-
-            # print(i, p_0, p_1, p_2)
-            curve_0_1 = super().core_spline(p_0, p_1, reverse=i==2, center=center)
-            curve_1_2 = super().core_spline(p_2, p_1, reverse=i!=1, center=center)
-            if self.side_2 > constants.TOL:
-                if i == 0:
-                    core_side_points = np.linspace(p_0 - 0.05 * self.side_2 * self.u_2, p_0, self.n_straight_spline_points)
-                    curve_0_1 = np.insert(curve_0_1, 0, core_side_points, axis=0)
-                elif i == 1:
-                    core_side_points = np.linspace(p_2 - 0.05 * self.side_2 * self.u_2, p_2, self.n_straight_spline_points)
-                    curve_1_2 = np.insert(curve_1_2, 0, core_side_points, axis=0)
-                elif i == 2:
-                    core_side_points = np.linspace(p_0, p_0 + 0.05 * self.side_2 * self.u_2, self.n_straight_spline_points)
-                    curve_0_1 = np.append(curve_0_1, core_side_points, axis=0)
-                elif i == 3:
-                    core_side_points = np.linspace(p_2, p_2 + 0.05 * self.side_2 * self.u_2, self.n_straight_spline_points)
-                    curve_1_2 = np.append(curve_1_2, core_side_points, axis=0)
-
-
-            if self.side_1 > constants.TOL:
-                if i == 0:
-                    core_side_points = np.linspace(p_2, p_2 - 0.05 * self.side_1 * self.u_1, self.n_straight_spline_points)
-                    curve_1_2 = np.append(curve_1_2, core_side_points, axis=0)
-                elif i == 1:
-                    core_side_points = np.linspace(p_0 + 0.05 * self.side_1 * self.u_1, p_0, self.n_straight_spline_points)
-                    curve_0_1 = np.insert(curve_0_1, 0, core_side_points, axis=0)
-                elif i == 2:
-                    core_side_points = np.linspace(p_2, p_2 + 0.05 * self.side_1 * self.u_1, self.n_straight_spline_points)
-                    curve_1_2 = np.append(curve_1_2, core_side_points, axis=0)
-                elif i == 3:
-                    core_side_points = np.linspace(p_0 - 0.05 * self.side_1 * self.u_1, p_0, self.n_straight_spline_points)
-                    curve_0_1 = np.insert(curve_0_1, 0, core_side_points, axis=0)
-            sides = [self.side_1, self.side_2]
-            radi = [self.radius_1, self.radius_2]
-            print(i)
-            print(abs(curve_0_1 - self.core_spline(face.point_array[(i + 1) % 4],
-                                                   face.point_array[(i + 2) % 4],
-                                                   radi[i%2], sides[i%2],
-                                                   radi[(i+1)%2], sides[(i+1)%2],
-                                                   reverse=i==2)).all()<1e-15)
-
-            print(abs(curve_1_2 - self.core_spline(face.point_array[(i + 3) % 4],
-                                                   face.point_array[(i + 2) % 4],
-                                                   radi[(i+1)%2], sides[(i+1)%2],
-                                                   radi[i%2], sides[i%2],
-                                                   reverse=i!=1)).all()<1e-15)
-            """
-            if i == 0:
-                print(i)
-                print(abs(curve_0_1 - self.core_spline(face.point_array[(i + 1) % 4],
-                                                       face.point_array[(i + 2) % 4],
-                                                       radi[i%2], sides[i%2],
-                                                       radi[(i+1)%2], sides[(i+1)%2],
-                                                       reverse=i==2)).all()<1e-15)
-
-                print(abs(curve_1_2 - self.core_spline(face.point_array[(i + 3) % 4],
-                                                       face.point_array[(i + 2) % 4],
-                                                       radi[(i+1)%2], sides[(i+1)%2],
-                                                       radi[i%2], sides[i%2],
-                                                       reverse=i!=1)).all()<1e-15)
-
-            elif i == 1:
-                print(i)
-                print(abs(curve_0_1 - self.core_spline(face.point_array[(i + 1) % 4],
-                                                       face.point_array[(i + 2) % 4],
-                                                       self.radius_2, self.side_2,
-                                                       self.radius_1,self.side_1,
-                                                       reverse=i==2)).all()<1e-15)
-
-                print(abs(curve_1_2 - self.core_spline(face.point_array[(i + 3) % 4],
-                                                       face.point_array[(i + 2) % 4],
-                                                       self.radius_1, self.side_1,
-                                                       self.radius_2, self.side_2,
-                                                       reverse=i!=1)).all()<1e-15)
-
-            if i == 2:
-                print(i)
-                print(abs(curve_0_1 - self.core_spline(face.point_array[(i + 1) % 4],
-                                                       face.point_array[(i + 2) % 4],
-                                                       self.radius_1, self.side_1,
-                                                       self.radius_2,self.side_2,
-                                                       reverse=i==2)).all()<1e-15)
-
-                print(abs(curve_1_2 - self.core_spline(face.point_array[(i + 3) % 4],
-                                                       face.point_array[(i + 2) % 4],
-                                                       self.radius_2, self.side_2,
-                                                       self.radius_1, self.side_1,
-                                                       reverse=i!=1)).all()<1e-15)
-            elif i == 3:
-                print(i)
-                print(abs(curve_0_1 - self.core_spline(face.point_array[(i + 1) % 4],
-                                                       face.point_array[(i + 2) % 4],
-                                                       self.radius_2, self.side_2,
-                                                       self.radius_1,self.side_1,
-                                                       reverse=i==2)).all()<1e-15)
-
-                print(abs(curve_1_2 - self.core_spline(face.point_array[(i + 3) % 4],
-                                                       face.point_array[(i + 2) % 4],
-                                                       self.radius_1, self.side_1,
-                                                       self.radius_2, self.side_2,
-                                                       reverse=i!=1)).all()<1e-15)
-
-            """
-            #print(i, p_0, curve_0_1, p_1)
-            #print(i, p_1, curve_1_2, p_2)
             curve_0_1 = Spline(curve_0_1)
             curve_1_2 = Spline(curve_1_2)
+
             # Add curves to edges
             edge_1 = (i + 1) % 4
             edge_2 = (i + 2) % 4
             face.add_edge(edge_1, curve_0_1)
             face.add_edge(edge_2, curve_1_2)
 
-    def add_outer_spline_edges(self) -> None:
+    def outer_spline(self, p_radius: PointType, p_diagonal: PointType,
+                     radius_1: float, side_1: float, radius_2: float, side_2: float,
+                     center: NPPointType = None, reversed: bool = False) -> NPPointListType:
+        """Creates the spline points for the core."""
+        p_0 = np.asarray(p_radius)
+        p_1 = np.asarray(p_diagonal)
+        center = self.origo if center is None else np.asarray(center)
+
+        # Create unitary points of p_0 and p_1
+        r_1 = radius_1 - side_1
+        r_2 = radius_2 - side_2
+        p_0_u = np.array([0, radius_1, 0])
+        p_1_u = np.array([0, side_1 + 2 ** (-1 / 2) * r_1, side_2 + 2 ** (-1 / 2) * r_2])
+
+        p_0_u_adj = p_0_u + np.array([0, 0, side_2])
+        c_0_u_adj = np.array([0, side_1, side_2])
+
+        theta = np.linspace(0, np.pi/4, self.n_outer_spline_points)
+        spline_points_u = c_0_u_adj + np.array([np.zeros(len(theta)), r_1 * np.cos(theta), r_2 * np.sin(theta)]).T
+
+        if reversed:
+            spline_points_u = spline_points_u[::-1]
+            # Add straight part for ovals
+            if side_2 > constants.TOL:
+                side_points_u = np.linspace(p_0_u_adj, p_0_u_adj - np.array([0, 0, 0.05 * side_2]), self.n_straight_spline_points)
+                spline_points_u = np.append(spline_points_u,  side_points_u, axis=0)
+        else:
+            # Add straight part for ovals
+            if side_2 > constants.TOL:
+                side_points_u = np.linspace(p_0_u_adj - np.array([0, 0, 0.05 * side_2]), p_0_u_adj, self.n_straight_spline_points)
+                spline_points_u = np.insert(spline_points_u, 0, side_points_u, axis=0)
+
+        # Orthogonal vectors based on p_0_u and p_1_u
+        u_0_org = p_0_u
+        u_1_org = p_1_u - np.dot(p_1_u, f.unit_vector(u_0_org)) * f.unit_vector(u_0_org)
+
+        # Spline points in u_0_org and u_1_org
+        spline_d_0_org = np.dot(spline_points_u, f.unit_vector(u_0_org)).reshape((-1, 1)) / f.norm(u_0_org)
+        spline_d_1_org = np.dot(spline_points_u, f.unit_vector(u_1_org)).reshape((-1, 1)) / f.norm(u_1_org)
+
+        # New plane defined by new points
+        u_0 = p_0 - center
+        u_1 = p_1 - center - np.dot(p_1 - center, f.unit_vector(u_0)) * f.unit_vector(u_0)
+
+        spline_points_new = center + spline_d_0_org * u_0 + spline_d_1_org * u_1
+        return spline_points_new
+
+    def add_outer_spline_edges(self, center:NPPointType = None) -> None:
+        """Add curved edge as spline to outside of sketch"""
+        sides = [self.side_1, self.side_2, self.side_2, self.side_1]
+        radi = [self.radius_1, self.radius_2, self.radius_2, self.radius_1]
         for i, face in enumerate(self.shell):
-            theta = np.linspace(i * np.pi / 4, (i + 1)*np.pi / 4,
-                                self.n_outer_spline_points + 1, endpoint=False)[1:].reshape((-1, 1))
-            shell_curve_points = (self.center +
-                                  (self.side_1 + self.r_1 * np.cos(theta)) * self.u_1 +
-                                  (self.side_2 + self.r_2 * np.sin(theta)) * self.u_2)
-            if i % 2 == 0 and self.side_2 > constants.TOL:
-                outer_side_points = np.linspace(
-                    self.radius_1_point + 0.95 * self.side_2 * self.u_2,
-                    self.radius_1_point + self.side_2 * self.u_2,
-                    self.n_straight_spline_points
-                )
-                shell_curve_points = np.insert(shell_curve_points, 0, outer_side_points, axis=0)
-            elif i % 2 == 1 and self.side_1 > constants.TOL:
-                outer_side_points = np.linspace(
-                    self.radius_2_point + self.side_1 * self.u_1,
-                    self.radius_2_point + 0.95 * self.side_1 * self.u_1,
-                    self.n_straight_spline_points)
-                shell_curve_points = np.append(shell_curve_points, outer_side_points, axis=0)
-            face.add_edge(1, Spline(shell_curve_points))
+            p_0 = face.point_array[(i % 2) + 1]         # Outer point on radius
+            p_1 = face.point_array[((i + 1) % 2) + 1]   # Outer point on diagonal
+
+            curve_0_1 = self.outer_spline(p_0, p_1, radi[i % 4], sides[i % 4],
+                                          radi[(i + 1) % 4], sides[(i + 1) % 4],
+                                          center, reversed=i % 2 == 1)
+            face.add_edge(1, Spline(curve_0_1))
+
+    def add_inner_spline_edges(self, center:NPPointType = None) -> None:
+        """Add curved edge as spline to inside of ring"""
+        sides = [self.side_1, self.side_2, self.side_2, self.side_1]
+        radi = [self.radius_1 - self.width_1, self.radius_2 - self.width_2,
+                self.radius_2 - self.width_2, self.radius_1 - self.width_1]
+        for i, face in enumerate(self.shell):
+            p_0 = face.point_array[0 if i % 2 == 0 else 3]   # Inner point on radius
+            p_1 = face.point_array[3 if i % 2 == 0 else 0]   # Inner point on diagonal
+
+            curve_0_1 = self.outer_spline(p_0, p_1, radi[i % 4], sides[i % 4],
+                                          radi[(i + 1) % 4], sides[(i + 1) % 4],
+                                          center, reversed=i % 2 == 1)
+
+            face.add_edge(3, Spline(curve_0_1))
 
     def add_edges(self) -> None:
         # Don't run add_edges in QuarterDisk.__init__()
@@ -261,8 +188,7 @@ class SplineRound(DiskBase):
             super().add_edges()
         else:
             self.add_core_spline_edges()
-            #self.add_outer_spline_edges()
-
+            self.add_outer_spline_edges()
 
     @property
     def radius_1_point(self) -> NPPointType:
@@ -270,7 +196,7 @@ class SplineRound(DiskBase):
 
     @property
     def radius_1_vector(self) -> NPVectorType:
-        return self.radius_vector
+        return self.radius_1_point - self.origo
 
     @property
     def radius_1(self) -> float:
@@ -278,23 +204,15 @@ class SplineRound(DiskBase):
 
     @property
     def radius_2_point(self) -> NPPointType:
-        return self.grid[1][1].points[2].position
+        return self.shell[1].points[2].position
 
     @property
     def radius_2_vector(self) -> NPVectorType:
-        return self.radius_2_point - self.center
+        return self.radius_2_point - self.origo
 
     @property
     def radius_2(self) -> float:
         return float(f.norm(self.radius_2_vector))
-
-    @property
-    def r_1(self) -> float:
-        return self.radius_1 - self.side_1
-
-    @property
-    def r_2(self) -> float:
-        return self.radius_2 - self.side_2
 
     @property
     def u_0(self) -> NPVectorType:
@@ -332,20 +250,10 @@ class SplineRound(DiskBase):
 
     def scale(self, ratio: float, origin: Optional[PointType] = None):
         """Reimplementation of scale to include side_1 and side_2."""
-
         self.side_1 = ratio * self.side_1
         self.side_2 = ratio * self.side_2
 
         return super().scale(ratio, origin)
-
-
-    # @classmethod
-    # def init_from_radius(cls, center_point, corner_1_point, corner_2_point, r_1, r_2):
-    #     """Calculate the side lengths based on the radius and return sketch"""
-    #     side_1 = f.norm(corner_1_point - center_point) - r_1
-    #     side_2 = f.norm(corner_2_point - center_point) - r_2
-
-    #     return cls(center_point, corner_1_point, corner_2_point, side_1, side_2)
 
 
 class QuarterSplineDisk(SplineRound, QuarterDisk):
@@ -377,30 +285,33 @@ class QuarterSplineDisk(SplineRound, QuarterDisk):
         self.u_1 = f.unit_vector(corner_1_point - np.asarray(center_point))
         self.u_2 = f.unit_vector(corner_2_point - np.asarray(center_point))
 
-        # Create a QuarterDisk and update positions
+        # Create a QuarterDisk
         self.disk_initialized = False
-        super(SplineRound, self). __init__(center_point,corner_1_point,normal=self.u_0)
+        super(SplineRound, self). __init__(center_point, corner_1_point, normal=self.u_0)
         self.disk_initialized = True
 
         # Adjust to actual shape
         self.correct_disk(corner_1_point, corner_2_point)
+        self.add_edges()
 
     def correct_disk(self, corner_1_point: NPPointType, corner_2_point: NPPointType):
         """Method to convert a circular disk to the elliptical/oval shape defined"""
-        # Note that self.r_2 here would give wrong results as corner_2 have not been updated
         r_1 = f.norm(corner_1_point - self.center) - self.side_1
         r_2 = f.norm(corner_2_point - self.center) - self.side_2
 
         pos = self.positions
-        pos[-1] = corner_2_point
-        pos[-2] = self.center + (self.side_1 + 2 ** (-1 / 2) * r_1) * self.u_1 + \
-                  (self.side_2 + 2 ** (-1 / 2) * r_2) * self.u_2
-        pos[3] = self.center + (self.side_2 + self.core_ratio * r_2) * self.u_2
+        # Core
+        pos[1] = self.center + (self.side_1 + self.core_ratio * r_1) * self.u_1
         pos[2] = self.center + (self.side_1 + 2 ** (-1 / 2) * self.diagonal_ratio * r_1) * self.u_1 + \
                  (self.side_2 + 2 ** (-1 / 2) * self.diagonal_ratio * r_2) * self.u_2
-        pos[1] = self.center + (self.side_1 + self.core_ratio * r_1) * self.u_1
+        pos[3] = self.center + (self.side_2 + self.core_ratio * r_2) * self.u_2
+
+        # Shell
+        pos[5] = self.center + (self.side_1 + 2 ** (-1 / 2) * r_1) * self.u_1 + \
+                 (self.side_2 + 2 ** (-1 / 2) * r_2) * self.u_2
+        pos[6] = corner_2_point
+
         self.update(pos)
-        self.add_edges()
 
 
 class HalfSplineDisk(SplineRound, HalfDisk):
@@ -431,37 +342,38 @@ class HalfSplineDisk(SplineRound, HalfDisk):
         self.u_1 = f.unit_vector(corner_1_point - np.asarray(center_point))
         self.u_2 = f.unit_vector(corner_2_point - np.asarray(center_point))
 
-        # Create a HalfDisk and update positions
+        # Create a HalfDisk
         self.disk_initialized = False
         super(SplineRound, self). __init__(center_point, corner_1_point, normal=self.u_0)
         self.disk_initialized = True
 
         # Adjust to actual shape
         self.correct_disk(corner_1_point, corner_2_point)
+        self.add_edges()
 
     def correct_disk(self, corner_1_point: NPPointType, corner_2_point: NPPointType):
         """Method to convert a circular disk to the elliptical/oval shape defined"""
-        # Note that self.r_2 here would give wrong results as corner_2 have not been updated
         r_1 = f.norm(corner_1_point - self.center) - self.side_1
         r_2 = f.norm(corner_2_point - self.center) - self.side_2
 
         pos = self.positions
-        pos[-2] = self.center - (self.side_1 + 2 ** (-1 / 2) * r_1) * self.u_1 + \
-                  (self.side_2 + 2 ** (-1 / 2) * r_2) * self.u_2
-        pos[-3] = corner_2_point
-        pos[-4] = self.center + (self.side_1 + 2 ** (-1 / 2) * r_1) * self.u_1 + \
-                  (self.side_2 + 2 ** (-1 / 2) * r_2) * self.u_2
-
-        pos[5] = self.center - (self.side_1 + self.core_ratio * r_1) * self.u_1
-        pos[4] = self.center - (self.side_1 + 2 ** (-1 / 2) * self.diagonal_ratio * r_1) * self.u_1 + \
-                 (self.side_2 + 2 ** (-1 / 2) * self.diagonal_ratio * r_2) * self.u_2
-        pos[3] = self.center + (self.side_2 + self.core_ratio * r_2) * self.u_2
+        # Core
+        pos[1] = self.center + (self.side_1 + self.core_ratio * r_1) * self.u_1
         pos[2] = self.center + (self.side_1 + 2 ** (-1 / 2) * self.diagonal_ratio * r_1) * self.u_1 + \
                  (self.side_2 + 2 ** (-1 / 2) * self.diagonal_ratio * r_2) * self.u_2
-        pos[1] = self.center + (self.side_1 + self.core_ratio * r_1) * self.u_1
+        pos[3] = self.center + (self.side_2 + self.core_ratio * r_2) * self.u_2
+        pos[4] = self.center - (self.side_1 + 2 ** (-1 / 2) * self.diagonal_ratio * r_1) * self.u_1 + \
+                 (self.side_2 + 2 ** (-1 / 2) * self.diagonal_ratio * r_2) * self.u_2
+        pos[5] = self.center - (self.side_1 + self.core_ratio * r_1) * self.u_1
+
+        # Shell
+        pos[7] = self.center + (self.side_1 + 2 ** (-1 / 2) * r_1) * self.u_1 + \
+                 (self.side_2 + 2 ** (-1 / 2) * r_2) * self.u_2
+        pos[8] = corner_2_point
+        pos[9] = self.center - (self.side_1 + 2 ** (-1 / 2) * r_1) * self.u_1 + \
+                 (self.side_2 + 2 ** (-1 / 2) * r_2) * self.u_2
 
         self.update(pos)
-        self.add_edges()
 
 
 class SplineDisk(SplineRound, FourCoreDisk):
@@ -492,17 +404,17 @@ class SplineDisk(SplineRound, FourCoreDisk):
         self.u_1 = f.unit_vector(corner_1_point - np.asarray(center_point))
         self.u_2 = f.unit_vector(corner_2_point - np.asarray(center_point))
 
-        # Create a HalfDisk and update positions
+        # Create a FourCoreDisk
         self.disk_initialized = False
         super(SplineRound, self). __init__(center_point, corner_1_point, normal=self.u_0)
         self.disk_initialized = True
 
         # Adjust to actual shape
         self.correct_disk(corner_1_point, corner_2_point)
+        self.add_edges()
 
     def correct_disk(self, corner_1_point: NPPointType, corner_2_point: NPPointType):
         """Method to convert a circular disk to the elliptical/oval shape defined"""
-        # Note that self.r_2 here would give wrong results as corner_2 have not been updated
         r_1 = f.norm(corner_1_point - self.center) - self.side_1
         r_2 = f.norm(corner_2_point - self.center) - self.side_2
 
@@ -536,10 +448,9 @@ class SplineDisk(SplineRound, FourCoreDisk):
                   (self.side_2 + 2 ** (-1 / 2) * r_2) * self.u_2
 
         self.update(pos)
-        self.add_edges()
 
 
-class QuarterSplineRing(SplineRound):
+class QuarterSplineRing(QuarterSplineDisk):
     """Ring based on SplineRound."""
 
     chops: ClassVar = [
@@ -572,175 +483,68 @@ class QuarterSplineRing(SplineRound):
             width_1: Width of shell
             width_2: Width of shell
         """
-        super().__init__(side_1, side_2, **kwargs)
-
-        center = np.array(center_point)
-        self._center = Point(center)
-        corner_1 = np.array(corner_1_point)
-        corner_2 = np.array(corner_2_point)
-
         self.width_1 = float(width_1)
         self.width_2 = float(width_2)
-        self._center = Point(center_point)
 
-        # TODO: DRY
-        u_1 = f.unit_vector(corner_1 - center)
-        u_2 = f.unit_vector(corner_2 - center)
+        # Initialize QuarterDisk
+        super().__init__(center_point, corner_1_point, corner_2_point, side_1, side_2, **kwargs)
 
-        r_1 = f.norm(corner_1 - center) - self.side_1
-        r_2 = f.norm(corner_2 - center) - self.side_2
+    def correct_disk(self, corner_1_point: NPPointType, corner_2_point: NPPointType):
+        """Method to convert a disk to a ting"""
 
-        r_1_outer = f.norm(corner_1 - center) - self.side_1 + self.width_1
-        r_2_outer = f.norm(corner_2 - center) - self.side_2 + self.width_2
+        # First adjust circular disk to SplineDisk
+        super().correct_disk(corner_1_point, corner_2_point)
+        self.remove_core()
 
-        p2 = corner_2
-        p2_2 = corner_2 + self.width_2 * u_2
-        p5 = corner_1
-        p5_2 = corner_1 + self.width_1 * u_1
-        p6 = center + (self.side_1 + 2 ** (-1 / 2) * r_1) * u_1 + (self.side_2 + 2 ** (-1 / 2) * r_2) * u_2
-        p6_2 = center + (self.side_1 + 2 ** (-1 / 2) * r_1_outer) * u_1 + (self.side_2 + 2 ** (-1 / 2) * r_2_outer) * u_2
+        # Adjust inner curve to be oval/elliptical
+        r_1 = self.radius_1 - self.side_1 - self.width_1
+        r_2 = self.radius_2 - self.side_2 - self.width_2
 
-        quad_map = [
-            [2, 3, 1, 0],
-            [4, 5, 3, 2],
-        ]
+        pos = self.positions
+        pos[0] = self.radius_1_point - self.width_1 * self.u_1
+        pos[1] = self.origo + (self.side_1 + r_1 * np.cos(np.pi / 4)) * self.u_1 + \
+                 (self.side_2 + r_2 * np.sin(np.pi / 4)) * self.u_2
+        pos[2] = self.radius_2_point - self.width_2 * self.u_2
+        self.update(pos)
 
-        positions = [p2, p2_2, p6, p6_2, p5, p5_2]
-        super(SplineRound, self).__init__(positions, quad_map)
+    def add_edges(self) -> None:
+        # Don't run add_edges in QuarterDisk.__init__()
+        if not self.disk_initialized:
+            return
 
-    @property
-    def center(self):
-        return self._center.position
+        # Outside
+        # Circular
+        if self.side_1 < constants.TOL and self.side_2 < constants.TOL and \
+            abs(self.radius_1 - self.radius_2) < constants.TOL:
 
-    @property
-    def corner_1(self) -> NPPointType:
-        return self.faces[1].points[0].position
+            for face in self.shell:
+                face.add_edge(1, Origin(self.origo))
+        else:
+            self.add_outer_spline_edges()
 
-    @property
-    def corner_2(self) -> NPPointType:
-        return self.faces[0].points[3].position
+        # Inside
+        # Circular
+        if self.side_1 < constants.TOL and self.side_2 < constants.TOL and \
+            abs(self.radius_1 - self.radius_2) < constants.TOL and \
+            abs(self.width_1 - self.width_2) < constants.TOL:
 
-    @property
-    def r_1_outer(self) -> float:
-        """Returns radius 1 in stable way after transforms."""
-        return f.norm(self.corner_1 - self.center) - self.side_1 + self.width_1
-
-    @property
-    def r_2_outer(self) -> float:
-        """Returns radius 2 in stable way after transforms."""
-        return f.norm(self.corner_2 - self.center) - self.side_2 + self.width_2
+            for face in self.shell:
+                face.add_edge(3, Origin(self.origo))
+        else:
+            self.add_inner_spline_edges()
 
     @property
     def grid(self):
-        return [self.faces]
+        return [self.faces[-2:]]
 
     @property
     def core(self):
         return None
 
-    @property
-    def shell(self):
-        return self.grid[0]
 
-    @property
-    def parts(self):
-        return [*super().parts, self._center]
+class HalfSplineRing(HalfSplineDisk):
+    """Ring based on SplineRound."""
 
-    def scale(self, ratio: float, origin: Optional[PointType] = None):
-        """Reimplementation of scale to include side_1 and side_2."""
-
-        self.side_1 = ratio * self.side_1
-        self.side_2 = ratio * self.side_2
-
-        self.width_1 = ratio * self.width_1
-        self.width_2 = ratio * self.width_2
-
-        return super().scale(ratio, origin)
-
-    def add_edges(self) -> None:
-        # Shell 1
-        theta = np.linspace(0, np.pi / 4, self.n_outer_spline_points + 1, endpoint=False)[1:].reshape((-1, 1))
-        shell_inner_curve_points = (
-            self.center
-            + self.side_2 * self.u_2
-            + self.side_1 * self.u_1
-            + self.r_2 * np.cos(theta) * self.u_2
-            + self.r_1 * np.sin(theta) * self.u_1
-        )
-        shell_outer_curve_points = (
-            self.center
-            + self.side_2 * self.u_2
-            + self.side_1 * self.u_1
-            + self.r_2_outer * np.cos(theta) * self.u_2
-            + self.r_1_outer * np.sin(theta) * self.u_1
-        )
-
-        # If oval shape 3 spline points are added to ensure a straight line
-        if self.side_1 > constants.TOL:
-            shell_inner_side_points = np.linspace(
-                self.center + (self.side_2 + self.r_2) * self.u_2 + 0.95 * self.side_1 * self.u_1,
-                self.center + (self.side_2 + self.r_2) * self.u_2 + self.side_1 * self.u_1,
-                3,
-            )
-            shell_inner_curve_points = np.insert(shell_inner_curve_points, 0, shell_inner_side_points, axis=0)
-
-            shell_outer_side_points = np.linspace(
-                self.center + (self.side_2 + self.r_2_outer) * self.u_2 + 0.95 * self.side_1 * self.u_1,
-                self.center + (self.side_2 + self.r_2_outer) * self.u_2 + self.side_1 * self.u_1,
-                3,
-            )
-            shell_outer_curve_points = np.insert(shell_outer_curve_points, 0, shell_outer_side_points, axis=0)
-
-        # Add edges to shell 1
-        self.shell[0].add_edge(3, Spline(shell_inner_curve_points[::-1]))
-        self.shell[0].add_edge(1, Spline(shell_outer_curve_points[::-1]))
-
-        # Shell 2
-        theta = np.linspace(np.pi / 4, np.pi / 2, 10, endpoint=False)[1:].reshape((-1, 1))
-        shell_inner_curve_points = (
-            self.center
-            + self.side_2 * self.u_2
-            + self.side_1 * self.u_1
-            + self.r_2 * np.cos(theta) * self.u_2
-            + self.r_1 * np.sin(theta) * self.u_1
-        )
-        shell_outer_curve_points = (
-            self.center
-            + self.side_2 * self.u_2
-            + self.side_1 * self.u_1
-            + self.r_2_outer * np.cos(theta) * self.u_2
-            + self.r_1_outer * np.sin(theta) * self.u_1
-        )
-
-        # If oval shape 3 spline points are added to ensure a straight line
-        if self.side_2 > constants.TOL:
-            shell_inner_side_points = np.linspace(
-                self.center + (self.side_1 + self.r_1) * self.u_1 + 0.95 * self.side_2 * self.u_2,
-                self.center + (self.side_1 + self.r_1) * self.u_1 + self.side_2 * self.u_2,
-                3,
-            )
-            shell_inner_curve_points = np.append(shell_inner_curve_points, shell_inner_side_points[::-1], axis=0)
-
-            shell_outer_side_points = np.linspace(
-                self.center + (self.side_1 + self.r_1_outer) * self.u_1 + 0.95 * self.side_2 * self.u_2,
-                self.center + (self.side_1 + self.r_1_outer) * self.u_1 + self.side_2 * self.u_2,
-                3,
-            )
-            shell_outer_curve_points = np.append(shell_outer_curve_points, shell_outer_side_points[::-1], axis=0)
-
-        # Add edges to shell 2
-        self.shell[1].add_edge(3, Spline(shell_inner_curve_points[::-1]))
-        self.shell[1].add_edge(1, Spline(shell_outer_curve_points[::-1]))
-
-        # If a circular shape use arc instead of spline
-        if self.side_1 <= constants.TOL and self.side_2 <= constants.TOL and abs(self.r_1 - self.r_2) < constants.TOL:
-            self.shell[0].add_edge(1, Origin(self.center))
-            self.shell[1].add_edge(1, Origin(self.center))
-            self.shell[0].add_edge(3, Origin(self.center))
-            self.shell[1].add_edge(3, Origin(self.center))
-
-class HalfSplineRing(QuarterSplineRing):
-    """Sketch for Half oval, elliptical and circular ring"""
     chops: ClassVar = [
         [0],  # axis 0
         [0, 1, 2, 3],  # axis 1
@@ -756,10 +560,12 @@ class HalfSplineRing(QuarterSplineRing):
         width_1: float,
         width_2: float,
         **kwargs
-    ) -> None:
+    ):
+
         """
         With a normal in x direction corner 1 will be in the y direction and corner 2 the z direction.
-        note the vectors from the center to corner 1 and 2 should be perpendicular.
+        Note the vectors from the center to corner 1 and 2 should be perpendicular.
+        The ring is defined such it will fit around a QuaterSplineRound defined with the same center, corners and sides.
         Args:
             center_point: Center of round shape
             corner_1_point: Radius for circular and elliptical shape
@@ -769,15 +575,70 @@ class HalfSplineRing(QuarterSplineRing):
             width_1: Width of shell
             width_2: Width of shell
         """
+        self.width_1 = float(width_1)
+        self.width_2 = float(width_2)
 
-        super().__init__(center_point, corner_1_point, corner_2_point, side_1, side_2, width_1, width_2, **kwargs)
-        other_quarter = QuarterSplineRing(self.center, self.corner_2, 2 * self.center - self.corner_1,
-                                          side_2, side_1, width_2, width_1, **kwargs)
-        self.merge(other_quarter)
+        super().__init__(center_point, corner_1_point, corner_2_point, side_1, side_2, **kwargs)
+
+    def correct_disk(self, corner_1_point: NPPointType, corner_2_point: NPPointType):
+        """Method to convert a disk to a ting"""
+
+        # First adjust circular disk to SplineDisk
+        super().correct_disk(corner_1_point, corner_2_point)
+        self.remove_core()
+
+        # Adjust inner curve to be oval/elliptical
+        r_1 = self.radius_1 - self.side_1 - self.width_1
+        r_2 = self.radius_2 - self.side_2 - self.width_2
+
+        pos = self.positions
+        pos[0] = self.radius_1_point - self.width_1 * self.u_1
+        pos[1] = self.origo + (self.side_1 + r_1 * np.cos(np.pi / 4)) * self.u_1 + \
+                 (self.side_2 + r_2 * np.sin(np.pi / 4)) * self.u_2
+        pos[2] = self.radius_2_point - self.width_2 * self.u_2
+        pos[3] = self.origo - (self.side_1 + r_1 * np.cos(np.pi / 4)) * self.u_1 + \
+                 (self.side_2 + r_2 * np.sin(np.pi / 4)) * self.u_2
+        pos[4] = self.origo - (self.radius_1 - self.width_1) * self.u_1
+        self.update(pos)
+
+    def add_edges(self) -> None:
+        # Don't run add_edges in QuarterDisk.__init__()
+        if not self.disk_initialized:
+            return
+
+        # Outside
+        # Circular
+        if self.side_1 < constants.TOL and self.side_2 < constants.TOL and \
+            abs(self.radius_1 - self.radius_2) < constants.TOL:
+
+            for face in self.shell:
+                face.add_edge(1, Origin(self.origo))
+        else:
+            self.add_outer_spline_edges()
+
+        # Inside
+        # Circular
+        if self.side_1 < constants.TOL and self.side_2 < constants.TOL and \
+            abs(self.radius_1 - self.radius_2) < constants.TOL and \
+            abs(self.width_1 - self.width_2) < constants.TOL:
+
+            for face in self.shell:
+                face.add_edge(3, Origin(self.origo))
+        else:
+            self.add_inner_spline_edges()
+
+    @property
+    def grid(self):
+        return [self.faces[-4:]]
+
+    @property
+    def core(self):
+        return None
 
 
-class SplineRing(HalfSplineRing):
-    """Sketch for full oval, elliptical and circular shapes"""
+class SplineRing(SplineDisk):
+    """Ring based on SplineRound."""
+
     chops: ClassVar = [
         [0],  # axis 0
         [0, 1, 2, 3, 4, 5, 6, 7],  # axis 1
@@ -793,39 +654,82 @@ class SplineRing(HalfSplineRing):
         width_1: float,
         width_2: float,
         **kwargs
-    ) -> None:
+    ):
+
         """
         With a normal in x direction corner 1 will be in the y direction and corner 2 the z direction.
-        note the vectors from the center to corner 1 and 2 should be perpendicular.
+        Note the vectors from the center to corner 1 and 2 should be perpendicular.
+        The ring is defined such it will fit around a QuaterSplineRound defined with the same center, corners and sides.
         Args:
             center_point: Center of round shape
             corner_1_point: Radius for circular and elliptical shape
             corner_2_point: Radius for circular and elliptical  shape
             side_1: Straight length for oval shape
             side_2: Straight length for oval shape
+            width_1: Width of shell
+            width_2: Width of shell
         """
+        self.width_1 = float(width_1)
+        self.width_2 = float(width_2)
 
-        super().__init__(center_point, corner_1_point, corner_2_point, side_1, side_2, width_1, width_2, **kwargs)
-        other_half = self.copy().transform([tr.Rotation(self.normal, np.pi, self.center)])
-        self.merge(other_half)
+        super().__init__(center_point, corner_1_point, corner_2_point, side_1, side_2, **kwargs)
 
+    def correct_disk(self, corner_1_point: NPPointType, corner_2_point: NPPointType):
+        """Method to convert a disk to a ting"""
 
-if __name__ == '__main__':
-    from classy_blocks.construct.shape import LoftedShape
-    from classy_blocks.mesh import Mesh
+        # First adjust circular disk to splinedisk
+        super().correct_disk(corner_1_point, corner_2_point)
+        self.remove_core()
 
-    sketch1 = SplineDisk([0,0.2,0], [0,1,0], [0,0,2], side_1=0, side_2=1)
+        # Adjust inner curve to be oval/elliptical
+        r_1 = self.radius_1 - self.side_1 - self.width_1
+        r_2 = self.radius_2 - self.side_2 - self.width_2
 
-    sketch2 = SplineDisk([5,0.2,0], [5,1,0], [5,0,2], side_1=0.5, side_2=1)
+        pos = self.positions
+        pos[0] = self.radius_1_point - self.width_1 * self.u_1
+        pos[1] = self.origo + (self.side_1 + r_1 * np.cos(np.pi / 4)) * self.u_1 + \
+                 (self.side_2 + r_2 * np.sin(np.pi / 4)) * self.u_2
+        pos[2] = self.radius_2_point - self.width_2 * self.u_2
+        pos[3] = self.origo - (self.side_1 + r_1 * np.cos(np.pi / 4)) * self.u_1 + \
+                 (self.side_2 + r_2 * np.sin(np.pi / 4)) * self.u_2
+        pos[4] = self.origo - (self.radius_1 - self.width_1) * self.u_1
+        pos[5] = self.origo - (self.side_1 + r_1 * np.cos(np.pi / 4)) * self.u_1 - \
+                 (self.side_2 + r_2 * np.sin(np.pi / 4)) * self.u_2
+        pos[6] = self.origo - (self.radius_2 - self.width_2) * self.u_2
+        pos[7] = self.origo + (self.side_1 + r_1 * np.cos(np.pi / 4)) * self.u_1 - \
+                 (self.side_2 + r_2 * np.sin(np.pi / 4)) * self.u_2
+        self.update(pos)
 
-    shape = LoftedShape(sketch1, sketch2)
-    # chop radial
-    shape.chop(0, count=10)
-    shape.chop(1, count=12)
-    shape.chop(2, count=14)
+    def add_edges(self) -> None:
+        # Don't run add_edges in QuarterDisk.__init__()
+        if not self.disk_initialized:
+            return
 
-    mesh = Mesh()
-    mesh.add(shape)
-    mesh.write('C:/Users/LAHN/OneDrive - Kamstrup A S/Documents/pythonScripts/classy_blocks/examples/case/system/blockMeshDict', debug_path='debug.vtk')
+        # Outside
+        # Circular
+        if self.side_1 < constants.TOL and self.side_2 < constants.TOL and \
+            abs(self.radius_1 - self.radius_2) < constants.TOL:
 
+            for face in self.shell:
+                face.add_edge(1, Origin(self.origo))
+        else:
+            self.add_outer_spline_edges()
 
+        # Inside
+        # Circular
+        if self.side_1 < constants.TOL and self.side_2 < constants.TOL and \
+            abs(self.radius_1 - self.radius_2) < constants.TOL and \
+            abs(self.width_1 - self.width_2) < constants.TOL:
+
+            for face in self.shell:
+                face.add_edge(3, Origin(self.origo))
+        else:
+            self.add_inner_spline_edges()
+
+    @property
+    def grid(self):
+        return [self.faces[-8:]]
+
+    @property
+    def core(self):
+        return None
