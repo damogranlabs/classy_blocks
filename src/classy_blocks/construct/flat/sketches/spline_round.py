@@ -486,6 +486,15 @@ class QuarterSplineRing(QuarterSplineDisk):
         self.width_1 = float(width_1)
         self.width_2 = float(width_2)
 
+        # Convert to corners to outer corners
+        if kwargs.get('from_inner', True):
+            corner_1_point = np.asarray(corner_1_point)
+            corner_2_point = np.asarray(corner_2_point)
+            self.u_1 = f.unit_vector(corner_1_point - np.asarray(center_point))
+            self.u_2 = f.unit_vector(corner_2_point - np.asarray(center_point))
+            corner_1_point = corner_1_point + self.width_1 * self.u_1
+            corner_2_point = corner_2_point + self.width_2 * self.u_2
+
         # Initialize QuarterDisk
         super().__init__(center_point, corner_1_point, corner_2_point, side_1, side_2, **kwargs)
 
@@ -577,6 +586,15 @@ class HalfSplineRing(HalfSplineDisk):
         """
         self.width_1 = float(width_1)
         self.width_2 = float(width_2)
+
+        # Convert to corners to outer corners
+        if kwargs.get('from_inner', True):
+            corner_1_point = np.asarray(corner_1_point)
+            corner_2_point = np.asarray(corner_2_point)
+            self.u_1 = f.unit_vector(corner_1_point - np.asarray(center_point))
+            self.u_2 = f.unit_vector(corner_2_point - np.asarray(center_point))
+            corner_1_point = corner_1_point + self.width_1 * self.u_1
+            corner_2_point = corner_2_point + self.width_2 * self.u_2
 
         super().__init__(center_point, corner_1_point, corner_2_point, side_1, side_2, **kwargs)
 
@@ -671,6 +689,15 @@ class SplineRing(SplineDisk):
         """
         self.width_1 = float(width_1)
         self.width_2 = float(width_2)
+
+        # Convert to corners to outer corners
+        if kwargs.get('from_inner', True):
+            corner_1_point = np.asarray(corner_1_point)
+            corner_2_point = np.asarray(corner_2_point)
+            self.u_1 = f.unit_vector(corner_1_point - np.asarray(center_point))
+            self.u_2 = f.unit_vector(corner_2_point - np.asarray(center_point))
+            corner_1_point = corner_1_point + self.width_1 * self.u_1
+            corner_2_point = corner_2_point + self.width_2 * self.u_2
 
         super().__init__(center_point, corner_1_point, corner_2_point, side_1, side_2, **kwargs)
 
