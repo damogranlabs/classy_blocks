@@ -120,7 +120,7 @@ class DiskBase(MappedSketch, abc.ABC):
             face.add_edge(edge_2, curve_1_2)
 
     def add_edges(self):
-        for face in self.grid[-1]:
+        for face in self.shell:
             face.add_edge(1, Origin(self.origo))
 
         self.add_core_spline_edges()
