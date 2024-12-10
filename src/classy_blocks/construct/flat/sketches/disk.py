@@ -162,20 +162,20 @@ class DiskBase(MappedSketch, abc.ABC):
 
     def translate(self: ElementBaseT, displacement: VectorType) -> ElementBaseT:
         """Reimplementation to ensure origo is transformed."""
-        self.origo += np.asarray(displacement)
-        super().translate(displacement)
+        self.origo += np.asarray(displacement, dtype='float64')
+        return super().translate(displacement)
 
     def rotate(self: ElementBaseT, angle: float, axis: VectorType, origin: Optional[PointType] = None) -> ElementBaseT:
         """Reimplementation to ensure origo is transformed."""
         o = self.center if origin is None else origin
         self.origo = f.rotate(self.origo, angle, f.unit_vector(axis), o)
-        super().rotate(angle, axis, origin)
+        return super().rotate(angle, axis, origin)
 
     def mirror(self: ElementBaseT, normal: VectorType, origin: Optional[PointType] = None) -> ElementBaseT:
         """Reimplementation to ensure origo is transformed."""
         o = np.array([0, 0, 0]) if origin is None else origin
         self.origo = f.mirror(self.origo, normal, o)
-        super().mirror(normal, origin)
+        return super().mirror(normal, origin)
 
     def shear(
         self: ElementBaseT, normal: VectorType, origin: PointType, direction: VectorType, angle: float
@@ -189,7 +189,7 @@ class DiskBase(MappedSketch, abc.ABC):
             amount = distance / np.tan(angle)
             self.origo += direction * amount
 
-        super().shear(normal, origin, direction, angle)
+        return super().shear(normal, origin, direction, angle)
 
 
 class OneCoreDisk(DiskBase):
@@ -248,7 +248,7 @@ class QuarterDisk(DiskBase):
             [2, 5, 6, 3],
         ]
         # Center point as a constant.
-        self.origo = np.asarray(center_point.copy())
+        self.origo = np.asarray(center_point.copy(), dtype='float64')
         pattern = FanPattern(center_point, radius_point, normal)
         ratios = [self.core_ratio, self.diagonal_ratio]
         angles = np.linspace(0, np.pi / 2, num=3)
@@ -282,7 +282,7 @@ class HalfDisk(DiskBase):
             [4, 9, 10, 5],
         ]
         # Center point as a constant.
-        self.origo = np.asarray(center_point.copy())
+        self.origo = np.asarray(center_point.copy(), dtype='float64')
         pattern = FanPattern(center_point, radius_point, normal)
         ratios = [self.core_ratio, self.diagonal_ratio]
         angles = np.linspace(0, np.pi, num=5)
@@ -320,7 +320,7 @@ class FourCoreDisk(DiskBase):
             [8, 16, 9, 1],
         ]
         # Center point as a constant.
-        self.origo = np.asarray(center_point.copy())
+        self.origo = np.asarray(center_point.copy(), dtype='float64')
         pattern = FanPattern(center_point, radius_point, normal)
         ratios = [self.core_ratio, self.diagonal_ratio]
         angles = np.linspace(0, 2 * np.pi, num=8, endpoint=False)
