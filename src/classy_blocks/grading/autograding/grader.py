@@ -1,4 +1,4 @@
-from typing import Tuple, get_args
+from typing import List, Tuple, get_args
 
 from classy_blocks.grading.autograding.params.base import ChopParams
 from classy_blocks.grading.autograding.params.fixed import FixedCountGraderParams
@@ -8,6 +8,7 @@ from classy_blocks.grading.autograding.params.smooth import SmoothGraderParams
 from classy_blocks.grading.autograding.probe import Probe
 from classy_blocks.grading.autograding.row import Row
 from classy_blocks.grading.chop import Chop
+from classy_blocks.items.wires.wire import Wire
 from classy_blocks.mesh import Mesh
 from classy_blocks.types import ChopTakeType, DirectionType
 
@@ -36,6 +37,14 @@ class GraderBase:
 
         self.mesh.assemble()
         self.probe = Probe(self.mesh)
+
+    def _chop_wire(self, wire: Wire, chops: List[Chop]) -> None:
+        """A shortcut"""
+        wire.grading.clear()
+        for chop in chops:
+            wire.grading.add_chop(chop)
+
+        wire.copy_to_coincidents()
 
     def check_at_wall(self, row: Row) -> Tuple[bool, bool]:
         """Returns True if any block on given row has a wall patch
@@ -77,9 +86,8 @@ class GraderBase:
 
                 info = self.probe.get_wire_info(wire, entry.block)
                 if self.params.is_squeezed(row.count, info):
-                    wire.grading.clear()
-                    wire.grading.add_chop(Chop(count=row.count))
-                    wire.copy_to_coincidents()
+                    chops = self.params.get_squeezed_chops(row.count, info)
+                    self._chop_wire(wire, chops)
 
     def finalize(self, row: Row) -> None:
         count = row.count
@@ -95,14 +103,9 @@ class GraderBase:
 
                 # TODO: cache wire info
                 info = self.probe.get_wire_info(wire, entry.block)
-
                 chops = self.params.get_chops(count, info)
 
-                wire.grading.clear()
-                for chop in chops:
-                    wire.grading.add_chop(chop)
-
-                wire.copy_to_coincidents()
+                self._chop_wire(wire, chops)
 
     def grade(self, take: ChopTakeType = "avg") -> None:
         for direction in get_args(DirectionType):

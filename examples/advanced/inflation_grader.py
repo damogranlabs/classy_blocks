@@ -19,6 +19,7 @@ mesh.add(shape)
 mesh.set_default_patch("boundary", "patch")
 for i in (0, 1, 2):
     shape.operations[i].set_patch("front", "walls")
+
 mesh.modify_patch("walls", "wall")
 
 # move some points to get a mesh with uneven blocks
@@ -36,6 +37,6 @@ for point in move_points:
 mesh.block_list.update()
 
 grader = InflationGrader(mesh, 1e-2, 0.1)
-grader.grade()
+grader.grade(take="max")
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

@@ -1,11 +1,11 @@
 import abc
-from typing import List
+from typing import List, Optional, Tuple
 
-import classy_blocks.grading.relations as gr
-from classy_blocks.grading.autograding.params.base import sum_length
+from classy_blocks.grading import relations as gr
 from classy_blocks.grading.autograding.params.smooth import SmoothGraderParams
 from classy_blocks.grading.autograding.probe import WireInfo
 from classy_blocks.grading.chop import Chop
+from classy_blocks.util.constants import VBIG
 
 
 class Layer(abc.ABC):
@@ -14,124 +14,87 @@ class Layer(abc.ABC):
     # Defines one chop and tools to handle it
     start_size: float
     c2c_expansion: float
+    length: float
+    count: int
+    end_size: float
 
-    def __init__(self, remainder: float):
-        # remaining length of the wire
-        self.remainder = remainder
+    def _construct(
+        self, length_limit: float = VBIG, count_limit: int = 10**12, size_limit: float = VBIG
+    ) -> Tuple[float, float, int]:
+        # stop construction of the layer when it hits any of the above limits
+        count = 1
+        size = self.start_size
+        length = self.start_size
 
-    @property
-    @abc.abstractmethod
-    def length(self) -> float:
-        """Returns overall length of this layer"""
+        for i in range(count_limit):
+            if length >= length_limit:
+                break
 
-    @property
-    def count(self) -> int:
-        """Returns cell count in this layer"""
-        length = min(self.length, self.remainder)
-        return gr.get_count__start_size__c2c_expansion(length, self.start_size, self.c2c_expansion)
+            if count >= count_limit:
+                break
 
-    @property
-    def end_size(self) -> float:
-        """Size of the last cell in this layer"""
-        return self.start_size * self.c2c_expansion**self.count
+            if size >= size_limit:
+                break
 
-    @property
-    def is_final(self) -> bool:
-        """Returns True if this layer is the last (no more space for additional ones)"""
-        return self.length >= self.remainder
+            length += size
+            size *= self.c2c_expansion
+            count = i
 
-    def get_chop(self, total_count: int, invert: bool) -> Chop:
-        """Returns a Chop with either this layer's count or given one,
-        whichever is lower"""
+        return length, size, count
+
+    def __init__(self, length_limit: float = VBIG, count_limit: int = 10**12, size_limit: float = VBIG):
+        # stop construction of the layer when it hits any of the above limits
+        self.length, self.end_size, self.count = self._construct(length_limit, count_limit, size_limit)
+
+    def get_chop_count(self, total_count: int) -> int:
+        return min(self.count, total_count)
+
+    def get_chop(self, actual_length: float, remaining_count: int, invert: bool) -> Tuple[Chop, int]:
+        """Returns a Chop, adapter to a given length; count will not exceed remaining"""
         # length ratios will be normalized later
-        if invert:
-            return Chop(
-                length_ratio=self.length,
-                end_size=self.end_size,
-                c2c_expansion=1 / self.c2c_expansion,
-                count=min(self.count, total_count),
-            )
+        length, end_size, count = self._construct(actual_length, remaining_count)
+        chop = Chop(length_ratio=length, end_size=end_size, count=count)
 
-        return Chop(
-            length_ratio=self.length,
-            start_size=self.start_size,
-            c2c_expansion=self.c2c_expansion,
-            count=min(self.count, total_count),
-        )
+        if invert:
+            chop.start_size = None
+            chop.end_size = self.start_size
+
+        return chop, count
 
     def __repr__(self):
         return f"{self.length}-{self.count}"
 
 
 class InflationLayer(Layer):
-    def __init__(self, wall_size: float, c2c_expansion: float, thickness_factor: int, max_length: float):
+    def __init__(self, wall_size: float, c2c_expansion: float, thickness_factor: int, _max_length: float):
         self.start_size = wall_size
         self.c2c_expansion = c2c_expansion
-        self.thickness_factor = thickness_factor
 
-        super().__init__(max_length)
-
-    @property
-    def length(self):
-        return min(self.remainder, self.start_size * self.thickness_factor)
+        super().__init__(length_limit=thickness_factor * wall_size)
 
 
 class BufferLayer(Layer):
-    def __init__(self, start_size: float, c2c_expansion: float, bulk_size: float, max_length: float):
-        self.start_size = start_size  # *c2c_expansion (the first cell is already bigger?)
+    def __init__(self, start_size: float, c2c_expansion: float, bulk_size: float, _max_length: float):
+        self.start_size = start_size
         self.c2c_expansion = c2c_expansion
-        self.bulk_size = bulk_size
 
-        self.total_expansion = self.bulk_size / self.start_size
+        super().__init__(size_limit=bulk_size)
 
-        # manually sum up those few cells that lead from start to bulk size
-        count = 0
-        size = self.start_size
-        length = 0.0
-
-        while size <= self.bulk_size:
-            length += size
-            count += 1
-
-            if length > max_length:
-                break
-
-            size *= self.c2c_expansion
-
-        self._count = count
-        self._last_size = size
-
-        super().__init__(max_length)
-
-    @property
-    def count(self):
-        return self._count
-
-    @property
-    def length(self):
-        return sum_length(self.start_size, self.count, self.c2c_expansion)
-
-    @property
-    def last_size(self):
-        return self._last_size
+    def get_chop_count(self, total_count: int) -> int:
+        # use all remaining cells
+        return max(self.count, total_count)
 
 
 class BulkLayer(Layer):
-    def __init__(self, cell_size: float, remainder: float):
-        self.start_size = cell_size
+    # Must be able to adapt end_size to match size_after
+    def __init__(self, start_size: float, end_size: float, remainder: float):
+        self.start_size = start_size
+        self.end_size = end_size
+        self.length = remainder
 
-        self.cell_size = cell_size
-        self.c2c_expansion = 1
-
-        super().__init__(remainder)
-
-    @property
-    def length(self):
-        return self.remainder
-
-    @property
-    def last_size(self):
-        return self.cell_size
+        total_expansion = gr.get_total_expansion__start_size__end_size(self.length, self.start_size, self.end_size)
+        self.count = gr.get_count__total_expansion__start_size(self.length, total_expansion, self.start_size)
+        self.c2c_expansion = gr.get_c2c_expansion__count__end_size(self.length, self.count, self.end_size)
 
 
 class LayerStack:
@@ -149,38 +112,35 @@ class LayerStack:
     def remaining_length(self) -> float:
         return self.length - sum(layer.length for layer in self.layers)
 
-    def add(self, layer: Layer) -> None:
-        """Returns True when the added layer was the final one"""
+    def add(self, layer: Layer) -> bool:
         self.layers.append(layer)
+        return self.is_done
 
     @property
     def is_done(self) -> bool:
         """Returns True if no more layers need to be added"""
+        if len(self.layers) == 0:
+            return False
+
         if len(self.layers) == 3:
             # nothing more to be added?
             return True
 
-        return self.remaining_length <= 0
+        return self.remaining_length <= self.layers[0].start_size
 
-    def get_chops(self, total_count: int, invert: bool) -> List[Chop]:
-        chops: List[Chop] = []
+    @property
+    def last_size(self) -> float:
+        return self.layers[-1].end_size
 
-        for layer in self.layers:
-            chop = layer.get_chop(total_count, invert)
-            chops.append(chop)
-
-            total_count -= layer.count
-
-            if total_count <= 0:
-                break
-
+    def get_chops(self, _total_count: int, _invert: bool) -> List[Chop]:
         # normalize length_ratios
-        ratios = [chop.length_ratio for chop in chops]
+        # ratios = [chop.length_ratio for chop in chops]
 
-        for chop in chops:
-            chop.length_ratio = chop.length_ratio / sum(ratios)
+        # for chop in chops:
+        #     chop.length_ratio = chop.length_ratio / sum(ratios)
 
-        return chops
+        # return chops
+        raise NotImplementedError
 
 
 class InflationGraderParams(SmoothGraderParams):
@@ -211,23 +171,23 @@ class InflationGraderParams(SmoothGraderParams):
     def get_buffer_layer(self, start_size, max_length: float) -> BufferLayer:
         return BufferLayer(start_size, self.buffer_expansion, self.bulk_cell_size, max_length)
 
-    def get_bulk_layer(self, remaining_length: float) -> BulkLayer:
-        return BulkLayer(self.bulk_cell_size, remaining_length)
+    def get_bulk_layer(self, remaining_length: float, size_after: float) -> BulkLayer:
+        return BulkLayer(self.bulk_cell_size, size_after, remaining_length)
 
-    def get_stack(self, length: float) -> LayerStack:
+    def get_stack(self, length: float, size_after: Optional[float] = None) -> LayerStack:
         stack = LayerStack(length)
 
         inflation = self.get_inflation_layer(length)
-        stack.add(inflation)
-        if stack.is_done:
+        if stack.add(inflation):
             return stack
 
         buffer = self.get_buffer_layer(stack.layers[0].end_size, stack.remaining_length)
-        stack.add(buffer)
-        if stack.is_done:
+        if stack.add(buffer):
             return stack
 
-        bulk = self.get_bulk_layer(stack.remaining_length)
+        if size_after is None:
+            size_after = self.bulk_cell_size
+        bulk = self.get_bulk_layer(stack.remaining_length, size_after)
         stack.add(bulk)
 
         return stack
@@ -249,20 +209,14 @@ class InflationGraderParams(SmoothGraderParams):
         if not (info.starts_at_wall or info.ends_at_wall):
             return super().is_squeezed(count, info)
 
-        # a squeezed wire is one that can't fit all layers
-        # or one that can't fit all cells
-        stack = self.get_stack(info.length)
-
-        if len(stack.layers) == 3:
-            return stack.count < count
-
-        return True
+        # TODO: replace 0.9 with something less arbitrary (a better rule)
+        return self.get_stack(info.length).last_size < 0.9 * self.bulk_cell_size
 
     def get_chops(self, count, info: WireInfo) -> List[Chop]:
         if not (info.starts_at_wall or info.ends_at_wall):
             return super().get_chops(count, info)
 
-        stack = self.get_stack(info.length)
+        stack = self.get_stack(info.length, info.size_after)
 
         if info.starts_at_wall and info.ends_at_wall:
             raise NotImplementedError

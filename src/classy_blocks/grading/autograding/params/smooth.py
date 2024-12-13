@@ -22,7 +22,7 @@ class SmoothGraderParams(ChopParams):
         return count
 
     def is_squeezed(self, count, info) -> bool:
-        return info.length <= self.cell_size * count
+        return info.length < self.cell_size * count
 
     def define_sizes(self, size_before: CellSizeType, size_after: CellSizeType) -> Tuple[float, float]:
         """Defines start and end cell size.
@@ -46,6 +46,13 @@ class SmoothGraderParams(ChopParams):
         halfcount = count // 2
 
         size_before, size_after = self.define_sizes(info.size_before, info.size_after)
+
+        from classy_blocks.grading.autograding.params.smoother import Smoother
+
+        smoother = Smoother(count, size_before, info.length, size_after)
+        return smoother.get_chops(3)
+
+        # return [Chop(length_ratio=0.5, count=halfcount), Chop(length_ratio=0.5, count=halfcount)]
 
         # choose length ratio so that cells at the middle of blocks
         # (between the two chops) have the same size
