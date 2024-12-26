@@ -1,10 +1,9 @@
 import dataclasses
-import warnings
-from typing import Tuple
-
-import scipy.optimize
+from typing import List, Tuple
 
 from classy_blocks.grading.autograding.params.base import CellSizeType, ChopParams
+from classy_blocks.grading.autograding.params.distributor import SmoothDistributor
+from classy_blocks.grading.autograding.probe import WireInfo
 from classy_blocks.grading.chop import Chop
 
 
@@ -42,35 +41,12 @@ class SmoothGraderParams(ChopParams):
 
         return size_before, size_after
 
-    def get_chops(self, count, info):
-        halfcount = count // 2
+    def get_squeezed_chops(self, count: int, _info: WireInfo) -> List[Chop]:
+        return [Chop(count=count)]
 
+    def get_chops(self, count, info):
         size_before, size_after = self.define_sizes(info.size_before, info.size_after)
 
-        from classy_blocks.grading.autograding.params.smoother import Smoother
+        smoother = SmoothDistributor(count, size_before, info.length, size_after)
 
-        smoother = Smoother(count, size_before, info.length, size_after)
-        return smoother.get_chops(3)
-
-        # return [Chop(length_ratio=0.5, count=halfcount), Chop(length_ratio=0.5, count=halfcount)]
-
-        # choose length ratio so that cells at the middle of blocks
-        # (between the two chops) have the same size
-        def fobj(lratio):
-            chop_1 = Chop(length_ratio=lratio, count=halfcount, start_size=size_before)
-            data_1 = chop_1.calculate(info.length)
-
-            chop_2 = Chop(length_ratio=1 - lratio, count=halfcount, end_size=size_after)
-            data_2 = chop_2.calculate(info.length)
-
-            ratio = (data_1.end_size - data_2.start_size) ** 2
-
-            return ratio, [chop_1, chop_2]
-
-        # it's not terribly important to minimize until the last dx
-        tol = min(size_before, size_after, self.cell_size) * 0.1
-        results = scipy.optimize.minimize_scalar(lambda r: fobj(r)[0], bounds=[0.1, 0.9], options={"xatol": tol})
-        if not results.success:  # type:ignore
-            warnings.warn("Could not determine optimal grading", stacklevel=1)
-
-        return fobj(results.x)[1]  # type:ignore
+        return smoother.get_chops(2)

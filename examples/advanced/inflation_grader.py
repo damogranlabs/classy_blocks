@@ -32,10 +32,6 @@ for point in move_points:
     vertex = list(finder.find_in_sphere(point))[0]
     vertex.translate([0, 0.8, 0])
 
-
-# TODO: Hack! mesh.assemble() won't work here but wires et. al. must be updated
-mesh.block_list.update()
-
 grader = InflationGrader(mesh, 1e-2, 0.1)
 grader.grade(take="max")
 
