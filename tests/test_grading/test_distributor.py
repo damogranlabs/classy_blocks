@@ -18,7 +18,7 @@ class SmoothDistributorTests(unittest.TestCase):
         # just to make sure it runs
         smoother = SmoothDistributor(10, 0.1, 1, 0.1)
 
-        np.testing.assert_almost_equal(smoother.get_smooth_coords(), np.arange(-0.1, 1.1, 0.1), decimal=5)
+        np.testing.assert_almost_equal(smoother.get_smooth_coords(), np.arange(0, 1.1, 0.1), decimal=5)
 
     def test_raw_variable(self):
         smoother = SmoothDistributor(10, 0.1, 1, 0.01)

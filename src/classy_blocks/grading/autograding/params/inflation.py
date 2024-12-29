@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from classy_blocks.grading.autograding.params.distributor import InflationDistributor, SmoothDistributor
 from classy_blocks.grading.autograding.params.layers import BufferLayer, BulkLayer, InflationLayer, LayerStack
@@ -69,20 +69,7 @@ class InflationGraderParams(SmoothGraderParams):
         stack = self.get_stack(length)
         return stack.count
 
-    def is_squeezed(self, count: int, info: WireInfo) -> bool:
-        if not (info.starts_at_wall or info.ends_at_wall):
-            return super().is_squeezed(count, info)
-
-        # TODO: replace 0.9 with something less arbitrary (a better rule)
-        return self.get_stack(info.length).last_size < 0.9 * self.bulk_cell_size
-
-    def get_squeezed_chops(self, count: int, info: WireInfo) -> List[Chop]:
-        return self.get_chops(count, info)
-
-    def get_chops(self, count, info: WireInfo) -> List[Chop]:
-        if info.starts_at_wall and info.ends_at_wall:
-            raise NotImplementedError
-
+    def get_sizes(self, info: WireInfo) -> Tuple[float, float]:
         size_before = info.size_before
         if size_before is None:
             if info.starts_at_wall:
@@ -97,18 +84,46 @@ class InflationGraderParams(SmoothGraderParams):
             else:
                 size_after = self.cell_size
 
+        return size_before, size_after
+
+    def is_squeezed(self, count: int, info: WireInfo) -> bool:
         if not (info.starts_at_wall or info.ends_at_wall):
-            print("NOT AT WALL", info)
+            return super().is_squeezed(count, info)
+
+        if info.starts_at_wall and info.ends_at_wall:
+            raise NotImplementedError
+
+        stack = self.get_stack(info.length, info.size_after)
+
+        if len(stack.layers) < 3:
+            return True
+
+        if stack.count < count:
+            return True
+
+        return False
+
+    def get_chops(self, count, info: WireInfo) -> List[Chop]:
+        # TODO: un-if-if-if
+        if info.starts_at_wall and info.ends_at_wall:
+            raise NotImplementedError
+
+        size_before, size_after = self.get_sizes(info)
+
+        if not (info.starts_at_wall or info.ends_at_wall):
             distributor = SmoothDistributor(count, size_before, info.length, size_after)
         else:
-            print("AT WALL", info)
             distributor = InflationDistributor(
-                count, size_before, info.length, size_after, self.c2c_expansion, self.bl_thickness_factor
+                count,
+                size_before,
+                info.length,
+                size_after,
+                self.c2c_expansion,
+                self.bl_thickness_factor,
+                self.buffer_expansion,
+                self.bulk_cell_size,
             )
 
         chops = distributor.get_chops(3)
-
-        if info.ends_at_wall:
-            return list(reversed(chops))
 
         return chops

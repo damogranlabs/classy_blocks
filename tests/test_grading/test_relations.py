@@ -160,7 +160,7 @@ class TestGradingRelations(unittest.TestCase):
             ((1, 10, 0.1), 1),
             ((1, 10, 0.01), 0.6784573173),
             ((1, 10, 0.2), 1.202420088),
-            ((1, 1, 1), 1),  # border case
+            ((1, 2, 0.5), 1),  # border case
         )
     )
     def test_get_c2c_expansion__count__end_size_valid(self, args, result):

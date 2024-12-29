@@ -23,14 +23,14 @@ class InflationParamsTests(unittest.TestCase):
 
     @parameterized.expand(
         (
-            (1, 24),
-            (2, 34),
-            (3, 44),
-            (0.1, 16),
-            (0.05, 14),
+            (1, 25),
+            (2, 35),
+            (3, 45),
+            (0.1, 17),
+            (0.05, 17),
             (0.01, 7),
             (0.002, 2),
-            (0.001, 2),
+            (0.001, 1),
             (0.0005, 1),
         )
     )
@@ -41,13 +41,13 @@ class InflationParamsTests(unittest.TestCase):
 
     @parameterized.expand(
         (
-            (1, 38),  # 0
-            (2, 48),  # 1
-            (3, 58),  # 2
-            (0.1, 28),  # 3
-            (0.05, 20),  # 4
-            (0.01, 8),  # 5
-            (0.002, 4),  # 6
+            (1, 40),  # 0
+            (2, 50),  # 1
+            (3, 60),  # 2
+            (0.1, 34),  # 3
+            (0.05, 22),  # 4
+            (0.01, 10),  # 5
+            (0.002, 2),  # 6
             (0.001, 2),  # 7
             (0.0005, 2),  # 8
         )
@@ -67,12 +67,11 @@ class InflationParamsTests(unittest.TestCase):
             (3, 44, False),  # 2
             (0.3, 16, False),  # 3
             # squeezed: enough room, high cell count
-            (1, 25, True),  # 4
-            (2, 35, True),  # 5
-            (3, 45, True),  # 6
+            (0.1, 25, True),  # 4
+            (1, 35, True),  # 5
+            (2, 45, True),  # 6
             # squeezed: not enough room, cell count doesn't matter
             (0.2, 16, True),  # 7
-            (0.2, 0, True),  # 8
         )
     )
     def test_is_squeezed_wall(self, length, count, squeezed):

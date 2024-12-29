@@ -23,7 +23,7 @@ class Layer(abc.ABC):
         size = self.start_size
         length = self.start_size
 
-        for i in range(count_limit):
+        for _ in range(count_limit):
             if length >= length_limit:
                 break
 
@@ -35,7 +35,7 @@ class Layer(abc.ABC):
 
             length += size
             size *= self.c2c_expansion
-            count = i
+            count += 1
 
         return length, size, count
 
@@ -45,11 +45,11 @@ class Layer(abc.ABC):
 
 
 class InflationLayer(Layer):
-    def __init__(self, wall_size: float, c2c_expansion: float, thickness_factor: int, _max_length: float):
+    def __init__(self, wall_size: float, c2c_expansion: float, thickness_factor: int, max_length: float):
         self.start_size = wall_size
         self.c2c_expansion = c2c_expansion
 
-        super().__init__(length_limit=thickness_factor * wall_size)
+        super().__init__(length_limit=min(thickness_factor * wall_size, max_length))
 
 
 class BufferLayer(Layer):
@@ -67,9 +67,18 @@ class BulkLayer(Layer):
         self.end_size = end_size
         self.length = remainder
 
-        total_expansion = gr.get_total_expansion__start_size__end_size(self.length, self.start_size, self.end_size)
-        self.count = gr.get_count__total_expansion__start_size(self.length, total_expansion, self.start_size)
-        self.c2c_expansion = gr.get_c2c_expansion__count__end_size(self.length, self.count, self.end_size)
+        # TODO: handle this in a more dignified way
+        if remainder < min(start_size, end_size):
+            self.count = 0
+            self.c2c_expansion = 1
+        else:
+            total_expansion = gr.get_total_expansion__start_size__end_size(self.length, self.start_size, self.end_size)
+            self.count = gr.get_count__total_expansion__start_size(self.length, total_expansion, self.start_size)
+
+            if self.count < 2:
+                self.c2c_expansion = 1
+            else:
+                self.c2c_expansion = gr.get_c2c_expansion__count__end_size(self.length, self.count, self.end_size)
 
 
 class LayerStack:
@@ -88,7 +97,8 @@ class LayerStack:
         return self.length - sum(layer.length for layer in self.layers)
 
     def add(self, layer: Layer) -> bool:
-        self.layers.append(layer)
+        if layer.count > 0:
+            self.layers.append(layer)
         return self.is_done
 
     @property

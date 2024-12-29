@@ -1,9 +1,9 @@
 from typing import Any, Callable, List, Literal, Sequence, Tuple, TypedDict, Union
 
-from nptyping import NDArray, Shape
+from nptyping import Float, NDArray, Shape
 
 # A plain list of floats
-FloatListType = NDArray[Shape["1, *"], Any]
+FloatListType = NDArray[Shape["1, *"], Float]
 
 # A single point can be specified as a list of floats or as a numpy array
 NPPointType = NDArray[Shape["3, 1"], Any]
