@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 from parameterized import parameterized
 
-from classy_blocks.grading.autograding.params.approximator import Approximator, Piece
+from classy_blocks.grading.autograding.approximator import Approximator, Piece
 
 
 def get_coords(count, c2c_expansion, start_coord, start_size):

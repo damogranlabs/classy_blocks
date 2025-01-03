@@ -2,7 +2,6 @@ import os
 
 import classy_blocks as cb
 from classy_blocks.construct.flat.sketches.disk import QuarterDisk
-from classy_blocks.grading.autograding.grader import SmoothGrader
 from classy_blocks.util import functions as f
 
 mesh = cb.Mesh()
@@ -21,7 +20,7 @@ mesh.add(quarter_cylinder)
 
 mesh.assemble()
 
-grader = SmoothGrader(mesh, 0.05)
+grader = cb.SmoothGrader(mesh, 0.05)
 grader.grade()
 
 mesh.set_default_patch("walls", "wall")

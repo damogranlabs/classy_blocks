@@ -1,14 +1,15 @@
 import dataclasses
 from typing import List, Tuple
 
-from classy_blocks.grading.autograding.params.base import CellSizeType, ChopParams
-from classy_blocks.grading.autograding.params.distributor import SmoothDistributor
 from classy_blocks.grading.autograding.probe import WireInfo
+from classy_blocks.grading.autograding.rules import ChopRules
+from classy_blocks.grading.autograding.smooth.distributor import SmoothDistributor
 from classy_blocks.grading.chop import Chop
+from classy_blocks.types import CellSizeType
 
 
 @dataclasses.dataclass
-class SmoothGraderParams(ChopParams):
+class SmoothRules(ChopRules):
     cell_size: float
 
     def get_count(self, length: float, _start_at_wall, _end_at_wall):
@@ -17,6 +18,10 @@ class SmoothGraderParams(ChopParams):
         # it must be divisible by 2
         if count % 2 != 0:
             count += 1
+
+        # can't use zero
+        if count == 0:
+            count = 2
 
         return count
 
@@ -31,6 +36,7 @@ class SmoothGraderParams(ChopParams):
             # until all counts/sizes are defined
             # (the first pass with uniform grading),
             # there's no point in doing anything
+            # TODO: check the same with other graders
             raise RuntimeError("Undefined grading encountered!")
 
         if size_before is None:

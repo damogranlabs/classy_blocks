@@ -2,7 +2,6 @@ import os
 from typing import List
 
 import classy_blocks as cb
-from classy_blocks.grading.autograding.grader import FixedCountGrader
 from classy_blocks.util import functions as f
 
 mesh = cb.Mesh()
@@ -34,7 +33,7 @@ for side in ("top", "right", "top", "top", "left", "top"):
 
 mesh.set_default_patch("walls", "wall")
 
-grader = FixedCountGrader(mesh, 5)
+grader = cb.FixedCountGrader(mesh, 5)
 grader.grade()
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

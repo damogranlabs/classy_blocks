@@ -32,6 +32,10 @@ from .construct.shapes.rings import ExtrudedRing, RevolvedRing
 from .construct.shapes.shell import Shell
 from .construct.shapes.sphere import Hemisphere
 from .construct.stack import ExtrudedStack, RevolvedStack, TransformedStack
+from .grading.autograding.fixed.grader import FixedCountGrader
+from .grading.autograding.inflation.grader import InflationGrader
+from .grading.autograding.simple.grader import SimpleGrader
+from .grading.autograding.smooth.grader import SmoothGrader
 from .mesh import Mesh
 from .modify.find.geometric import GeometricFinder
 from .modify.find.shape import RoundSolidFinder
@@ -136,4 +140,9 @@ __all__ = [
     "NJoint",
     "TJoint",
     "LJoint",
+    # Autograding
+    "FixedCountGrader",
+    "SimpleGrader",
+    "SmoothGrader",
+    "InflationGrader",
 ]

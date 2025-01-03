@@ -1,7 +1,6 @@
 import os
 
 import classy_blocks as cb
-from classy_blocks.grading.autograding.grader import SimpleGrader
 
 # a cylindrical tank with round end caps
 diameter = 0.5
@@ -25,7 +24,7 @@ mesh.add(cylinder)
 mesh.add(start_cap)
 mesh.add(end_cap)
 
-grader = SimpleGrader(mesh, 0.05)
+grader = cb.SimpleGrader(mesh, 0.05)
 grader.grade()
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

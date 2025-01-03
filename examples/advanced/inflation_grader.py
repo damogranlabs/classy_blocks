@@ -1,9 +1,9 @@
+# A terrible blocking of a rectangle for displaying InflationGrader capabilities
 import os
 
 import numpy as np
 
 import classy_blocks as cb
-from classy_blocks.grading.autograding.grader import InflationGrader
 
 mesh = cb.Mesh()
 
@@ -39,7 +39,7 @@ for point in move_points:
     vertex = list(finder.find_in_sphere(point))[0]
     vertex.translate([0, 0.8, 0])
 
-grader = InflationGrader(mesh, 5e-3, 0.1)
+grader = cb.InflationGrader(mesh, 5e-3, 0.1)
 grader.grade(take="max")
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

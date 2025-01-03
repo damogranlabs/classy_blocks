@@ -1,9 +1,10 @@
+# A terrible blocking of a rectangle for displaying SmoothGrader capabilities
+
 import os
 
 import numpy as np
 
 import classy_blocks as cb
-from classy_blocks.grading.autograding.grader import SmoothGrader
 
 mesh = cb.Mesh()
 
@@ -28,7 +29,7 @@ for point in move_points:
 
 mesh.set_default_patch("walls", "wall")
 mesh.block_list.update()
-grader = SmoothGrader(mesh, 0.05)
+grader = cb.SmoothGrader(mesh, 0.05)
 grader.grade()
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

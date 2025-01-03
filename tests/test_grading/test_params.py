@@ -2,15 +2,15 @@ import unittest
 
 from parameterized import parameterized
 
-from classy_blocks.grading.autograding.params.base import WireInfo
-from classy_blocks.grading.autograding.params.inflation import InflationGraderParams
+from classy_blocks.grading.autograding.inflation.rules import InflationRules
+from classy_blocks.grading.autograding.probe import WireInfo
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.wire import Wire
 
 
 class InflationParamsTests(unittest.TestCase):
     def setUp(self):
-        self.params = InflationGraderParams(1e-3, 0.1, 1.2, 30, 2)
+        self.params = InflationRules(1e-3, 0.1, 1.2, 30, 2)
 
     def get_info(self, length, starts_at_wall, ends_at_wall) -> WireInfo:
         wire = Wire([Vertex([0, 0, 0], 0), Vertex([length, 0, 0], 1)], 0, 0, 1)

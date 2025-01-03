@@ -8,8 +8,6 @@ from classy_blocks.types import PointListType, PointType, VectorType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import DTYPE, TOL
 
-# TODO! Tests
-
 
 class Array(ElementBase):
     def __init__(self, points: PointListType):

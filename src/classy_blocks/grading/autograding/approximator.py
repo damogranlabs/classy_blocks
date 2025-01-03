@@ -106,7 +106,7 @@ class Approximator:
         return pieces
 
     def get_chops(self, number: int) -> List[Chop]:
-        if self.is_simple:
+        if self.is_simple or self.count < 3:
             # don't bother
             return [Chop(count=self.count)]
 

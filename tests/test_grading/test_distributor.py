@@ -2,7 +2,8 @@ import unittest
 
 import numpy as np
 
-from classy_blocks.grading.autograding.params.distributor import SmoothDistributor
+from classy_blocks.grading.autograding.inflation.distributor import DoubleInflationDistributor, InflationDistributor
+from classy_blocks.grading.autograding.smooth.distributor import SmoothDistributor
 
 
 class SmoothDistributorTests(unittest.TestCase):
@@ -42,3 +43,25 @@ class SmoothDistributorTests(unittest.TestCase):
         smoother = SmoothDistributor(20, 0.01, 1, 0.01)
 
         print(smoother.get_chops(3))
+
+
+class InflationDistributorTests(unittest.TestCase):
+    def setUp(self):
+        self.distributor = InflationDistributor(20, 1e-3, 1, 0.1, 1.2, 30, 2, 0.1)
+
+    def test_ideal_ratios(self):
+        ratios = self.distributor.get_ideal_ratios()
+
+        exp_count = len(np.where(ratios == 1.2)[0])
+        self.assertEqual(exp_count, 11)
+
+        buffer_count = len(np.where(ratios == 2)[0])
+        self.assertEqual(buffer_count, 4)
+
+        bulk_count = len(np.where(ratios == 1)[0])
+        self.assertEqual(bulk_count, 20 - exp_count - buffer_count + 1)
+
+    def test_flip_ratios(self):
+        ratios = self.distributor.get_ideal_ratios()
+
+        print(DoubleInflationDistributor.flip_ratios(ratios))

@@ -1,12 +1,12 @@
 import dataclasses
 from typing import List
 
-from classy_blocks.grading.autograding.params.base import ChopParams
+from classy_blocks.grading.autograding.rules import ChopRules
 from classy_blocks.grading.chop import Chop
 
 
 @dataclasses.dataclass
-class FixedCountGraderParams(ChopParams):
+class FixedCountRules(ChopRules):
     count: int = 8
 
     def get_count(self, _length, _start_at_wall, _end_at_wall):

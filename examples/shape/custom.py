@@ -3,7 +3,6 @@ import os
 import numpy as np
 
 import classy_blocks as cb
-from classy_blocks.grading.autograding.grader import SmoothGrader
 from classy_blocks.types import PointType
 from classy_blocks.util import functions as f
 
@@ -65,7 +64,7 @@ shape = cb.ExtrudedShape(base_1, 1)
 mesh.add(shape)
 mesh.assemble()
 
-grader = SmoothGrader(mesh, 0.03)
+grader = cb.SmoothGrader(mesh, 0.03)
 grader.grade(take="max")
 
 mesh.set_default_patch("walls", "wall")

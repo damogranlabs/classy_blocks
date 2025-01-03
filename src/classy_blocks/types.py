@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Literal, Sequence, Tuple, TypedDict, Union
+from typing import Any, Callable, List, Literal, Optional, Sequence, Tuple, TypedDict, Union
 
 from nptyping import Float, NDArray, Shape
 
@@ -54,3 +54,5 @@ class ChopArgs(TypedDict, total=False):
 
 # what goes into blockMeshDict's block grading specification
 GradingSpecType = Tuple[float, int, float]
+# Used by autograders
+CellSizeType = Optional[float]

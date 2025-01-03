@@ -23,17 +23,13 @@ r_chamber_outer = 20e-3
 l_outlet = 80e-3
 
 # cell sizing
-cell_size = 1.5e-3
-bl_size = 0.15e-3
-c2c_expansion = 1.1
-axial_expansion = 2  # make cells in non-interesting places longer to save on count
+first_cell_size = 0.01e-3
+bulk_cell_size = 1.5e-3
 
 mesh = cb.Mesh()
 
 # inlet
 inlet = cb.Cylinder([0, 0, 0], [l_inlet, 0, 0], [0, 0, r_inlet])
-inlet.chop_axial(start_size=cell_size * axial_expansion, end_size=cell_size)
-inlet.chop_tangential(start_size=cell_size)
 
 inlet.set_start_patch("inlet")
 inlet.set_outer_patch("wall")
@@ -41,27 +37,15 @@ mesh.add(inlet)
 
 # nozzle
 nozzle = cb.Frustum.chain(inlet, l_nozzle, r_nozzle)
-# cell sizing: make sure bl_size is correct here
-nozzle.chop_axial(length_ratio=0.5, start_size=cell_size * axial_expansion, end_size=cell_size)
-nozzle.chop_axial(length_ratio=0.5, start_size=cell_size, end_size=bl_size)
-nozzle.chop_radial(end_size=bl_size, c2c_expansion=1 / c2c_expansion)
 nozzle.set_outer_patch("wall")
 mesh.add(nozzle)
 
 # chamber: inner cylinder
 chamber_inner = cb.Cylinder.chain(nozzle, l_chamber_inner)
-# create smaller cells at inlet and outlet but leave them bigger in the middle;
-chamber_inner.chop_axial(length_ratio=0.25, start_size=bl_size, end_size=cell_size)
-chamber_inner.chop_axial(length_ratio=0.25, start_size=cell_size, end_size=cell_size * axial_expansion)
-
-chamber_inner.chop_axial(length_ratio=0.25, start_size=cell_size * axial_expansion, end_size=cell_size)
-chamber_inner.chop_axial(length_ratio=0.25, start_size=cell_size, end_size=bl_size)
 mesh.add(chamber_inner)
 
 # chamber outer: expanded ring; the end face will be moved when the mesh is assembled
 chamber_outer = cb.ExtrudedRing.expand(chamber_inner, r_chamber_outer - r_inlet)
-chamber_outer.chop_radial(length_ratio=0.5, start_size=bl_size, c2c_expansion=c2c_expansion)
-chamber_outer.chop_radial(length_ratio=0.5, end_size=bl_size, c2c_expansion=1 / c2c_expansion)
 chamber_outer.set_start_patch("wall")
 chamber_outer.set_end_patch("wall")
 chamber_outer.set_outer_patch("wall")
@@ -78,10 +62,13 @@ for face in chamber_outer.sketch_2.faces:
 
 # outlet pipe
 outlet = cb.Cylinder.chain(chamber_inner, l_outlet)
-outlet.chop_axial(length_ratio=0.5, start_size=bl_size, end_size=cell_size)
-outlet.chop_axial(length_ratio=0.5, start_size=cell_size, end_size=cell_size * axial_expansion)
 outlet.set_outer_patch("wall")
 outlet.set_end_patch("outlet")
 mesh.add(outlet)
+
+mesh.modify_patch("wall", "wall")
+
+grader = cb.InflationGrader(mesh, first_cell_size, bulk_cell_size)
+grader.grade()
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

@@ -3,11 +3,9 @@ import dataclasses
 from typing import List
 
 import numpy as np
-import scipy.interpolate
 import scipy.optimize
 
-from classy_blocks.grading.autograding.params.approximator import Approximator
-from classy_blocks.grading.autograding.params.layers import InflationLayer
+from classy_blocks.grading.autograding.approximator import Approximator
 from classy_blocks.grading.chop import Chop
 from classy_blocks.types import FloatListType
 from classy_blocks.util.constants import TOL
@@ -87,58 +85,3 @@ class DistributorBase(abc.ABC):
     def get_last_size(self) -> float:
         coords = self.get_smooth_coords()
         return coords[-2] - coords[-3]
-
-
-@dataclasses.dataclass
-class SmoothDistributor(DistributorBase):
-    def get_ideal_ratios(self):
-        # In a smooth grader, we want all cells to be as similar to their neighbours as possible
-        return super().get_ideal_ratios()
-
-    def get_ratio_weights(self):
-        weights = np.ones(self.count + 1)
-        # Enforce stricter policy on the first few cells
-        # to match size_before and size_after
-        for i in (0, 1, 2, 3):
-            w = 2 ** (3 - i)
-            weights[i] = w
-            weights[-i - 1] = w
-
-        return weights
-
-
-@dataclasses.dataclass
-class InflationDistributor(SmoothDistributor):
-    c2c_expansion: float
-    bl_thickness_factor: int
-    buffer_expansion: float
-    bulk_size: float
-
-    @property
-    def is_simple(self) -> bool:
-        return False
-
-    def get_ideal_ratios(self):
-        # TODO: combine this logic and LayerStack;
-        # possibly package all parameters into a separate dataclass
-        ratios = super().get_ideal_ratios()
-
-        # Ideal growth ratio in boundary layer is user-specified c2c_expansion;
-        inflation_layer = InflationLayer(self.size_before, self.c2c_expansion, self.bl_thickness_factor, 1e12)
-        inflation_count = inflation_layer.count
-
-        ratios[:inflation_count] = self.c2c_expansion
-
-        # add a buffer layer if needed
-        last_inflation_size = inflation_layer.end_size
-        if self.bulk_size > self.buffer_expansion * last_inflation_size:
-            buffer_count = int(np.log(self.bulk_size / last_inflation_size) / np.log(self.buffer_expansion)) + 1
-            ratios[inflation_count : inflation_count + buffer_count] = self.buffer_expansion
-
-        return ratios
-
-    def get_ratio_weights(self):
-        # using the same weights as in SmoothDistributor
-        # can trigger overflow warnings but doesn't produce
-        # better chops; thus, keep it simple
-        return np.ones(self.count + 1)

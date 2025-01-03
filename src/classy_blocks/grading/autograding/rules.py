@@ -1,25 +1,14 @@
 import abc
-from typing import List, Optional
+from typing import List
 
 from classy_blocks.grading.autograding.probe import WireInfo
 from classy_blocks.grading.chop import Chop
 
-CellSizeType = Optional[float]
 
+class ChopRules(abc.ABC):
+    """Provides  information and mechanisms for determining cell count and
+    grading for autograders."""
 
-def sum_length(start_size: float, count: int, c2c_expansion: float) -> float:
-    """Returns absolute length of the chop"""
-    length = 0.0
-    size = start_size
-
-    for _ in range(count):
-        length += size
-        size *= c2c_expansion
-
-    return length
-
-
-class ChopParams(abc.ABC):
     @abc.abstractmethod
     def get_count(self, length: float, start_at_wall: bool, end_at_wall: bool) -> int:
         """Calculates count based on given length and position"""

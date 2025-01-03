@@ -84,6 +84,8 @@ class BulkLayer(Layer):
 class LayerStack:
     """A collection of one, two or three layers (chops) for InflationGrader"""
 
+    desired_layers = 3
+
     def __init__(self, length: float):
         self.length = length
         self.layers: List[Layer] = []
@@ -107,12 +109,8 @@ class LayerStack:
         if len(self.layers) == 0:
             return False
 
-        if len(self.layers) == 3:
+        if len(self.layers) == self.desired_layers:
             # nothing more to be added?
             return True
 
         return self.remaining_length <= self.layers[0].start_size
-
-    @property
-    def last_size(self) -> float:
-        return self.layers[-1].end_size

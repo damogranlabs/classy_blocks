@@ -1,12 +1,12 @@
 import dataclasses
 
-from classy_blocks.grading.autograding.params.base import ChopParams
 from classy_blocks.grading.autograding.probe import WireInfo
+from classy_blocks.grading.autograding.rules import ChopRules
 from classy_blocks.grading.chop import Chop
 
 
 @dataclasses.dataclass
-class SimpleGraderParams(ChopParams):
+class SimpleRules(ChopRules):
     cell_size: float
 
     def get_count(self, length: float, _start_at_wall, _end_at_wall):

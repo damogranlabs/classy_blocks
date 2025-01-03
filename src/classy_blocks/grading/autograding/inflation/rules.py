@@ -1,13 +1,14 @@
 from typing import List, Optional, Tuple
 
-from classy_blocks.grading.autograding.params.distributor import InflationDistributor, SmoothDistributor
-from classy_blocks.grading.autograding.params.layers import BufferLayer, BulkLayer, InflationLayer, LayerStack
-from classy_blocks.grading.autograding.params.smooth import SmoothGraderParams
+from classy_blocks.grading.autograding.inflation.distributor import DoubleInflationDistributor, InflationDistributor
+from classy_blocks.grading.autograding.inflation.layers import BufferLayer, BulkLayer, InflationLayer, LayerStack
 from classy_blocks.grading.autograding.probe import WireInfo
+from classy_blocks.grading.autograding.smooth.distributor import SmoothDistributor
+from classy_blocks.grading.autograding.smooth.rules import SmoothRules
 from classy_blocks.grading.chop import Chop
 
 
-class InflationGraderParams(SmoothGraderParams):
+class InflationRules(SmoothRules):
     """See description of InflationGrader"""
 
     # TODO: refactor to a reasonable number of 'if' clauses
@@ -61,8 +62,6 @@ class InflationGraderParams(SmoothGraderParams):
             return super().get_count(length, False, False)
 
         if starts_at_wall and ends_at_wall:
-            # this will produce 1 extra chop (the middle one could be
-            # common to both bulk chops) but it doesn't matter at this moment
             stack = self.get_stack(length / 2)
             return 2 * stack.count
 
@@ -90,10 +89,12 @@ class InflationGraderParams(SmoothGraderParams):
         if not (info.starts_at_wall or info.ends_at_wall):
             return super().is_squeezed(count, info)
 
-        if info.starts_at_wall and info.ends_at_wall:
-            raise NotImplementedError
+        length = info.length
 
-        stack = self.get_stack(info.length, info.size_after)
+        if info.starts_at_wall and info.ends_at_wall:
+            length = length / 2
+
+        stack = self.get_stack(length, info.size_after)
 
         if len(stack.layers) < 3:
             return True
@@ -112,18 +113,26 @@ class InflationGraderParams(SmoothGraderParams):
 
         if not (info.starts_at_wall or info.ends_at_wall):
             distributor = SmoothDistributor(count, size_before, info.length, size_after)
+            chop_count = 3
         else:
-            distributor = InflationDistributor(
-                count,
-                size_before,
-                info.length,
-                size_after,
-                self.c2c_expansion,
-                self.bl_thickness_factor,
-                self.buffer_expansion,
-                self.bulk_cell_size,
-            )
+            params = {
+                "count": count,
+                "size_before": size_before,
+                "length": info.length,
+                "size_after": size_after,
+                "c2c_expansion": self.c2c_expansion,
+                "bl_thickness_factor": self.bl_thickness_factor,
+                "buffer_expansion": self.buffer_expansion,
+                "bulk_size": self.bulk_cell_size,
+            }
 
-        chops = distributor.get_chops(3)
+            if info.starts_at_wall and info.ends_at_wall:
+                distributor = DoubleInflationDistributor(**params)
+                chop_count = 5
+            else:
+                distributor = InflationDistributor(**params)
+                chop_count = 3
+
+        chops = distributor.get_chops(chop_count)
 
         return chops

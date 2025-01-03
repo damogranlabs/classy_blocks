@@ -2,7 +2,6 @@ import os
 
 import classy_blocks as cb
 from classy_blocks.construct.flat.sketches.disk import DiskBase
-from classy_blocks.grading.autograding.grader import SmoothGrader
 
 DiskBase.core_ratio = 0.4  # Default is 0.8
 
@@ -36,7 +35,7 @@ mesh.assemble()
 mesh.block_list.update()
 
 # automatic grading
-grader = SmoothGrader(mesh, 0.1)
+grader = cb.SmoothGrader(mesh, 0.1)
 grader.grade()
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

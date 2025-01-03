@@ -40,7 +40,6 @@ class Frustum(RoundSolidShape):
         radius_vector_1 = radius_point_1 - axis_point_1
         radius_1 = f.norm(radius_vector_1)
 
-        # TODO: TEST
         diff = np.dot(axis, radius_vector_1)
         if diff > TOL:
             raise FrustumCreationError(
