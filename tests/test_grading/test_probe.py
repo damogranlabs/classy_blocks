@@ -23,7 +23,7 @@ class ProbeTests(AutogradeTestsBase):
         with self.assertRaises(RuntimeError):
             get_block_from_axis(mesh_1, mesh_2.blocks[0].axes[0])
 
-    @parameterized.expand((("min", 0.196889), ("max", 0.8), ("avg", 0.470923)))
+    @parameterized.expand((("min", 0.19305), ("max", 0.8), ("avg", 0.46677)))
     def test_get_row_length(self, take, length):
         self.mesh.add(self.get_frustum())
         self.mesh.assemble()

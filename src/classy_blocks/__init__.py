@@ -25,7 +25,7 @@ from .construct.operations.operation import Operation
 from .construct.operations.revolve import Revolve
 from .construct.operations.wedge import Wedge
 from .construct.shape import ExtrudedShape, LoftedShape, RevolvedShape, Shape
-from .construct.shapes.cylinder import Cylinder, SemiCylinder
+from .construct.shapes.cylinder import Cylinder, QuarterCylinder, SemiCylinder
 from .construct.shapes.elbow import Elbow
 from .construct.shapes.frustum import Frustum
 from .construct.shapes.rings import ExtrudedRing, RevolvedRing
@@ -100,6 +100,7 @@ __all__ = [
     "Frustum",
     "Cylinder",
     "SemiCylinder",
+    "QuarterCylinder",
     "ExtrudedRing",
     "RevolvedRing",
     "Hemisphere",

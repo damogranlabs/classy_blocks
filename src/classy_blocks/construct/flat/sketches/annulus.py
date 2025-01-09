@@ -24,12 +24,13 @@ class Annulus(Sketch):
         normal: VectorType,
         inner_radius: float,
         n_segments: int = 8,
+        angle: float = 2 * np.pi,
     ):
         center_point = np.asarray(center_point)
         normal = f.unit_vector(np.asarray(normal))
         outer_radius_point = np.asarray(outer_radius_point)
         inner_radius_point = center_point + f.unit_vector(outer_radius_point - center_point) * inner_radius
-        segment_angle = 2 * np.pi / n_segments
+        segment_angle = angle / n_segments
 
         face = Face(
             [  # points
@@ -66,7 +67,17 @@ class Annulus(Sketch):
 
     @property
     def center(self) -> NPPointType:
-        return np.average([f.center for f in self.faces], axis=0)
+        """Return center of sketch by assuming radial sides of faces intersect in the center"""
+        return np.average(
+            [
+                p[0]
+                - f.norm(np.cross(p[2] - p[3], p[3] - p[0]))
+                / f.norm(np.cross(p[2] - p[3], p[1] - p[0]))
+                * (p[1] - p[0])
+                for p in (face.point_array for face in self.faces)
+            ],
+            axis=0,
+        )
 
     @property
     def n_segments(self):

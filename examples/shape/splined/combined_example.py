@@ -33,16 +33,7 @@ oval_sketch_1 = cb.SplineDisk(center_point=center_point + direction * 3.4,
                               corner_2_point=np.asarray([0, 0, 2.2]) + direction * 3.4,
                               side_1=0.3, side_2=0.3)
 
-# It is possible to define the oval rom the radius instead of the side lengths.
-# It is sometimes necessary to increase the number of spline points
-# in the transition from curved to straight for good mesh quality.
-# This is done using the n_straight_spline_points key word.
-"""
-oval_sketch_2 = cb.SplineDisk.init_from_radius(center_point=center_point + direction * 4,
-                                               corner_1_point=np.asarray([0, 1.5, 0]) + direction * 4,
-                                               corner_2_point=np.asarray([0, 0, 2.5]) + direction * 4,
-                                               r_1=0.7, r_2=0.7, n_straight_spline_points=100)
-"""
+
 
 oval_sketch_2 = cb.SplineDisk(center_point=center_point + direction * 4,
                               corner_1_point=np.asarray([0, 1.5, 0]) + direction * 4,
@@ -52,16 +43,16 @@ oval_sketch_2 = cb.SplineDisk(center_point=center_point + direction * 4,
 # The ring is defined as the disk,
 # where a ring with same center, corner_1... as a disk will fit on the outside of the disk.
 oval_ring_1 = cb.SplineRing(center_point=oval_sketch_2.center,
-                            corner_1_point=oval_sketch_2.corner_1,
-                            corner_2_point=oval_sketch_2.corner_2,
+                            corner_1_point=oval_sketch_2.radius_1_point,
+                            corner_2_point=oval_sketch_2.radius_2_point,
                             side_1=oval_sketch_2.side_1,
                             side_2=oval_sketch_2.side_2,
                             width_1=0.2, width_2=0.2, n_outer_spline_points=100)
 
 # Note it is possible to access the center and corners of a defined sketch. These are stable on transformation.
 oval_ring_2 = cb.SplineRing(center_point=oval_sketch_2.center + direction,
-                            corner_1_point=oval_sketch_2.corner_1 + direction,
-                            corner_2_point=oval_sketch_2.corner_2 + direction,
+                            corner_1_point=oval_sketch_2.radius_1_point + direction,
+                            corner_2_point=oval_sketch_2.radius_2_point + direction,
                             side_1=0,
                             side_2=0,
                             width_1=0.2, width_2=0.2, n_outer_spline_points=100)
