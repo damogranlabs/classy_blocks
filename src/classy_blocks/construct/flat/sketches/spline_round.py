@@ -16,6 +16,12 @@ class SplineRound(DiskBase):
     n_outer_spline_points = 20
     n_straight_spline_points = 10
 
+    # Widths only used for rings
+    width_1: float = 0
+    width_2: float = 0
+
+    disk_initialized: bool = False
+
     def __init__(
         self,
         side_1: float,
@@ -27,6 +33,8 @@ class SplineRound(DiskBase):
 
         self.n_outer_spline_points = kwargs.get('n_outer_spline_points', self.n_outer_spline_points)
         self.n_straight_spline_points = kwargs.get('n_straight_spline_points', self.n_straight_spline_points)
+
+
 
     def remove_core(self):
         """Remove core. Used for rings"""
@@ -62,10 +70,12 @@ class SplineRound(DiskBase):
         # Add straight part for ovals
         if side_2 > constants.TOL:
             if reverse:
-                side_points_u = np.linspace(p_0_u_adj, p_0_u_adj - np.array([0, 0, 0.05 * side_2]), self.n_straight_spline_points)
+                side_points_u = np.linspace(p_0_u_adj, p_0_u_adj - np.array([0, 0, 0.05 * side_2]),
+                                            self.n_straight_spline_points)
                 spline_points_u = np.append(spline_points_u, side_points_u, axis=0)
             else:
-                side_points_u = np.linspace(p_0_u_adj - np.array([0, 0, 0.05 * side_2]), p_0_u_adj, self.n_straight_spline_points)
+                side_points_u = np.linspace(p_0_u_adj - np.array([0, 0, 0.05 * side_2]), p_0_u_adj,
+                                            self.n_straight_spline_points)
                 spline_points_u = np.insert(spline_points_u, 0, side_points_u, axis=0)
 
         # Orthogonal vectors based on p_0_u and p_1_u
@@ -95,18 +105,18 @@ class SplineRound(DiskBase):
             curve_0_1 = self.core_spline(p_0, p_1, radi[i%2], sides[i%2], radi[(i+1)%2], sides[(i+1)%2], reverse=i==2)
             curve_1_2 = self.core_spline(p_2, p_1, radi[(i+1)%2], sides[(i+1)%2], radi[i%2], sides[i%2], reverse=i!=1)
 
-            curve_0_1 = Spline(curve_0_1)
-            curve_1_2 = Spline(curve_1_2)
+            spline_curve_0_1 = Spline(curve_0_1)
+            spline_curve_1_2 = Spline(curve_1_2)
 
             # Add curves to edges
             edge_1 = (i + 1) % 4
             edge_2 = (i + 2) % 4
-            face.add_edge(edge_1, curve_0_1)
-            face.add_edge(edge_2, curve_1_2)
+            face.add_edge(edge_1, spline_curve_0_1)
+            face.add_edge(edge_2, spline_curve_1_2)
 
     def outer_spline(self, p_radius: PointType, p_diagonal: PointType,
                      radius_1: float, side_1: float, radius_2: float, side_2: float,
-                     center: NPPointType = None, reversed: bool = False) -> NPPointListType:
+                     center: Optional[NPPointType] = None, reverse: bool = False) -> NPPointListType:
         """Creates the spline points for the core."""
         p_0 = np.asarray(p_radius)
         p_1 = np.asarray(p_diagonal)
@@ -124,16 +134,18 @@ class SplineRound(DiskBase):
         theta = np.linspace(0, np.pi/4, self.n_outer_spline_points)
         spline_points_u = c_0_u_adj + np.array([np.zeros(len(theta)), r_1 * np.cos(theta), r_2 * np.sin(theta)]).T
 
-        if reversed:
+        if reverse:
             spline_points_u = spline_points_u[::-1]
             # Add straight part for ovals
             if side_2 > constants.TOL:
-                side_points_u = np.linspace(p_0_u_adj, p_0_u_adj - np.array([0, 0, 0.05 * side_2]), self.n_straight_spline_points)
+                side_points_u = np.linspace(p_0_u_adj, p_0_u_adj - np.array([0, 0, 0.05 * side_2]),
+                                            self.n_straight_spline_points)
                 spline_points_u = np.append(spline_points_u,  side_points_u, axis=0)
         else:
             # Add straight part for ovals
             if side_2 > constants.TOL:
-                side_points_u = np.linspace(p_0_u_adj - np.array([0, 0, 0.05 * side_2]), p_0_u_adj, self.n_straight_spline_points)
+                side_points_u = np.linspace(p_0_u_adj - np.array([0, 0, 0.05 * side_2]), p_0_u_adj,
+                                            self.n_straight_spline_points)
                 spline_points_u = np.insert(spline_points_u, 0, side_points_u, axis=0)
 
         # Orthogonal vectors based on p_0_u and p_1_u
@@ -151,7 +163,7 @@ class SplineRound(DiskBase):
         spline_points_new = center + spline_d_0_org * u_0 + spline_d_1_org * u_1
         return spline_points_new
 
-    def add_outer_spline_edges(self, center:NPPointType = None) -> None:
+    def add_outer_spline_edges(self, center: Optional[NPPointType] = None) -> None:
         """Add curved edge as spline to outside of sketch"""
         sides = [self.side_1, self.side_2, self.side_2, self.side_1]
         radi = [self.radius_1, self.radius_2, self.radius_2, self.radius_1]
@@ -159,12 +171,12 @@ class SplineRound(DiskBase):
             p_0 = face.point_array[(i % 2) + 1]         # Outer point on radius
             p_1 = face.point_array[((i + 1) % 2) + 1]   # Outer point on diagonal
 
-            curve_0_1 = self.outer_spline(p_0, p_1, radi[i % 4], sides[i % 4],
-                                          radi[(i + 1) % 4], sides[(i + 1) % 4],
-                                          center, reversed=i % 2 == 1)
-            face.add_edge(1, Spline(curve_0_1))
+            spline_curve_0_1 = self.outer_spline(p_0, p_1, radi[i % 4], sides[i % 4],
+                                                 radi[(i + 1) % 4], sides[(i + 1) % 4],
+                                                 center, reverse=i % 2 == 1)
+            face.add_edge(1, Spline(spline_curve_0_1))
 
-    def add_inner_spline_edges(self, center:NPPointType = None) -> None:
+    def add_inner_spline_edges(self, center: Optional[NPPointType] = None) -> None:
         """Add curved edge as spline to inside of ring"""
         sides = [self.side_1, self.side_2, self.side_2, self.side_1]
         radi = [self.radius_1 - self.width_1, self.radius_2 - self.width_2,
@@ -173,18 +185,19 @@ class SplineRound(DiskBase):
             p_0 = face.point_array[0 if i % 2 == 0 else 3]   # Inner point on radius
             p_1 = face.point_array[3 if i % 2 == 0 else 0]   # Inner point on diagonal
 
-            curve_0_1 = self.outer_spline(p_0, p_1, radi[i % 4], sides[i % 4],
-                                          radi[(i + 1) % 4], sides[(i + 1) % 4],
-                                          center, reversed=i % 2 == 1)
+            spline_curve_0_1 = self.outer_spline(p_0, p_1, radi[i % 4], sides[i % 4],
+                                                 radi[(i + 1) % 4], sides[(i + 1) % 4],
+                                                 center, reverse=i % 2 == 1)
 
-            face.add_edge(3, Spline(curve_0_1))
+            face.add_edge(3, Spline(spline_curve_0_1))
 
     def add_edges(self) -> None:
         # Don't run add_edges in QuarterDisk.__init__()
         if not self.disk_initialized:
             return
         # Circular
-        if self.side_1 < constants.TOL and self.side_2 < constants.TOL and abs(self.radius_1 - self.radius_2) < constants.TOL:
+        if self.side_1 < constants.TOL and self.side_2 < constants.TOL and \
+            abs(self.radius_1 - self.radius_2) < constants.TOL:
             super().add_edges()
         else:
             self.add_core_spline_edges()

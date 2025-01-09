@@ -42,6 +42,7 @@ class DiskBase(MappedSketch, abc.ABC):
     # Just the right value will yield the lowest non-orthogonality and skewness;
     # determined empirically
     core_ratio = 0.8
+    origo: NPPointType = np.array([0, 0, 0])
 
     # Spline points for optimized round meshes
     # As ratio of radius
@@ -70,7 +71,7 @@ class DiskBase(MappedSketch, abc.ABC):
         return 2 ** 0.5 * self.spline_ratios[7] / 0.8 * self.core_ratio
 
     def core_spline(self, p_core_ratio: PointType, p_diagonal_ratio: PointType,
-                    reverse: bool = False, center: PointType = None) -> NPPointListType:
+                    reverse: bool = False, center: Optional[PointType] = None) -> NPPointListType:
         """Creates the spline points for the core."""
         p_0 = np.asarray(p_core_ratio)
         p_1 = np.asarray(p_diagonal_ratio)
@@ -110,14 +111,14 @@ class DiskBase(MappedSketch, abc.ABC):
             p_1 = face.point_array[(i + 2) % 4]     # Core point on diagonal
             p_2 = face.point_array[(i + 3) % 4]     # Core point on perpendicular radius vector
 
-            curve_0_1 = Spline(self.core_spline(p_0, p_1, reverse=i == 2))
-            curve_1_2 = Spline(self.core_spline(p_2, p_1, reverse=i != 1))
+            spline_curve_0_1 = Spline(self.core_spline(p_0, p_1, reverse=i == 2))
+            spline_curve_1_2 = Spline(self.core_spline(p_2, p_1, reverse=i != 1))
 
             # Add curves to edges
             edge_1 = (i + 1) % 4
             edge_2 = (i + 2) % 4
-            face.add_edge(edge_1, curve_0_1)
-            face.add_edge(edge_2, curve_1_2)
+            face.add_edge(edge_1, spline_curve_0_1)
+            face.add_edge(edge_2, spline_curve_1_2)
 
     def add_edges(self):
         for face in self.shell:
@@ -212,7 +213,7 @@ class OneCoreDisk(DiskBase):
             [3, 7, 4, 0],
         ]
         # Center point as a constant.
-        self.origo = np.asarray(center_point.copy())
+        self.origo = np.asarray(center_point).copy()
         pattern = FanPattern(center_point, radius_point, normal)
         ratios = [self.diagonal_ratio]
         angles = np.linspace(0, 2 * np.pi, num=4, endpoint=False)
@@ -248,7 +249,7 @@ class QuarterDisk(DiskBase):
             [2, 5, 6, 3],
         ]
         # Center point as a constant.
-        self.origo = np.asarray(center_point.copy(), dtype='float64')
+        self.origo = np.asarray(center_point, dtype='float64').copy()
         pattern = FanPattern(center_point, radius_point, normal)
         ratios = [self.core_ratio, self.diagonal_ratio]
         angles = np.linspace(0, np.pi / 2, num=3)
@@ -282,7 +283,7 @@ class HalfDisk(DiskBase):
             [4, 9, 10, 5],
         ]
         # Center point as a constant.
-        self.origo = np.asarray(center_point.copy(), dtype='float64')
+        self.origo = np.asarray(center_point, dtype='float64').copy()
         pattern = FanPattern(center_point, radius_point, normal)
         ratios = [self.core_ratio, self.diagonal_ratio]
         angles = np.linspace(0, np.pi, num=5)
@@ -320,7 +321,7 @@ class FourCoreDisk(DiskBase):
             [8, 16, 9, 1],
         ]
         # Center point as a constant.
-        self.origo = np.asarray(center_point.copy(), dtype='float64')
+        self.origo = np.asarray(center_point, dtype='float64').copy()
         pattern = FanPattern(center_point, radius_point, normal)
         ratios = [self.core_ratio, self.diagonal_ratio]
         angles = np.linspace(0, 2 * np.pi, num=8, endpoint=False)

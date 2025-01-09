@@ -21,7 +21,7 @@ class SemiCylinder(RoundSolidShape):
     axis_point_2: position of end face
     radius_point_1: defines starting point and radius"""
 
-    sketch_class: ClassVar[Union[Type[Disk], Type[HalfDisk]]] = HalfDisk
+    sketch_class: ClassVar[Union[Type[Disk], Type[HalfDisk], Type[QuarterDisk]]] = HalfDisk
 
     def __init__(self, axis_point_1: PointType, axis_point_2: PointType, radius_point_1: PointType):
         axis_point_1 = np.asarray(axis_point_1)
@@ -54,7 +54,7 @@ class QuarterCylinder(RoundSolidShape):
     axis_point_2: position of end face
     radius_point_1: defines starting point and radius"""
 
-    sketch_class: ClassVar[Union[Type[Disk], Type[HalfDisk]]] = QuarterDisk
+    sketch_class: ClassVar[Union[Type[Disk], Type[HalfDisk], Type[QuarterDisk]]] = QuarterDisk
 
     def __init__(self, axis_point_1: PointType, axis_point_2: PointType, radius_point_1: PointType):
         axis_point_1 = np.asarray(axis_point_1)
