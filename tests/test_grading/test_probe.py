@@ -1,13 +1,11 @@
-from typing import Set, get_args
+from typing import get_args
 
 import numpy as np
 from parameterized import parameterized
 
 from classy_blocks.grading.autograding.catalogue import get_block_from_axis
-from classy_blocks.grading.autograding.probe import Probe, get_defined_wall_vertices
-from classy_blocks.items.vertex import Vertex
+from classy_blocks.grading.autograding.probe import Probe
 from classy_blocks.mesh import Mesh
-from classy_blocks.modify.find.shape import RoundSolidFinder
 from classy_blocks.types import DirectionType
 from tests.test_grading.test_autograde import AutogradeTestsBase
 
@@ -83,7 +81,7 @@ class ProbeTests(AutogradeTestsBase):
         probe = Probe(self.mesh)
         indexes = set()
 
-        for block in probe.catalogue.rows[axis][row].blocks:
+        for block in probe.rows.rows[axis][row].blocks:
             indexes.add(block.index)
 
         self.assertSetEqual(indexes, blocks)
@@ -105,71 +103,10 @@ class ProbeTests(AutogradeTestsBase):
         probe = Probe(self.mesh)
         indexes = set()
 
-        for block in probe.catalogue.rows[axis][row].blocks:
+        for block in probe.rows.rows[axis][row].blocks:
             indexes.add(block.index)
 
         self.assertSetEqual(indexes, blocks)
-
-    def test_wall_vertices_defined(self) -> None:
-        """Catch wall vertices from explicitly defined wall patches"""
-        cylinder = self.get_cylinder()
-        cylinder.set_outer_patch("outer")
-
-        self.mesh.add(cylinder)
-        self.mesh.modify_patch("outer", "wall")
-        self.mesh.assemble()
-
-        finder = RoundSolidFinder(self.mesh, cylinder)
-        shell_vertices = finder.find_shell(True).union(finder.find_shell(False))
-        wall_vertices: Set[Vertex] = set()
-
-        wall_vertices.update(get_defined_wall_vertices(self.mesh))
-
-        self.assertSetEqual(shell_vertices, wall_vertices)
-
-    def test_wall_vertices_default(self) -> None:
-        """Catch wall vertices from default patch"""
-        cylinder = self.get_cylinder()
-        cylinder.set_start_patch("inlet")
-        cylinder.set_end_patch("outlet")
-        self.mesh.add(cylinder)
-
-        self.mesh.set_default_patch("outer", "wall")
-        self.mesh.assemble()
-
-        probe = Probe(self.mesh)
-
-        finder = RoundSolidFinder(self.mesh, cylinder)
-        shell_vertices = finder.find_shell(True).union(finder.find_shell(False))
-        wall_vertices: Set[Vertex] = set()
-
-        for block in self.mesh.blocks:
-            wall_vertices.update(probe.get_wall_vertices(block))
-
-        self.assertSetEqual(shell_vertices, wall_vertices)
-
-    def test_wall_vertices_combined(self) -> None:
-        cylinder = self.get_cylinder()
-        cylinder.set_end_patch("outlet")
-
-        cylinder.set_start_patch("bottom")
-        self.mesh.add(cylinder)
-
-        self.mesh.modify_patch("bottom", "wall")
-
-        self.mesh.set_default_patch("outer", "wall")
-        self.mesh.assemble()
-
-        probe = Probe(self.mesh)
-
-        finder = RoundSolidFinder(self.mesh, cylinder)
-        shell_vertices = finder.find_shell(True).union(finder.find_shell(False)).union(finder.find_core(False))
-        wall_vertices: Set[Vertex] = set()
-
-        for block in self.mesh.blocks:
-            wall_vertices.update(probe.get_wall_vertices(block))
-
-        self.assertSetEqual(shell_vertices, wall_vertices)
 
     def test_flipped_simple(self):
         shape = self.get_stack().shapes[0]
@@ -232,7 +169,7 @@ class ProbeTests(AutogradeTestsBase):
 
         probe = Probe(self.mesh)
         block = self.mesh.blocks[0]
-        info = probe.get_wire_info(block.wires[wire_start][wire_end], block)
+        info = probe.get_wire_info(block.wires[wire_start][wire_end])
 
         self.assertEqual(info.starts_at_wall, starts_at_wall)
 
@@ -264,6 +201,23 @@ class ProbeTests(AutogradeTestsBase):
 
         probe = Probe(self.mesh)
         block = self.mesh.blocks[0]
-        info = probe.get_wire_info(block.wires[wire_start][wire_end], block)
+        info = probe.get_wire_info(block.wires[wire_start][wire_end])
 
         self.assertEqual(info.starts_at_wall, starts_at_wall)
+
+    def test_wire_boundaries_cylinder(self):
+        block_index = 0
+        wire_start = 0
+        wire_end = 1
+        # same as above tests but on a cylinder, not just a box
+        cylinder = self.get_cylinder()
+        cylinder.set_outer_patch("sides")
+        self.mesh.add(cylinder)
+        self.mesh.modify_patch("sides", "wall")
+        self.mesh.assemble()
+
+        probe = Probe(self.mesh)
+        block = self.mesh.blocks[block_index]
+        info = probe.get_wire_info(block.wires[wire_start][wire_end])
+
+        self.assertEqual(info.starts_at_wall, False)

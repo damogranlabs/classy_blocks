@@ -1,4 +1,4 @@
-from classy_blocks.grading.autograding.graders import GraderBase
+from classy_blocks.grading.autograding.grader import GraderBase
 from classy_blocks.grading.autograding.inflation.rules import InflationRules
 from classy_blocks.mesh import Mesh
 

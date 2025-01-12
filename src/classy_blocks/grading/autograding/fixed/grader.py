@@ -1,5 +1,5 @@
 from classy_blocks.grading.autograding.fixed.rules import FixedCountRules
-from classy_blocks.grading.autograding.graders import GraderBase
+from classy_blocks.grading.autograding.grader import GraderBase
 from classy_blocks.mesh import Mesh
 
 

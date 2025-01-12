@@ -46,10 +46,6 @@ mesh.add(chamber_inner)
 
 # chamber outer: expanded ring; the end face will be moved when the mesh is assembled
 chamber_outer = cb.ExtrudedRing.expand(chamber_inner, r_chamber_outer - r_inlet)
-chamber_outer.set_start_patch("wall")
-chamber_outer.set_end_patch("wall")
-chamber_outer.set_outer_patch("wall")
-mesh.add(chamber_outer)
 
 # translate outer points of outer chamber (and edges) to get
 # that inverted cone at the end;
@@ -59,6 +55,11 @@ for face in chamber_outer.sketch_2.faces:
         face.points[i].translate([l_chamber_outer - l_chamber_inner, 0, 0])
 
     face.add_edge(1, cb.Origin([l_inlet + l_nozzle + l_chamber_outer, 0, 0]))
+
+chamber_outer.set_start_patch("wall")
+chamber_outer.set_end_patch("wall")
+chamber_outer.set_outer_patch("wall")
+mesh.add(chamber_outer)
 
 # outlet pipe
 outlet = cb.Cylinder.chain(chamber_inner, l_outlet)

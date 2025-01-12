@@ -33,7 +33,7 @@ class Instruction:
         return id(self)
 
 
-class Catalogue:
+class RowCatalogue:
     """A collection of rows on a specified axis"""
 
     def __init__(self, mesh: Mesh):

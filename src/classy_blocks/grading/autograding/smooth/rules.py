@@ -32,13 +32,6 @@ class SmoothRules(ChopRules):
         """Defines start and end cell size.
         size_before and size_after are taken from preceding/following wires;
         when a size is None, this is the last/first wire."""
-        if size_before == 0 or size_after == 0:
-            # until all counts/sizes are defined
-            # (the first pass with uniform grading),
-            # there's no point in doing anything
-            # TODO: check the same with other graders
-            raise RuntimeError("Undefined grading encountered!")
-
         if size_before is None:
             size_before = self.cell_size
 

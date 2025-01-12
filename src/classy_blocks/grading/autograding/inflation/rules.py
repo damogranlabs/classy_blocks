@@ -106,9 +106,6 @@ class InflationRules(SmoothRules):
 
     def get_chops(self, count, info: WireInfo) -> List[Chop]:
         # TODO: un-if-if-if
-        if info.starts_at_wall and info.ends_at_wall:
-            raise NotImplementedError
-
         size_before, size_after = self.get_sizes(info)
 
         if not (info.starts_at_wall or info.ends_at_wall):
@@ -136,3 +133,6 @@ class InflationRules(SmoothRules):
         chops = distributor.get_chops(chop_count)
 
         return chops
+
+    def get_squeezed_chops(self, count: int, info: WireInfo) -> List[Chop]:
+        return self.get_chops(count, info)

@@ -134,7 +134,6 @@ class Approximator:
                 continue
 
         pieces = self.get_pieces(best_scenario)  # type:ignore
-
         chops = [piece.get_chop() for piece in pieces]
 
         # normalize length ratios

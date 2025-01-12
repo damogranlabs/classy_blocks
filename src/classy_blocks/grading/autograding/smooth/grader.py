@@ -1,4 +1,4 @@
-from classy_blocks.grading.autograding.graders import GraderBase
+from classy_blocks.grading.autograding.grader import GraderBase
 from classy_blocks.grading.autograding.smooth.rules import SmoothRules
 from classy_blocks.mesh import Mesh
 

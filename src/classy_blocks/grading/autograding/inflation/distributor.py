@@ -37,12 +37,6 @@ class InflationDistributor(SmoothDistributor):
 
         return ratios
 
-    def get_ratio_weights(self):
-        # using the same weights as in SmoothDistributor
-        # can trigger overflow warnings but doesn't produce
-        # better chops; thus, keep it simple
-        return np.ones(self.count + 1)
-
 
 class DoubleInflationDistributor(InflationDistributor):
     @staticmethod

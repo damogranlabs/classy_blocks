@@ -10,10 +10,7 @@ from classy_blocks.types import ChopTakeType, DirectionType
 
 
 class GraderBase:
-    """One grader to rule them all. Grading procedure depends on given GraderParams object
-    that decides whether to grade a specific block (wire) or to let it pass to
-
-    Behold the most general procedure for grading _anything_.
+    """Behold the most general procedure for grading _anything_.
     For each row in every direction:
     1. Set count
         If there's a wire on the wall - determine 'wall' count (low-re grading etc)
@@ -22,10 +19,9 @@ class GraderBase:
         If there's a wire that has a count, defined by user, use that unconditionally
     2. Chop 'squeezed' blocks
         Where there's not enough space to fit graded cells, use a simple grading
-        (or whatever the grader defines)
+        (or whatever the rules define)
     3. Chop other blocks
-        optionally use multigrading to match neighbours' cell sizes
-    """
+        optionally use multigrading to match neighbours' cell sizes"""
 
     def __init__(self, mesh: Mesh, rules: ChopRules):
         self.mesh = mesh
@@ -52,7 +48,7 @@ class GraderBase:
         for entry in row.entries:
             for wire in entry.wires:
                 # TODO: cache WireInfo
-                info = self.probe.get_wire_info(wire, entry.block)
+                info = self.probe.get_wire_info(wire)
                 if info.starts_at_wall:
                     start = True
                 if info.ends_at_wall:
@@ -80,14 +76,12 @@ class GraderBase:
                 if wire.is_defined:
                     continue
 
-                info = self.probe.get_wire_info(wire, entry.block)
+                info = self.probe.get_wire_info(wire)
                 if self.rules.is_squeezed(row.count, info):
                     chops = self.rules.get_squeezed_chops(row.count, info)
                     self._chop_wire(wire, chops)
 
     def finalize(self, row: Row) -> None:
-        count = row.count
-
         for entry in row.entries:
             # TODO! don't touch wires, defined by USER
             # if wire.is_defined:
@@ -98,8 +92,8 @@ class GraderBase:
                     continue
 
                 # TODO: cache wire info
-                info = self.probe.get_wire_info(wire, entry.block)
-                chops = self.rules.get_chops(count, info)
+                info = self.probe.get_wire_info(wire)
+                chops = self.rules.get_chops(row.count, info)
 
                 self._chop_wire(wire, chops)
 

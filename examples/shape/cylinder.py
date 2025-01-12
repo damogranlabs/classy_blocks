@@ -21,8 +21,8 @@ cylinder.set_outer_patch("walls")
 # remove them with this method:
 cylinder.remove_inner_edges(start=False, end=True)
 
-bl_thickness = 0.05
-core_size = 0.2
+bl_thickness = 1e-3
+core_size = 0.1
 
 # manual grading
 # cylinder.chop_axial(count=30)
@@ -30,12 +30,11 @@ core_size = 0.2
 # cylinder.chop_tangential(start_size=core_size)
 
 mesh.add(cylinder)
-
-mesh.assemble()
-mesh.block_list.update()
+mesh.modify_patch("walls", "wall")
 
 # automatic grading
-grader = cb.SmoothGrader(mesh, 0.1)
+# grader = cb.SmoothGrader(mesh, 0.1)
+grader = cb.InflationGrader(mesh, bl_thickness, core_size)
 grader.grade()
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

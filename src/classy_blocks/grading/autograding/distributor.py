@@ -38,10 +38,6 @@ class DistributorBase(abc.ABC):
         """Returns desired cell-to-cell ratios"""
         return np.ones(self.count + 1)
 
-    @abc.abstractmethod
-    def get_ratio_weights(self) -> FloatListType:
-        """Returns weights of cell ratios"""
-
     def get_raw_coords(self) -> FloatListType:
         # 'count' denotes number of 'intervals' so add one more point to get points;
         # first and last cells are added artificially ('ghost cells') to calculate
@@ -61,13 +57,15 @@ class DistributorBase(abc.ABC):
             coords[2:-2] = inner_coords
 
             # to prevent 'flipping' over and producing zero or negative length, scale with e^-ratio
-            difference = -(self.get_ratio_weights() * (self.get_actual_ratios(coords) - self.get_ideal_ratios()))
+            difference = -(self.get_actual_ratios(coords) - self.get_ideal_ratios())
             return np.exp(difference) - 1
 
         scale = min(self.size_before, self.size_after, self.length / self.count) / 100
-        _ = scipy.optimize.least_squares(ratios, coords[2:-2], ftol=scale / 10, x_scale=scale)
+        tol = scale / 10
+        _ = scipy.optimize.least_squares(ratios, coords[2:-2], ftol=tol, x_scale=scale, gtol=tol, xtol=tol)
 
         # omit the 'ghost' cells
+        print(coords)
         return coords[1:-1]
 
     @property
