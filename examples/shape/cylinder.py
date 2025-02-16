@@ -33,8 +33,7 @@ mesh.add(cylinder)
 mesh.modify_patch("walls", "wall")
 
 # automatic grading
-# grader = cb.SmoothGrader(mesh, 0.1)
-grader = cb.InflationGrader(mesh, bl_thickness, core_size)
+grader = cb.SmoothGrader(mesh, 0.1)
 grader.grade()
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")
