@@ -2,13 +2,13 @@ import functools
 from typing import Dict, List, Optional, Set, get_args
 
 from classy_blocks.base.exceptions import BlockNotFoundError, NoInstructionError
+from classy_blocks.cbtyping import ChopTakeType, DirectionType, OrientType
 from classy_blocks.items.block import Block
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.axis import Axis
 from classy_blocks.items.wires.wire import Wire
 from classy_blocks.mesh import Mesh
 from classy_blocks.optimize.grid import HexGrid
-from classy_blocks.types import ChopTakeType, DirectionType, OrientType
 from classy_blocks.util.constants import FACE_MAP
 
 

@@ -4,11 +4,11 @@ import numpy as np
 from parameterized import parameterized
 
 from classy_blocks.base.exceptions import DisconnectedChopError, PointNotCoincidentError, SharedPointNotFoundError
+from classy_blocks.cbtyping import OrientType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.box import Box
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.shapes.shell import AwareFace, AwareFaceStore, SharedPoint, SharedPointStore, Shell
-from classy_blocks.types import OrientType
 from classy_blocks.util import functions as f
 from tests.fixtures.block import DataTestCase
 

@@ -9,7 +9,7 @@ import scipy.linalg
 import scipy.optimize
 import scipy.spatial
 
-from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, PointListType, PointType, VectorType
+from classy_blocks.cbtyping import NPPointListType, NPPointType, NPVectorType, PointListType, PointType, VectorType
 from classy_blocks.util import constants
 
 

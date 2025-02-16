@@ -5,8 +5,8 @@ from typing import ClassVar, Dict, List, Optional, Set, Tuple
 import numpy as np
 
 from classy_blocks.base.exceptions import NoCommonSidesError
+from classy_blocks.cbtyping import FloatListType, IndexType, NPPointListType, NPPointType, OrientType
 from classy_blocks.optimize.connection import CellConnection
-from classy_blocks.types import FloatListType, IndexType, NPPointListType, NPPointType, OrientType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import EDGE_PAIRS, VSMALL
 

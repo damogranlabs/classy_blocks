@@ -3,6 +3,7 @@ from typing import List, Type, Union
 import numpy as np
 
 from classy_blocks.base.exceptions import InvalidLinkError, NoJunctionError
+from classy_blocks.cbtyping import IndexType, NPPointListType, NPPointType
 from classy_blocks.construct.assemblies.assembly import Assembly
 from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.construct.flat.sketches.mapped import MappedSketch
@@ -15,7 +16,6 @@ from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.junction import Junction
 from classy_blocks.optimize.links import LinkBase
 from classy_blocks.optimize.mapper import Mapper
-from classy_blocks.types import IndexType, NPPointListType, NPPointType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
 

@@ -6,9 +6,9 @@ import numpy as np
 
 from classy_blocks.base.element import ElementBase
 from classy_blocks.base.exceptions import FaceCreationError
+from classy_blocks.cbtyping import NPPointListType, NPPointType, NPVectorType, PointListType, PointType, ProjectToType
 from classy_blocks.construct.edges import EdgeData, Line, Project
 from classy_blocks.construct.point import Point
-from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, PointListType, PointType, ProjectToType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 

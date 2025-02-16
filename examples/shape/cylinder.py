@@ -17,7 +17,7 @@ cylinder = cb.QuarterCylinder(axis_point_1, axis_point_2, radius_point_1)
 cylinder.set_start_patch("inlet")
 cylinder.set_end_patch("outlet")
 cylinder.set_outer_patch("walls")
-cylinder.set_symmetry_patch('sym')
+cylinder.set_symmetry_patch("sym")
 
 # if curved core edges get in the way (when moving vertices, optimization, ...),
 # remove them with this method:

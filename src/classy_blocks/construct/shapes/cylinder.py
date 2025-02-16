@@ -4,10 +4,10 @@ import numpy as np
 
 from classy_blocks.base import transforms as tr
 from classy_blocks.base.exceptions import CylinderCreationError
+from classy_blocks.cbtyping import PointType
 from classy_blocks.construct.flat.sketches.disk import Disk, HalfDisk, QuarterDisk
 from classy_blocks.construct.shapes.rings import ExtrudedRing
 from classy_blocks.construct.shapes.round import RoundSolidShape
-from classy_blocks.types import PointType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
 

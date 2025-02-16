@@ -2,9 +2,9 @@ from typing import ClassVar, Optional
 
 import numpy as np
 
+from classy_blocks.cbtyping import NPPointListType, NPPointType, NPVectorType, PointType
 from classy_blocks.construct.edges import Origin, Spline
 from classy_blocks.construct.flat.sketches.disk import DiskBase, FourCoreDisk, HalfDisk, QuarterDisk
-from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, PointType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
@@ -612,7 +612,6 @@ class QuarterSplineRing(QuarterSplineDisk):
             and self.side_2 < constants.TOL
             and abs(self.radius_1 - self.radius_2) < constants.TOL
         ):
-
             for face in self.shell:
                 face.add_edge(1, Origin(self.origo))
         else:
@@ -626,7 +625,6 @@ class QuarterSplineRing(QuarterSplineDisk):
             and abs(self.radius_1 - self.radius_2) < constants.TOL
             and abs(self.width_1 - self.width_2) < constants.TOL
         ):
-
             for face in self.shell:
                 face.add_edge(3, Origin(self.origo))
         else:
@@ -726,7 +724,6 @@ class HalfSplineRing(HalfSplineDisk):
             and self.side_2 < constants.TOL
             and abs(self.radius_1 - self.radius_2) < constants.TOL
         ):
-
             for face in self.shell:
                 face.add_edge(1, Origin(self.origo))
         else:
@@ -740,7 +737,6 @@ class HalfSplineRing(HalfSplineDisk):
             and abs(self.radius_1 - self.radius_2) < constants.TOL
             and abs(self.width_1 - self.width_2) < constants.TOL
         ):
-
             for face in self.shell:
                 face.add_edge(3, Origin(self.origo))
         else:
@@ -851,7 +847,6 @@ class SplineRing(SplineDisk):
             and self.side_2 < constants.TOL
             and abs(self.radius_1 - self.radius_2) < constants.TOL
         ):
-
             for face in self.shell:
                 face.add_edge(1, Origin(self.origo))
         else:
@@ -865,7 +860,6 @@ class SplineRing(SplineDisk):
             and abs(self.radius_1 - self.radius_2) < constants.TOL
             and abs(self.width_1 - self.width_2) < constants.TOL
         ):
-
             for face in self.shell:
                 face.add_edge(3, Origin(self.origo))
         else:

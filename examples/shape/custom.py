@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 import classy_blocks as cb
-from classy_blocks.types import PointType
+from classy_blocks.cbtyping import PointType
 from classy_blocks.util import functions as f
 
 # an example with a custom sketch, yielding a custom shape (square with rounded corners);

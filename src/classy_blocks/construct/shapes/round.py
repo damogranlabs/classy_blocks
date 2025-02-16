@@ -1,11 +1,11 @@
 from typing import List, Optional, Sequence
 
 from classy_blocks.base import transforms as tr
+from classy_blocks.cbtyping import DirectionType, OrientType
 from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.construct.flat.sketches.annulus import Annulus
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.shape import LoftedShape
-from classy_blocks.types import DirectionType, OrientType
 
 
 class RoundSolidShape(LoftedShape):

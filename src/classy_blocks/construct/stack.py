@@ -4,10 +4,10 @@ import numpy as np
 
 from classy_blocks.base import transforms as tr
 from classy_blocks.base.element import ElementBase
+from classy_blocks.cbtyping import DirectionType, PointType, VectorType
 from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.shape import LoftedShape
-from classy_blocks.types import DirectionType, PointType, VectorType
 from classy_blocks.util import functions as f
 
 

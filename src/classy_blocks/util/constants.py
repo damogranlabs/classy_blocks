@@ -1,6 +1,6 @@
 from typing import Dict, List, Tuple
 
-from classy_blocks.types import OrientType
+from classy_blocks.cbtyping import OrientType
 
 # data type
 DTYPE = "float"  # dtype as taken by np.array()

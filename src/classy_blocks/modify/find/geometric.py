@@ -1,8 +1,8 @@
 from typing import Optional, Set
 
+from classy_blocks.cbtyping import PointType, VectorType
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.modify.find.finder import FinderBase
-from classy_blocks.types import PointType, VectorType
 from classy_blocks.util import functions as f
 
 

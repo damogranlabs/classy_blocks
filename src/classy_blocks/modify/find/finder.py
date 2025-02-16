@@ -2,9 +2,9 @@ from typing import Optional, Set
 
 import numpy as np
 
+from classy_blocks.cbtyping import PointType
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.mesh import Mesh
-from classy_blocks.types import PointType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 

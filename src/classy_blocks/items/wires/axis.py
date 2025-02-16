@@ -1,12 +1,12 @@
 from typing import List, Set
 
 from classy_blocks.base.exceptions import InconsistentGradingsError
+from classy_blocks.cbtyping import DirectionType
 from classy_blocks.grading.chop import Chop
 from classy_blocks.grading.grading import Grading
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.manager import WireManager
 from classy_blocks.items.wires.wire import Wire
-from classy_blocks.types import DirectionType
 
 
 class Axis:

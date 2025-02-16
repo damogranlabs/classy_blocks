@@ -1,8 +1,8 @@
 """Defines a numbered vertex in 3D space and all operations
 that can be applied to it."""
 
+from classy_blocks.cbtyping import PointType
 from classy_blocks.construct.point import Point
-from classy_blocks.types import PointType
 from classy_blocks.util.constants import vector_format
 
 

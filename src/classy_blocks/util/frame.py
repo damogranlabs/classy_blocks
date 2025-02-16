@@ -1,6 +1,6 @@
 from typing import ClassVar, Dict, Generic, List, Optional, Set, Tuple, TypeVar
 
-from classy_blocks.types import DirectionType
+from classy_blocks.cbtyping import DirectionType
 from classy_blocks.util import constants
 
 BeamT = TypeVar("BeamT")

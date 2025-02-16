@@ -4,13 +4,13 @@ from typing import get_args
 import numpy as np
 
 from classy_blocks.base.exceptions import InconsistentGradingsError
+from classy_blocks.cbtyping import DirectionType
 from classy_blocks.construct.edges import Arc
 from classy_blocks.construct.operations.box import Box
 from classy_blocks.construct.operations.connector import Connector
 from classy_blocks.construct.operations.extrude import Extrude
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.mesh import Mesh
-from classy_blocks.types import DirectionType
 
 
 class EdgeGradingExampleTests(unittest.TestCase):

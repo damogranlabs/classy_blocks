@@ -40,8 +40,8 @@ import warnings
 from typing import List
 
 from classy_blocks.base.exceptions import UndefinedGradingsError
+from classy_blocks.cbtyping import GradingSpecType
 from classy_blocks.grading.chop import Chop, ChopData
-from classy_blocks.types import GradingSpecType
 from classy_blocks.util import constants
 
 

@@ -2,9 +2,9 @@ from typing import Optional, Tuple
 
 import numpy as np
 
+from classy_blocks.cbtyping import NPVectorType, ParamCurveFuncType, PointType, VectorType
 from classy_blocks.construct.curves.curve import FunctionCurveBase
 from classy_blocks.construct.point import Point
-from classy_blocks.types import NPVectorType, ParamCurveFuncType, PointType, VectorType
 from classy_blocks.util import functions as f
 
 

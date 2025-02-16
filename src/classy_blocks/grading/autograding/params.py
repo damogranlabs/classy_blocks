@@ -6,8 +6,8 @@ from typing import List, Optional, Tuple
 import scipy.optimize
 
 import classy_blocks.grading.relations as gr
+from classy_blocks.cbtyping import ChopTakeType
 from classy_blocks.grading.chop import Chop
-from classy_blocks.types import ChopTakeType
 
 CellSizeType = Optional[float]
 

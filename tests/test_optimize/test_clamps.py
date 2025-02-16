@@ -2,11 +2,11 @@ import unittest
 
 import numpy as np
 
+from classy_blocks.cbtyping import NPPointType
 from classy_blocks.construct.curves.analytic import AnalyticCurve
 from classy_blocks.optimize.clamps.curve import CurveClamp, LineClamp, RadialClamp
 from classy_blocks.optimize.clamps.free import FreeClamp
 from classy_blocks.optimize.clamps.surface import ParametricSurfaceClamp, PlaneClamp
-from classy_blocks.types import NPPointType
 from classy_blocks.util import functions as f
 
 

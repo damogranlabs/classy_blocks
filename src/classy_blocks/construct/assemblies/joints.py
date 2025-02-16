@@ -3,12 +3,12 @@ from typing import List
 
 import numpy as np
 
+from classy_blocks.cbtyping import FloatListType, PointType
 from classy_blocks.construct.assemblies.assembly import Assembly
 from classy_blocks.construct.edges import Spline
 from classy_blocks.construct.flat.sketches.disk import HalfDisk
 from classy_blocks.construct.shape import Shape
 from classy_blocks.construct.shapes.cylinder import SemiCylinder
-from classy_blocks.types import FloatListType, PointType
 from classy_blocks.util import functions as f
 
 

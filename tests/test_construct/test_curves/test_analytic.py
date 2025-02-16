@@ -4,8 +4,8 @@ from math import cos, sin
 import numpy as np
 from parameterized import parameterized
 
+from classy_blocks.cbtyping import NPPointType
 from classy_blocks.construct.curves.analytic import AnalyticCurve, CircleCurve, LineCurve
-from classy_blocks.types import NPPointType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
 

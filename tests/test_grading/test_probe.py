@@ -2,11 +2,11 @@ from typing import Set, get_args
 
 from parameterized import parameterized
 
+from classy_blocks.cbtyping import DirectionType
 from classy_blocks.grading.autograding.probe import Probe, get_block_from_axis
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.mesh import Mesh
 from classy_blocks.modify.find.shape import RoundSolidFinder
-from classy_blocks.types import DirectionType
 from tests.test_grading.test_autograde import AutogradeTestsBase
 
 

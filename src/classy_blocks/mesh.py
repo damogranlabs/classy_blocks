@@ -3,6 +3,7 @@
 from typing import List, Optional, Set, Union, get_args
 
 from classy_blocks.base.exceptions import EdgeNotFoundError
+from classy_blocks.cbtyping import DirectionType
 from classy_blocks.construct.assemblies.assembly import Assembly
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.shape import Shape
@@ -16,7 +17,6 @@ from classy_blocks.lists.face_list import FaceList
 from classy_blocks.lists.geometry_list import GeometryList
 from classy_blocks.lists.patch_list import PatchList
 from classy_blocks.lists.vertex_list import VertexList
-from classy_blocks.types import DirectionType
 from classy_blocks.util import constants
 from classy_blocks.util.vtk_writer import write_vtk
 

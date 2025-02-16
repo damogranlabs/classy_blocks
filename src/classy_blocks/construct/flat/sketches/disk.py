@@ -3,11 +3,7 @@ from typing import ClassVar, List, Optional
 
 import numpy as np
 
-from classy_blocks.construct.edges import Origin, Spline
-from classy_blocks.construct.flat.face import Face
-from classy_blocks.construct.flat.sketches.mapped import MappedSketch
-from classy_blocks.construct.point import Point
-from classy_blocks.types import (
+from classy_blocks.cbtyping import (
     IndexType,
     NPPointListType,
     NPPointType,
@@ -16,6 +12,10 @@ from classy_blocks.types import (
     PointType,
     VectorType,
 )
+from classy_blocks.construct.edges import Origin, Spline
+from classy_blocks.construct.flat.face import Face
+from classy_blocks.construct.flat.sketches.mapped import MappedSketch
+from classy_blocks.construct.point import Point
 from classy_blocks.util import functions as f
 
 
@@ -193,8 +193,9 @@ class OneCoreDisk(DiskBase):
     """A disk with a single block in  the center and four blocks around;
     see docs/blocking for point numbers and faces/grid indexing."""
 
+    # TODO: test
     chops: ClassVar = [
-        [0],  # axis 0
+        [1],  # axis 0
         [1, 2],  # axis 1
     ]
 

@@ -1,10 +1,10 @@
 import abc
 from typing import get_args
 
+from classy_blocks.cbtyping import ChopTakeType, DirectionType
 from classy_blocks.grading.autograding.params import ChopParams, FixedCountParams, HighReChopParams, SimpleChopParams
 from classy_blocks.grading.autograding.probe import Probe, Row
 from classy_blocks.mesh import Mesh
-from classy_blocks.types import ChopTakeType, DirectionType
 
 
 class GraderBase(abc.ABC):

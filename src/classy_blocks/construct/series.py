@@ -4,14 +4,14 @@ import numpy as np
 
 from classy_blocks.base.element import ElementBase
 from classy_blocks.base.exceptions import ArrayCreationError
-from classy_blocks.types import PointListType, PointType, VectorType
+from classy_blocks.cbtyping import PointListType, PointType, VectorType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import DTYPE, TOL
 
 # TODO! Tests
 
 
-class Array(ElementBase):
+class Series(ElementBase):
     def __init__(self, points: PointListType):
         """A list of points ('positions') in 3D space"""
         self.points = np.array(points, dtype=DTYPE)

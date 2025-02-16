@@ -1,11 +1,11 @@
 from typing import List, get_args
 
+from classy_blocks.cbtyping import DirectionType, IndexType
 from classy_blocks.grading.chop import Chop
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.axis import Axis
 from classy_blocks.items.wires.wire import Wire
-from classy_blocks.types import DirectionType, IndexType
 from classy_blocks.util import constants
 from classy_blocks.util.frame import Frame
 

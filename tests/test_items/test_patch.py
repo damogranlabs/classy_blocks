@@ -1,6 +1,6 @@
+from classy_blocks.cbtyping import OrientType
 from classy_blocks.items.patch import Patch
 from classy_blocks.items.side import Side
-from classy_blocks.types import OrientType
 from tests.fixtures.block import BlockTestCase
 
 

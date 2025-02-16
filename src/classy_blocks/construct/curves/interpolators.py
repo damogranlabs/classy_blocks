@@ -3,8 +3,8 @@ import abc
 import numpy as np
 import scipy.interpolate
 
-from classy_blocks.construct.array import Array
-from classy_blocks.types import FloatListType, NPPointType, ParamCurveFuncType
+from classy_blocks.cbtyping import FloatListType, NPPointType, ParamCurveFuncType
+from classy_blocks.construct.series import Series
 
 
 class InterpolatorBase(abc.ABC):
@@ -18,7 +18,7 @@ class InterpolatorBase(abc.ABC):
     def _get_function(self) -> ParamCurveFuncType:
         """Returns an interpolation function from stored points"""
 
-    def __init__(self, points: Array, extrapolate: bool, equalize: bool = True):
+    def __init__(self, points: Series, extrapolate: bool, equalize: bool = True):
         self.points = points
         self.extrapolate = extrapolate
         self.equalize = equalize

@@ -1,12 +1,12 @@
 import copy
 
 from classy_blocks.base.exceptions import InconsistentGradingsError
+from classy_blocks.cbtyping import DirectionType
 from classy_blocks.construct.edges import Arc
 from classy_blocks.grading.chop import Chop
 from classy_blocks.items.edges.arcs.arc import ArcEdge
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.wire import Wire
-from classy_blocks.types import DirectionType
 from tests.fixtures.data import DataTestCase
 
 

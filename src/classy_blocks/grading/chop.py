@@ -2,8 +2,8 @@ import dataclasses
 from functools import lru_cache
 from typing import Callable, List, Optional, Set, Union
 
+from classy_blocks.cbtyping import ChopPreserveType, ChopTakeType, GradingSpecType
 from classy_blocks.grading import relations as rel
-from classy_blocks.types import ChopPreserveType, ChopTakeType, GradingSpecType
 
 
 @dataclasses.dataclass

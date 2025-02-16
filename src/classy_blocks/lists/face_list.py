@@ -1,11 +1,11 @@
 import dataclasses
 from typing import List
 
+from classy_blocks.cbtyping import OrientType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.items.side import Side
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.types import OrientType
 from classy_blocks.util.constants import SIDES_MAP
 
 

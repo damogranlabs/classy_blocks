@@ -2,9 +2,9 @@ from typing import List, Union
 
 import numpy as np
 
+from classy_blocks.cbtyping import IndexType, NPPointListType, NPPointType, PointListType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketch import Sketch
-from classy_blocks.types import IndexType, NPPointListType, NPPointType, PointListType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 

@@ -1,8 +1,8 @@
 from typing import List, Union
 
+from classy_blocks.cbtyping import IndexType, NPPointType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.operation import Operation
-from classy_blocks.types import IndexType, NPPointType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
 

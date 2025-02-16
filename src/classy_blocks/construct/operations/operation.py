@@ -7,11 +7,19 @@ from typing_extensions import Unpack
 from classy_blocks.base.element import ElementBase
 from classy_blocks.base.exceptions import EdgeCreationError
 from classy_blocks.base.transforms import Mirror
+from classy_blocks.cbtyping import (
+    ChopArgs,
+    DirectionType,
+    NPPointType,
+    OrientType,
+    PointType,
+    ProjectToType,
+    VectorType,
+)
 from classy_blocks.construct.edges import Arc, EdgeData, Line, Project, Spline
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.point import Point
 from classy_blocks.grading.chop import Chop
-from classy_blocks.types import ChopArgs, DirectionType, NPPointType, OrientType, PointType, ProjectToType, VectorType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import SIDES_MAP

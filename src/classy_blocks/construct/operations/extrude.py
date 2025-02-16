@@ -2,9 +2,9 @@ from typing import Union
 
 import numpy as np
 
+from classy_blocks.cbtyping import VectorType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.loft import Loft
-from classy_blocks.types import VectorType
 
 
 class Extrude(Loft):

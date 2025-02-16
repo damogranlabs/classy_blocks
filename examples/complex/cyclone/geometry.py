@@ -16,7 +16,7 @@ from parameters import (
 )
 
 from classy_blocks.base.exceptions import GeometryConstraintError
-from classy_blocks.types import NPPointType
+from classy_blocks.cbtyping import NPPointType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import vector_format as fvect
 

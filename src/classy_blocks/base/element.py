@@ -3,7 +3,7 @@ import copy
 from typing import Dict, List, Optional, Sequence, TypeVar
 
 from classy_blocks.base import transforms as tr
-from classy_blocks.types import NPPointType, PointType, VectorType
+from classy_blocks.cbtyping import NPPointType, PointType, VectorType
 
 ElementBaseT = TypeVar("ElementBaseT", bound="ElementBase")
 

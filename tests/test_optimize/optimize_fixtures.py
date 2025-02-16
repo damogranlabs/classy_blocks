@@ -3,11 +3,11 @@ from typing import get_args
 
 import numpy as np
 
+from classy_blocks.cbtyping import DirectionType
 from classy_blocks.construct.operations.box import Box
 from classy_blocks.mesh import Mesh
 from classy_blocks.modify.find.geometric import GeometricFinder
 from classy_blocks.optimize.grid import QuadGrid
-from classy_blocks.types import DirectionType
 
 
 class SketchTestsBase(unittest.TestCase):

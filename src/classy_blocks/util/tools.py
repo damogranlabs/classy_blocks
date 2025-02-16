@@ -4,7 +4,7 @@ import dataclasses
 import os
 
 from classy_blocks.base.exceptions import CornerPairError
-from classy_blocks.types import OrientType
+from classy_blocks.cbtyping import OrientType
 from classy_blocks.util.constants import SIDES_MAP
 from classy_blocks.util.frame import Frame
 

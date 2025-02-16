@@ -1,9 +1,8 @@
-from typing import List, Set
+from typing import List
 
 from regions.region import Region
 
 import classy_blocks as cb
-from classy_blocks.optimize.clamps.clamp import ClampBase
 
 
 class Skirt(Region):
