@@ -2,22 +2,24 @@ import unittest
 
 from parameterized import parameterized
 
+from classy_blocks.grading.autograding.inflation.params import InflationParams
 from classy_blocks.grading.autograding.inflation.rules import InflationRules
 from classy_blocks.grading.autograding.probe import WireInfo
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.wire import Wire
 
 
-class InflationParamsTests(unittest.TestCase):
+class InflationRulesTests(unittest.TestCase):
     def setUp(self):
-        self.params = InflationRules(1e-3, 0.1, 1.2, 30, 2)
+        params = InflationParams(1e-3, 0.1, 1.2, 30, 2)
+        self.rules = InflationRules(params)
 
     def get_info(self, length, starts_at_wall, ends_at_wall) -> WireInfo:
         wire = Wire([Vertex([0, 0, 0], 0), Vertex([length, 0, 0], 1)], 0, 0, 1)
         return WireInfo(wire, starts_at_wall, ends_at_wall)
 
     def test_get_count_bulk(self):
-        count = self.params.get_count(1, False, False)
+        count = self.rules.get_count(1, False, False)
 
         self.assertEqual(count, 10)
 
@@ -37,7 +39,7 @@ class InflationParamsTests(unittest.TestCase):
     def test_get_count_wall(self, length, count):
         # count calculation when one vertex of the wire is at wall;
         # numbers checked with manual spreadsheet calculation
-        self.assertEqual(self.params.get_count(length, True, False), count)
+        self.assertEqual(self.rules.get_count(length, True, False), count)
 
     @parameterized.expand(
         (
@@ -55,7 +57,7 @@ class InflationParamsTests(unittest.TestCase):
     def test_get_count_double_wall(self, length, count):
         # count when both vertices are at wall
         # numbers checked with manual spreadsheet calculation
-        half_count = self.params.get_count(length / 2, True, False)
+        half_count = self.rules.get_count(length / 2, True, False)
 
         self.assertEqual(2 * half_count, count)
 
@@ -71,23 +73,23 @@ class InflationParamsTests(unittest.TestCase):
             (1, 35, True),  # 5
             (2, 45, True),  # 6
             # squeezed: not enough room, cell count doesn't matter
-            (0.2, 16, True),  # 7
+            (0.09, 2, True),  # 7
         )
     )
     def test_is_squeezed_wall(self, length, count, squeezed):
         info = self.get_info(length, True, False)
 
-        self.assertEqual(self.params.is_squeezed(count, info), squeezed)
+        self.assertEqual(self.rules.is_squeezed(count, info), squeezed)
 
     @parameterized.expand(
         (
-            (1, 9, False),
-            (1, 0, False),
-            (1, 11, True),
+            (0.01, 9, False),
+            (0.01, 0, False),
+            (0.01, 100, True),
         )
     )
     def test_is_squeezed_bulk(self, length, count, squeezed):
         # a test of SmoothGrader, actually
         info = self.get_info(length, False, False)
 
-        self.assertEqual(self.params.is_squeezed(count, info), squeezed)
+        self.assertEqual(self.rules.is_squeezed(count, info), squeezed)

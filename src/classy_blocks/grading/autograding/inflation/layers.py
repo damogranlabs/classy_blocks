@@ -2,6 +2,8 @@ import abc
 from typing import List, Tuple
 
 from classy_blocks.grading import relations as gr
+from classy_blocks.grading.autograding.inflation.params import InflationParams
+from classy_blocks.grading.chop import Chop
 from classy_blocks.util.constants import VBIG
 
 
@@ -43,13 +45,21 @@ class Layer(abc.ABC):
         # stop construction of the layer when it hits any of the above limits
         self.length, self.end_size, self.count = self._construct(length_limit, count_limit, size_limit)
 
+    def get_chop(self, overall_length: float) -> Chop:
+        return Chop(
+            length_ratio=self.length / overall_length,
+            count=self.count,
+            start_size=self.start_size,
+            end_size=self.end_size,
+        )
+
 
 class InflationLayer(Layer):
-    def __init__(self, wall_size: float, c2c_expansion: float, thickness_factor: int, max_length: float):
+    def __init__(self, wall_size: float, c2c_expansion: float, bl_thickness: float, max_length: float):
         self.start_size = wall_size
         self.c2c_expansion = c2c_expansion
 
-        super().__init__(length_limit=min(thickness_factor * wall_size, max_length))
+        super().__init__(length_limit=min(bl_thickness, max_length))
 
 
 class BufferLayer(Layer):
@@ -82,12 +92,30 @@ class BulkLayer(Layer):
 
 
 class LayerStack:
-    """A collection of one, two or three layers (chops) for InflationGrader"""
+    """A collection of one, two or three layers (chops) for InflationGrader.
 
-    desired_layers = 3
+    LayerStack construction
+    - Params: length, first size, bulk size, c2c expansion, bl thickness, buffer expansion
+    - Results: 3 Layers (or less, depending on situation)
 
-    def __init__(self, length: float):
+    Forward: build layer cell by cell until it reaches max cell size,
+    overall length or final cell size. Count is the sought quantity.
+
+    Backward construction:
+    Count is known
+    Inflation layer:
+    - Adjustable params: count
+    - Results: length, end size
+    Buffer layer:
+    - Calculates count from start/end size
+    Bulk layer:
+    - Calculates count from size and remaining length
+    """
+
+    def __init__(self, params: InflationParams, length: float):
+        self.params = params
         self.length = length
+
         self.layers: List[Layer] = []
 
     @property
@@ -99,6 +127,7 @@ class LayerStack:
         return self.length - sum(layer.length for layer in self.layers)
 
     def add(self, layer: Layer) -> bool:
+        """Adds a layer to the stack; returns True if no more layers need to be added."""
         if layer.count > 0:
             self.layers.append(layer)
         return self.is_done
@@ -109,8 +138,28 @@ class LayerStack:
         if len(self.layers) == 0:
             return False
 
-        if len(self.layers) == self.desired_layers:
+        if len(self.layers) == 3:
             # nothing more to be added?
             return True
 
         return self.remaining_length <= self.layers[0].start_size
+
+    @classmethod
+    def construct(cls, params: InflationParams, length: float, size_after: float) -> "LayerStack":
+        """Constructs a LayerStack from given parameters (cell count is not known)"""
+        stack = cls(params, length)
+
+        inflation_layer = InflationLayer(params.first_cell_size, params.c2c_expansion, params.bl_thickness, length)
+        if stack.add(inflation_layer):
+            return stack
+
+        buffer_layer = BufferLayer(
+            inflation_layer.end_size, params.buffer_expansion, params.bulk_cell_size, stack.remaining_length
+        )
+        if stack.add(buffer_layer):
+            return stack
+
+        bulk_layer = BulkLayer(params.bulk_cell_size, size_after, stack.remaining_length)
+        stack.add(bulk_layer)
+
+        return stack

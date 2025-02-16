@@ -1,4 +1,5 @@
 from classy_blocks.grading.autograding.grader import GraderBase
+from classy_blocks.grading.autograding.inflation.params import InflationParams
 from classy_blocks.grading.autograding.inflation.rules import InflationRules
 from classy_blocks.mesh import Mesh
 
@@ -43,6 +44,7 @@ class InflationGrader(GraderBase):
         bl_thickness_factor: int = 30,
         buffer_expansion: float = 2,
     ):
-        params = InflationRules(first_cell_size, bulk_cell_size, c2c_expansion, bl_thickness_factor, buffer_expansion)
+        params = InflationParams(first_cell_size, bulk_cell_size, c2c_expansion, bl_thickness_factor, buffer_expansion)
+        rules = InflationRules(params)
 
-        super().__init__(mesh, params)
+        super().__init__(mesh, rules)

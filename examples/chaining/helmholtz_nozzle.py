@@ -5,26 +5,32 @@ import classy_blocks as cb
 # A nozzle with a chamber that produces self-induced oscillations.
 # See helmholtz_nozzle.svg for geometry explanation.
 
-# geometry data (all dimensions in meters):
+# Also a good example how inapproproate blocking leads to bad mesh
+# when boundary layers are required.
+
+# Also a good example how InflationGrader isn't finished yet.
+# TODO: finish InflationGrader
+
+# geometry data (all dimensions in milimeters):
 # inlet pipe
-r_inlet = 10e-3
-l_inlet = 50e-3
+r_inlet = 10
+l_inlet = 50
 
 # nozzle
-r_nozzle = 6e-3
-l_nozzle = 20e-3
+r_nozzle = 6
+l_nozzle = 20
 
 # chamber
-l_chamber_inner = 100e-3
-l_chamber_outer = 105e-3
-r_chamber_outer = 20e-3
+l_chamber_inner = 100
+l_chamber_outer = 105
+r_chamber_outer = 20
 
 # outlet
-l_outlet = 80e-3
+l_outlet = 80
 
 # cell sizing
-first_cell_size = 0.01e-3
-bulk_cell_size = 1.5e-3
+first_cell_size = 0.02
+bulk_cell_size = 1.2
 
 mesh = cb.Mesh()
 
@@ -72,4 +78,5 @@ mesh.modify_patch("wall", "wall")
 grader = cb.InflationGrader(mesh, first_cell_size, bulk_cell_size)
 grader.grade()
 
+mesh.settings["scale"] = 0.001
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

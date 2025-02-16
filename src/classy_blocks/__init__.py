@@ -33,7 +33,6 @@ from .construct.shapes.shell import Shell
 from .construct.shapes.sphere import Hemisphere
 from .construct.stack import ExtrudedStack, RevolvedStack, TransformedStack
 from .grading.autograding.fixed.grader import FixedCountGrader
-from .grading.autograding.inflation.grader import InflationGrader
 from .grading.autograding.simple.grader import SimpleGrader
 from .grading.autograding.smooth.grader import SmoothGrader
 from .mesh import Mesh
@@ -144,5 +143,4 @@ __all__ = [
     "FixedCountGrader",
     "SimpleGrader",
     "SmoothGrader",
-    "InflationGrader",
 ]

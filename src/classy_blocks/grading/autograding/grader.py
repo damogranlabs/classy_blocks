@@ -47,7 +47,6 @@ class GraderBase:
         # Check if there are blocks at the wall;
         for entry in row.entries:
             for wire in entry.wires:
-                # TODO: cache WireInfo
                 info = self.probe.get_wire_info(wire)
                 if info.starts_at_wall:
                     start = True
@@ -72,11 +71,13 @@ class GraderBase:
             # if wire.is_defined:
             #    # TODO: test
             #    continue
+
             for wire in entry.wires:
                 if wire.is_defined:
                     continue
 
                 info = self.probe.get_wire_info(wire)
+
                 if self.rules.is_squeezed(row.count, info):
                     chops = self.rules.get_squeezed_chops(row.count, info)
                     self._chop_wire(wire, chops)
@@ -91,7 +92,6 @@ class GraderBase:
                 if wire.is_defined:
                     continue
 
-                # TODO: cache wire info
                 info = self.probe.get_wire_info(wire)
                 chops = self.rules.get_chops(row.count, info)
 

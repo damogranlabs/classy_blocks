@@ -1,11 +1,47 @@
 import dataclasses
+import warnings
 from typing import List, Tuple
+
+import scipy.optimize
 
 from classy_blocks.grading.autograding.probe import WireInfo
 from classy_blocks.grading.autograding.rules import ChopRules
-from classy_blocks.grading.autograding.smooth.distributor import SmoothDistributor
 from classy_blocks.grading.chop import Chop
 from classy_blocks.types import CellSizeType
+
+
+def distribute_cells(count, length, size_before, size_after) -> List[Chop]:
+    # TODO: put back in SmoothRules
+    if length < max(size_before, size_after):
+        return [Chop(count=count)]
+
+    count_1 = count // 2
+    count_2 = count - count_1
+
+    # choose length ratio so that cells at the middle of blocks
+    # (between the two chops) have the same size
+    def fobj(lratio):
+        chop_1 = Chop(length_ratio=lratio, count=count_1, start_size=size_before)
+        data_1 = chop_1.calculate(length)
+
+        chop_2 = Chop(length_ratio=1 - lratio, count=count_2, end_size=size_after)
+        data_2 = chop_2.calculate(length)
+
+        ratio = (data_1.end_size - data_2.start_size) ** 2
+
+        return ratio, [chop_1, chop_2]
+
+    # it's not terribly important to minimize until the last dx
+    tol = min(size_before, size_after) * 0.01
+    try:
+        results = scipy.optimize.minimize_scalar(lambda r: fobj(r)[0], bounds=[0.1, 0.9], options={"xatol": tol})
+    except ValueError:  # TODO: custom exception for grading relations
+        return [Chop(count=count)]
+
+    if not results.success:  # type:ignore
+        warnings.warn("Could not determine optimal grading", stacklevel=1)
+
+    return fobj(results.x)[1]  # type:ignore
 
 
 @dataclasses.dataclass
@@ -15,9 +51,6 @@ class SmoothRules(ChopRules):
     def get_count(self, length: float, _start_at_wall, _end_at_wall):
         # the first chop defines the count;
         count = int(length / self.cell_size)
-        # it must be divisible by 2
-        if count % 2 != 0:
-            count += 1
 
         # can't use zero
         if count == 0:
@@ -45,7 +78,4 @@ class SmoothRules(ChopRules):
 
     def get_chops(self, count, info):
         size_before, size_after = self.define_sizes(info.size_before, info.size_after)
-
-        smoother = SmoothDistributor(count, size_before, info.length, size_after)
-
-        return smoother.get_chops(2)
+        return distribute_cells(count, info.length, size_before, size_after)

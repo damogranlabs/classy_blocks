@@ -42,7 +42,7 @@ class Row:
     depending on blocking, a whole 'layer' of blocks can be
     chopped by specifying a single block only (for example, direction 2 in a cylinder)"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.entries: List[Entry] = []
 
         # the whole row must share the same cell count;
