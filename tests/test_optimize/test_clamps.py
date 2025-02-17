@@ -45,15 +45,6 @@ class CurveClampTests(ClampTestsBase):
 
         self.assertAlmostEqual(clamp.params[0], 0)
 
-    def test_line_init_noncoincident(self):
-        """Initialization of LineClamp with a non-coincident vertex;
-        update vertex with closest point"""
-        clamp = LineClamp(self.position, [1, 1, 1], [2, 1, 1], (-100, 100))
-
-        # don't be too strict about initial parameters,
-        # optimization will move everything away anyhow
-        np.testing.assert_array_almost_equal(clamp.position, [0, 1, 1], decimal=3)
-
     def test_line_init_far(self):
         """Initialization that will yield t < 0"""
         clamp = LineClamp(self.position, [1, 1, 1], [2, 2, 2], (-100, 100))

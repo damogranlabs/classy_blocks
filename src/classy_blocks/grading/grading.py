@@ -1,4 +1,4 @@
-""" In theory, combination of three of these 6 values can be specified:
+"""In theory, combination of three of these 6 values can be specified:
  - Total length
  - Number of cells
  - Total expansion ratio
@@ -32,7 +32,7 @@ division: an entry in simpleGrading specification in blockMeshDict
 
 calculations meticulously transcribed from the blockmesh grading calculator:
 https://gitlab.com/herpes-free-engineer-hpe/blockmeshgradingweb/-/blob/master/calcBlockMeshGrading.coffee
-(since block length is always known, there's less wrestling but the calculation principle is similar) """
+(since block length is always known, there's less wrestling but the calculation principle is similar)"""
 
 import dataclasses
 import math
