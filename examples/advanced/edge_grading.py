@@ -1,3 +1,5 @@
+# NOT FINISHED!
+# TODO: add operation.grade_edge() and show its usage in this example
 import os
 
 import classy_blocks as cb

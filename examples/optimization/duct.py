@@ -28,12 +28,10 @@ for operation in shape.operations[:4]:
 
 optimizer.optimize(tolerance=0.01)
 
-# Quick'n'dirty chopping, don't do this at home
-for operation in shape.operations:
-    for axis in range(3):
-        operation.chop(axis, count=10)
-
 mesh.add(shape)
+
+grader = cb.SmoothGrader(mesh, 0.08)
+grader.grade()
 
 mesh.set_default_patch("walls", "wall")
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

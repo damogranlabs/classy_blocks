@@ -125,7 +125,8 @@ class Mesh:
         blockMeshDict. After this has been done, the above objects
         cease to have any function or influence on mesh."""
         if self.is_assembled:
-            # don't assemble twice
+            # don't assemble twice but do update wire lengths
+            self.block_list.update()
             return
 
         operations = self._operations

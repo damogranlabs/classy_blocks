@@ -76,3 +76,16 @@ class AxisTests(BlockTestCase):
         expected_after = {block_1.wires[0][1]}
 
         self.assertSetEqual(calculated_after, expected_after)
+
+    def test_is_inline(self):
+        block_0, block_1 = self.add_blocks()
+
+        self.assertTrue(block_0.axes[0].is_inline(block_1.axes[0]))
+
+    def test_is_not_inline(self):
+        block_0 = self.make_block(0)
+        block_2 = self.make_block(2)
+        block_0.add_neighbour(block_2)
+        block_2.add_neighbour(block_0)
+
+        self.assertFalse(block_0.axes[0].is_inline(block_2.axes[0]))

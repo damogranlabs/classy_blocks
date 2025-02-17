@@ -1,166 +1,148 @@
-import functools
-from typing import Dict, List, Optional, Set, get_args
+import dataclasses
+from typing import Dict, List, Optional, Tuple
 
-from classy_blocks.base.exceptions import BlockNotFoundError, NoInstructionError
-from classy_blocks.cbtyping import ChopTakeType, DirectionType, OrientType
+from classy_blocks.base.exceptions import PatchNotFoundError
+from classy_blocks.cbtyping import DirectionType, OrientType
+from classy_blocks.grading.autograding.catalogue import RowCatalogue
+from classy_blocks.grading.autograding.row import Row
 from classy_blocks.items.block import Block
-from classy_blocks.items.vertex import Vertex
-from classy_blocks.items.wires.axis import Axis
 from classy_blocks.items.wires.wire import Wire
 from classy_blocks.mesh import Mesh
 from classy_blocks.optimize.grid import HexGrid
-from classy_blocks.util.constants import FACE_MAP
+from classy_blocks.util.constants import DIRECTION_MAP
 
 
-@functools.lru_cache(maxsize=3000)  # that's for 1000 blocks
-def get_block_from_axis(mesh: Mesh, axis: Axis) -> Block:
-    for block in mesh.blocks:
-        if axis in block.axes:
-            return block
+@dataclasses.dataclass
+class WireInfo:
+    """Gathers data about a wire; its location, cell sizes, neighbours and wires before/after"""
 
-    raise RuntimeError("Block for Axis not found!")
-
-
-@functools.lru_cache(maxsize=2)
-def get_defined_wall_vertices(mesh: Mesh) -> Set[Vertex]:
-    """Returns vertices that are on the 'wall' patches"""
-    wall_vertices: set[Vertex] = set()
-
-    # explicitly defined walls
-    for patch in mesh.patches:
-        if patch.kind == "wall":
-            for side in patch.sides:
-                wall_vertices.update(set(side.vertices))
-
-    return wall_vertices
-
-
-class Instruction:
-    """A descriptor that tells in which direction the specific block can be chopped."""
-
-    def __init__(self, block: Block):
-        self.block = block
-        self.directions: List[bool] = [False] * 3
+    wire: Wire
+    starts_at_wall: bool
+    ends_at_wall: bool
 
     @property
-    def is_defined(self):
-        return all(self.directions)
+    def length(self) -> float:
+        return self.wire.length
 
-    def __hash__(self) -> int:
-        return id(self)
+    @property
+    def size_after(self) -> Optional[float]:
+        """Returns average cell size in wires that come after this one (in series/inline);
+        None if this is the last wire"""
+        # TODO: merge this with size_before somehow
+        sum_size: float = 0
+        defined_count: int = 0
 
+        for joint in self.wire.after:
+            if joint.wire.grading.is_defined:
+                defined_count += 1
 
-class Row:
-    """A string of blocks that must share the same count
-    because they sit next to each other.
+                if joint.same_dir:
+                    sum_size += joint.wire.grading.start_size
+                else:
+                    sum_size += joint.wire.grading.end_size
 
-    This needs not be an actual 'string' of blocks because,
-    depending on blocking, a whole 'layer' of blocks can be
-    chopped by specifying a single block only (for example, direction 2 in a cylinder)"""
+        if defined_count == 0:
+            return None
 
-    def __init__(self, direction: DirectionType):
-        self.direction = direction
+        return sum_size / defined_count
 
-        # blocks of different orientations can belong to the same row;
-        # remember how they are oriented
-        self.blocks: List[Block] = []
-        self.headings: List[DirectionType] = []
+    @property
+    def size_before(self) -> Optional[float]:
+        """Returns average cell size in wires that come before this one (in series/inline);
+        None if this is the first wire"""
+        # TODO: merge this with size_after somehow
+        sum_size: float = 0
+        defined_count: int = 0
 
-    def add_block(self, block: Block, row_direction: DirectionType) -> None:
-        self.blocks.append(block)
-        self.headings.append(row_direction)
+        for joint in self.wire.before:
+            if joint.wire.grading.is_defined:
+                defined_count += 1
 
-    def get_length(self, take: ChopTakeType = "avg"):
-        lengths = [wire.length for wire in self.get_wires()]
+                if joint.same_dir:
+                    sum_size += joint.wire.grading.end_size
+                else:
+                    sum_size += joint.wire.grading.start_size
 
-        if take == "min":
-            return min(lengths)
+        if defined_count == 0:
+            return None
 
-        if take == "max":
-            return max(lengths)
-
-        return sum(lengths) / len(self.blocks) / 4  # "avg"
-
-    def get_axes(self) -> List[Axis]:
-        axes: List[Axis] = []
-
-        for i, block in enumerate(self.blocks):
-            direction = self.headings[i]
-            axes.append(block.axes[direction])
-
-        return axes
-
-    def get_wires(self) -> List[Wire]:
-        wires: List[Wire] = []
-
-        for axis in self.get_axes():
-            wires += axis.wires
-
-        return wires
-
-    def get_count(self) -> Optional[int]:
-        for wire in self.get_wires():
-            if wire.is_defined:
-                return wire.grading.count
-
-        return None
+        return sum_size / defined_count
 
 
-class Catalogue:
-    """A collection of rows on a specified axis"""
+class WireCatalogue:
+    """A database of all wires' whereabouts;
+    many wires can be located at the same spot and only some of them can be
+    on 'walls'; gather data first so that wall-bounded wires aren't ignored"""
 
     def __init__(self, mesh: Mesh):
         self.mesh = mesh
 
-        self.rows: Dict[DirectionType, List[Row]] = {0: [], 1: [], 2: []}
-        self.instructions = [Instruction(block) for block in mesh.blocks]
+        # finds blocks' neighbours
+        self.grid = HexGrid.from_mesh(self.mesh)
 
-        for i in get_args(DirectionType):
-            self._populate(i)
+        # WireInfo is stored at indexes [vertex_1][vertex_2];
+        # if a coincident wire is inverted, it will reside at
+        # [vertex_2][vertex_1]
+        self.data: Dict[int, Dict[int, Optional[WireInfo]]] = {}
 
-    def _get_undefined_instructions(self, direction: DirectionType) -> List[Instruction]:
-        return [i for i in self.instructions if not i.directions[direction]]
+        self._populate()
 
-    def _find_instruction(self, block: Block):
-        # TODO: perform dedumbing on this exquisite piece of code
-        for instruction in self.instructions:
-            if instruction.block == block:
-                return instruction
+    def _fetch(self, index_1: int, index_2: int) -> Optional[WireInfo]:
+        if self.data.get(index_1) is None:
+            self.data[index_1] = {}
 
-        raise NoInstructionError(f"No instruction found for block {block}")
+        return self.data[index_1].get(index_2)
 
-    def _add_block_to_row(self, row: Row, instruction: Instruction, direction: DirectionType) -> None:
-        row.add_block(instruction.block, direction)
-        instruction.directions[direction] = True
+    def _populate(self) -> None:
+        for block in self.mesh.blocks:
+            for wire in block.wire_list:
+                start_index, end_index = wire.vertices[0].index, wire.vertices[1].index
 
-        block = instruction.block
+                info = self._fetch(start_index, end_index)
+                if info is None:
+                    info = WireInfo(wire, False, False)
+                    self.data[start_index][end_index] = info
 
-        for neighbour_axis in block.axes[direction].neighbours:
-            neighbour_block = get_block_from_axis(self.mesh, neighbour_axis)
+                starts, ends = self._get_wire_boundaries(wire, block)
 
-            if neighbour_block in row.blocks:
-                continue
+                # remember if any of the coincident wires starts or ends at the wall,
+                info.starts_at_wall = info.starts_at_wall or starts
+                info.ends_at_wall = info.ends_at_wall or ends
 
-            instruction = self._find_instruction(neighbour_block)
+    def _get_wire_boundaries(self, wire: Wire, block: Block) -> Tuple[bool, bool]:
+        """Finds out whether a Wire starts or ends on a wall patch"""
+        start_orient = DIRECTION_MAP[wire.direction][0]
+        end_orient = DIRECTION_MAP[wire.direction][1]
+        block_index = self.mesh.blocks.index(block)
 
-            self._add_block_to_row(row, instruction, neighbour_block.get_axis_direction(neighbour_axis))
+        def find_patch(orient: OrientType) -> bool:
+            # search for external faces;
+            # either this block has one or any of its neighbours at the start
+            # or end of this wire
+            if self.grid.cells[block_index].neighbours[orient] is not None:
+                # Internal face
+                return False
 
-    def _populate(self, direction: DirectionType) -> None:
-        while True:
-            undefined_instructions = self._get_undefined_instructions(direction)
-            if len(undefined_instructions) == 0:
-                break
+            vertices = set(block.get_side_vertices(orient))
+            try:
+                patch = self.mesh.patch_list.find(vertices)
+                if patch.kind == "wall":
+                    return True
+            except PatchNotFoundError:
+                if self.mesh.patch_list.default.get("kind") == "wall":
+                    return True
 
-            row = Row(direction)
-            self._add_block_to_row(row, undefined_instructions[0], direction)
-            self.rows[direction].append(row)
+            return False
 
-    def get_row_blocks(self, block: Block, direction: DirectionType) -> List[Block]:
-        for row in self.rows[direction]:
-            if block in row.blocks:
-                return row.blocks
+        return (find_patch(start_orient), find_patch(end_orient))
 
-        raise BlockNotFoundError(f"Direction {direction} of {block} not in catalogue")
+    def get_info(self, wire: Wire) -> WireInfo:
+        info = self.data[wire.vertices[0].index][wire.vertices[1].index]
+
+        if info is None:
+            raise ValueError("Wire not found!")
+
+        return info
 
 
 class Probe:
@@ -170,44 +152,16 @@ class Probe:
         self.mesh = mesh
 
         # maps blocks to rows
-        self.catalogue = Catalogue(self.mesh)
+        self.rows = RowCatalogue(self.mesh)
 
-        # finds blocks' neighbours
-        self.grid = HexGrid.from_mesh(self.mesh)
+        # build a wire database
+        self.wires = WireCatalogue(self.mesh)
 
     def get_row_blocks(self, block: Block, direction: DirectionType) -> List[Block]:
-        return self.catalogue.get_row_blocks(block, direction)
+        return self.rows.get_row_blocks(block, direction)
 
     def get_rows(self, direction: DirectionType) -> List[Row]:
-        return self.catalogue.rows[direction]
+        return self.rows.rows[direction]
 
-    def get_explicit_wall_vertices(self, block: Block) -> Set[Vertex]:
-        """Returns vertices from a block that lie on explicitly defined wall patches"""
-        mesh_vertices = get_defined_wall_vertices(self.mesh)
-        block_vertices = set(block.vertices)
-
-        return block_vertices.intersection(mesh_vertices)
-
-    def get_default_wall_vertices(self, block: Block) -> Set[Vertex]:
-        """Returns vertices that lie on default 'wall' patch"""
-        wall_vertices: Set[Vertex] = set()
-
-        # other sides when mesh has a default wall patch
-        if self.mesh.patch_list.default["kind"] == "wall":
-            # find block boundaries
-            block_index = self.mesh.blocks.index(block)
-            cell = self.grid.cells[block_index]
-
-            # sides with no neighbours are on boundary
-            boundaries: List[OrientType] = [
-                orient for orient, neighbours in cell.neighbours.items() if neighbours is None
-            ]
-
-            for orient in boundaries:
-                wall_vertices.union({block.vertices[i] for i in FACE_MAP[orient]})
-
-        return wall_vertices
-
-    def get_wall_vertices(self, block: Block) -> Set[Vertex]:
-        """Returns vertices that are on the 'wall' patches"""
-        return self.get_explicit_wall_vertices(block).union(self.get_default_wall_vertices(block))
+    def get_wire_info(self, wire: Wire) -> WireInfo:
+        return self.wires.get_info(wire)

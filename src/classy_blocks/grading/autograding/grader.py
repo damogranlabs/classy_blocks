@@ -1,97 +1,100 @@
 import abc
-from typing import get_args
+from typing import List, Tuple, get_args
 
 from classy_blocks.cbtyping import ChopTakeType, DirectionType
-from classy_blocks.grading.autograding.params import ChopParams, FixedCountParams, HighReChopParams, SimpleChopParams
-from classy_blocks.grading.autograding.probe import Probe, Row
+from classy_blocks.grading.autograding.probe import Probe
+from classy_blocks.grading.autograding.row import Row
+from classy_blocks.grading.autograding.rules import ChopRules
+from classy_blocks.grading.chop import Chop
+from classy_blocks.items.wires.wire import Wire
 from classy_blocks.mesh import Mesh
 
 
 class GraderBase(abc.ABC):
     stages: int
 
-    def __init__(self, mesh: Mesh, params: ChopParams):
+    def __init__(self, mesh: Mesh, rules: ChopRules):
         self.mesh = mesh
-        self.params = params
+        self.rules = rules
 
         self.mesh.assemble()
         self.probe = Probe(self.mesh)
 
-    def get_count(self, row: Row, take: ChopTakeType) -> int:
-        count = row.get_count()
+    def _chop_wire(self, wire: Wire, chops: List[Chop]) -> None:
+        """A shortcut"""
+        wire.grading.clear()
+        for chop in chops:
+            wire.grading.add_chop(chop)
 
-        if count is None:
-            # take length from a row, as requested by 'take'
-            length = row.get_length(take)
-            # and set count from it
-            count = self.params.get_count(length)
+        wire.copy_to_coincidents()
 
-        return count
+    def check_at_wall(self, row: Row) -> Tuple[bool, bool]:
+        """Returns True if any block on given row has a wall patch
+        (at start and/or end, respectively)."""
+        start = False
+        end = False
 
-    def grade_axis(self, axis: DirectionType, take: ChopTakeType, stage: int) -> None:
-        handled_wires = set()
+        # Check if there are blocks at the wall;
+        for entry in row.entries:
+            for wire in entry.wires:
+                info = self.probe.get_wire_info(wire)
+                if info.starts_at_wall:
+                    start = True
+                if info.ends_at_wall:
+                    end = True
 
-        for row in self.probe.get_rows(axis):
-            count = self.get_count(row, take)
+        return start, end
 
-            for wire in row.get_wires():
-                if wire in handled_wires:
+    def set_counts(self, row: Row, take: ChopTakeType) -> None:
+        if row.count > 0:
+            # stuff, pre-defined by the user
+            return
+
+        length = row.get_length(take)
+        start_at_wall, end_at_wall = self.check_at_wall(row)
+
+        row.count = self.rules.get_count(length, start_at_wall, end_at_wall)
+
+    def grade_squeezed(self, row: Row) -> None:
+        for entry in row.entries:
+            # TODO! don't touch wires, defined by USER
+            # if wire.is_defined:
+            #    # TODO: test
+            #    continue
+
+            for wire in entry.wires:
+                if wire.is_defined:
                     continue
 
-                # don't touch defined wires
-                # TODO! don't touch wires, defined by USER
-                # if wire.is_defined:
-                #    # TODO: test
-                #    continue
+                info = self.probe.get_wire_info(wire)
 
-                size_before = wire.size_before
-                size_after = wire.size_after
+                if self.rules.is_squeezed(row.count, info):
+                    chops = self.rules.get_squeezed_chops(row.count, info)
+                    self._chop_wire(wire, chops)
 
-                chops = self.params.get_chops(stage, count, wire.length, size_before, size_after)
+    def finalize(self, row: Row) -> None:
+        for entry in row.entries:
+            # TODO! don't touch wires, defined by USER
+            # if wire.is_defined:
+            #    # TODO: test
+            #    continue
+            for wire in entry.wires:
+                if wire.is_defined:
+                    continue
 
-                wire.grading.clear()
-                for chop in chops:
-                    wire.grading.add_chop(chop)
+                info = self.probe.get_wire_info(wire)
+                chops = self.rules.get_chops(row.count, info)
 
-                wire.copy_to_coincidents()
-
-                handled_wires.add(wire)
-                handled_wires.update(wire.coincidents)
+                self._chop_wire(wire, chops)
 
     def grade(self, take: ChopTakeType = "avg") -> None:
-        for axis in get_args(DirectionType):
-            for stage in range(self.stages):
-                self.grade_axis(axis, take, stage)
+        for direction in get_args(DirectionType):
+            rows = self.probe.get_rows(direction)
+            for row in rows:
+                self.set_counts(row, take)
+            for row in rows:
+                self.grade_squeezed(row)
+            for row in rows:
+                self.finalize(row)
 
-
-class FixedCountGrader(GraderBase):
-    """The simplest possible mesh grading: use a constant cell count for all axes on all blocks;
-    useful during mesh building and some tutorial cases"""
-
-    stages = 1
-
-    def __init__(self, mesh: Mesh, count: int = 8):
-        super().__init__(mesh, FixedCountParams(count))
-
-
-class SimpleGrader(GraderBase):
-    """Simple mesh grading for high-Re cases.
-    A single chop is used that sets cell count based on size.
-    Cell sizes between blocks differ as blocks' sizes change."""
-
-    stages = 1
-
-    def __init__(self, mesh: Mesh, cell_size: float):
-        super().__init__(mesh, SimpleChopParams(cell_size))
-
-
-class HighReGrader(GraderBase):
-    """Parameters for mesh grading for high-Re cases.
-    Two chops are added to all blocks; c2c_expansion and and length_ratio
-    are utilized to keep cell sizes between blocks consistent
-    (as much as possible)"""
-
-    stages = 3
-
-    def __init__(self, mesh: Mesh, cell_size: float):
-        super().__init__(mesh, HighReChopParams(cell_size))
+        self.mesh.block_list.check_consistency()

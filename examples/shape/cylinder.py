@@ -2,7 +2,6 @@ import os
 
 import classy_blocks as cb
 from classy_blocks.construct.flat.sketches.disk import DiskBase
-from classy_blocks.grading.autograding.grader import HighReGrader
 
 DiskBase.core_ratio = 0.4  # Default is 0.8
 
@@ -23,8 +22,8 @@ cylinder.set_symmetry_patch("sym")
 # remove them with this method:
 cylinder.remove_inner_edges(start=False, end=True)
 
-bl_thickness = 0.05
-core_size = 0.2
+bl_thickness = 1e-3
+core_size = 0.1
 
 # manual grading
 # cylinder.chop_axial(count=30)
@@ -32,12 +31,10 @@ core_size = 0.2
 # cylinder.chop_tangential(start_size=core_size)
 
 mesh.add(cylinder)
-
-mesh.assemble()
-mesh.block_list.update()
+mesh.modify_patch("walls", "wall")
 
 # automatic grading
-grader = HighReGrader(mesh, 0.1)
+grader = cb.SmoothGrader(mesh, 0.1)
 grader.grade()
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

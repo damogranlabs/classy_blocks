@@ -1,6 +1,6 @@
 from typing import List, get_args
 
-from classy_blocks.cbtyping import DirectionType, IndexType
+from classy_blocks.cbtyping import DirectionType, IndexType, OrientType
 from classy_blocks.grading.chop import Chop
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.vertex import Vertex
@@ -68,7 +68,7 @@ class Block:
         for this_axis in self.axes:
             for cnd_axis in candidate.axes:
                 this_axis.add_neighbour(cnd_axis)
-                this_axis.add_sequential(cnd_axis)
+                this_axis.add_inline(cnd_axis)
 
         # wires
         for this_wire in self.wire_list:
@@ -116,6 +116,9 @@ class Block:
     @property
     def indexes(self) -> IndexType:
         return [vertex.index for vertex in self.vertices]
+
+    def get_side_vertices(self, orient: OrientType) -> List[Vertex]:
+        return [self.vertices[i] for i in constants.FACE_MAP[orient]]
 
     def format_grading(self) -> str:
         """Returns the simple/edgeGrading string"""

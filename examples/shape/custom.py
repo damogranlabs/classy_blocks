@@ -69,5 +69,8 @@ shape.chop(2, count=5)
 mesh.add(shape)
 mesh.assemble()
 
+grader = cb.SmoothGrader(mesh, 0.03)
+grader.grade(take="max")
+
 mesh.set_default_patch("walls", "wall")
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")
