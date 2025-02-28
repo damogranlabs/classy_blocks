@@ -22,11 +22,11 @@ class PropagationTests(BlockTestCase):
         self.mesh.add(op_1)
 
         self.mesh.assemble()
-        self.mesh.block_list.propagate_gradings()
+        self.mesh.block_list.assemble()
 
         self.assertListEqual(
-            self.mesh.block_list.blocks[0].axes[1].grading.specification,
-            self.mesh.block_list.blocks[1].axes[1].grading.specification,
+            self.mesh.block_list.blocks[0].axes[1].wires[2].grading.specification,
+            self.mesh.block_list.blocks[1].axes[1].wires[2].grading.specification,
         )
 
     def test_propagate_upsidedown(self):
@@ -43,9 +43,9 @@ class PropagationTests(BlockTestCase):
         self.mesh.add(op_1)
 
         self.mesh.assemble()
-        self.mesh.block_list.propagate_gradings()
+        self.mesh.block_list.assemble()
 
-        self.assertListEqual(
-            self.mesh.block_list.blocks[0].axes[1].grading.specification,
-            self.mesh.block_list.blocks[1].axes[1].grading.inverted.specification,
-        )
+        spec_0 = self.mesh.block_list.blocks[0].axes[1].wires[1].grading.get_specification(False)
+        spec_1 = self.mesh.block_list.blocks[1].axes[1].wires[1].grading.get_specification(False)
+
+        self.assertListEqual(spec_0, spec_1)

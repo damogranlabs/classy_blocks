@@ -1,7 +1,7 @@
 import numpy as np
 
+from classy_blocks.cbtyping import NPPointType, PointType, VectorType
 from classy_blocks.optimize.clamps.clamp import ClampBase
-from classy_blocks.types import NPPointType, PointType, VectorType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import DTYPE
 

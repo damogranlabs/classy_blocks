@@ -1,6 +1,6 @@
 [project]
 name = "classy_blocks"
-version = "1.6.4"
+version = "1.7.0"
 description = "Python classes for easier creation of openFoam's blockMesh dictionaries."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -29,9 +29,9 @@ line_length = 120
 src_paths = ["src", "tests"]
 
 [tool.ruff]
-select = ["E", "F", "N", "UP", "YTT", "B", "A", "ARG", "RUF"]
 target-version = "py38"
 line-length = 120
+select = ["E", "F", "N", "UP", "YTT", "B", "A", "ARG", "RUF"]
 
 [[tool.mypy.overrides]]
 module = "scipy,scipy.*,parameterized.*"

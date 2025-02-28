@@ -2,7 +2,7 @@ import abc
 
 import numpy as np
 
-from classy_blocks.types import NPPointType, NPVectorType, PointType, VectorType
+from classy_blocks.cbtyping import NPPointType, NPVectorType, PointType, VectorType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 

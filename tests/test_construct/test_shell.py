@@ -3,20 +3,12 @@ from typing import List
 import numpy as np
 from parameterized import parameterized
 
+from classy_blocks.base.exceptions import DisconnectedChopError, PointNotCoincidentError, SharedPointNotFoundError
+from classy_blocks.cbtyping import OrientType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.box import Box
 from classy_blocks.construct.operations.loft import Loft
-from classy_blocks.construct.shapes.shell import (
-    AwareFace,
-    AwareFaceStore,
-    DisconnectedChopError,
-    PointNotCoincidentError,
-    SharedPoint,
-    SharedPointNotFoundError,
-    SharedPointStore,
-    Shell,
-)
-from classy_blocks.types import OrientType
+from classy_blocks.construct.shapes.shell import AwareFace, AwareFaceStore, SharedPoint, SharedPointStore, Shell
 from classy_blocks.util import functions as f
 from tests.fixtures.block import DataTestCase
 
@@ -271,8 +263,8 @@ class ShellTests(ShellTestsBase):
 
         self.assertEqual(len(shell.operations[0].chops[2]), 1)
 
-    def test_set_outer_patch(self):
-        orients = ["front", "right"]
+    def test_set_outer_patch(self) -> None:
+        orients: List[OrientType] = ["front", "right"]
         shell = self.get_shell(orients)
         shell.set_outer_patch("roof")
 

@@ -1,8 +1,8 @@
 from typing import get_args
 
+from classy_blocks.cbtyping import DirectionType
 from classy_blocks.construct.operations.box import Box
 from classy_blocks.mesh import Mesh
-from classy_blocks.types import AxisType
 from tests.fixtures.data import DataTestCase
 
 
@@ -14,7 +14,7 @@ class MeshTestCase(DataTestCase):
 
         box = Box(data.points[0], data.points[6])
 
-        for i in get_args(AxisType):
+        for i in get_args(DirectionType):
             box.chop(i, count=10)
 
         return box

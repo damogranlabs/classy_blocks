@@ -1,8 +1,8 @@
 from typing import List
 
 from classy_blocks.base.exceptions import SideCreationError
+from classy_blocks.cbtyping import OrientType
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.types import OrientType
 from classy_blocks.util import constants
 
 

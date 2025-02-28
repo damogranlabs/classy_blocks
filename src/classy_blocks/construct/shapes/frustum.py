@@ -4,9 +4,9 @@ import numpy as np
 
 from classy_blocks.base import transforms as tr
 from classy_blocks.base.exceptions import FrustumCreationError
+from classy_blocks.cbtyping import PointType
 from classy_blocks.construct.flat.sketches.disk import Disk
 from classy_blocks.construct.shapes.round import RoundSolidShape
-from classy_blocks.types import PointType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
 
@@ -40,7 +40,6 @@ class Frustum(RoundSolidShape):
         radius_vector_1 = radius_point_1 - axis_point_1
         radius_1 = f.norm(radius_vector_1)
 
-        # TODO: TEST
         diff = np.dot(axis, radius_vector_1)
         if diff > TOL:
             raise FrustumCreationError(

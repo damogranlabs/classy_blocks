@@ -3,28 +3,13 @@ from typing import List
 
 import numpy as np
 
+from classy_blocks.base.exceptions import DisconnectedChopError, PointNotCoincidentError, SharedPointNotFoundError
+from classy_blocks.cbtyping import NPPointType, NPVectorType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.point import Point
 from classy_blocks.construct.shape import Shape
-from classy_blocks.types import NPPointType, NPVectorType
 from classy_blocks.util import functions as f
-
-
-class SharedPointError(Exception):
-    """Errors with shared points"""
-
-
-class SharedPointNotFoundError(SharedPointError):
-    pass
-
-
-class PointNotCoincidentError(SharedPointError):
-    pass
-
-
-class DisconnectedChopError(SharedPointError):
-    """Issued when chopping a Shell that has disconnected faces"""
 
 
 class SharedPoint:

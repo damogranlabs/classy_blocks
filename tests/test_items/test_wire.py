@@ -1,21 +1,26 @@
 import copy
 
+from classy_blocks.base.exceptions import InconsistentGradingsError
+from classy_blocks.cbtyping import DirectionType
+from classy_blocks.construct.edges import Arc
+from classy_blocks.grading.chop import Chop
+from classy_blocks.items.edges.arcs.arc import ArcEdge
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.items.wire import Wire
+from classy_blocks.items.wires.wire import Wire
 from tests.fixtures.data import DataTestCase
 
 
 class WireTests(DataTestCase):
     """Tests of Pair object"""
 
-    def setUp(self):
+    def setUp(self) -> None:
         block = self.get_single_data(0)
 
         self.vertices = [Vertex(block.points[i], i) for i in range(8)]
 
         self.corner_1 = 1
         self.corner_2 = 2
-        self.axis = 1  # make sure corners and axis are consistent
+        self.axis: DirectionType = 1  # make sure corners and axis are consistent
 
     @property
     def wire(self) -> Wire:
@@ -88,3 +93,38 @@ class WireTests(DataTestCase):
         wire_2.vertices.reverse()
 
         self.assertFalse(wire_1.is_aligned(wire_2))
+
+    def test_add_inline_duplicate(self):
+        wire = self.wire
+
+        wire.add_inline(wire)
+        self.assertEqual(len(wire.after), 0)
+        self.assertEqual(len(wire.before), 0)
+
+    def test_check_consistency_count(self):
+        wire_1 = Wire(self.vertices, 0, 0, 1)
+        wire_1.grading.add_chop(Chop(count=10))
+        wire_1.update()
+
+        wire_2 = Wire(self.vertices, 0, 0, 1)
+        wire_2.grading.add_chop(Chop(count=5))
+        wire_2.update()
+
+        wire_1.coincidents.add(wire_2)
+
+        with self.assertRaises(InconsistentGradingsError):
+            wire_1.check_consistency()
+
+    def test_check_consistency_length(self):
+        # Add two different edges so that lengths are not equal
+        wire_1 = Wire(self.vertices, 0, 0, 1)
+        wire_1.edge = ArcEdge(self.vertices[0], self.vertices[1], Arc([0.5, 0.5, 0]))
+
+        wire_2 = Wire(self.vertices, 0, 0, 1)
+        wire_2.edge = ArcEdge(self.vertices[0], self.vertices[1], Arc([0.5, 0.25, 0]))
+        wire_2.update()
+
+        wire_1.add_coincident(wire_2)
+
+        with self.assertRaises(InconsistentGradingsError):
+            wire_1.check_consistency()

@@ -3,10 +3,10 @@ import dataclasses
 
 import numpy as np
 
+from classy_blocks.cbtyping import EdgeKindType, NPPointListType
 from classy_blocks.construct import edges
 from classy_blocks.construct.curves.discrete import DiscreteCurve
 from classy_blocks.items.edges.edge import Edge
-from classy_blocks.types import EdgeKindType, NPPointListType
 from classy_blocks.util.constants import vector_format
 
 

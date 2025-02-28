@@ -1,8 +1,8 @@
 import numpy as np
 
+from classy_blocks.cbtyping import PointType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.loft import Loft
-from classy_blocks.types import PointType
 
 
 class Box(Loft):

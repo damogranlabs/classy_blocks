@@ -1,9 +1,9 @@
 import dataclasses
 from functools import lru_cache
-from typing import Callable, List, Optional, Set, Tuple, Union
+from typing import Callable, List, Optional, Set, Union
 
+from classy_blocks.cbtyping import ChopPreserveType, ChopTakeType, GradingSpecType
 from classy_blocks.grading import relations as rel
-from classy_blocks.types import ChopTakeType
 
 
 @dataclasses.dataclass
@@ -46,6 +46,26 @@ class ChopRelation:
 
 
 @dataclasses.dataclass
+class ChopData:
+    """A collection of results from Chop.calculate()"""
+
+    length_ratio: float
+    start_size: float
+    c2c_expansion: float
+    count: int
+    end_size: float
+    total_expansion: float
+    take: ChopTakeType = "avg"
+    preserve: ChopPreserveType = "total_expansion"
+
+    def get_specification(self, invert: bool) -> GradingSpecType:
+        if invert:
+            return (self.length_ratio, self.count, 1 / self.total_expansion)
+
+        return (self.length_ratio, self.count, self.total_expansion)
+
+
+@dataclasses.dataclass
 class Chop:
     """A single 'chop' represents a division in Grading object;
     user-provided arguments are stored in this object and used
@@ -57,10 +77,10 @@ class Chop:
     count: Optional[int] = None
     end_size: Optional[float] = None
     total_expansion: Optional[float] = None
-    invert: bool = False
     take: ChopTakeType = "avg"
+    preserve: ChopPreserveType = "total_expansion"
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         # default: take c2c_expansion=1 if there's less than 2 parameters given
         grading_params = [self.start_size, self.end_size, self.count, self.total_expansion, self.c2c_expansion]
         if len(grading_params) - grading_params.count(None) < 2:
@@ -71,25 +91,21 @@ class Chop:
         if self.count is not None:
             self.count = max(int(self.count), 1)
 
-    def calculate(self, length: float) -> Tuple[int, float]:
+    def calculate(self, length: float) -> ChopData:
         """Calculates cell count and total expansion ratio for this chop
         by calling functions that take known variables and return new values"""
         data = dataclasses.asdict(self)
         calculated: Set[str] = set()
+        length = length * self.length_ratio
 
         for key in data.keys():
             if data[key] is not None:
                 calculated.add(key)
 
-        for _ in range(20):
-            if {"count", "total_expansion"}.issubset(calculated):
-                count = int(data["count"])
-                total_expansion = data["total_expansion"]
-
-                if self.invert:
-                    return count, 1 / total_expansion
-
-                return count, total_expansion
+        for _ in range(12):
+            if {"count", "total_expansion", "c2c_expansion", "start_size", "end_size"}.issubset(calculated):
+                data["count"] = int(data["count"])
+                return ChopData(**data)
 
             for chop_rel in ChopRelation.get_possible_combinations():
                 output = chop_rel.output

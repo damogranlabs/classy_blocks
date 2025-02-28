@@ -5,7 +5,9 @@ import numpy as np
 from parameterized import parameterized
 
 from classy_blocks.construct.flat.sketches.disk import HalfDisk, OneCoreDisk, Oval, QuarterDisk, WrappedDisk
+from classy_blocks.construct.shape import ExtrudedShape
 from classy_blocks.construct.shapes.sphere import get_named_points
+from classy_blocks.mesh import Mesh
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
 
@@ -107,6 +109,11 @@ class DisksTests(unittest.TestCase):
         self.assertEqual(len(disk.grid[0]), 1)
         self.assertEqual(len(disk.grid[1]), 4)
 
+    def test_one_core_disk_origo(self):
+        disk = OneCoreDisk([0, 0, 0], [1, 0, 0], [0, 0, 1])
+
+        np.testing.assert_array_almost_equal(disk.origo, [0, 0, 0])
+
     def test_half_disk(self):
         disk = HalfDisk([0, 0, 0], [1, 0, 0], [0, 0, 1])
 
@@ -148,3 +155,19 @@ class OvalTests(unittest.TestCase):
 
         self.assertEqual(len(oval.grid[0]), 6)
         self.assertEqual(len(oval.grid[1]), 10)
+
+
+class ChopTests(unittest.TestCase):
+    def setUp(self):
+        self.mesh = Mesh()
+
+    def test_one_core_disk(self):
+        sketch = OneCoreDisk([0, 0, 0], [1, 0, 0], [0, 0, 1])
+        extrude = ExtrudedShape(sketch, 1)
+
+        extrude.chop(0, count=10)
+        extrude.chop(1, count=5)
+        extrude.chop(2, count=1)
+
+        self.mesh.add(extrude)
+        self.mesh.assemble()

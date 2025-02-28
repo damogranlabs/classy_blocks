@@ -3,9 +3,9 @@ import unittest
 import numpy as np
 from parameterized import parameterized
 
+from classy_blocks.cbtyping import NPPointListType
 from classy_blocks.construct.assemblies.joints import JointBase, LJoint, NJoint, TJoint
 from classy_blocks.mesh import Mesh
-from classy_blocks.types import NPPointListType
 from classy_blocks.util import functions as f
 
 
@@ -75,7 +75,7 @@ class AssemblyTests(unittest.TestCase):
 
         mesh.add(joint)
         mesh.assemble()
-        mesh.block_list.propagate_gradings()
+        mesh.block_list.assemble()
 
     def test_set_patches(self):
         branches = 5

@@ -1,7 +1,8 @@
 import numpy as np
 from parameterized import parameterized
 
-from classy_blocks.optimize.cell import HexCell, NoCommonSidesError
+from classy_blocks.base.exceptions import NoCommonSidesError
+from classy_blocks.optimize.cell import HexCell
 from tests.fixtures.mesh import MeshTestCase
 
 

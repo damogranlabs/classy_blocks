@@ -14,7 +14,7 @@ extrudes: List[cb.Extrude] = []
 
 face = cb.Face([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]])
 extrude = cb.Extrude(face, 1)
-extrudes.append(extrude)
+mesh.add(extrude)
 
 for side in ("top", "right", "top", "top", "left", "top"):
     face = extrude.get_face(side)
@@ -29,14 +29,11 @@ for side in ("top", "right", "top", "top", "left", "top"):
     # the operations to keep them consistent - 'top' faces
     # facing upwards.
     orienter.reorient(extrude)
-
-    extrudes.append(extrude)
-
-for extrude in extrudes:
-    for i in range(3):
-        extrude.chop(i, count=10)
-
     mesh.add(extrude)
 
 mesh.set_default_patch("walls", "wall")
+
+grader = cb.FixedCountGrader(mesh, 5)
+grader.grade()
+
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

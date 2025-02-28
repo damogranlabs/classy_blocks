@@ -160,7 +160,7 @@ class TestGradingRelations(unittest.TestCase):
             ((1, 10, 0.1), 1),
             ((1, 10, 0.01), 0.6784573173),
             ((1, 10, 0.2), 1.202420088),
-            ((1, 1, 1), 1),  # border case
+            ((1, 2, 0.5), 1),  # border case
         )
     )
     def test_get_c2c_expansion__count__end_size_valid(self, args, result):
@@ -188,8 +188,8 @@ class TestGradingRelations(unittest.TestCase):
         self.assertAlmostEqual(rel.get_c2c_expansion__count__total_expansion(*args), result)
 
     def test_get_c2c_expansion__count__total_expansion_invalid(self):
-        with self.assertRaises(ValueError):
-            rel.get_c2c_expansion__count__total_expansion(1, 1, 1)
+        c2cexp = rel.get_c2c_expansion__count__total_expansion(1, 1, 1)
+        self.assertEqual(c2cexp, 1)
 
     @parameterized.expand((((1, 10, 1), 1), ((1, 1, 1), 1), ((1, 10, 1.1), 2.3579476), ((1, 1, 1), 1)))  # border case
     def test_get_total_expansion__count__c2c_expansion_valid(self, args, result):

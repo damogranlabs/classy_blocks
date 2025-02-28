@@ -4,7 +4,7 @@
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.wordBasedSuggestions": "off",
         "editor.codeActionsOnSave": {
-            "source.organizeImports": "explicit"
+            "source.organizeImports.isort": "explicit"
         },
     },
     "python.analysis.typeCheckingMode": "basic",

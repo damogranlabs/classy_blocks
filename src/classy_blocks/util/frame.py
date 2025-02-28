@@ -1,6 +1,6 @@
 from typing import ClassVar, Dict, Generic, List, Optional, Set, Tuple, TypeVar
 
-from classy_blocks.types import AxisType
+from classy_blocks.cbtyping import DirectionType
 from classy_blocks.util import constants
 
 BeamT = TypeVar("BeamT")
@@ -42,7 +42,7 @@ class Frame(Generic[BeamT]):
         self.beams[corner_1][corner_2] = beam
         self.beams[corner_2][corner_1] = beam
 
-    def get_axis_beams(self, axis: AxisType) -> List[BeamT]:
+    def get_axis_beams(self, axis: DirectionType) -> List[BeamT]:
         """Returns all non-None beams from given axis"""
         beams = []
 

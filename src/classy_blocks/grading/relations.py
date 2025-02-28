@@ -47,7 +47,7 @@ def _validate_count(count: float, condition: str) -> None:
         )
 
     if not eval(f"{count}{condition}"):
-        raise ValueError(f"Count value ({count}) does not met the condition: {condition}")
+        raise ValueError(f"Count value ({count}) does not meet the condition: {condition}")
 
 
 def _validate_start_end_size(size, name: str) -> None:
@@ -195,7 +195,7 @@ def get_c2c_expansion__count__start_size(length, count, start_size):
 def get_c2c_expansion__count__end_size(length, count, end_size):
     """Calculates cell-to-cell expansion ratio from given count and end size"""
     _validate_length(length)
-    _validate_count(count, ">=1")
+    _validate_count(count, ">=2")
     _validate_start_end_size(end_size, "end")
 
     if abs(count * end_size - length) / length < constants.TOL:
@@ -219,6 +219,9 @@ def get_c2c_expansion__count__end_size(length, count, end_size):
 
 def get_c2c_expansion__count__total_expansion(length, count, total_expansion):
     """Calculates cell-to-cell expansion ratio from given count and total expansion ratio"""
+    if count == 1:
+        return 1
+
     _validate_length(length)
     _validate_count(count, ">1")
 

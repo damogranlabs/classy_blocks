@@ -1,6 +1,6 @@
 from typing import Dict, List, Tuple
 
-from classy_blocks.types import OrientType
+from classy_blocks.cbtyping import DirectionType, OrientType
 
 # data type
 DTYPE = "float"  # dtype as taken by np.array()
@@ -31,6 +31,14 @@ SIDES_MAP: List[OrientType] = [
     "back",
     "left",
 ]
+
+# Connects block axis (direction) and orients
+# (read: Direction 0 goes from right to left, etc.
+DIRECTION_MAP: Dict[DirectionType, Tuple[OrientType, OrientType]] = {
+    0: ("left", "right"),
+    1: ("front", "back"),
+    2: ("bottom", "top"),
+}
 
 # pairs of corner indexes along axes
 AXIS_PAIRS = (

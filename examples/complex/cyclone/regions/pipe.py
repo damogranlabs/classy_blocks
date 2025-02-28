@@ -5,7 +5,7 @@ import parameters as params
 from regions.region import Region
 
 import classy_blocks as cb
-from classy_blocks.types import NPPointType
+from classy_blocks.cbtyping import NPPointType
 from classy_blocks.util import functions as f
 
 

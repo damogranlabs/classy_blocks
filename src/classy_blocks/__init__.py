@@ -25,13 +25,16 @@ from .construct.operations.operation import Operation
 from .construct.operations.revolve import Revolve
 from .construct.operations.wedge import Wedge
 from .construct.shape import ExtrudedShape, LoftedShape, RevolvedShape, Shape
-from .construct.shapes.cylinder import Cylinder, SemiCylinder
+from .construct.shapes.cylinder import Cylinder, QuarterCylinder, SemiCylinder
 from .construct.shapes.elbow import Elbow
 from .construct.shapes.frustum import Frustum
 from .construct.shapes.rings import ExtrudedRing, RevolvedRing
 from .construct.shapes.shell import Shell
 from .construct.shapes.sphere import Hemisphere
 from .construct.stack import ExtrudedStack, RevolvedStack, TransformedStack
+from .grading.autograding.fixed.grader import FixedCountGrader
+from .grading.autograding.simple.grader import SimpleGrader
+from .grading.autograding.smooth.grader import SmoothGrader
 from .mesh import Mesh
 from .modify.find.geometric import GeometricFinder
 from .modify.find.shape import RoundSolidFinder
@@ -45,95 +48,85 @@ from .optimize.optimizer import MeshOptimizer, SketchOptimizer
 from .optimize.smoother import MeshSmoother, SketchSmoother
 
 __all__ = [
-    # Base
-    "Mirror",
-    "Rotation",
-    "Scaling",
-    "Translation",
-    "Shear",
-    # curves
-    "CurveBase",
-    "DiscreteCurve",
-    "LinearInterpolatedCurve",
-    "SplineInterpolatedCurve",
     "AnalyticCurve",
-    "LineCurve",
-    "CircleCurve",
-    # edges
-    "Arc",
-    "Origin",
     "Angle",
-    "Spline",
-    "PolyLine",
-    "Project",
-    "OnCurve",
-    # Face
-    "Face",
-    # construct operations
-    "Operation",
-    "Loft",
-    "Extrude",
-    "Revolve",
+    "Arc",
     "Box",
-    "Wedge",
-    "Connector",
-    # Sketches
-    "MappedSketch",
-    "Grid",
-    "OneCoreDisk",
-    "FourCoreDisk",
-    "HalfDisk",
-    "WrappedDisk",
-    "Oval",
-    "QuarterSplineDisk",
-    "HalfSplineDisk",
-    "SplineDisk",
-    "QuarterSplineRing",
-    "HalfSplineRing",
-    "SplineRing",
-    # construct shapes
-    "Shape",
-    "ExtrudedShape",
-    "LoftedShape",
-    "RevolvedShape",
-    "Elbow",
-    "Frustum",
-    "Cylinder",
-    "SemiCylinder",
-    "ExtrudedRing",
-    "RevolvedRing",
-    "Hemisphere",
-    "Shell",
-    # Stacks
-    "TransformedStack",
-    "ExtrudedStack",
-    "RevolvedStack",
-    # The Mesh
-    "Mesh",
-    # Modification
-    "GeometricFinder",
-    "RoundSolidFinder",
-    "ViewpointReorienter",
-    # Optimization: Clamps
+    "CircleCurve",
     "ClampBase",
-    "FreeClamp",
-    "LineClamp",
+    "Connector",
+    "CurveBase",
     "CurveClamp",
-    "RadialClamp",
+    "Cylinder",
+    "DiscreteCurve",
+    "Elbow",
+    "Extrude",
+    "ExtrudedRing",
+    "ExtrudedShape",
+    "ExtrudedStack",
+    "Face",
+    "FixedCountGrader",
+    "FourCoreDisk",
+    "FreeClamp",
+    "Frustum",
+    "GeometricFinder",
+    "Grid",
+    "HalfDisk",
+    "HalfSplineDisk",
+    "HalfSplineRing",
+    "Hemisphere",
+    "LJoint",
+    "LineClamp",
+    "LineCurve",
+    "LinearInterpolatedCurve",
+    "LinkBase",
+    "Loft",
+    "LoftedShape",
+    "MappedSketch",
+    "Mesh",
+    "MeshOptimizer",
+    "MeshSmoother",
+    "Mirror",
+    "NJoint",
+    "OnCurve",
+    "OneCoreDisk",
+    "Operation",
+    "Origin",
+    "Oval",
     "ParametricSurfaceClamp",
     "PlaneClamp",
-    # Optimization: links
-    "LinkBase",
-    "TranslationLink",
+    "PolyLine",
+    "Project",
+    "QuarterCylinder",
+    "QuarterSplineDisk",
+    "QuarterSplineRing",
+    "RadialClamp",
+    "Revolve",
+    "RevolvedRing",
+    "RevolvedShape",
+    "RevolvedStack",
+    "Rotation",
     "RotationLink",
-    "SymmetryLink",
-    # Optimization: optimizers and smoothers
-    "MeshOptimizer",
+    "RoundSolidFinder",
+    "Scaling",
+    "SemiCylinder",
+    "Shape",
+    "Shear",
+    "Shell",
+    "SimpleGrader",
     "SketchOptimizer",
-    "MeshSmoother",
     "SketchSmoother",
-    # Assemblies
-    "NJoint",
+    "SmoothGrader",
+    "Spline",
+    "SplineDisk",
+    "SplineInterpolatedCurve",
+    "SplineRing",
+    "SymmetryLink",
     "TJoint",
-    "LJoint",
+    "TransformedStack",
+    "Translation",
+    "TranslationLink",
+    "ViewpointReorienter",
+    "Wedge",
+    "WrappedDisk",
 ]

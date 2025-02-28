@@ -1,7 +1,7 @@
 import numpy as np
 
+from classy_blocks.cbtyping import PointType
 from classy_blocks.optimize.clamps.clamp import ClampBase
-from classy_blocks.types import PointType
 
 
 class FreeClamp(ClampBase):

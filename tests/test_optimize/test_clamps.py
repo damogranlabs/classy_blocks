@@ -2,11 +2,11 @@ import unittest
 
 import numpy as np
 
+from classy_blocks.cbtyping import NPPointType
 from classy_blocks.construct.curves.analytic import AnalyticCurve
 from classy_blocks.optimize.clamps.curve import CurveClamp, LineClamp, RadialClamp
 from classy_blocks.optimize.clamps.free import FreeClamp
 from classy_blocks.optimize.clamps.surface import ParametricSurfaceClamp, PlaneClamp
-from classy_blocks.types import NPPointType
 from classy_blocks.util import functions as f
 
 
@@ -44,15 +44,6 @@ class CurveClampTests(ClampTestsBase):
         clamp = LineClamp(self.position, [0, 0, 0], [1, 1, 1])
 
         self.assertAlmostEqual(clamp.params[0], 0)
-
-    def test_line_init_noncoincident(self):
-        """Initialization of LineClamp with a non-coincident vertex;
-        update vertex with closest point"""
-        clamp = LineClamp(self.position, [1, 1, 1], [2, 1, 1], (-100, 100))
-
-        # don't be too strict about initial parameters,
-        # optimization will move everything away anyhow
-        np.testing.assert_array_almost_equal(clamp.position, [0, 1, 1], decimal=3)
 
     def test_line_init_far(self):
         """Initialization that will yield t < 0"""

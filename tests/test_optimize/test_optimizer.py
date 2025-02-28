@@ -2,10 +2,10 @@ import unittest
 
 import numpy as np
 
+from classy_blocks.base.exceptions import ClampExistsError
 from classy_blocks.construct.flat.sketches.mapped import MappedSketch
 from classy_blocks.optimize.clamps.free import FreeClamp
 from classy_blocks.optimize.clamps.surface import PlaneClamp
-from classy_blocks.optimize.junction import ClampExistsError
 from classy_blocks.optimize.links import TranslationLink
 from classy_blocks.optimize.optimizer import MeshOptimizer, SketchOptimizer
 from classy_blocks.optimize.smoother import SketchSmoother
@@ -131,7 +131,7 @@ class ComplexSketchTests(unittest.TestCase):
         # use a method that doesn't work well with this kind of problem
         # (SLSQP seems to have issues with different orders of magnitude)
         # so that a lot of rollback is required
-        iterations = optimizer.auto_optimize(method="SLSQP", tolerance=1e-3)
+        iterations = optimizer.auto_optimize(method="Powell", tolerance=1e-3)
 
         self.assertLess(optimizer.grid.quality, initial_quality)
 

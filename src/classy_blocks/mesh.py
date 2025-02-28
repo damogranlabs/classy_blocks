@@ -2,11 +2,14 @@
 
 from typing import List, Optional, Set, Union, get_args
 
+from classy_blocks.base.exceptions import EdgeNotFoundError
+from classy_blocks.cbtyping import DirectionType
 from classy_blocks.construct.assemblies.assembly import Assembly
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.shape import Shape
 from classy_blocks.construct.stack import Stack
 from classy_blocks.items.block import Block
+from classy_blocks.items.patch import Patch
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.lists.block_list import BlockList
 from classy_blocks.lists.edge_list import EdgeList
@@ -14,7 +17,6 @@ from classy_blocks.lists.face_list import FaceList
 from classy_blocks.lists.geometry_list import GeometryList
 from classy_blocks.lists.patch_list import PatchList
 from classy_blocks.lists.vertex_list import VertexList
-from classy_blocks.types import AxisType
 from classy_blocks.util import constants
 from classy_blocks.util.vtk_writer import write_vtk
 
@@ -96,41 +98,69 @@ class Mesh:
         the data remains but it will not contribute to the mesh"""
         self.deleted.add(operation)
 
-    def assemble(self, skip_edges: bool = False) -> None:
+    @property
+    def _operations(self) -> List[Operation]:
+        operations: List[Operation] = []
+
+        for entity in self.depot:
+            if isinstance(entity, Operation):
+                ops_to_add = [entity]
+            else:
+                ops_to_add = entity.operations
+
+            for op in ops_to_add:
+                if op not in self.deleted:
+                    operations.append(op)
+
+        return operations
+
+    def _add_geometry(self) -> None:
+        for entity in self.depot:
+            if entity.geometry is not None:
+                self.add_geometry(entity.geometry)
+
+    def assemble(self) -> None:
         """Converts classy_blocks entities (operations and shapes) to
         actual vertices, edges, blocks and other stuff to be inserted into
         blockMeshDict. After this has been done, the above objects
         cease to have any function or influence on mesh."""
-        # first, collect data about patches and merged stuff
-        for entity in self.depot:
-            if isinstance(entity, Operation):
-                operations = [entity]
-            else:
-                operations = entity.operations
+        if self.is_assembled:
+            # don't assemble twice but do update wire lengths
+            self.block_list.update()
+            return
 
-            for operation in operations:
-                if operation in self.deleted:
+        operations = self._operations
+        op_vertices: List[List[Vertex]] = []
+
+        for operation in operations:
+            # create vertices and edges
+            vertices = self._add_vertices(operation)
+            self.edge_list.add_from_operation(vertices, operation)
+            op_vertices.append(vertices)  # blocks will be created from those
+
+            # get patches and faces
+            self.patch_list.add(vertices, operation)
+            self.face_list.add(vertices, operation)
+
+        # then, create blocks from known vertices and edges
+        for i, operation in enumerate(operations):
+            block = Block(len(self.block_list.blocks), op_vertices[i])
+            for wire in block.wire_list:
+                try:
+                    edge = self.edge_list.find(*wire.vertices)
+                    block.add_edge(wire.corners[0], wire.corners[1], edge)
+                except EdgeNotFoundError:
                     continue
 
-                vertices = self._add_vertices(operation)
+            for direction in get_args(DirectionType):
+                block.add_chops(direction, operation.chops[direction])
 
-                block = Block(len(self.block_list.blocks), vertices)
-                if not skip_edges:
-                    for data in self.edge_list.add_from_operation(vertices, operation):
-                        block.add_edge(*data)
+            block.cell_zone = operation.cell_zone
 
-                for axis in get_args(AxisType):
-                    for chop in operation.chops[axis]:
-                        block.chop(axis, chop)
+            self.block_list.add(block)
 
-                block.cell_zone = operation.cell_zone
-
-                self.block_list.add(block)
-                self.patch_list.add(vertices, operation)
-                self.face_list.add(vertices, operation)
-
-            if entity.geometry is not None:
-                self.add_geometry(entity.geometry)
+        self._add_geometry()
+        self.block_list.update()
 
     def clear(self) -> None:
         """Undoes the assemble() method; clears created blocks and other lists
@@ -189,7 +219,7 @@ class Mesh:
 
         # gradings: define after writing VTK;
         # if it is not specified correctly, this will raise an exception
-        self.block_list.propagate_gradings()
+        self.block_list.assemble()
 
         with open(output_path, "w", encoding="utf-8") as output:
             output.write(constants.MESH_HEADER)
@@ -214,6 +244,10 @@ class Mesh:
     @property
     def vertices(self) -> List[Vertex]:
         return self.vertex_list.vertices
+
+    @property
+    def patches(self) -> List[Patch]:
+        return list(self.patch_list.patches.values())
 
     @property
     def operations(self) -> List[Operation]:

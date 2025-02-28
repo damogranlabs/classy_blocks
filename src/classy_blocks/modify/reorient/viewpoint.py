@@ -3,14 +3,11 @@ from typing import Dict, List
 import numpy as np
 from scipy.spatial import ConvexHull
 
+from classy_blocks.base.exceptions import DegenerateGeometryError
+from classy_blocks.cbtyping import NPPointListType, NPPointType, NPVectorType, OrientType, PointType
 from classy_blocks.construct.operations.operation import Operation
-from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, OrientType, PointType
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
-
-
-class DegenerateGeometryError(Exception):
-    """Raised when orienting by ObserverSorter failed because of invalid geometry"""
 
 
 class Triangle:

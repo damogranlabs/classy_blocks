@@ -6,18 +6,15 @@ from typing import Generic, List, Optional, TypeVar, Union
 import numpy as np
 
 from classy_blocks.base.element import ElementBase
+from classy_blocks.base.exceptions import ShapeCreationError
+from classy_blocks.cbtyping import DirectionType, NPPointType, VectorType
 from classy_blocks.construct.edges import Angle
 from classy_blocks.construct.flat.sketch import Sketch, SketchT
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.operations.operation import Operation
-from classy_blocks.types import AxisType, NPPointType, VectorType
 from classy_blocks.util import functions as f
 
 ShapeT = TypeVar("ShapeT", bound="Shape")
-
-
-class ShapeCreationError(Exception):
-    """Raised when creating a shape from errorneous data"""
 
 
 class Shape(ElementBase, abc.ABC):
@@ -106,7 +103,7 @@ class LoftedShape(Shape, abc.ABC, Generic[SketchT]):
         """Analogous to Sketch's grid but corresponsing operations are returned"""
         return self.lofts
 
-    def chop(self, axis: AxisType, **kwargs) -> None:
+    def chop(self, axis: DirectionType, **kwargs) -> None:
         """Chops operations along given axis.
         Only axis 0 and 1 are allowed as defined in sketch_1"""
         if axis == 2:

@@ -4,7 +4,7 @@ import numpy as np
 
 from classy_blocks.base.element import ElementBase
 from classy_blocks.base.exceptions import PointCreationError
-from classy_blocks.types import NPVectorType, PointType, ProjectToType, VectorType
+from classy_blocks.cbtyping import NPVectorType, PointType, ProjectToType, VectorType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import DTYPE, TOL, vector_format
 

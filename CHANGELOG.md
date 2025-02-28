@@ -4,14 +4,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# [1.6.4]
+# [1.7.0]
+### Added
+- Automatic grading:
+  - `FixedCountGrader`: simple and quick, grades all blocks in all directions with the same number. Useful while developing meshes - settings blocking etc.
+  - `SimpleGrader`: quick and good for cases where blocks do not differ much in size. Sets simple-graded counts on blocks based on wanted cell size.
+  - `SmoothGrader`: Tries to stretch and squeeze cells within blocks by using two graded chops in each direction. The idea is to try to keep difference in cell size between neighbouring blocks as little as possible. Blocks that cannot maintain required cell size are simply/uniformly chopped.
+- Possibility to define rings by their inner radius
+- Spline round shapes
+- Cylinders:
+  - Add symmetry patch to SemiCylinder
+- New examples:
+  - Quarter cylinder
+  - One core cylinder
+- `ShapeOptimizer` can optimize shapes _before_ they are added  to mesh
+
+### Changed
+- Renamed `classy_blocks.typing` module to `classy_blocks.cbtyping` due to name clash
+- Bugfixes
+
+## [1.6.4]
 ### Added
 - MappedSketch.merge() method
 
 ### Changed
 - Improved blocking in cyclone example
 
-# [1.6.3]
+## [1.6.3]
 ### Changed
 - Bugfix: sorting of cells by sensitivity
 - Bugfix: sensitivity calculation moved clamps around
@@ -21,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Quality caching (produced invalid results and did not speed up optimization)
 
-# [1.6.2]
+## [1.6.2]
 ### Added
 - QuarterSplineRound and QuarterSplineRoundRing; cylinders and rings with an arbitrary, parametrized spline cross-section
 - Lofts and Shapes, created with spline side-edges (when multiple sketches for mid-sections are provided)
@@ -30,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Bugfixes
 
-# [1.6.1]
+## [1.6.1]
 ### Added
 - Assemblies and *Joints
   - Examples thereof
@@ -38,7 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Some bugfixes
 
-# [1.6.0]
+## [1.6.0]
 ### Added
 - Array element; handling multiple points at once (makes transforms faster)
 - Complete overhaul of Optimization:
@@ -55,14 +74,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - QuadMap is no longer needed (handled by Grid classes)
 
-# [1.5.3]
+## [1.5.3]
 ### Added
 - RoundSolidShape.remove_inner_edges() can now remove edges from a specific face (start, end or both)
 
 ### Changed
 - Bugfix: invalid cells in round shapes (due to wrong spline point calculation)
 
-# [1.5.2]
+## [1.5.2]
 ### Added
 - Spline edges on QuarterDisk, HalfDisk and Disk (FourCoreDisk) to improve mesh quality
 - Face.remove_edges() to reset all edges to simple lines
@@ -71,7 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Updated affected tutorials (diffusers, cyclone)
 
-# [1.5.1]
+## [1.5.1]
 ### Added
 - Optimization:
   - Choice of solver (different problems require - work best - with different solvers)
@@ -86,7 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Improved optimization speed
 
-# [1.5.0]
+## [1.5.0]
 ### Added
 - Curves:
   - get_tangent()
@@ -114,7 +133,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Calling .transform() with a Mirror transformation will warn about creating an inverted block
 
 
-# [1.4.1]
+## [1.4.1]
 ### Changed
 - Improved optimization output
 
@@ -122,7 +141,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Relaxation within optimization
 - Numerical integration of analytic curve lengths; use discretization instead
 
-# [1.4.0]
+## [1.4.0]
 ### Added
 - Channel example
 - Cyclone example
@@ -157,7 +176,7 @@ that parameter is of a similar magnitudes than points' coordinates.
 ### Removed
 - Junction.delta() is now handled by optimization automatically
 
-# [1.3.3]
+## [1.3.3]
 ### Added
 - Airfoil example
 - Translation and Rotational Link: move together with vertices being optimized (see the airfoil example)
@@ -172,11 +191,11 @@ that parameter is of a similar magnitudes than points' coordinates.
 ### Removed
 - Curve.get_closest_param() now finds initial_param automatically
 
-# [1.3.2] Curves
+## [1.3.2] Curves
 ### Added
 - *Curve objects for dealing with edge specification and optimization
 
-# [1.3.1] Optimization/Backport
+## [1.3.1] Optimization/Backport
 ### Added
 - mesh.clear() removes lists of all items that were populated during mesh.assemble()
 - mesh.backport() updates user supplied operations' points with results of optimization/modification
@@ -184,7 +203,7 @@ that parameter is of a similar magnitudes than points' coordinates.
 ### Changed
 - Optimizer: under-relaxation for the first optimization iterations
 
-# [1.3.0] Blocking Optimization
+## [1.3.0] Blocking Optimization
 ### Added
 - **Blocking Optimization**
   - Finders for easier fetching vertices, generated by mesh.assemble()
@@ -208,7 +227,7 @@ that parameter is of a similar magnitudes than points' coordinates.
   - Calling .project_side() on an Operation will add the new geometry to edges instead of replacing them (but will replace existing label for the side)
 
 
-# [1.2.0] Shell Shape
+## [1.2.0] Shell Shape
 ### Added
 - A Shell Shape, created from arbitrary set of faces
 ### Changed

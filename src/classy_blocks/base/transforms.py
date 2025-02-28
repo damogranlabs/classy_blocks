@@ -4,7 +4,7 @@ into an easily digestable function/method arguments"""
 import dataclasses
 from typing import Optional
 
-from classy_blocks.types import PointType, VectorType
+from classy_blocks.cbtyping import PointType, VectorType
 
 
 @dataclasses.dataclass

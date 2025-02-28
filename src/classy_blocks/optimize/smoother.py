@@ -3,11 +3,11 @@ from typing import Iterable, List, Set
 
 import numpy as np
 
+from classy_blocks.cbtyping import PointListType
 from classy_blocks.construct.flat.sketches.mapped import MappedSketch
 from classy_blocks.mesh import Mesh
 from classy_blocks.optimize.grid import GridBase, HexGrid, QuadGrid
 from classy_blocks.optimize.junction import Junction
-from classy_blocks.types import PointListType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
 

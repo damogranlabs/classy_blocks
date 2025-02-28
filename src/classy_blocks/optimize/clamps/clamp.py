@@ -4,7 +4,7 @@ from typing import Callable, List, Optional
 import numpy as np
 import scipy.optimize
 
-from classy_blocks.types import NPPointType, PointType
+from classy_blocks.cbtyping import NPPointType, PointType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
 
@@ -25,7 +25,6 @@ class ClampBase(abc.ABC):
         self.initial_params = initial_params
 
         self.params = self.get_params()
-        self.update_params(self.params)
 
     @property
     @abc.abstractmethod

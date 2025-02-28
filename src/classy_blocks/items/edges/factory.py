@@ -1,5 +1,6 @@
 from typing import Type
 
+from classy_blocks.cbtyping import EdgeKindType
 from classy_blocks.construct.edges import EdgeData
 from classy_blocks.items.edges.arcs.angle import AngleEdge
 from classy_blocks.items.edges.arcs.arc import ArcEdge
@@ -10,7 +11,6 @@ from classy_blocks.items.edges.edge import Edge
 # FIXME: make this automatic
 from classy_blocks.items.edges.line import LineEdge
 from classy_blocks.items.edges.project import ProjectEdge
-from classy_blocks.types import EdgeKindType
 
 
 class EdgeFactory:

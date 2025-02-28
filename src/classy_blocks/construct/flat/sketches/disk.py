@@ -1,12 +1,21 @@
 import abc
-from typing import ClassVar, List
+from typing import ClassVar, List, Optional
 
 import numpy as np
 
+from classy_blocks.cbtyping import (
+    IndexType,
+    NPPointListType,
+    NPPointType,
+    NPVectorType,
+    PointListType,
+    PointType,
+    VectorType,
+)
 from classy_blocks.construct.edges import Origin, Spline
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketches.mapped import MappedSketch
-from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, PointType, VectorType
+from classy_blocks.construct.point import Point
 from classy_blocks.util import functions as f
 
 
@@ -51,8 +60,8 @@ class DiskBase(MappedSketch, abc.ABC):
         0.421177,
         0.502076,
         0.566526,
-        0.610535,
         0.610532,
+        0.610535,
         0.625913,
         0.652300,
         0.686516,
@@ -61,52 +70,84 @@ class DiskBase(MappedSketch, abc.ABC):
         0.792025,
     )
 
+    def __init__(self, positions: PointListType, quads: List[IndexType]):
+        # Center point as a constant.
+        self.origo_point = Point(positions[0])
+
+        super().__init__(positions, quads)
+
+    @property
+    def origo(self):
+        return self.origo_point.position
+
     # Relative size of the inner square (O-1-2-3) in a single core cylinder:
     # - too small will cause unnecessary high number of small cells in the square;
     # - too large will prevent creating large numbers of boundary layers
     @property
     def diagonal_ratio(self) -> float:
-        return 2**0.5 * self.spline_ratios[8] / 0.8 * self.core_ratio
+        return 2**0.5 * self.spline_ratios[7] / 0.8 * self.core_ratio
 
-    def add_spline_edges(self) -> None:
+    def circular_core_spline(
+        self,
+        p_core_ratio: PointType,
+        p_diagonal_ratio: PointType,
+        reverse: bool = False,
+        center: Optional[PointType] = None,
+    ) -> NPPointListType:
+        """Creates the spline points for the core."""
+        p_0 = np.asarray(p_core_ratio)
+        p_1 = np.asarray(p_diagonal_ratio)
+        if center is None:
+            center = self.center
+
+        # Spline points in unitary coordinates
+        spline_points_u = np.array([self.spline_ratios[-1:6:-1]]).T * np.array([0, 1, 0]) + np.array(
+            [self.spline_ratios[:7]]
+        ).T * np.array([0, 0, 1])
+
+        # p_1 and p_2 in unitary coordinates
+        p_0_u = np.array([0, 0.8, 0])
+        p_1_u = np.array([0, 6.10535e-01, 6.10535e-01])
+
+        # orthogonal vectors based on p_0_u and p_1_u
+        u_0_org = p_0_u
+        u_1_org = p_1_u - np.dot(p_1_u, f.unit_vector(u_0_org)) * f.unit_vector(u_0_org)
+
+        # Spline points in u_0_org and u_1_org
+        spline_d_0_org = np.dot(spline_points_u, f.unit_vector(u_0_org)).reshape((-1, 1)) / f.norm(u_0_org)
+        spline_d_1_org = np.dot(spline_points_u, f.unit_vector(u_1_org)).reshape((-1, 1)) / f.norm(u_1_org)
+
+        # New plane defined by new points
+        u_0 = p_0 - center
+        u_1 = p_1 - center - np.dot(p_1 - center, f.unit_vector(u_0)) * f.unit_vector(u_0)
+
+        spline_points_new = center + spline_d_0_org * u_0 + spline_d_1_org * u_1
+        if reverse:
+            return spline_points_new[::-1]
+        else:
+            return spline_points_new
+
+    def add_core_spline_edges(self) -> None:
         """Add a spline to the core blocks for an optimized mesh."""
-        spline_ratios = np.array(self.spline_ratios) / 0.8 * self.core_ratio
-        spl_len = len(spline_ratios)
+        for i, face in enumerate(self.core):
+            p_0 = face.point_array[(i + 1) % 4]  # Core point on radius vector
+            p_1 = face.point_array[(i + 2) % 4]  # Core point on diagonal
+            p_2 = face.point_array[(i + 3) % 4]  # Core point on perpendicular radius vector
 
-        spline_points = [
-            self.center
-            + self.radius_vector * spline_ratios[i]
-            + self.perp_radius_vector * spline_ratios[spl_len - i - 1]
-            for i in range(spl_len)
-        ]
-        spline_points.reverse()
+            spline_curve_0_1 = Spline(self.circular_core_spline(p_0, p_1, reverse=i == 2))
+            spline_curve_1_2 = Spline(self.circular_core_spline(p_2, p_1, reverse=i != 1))
 
-        for i in range(len(self.core)):
-            angle = i * np.pi / 2
-            points = [f.rotate(p, angle, self.normal, self.center) for p in spline_points]
-
-            points_1 = points[: spl_len // 2 - 1]
-            points_2 = points[1 + spl_len // 2 :]
-
-            if i == 2:
-                points_1.reverse()
-            if i == 1:
-                points_2.reverse()
-
-            curve_1 = Spline(points_1)
-            curve_2 = Spline(points_2)
-
+            # Add curves to edges
             edge_1 = (i + 1) % 4
             edge_2 = (i + 2) % 4
-
-            self.grid[0][i].add_edge(edge_1, curve_1)
-            self.grid[0][i].add_edge(edge_2, curve_2)
+            face.add_edge(edge_1, spline_curve_0_1)
+            face.add_edge(edge_2, spline_curve_1_2)
 
     def add_edges(self):
-        for face in self.grid[-1]:
-            face.add_edge(1, Origin(self.center))
+        for face in self.shell:
+            face.add_edge(1, Origin(self.origo))
 
-        self.add_spline_edges()
+        self.add_core_spline_edges()
 
     @property
     def center(self) -> NPPointType:
@@ -116,19 +157,15 @@ class DiskBase(MappedSketch, abc.ABC):
     @property
     def radius_point(self) -> NPPointType:
         """Point at outer radius"""
-        return self.grid[1][0].points[1].position
+        return self.shell[0].points[1].position
 
     @property
     def radius_vector(self) -> NPVectorType:
         """Vector that points from center of this
-        *Circle to its (first) radius point"""
-        return self.radius_point - self.center
-
-    @property
-    def perp_radius_vector(self) -> NPVectorType:
-        """Vector that points from center of this
-        *Circle to its (second) radius point"""
-        return f.unit_vector(np.cross(self.normal, self.radius_vector)) * f.norm(self.radius_vector)
+        *Circle to its (first) radius point
+        Origo is used instead of center to ensure outside is constant, when moving the core,
+        does not change the outer shape."""
+        return self.radius_point - self.origo
 
     @property
     def radius(self) -> float:
@@ -147,13 +184,17 @@ class DiskBase(MappedSketch, abc.ABC):
     def shell(self) -> List[Face]:
         return self.grid[-1]
 
+    @property
+    def parts(self):
+        return [self.origo_point, *super().parts]
+
 
 class OneCoreDisk(DiskBase):
     """A disk with a single block in  the center and four blocks around;
-    see docs/blocking for point numbers and faces/grid indexing."""
+    see docs/sketches for point numbers and faces/grid indexing."""
 
     chops: ClassVar = [
-        [0],  # axis 0
+        [1],  # axis 0
         [1, 2],  # axis 1
     ]
 
@@ -179,18 +220,22 @@ class OneCoreDisk(DiskBase):
         return self.faces[0].center
 
     @property
+    def origo(self):
+        return self.faces[0].center
+
+    @property
     def grid(self):
         return [self.faces[:1], self.faces[1:]]
 
-    def add_spline_edges(self):
+    def add_core_spline_edges(self):
         pass
 
 
 class QuarterDisk(DiskBase):
-    """A quarter of a four-core disk; see docs/blocking for point numbers and faces/grid indexing"""
+    """A quarter of a four-core disk; see docs/sketches for point numbers and faces/grid indexing"""
 
     chops: ClassVar = [
-        [0],  # axis 0
+        [1],  # axis 0
         [1, 2],  # axis 1
     ]
 
@@ -333,7 +378,7 @@ class WrappedDisk(DiskBase):
 
     def add_edges(self):
         for face in self.grid[1]:
-            face.add_edge(1, Origin(self.center))
+            face.add_edge(1, Origin(self.origo))
 
     @property
     def center(self):

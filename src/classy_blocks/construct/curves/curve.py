@@ -6,8 +6,8 @@ import numpy as np
 import scipy.optimize
 
 from classy_blocks.base.element import ElementBase
-from classy_blocks.construct.array import Array
-from classy_blocks.types import NPPointListType, NPPointType, NPVectorType, ParamCurveFuncType, PointType
+from classy_blocks.cbtyping import NPPointListType, NPPointType, NPVectorType, ParamCurveFuncType, PointType
+from classy_blocks.construct.series import Series
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
 
@@ -109,7 +109,7 @@ class CurveBase(ElementBase):
 class PointCurveBase(CurveBase):
     """A base object for curves, defined by a list of points"""
 
-    array: Array
+    series: Series
 
     def _check_param(self, param):
         return int(super()._check_param(param))

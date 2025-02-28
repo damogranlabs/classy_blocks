@@ -3,11 +3,11 @@ from typing import get_args
 
 import numpy as np
 
+from classy_blocks.cbtyping import DirectionType
 from classy_blocks.construct.operations.box import Box
 from classy_blocks.mesh import Mesh
 from classy_blocks.modify.find.geometric import GeometricFinder
-from classy_blocks.optimize.grid import HexGrid, QuadGrid
-from classy_blocks.types import AxisType
+from classy_blocks.optimize.grid import QuadGrid
 
 
 class SketchTestsBase(unittest.TestCase):
@@ -51,7 +51,7 @@ class BoxTestsBase(unittest.TestCase):
                 for z in (-1, 0):
                     box = Box([x, y, z], [x + 1, y + 1, z + 1])
 
-                    for axis in get_args(AxisType):
+                    for axis in get_args(DirectionType):
                         box.chop(axis, count=10)
 
                     self.mesh.add(box)
@@ -62,6 +62,3 @@ class BoxTestsBase(unittest.TestCase):
 
     def get_vertex(self, position):
         return next(iter(self.finder.find_in_sphere(position)))
-
-    def get_grid(self, mesh: Mesh) -> HexGrid:
-        return HexGrid.from_mesh(mesh)

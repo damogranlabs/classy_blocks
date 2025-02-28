@@ -1,8 +1,8 @@
 from parameterized import parameterized
 
+from classy_blocks.cbtyping import OrientType
 from classy_blocks.items.side import Side
 from classy_blocks.lists.face_list import FaceList, ProjectedFace
-from classy_blocks.types import OrientType
 from tests.fixtures.block import BlockTestCase
 
 

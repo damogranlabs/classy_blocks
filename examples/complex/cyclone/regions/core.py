@@ -6,9 +6,9 @@ from regions.region import Region
 
 import classy_blocks as cb
 from classy_blocks.base.transforms import Transformation, Translation
+from classy_blocks.cbtyping import NPVectorType, PointListType, PointType
 from classy_blocks.construct.point import Point
 from classy_blocks.construct.shapes.round import RoundSolidShape
-from classy_blocks.types import NPVectorType, PointListType, PointType
 
 
 class NineCoreDisk(cb.MappedSketch):
