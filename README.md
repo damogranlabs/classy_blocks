@@ -77,17 +77,15 @@ _Unchecked items are not implemented yet but are on a TODO list_
     - [x] Ring (annulus)
     - [x] Hemisphere
 - [x] Stacks (collections of similar Shapes stacked on top of each other)
-- [ ] Predefined parametric Objects
+- [x] Predefined parametric Objects
     - [x] T-joint (round pipes)
     - [x] X-joint
     - [x] N-joint (multiple pipes)
-    - [ ] Collector (a barrel with multiple radial outlets)
 - [ ] Other building tools
     - [x] Use existing Operation's Face to generate a new Operation
     - [x] Chain Shape's start/end surface to generate a new Shape
     - [x] Expand Shape's outer surface to generate a new Shape (Cylinder/Annulus > Annulus)
     - [x] Contract Shape's inner surface into a new Shape (Annulus > Cylinder/Annulus)
-    - [ ] Join two Operations by extending their Edges
     - [x] Offset Operation's faces to form new operations
 
 ## Modifiers
@@ -106,6 +104,7 @@ After blocks have been placed, it is possible to create new geometry based on pl
 - [x] Automatic propagation of grading and cell count from a single block to all connected blocks as required by blockMesh
 - [x] Projections of vertices, edges and block faces to geometry (triangulated and [searchable surfaces](https://www.openfoam.com/documentation/guides/latest/doc/guide-meshing-snappyhexmesh-geometry.html#meshing-snappyhexmesh-searchable-objects))
 - [x] Face merging as described by [blockMesh user guide](https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-470004.3.2). Breaks the pure-hexahedral-mesh rule but can often save the day for trickier geometries. Automatic duplication of points on merged block faces
+- [x] Auto grading for high-Re meshes
 - [ ] Auto grading for Low-Re meshes: boundary layer with specified cell-to-cell expansion, transition with 2:1 expansion, and specified 'bulk' cell size
 
 # Examples
@@ -253,6 +252,16 @@ A collection of pre-assembled parametric Shapes, ready to be used for further co
 
 Three pipes, joined in a single point.
 ![N-Joint](showcase/n_joint.png)
+
+## Automatic Grading
+After blocks have been positioned their cell count must be defined. This can be done manually with something like `operation.chop(axis, start_size=..., c2c_expansion=...)` or anything that `.chop()` method supports. Not all blocks need to be chopped as cell counts will be propagated throughout the mesh so it is advisable to only _chop_ the minimum required.
+
+All that can also be avoided by using automatic graders, for instance, `SmoothGrader` will set counts so that desired cell size will be obtained but will also use multigrading to keep cell sizes between neighbouring blocks as uniform as possible.
+
+![SmoothGrader, automatic grading of blocks](showcase/smooth_grader.png)
+
+Also other, quicker and simpler graders are available.
+The ultimate grader that will also create inflation layers on walls for resolved boundary layer is in development.
 
 ## Projection To Geometry
 
