@@ -1,4 +1,3 @@
-import abc
 from typing import List, Tuple, get_args
 
 from classy_blocks.cbtyping import ChopTakeType, DirectionType
@@ -10,9 +9,7 @@ from classy_blocks.items.wires.wire import Wire
 from classy_blocks.mesh import Mesh
 
 
-class GraderBase(abc.ABC):
-    stages: int
-
+class GraderBase:
     def __init__(self, mesh: Mesh, rules: ChopRules):
         self.mesh = mesh
         self.rules = rules
@@ -57,11 +54,6 @@ class GraderBase(abc.ABC):
 
     def grade_squeezed(self, row: Row) -> None:
         for entry in row.entries:
-            # TODO! don't touch wires, defined by USER
-            # if wire.is_defined:
-            #    # TODO: test
-            #    continue
-
             for wire in entry.wires:
                 if wire.is_defined:
                     continue
@@ -74,10 +66,6 @@ class GraderBase(abc.ABC):
 
     def finalize(self, row: Row) -> None:
         for entry in row.entries:
-            # TODO! don't touch wires, defined by USER
-            # if wire.is_defined:
-            #    # TODO: test
-            #    continue
             for wire in entry.wires:
                 if wire.is_defined:
                     continue

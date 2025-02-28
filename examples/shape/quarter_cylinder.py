@@ -18,8 +18,8 @@ quarter_cylinder = cb.ExtrudedShape(quarter_disk, f.norm(axis_point_2 - axis_poi
 
 mesh.add(quarter_cylinder)
 
-mesh.assemble()
-
+# Use an automatic grader that will try to make cells in neighbouring blocks
+# as similar in size as possible
 grader = cb.SmoothGrader(mesh, 0.05)
 grader.grade()
 

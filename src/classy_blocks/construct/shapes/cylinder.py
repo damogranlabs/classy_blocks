@@ -116,3 +116,6 @@ class Cylinder(SemiCylinder):
             )
 
         return cls(source.sketch_1.center, source.sketch_2.center, source.sketch_1.inner_radius_point)
+
+    def set_symmetry_patch(self, _name: str) -> None:
+        raise RuntimeError("Cylinder does not have symmetry patches")

@@ -2,6 +2,7 @@ import unittest
 
 import numpy as np
 
+import classy_blocks as cb
 from classy_blocks.construct.flat.sketches.grid import Grid
 from classy_blocks.construct.operations.box import Box
 from classy_blocks.construct.shapes.cylinder import Cylinder
@@ -65,7 +66,7 @@ class GraderTests(AutogradeTestsBase):
             for axis in block.axes:
                 self.assertEqual(axis.count, 5)
 
-    def test_highre_cylinder(self):
+    def test_smooth_cylinder(self):
         self.mesh.add(self.get_cylinder())
         self.mesh.assemble()
 
@@ -75,3 +76,37 @@ class GraderTests(AutogradeTestsBase):
         # make sure all blocks are defined
         for block in self.mesh.blocks:
             self.assertTrue(block.is_defined)
+
+
+class AdvancedAutogradeTests(unittest.TestCase):
+    def setUp(self):
+        self.mesh = Mesh()
+
+    def get_grid(self, badness: float = 0.8):
+        # 6 blocks of weird shape, taken from the autograder examples
+        # but with adjustable 'badness' (amount of displacement)
+        # to test border cases
+        base = cb.Grid([0, 0, 0], [3, 2, 0], 3, 2)
+        shape = cb.ExtrudedShape(base, 1)
+
+        # turn one block around
+        shape.grid[1][0].rotate(np.pi, [0, 0, 1])
+        self.mesh.add(shape)
+
+        # move some points to get a mesh with uneven blocks
+        self.mesh.assemble()
+        finder = cb.GeometricFinder(self.mesh)
+
+        move_points = [[0, 1, 1], [2, 1, 1], [3, 1, 1]]
+
+        for point in move_points:
+            vertex = next(iter(finder.find_in_sphere(point)))
+            vertex.translate([0, badness, 0])
+
+    def test_squeezed_chop(self):
+        self.get_grid()
+
+        grader = SmoothGrader(self.mesh, 0.05)
+        grader.grade()
+
+        self.assertIsNone(self.mesh.blocks[5].axes[1].wires[1].grading.chops[0].total_expansion)

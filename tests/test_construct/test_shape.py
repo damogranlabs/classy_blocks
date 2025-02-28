@@ -322,6 +322,10 @@ class CylinderTests(unittest.TestCase):
             for edge in operation.top_face.edges:
                 self.assertIsInstance(edge, Line)
 
+    def test_symmetry_patches(self):
+        with self.assertRaises(RuntimeError):
+            self.cylinder.set_symmetry_patch("test")
+
 
 class LoftedShapeTests(unittest.TestCase):
     @property

@@ -15,5 +15,7 @@ class FixedCountRules(ChopRules):
     def is_squeezed(self, _count, _info) -> bool:
         return True  # grade everything in first pass
 
-    def get_chops(self, count, _info) -> List[Chop]:
-        return [Chop(count=count)]
+    def get_chops(self, _count, _info) -> List[Chop]:
+        # In FixedCountGrader this is never called
+        # (everything is graded as 'squeezed')
+        raise RuntimeError

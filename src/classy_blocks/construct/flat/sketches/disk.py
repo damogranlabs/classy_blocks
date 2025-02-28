@@ -191,9 +191,8 @@ class DiskBase(MappedSketch, abc.ABC):
 
 class OneCoreDisk(DiskBase):
     """A disk with a single block in  the center and four blocks around;
-    see docs/blocking for point numbers and faces/grid indexing."""
+    see docs/sketches for point numbers and faces/grid indexing."""
 
-    # TODO: test
     chops: ClassVar = [
         [1],  # axis 0
         [1, 2],  # axis 1
@@ -221,6 +220,10 @@ class OneCoreDisk(DiskBase):
         return self.faces[0].center
 
     @property
+    def origo(self):
+        return self.faces[0].center
+
+    @property
     def grid(self):
         return [self.faces[:1], self.faces[1:]]
 
@@ -229,7 +232,7 @@ class OneCoreDisk(DiskBase):
 
 
 class QuarterDisk(DiskBase):
-    """A quarter of a four-core disk; see docs/blocking for point numbers and faces/grid indexing"""
+    """A quarter of a four-core disk; see docs/sketches for point numbers and faces/grid indexing"""
 
     chops: ClassVar = [
         [1],  # axis 0
