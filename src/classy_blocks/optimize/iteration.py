@@ -68,12 +68,12 @@ class IterationData:
         return self.initial_quality - self.final_quality
 
     def report_begin(self):
-        report(f"Optimization iteration {self.index+1}:")
+        report(f"Optimization iteration {self.index + 1}:")
         # headers
         report("Vertex     Initial       Local   Improvement       Final   Status")
 
     def report_end(self):
-        report(f"Iteration {self.index+1} finished.", end=" ")
+        report(f"Iteration {self.index + 1} finished.", end=" ")
         report(f"Improvement: {self.initial_quality - self.final_quality:.0f}", end="")
         report(f" ({self.initial_quality:.3e} > {self.final_quality:.3e})")
 

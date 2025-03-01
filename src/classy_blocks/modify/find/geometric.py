@@ -25,7 +25,7 @@ class GeometricFinder(FinderBase):
         """Returns vertices that are inside a box, aligned with cartesian coordinate system and
         defined by its center and width, height and depth."""
         # TODO: un-wip this
-        raise NotImplementedError("Alas, this is a work-in-progress" "")
+        raise NotImplementedError("Alas, this is a work-in-progress")
 
     def find_on_plane(self, point: PointType, normal: VectorType):
         """Returns vertices that lie on a plane, defined by a point and normal vector."""

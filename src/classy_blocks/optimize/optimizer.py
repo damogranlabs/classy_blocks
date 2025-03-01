@@ -120,7 +120,7 @@ class OptimizerBase(abc.ABC):
 
             print(
                 f"Overall improvement: {start_quality:.3e} > {end_quality:.3e}"
-                f"({abs_improvement:.3e}, {rel_improvement*100:.0f}%)"
+                f"({abs_improvement:.3e}, {rel_improvement * 100:.0f}%)"
             )
             print(f"Elapsed time: {end_time - start_time:.0f}s")
 

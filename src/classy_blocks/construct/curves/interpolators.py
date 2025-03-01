@@ -60,7 +60,11 @@ class LinearInterpolator(InterpolatorBase):
             fill_value = np.nan
 
         function = scipy.interpolate.interp1d(
-            self.params, self.points.points, bounds_error=bounds_error, fill_value=fill_value, axis=0  # type: ignore
+            self.params,
+            self.points.points,
+            bounds_error=bounds_error,
+            fill_value=fill_value,  # type: ignore
+            axis=0,  # type: ignore
         )
 
         return lambda param: function(param)

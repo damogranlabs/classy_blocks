@@ -224,7 +224,7 @@ class BlockSimpleGradingTests(BlockTestCase):
         block_0.grade()
 
         expected_description = (
-            "\thex ( 0 1 2 3 4 5 6 7 ) test_zone ( 10 10 10 )" " simpleGrading ( 1 1 1 ) // 0 test_comment\n"
+            "\thex ( 0 1 2 3 4 5 6 7 ) test_zone ( 10 10 10 ) simpleGrading ( 1 1 1 ) // 0 test_comment\n"
         )
 
         self.assertEqual(block_0.description, expected_description)

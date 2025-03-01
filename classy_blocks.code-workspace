@@ -15,7 +15,7 @@
         "editor.autoClosingBrackets": "never",
         "isort.importStrategy": "fromEnvironment",
         "editor.defaultFormatter": null,
-        "ruff.organizeImports": false
+        "ruff.organizeImports": true
     },
     "extensions": {
         "recommendations": [
