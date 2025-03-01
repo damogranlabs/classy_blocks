@@ -16,7 +16,7 @@ dependencies = ["numpy", "scipy", "nptyping"]
 "Contributing" = "https://github.com/damogranlabs/classy_blocks/blob/master/CONTRIBUTING.md"
 
 [project.optional-dependencies]
-dev = ["pytest", "parameterized", "ruff", "mypy", "pre-commit"]
+dev = ["pytest", "parameterized", "ruff~=0.9", "mypy~=1.2", "pre-commit"]
 
 [build-system]
 requires = ["setuptools >= 61.0"]
