@@ -8,15 +8,12 @@ repos:
     -   id: check-toml
     -   id: end-of-file-fixer
 -   repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.0.265"
+    rev: "v0.9.9"
     hooks:
+    # Run the linter.
     -   id: ruff
--   repo: https://github.com/psf/black
-    rev: 23.3.0
-    hooks:
-    -   id: black
--   repo: https://github.com/pycqa/isort
-    rev: 5.12.0
-    hooks:
-    -   id: isort
-        args: ["--profile", "black", "--filter-files"]
+        args: [--fix]
+    -   id: ruff
+        args: [--select, I, --fix]
+    # Run the formatter.
+    -   id: ruff-format
