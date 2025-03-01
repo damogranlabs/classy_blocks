@@ -87,10 +87,8 @@ Code/test/examples fixes: install local `classy_block` package and development r
 formatting and other rules.
     ``` shell
     $ python -m pytest
-    $ ruff check src tests
+    $ ruff check --fix src tests
     $ mypy src tests
-    $ black --check --diff src tests
-    $ isort --check --diff src tests
     ```
     Make sure you test on all python versions. Help yourself with `tox` configurations.
 
