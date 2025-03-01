@@ -16,22 +16,18 @@ dependencies = ["numpy", "scipy", "nptyping"]
 "Contributing" = "https://github.com/damogranlabs/classy_blocks/blob/master/CONTRIBUTING.md"
 
 [project.optional-dependencies]
-dev = ["pytest", "parameterized", "black", "isort", "ruff", "mypy", "pre-commit"]
+dev = ["pytest", "parameterized", "ruff~=0.9", "mypy~=1.2", "pre-commit"]
 
-[tool.black]
-line-length = 120
-target-version = ["py38"]
-
-[tool.isort]
-profile = "black"
-py_version = 38
-line_length = 120
-src_paths = ["src", "tests"]
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
 
 [tool.ruff]
 target-version = "py38"
 line-length = 120
-select = ["E", "F", "N", "UP", "YTT", "B", "A", "ARG", "RUF"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "YTT", "B", "A", "ARG", "RUF"]
 
 [[tool.mypy.overrides]]
 module = "scipy,scipy.*,parameterized.*"
