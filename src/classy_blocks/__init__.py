@@ -30,7 +30,7 @@ from .construct.shapes.elbow import Elbow
 from .construct.shapes.frustum import Frustum
 from .construct.shapes.rings import ExtrudedRing, RevolvedRing
 from .construct.shapes.shell import Shell
-from .construct.shapes.sphere import Hemisphere
+from .construct.shapes.sphere import EighthSphere, Hemisphere, QuarterSphere
 from .construct.stack import ExtrudedStack, RevolvedStack, TransformedStack
 from .grading.autograding.fixed.grader import FixedCountGrader
 from .grading.autograding.simple.grader import SimpleGrader
@@ -59,6 +59,7 @@ __all__ = [
     "CurveClamp",
     "Cylinder",
     "DiscreteCurve",
+    "EighthSphere",
     "Elbow",
     "Extrude",
     "ExtrudedRing",
@@ -98,6 +99,7 @@ __all__ = [
     "PolyLine",
     "Project",
     "QuarterCylinder",
+    "QuarterSphere",
     "QuarterSplineDisk",
     "QuarterSplineRing",
     "RadialClamp",
