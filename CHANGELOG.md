@@ -4,9 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+# [1.7.0]
 ### Added
-- **Edge grading**
+- Automatic grading:
+  - `FixedCountGrader`: simple and quick, grades all blocks in all directions with the same number. Useful while developing meshes - settings blocking etc.
+  - `SimpleGrader`: quick and good for cases where blocks do not differ much in size. Sets simple-graded counts on blocks based on wanted cell size.
+  - `SmoothGrader`: Tries to stretch and squeeze cells within blocks by using two graded chops in each direction. The idea is to try to keep difference in cell size between neighbouring blocks as little as possible. Blocks that cannot maintain required cell size are simply/uniformly chopped.
+- Possibility to define rings by their inner radius
+- Spline round shapes
+- Cylinders:
+  - Add symmetry patch to SemiCylinder
+- New examples:
+  - Quarter cylinder
+  - One core cylinder
+- `ShapeOptimizer` can optimize shapes _before_ they are added  to mesh
+
+### Changed
+- Renamed `classy_blocks.typing` module to `classy_blocks.cbtyping` due to name clash
+- Bugfixes
 
 ## [1.6.4]
 ### Added
