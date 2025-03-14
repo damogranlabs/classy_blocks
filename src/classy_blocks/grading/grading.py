@@ -115,7 +115,8 @@ class Grading:
         """Creates a new grading with the same chops (counts) on a different length,
         keeping chop.preserve quantity constant;
 
-        the 'length' parameter is the new wire's length"""
+        the 'length' parameter is the new wire's length;
+        'invert' does not set the grading.inverted flag but flips the original value"""
         new_grading = Grading(length)
 
         for data in self.chop_data:
@@ -132,6 +133,7 @@ class Grading:
 
             new_grading.add_chop(Chop(**new_args))
 
+        new_grading.inverted = self.inverted
         if invert:
             new_grading.inverted = not new_grading.inverted
 
