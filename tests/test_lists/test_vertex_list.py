@@ -17,7 +17,7 @@ class VertexListTests(DataTestCase):
     def add_all(self, points):
         vertices = []
         for p in points:
-            vertices.append(self.vlist.add(Point(p)))
+            vertices.append(self.vlist.add(Point(p), []))
 
         return vertices
 

@@ -21,7 +21,7 @@ class EdgeListTests(DataTestCase):
         vertices = []
 
         for point in self.get_single_data(index).points:
-            vertices.append(self.vl.add(Point(point)))
+            vertices.append(self.vl.add(Point(point), []))
 
         return vertices
 
@@ -92,7 +92,7 @@ class EdgeListTests(DataTestCase):
         revolve = Revolve(face, 1, [0, 0, 1], [-1, 0, 0])
 
         for point in revolve.point_array:
-            self.vl.add(Point(point))
+            self.vl.add(Point(point), [])
 
         self.el.add_from_operation(self.vl.vertices, revolve)
 

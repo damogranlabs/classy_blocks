@@ -53,7 +53,7 @@ class Frustum(RoundSolidShape):
         else:
             transform_mid = [tr.Translation(axis / 2), tr.Scaling(radius_mid / radius_1)]
 
-        super().__init__(Disk(axis_point_1, radius_point_1, axis), transform_2, transform_mid)
+        super().__init__(self.sketch_class(axis_point_1, radius_point_1, axis), transform_2, transform_mid)
 
     @classmethod
     def chain(

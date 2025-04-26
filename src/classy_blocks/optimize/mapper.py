@@ -13,7 +13,9 @@ class Mapper:
     """A helper that constructs mapped sketches/shapes
     from arbitrary collection of faces/operations"""
 
-    def __init__(self) -> None:
+    def __init__(self, merge_tol: float = TOL) -> None:
+        self.tol = merge_tol
+
         self.points: List[NPPointType] = []
         self.indexes: List[IndexType] = []
         self.elements: List[Union[Face, Operation]] = []
@@ -23,7 +25,7 @@ class Mapper:
         # consolidate, unify, agglomerate, amass
         # (especially in case one would need to utilize an octree or something)
         for i, position in enumerate(self.points):
-            if f.norm(point - position) < TOL:
+            if f.norm(point - position) < self.tol:
                 # reuse an existing point
                 index = i
                 break

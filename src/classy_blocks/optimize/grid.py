@@ -147,9 +147,13 @@ class HexGrid(GridBase):
     cell_class = HexCell
 
     @classmethod
-    def from_elements(cls, elements: List[Union[Operation, Shape, Stack, Assembly]]) -> "HexGrid":
+    def from_elements(
+        cls,
+        elements: List[Union[Operation, Shape, Stack, Assembly]],
+        merge_tol: float = TOL,
+    ) -> "HexGrid":
         """Creates a grid from a list of elements"""
-        mapper = Mapper()
+        mapper = Mapper(merge_tol)  # TODO: test
 
         for element in elements:
             if isinstance(element, Operation):

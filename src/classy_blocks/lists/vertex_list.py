@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from classy_blocks.base.exceptions import VertexNotFoundError
 from classy_blocks.cbtyping import NPPointType
@@ -53,7 +53,7 @@ class VertexList:
 
         raise VertexNotFoundError(f"Vertex not found: {position}")
 
-    def add(self, point: Point, slave_patches: Optional[List[str]] = None) -> Vertex:
+    def add(self, point: Point, slave_patches: List[str]) -> Vertex:
         """Re-use existing vertices when there's already one at the position;
         unless that vertex belongs to a slave of a face-merged pair -
         in that case add a duplicate in the same position anyway"""
@@ -64,7 +64,7 @@ class VertexList:
         # 3. add a new, duplicated vertex at the same location but for a different set of slave patches
         # 4. add a new, 'master' vertex because what's at the same location belongs to a slave patch
 
-        if slave_patches is None:
+        if len(slave_patches) == 0:
             # scenario #1 and #2
             try:
                 vertex = self.find_unique(point.position)

@@ -147,8 +147,8 @@ class MeshOptimizer(OptimizerBase):
 
 
 class ShapeOptimizer(OptimizerBase):
-    def __init__(self, operations: List[Operation], report: bool = True):
-        self.mapper = Mapper()
+    def __init__(self, operations: List[Operation], report: bool = True, merge_tol: float = TOL):
+        self.mapper = Mapper(merge_tol)
 
         for operation in operations:
             self.mapper.add(operation)
