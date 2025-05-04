@@ -81,8 +81,10 @@ class Row:
                     if self.count != wire.grading.count:
                         # TODO! Custom exception
                         raise RuntimeError(
-                            f"Inconsistent counts (existing {self.count}, replaced with {wire.grading.count}"
+                            f"Inconsistent counts (existing {self.count}, replaced with {wire.grading.count}, "
+                            f"block {block.index} direction {axis.direction})"
                         )
+
                 self.count = wire.grading.count
 
     def get_length(self, take: ChopTakeType = "avg"):

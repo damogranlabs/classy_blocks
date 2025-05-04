@@ -2,6 +2,7 @@
 
 from typing import List, Optional, Set, Union, get_args
 
+from classy_blocks.assemble.navigator import HexNavigator
 from classy_blocks.base.exceptions import EdgeNotFoundError
 from classy_blocks.cbtyping import DirectionType
 from classy_blocks.construct.assemblies.assembly import Assembly
@@ -126,25 +127,32 @@ class Mesh:
         cease to have any function or influence on mesh."""
         if self.is_assembled:
             # don't assemble twice but do update wire lengths
-            self.block_list.update()
+            self.block_list.update_lengths()
             return
 
         operations = self._operations
-        op_vertices: List[List[Vertex]] = []
+        navigator = HexNavigator.from_operations(operations)
 
-        for operation in operations:
-            # create vertices and edges
-            vertices = self._add_vertices(operation)
-            self.edge_list.add_from_operation(vertices, operation)
-            op_vertices.append(vertices)  # blocks will be created from those
+        self.vertex_list.vertices = [Vertex(pos, i) for i, pos in enumerate(navigator.unique_points)]
 
-            # get patches and faces
-            self.patch_list.add(vertices, operation)
-            self.face_list.add(vertices, operation)
+        # first skim all data from operations
+        for iop, operation in enumerate(operations):
+            op_indexes = navigator.find_cell_indexes(iop)
+            op_vertices = [self.vertex_list.vertices[i] for i in op_indexes]
 
-        # then, create blocks from known vertices and edges
-        for i, operation in enumerate(operations):
-            block = Block(len(self.block_list.blocks), op_vertices[i])
+            for ipnt, point in enumerate(operation.points):
+                op_vertices[ipnt].projected_to = point.projected_to
+                self.edge_list.add_from_operation(op_vertices, operation)
+
+            self.patch_list.add(op_vertices, operation)
+            self.face_list.add(op_vertices, operation)
+
+        # then create blocks from already known vertices and edges
+        for iop, operation in enumerate(operations):
+            op_indexes = navigator.find_cell_indexes(iop)
+            op_vertices = [self.vertex_list.vertices[i] for i in op_indexes]
+
+            block = Block(iop, op_vertices)
             for wire in block.wire_list:
                 try:
                     edge = self.edge_list.find(*wire.vertices)
@@ -160,7 +168,8 @@ class Mesh:
             self.block_list.add(block)
 
         self._add_geometry()
-        self.block_list.update()
+        self.block_list.update_neighbours(navigator)
+        self.block_list.update_lengths()
 
     def clear(self) -> None:
         """Undoes the assemble() method; clears created blocks and other lists

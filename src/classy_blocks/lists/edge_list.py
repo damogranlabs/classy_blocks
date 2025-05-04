@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 from classy_blocks.base.exceptions import EdgeNotFoundError
 from classy_blocks.construct.edges import EdgeData
@@ -7,33 +7,43 @@ from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
 from classy_blocks.items.vertex import Vertex
 
+EdgeLocationType = Tuple[int, int]
+
+
+def get_location(vertex_1, vertex_2):
+    if vertex_1.index < vertex_2.index:
+        return (vertex_1.index, vertex_2.index)
+
+    return (vertex_2.index, vertex_1.index)
+
 
 class EdgeList:
     """Handling of the 'edges' part of blockMeshDict"""
 
     def __init__(self) -> None:
-        self.edges: List[Edge] = []
+        self.edges: Dict[EdgeLocationType, Edge] = {}
 
     def find(self, vertex_1: Vertex, vertex_2: Vertex) -> Edge:
-        """checks if an edge with the same pair of vertices
-        exists in self.edges already"""
-        for edge in self.edges:
-            if {vertex_1.index, vertex_2.index} == {edge.vertex_1.index, edge.vertex_2.index}:
-                return edge
+        location = get_location(vertex_1, vertex_2)
 
-        raise EdgeNotFoundError(f"Edge not found: {vertex_1}, {vertex_2}")
+        if location in self.edges:
+            return self.edges[location]
+
+        raise EdgeNotFoundError
 
     def add(self, vertex_1: Vertex, vertex_2: Vertex, data: EdgeData) -> Edge:
         """Adds an edge between given vertices or returns an existing one"""
-        try:
-            # if this edge exists in the list, return it regardless of what's
-            # specified in edge_data; redefinitions of the same edges are ignored
-            edge = self.find(vertex_1, vertex_2)
-        except EdgeNotFoundError:
-            edge = factory.create(vertex_1, vertex_2, data)
+        location = get_location(vertex_1, vertex_2)
 
-            if edge.is_valid:
-                self.edges.append(edge)
+        # if this edge exists in the list, return it regardless of what's
+        # specified in edge_data; redefinitions of the same edges are ignored
+        if location in self.edges:
+            return self.edges[location]
+
+        edge = factory.create(vertex_1, vertex_2, data)
+
+        if edge.is_valid:
+            self.edges[location] = edge
 
         return edge
 
@@ -63,7 +73,7 @@ class EdgeList:
         """Outputs a list of edges to be inserted into blockMeshDict"""
         out = "edges\n(\n"
 
-        for edge in self.edges:
+        for edge in self.edges.values():
             out += edge.description + "\n"
 
         out += ");\n\n"

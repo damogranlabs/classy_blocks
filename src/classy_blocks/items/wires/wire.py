@@ -1,4 +1,5 @@
 import dataclasses
+import functools
 from typing import List, Set
 
 from classy_blocks.base.exceptions import InconsistentGradingsError
@@ -8,6 +9,11 @@ from classy_blocks.grading.grading import Grading
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
 from classy_blocks.items.vertex import Vertex
+
+
+@functools.lru_cache(maxsize=10000)
+def get_length(wire: "Wire") -> float:
+    return wire.edge.length
 
 
 @dataclasses.dataclass
@@ -49,7 +55,7 @@ class Wire:
 
     @property
     def length(self) -> float:
-        return self.edge.length
+        return get_length(self)
 
     def update(self) -> None:
         """Re-sets grading's edge length after the edge has changed"""
@@ -127,3 +133,6 @@ class Wire:
 
     def __repr__(self):
         return f"Wire {self.corners[0]}-{self.corners[1]} ({self.vertices[0].index}-{self.vertices[1].index})"
+
+    def __hash__(self):
+        return hash((min(self.corners), max(self.corners)))
