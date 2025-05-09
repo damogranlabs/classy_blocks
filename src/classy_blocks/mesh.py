@@ -2,7 +2,7 @@
 
 from typing import List, Optional, Set, Union, get_args
 
-from classy_blocks.assemble.navigator import HexNavigator
+from classy_blocks.assemble.point_registry import HexPointRegistry
 from classy_blocks.base.exceptions import EdgeNotFoundError
 from classy_blocks.cbtyping import DirectionType
 from classy_blocks.construct.assemblies.assembly import Assembly
@@ -99,22 +99,6 @@ class Mesh:
         the data remains but it will not contribute to the mesh"""
         self.deleted.add(operation)
 
-    @property
-    def _operations(self) -> List[Operation]:
-        operations: List[Operation] = []
-
-        for entity in self.depot:
-            if isinstance(entity, Operation):
-                ops_to_add = [entity]
-            else:
-                ops_to_add = entity.operations
-
-            for op in ops_to_add:
-                if op not in self.deleted:
-                    operations.append(op)
-
-        return operations
-
     def _add_geometry(self) -> None:
         for entity in self.depot:
             if entity.geometry is not None:
@@ -130,8 +114,8 @@ class Mesh:
             self.block_list.update_lengths()
             return
 
-        operations = self._operations
-        navigator = HexNavigator.from_operations(operations)
+        operations = self.operations
+        navigator = HexPointRegistry.from_operations(operations)
 
         self.vertex_list.vertices = [Vertex(pos, i) for i, pos in enumerate(navigator.unique_points)]
 
@@ -164,6 +148,7 @@ class Mesh:
                 block.add_chops(direction, operation.chops[direction])
 
             block.cell_zone = operation.cell_zone
+            block.visible = operation not in self.deleted
 
             self.block_list.add(block)
 

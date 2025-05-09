@@ -1,23 +1,27 @@
-from typing import List, Set, Tuple, Type, TypeVar
+from typing import List, Set, Type, TypeVar
 
 import numpy as np
 import scipy.spatial
 
 from classy_blocks.base.exceptions import VertexNotFoundError
 from classy_blocks.cbtyping import IndexType, NPPointListType, PointType
+from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL, vector_format
 
-NavigatorType = TypeVar("NavigatorType", bound="NavigatorBase")
+PointRegistryType = TypeVar("PointRegistryType", bound="PointRegistryBase")
 
 
-class NavigatorBase:
-    """Searches for, connects and creates unique indexes points, taken from lists of operations"""
+class PointRegistryBase:
+    """Searches for, connects and creates unique points, taken from lists of elements (quads, hexas, ...)"""
 
     cell_size: int  # 4 for quads, 8 for hexas
 
     def __init__(self, flattened_points: NPPointListType, merge_tol: float) -> None:
+        if len(flattened_points) % self.cell_size != 0:
+            raise ValueError(f"Number of points not divisible by cell_size: {len(flattened_points)} % {self.cell_size}")
+
         self.merge_tol = merge_tol
 
         # a flattened list of all points, possibly multiple at the same spot;
@@ -28,6 +32,8 @@ class NavigatorBase:
         # a list of unique points, analogous to blockMesh's vertex list
         self.unique_points = self._compile_unique()
         self._unique_point_tree = scipy.spatial.KDTree(self.unique_points)
+
+        self.cell_addressing = [self._query_unique(self.find_cell_points(i)) for i in range(self.cell_count)]
 
     def _compile_unique(self) -> NPPointListType:
         # create a list of unique vertices, taken from the list of operations
@@ -83,10 +89,11 @@ class NavigatorBase:
 
     def find_cell_indexes(self, cell: int) -> List[int]:
         """Returns indexes of points that define this cell"""
-        return self._query_unique(self.find_cell_points(cell))
+        return self.cell_addressing[cell]
 
     def find_cell_neighbours(self, cell: int) -> List[int]:
         """Returns indexes of this and every touching cell"""
+        # TODO: remove
         cell_points = self.find_cell_points(cell)
 
         indexes = []
@@ -96,38 +103,50 @@ class NavigatorBase:
 
         return list(set(indexes))
 
-    def get_map(self) -> Tuple[NPPointListType, List[IndexType]]:
-        cell_indexes: List[IndexType] = []
-
-        for i in range(len(self._repeated_points) // self.cell_size):
-            cell_indexes.append(self.find_cell_indexes(i))
-
-        return self.unique_points, cell_indexes
-
     @staticmethod
     def flatten(points, length) -> NPPointListType:
         return np.reshape(points, (length, 3))
 
     @classmethod
     def from_addresses(
-        cls: Type[NavigatorType], points: NPPointListType, addressing: List[IndexType], merge_tol: float = TOL
-    ) -> NavigatorType:
+        cls: Type[PointRegistryType], points: NPPointListType, addressing: List[IndexType], merge_tol: float = TOL
+    ) -> PointRegistryType:
         all_points = cls.flatten(
             [np.take(points, addr, axis=0) for addr in addressing], len(addressing) * cls.cell_size
         )
 
         return cls(all_points, merge_tol)
 
+    @property
+    def cell_count(self) -> int:
+        return len(self._repeated_points) // self.cell_size
 
-class QuadNavigator(NavigatorBase):
+    @property
+    def point_count(self) -> int:
+        return len(self.unique_points)
+
+
+class QuadPointRegistry(PointRegistryBase):
+    """A registry of points, taken from a list of quads"""
+
     cell_size = 4
 
+    @classmethod
+    def from_sketch(cls: Type[PointRegistryType], sketch: Sketch, merge_tol: float = TOL) -> PointRegistryType:
+        return cls(
+            cls.flatten([face.point_array for face in sketch.faces], len(sketch.faces) * cls.cell_size), merge_tol
+        )
 
-class HexNavigator(NavigatorBase):
+
+class HexPointRegistry(PointRegistryBase):
+    """A registry of points, taken from a list of hexas"""
+
     cell_size = 8
 
     @classmethod
-    def from_operations(cls: Type[NavigatorType], operations: List[Operation], merge_tol: float = TOL) -> NavigatorType:
+    def from_operations(
+        cls: Type[PointRegistryType], operations: List[Operation], merge_tol: float = TOL
+    ) -> PointRegistryType:
         all_points = cls.flatten([op.point_array for op in operations], len(operations) * cls.cell_size)
 
         return cls(all_points, merge_tol)

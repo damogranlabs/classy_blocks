@@ -28,7 +28,7 @@ for point in move_points:
     vertex.translate([0, 0.8, 0])
 
 mesh.set_default_patch("walls", "wall")
-mesh.block_list.update_lengths()
+
 grader = cb.SmoothGrader(mesh, 0.05)
 grader.grade()
 

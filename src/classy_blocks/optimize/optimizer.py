@@ -169,7 +169,8 @@ class ShapeOptimizer(OptimizerBase):
 class SketchOptimizer(OptimizerBase):
     def __init__(self, sketch: MappedSketch, report: bool = True):
         self.sketch = sketch
-        grid = QuadGrid.from_sketch(self.sketch)
+
+        grid = QuadGrid(sketch.positions, sketch.indexes)
 
         super().__init__(grid, report)
 

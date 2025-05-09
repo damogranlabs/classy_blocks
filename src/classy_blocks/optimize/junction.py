@@ -47,19 +47,8 @@ class Junction:
         if to == self:
             return False
 
-        # if any of connections within a cell is equal to
-        # the connection between these two junctions,
-        # they are connected
-        junction_indexes = {self.index, to.index}
-
-        for cell in self.cells:
-            for connection in cell.connections:
-                if connection.indexes == junction_indexes:
-                    if to not in self.neighbours:
-                        self.neighbours.append(to)
-                        return True
-
-        return False
+        self.neighbours.append(to)
+        return True
 
     def add_clamp(self, clamp: ClampBase) -> None:
         if self.clamp is not None:

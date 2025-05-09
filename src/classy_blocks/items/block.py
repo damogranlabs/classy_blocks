@@ -38,6 +38,10 @@ class Block:
         # (visible in blockMeshDict, useful for debugging)
         self.comment: str = ""
 
+        # 'hidden' blocks carry all of the data from the mesh
+        # but is not inserted into blockMeshDict;
+        self.visible = True
+
     def add_edge(self, corner_1: int, corner_2: int, edge: Edge):
         """Adds an edge between vertices at specified indexes."""
         if not (0 <= corner_1 < 8 and 0 <= corner_2 < 8):
@@ -146,13 +150,14 @@ class Block:
     @property
     def description(self) -> str:
         """hex definition for blockMesh"""
+        fmt_hidden = "" if self.visible else "// "
         fmt_vertices = "( " + " ".join(str(v.index) for v in self.vertices) + " )"
         fmt_count = "( " + " ".join([str(axis.count) for axis in self.axes]) + " )"
 
         fmt_grading = self.format_grading()
         fmt_comments = f"// {self.index} {self.comment}\n"
 
-        return f"\thex {fmt_vertices} {self.cell_zone} {fmt_count} {fmt_grading} {fmt_comments}"
+        return f"\t{fmt_hidden}hex {fmt_vertices} {self.cell_zone} {fmt_count} {fmt_grading} {fmt_comments}"
 
     def __hash__(self) -> int:
         return self.index

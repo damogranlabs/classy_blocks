@@ -138,14 +138,22 @@ class FunctionCurveBase(PointCurveBase):
         """Finds the param on curve where point is the closest to given point;
         To improve search speed and reliability, an optional starting
         estimation can be supplied."""
-        param_start = super().get_closest_param(point)
+        closest_param = super().get_closest_param(point)
         point = np.array(point)
 
         result = scipy.optimize.minimize(
-            lambda t: f.norm(self.get_point(t[0]) - point), (param_start,), bounds=(self.bounds,)
+            lambda t: f.norm(self.get_point(t[0]) - point), (closest_param,), bounds=(self.bounds,)
         )
 
         return result.x[0]
+
+        # TODO: optimize by using a simpler function (?)
+        # param_start = super().get_closest_param(point)
+        # param_end = (1 + closest_param) / 2
+        # result = scipy.optimize.minimize_scalar(
+        #     lambda t: f.norm(self.get_point(t) - point), bounds=(param_start, param_end), method="bounded"
+        # )
+        # return result.x
 
     def get_point(self, param: float) -> NPPointType:
         self._check_param(param)

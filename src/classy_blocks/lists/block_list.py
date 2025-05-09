@@ -1,6 +1,6 @@
 from typing import List, Set
 
-from classy_blocks.assemble.navigator import HexNavigator
+from classy_blocks.assemble.point_registry import HexPointRegistry
 from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.items.block import Block
 
@@ -16,7 +16,7 @@ class BlockList:
         """Add blocks"""
         self.blocks.append(block)
 
-    def update_neighbours(self, navigator: HexNavigator) -> None:
+    def update_neighbours(self, navigator: HexPointRegistry) -> None:
         """Find and assign neighbours of a given block entry"""
         for block in self.blocks:
             neighbour_indexes = navigator.find_cell_neighbours(block.index)

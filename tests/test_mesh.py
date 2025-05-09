@@ -279,4 +279,4 @@ class MeshTests(BlockTestCase):
 
         self.mesh.assemble()
 
-        self.assertEqual(len(self.mesh.blocks), 3)
+        self.assertFalse(self.mesh.blocks[0].visible)

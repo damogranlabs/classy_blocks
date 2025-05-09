@@ -2,6 +2,12 @@ from typing import List, Type, Union
 
 import numpy as np
 
+from classy_blocks.assemble.connection_registry import (
+    ConnectionRegistryBase,
+    HexConnectionRegistry,
+    QuadConnectionRegistry,
+)
+from classy_blocks.assemble.point_registry import HexPointRegistry
 from classy_blocks.base.exceptions import InvalidLinkError, NoJunctionError
 from classy_blocks.cbtyping import IndexType, NPPointListType, NPPointType
 from classy_blocks.construct.assemblies.assembly import Assembly
@@ -24,18 +30,28 @@ class GridBase:
     """A list of cells and junctions"""
 
     cell_class: Type[CellBase]
+    connection_registry_class: Type[ConnectionRegistryBase]
 
     def __init__(self, points: NPPointListType, addressing: List[IndexType]):
         # work on a fixed point array and only refer to it instead of building
         # new numpy arrays for every calculation
         self.points = points
+        self.addressing = addressing
 
         self.junctions = [Junction(self.points, index) for index in range(len(self.points))]
         self.cells = [self.cell_class(self.points, indexes) for indexes in addressing]
 
+        self._bind_junction_neighbours()
         self._bind_cell_neighbours()
         self._bind_junction_cells()
-        self._bind_junction_neighbours()
+
+    def _bind_junction_neighbours(self) -> None:
+        """Adds connections to junctions"""
+        creg = self.connection_registry_class(self.points, self.addressing)
+
+        for i, junction in enumerate(self.junctions):
+            for c in creg.get_connected_indexes(i):
+                junction.add_neighbour(self.junctions[c])
 
     def _bind_cell_neighbours(self) -> None:
         """Adds neighbours to cells"""
@@ -48,12 +64,6 @@ class GridBase:
         for cell in self.cells:
             for junction in self.junctions:
                 junction.add_cell(cell)
-
-    def _bind_junction_neighbours(self) -> None:
-        """Adds connections to junctions"""
-        for junction_1 in self.junctions:
-            for junction_2 in self.junctions:
-                junction_1.add_neighbour(junction_2)
 
     def get_junction_from_clamp(self, clamp: ClampBase) -> Junction:
         for junction in self.junctions:
@@ -128,6 +138,7 @@ class GridBase:
 
 class QuadGrid(GridBase):
     cell_class = QuadCell
+    connection_registry_class = QuadConnectionRegistry
 
     @classmethod
     def from_sketch(cls, sketch: Sketch) -> "QuadGrid":
@@ -136,6 +147,7 @@ class QuadGrid(GridBase):
             return cls(sketch.positions, sketch.indexes)
 
         # automatically create a mapping for arbitrary sketches
+        # TODO: replace Mapper with assemble.*registry, then delete the whole Mapper business
         mapper = Mapper()
         for face in sketch.faces:
             mapper.add(face)
@@ -145,6 +157,7 @@ class QuadGrid(GridBase):
 
 class HexGrid(GridBase):
     cell_class = HexCell
+    connection_registry_class = HexConnectionRegistry
 
     @classmethod
     def from_elements(
@@ -153,18 +166,18 @@ class HexGrid(GridBase):
         merge_tol: float = TOL,
     ) -> "HexGrid":
         """Creates a grid from a list of elements"""
-        mapper = Mapper(merge_tol)  # TODO: test
+        # mapper = Mapper(merge_tol)  # TODO: test
 
+        ops: List[Operation] = []
         for element in elements:
             if isinstance(element, Operation):
-                operations = [element]
+                ops.append(element)
             else:
-                operations = element.operations
+                ops += element.operations
 
-            for operation in operations:
-                mapper.add(operation)
+        preg = HexPointRegistry.from_operations(ops, merge_tol)
 
-        return cls(np.array(mapper.points), mapper.indexes)
+        return cls(preg.unique_points, preg.cell_addressing)
 
     @classmethod
     def from_mesh(cls, mesh: Mesh) -> "HexGrid":

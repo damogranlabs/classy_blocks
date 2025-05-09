@@ -4,9 +4,9 @@ import classy_blocks as cb
 
 mesh = cb.Mesh()
 
-axis_point_1 = [0.0, 0.0, 0.0]
-axis_point_2 = [5.0, 5.0, 0.0]
-radius_point_1 = [0.0, 0.0, 2.0]
+axis_point_1 = [0, 0, 0]
+axis_point_2 = [0, 0, 1]
+radius_point_1 = [1, 0, 0]
 
 cylinder = cb.Cylinder(axis_point_1, axis_point_2, radius_point_1)
 
