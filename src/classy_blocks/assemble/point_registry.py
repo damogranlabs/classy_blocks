@@ -41,7 +41,7 @@ class PointRegistryBase:
         handled_indexes: Set[int] = set()
 
         for point in self._repeated_points:
-            coincident_indexes = self._repeated_point_tree.query_ball_point(point, r=self.merge_tol, workers=-1)
+            coincident_indexes = self._repeated_point_tree.query_ball_point(point, r=self.merge_tol, workers=1)
 
             if set(coincident_indexes).isdisjoint(handled_indexes):
                 # this vertex hasn't been handled yet
@@ -52,7 +52,7 @@ class PointRegistryBase:
 
     def _query_unique(self, positions) -> List[int]:
         """A shortcut to KDTree.query_ball_point()"""
-        result = self._unique_point_tree.query_ball_point(positions, r=self.merge_tol, workers=-1)
+        result = self._unique_point_tree.query_ball_point(positions, r=self.merge_tol, workers=1)
 
         if len(np.shape(positions)) > 1:
             return f.flatten_2d_list(result)
@@ -60,7 +60,7 @@ class PointRegistryBase:
         return result
 
     def _query_repeated(self, positions) -> List[int]:
-        result = self._repeated_point_tree.query_ball_point(positions, r=self.merge_tol, workers=-1)
+        result = self._repeated_point_tree.query_ball_point(positions, r=self.merge_tol, workers=1)
 
         if len(np.shape(positions)) > 1:
             return f.flatten_2d_list(result)

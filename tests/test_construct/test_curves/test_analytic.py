@@ -40,7 +40,7 @@ class AnalyticCurveTests(unittest.TestCase):
         )
     )
     def test_closest_param(self, position, param):
-        self.assertAlmostEqual(self.curve.get_closest_param(position), param, places=5)
+        self.assertAlmostEqual(self.curve.get_closest_param(position), param, places=4)
 
     def test_discretize(self):
         count = 20

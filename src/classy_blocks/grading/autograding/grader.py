@@ -15,6 +15,7 @@ class GraderBase:
         self.rules = rules
 
         self.mesh.assemble()
+        self.mesh.block_list.update_lengths()  # TODO: move to a better place
         self.probe = Probe(self.mesh)
 
     def _chop_wire(self, wire: Wire, chops: List[Chop]) -> None:

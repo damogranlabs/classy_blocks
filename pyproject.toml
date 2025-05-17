@@ -7,7 +7,7 @@ license = { file = "LICENSE" }
 keywords = ["classy_blocks", "OpenFOAM", "blockMesh"]
 authors = [{ name = "Nejc Jurkovic", email = "kandelabr@gmail.com" }]
 requires-python = ">=3.8"
-dependencies = ["numpy", "scipy", "nptyping"]
+dependencies = ["numpy", "scipy", "nptyping", "numba"]
 
 [project.urls]
 "Homepage" = "https://github.com/damogranlabs/classy_blocks"

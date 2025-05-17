@@ -25,7 +25,7 @@ class Junction:
 
         self.cells: Set[CellBase] = set()
 
-        self.neighbours: List[Junction] = []
+        self.neighbours: Set[Junction] = set()
 
         self.clamp: Optional[ClampBase] = None
         self.links: List[IndexedLink] = []
@@ -33,22 +33,6 @@ class Junction:
     @property
     def point(self) -> NPPointType:
         return self.points[self.index]
-
-    def add_cell(self, cell: CellBase) -> None:
-        """Adds the given cell to the list if it is
-        a part of this junction (one common vertex)"""
-        for index in cell.indexes:
-            if index == self.index:
-                self.cells.add(cell)
-                return
-
-    def add_neighbour(self, to: "Junction") -> bool:
-        """Returns True if this Junction is connected to passed one"""
-        if to == self:
-            return False
-
-        self.neighbours.append(to)
-        return True
 
     def add_clamp(self, clamp: ClampBase) -> None:
         if self.clamp is not None:

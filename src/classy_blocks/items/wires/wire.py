@@ -11,7 +11,7 @@ from classy_blocks.items.edges.factory import factory
 from classy_blocks.items.vertex import Vertex
 
 
-@functools.lru_cache(maxsize=10000)
+@functools.lru_cache(maxsize=None)
 def get_length(wire: "Wire") -> float:
     return wire.edge.length
 
@@ -53,6 +53,8 @@ class Wire:
         # wires that follow this (start with this wire's end vertex)
         self.after: Set[WireJoint] = set()
 
+        self.key = hash(tuple(sorted([v.index for v in self.vertices])))
+
     @property
     def length(self) -> float:
         return get_length(self)
@@ -69,13 +71,7 @@ class Wire:
     def is_coincident(self, candidate: "Wire") -> bool:
         """Returns True if this wire is in the same spot than the argument,
         regardless of alignment"""
-        return {
-            self.vertices[0].index,
-            self.vertices[1].index,
-        } == {
-            candidate.vertices[0].index,
-            candidate.vertices[1].index,
-        }
+        return self.key == candidate.key
 
     def is_aligned(self, candidate: "Wire") -> bool:
         """Returns true is this pair has the same alignment
@@ -135,4 +131,4 @@ class Wire:
         return f"Wire {self.corners[0]}-{self.corners[1]} ({self.vertices[0].index}-{self.vertices[1].index})"
 
     def __hash__(self):
-        return hash((min(self.corners), max(self.corners)))
+        return self.key

@@ -1,12 +1,14 @@
-from typing import List, Type, Union
+from typing import List, Sequence, Type, Union
 
 import numpy as np
 
+from classy_blocks.assemble.cell_registry import CellRegistry
 from classy_blocks.assemble.connection_registry import (
     ConnectionRegistryBase,
     HexConnectionRegistry,
     QuadConnectionRegistry,
 )
+from classy_blocks.assemble.face_registry import FaceRegistryBase, HexFaceRegistry, QuadFaceRegistry
 from classy_blocks.assemble.point_registry import HexPointRegistry
 from classy_blocks.base.exceptions import InvalidLinkError, NoJunctionError
 from classy_blocks.cbtyping import IndexType, NPPointListType, NPPointType
@@ -16,7 +18,6 @@ from classy_blocks.construct.flat.sketches.mapped import MappedSketch
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.shape import Shape
 from classy_blocks.construct.stack import Stack
-from classy_blocks.mesh import Mesh
 from classy_blocks.optimize.cell import CellBase, HexCell, QuadCell
 from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.junction import Junction
@@ -31,6 +32,7 @@ class GridBase:
 
     cell_class: Type[CellBase]
     connection_registry_class: Type[ConnectionRegistryBase]
+    face_registry_class: Type[FaceRegistryBase]
 
     def __init__(self, points: NPPointListType, addressing: List[IndexType]):
         # work on a fixed point array and only refer to it instead of building
@@ -39,7 +41,7 @@ class GridBase:
         self.addressing = addressing
 
         self.junctions = [Junction(self.points, index) for index in range(len(self.points))]
-        self.cells = [self.cell_class(self.points, indexes) for indexes in addressing]
+        self.cells = [self.cell_class(i, self.points, indexes) for i, indexes in enumerate(addressing)]
 
         self._bind_junction_neighbours()
         self._bind_cell_neighbours()
@@ -51,19 +53,27 @@ class GridBase:
 
         for i, junction in enumerate(self.junctions):
             for c in creg.get_connected_indexes(i):
-                junction.add_neighbour(self.junctions[c])
+                junction.neighbours.add(self.junctions[c])
 
     def _bind_cell_neighbours(self) -> None:
         """Adds neighbours to cells"""
-        for cell_1 in self.cells:
-            for cell_2 in self.cells:
-                cell_1.add_neighbour(cell_2)
+        freg = self.face_registry_class(self.addressing)
+
+        for i, cell in enumerate(self.cells):
+            for orient in cell.side_names:
+                for neighbour in freg.get_cells(i, orient):
+                    if neighbour == i:
+                        continue
+
+                    cell.neighbours[orient] = self.cells[neighbour]
 
     def _bind_junction_cells(self) -> None:
         """Adds cells to junctions"""
-        for cell in self.cells:
-            for junction in self.junctions:
-                junction.add_cell(cell)
+        creg = CellRegistry(self.addressing)
+
+        for junction in self.junctions:
+            for cell_index in creg.get_near_cells(junction.index):
+                junction.cells.add(self.cells[cell_index])
 
     def get_junction_from_clamp(self, clamp: ClampBase) -> Junction:
         for junction in self.junctions:
@@ -139,6 +149,7 @@ class GridBase:
 class QuadGrid(GridBase):
     cell_class = QuadCell
     connection_registry_class = QuadConnectionRegistry
+    face_registry_class = QuadFaceRegistry
 
     @classmethod
     def from_sketch(cls, sketch: Sketch) -> "QuadGrid":
@@ -158,16 +169,15 @@ class QuadGrid(GridBase):
 class HexGrid(GridBase):
     cell_class = HexCell
     connection_registry_class = HexConnectionRegistry
+    face_registry_class = HexFaceRegistry
 
     @classmethod
     def from_elements(
         cls,
-        elements: List[Union[Operation, Shape, Stack, Assembly]],
+        elements: Sequence[Union[Operation, Shape, Stack, Assembly]],
         merge_tol: float = TOL,
     ) -> "HexGrid":
         """Creates a grid from a list of elements"""
-        # mapper = Mapper(merge_tol)  # TODO: test
-
         ops: List[Operation] = []
         for element in elements:
             if isinstance(element, Operation):
@@ -180,7 +190,7 @@ class HexGrid(GridBase):
         return cls(preg.unique_points, preg.cell_addressing)
 
     @classmethod
-    def from_mesh(cls, mesh: Mesh) -> "HexGrid":
+    def from_mesh(cls, mesh) -> "HexGrid":
         """Creates a grid from an assembled Mesh object"""
         points = np.array([vertex.position for vertex in mesh.vertices])
         addresses = [block.indexes for block in mesh.blocks]

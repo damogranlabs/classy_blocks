@@ -18,6 +18,7 @@ from classy_blocks.lists.face_list import FaceList
 from classy_blocks.lists.geometry_list import GeometryList
 from classy_blocks.lists.patch_list import PatchList
 from classy_blocks.lists.vertex_list import VertexList
+from classy_blocks.optimize.grid import HexGrid
 from classy_blocks.util import constants
 from classy_blocks.util.vtk_writer import write_vtk
 
@@ -110,18 +111,17 @@ class Mesh:
         blockMeshDict. After this has been done, the above objects
         cease to have any function or influence on mesh."""
         if self.is_assembled:
-            # don't assemble twice but do update wire lengths
-            self.block_list.update_lengths()
             return
 
         operations = self.operations
-        navigator = HexPointRegistry.from_operations(operations)
+        grid = HexGrid.from_elements(operations)
+        navigator = HexPointRegistry.from_addresses(grid.points, grid.addressing)
 
-        self.vertex_list.vertices = [Vertex(pos, i) for i, pos in enumerate(navigator.unique_points)]
+        self.vertex_list.vertices = [Vertex(pos, i) for i, pos in enumerate(grid.points)]
 
         # first skim all data from operations
         for iop, operation in enumerate(operations):
-            op_indexes = navigator.find_cell_indexes(iop)
+            op_indexes = grid.addressing[iop]
             op_vertices = [self.vertex_list.vertices[i] for i in op_indexes]
 
             for ipnt, point in enumerate(operation.points):
@@ -133,7 +133,7 @@ class Mesh:
 
         # then create blocks from already known vertices and edges
         for iop, operation in enumerate(operations):
-            op_indexes = navigator.find_cell_indexes(iop)
+            op_indexes = grid.addressing[iop]
             op_vertices = [self.vertex_list.vertices[i] for i in op_indexes]
 
             block = Block(iop, op_vertices)
@@ -154,7 +154,6 @@ class Mesh:
 
         self._add_geometry()
         self.block_list.update_neighbours(navigator)
-        self.block_list.update_lengths()
 
     def clear(self) -> None:
         """Undoes the assemble() method; clears created blocks and other lists

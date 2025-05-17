@@ -36,7 +36,7 @@ class CuspSemiCylinder(SemiCylinder):
         for loft in self.shell:
             point_1 = loft.top_face.points[1].position
             point_2 = loft.top_face.points[2].position
-            edge_points = f.divide_arc(axis, axis_point_2, point_1, point_2, 5)
+            edge_points = f.divide_arc(axis_point_2, point_1, point_2, 5)
             loft.top_face.add_edge(1, Spline(edge_points))
 
         for loft in self.operations:

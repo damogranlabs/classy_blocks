@@ -60,19 +60,7 @@ class CurveBase(ElementBase):
 
     @abc.abstractmethod
     def get_closest_param(self, point: PointType) -> float:
-        """Finds the parameter on curve where point is the closest to given point;
-        To improve search speed and reliability, an optional starting
-        estimation can be supplied."""
-        # because curves can have all sorts of shapes, find
-        # initial guess by checking distance to discretized points
-        point = np.array(point)
-        all_points = self.discretize()
-
-        distances = np.array([f.norm(p - point) for p in all_points])
-        params = np.linspace(self.bounds[0], self.bounds[1], num=len(distances))
-
-        i_distance = np.argmin(distances)
-        return params[i_distance]
+        """Finds the parameter on curve where point is the closest to given point."""
 
     def get_param_at_length(self, length: float) -> float:
         """Returns parameter at specified length along the curve"""
@@ -135,25 +123,28 @@ class FunctionCurveBase(PointCurveBase):
         return np.array([self.function(t) for t in params])
 
     def get_closest_param(self, point: PointType) -> float:
-        """Finds the param on curve where point is the closest to given point;
-        To improve search speed and reliability, an optional starting
-        estimation can be supplied."""
-        closest_param = super().get_closest_param(point)
+        """Finds the param on curve where point is the closest to given point"""
+        # because curves can have all sorts of shapes, find
+        # initial guess by checking distance to discretized points
         point = np.array(point)
+        all_points = self.discretize()
 
-        result = scipy.optimize.minimize(
-            lambda t: f.norm(self.get_point(t[0]) - point), (closest_param,), bounds=(self.bounds,)
+        distances = np.linalg.norm(all_points.T - point[:, None], axis=0)
+        params = np.linspace(self.bounds[0], self.bounds[1], num=len(distances))
+
+        i_smallest = int(np.argmin(distances))
+        i_prev = max(i_smallest - 1, 0)
+        i_next = min(i_smallest + 1, len(distances) - 1)
+
+        param_start = params[i_prev]
+        param_end = params[i_next]
+
+        result = scipy.optimize.minimize_scalar(
+            lambda t: f.norm(self.get_point(t) - point),
+            bounds=(param_start, param_end),
         )
 
-        return result.x[0]
-
-        # TODO: optimize by using a simpler function (?)
-        # param_start = super().get_closest_param(point)
-        # param_end = (1 + closest_param) / 2
-        # result = scipy.optimize.minimize_scalar(
-        #     lambda t: f.norm(self.get_point(t) - point), bounds=(param_start, param_end), method="bounded"
-        # )
-        # return result.x
+        return result.x
 
     def get_point(self, param: float) -> NPPointType:
         self._check_param(param)

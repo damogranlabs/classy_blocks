@@ -15,7 +15,7 @@ class CellTests(MeshTestCase):
         return np.array([vertex.position for vertex in self.mesh.vertices])
 
     def get_cell(self, index: int) -> HexCell:
-        return HexCell(self.mesh_points, self.mesh.blocks[index].indexes)
+        return HexCell(0, self.mesh_points, self.mesh.blocks[index].indexes)
 
     @parameterized.expand(
         (

@@ -16,7 +16,8 @@ class CellBase(abc.ABC):
     side_indexes: ClassVar[List[IndexType]]
     edge_pairs: ClassVar[List[Tuple[int, int]]]
 
-    def __init__(self, grid_points: NPPointListType, indexes: IndexType):
+    def __init__(self, index: int, grid_points: NPPointListType, indexes: IndexType):
+        self.index = index
         self.grid_points = grid_points
         self.indexes = indexes
 
@@ -176,6 +177,9 @@ class CellBase(abc.ABC):
 
     def __str__(self):
         return "-".join([str(index) for index in self.indexes])
+
+    def __repr__(self):
+        return str(self)
 
 
 class QuadCell(CellBase):
