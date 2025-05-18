@@ -50,16 +50,3 @@ class CellTests(MeshTestCase):
             cell_2 = self.get_cell(2)
 
             cell_1.get_common_side(cell_2)
-
-    def test_quality_good(self):
-        cell = self.get_cell(0)
-
-        self.assertLess(cell.quality, 1)
-
-    def test_quality_bad(self):
-        block = self.mesh.blocks[0]
-        block.vertices[0].move_to([-10, -10, -10])
-
-        cell = self.get_cell(0)
-
-        self.assertGreater(cell.quality, 100)

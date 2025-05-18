@@ -3,9 +3,10 @@ from typing import List, Optional, Set
 
 from classy_blocks.base.exceptions import ClampExistsError
 from classy_blocks.cbtyping import NPPointListType, NPPointType
-from classy_blocks.optimize.cell import CellBase
+from classy_blocks.optimize.cell import CellBase, HexCell
 from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.links import LinkBase
+from classy_blocks.optimize.quality import get_hex_quality, get_quad_quality
 
 
 @dataclasses.dataclass
@@ -54,7 +55,9 @@ class Junction:
 
     @property
     def quality(self) -> float:
-        """Returns average quality of all cells at this junction;
-        this serves as an indicator of which junction to optimize,
-        not a measurement of overall mesh quality"""
-        return sum([cell.quality for cell in self.cells]) / len(self.cells)
+        if isinstance(next(iter(self.cells)), HexCell):
+            quality_function = get_hex_quality
+        else:
+            quality_function = get_quad_quality
+
+        return sum(quality_function(self.points, cell.indexes) for cell in self.cells)
