@@ -121,7 +121,7 @@ class IterationDriver:
             report("Iteration limit hit, stopping optimization.")
             return True
 
-        if self.iterations[-1].final_quality < TOL:
+        if len(self.iterations) > 0 and self.iterations[-1].final_quality < TOL:
             print("Nothing left to optimize.")
             return True
 
