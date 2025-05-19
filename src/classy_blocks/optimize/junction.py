@@ -1,6 +1,8 @@
 import dataclasses
 from typing import List, Optional, Set
 
+import numpy as np
+
 from classy_blocks.base.exceptions import ClampExistsError
 from classy_blocks.cbtyping import NPPointListType, NPPointType
 from classy_blocks.optimize.cell import CellBase, HexCell
@@ -60,4 +62,4 @@ class Junction:
         else:
             quality_function = get_quad_quality
 
-        return sum(quality_function(self.points, cell.indexes) for cell in self.cells)
+        return sum(quality_function(self.points, np.array(cell.indexes, dtype=np.int32)) for cell in self.cells)

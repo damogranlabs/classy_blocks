@@ -1,7 +1,7 @@
 import dataclasses
 from typing import List
 
-from classy_blocks.util.constants import VBIG, VSMALL
+from classy_blocks.util.constants import TOL, VBIG, VSMALL
 from classy_blocks.util.tools import report
 
 
@@ -127,6 +127,10 @@ class IterationDriver:
 
         if self.last_improvement / self.iterations[0].initial_quality < self.tolerance:
             print("Tolerance reached, stopping optimization.")
+            return True
+
+        if self.iterations[-1].final_quality < TOL:
+            print("Nothing left to optimize.")
             return True
 
         return False

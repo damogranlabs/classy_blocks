@@ -1,10 +1,13 @@
-from typing import List, Tuple
+from typing import Tuple
 
 import numba  # type:ignore
 import numpy as np
+from nptyping import Int32, NDArray, Shape
 
 from classy_blocks.cbtyping import NPPointListType, NPPointType, NPVectorType
 from classy_blocks.util.constants import VSMALL
+
+NPIndexType = NDArray[Shape["*, 1"], Int32]
 
 
 @numba.jit(nopython=True, cache=True)
@@ -25,6 +28,19 @@ def scale_inner_angle(angle: float) -> float:
 @numba.jit(nopython=True, cache=True)
 def scale_aspect(ratio: float) -> float:
     return scale_quality(3, 2.5, 3, np.log10(ratio))
+
+
+@numba.jit(nopython=True, cache=True)
+def take(points: NPPointListType, indexes: NPIndexType):
+    n_points = len(indexes)
+    dim = points.shape[1]
+    result = np.empty((n_points, dim), dtype=points.dtype)
+
+    for i in range(n_points):
+        for j in range(dim):
+            result[i, j] = points[indexes[i], j]
+
+    return result
 
 
 @numba.jit(nopython=True, cache=True)
@@ -103,8 +119,8 @@ def get_quad_angle_quality(quad_points: NPPointListType) -> float:
 
 
 @numba.jit(nopython=True, cache=True)
-def get_quad_quality(grid_points: NPPointListType, cell_indexes: List[int]) -> float:
-    cell_points = np.take(grid_points, cell_indexes, axis=0)
+def get_quad_quality(grid_points: NPPointListType, cell_indexes: NPIndexType) -> float:
+    cell_points = take(grid_points, cell_indexes)
     cell_center, cell_normal, cell_aspect = get_quad_normal(cell_points)
 
     # non-ortho
@@ -119,8 +135,8 @@ def get_quad_quality(grid_points: NPPointListType, cell_indexes: List[int]) -> f
 
 
 @numba.jit(nopython=True, cache=True)
-def get_hex_quality(grid_points: NPPointListType, cell_indexes: List[int]) -> float:
-    cell_points = np.take(grid_points, cell_indexes, axis=0)
+def get_hex_quality(grid_points: NPPointListType, cell_indexes: NPIndexType) -> float:
+    cell_points = take(grid_points, cell_indexes)
     cell_center = get_center_point(cell_points)
 
     side_indexes = np.array([[0, 1, 2, 3], [7, 6, 5, 4], [4, 0, 3, 7], [6, 2, 1, 5], [0, 4, 5, 1], [7, 3, 2, 6]])
@@ -136,7 +152,7 @@ def get_hex_quality(grid_points: NPPointListType, cell_indexes: List[int]) -> fl
         # For this kind of optimization it is quite sufficient to take
         # only the latter as it's not much different and we'll optimize
         # other cells too.
-        side_points = np.take(cell_points, side, axis=0)
+        side_points = take(cell_points, side)
         side_center, side_normal, side_aspect = get_quad_normal(side_points)
         center_vector = cell_center - side_center
 
