@@ -54,7 +54,7 @@ class OptimizerBase(abc.ABC):
             reporter.junction_final = junction.quality
             reporter.grid_final = self.grid.quality
 
-            if reporter.improvement <= 0:
+            if np.isnan(reporter.improvement) or reporter.improvement <= 0:
                 reporter.rollback()
 
                 clamp.update_params(initial_params)
