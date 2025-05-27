@@ -1,6 +1,6 @@
 """The Mesh object ties everything together and writes the blockMeshDict in the end."""
 
-from typing import List, Optional, Set, Union, get_args
+from typing import List, Optional, Union, get_args
 
 from classy_blocks.assemble.point_registry import HexPointRegistry
 from classy_blocks.base.exceptions import EdgeNotFoundError
@@ -20,6 +20,7 @@ from classy_blocks.lists.patch_list import PatchList
 from classy_blocks.lists.vertex_list import VertexList
 from classy_blocks.optimize.grid import HexGrid
 from classy_blocks.util import constants
+from classy_blocks.util.depot import SolidDepot
 from classy_blocks.util.vtk_writer import write_vtk
 
 AdditiveType = Union[Operation, Shape, Stack, Assembly]
@@ -29,15 +30,15 @@ class Mesh:
     """contains blocks, edges and all necessary methods for assembling blockMeshDict"""
 
     def __init__(self) -> None:
-        # List of all added operations/shapes
-        self.depot: List[AdditiveType] = []
-        self.deleted: Set[Operation] = set()
+        # List of all added/deleted operations/shapes
+        self.depot = SolidDepot()
 
         self.vertex_list = VertexList()
         self.edge_list = EdgeList()
         self.block_list = BlockList()
         self.patch_list = PatchList()
         self.face_list = FaceList()
+
         self.geometry_list = GeometryList()
 
         self.settings = {
@@ -49,12 +50,12 @@ class Mesh:
             "verbose": None,
         }
 
-    def add(self, entity: AdditiveType) -> None:
-        """Add a classy_blocks entity to the mesh (Operation or a Shape)"""
+    def add(self, solid: AdditiveType) -> None:
+        """Add a classy_blocks solid to the mesh (Loft, Shape, Assembly, ...)"""
         # this does nothing yet;
         # the data will be processed automatically at an
         # appropriate occasion (before write/optimize)
-        self.depot.append(entity)
+        self.depot.add(solid)
 
     def _add_vertices(self, operation: Operation) -> List[Vertex]:
         """Creates/finds vertices from operation's points and returns them"""
@@ -98,12 +99,7 @@ class Mesh:
     def delete(self, operation: Operation) -> None:
         """Excludes the given operation from any processing;
         the data remains but it will not contribute to the mesh"""
-        self.deleted.add(operation)
-
-    def _add_geometry(self) -> None:
-        for entity in self.depot:
-            if entity.geometry is not None:
-                self.add_geometry(entity.geometry)
+        self.depot.delete(operation)
 
     def assemble(self) -> None:
         """Converts classy_blocks entities (operations and shapes) to
@@ -148,11 +144,12 @@ class Mesh:
                 block.add_chops(direction, operation.chops[direction])
 
             block.cell_zone = operation.cell_zone
-            block.visible = operation not in self.deleted
+            block.visible = operation not in self.depot.deleted
 
             self.block_list.add(block)
 
-        self._add_geometry()
+        for geom in self.depot.get_geometry():
+            self.add_geometry(geom)
         self.block_list.update_neighbours(navigator)
 
     def clear(self) -> None:
@@ -245,15 +242,7 @@ class Mesh:
     @property
     def operations(self) -> List[Operation]:
         """Returns a list of operations from all entities in depot"""
-        operations: List[Operation] = []
-
-        for entity in self.depot:
-            if isinstance(entity, Operation):
-                operations.append(entity)
-            else:
-                operations += entity.operations
-
-        return operations
+        return self.depot.operations
 
     @property
     def blocks(self) -> List[Block]:
