@@ -22,7 +22,7 @@ def scale_non_ortho(angle: float) -> float:
 
 @numba.jit(nopython=True, cache=True)
 def scale_inner_angle(angle: float) -> float:
-    return scale_quality(1.5, 0.25, 0.15, angle)
+    return scale_quality(1.5, 0.25, 0.15, np.abs(angle))
 
 
 @numba.jit(nopython=True, cache=True)

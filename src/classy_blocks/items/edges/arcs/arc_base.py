@@ -7,6 +7,7 @@ from classy_blocks.construct.point import Point
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
+from classy_blocks.util.constants import vector_format
 
 
 @dataclasses.dataclass
@@ -28,7 +29,7 @@ class ArcEdgeBase(Edge, abc.ABC):
     @property
     def description(self):
         # it's always 'arc' for arc edges
-        return f"\tarc {self.vertex_1.index} {self.vertex_2.index} {self.third_point.description}"
+        return f"arc {self.vertex_1.index} {self.vertex_2.index} {vector_format(self.third_point.position)}"
 
     @property
     def is_valid(self):

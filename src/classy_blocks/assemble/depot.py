@@ -8,17 +8,17 @@ from classy_blocks.construct.stack import Stack
 AdditiveType = Union[Operation, Shape, Stack, Assembly]
 
 
-class SolidDepot:
-    """Collects, stores and serves AdditiveType stuff"""
+class Depot:
+    """Collects, stores and serves user-added AdditiveType stuff"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.solids: List[AdditiveType] = []
         self.deleted: List[Operation] = []
 
-    def add(self, solid: AdditiveType) -> None:
+    def add_solid(self, solid: AdditiveType) -> None:
         self.solids.append(solid)
 
-    def delete(self, operation: Operation) -> None:
+    def delete_solid(self, operation: Operation) -> None:
         self.deleted.append(operation)
 
     @property
@@ -32,15 +32,3 @@ class SolidDepot:
                 operations += solid.operations
 
         return operations
-
-    def get_geometry(self) -> List[dict]:
-        geom = []
-
-        for solid in self.solids:
-            if solid.geometry is not None:
-                geom.append(solid.geometry)
-
-        return geom
-
-
-# class PatchData

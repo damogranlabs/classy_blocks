@@ -317,21 +317,17 @@ class EdgeDescriptionTests(unittest.TestCase):
     def test_arc_description(self):
         """Classic arc description"""
         self.assertEqual(
-            self.get_edge(edges.Arc([0.5, 0.1, 0])).description, "\tarc 0 1 (0.50000000 0.10000000 0.00000000)"
+            self.get_edge(edges.Arc([0.5, 0.1, 0])).description.strip(), "arc 0 1 (0.50000000 0.10000000 0.00000000)"
         )
 
     def test_angle_description(self):
-        self.assertEqual(
-            self.get_edge(edges.Angle(np.pi, [0, 0, 1])).description,
-            f"\t// arc 0 1 {np.pi} (0.00000000 0.00000000 1.00000000)\n"
-            + "\tarc 0 1 (0.50000000 -0.50000000 0.00000000)",
+        self.assertIn(
+            "arc 0 1 (0.50000000 -0.50000000 0.00000000)", self.get_edge(edges.Angle(np.pi, [0, 0, 1])).description
         )
 
     def test_origin_description(self):
-        self.assertEqual(
-            self.get_edge(edges.Origin([0.5, -0.5, 0])).description,
-            "\t// arc 0 1 origin 1 (0.50000000 -0.50000000 0.00000000)\n"
-            + "\tarc 0 1 (0.50000000 0.20710678 0.00000000)",
+        self.assertIn(
+            "arc 0 1 (0.50000000 0.20710678 0.00000000)", self.get_edge(edges.Origin([0.5, -0.5, 0])).description
         )
 
     def test_spline_description(self):

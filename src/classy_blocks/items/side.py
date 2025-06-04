@@ -12,17 +12,15 @@ class Side:
 
     def __init__(self, orient: OrientType, vertices: List[Vertex]):
         if len(vertices) != 8:
-            raise SideCreationError("Pass exactly 8 of block's vertices", f"Given {len(vertices)} vertice(s)")
+            raise SideCreationError("Pass exactly 8 of block vertices", f"Given {len(vertices)} vertice(s)")
 
         corners = constants.FACE_MAP[orient]
         self.vertices = [vertices[i] for i in corners]
 
-    @property
-    def description(self) -> str:
-        """Outputs a string that represents a block face in blockMeshDict"""
-        indexes = " ".join([str(v.index) for v in self.vertices])
-
-        return "(" + indexes + ")"
+        self._hash = hash(tuple(sorted([v.index for v in self.vertices])))
 
     def __eq__(self, other):
         return {v.index for v in self.vertices} == {v.index for v in other.vertices}
+
+    def __hash__(self):
+        return self._hash

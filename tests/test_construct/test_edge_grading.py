@@ -11,6 +11,7 @@ from classy_blocks.construct.operations.connector import Connector
 from classy_blocks.construct.operations.extrude import Extrude
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.mesh import Mesh
+from classy_blocks.write import formats
 
 
 class EdgeGradingExampleTests(unittest.TestCase):
@@ -42,8 +43,8 @@ class EdgeGradingExampleTests(unittest.TestCase):
 
         mesh.add(end)
 
-        mesh.assemble()
-        mesh.block_list.assemble()
+        dump = mesh.assemble()
+        dump.finalize()
 
         self.mesh = mesh
 
@@ -62,12 +63,14 @@ class EdgeGradingExampleTests(unittest.TestCase):
     def test_block_grading_simple(self):
         # blocks 0 and 3 can be simpleGraded
         for i in (0, 3):
-            self.assertTrue("simpleGrading" in self.mesh.blocks[i].description)
+            block_description = formats.format_block(self.mesh.blocks[i])
+            self.assertTrue("simpleGrading" in block_description)
 
     def test_block_grading_edge(self):
         # blocks 1 and 2 must be edge graded
         for i in (1, 2):
-            self.assertTrue("edgeGrading" in self.mesh.blocks[i].description)
+            block_description = formats.format_block(self.mesh.blocks[i])
+            self.assertTrue("edgeGrading" in block_description)
 
 
 class EdgeGradingTests(unittest.TestCase):
@@ -77,8 +80,8 @@ class EdgeGradingTests(unittest.TestCase):
         self.mesh = Mesh()
 
     def prepare(self):
-        self.mesh.assemble()
-        self.mesh.block_list.assemble()
+        dump = self.mesh.assemble()
+        dump.finalize()
 
     def test_inconsistent_wires(self):
         box_left = Box([0, 0, 0], [1, 1, 1])
@@ -146,4 +149,4 @@ class EdgeGradingTests(unittest.TestCase):
         self.prepare()
 
         for block in self.mesh.blocks:
-            self.assertTrue(" ( 10 10 10 ) simpleGrading" in block.description)
+            self.assertTrue(" ( 10 10 10 ) simpleGrading" in formats.format_block(block))

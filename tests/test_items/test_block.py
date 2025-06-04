@@ -1,15 +1,15 @@
-from typing import List, get_args
+from typing import List
 
 import numpy as np
 from parameterized import parameterized
 
-from classy_blocks.cbtyping import DirectionType
 from classy_blocks.construct.edges import Arc
 from classy_blocks.grading.chop import Chop
 from classy_blocks.items.block import Block
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.wire import Wire
 from classy_blocks.util import functions as f
+from classy_blocks.write.formats import format_block
 from tests.fixtures.block import BlockTestCase
 
 
@@ -205,30 +205,6 @@ class BlockSimpleGradingTests(BlockTestCase):
 
         self.assertTrue(block_0.is_defined)
 
-    def test_output(self):
-        """Output of a simple block"""
-        # just to make sure it works
-        block_0 = self.make_block(0)
-        block_0.axes[0].wires.chops = []
-
-        for axis in get_args(DirectionType):
-            block_0.axes[axis].chops = []
-
-        block_0.add_chops(0, [Chop(count=10)])
-        block_0.add_chops(1, [Chop(count=10)])
-        block_0.add_chops(2, [Chop(count=10)])
-
-        block_0.cell_zone = "test_zone"
-        block_0.comment = "test_comment"
-
-        block_0.grade()
-
-        expected_description = (
-            "\thex ( 0 1 2 3 4 5 6 7 ) test_zone ( 10 10 10 ) simpleGrading ( 1 1 1 ) // 0 test_comment\n"
-        )
-
-        self.assertEqual(block_0.description, expected_description)
-
 
 class BlockEdgeGradingTests(BlockTestCase):
     """Refer to test_edge_grading.py for more involved (function) tests"""
@@ -269,7 +245,7 @@ class BlockEdgeGradingTests(BlockTestCase):
         self.chop(block, 2, count=10)
         self.calculate(block)
 
-        self.assertTrue("edgeGrading" in block.format_grading())
+        self.assertIn("edgeGrading", format_block(block))
 
     def test_edge_multigrading(self):
         """Switch to edgeGrading when `preserve` keyword is provided"""
@@ -280,7 +256,7 @@ class BlockEdgeGradingTests(BlockTestCase):
         self.chop(block, 2, count=10)
         self.calculate(block)
 
-        self.assertTrue("edgeGrading" in block.format_grading())
+        self.assertIn("edgeGrading", format_block(block))
 
     def test_copy_grading(self):
         """Copy data from neighbours"""
@@ -300,8 +276,8 @@ class BlockEdgeGradingTests(BlockTestCase):
         self.calculate(block_1)
 
         # block_0 must be simpleGraded, block_1 edge
-        self.assertTrue("simpleGrading" in block_0.format_grading())
-        self.assertTrue("edgeGrading" in block_1.format_grading())
+        self.assertIn("simpleGrading", format_block(block_0))
+        self.assertIn("edgeGrading", format_block(block_1))
 
     def test_single_grading(self):
         """Output simpleGrading when there is no need for edgeGrading"""
@@ -313,7 +289,7 @@ class BlockEdgeGradingTests(BlockTestCase):
         self.calculate(block)
 
         # block_0 must be simpleGraded, block_1 edge
-        self.assertTrue("simpleGrading" in block.format_grading())
+        self.assertIn("simpleGrading", format_block(block))
 
 
 class WireframeTests(BlockTestCase):

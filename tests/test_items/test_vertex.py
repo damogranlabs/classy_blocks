@@ -4,6 +4,7 @@ from classy_blocks.base import transforms as tr
 from classy_blocks.base.exceptions import PointCreationError
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.util import constants
+from classy_blocks.write.formats import format_vertex
 from tests.fixtures.data import DataTestCase
 
 
@@ -53,7 +54,7 @@ class VertexTests(DataTestCase):
         """A Rudimentary Vertex description"""
         v = Vertex([0, 0, 0], 0)
 
-        self.assertEqual(v.description, "(0.00000000 0.00000000 0.00000000) // 0")
+        self.assertEqual(format_vertex(v), "(0.00000000 0.00000000 0.00000000) // 0")
 
     def test_project_single(self):
         """Add a single geometry to project to"""
@@ -62,7 +63,7 @@ class VertexTests(DataTestCase):
 
         expected = "project (0.00000000 0.00000000 0.00000000) (terrain) // 0"
 
-        self.assertEqual(v.description, expected)
+        self.assertEqual(format_vertex(v), expected)
 
     def test_project_multiple(self):
         """Add a single geometry to project to"""
@@ -71,7 +72,7 @@ class VertexTests(DataTestCase):
 
         expected = "project (0.00000000 0.00000000 0.00000000) (terrain walls border) // 0"
 
-        self.assertEqual(v.description, expected)
+        self.assertEqual(format_vertex(v), expected)
 
     def test_multitransform(self):
         """Use the Transformation class for multiple transforms"""

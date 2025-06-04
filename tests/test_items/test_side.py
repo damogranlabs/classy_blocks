@@ -17,13 +17,6 @@ class SideTests(BlockTestCase):
 
         self.assertListEqual(side.vertices, [vertices[i] for i in (0, 1, 2, 3)])
 
-    def test_description(self):
-        """String output"""
-        vertices = self.make_vertices(0)
-        side = Side("bottom", vertices)
-
-        self.assertEqual(side.description, "(0 1 2 3)")
-
     def test_equal(self):
         """Two coincident sides from different blocks are equal"""
         side_1 = Side("right", self.make_vertices(0))

@@ -9,7 +9,7 @@ class PropagationTests(BlockTestCase):
         self.mesh = Mesh()
 
     def test_propagate_normal(self):
-        """Propagate grading from a block to another"""
+        """Propagate grading from one block to another"""
         op_0 = self.make_loft(0)
         op_0.chop(0, count=10)
         op_0.chop(1, count=20, total_expansion=5)
@@ -21,12 +21,11 @@ class PropagationTests(BlockTestCase):
 
         self.mesh.add(op_1)
 
-        self.mesh.assemble()
-        self.mesh.block_list.assemble()
+        self.mesh.assemble().finalize()
 
         self.assertListEqual(
-            self.mesh.block_list.blocks[0].axes[1].wires[2].grading.specification,
-            self.mesh.block_list.blocks[1].axes[1].wires[2].grading.specification,
+            self.mesh.blocks[0].axes[1].wires[2].grading.specification,
+            self.mesh.blocks[1].axes[1].wires[2].grading.specification,
         )
 
     def test_propagate_upsidedown(self):
@@ -42,10 +41,9 @@ class PropagationTests(BlockTestCase):
 
         self.mesh.add(op_1)
 
-        self.mesh.assemble()
-        self.mesh.block_list.assemble()
+        self.mesh.assemble().finalize()
 
-        spec_0 = self.mesh.block_list.blocks[0].axes[1].wires[1].grading.get_specification(False)
-        spec_1 = self.mesh.block_list.blocks[1].axes[1].wires[1].grading.get_specification(False)
+        spec_0 = self.mesh.blocks[0].axes[1].wires[1].grading.get_specification(False)
+        spec_1 = self.mesh.blocks[1].axes[1].wires[1].grading.get_specification(False)
 
         self.assertListEqual(spec_0, spec_1)

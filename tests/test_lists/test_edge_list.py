@@ -14,14 +14,14 @@ from tests.fixtures.data import DataTestCase
 class EdgeListTests(DataTestCase):
     def setUp(self):
         self.blocks = DataTestCase.get_all_data()
-        self.vl = VertexList()
+        self.vl = VertexList([])
         self.el = EdgeList()
 
     def get_vertices(self, index: int) -> List[Vertex]:
         vertices = []
 
         for point in self.get_single_data(index).points:
-            vertices.append(self.vl.add(Point(point), []))
+            vertices.append(self.vl.add_duplicated(Point(point), []))
 
         return vertices
 
@@ -92,7 +92,7 @@ class EdgeListTests(DataTestCase):
         revolve = Revolve(face, 1, [0, 0, 1], [-1, 0, 0])
 
         for point in revolve.point_array:
-            self.vl.add(Point(point), [])
+            self.vl.add_duplicated(Point(point), [])
 
         self.el.add_from_operation(self.vl.vertices, revolve)
 
@@ -111,18 +111,3 @@ class EdgeListTests(DataTestCase):
 
         self.assertEqual(no_arc, 4)
         self.assertEqual(no_project, 2)
-
-    def test_description(self):
-        """Output for blockMesh"""
-        vertices = self.get_vertices(0)
-        self.el.add(vertices[0], vertices[1], Arc([0.5, 0.5, 0]))
-        self.el.add(vertices[0], vertices[1], Arc([0.5, 0.5, 0]))
-
-        expected = "edges\n(\n"
-
-        for edge in self.el.edges.values():
-            expected += edge.description + "\n"
-
-        expected += ");\n\n"
-
-        self.assertEqual(self.el.description, expected)

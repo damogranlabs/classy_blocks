@@ -31,6 +31,7 @@ class CurveEdgeBase(Edge, abc.ABC):
 
     @property
     def description(self):
+        # TODO! Put this into writer
         point_list = " ".join([vector_format(p) for p in self.point_array])
         return super().description + "(" + point_list + ")"
 

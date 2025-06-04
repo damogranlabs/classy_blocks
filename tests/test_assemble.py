@@ -3,13 +3,13 @@ from typing import List
 
 from parameterized import parameterized
 
-from classy_blocks.assemble.cell_registry import CellRegistry
-from classy_blocks.assemble.connection_registry import HexConnectionRegistry, get_key
-from classy_blocks.assemble.face_registry import HexFaceRegistry
-from classy_blocks.assemble.point_registry import HexPointRegistry
 from classy_blocks.construct.operations.box import Box
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.shapes.cylinder import Cylinder
+from classy_blocks.lookup.cell_registry import CellRegistry
+from classy_blocks.lookup.connection_registry import HexConnectionRegistry, get_key
+from classy_blocks.lookup.face_registry import HexFaceRegistry
+from classy_blocks.lookup.point_registry import HexPointRegistry
 
 
 class RegistryTests(unittest.TestCase):

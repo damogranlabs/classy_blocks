@@ -13,6 +13,8 @@ class Mapper:
     """A helper that constructs mapped sketches/shapes
     from arbitrary collection of faces/operations"""
 
+    # TODO: remove
+
     def __init__(self, merge_tol: float = TOL) -> None:
         self.tol = merge_tol
 

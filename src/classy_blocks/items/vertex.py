@@ -3,7 +3,6 @@ that can be applied to it."""
 
 from classy_blocks.cbtyping import PointType
 from classy_blocks.construct.point import Point
-from classy_blocks.util.constants import vector_format
 
 
 class Vertex(Point):
@@ -28,17 +27,6 @@ class Vertex(Point):
 
     def __repr__(self):
         return f"Vertex {self.index} at {self.position}"
-
-    @property
-    def description(self) -> str:
-        """Returns a string representation to be written to blockMeshDict"""
-        point = vector_format(self.position)
-        comment = f"// {self.index}"
-
-        if len(self.projected_to) > 0:
-            return f"project {point} ({' '.join(self.projected_to)}) {comment}"
-
-        return f"{point} {comment}"
 
     @classmethod
     def from_point(cls, point: Point, index: int):

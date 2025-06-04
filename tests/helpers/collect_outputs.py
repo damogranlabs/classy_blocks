@@ -38,9 +38,9 @@ def collect_dict(path):
     # >>> 'tests/outputs/examples/chaining/tank'
     output_path = output_dir + example_name
 
+    print(f"Running {output_path} > {output_path}")
     os.chdir(example_dir)
     subprocess.run(["python", example_file], check=False)
-    print(f"Running {output_path} > {output_path}")
     os.chdir(current_dir)
 
     # create mesh and confirm checkMesh output

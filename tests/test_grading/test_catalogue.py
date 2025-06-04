@@ -26,6 +26,7 @@ class RowCatalogueTests(BlockTestCase):
         self.mesh = Mesh()
 
         self.mesh.add(Cylinder([0, 0, 0], [1, 0, 0], [0, 1, 0]))
+        self.mesh.assemble()
 
         self.catalogue = RowCatalogue(self.mesh)
 

@@ -63,19 +63,3 @@ class EdgeList:
             edges.append((corner_1, corner_2, edge))
 
         return edges
-
-    def clear(self) -> None:
-        """Empties all lists"""
-        self.edges.clear()
-
-    @property
-    def description(self) -> str:
-        """Outputs a list of edges to be inserted into blockMeshDict"""
-        out = "edges\n(\n"
-
-        for edge in self.edges.values():
-            out += edge.description + "\n"
-
-        out += ");\n\n"
-
-        return out

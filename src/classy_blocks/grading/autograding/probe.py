@@ -1,6 +1,7 @@
 import dataclasses
 from typing import Dict, List, Optional, Tuple
 
+from classy_blocks.assemble.dump import AssembledDump
 from classy_blocks.base.exceptions import PatchNotFoundError
 from classy_blocks.cbtyping import DirectionType, OrientType
 from classy_blocks.grading.autograding.catalogue import RowCatalogue
@@ -76,6 +77,8 @@ class WireCatalogue:
 
     def __init__(self, mesh: Mesh):
         self.mesh = mesh
+        assert isinstance(self.mesh.dump, AssembledDump)
+        self.dump = self.mesh.dump
 
         # finds blocks' neighbours
         self.grid = HexGrid.from_mesh(self.mesh)
@@ -125,11 +128,11 @@ class WireCatalogue:
 
             vertices = set(block.get_side_vertices(orient))
             try:
-                patch = self.mesh.patch_list.find(vertices)
+                patch = self.dump.patch_list.find(vertices)
                 if patch.kind == "wall":
                     return True
             except PatchNotFoundError:
-                if self.mesh.patch_list.default.get("kind") == "wall":
+                if self.mesh.settings.default_patch.get("kind") == "wall":
                     return True
 
             return False

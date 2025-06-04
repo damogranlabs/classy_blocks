@@ -5,6 +5,7 @@ import numpy as np
 
 import classy_blocks as cb
 from classy_blocks.cbtyping import DirectionType
+from classy_blocks.write import formats
 
 
 class GradingBugTests(unittest.TestCase):
@@ -36,8 +37,8 @@ class GradingBugTests(unittest.TestCase):
         mesh.add(left_loft)
         mesh.add(right_loft)
 
-        mesh.assemble()
-        mesh.block_list.assemble()
+        dump = mesh.assemble()
+        dump.block_list.assemble()
 
-        self.assertEqual(mesh.blocks[0].format_grading(), "simpleGrading ( 5 5 5 )")
-        self.assertEqual(mesh.blocks[1].format_grading(), "simpleGrading ( 0.2 5 1 )")
+        self.assertIn("simpleGrading ( 5 5 5 )", formats.format_block(mesh.blocks[0]))
+        self.assertIn("simpleGrading ( 0.2 5 1 )", formats.format_block(mesh.blocks[1]))

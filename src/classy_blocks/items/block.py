@@ -124,41 +124,6 @@ class Block:
     def get_side_vertices(self, orient: OrientType) -> List[Vertex]:
         return [self.vertices[i] for i in constants.FACE_MAP[orient]]
 
-    def format_grading(self) -> str:
-        """Returns the simple/edgeGrading string"""
-        if all(axis.is_simple for axis in self.axes):  # is_simple
-            return (
-                "simpleGrading ( "
-                + self.axes[0].wires.format_single()
-                + " "
-                + self.axes[1].wires.format_single()
-                + " "
-                + self.axes[2].wires.format_single()
-                + " )"
-            )
-        else:
-            return (
-                "edgeGrading ( "
-                + self.axes[0].wires.format_all()
-                + " "
-                + self.axes[1].wires.format_all()
-                + " "
-                + self.axes[2].wires.format_all()
-                + " )"
-            )
-
-    @property
-    def description(self) -> str:
-        """hex definition for blockMesh"""
-        fmt_hidden = "" if self.visible else "// "
-        fmt_vertices = "( " + " ".join(str(v.index) for v in self.vertices) + " )"
-        fmt_count = "( " + " ".join([str(axis.count) for axis in self.axes]) + " )"
-
-        fmt_grading = self.format_grading()
-        fmt_comments = f"// {self.index} {self.comment}\n"
-
-        return f"\t{fmt_hidden}hex {fmt_vertices} {self.cell_zone} {fmt_count} {fmt_grading} {fmt_comments}"
-
     def __hash__(self) -> int:
         return self.index
 

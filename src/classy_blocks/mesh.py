@@ -1,10 +1,10 @@
-"""The Mesh object ties everything together and writes the blockMeshDict in the end."""
+from typing import List, Optional, Union
 
-from typing import List, Optional, Union, get_args
-
-from classy_blocks.assemble.point_registry import HexPointRegistry
-from classy_blocks.base.exceptions import EdgeNotFoundError
-from classy_blocks.cbtyping import DirectionType
+from classy_blocks.assemble.assembler import MeshAssembler
+from classy_blocks.assemble.depot import Depot
+from classy_blocks.assemble.dump import AssembledDump, DumpBase, EmptyDump
+from classy_blocks.assemble.settings import Settings
+from classy_blocks.cbtyping import GeometryType
 from classy_blocks.construct.assemblies.assembly import Assembly
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.shape import Shape
@@ -12,16 +12,8 @@ from classy_blocks.construct.stack import Stack
 from classy_blocks.items.block import Block
 from classy_blocks.items.patch import Patch
 from classy_blocks.items.vertex import Vertex
-from classy_blocks.lists.block_list import BlockList
-from classy_blocks.lists.edge_list import EdgeList
-from classy_blocks.lists.face_list import FaceList
-from classy_blocks.lists.geometry_list import GeometryList
-from classy_blocks.lists.patch_list import PatchList
-from classy_blocks.lists.vertex_list import VertexList
-from classy_blocks.optimize.grid import HexGrid
-from classy_blocks.util import constants
-from classy_blocks.util.depot import SolidDepot
-from classy_blocks.util.vtk_writer import write_vtk
+from classy_blocks.write.vtk import write_vtk
+from classy_blocks.write.writer import MeshWriter
 
 AdditiveType = Union[Operation, Shape, Stack, Assembly]
 
@@ -31,135 +23,65 @@ class Mesh:
 
     def __init__(self) -> None:
         # List of all added/deleted operations/shapes
-        self.depot = SolidDepot()
+        self.depot = Depot()
+        self.settings = Settings()
 
-        self.vertex_list = VertexList()
-        self.edge_list = EdgeList()
-        self.block_list = BlockList()
-        self.patch_list = PatchList()
-        self.face_list = FaceList()
-
-        self.geometry_list = GeometryList()
-
-        self.settings = {
-            "prescale": None,
-            "scale": 1,
-            "transform": None,
-            "mergeType": None,  # use 'points' to fall back to the older point-based block merging
-            "checkFaceCorrespondence": None,  # true by default, turn off if blockMesh fails (3-sided pyramids etc.)
-            "verbose": None,
-        }
+        # container for items - assembled blocks, vertices, patches, etc.
+        self.dump: DumpBase = EmptyDump()
 
     def add(self, solid: AdditiveType) -> None:
         """Add a classy_blocks solid to the mesh (Loft, Shape, Assembly, ...)"""
         # this does nothing yet;
         # the data will be processed automatically at an
         # appropriate occasion (before write/optimize)
-        self.depot.add(solid)
-
-    def _add_vertices(self, operation: Operation) -> List[Vertex]:
-        """Creates/finds vertices from operation's points and returns them"""
-        vertices: List[Vertex] = []
-
-        # FIXME: prettify/move logic elsewhere/remove private method
-        for corner in range(8):
-            point = operation.points[corner]
-            # remove master patches, only slave will remain
-            patches = operation.get_patches_at_corner(corner)
-            patches = patches.intersection(self.patch_list.slave_patches)
-            new_vertices = self.vertex_list.add(point, list(patches))
-            vertices.append(new_vertices)
-
-        return vertices
+        self.depot.add_solid(solid)
 
     def merge_patches(self, master: str, slave: str) -> None:
         """Merges two non-conforming named patches using face merging;
         https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-470004.3.2
         (breaks the 100% hex-mesh rule)"""
-        self.patch_list.merge(master, slave)
+        self.settings.merged_patches.append((master, slave))
 
     def set_default_patch(self, name: str, kind: str) -> None:
         """Adds the 'defaultPatch' entry to the mesh; any non-specified block boundaries
         will be assigned this patch"""
-        self.patch_list.set_default(name, kind)
+        self.settings.default_patch = {"name": name, "kind": kind}
 
     def modify_patch(self, name: str, kind: str, settings: Optional[List[str]] = None) -> None:
         """Fetches a patch named 'patch' and modifies its type and optionally
         other settings. They are passed on to blockMeshDict as a list of strings
         as-is, with no additional brain power used"""
-        self.patch_list.modify(name, kind, settings)
+        self.settings.modify_patch(name, kind, settings)
 
-    def add_geometry(self, geometry: dict) -> None:
+    def add_geometry(self, geometry: GeometryType) -> None:
         """Adds named entry in the 'geometry' section of blockMeshDict;
         'geometry' is in the form of dictionary {'geometry_name': [list of properties]};
         properties are as specified by searchable* class in documentation.
         See examples/advanced/project for an example."""
-        self.geometry_list.add(geometry)
+        self.settings.add_geometry(geometry)
 
     def delete(self, operation: Operation) -> None:
         """Excludes the given operation from any processing;
         the data remains but it will not contribute to the mesh"""
-        self.depot.delete(operation)
+        self.depot.delete_solid(operation)
 
-    def assemble(self) -> None:
+    def assemble(self) -> AssembledDump:
         """Converts classy_blocks entities (operations and shapes) to
         actual vertices, edges, blocks and other stuff to be inserted into
         blockMeshDict. After this has been done, the above objects
         cease to have any function or influence on mesh."""
         if self.is_assembled:
-            return
+            assert isinstance(self.dump, AssembledDump)
+            return self.dump
 
-        operations = self.operations
-        grid = HexGrid.from_elements(operations)
-        navigator = HexPointRegistry.from_addresses(grid.points, grid.addressing)
-
-        self.vertex_list.vertices = [Vertex(pos, i) for i, pos in enumerate(grid.points)]
-
-        # first skim all data from operations
-        for iop, operation in enumerate(operations):
-            op_indexes = grid.addressing[iop]
-            op_vertices = [self.vertex_list.vertices[i] for i in op_indexes]
-
-            for ipnt, point in enumerate(operation.points):
-                op_vertices[ipnt].projected_to = point.projected_to
-                self.edge_list.add_from_operation(op_vertices, operation)
-
-            self.patch_list.add(op_vertices, operation)
-            self.face_list.add(op_vertices, operation)
-
-        # then create blocks from already known vertices and edges
-        for iop, operation in enumerate(operations):
-            op_indexes = grid.addressing[iop]
-            op_vertices = [self.vertex_list.vertices[i] for i in op_indexes]
-
-            block = Block(iop, op_vertices)
-            for wire in block.wire_list:
-                try:
-                    edge = self.edge_list.find(*wire.vertices)
-                    block.add_edge(wire.corners[0], wire.corners[1], edge)
-                except EdgeNotFoundError:
-                    continue
-
-            for direction in get_args(DirectionType):
-                block.add_chops(direction, operation.chops[direction])
-
-            block.cell_zone = operation.cell_zone
-            block.visible = operation not in self.depot.deleted
-
-            self.block_list.add(block)
-
-        for geom in self.depot.get_geometry():
-            self.add_geometry(geom)
-        self.block_list.update_neighbours(navigator)
+        assembler = MeshAssembler(self.depot, self.settings)
+        self.dump = assembler.assemble()
+        return self.dump
 
     def clear(self) -> None:
         """Undoes the assemble() method; clears created blocks and other lists
         but leaves added depot items intact"""
-        self.vertex_list.clear()
-        self.edge_list.clear()
-        self.block_list.clear()
-        self.patch_list.clear()
-        self.face_list.clear()
+        self.dump = EmptyDump()
 
     def backport(self) -> None:
         """When mesh is assembled, points from depot are converted to vertices and
@@ -185,18 +107,6 @@ class Mesh:
         self.clear()
         self.assemble()
 
-    def format_settings(self) -> str:
-        """Put self.settings in a proper, blockMesh-readable format"""
-        out = ""
-
-        for key, value in self.settings.items():
-            if value is not None:
-                out += f"{key} {value};\n"
-
-        out += "\n"
-
-        return out
-
     def write(self, output_path: str, debug_path: Optional[str] = None) -> None:
         """Writes a blockMeshDict to specified location. If debug_path is specified,
         a VTK file is created first where each block is a single cell, to see simplified
@@ -205,39 +115,28 @@ class Mesh:
             self.assemble()
 
         if debug_path is not None:
-            write_vtk(debug_path, self.vertex_list.vertices, self.block_list.blocks)
+            write_vtk(debug_path, self.vertices, self.blocks)
 
         # gradings: define after writing VTK;
         # if it is not specified correctly, this will raise an exception
-        self.block_list.assemble()
+        self.dump.finalize()
 
-        with open(output_path, "w", encoding="utf-8") as output:
-            output.write(constants.MESH_HEADER)
-
-            output.write(self.format_settings())
-
-            output.write(self.geometry_list.description)
-
-            output.write(self.vertex_list.description)
-            output.write(self.block_list.description)
-            output.write(self.edge_list.description)
-            output.write(self.face_list.description)
-            output.write(self.patch_list.description)
-
-            output.write(constants.MESH_FOOTER)
+        assert isinstance(self.dump, AssembledDump)  # to pacify type checker
+        writer = MeshWriter(self.dump, self.settings)
+        writer.write(output_path)
 
     @property
     def is_assembled(self) -> bool:
         """Returns True if assemble() has been executed on this mesh"""
-        return len(self.vertex_list.vertices) > 0
+        return self.dump.is_assembled
 
     @property
     def vertices(self) -> List[Vertex]:
-        return self.vertex_list.vertices
+        return self.dump.vertices
 
     @property
     def patches(self) -> List[Patch]:
-        return list(self.patch_list.patches.values())
+        return list(self.dump.patches)
 
     @property
     def operations(self) -> List[Operation]:
@@ -246,4 +145,4 @@ class Mesh:
 
     @property
     def blocks(self) -> List[Block]:
-        return self.block_list.blocks
+        return self.dump.blocks

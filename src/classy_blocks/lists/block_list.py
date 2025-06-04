@@ -1,8 +1,8 @@
 from typing import List, Set
 
-from classy_blocks.assemble.point_registry import HexPointRegistry
 from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.items.block import Block
+from classy_blocks.lookup.point_registry import HexPointRegistry
 
 
 class BlockList:
@@ -84,19 +84,3 @@ class BlockList:
         also check that all coincident wires have the same length and grading"""
         for block in self.blocks:
             block.check_consistency()
-
-    def clear(self) -> None:
-        """Removes created blocks"""
-        self.blocks.clear()
-
-    @property
-    def description(self) -> str:
-        """Outputs a list of blocks to be inserted directly into blockMeshDict"""
-        out = "blocks\n(\n"
-
-        for block in self.blocks:
-            out += block.description
-
-        out += ");\n\n"
-
-        return out

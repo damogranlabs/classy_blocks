@@ -153,6 +153,7 @@ class Grading:
     @property
     def description(self) -> str:
         """Output string for blockMeshDict"""
+        # TODO! Put this into writer
         if not self.is_defined:
             raise UndefinedGradingsError(f"Grading not defined: {self}")
 

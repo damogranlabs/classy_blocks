@@ -2,14 +2,6 @@ from typing import List, Sequence, Type, Union
 
 import numpy as np
 
-from classy_blocks.assemble.cell_registry import CellRegistry
-from classy_blocks.assemble.connection_registry import (
-    ConnectionRegistryBase,
-    HexConnectionRegistry,
-    QuadConnectionRegistry,
-)
-from classy_blocks.assemble.face_registry import FaceRegistryBase, HexFaceRegistry, QuadFaceRegistry
-from classy_blocks.assemble.point_registry import HexPointRegistry
 from classy_blocks.base.exceptions import InvalidLinkError, NoJunctionError
 from classy_blocks.cbtyping import IndexType, NPPointListType, NPPointType
 from classy_blocks.construct.assemblies.assembly import Assembly
@@ -18,6 +10,14 @@ from classy_blocks.construct.flat.sketches.mapped import MappedSketch
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.shape import Shape
 from classy_blocks.construct.stack import Stack
+from classy_blocks.lookup.cell_registry import CellRegistry
+from classy_blocks.lookup.connection_registry import (
+    ConnectionRegistryBase,
+    HexConnectionRegistry,
+    QuadConnectionRegistry,
+)
+from classy_blocks.lookup.face_registry import FaceRegistryBase, HexFaceRegistry, QuadFaceRegistry
+from classy_blocks.lookup.point_registry import HexPointRegistry
 from classy_blocks.optimize.cell import CellBase, HexCell, QuadCell
 from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.junction import Junction

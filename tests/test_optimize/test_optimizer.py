@@ -128,6 +128,6 @@ class ComplexSketchTests(unittest.TestCase):
         optimizer = SketchOptimizer(self.sketch)
         initial_quality = optimizer.grid.quality
 
-        optimizer.auto_optimize(tolerance=1e-6)
+        optimizer.auto_optimize(tolerance=1e-6, method="Nelder-Mead")
 
         self.assertLess(optimizer.grid.quality, initial_quality)

@@ -93,7 +93,6 @@ class PointRegistryBase:
 
     def find_cell_neighbours(self, cell: int) -> List[int]:
         """Returns indexes of this and every touching cell"""
-        # TODO: remove
         cell_points = self.find_cell_points(cell)
 
         indexes = []

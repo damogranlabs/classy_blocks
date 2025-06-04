@@ -62,6 +62,8 @@ class Edge(ElementBase):
     @abc.abstractmethod
     def description(self) -> str:
         """string description of the edge to be put in blockMeshDict"""
+        # FIXME: separate 'description' logic from geometry-related stuff
+        # (a.k.a., throw this somewhere else)
         # subclasses continue from here
         return f"\t{self.representation} {self.vertex_1.index} {self.vertex_2.index} "
 
