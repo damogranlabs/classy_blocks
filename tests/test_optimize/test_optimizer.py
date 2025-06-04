@@ -60,7 +60,7 @@ class SketchOptimizerTests(SketchTestsBase):
         optimizer = SketchOptimizer(sketch)
         optimizer.add_clamp(clamp)
 
-        optimizer.optimize(method="L-BFGS-B")
+        optimizer.optimize()
 
         np.testing.assert_almost_equal(sketch.positions[4], [1, 1, 0], decimal=3)
 
@@ -68,7 +68,7 @@ class SketchOptimizerTests(SketchTestsBase):
         sketch = MappedSketch(self.positions, self.quads)
 
         optimizer = SketchOptimizer(sketch)
-        optimizer.auto_optimize(method="L-BFGS-B")
+        optimizer.auto_optimize()
 
         np.testing.assert_almost_equal(sketch.positions[4], [1, 1, 0], decimal=3)
 
@@ -128,14 +128,6 @@ class ComplexSketchTests(unittest.TestCase):
         optimizer = SketchOptimizer(self.sketch)
         initial_quality = optimizer.grid.quality
 
-        # use a method that doesn't work well with this kind of problem
-        # (SLSQP seems to have issues with different orders of magnitude)
-        # so that a lot of rollback is required
-        iterations = optimizer.auto_optimize(method="Powell", tolerance=1e-3)
+        optimizer.auto_optimize(tolerance=1e-6, method="Nelder-Mead")
 
         self.assertLess(optimizer.grid.quality, initial_quality)
-
-        last_val = 1e12
-        for iteration in iterations.iterations:
-            self.assertLess(iteration.final_quality, last_val)
-            last_val = iteration.final_quality

@@ -2,6 +2,7 @@ from typing import List, Set
 
 from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.items.block import Block
+from classy_blocks.lookup.point_registry import HexPointRegistry
 
 
 class BlockList:
@@ -13,27 +14,23 @@ class BlockList:
 
     def add(self, block: Block) -> None:
         """Add blocks"""
-        block.index = len(self.blocks)
-
         self.blocks.append(block)
-        self.update_neighbours(block)
 
-    def update_neighbours(self, new_block: Block) -> None:
+    def update_neighbours(self, navigator: HexPointRegistry) -> None:
         """Find and assign neighbours of a given block entry"""
         for block in self.blocks:
-            if block == new_block:
-                continue
+            neighbour_indexes = navigator.find_cell_neighbours(block.index)
 
-            block.add_neighbour(new_block)
-            new_block.add_neighbour(block)
+            for i in neighbour_indexes:
+                block.add_neighbour(self.blocks[i])
 
     def assemble(self) -> None:
-        self.update()
+        self.update_lengths()
         self.grade()
         self.check_definitions()
         self.check_consistency()
 
-    def update(self) -> None:
+    def update_lengths(self) -> None:
         """Update lengths on grading objects"""
         # Grading on each wire was specified with length 0;
         # after edges have been added to blocks, they now have a proper
@@ -87,19 +84,3 @@ class BlockList:
         also check that all coincident wires have the same length and grading"""
         for block in self.blocks:
             block.check_consistency()
-
-    def clear(self) -> None:
-        """Removes created blocks"""
-        self.blocks.clear()
-
-    @property
-    def description(self) -> str:
-        """Outputs a list of blocks to be inserted directly into blockMeshDict"""
-        out = "blocks\n(\n"
-
-        for block in self.blocks:
-            out += block.description
-
-        out += ");\n\n"
-
-        return out

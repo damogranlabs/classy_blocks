@@ -75,7 +75,7 @@ class AssemblyTests(unittest.TestCase):
 
         mesh.add(joint)
         mesh.assemble()
-        mesh.block_list.assemble()
+        mesh.dump.finalize()
 
     def test_set_patches(self):
         branches = 5

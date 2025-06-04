@@ -10,6 +10,7 @@ from classy_blocks.construct.point import Point
 from classy_blocks.items.edges.arcs.arc_base import ArcEdgeBase
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
+from classy_blocks.util.constants import vector_format
 
 
 def arc_from_origin(
@@ -73,7 +74,7 @@ def arc_from_origin(
         return arc_from_origin(p1, p3, new_center, False)
 
     # done, return the calculated point
-    return f.arc_mid(axis, center, edge_point_1, edge_point_2)
+    return f.arc_mid(center, edge_point_1, edge_point_2)
 
 
 @dataclasses.dataclass
@@ -82,6 +83,7 @@ class OriginEdge(ArcEdgeBase):
 
     data: edges.Origin
 
+    # TODO: make this accessible to the user
     adjust_center: ClassVar[bool] = True
 
     @property
@@ -106,7 +108,7 @@ class OriginEdge(ArcEdgeBase):
         # produce 2 lines:
         # one commented out with user-provided description
         # arc 0 1 origin 1.1 (0 0 0)
-        out = f"\t// arc {self.vertex_1.index} {self.vertex_2.index} origin"
-        out += f" {self.data.flatness} {self.data.origin.description}\n"
+        native = f" // arc {self.vertex_1.index} {self.vertex_2.index} origin"
+        native += f" {self.data.flatness} {vector_format(self.data.origin.position)}"
         # the other one with a default three-point arc description
-        return out + super().description
+        return super().description + native

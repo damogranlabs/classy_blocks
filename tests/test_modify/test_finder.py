@@ -23,7 +23,7 @@ class GeometricFinderTests(BlockTestCase):
         """Find one exact vertex"""
         found_vertices = self.finder.find_in_sphere([0, 0, 0])
 
-        self.assertSetEqual(found_vertices, {self.mesh.vertex_list.vertices[0]})
+        self.assertSetEqual(found_vertices, {self.mesh.vertices[0]})
 
     def test_by_position_close_count(self):
         """Find one exact vertex"""

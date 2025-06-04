@@ -1,3 +1,4 @@
+import warnings
 from typing import List, Union
 
 import numpy as np
@@ -69,9 +70,10 @@ class MappedSketch(Sketch):
             # Check planes are oriented the same
             if not abs(f.angle_between(sketch_1.normal, sketch_2.normal)) < constants.TOL:
                 print(f.angle_between(sketch_1.normal, sketch_2.normal) / np.pi, sketch_1.normal, sketch_2.normal)
-                raise Warning(
+                warnings.warn(
                     f"Sketch {sketch_2} with normal {sketch_2.normal} is not oriented as "
-                    f"sketch {sketch_1} with normal {sketch_1.normal}"
+                    f"sketch {sketch_1} with normal {sketch_1.normal}",
+                    stacklevel=1,
                 )
 
             # All unique points

@@ -14,14 +14,14 @@ from tests.fixtures.data import DataTestCase
 class EdgeListTests(DataTestCase):
     def setUp(self):
         self.blocks = DataTestCase.get_all_data()
-        self.vl = VertexList()
+        self.vl = VertexList([])
         self.el = EdgeList()
 
     def get_vertices(self, index: int) -> List[Vertex]:
         vertices = []
 
         for point in self.get_single_data(index).points:
-            vertices.append(self.vl.add(Point(point)))
+            vertices.append(self.vl.add_duplicated(Point(point), []))
 
         return vertices
 
@@ -79,11 +79,11 @@ class EdgeListTests(DataTestCase):
 
         self.assertEqual(len(self.el.edges), 2)
 
-        self.assertEqual(self.el.edges[0].vertex_1.index, 2)
-        self.assertEqual(self.el.edges[0].vertex_2.index, 3)
+        self.assertEqual(self.el.edges[(2, 3)].vertex_1.index, 2)
+        self.assertEqual(self.el.edges[(2, 3)].vertex_2.index, 3)
 
-        self.assertEqual(self.el.edges[1].vertex_1.index, 6)
-        self.assertEqual(self.el.edges[1].vertex_2.index, 7)
+        self.assertEqual(self.el.edges[(6, 7)].vertex_1.index, 6)
+        self.assertEqual(self.el.edges[(6, 7)].vertex_2.index, 7)
 
     def test_add_from_operations(self):
         """Add edges from an operation"""
@@ -92,7 +92,7 @@ class EdgeListTests(DataTestCase):
         revolve = Revolve(face, 1, [0, 0, 1], [-1, 0, 0])
 
         for point in revolve.point_array:
-            self.vl.add(Point(point))
+            self.vl.add_duplicated(Point(point), [])
 
         self.el.add_from_operation(self.vl.vertices, revolve)
 
@@ -103,7 +103,7 @@ class EdgeListTests(DataTestCase):
         no_arc = 0
         no_project = 0
 
-        for edge in self.el.edges:
+        for edge in self.el.edges.values():
             if edge.kind == "angle":
                 no_arc += 1
             elif edge.kind == "project":
@@ -111,18 +111,3 @@ class EdgeListTests(DataTestCase):
 
         self.assertEqual(no_arc, 4)
         self.assertEqual(no_project, 2)
-
-    def test_description(self):
-        """Output for blockMesh"""
-        vertices = self.get_vertices(0)
-        self.el.add(vertices[0], vertices[1], Arc([0.5, 0.5, 0]))
-        self.el.add(vertices[0], vertices[1], Arc([0.5, 0.5, 0]))
-
-        expected = "edges\n(\n"
-
-        for edge in self.el.edges:
-            expected += edge.description + "\n"
-
-        expected += ");\n\n"
-
-        self.assertEqual(self.el.description, expected)

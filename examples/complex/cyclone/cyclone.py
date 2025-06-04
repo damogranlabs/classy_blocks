@@ -152,5 +152,5 @@ mirror_region(inlet_extension)
 
 mesh.set_default_patch("walls", "wall")
 mesh.add_geometry(geometry.surfaces)
-mesh.settings["scale"] = params.MESH_SCALE
+mesh.settings.scale = params.MESH_SCALE
 mesh.write(os.path.join("..", "..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

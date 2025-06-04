@@ -1,11 +1,14 @@
 import dataclasses
 from typing import List, Optional, Set
 
+import numpy as np
+
 from classy_blocks.base.exceptions import ClampExistsError
 from classy_blocks.cbtyping import NPPointListType, NPPointType
-from classy_blocks.optimize.cell import CellBase
+from classy_blocks.optimize.cell import CellBase, HexCell
 from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.links import LinkBase
+from classy_blocks.optimize.quality import get_hex_quality, get_quad_quality
 
 
 @dataclasses.dataclass
@@ -25,7 +28,7 @@ class Junction:
 
         self.cells: Set[CellBase] = set()
 
-        self.neighbours: List[Junction] = []
+        self.neighbours: Set[Junction] = set()
 
         self.clamp: Optional[ClampBase] = None
         self.links: List[IndexedLink] = []
@@ -33,33 +36,6 @@ class Junction:
     @property
     def point(self) -> NPPointType:
         return self.points[self.index]
-
-    def add_cell(self, cell: CellBase) -> None:
-        """Adds the given cell to the list if it is
-        a part of this junction (one common vertex)"""
-        for index in cell.indexes:
-            if index == self.index:
-                self.cells.add(cell)
-                return
-
-    def add_neighbour(self, to: "Junction") -> bool:
-        """Returns True if this Junction is connected to passed one"""
-        if to == self:
-            return False
-
-        # if any of connections within a cell is equal to
-        # the connection between these two junctions,
-        # they are connected
-        junction_indexes = {self.index, to.index}
-
-        for cell in self.cells:
-            for connection in cell.connections:
-                if connection.indexes == junction_indexes:
-                    if to not in self.neighbours:
-                        self.neighbours.append(to)
-                        return True
-
-        return False
 
     def add_clamp(self, clamp: ClampBase) -> None:
         if self.clamp is not None:
@@ -81,7 +57,9 @@ class Junction:
 
     @property
     def quality(self) -> float:
-        """Returns average quality of all cells at this junction;
-        this serves as an indicator of which junction to optimize,
-        not a measurement of overall mesh quality"""
-        return sum([cell.quality for cell in self.cells]) / len(self.cells)
+        if isinstance(next(iter(self.cells)), HexCell):
+            quality_function = get_hex_quality
+        else:
+            quality_function = get_quad_quality
+
+        return sum(quality_function(self.points, np.array(cell.indexes, dtype=np.int32)) for cell in self.cells)

@@ -66,8 +66,15 @@ class WireManager:
             raise UndefinedGradingsError("Can't propagate: no defined wires")
 
         for wire in self.wires:
-            wire.grading = defined.grading.copy(wire.length, False)
-            wire.copy_to_coincidents()
+            # only copy to wires that have no defined coincident wires
+            # TODO: test, rethink, refactor, reimplement
+            for coincident in wire.coincidents:
+                if coincident.is_defined:
+                    coincident.copy_to_coincidents()
+                    break
+            else:
+                wire.grading = defined.grading.copy(wire.length, False)
+                wire.copy_to_coincidents()
 
     @property
     def count(self):

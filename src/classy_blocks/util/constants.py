@@ -1,9 +1,11 @@
 from typing import Dict, List, Tuple
 
+import numpy as np
+
 from classy_blocks.cbtyping import DirectionType, OrientType
 
 # data type
-DTYPE = "float"  # dtype as taken by np.array()
+DTYPE = np.float64
 
 # geometric tolerance for searching/merging points
 TOL = 1e-7

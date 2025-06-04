@@ -14,7 +14,8 @@ class GraderBase:
         self.mesh = mesh
         self.rules = rules
 
-        self.mesh.assemble()
+        self.dump = self.mesh.assemble()
+        self.dump.block_list.update_lengths()  # TODO: move to a better place
         self.probe = Probe(self.mesh)
 
     def _chop_wire(self, wire: Wire, chops: List[Chop]) -> None:
@@ -85,4 +86,4 @@ class GraderBase:
             for row in rows:
                 self.finalize(row)
 
-        self.mesh.block_list.check_consistency()
+        self.dump.block_list.check_consistency()

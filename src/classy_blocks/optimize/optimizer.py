@@ -54,7 +54,7 @@ class OptimizerBase(abc.ABC):
             reporter.junction_final = junction.quality
             reporter.grid_final = self.grid.quality
 
-            if reporter.improvement <= 0:
+            if np.isnan(reporter.improvement) or reporter.improvement <= 0:
                 reporter.rollback()
 
                 clamp.update_params(initial_params)
@@ -147,8 +147,8 @@ class MeshOptimizer(OptimizerBase):
 
 
 class ShapeOptimizer(OptimizerBase):
-    def __init__(self, operations: List[Operation], report: bool = True):
-        self.mapper = Mapper()
+    def __init__(self, operations: List[Operation], report: bool = True, merge_tol: float = TOL):
+        self.mapper = Mapper(merge_tol)
 
         for operation in operations:
             self.mapper.add(operation)
@@ -169,7 +169,8 @@ class ShapeOptimizer(OptimizerBase):
 class SketchOptimizer(OptimizerBase):
     def __init__(self, sketch: MappedSketch, report: bool = True):
         self.sketch = sketch
-        grid = QuadGrid.from_sketch(self.sketch)
+
+        grid = QuadGrid(sketch.positions, sketch.indexes)
 
         super().__init__(grid, report)
 

@@ -17,11 +17,6 @@ def report(text, end=None):
     print(text, end=end)
 
 
-def indent(text: str, levels: int) -> str:
-    """Indents 'text' by 'levels' tab characters"""
-    return "\t" * levels + text + "\n"
-
-
 @dataclasses.dataclass
 class EdgeLocation:
     """A helper class that maps top/bottom/side faces of an operation and corner indexes"""

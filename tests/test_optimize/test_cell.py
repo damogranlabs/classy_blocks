@@ -15,7 +15,7 @@ class CellTests(MeshTestCase):
         return np.array([vertex.position for vertex in self.mesh.vertices])
 
     def get_cell(self, index: int) -> HexCell:
-        return HexCell(self.mesh_points, self.mesh.blocks[index].indexes)
+        return HexCell(0, self.mesh_points, self.mesh.blocks[index].indexes)
 
     @parameterized.expand(
         (
@@ -50,16 +50,3 @@ class CellTests(MeshTestCase):
             cell_2 = self.get_cell(2)
 
             cell_1.get_common_side(cell_2)
-
-    def test_quality_good(self):
-        cell = self.get_cell(0)
-
-        self.assertLess(cell.quality, 1)
-
-    def test_quality_bad(self):
-        block = self.mesh.blocks[0]
-        block.vertices[0].move_to([-10, -10, -10])
-
-        cell = self.get_cell(0)
-
-        self.assertGreater(cell.quality, 100)

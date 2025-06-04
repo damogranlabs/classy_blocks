@@ -25,7 +25,7 @@ class FinderBase:
         if radius is None:
             radius = constants.TOL
 
-        # TODO: optimize with octree/kdtree (not sure if necessary)
+        # TODO: optimize with octree/kdtree
         position = np.array(position)
 
         for vertex in self.mesh.vertices:

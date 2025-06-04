@@ -1,4 +1,5 @@
 import dataclasses
+import functools
 from typing import List, Set
 
 from classy_blocks.base.exceptions import InconsistentGradingsError
@@ -8,6 +9,11 @@ from classy_blocks.grading.grading import Grading
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
 from classy_blocks.items.vertex import Vertex
+
+
+@functools.lru_cache(maxsize=None)
+def get_length(wire: "Wire") -> float:
+    return wire.edge.length
 
 
 @dataclasses.dataclass
@@ -47,9 +53,11 @@ class Wire:
         # wires that follow this (start with this wire's end vertex)
         self.after: Set[WireJoint] = set()
 
+        self.key = hash(tuple(sorted([v.index for v in self.vertices])))
+
     @property
     def length(self) -> float:
-        return self.edge.length
+        return get_length(self)
 
     def update(self) -> None:
         """Re-sets grading's edge length after the edge has changed"""
@@ -63,7 +71,7 @@ class Wire:
     def is_coincident(self, candidate: "Wire") -> bool:
         """Returns True if this wire is in the same spot than the argument,
         regardless of alignment"""
-        return self.vertices in [candidate.vertices, candidate.vertices[::-1]]
+        return self.key == candidate.key
 
     def is_aligned(self, candidate: "Wire") -> bool:
         """Returns true is this pair has the same alignment
@@ -121,3 +129,6 @@ class Wire:
 
     def __repr__(self):
         return f"Wire {self.corners[0]}-{self.corners[1]} ({self.vertices[0].index}-{self.vertices[1].index})"
+
+    def __hash__(self):
+        return self.key

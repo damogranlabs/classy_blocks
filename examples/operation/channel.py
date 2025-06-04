@@ -44,5 +44,5 @@ right_block.set_patch("top", "outlet")
 mesh.add(right_block)
 
 mesh.set_default_patch("walls", "wall")
-mesh.settings["scale"] = SCALE
+mesh.settings.scale = SCALE
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"))

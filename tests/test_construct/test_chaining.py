@@ -42,8 +42,8 @@ class ElbowChainingTests(unittest.TestCase):
 
         self.mesh.assemble()
 
-        self.assertEqual(len(self.mesh.block_list.blocks), 24)
-        self.assertEqual(len(self.mesh.vertex_list.vertices), 3 * 17)
+        self.assertEqual(len(self.mesh.blocks), 24)
+        self.assertEqual(len(self.mesh.vertices), 3 * 17)
 
         np.testing.assert_allclose(chained_shape.sketch_2.center, end_center)
 
@@ -130,8 +130,8 @@ class RingChainingTests(unittest.TestCase):
 
         self.mesh.assemble()
 
-        self.assertEqual(len(self.mesh.block_list.blocks), 2 * self.ring.sketch_1.n_segments)
-        self.assertEqual(len(self.mesh.vertex_list.vertices), 3 * 2 * self.ring.sketch_1.n_segments)
+        self.assertEqual(len(self.mesh.blocks), 2 * self.ring.sketch_1.n_segments)
+        self.assertEqual(len(self.mesh.vertices), 3 * 2 * self.ring.sketch_1.n_segments)
 
         np.testing.assert_allclose(chained_shape.sketch_2.center, end_center, atol=TOL)
 
@@ -161,8 +161,8 @@ class ExpandContractTests(unittest.TestCase):
         self.mesh.add(shape_2)
         self.mesh.assemble()
 
-        self.assertEqual(len(self.mesh.block_list.blocks), n_blocks)
-        self.assertEqual(len(self.mesh.vertex_list.vertices), n_vertices)
+        self.assertEqual(len(self.mesh.blocks), n_blocks)
+        self.assertEqual(len(self.mesh.vertices), n_vertices)
 
     def test_expand_cylinder(self):
         """Expand a ring from a cylinder"""

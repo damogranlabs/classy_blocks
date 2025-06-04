@@ -6,8 +6,7 @@ from typing import List, Literal, Optional, Union
 import numpy as np
 import scipy
 import scipy.linalg
-import scipy.optimize
-import scipy.spatial
+from numba import jit  # type: ignore
 
 from classy_blocks.cbtyping import NPPointListType, NPPointType, NPVectorType, PointListType, PointType, VectorType
 from classy_blocks.util import constants
@@ -16,7 +15,7 @@ from classy_blocks.util import constants
 def vector(x: float, y: float, z: float) -> NPVectorType:
     """A shortcut for creating 3D-space vectors;
     in case you need a lot of manual np.array([...])"""
-    return np.array([x, y, z])
+    return np.array([x, y, z], dtype=constants.DTYPE)
 
 
 def deg2rad(deg: float) -> float:
@@ -158,6 +157,7 @@ def lin_map(x: float, x_min: float, x_max: float, out_min: float, out_max: float
         return r
 
 
+@jit(nopython=True, cache=True)
 def arc_length_3point(p_start: NPPointType, p_btw: NPPointType, p_end: NPPointType) -> float:
     """Returns length of arc defined by 3 points"""
     ### Meticulously transcribed from
@@ -173,7 +173,7 @@ def arc_length_3point(p_start: NPPointType, p_btw: NPPointType, p_end: NPPointTy
 
     denom = asqr * bsqr - adotb * adotb
     # https://develop.openfoam.com/Development/openfoam/-/blob/master/src/OpenFOAM/primitives/Scalar/floatScalar/floatScalar.H
-    if norm(denom) < 1e-18:
+    if denom < 1e-18:
         raise ValueError("Invalid arc points!")
 
     fact = 0.5 * (bsqr - adotb) / denom
@@ -185,8 +185,8 @@ def arc_length_3point(p_start: NPPointType, p_btw: NPPointType, p_end: NPPointTy
     rad_btw = p_btw - centre
     rad_end = p_end - centre
 
-    mag1 = norm(rad_start)
-    mag3 = norm(rad_end)
+    mag1 = np.linalg.norm(rad_start)
+    mag3 = np.linalg.norm(rad_end)
 
     # The radius from r1 and from r3 will be identical
     radius = rad_end
@@ -198,30 +198,47 @@ def arc_length_3point(p_start: NPPointType, p_btw: NPPointType, p_end: NPPointTy
     if np.dot(np.cross(rad_start, rad_btw), np.cross(rad_start, rad_end)) < 0:
         angle = 2 * np.pi - angle
 
-    return angle * norm(radius)
+    return angle * np.linalg.norm(radius)
 
 
-def divide_arc(
-    axis: VectorType, center: PointType, point_1: PointType, point_2: PointType, count: int
-) -> NPPointListType:
-    # Kudos to this guy for his shrewd solution
-    # https://math.stackexchange.com/questions/3717427
-    # (extended here to create more than 1 point)
-    axis = np.asarray(axis, dtype=constants.DTYPE)
-    center = np.asarray(center, dtype=constants.DTYPE)
-    point_1 = np.asarray(point_1, dtype=constants.DTYPE)
-    point_2 = np.asarray(point_2, dtype=constants.DTYPE)
-    radius = norm(center - point_1)
+# def arc_length_3point(p_start: NPPointType, p_btw: NPPointType, p_end: NPPointType) -> float:
+#     p_start = np.asarray(p_start, dtype=np.float64)
+#     p_btw = np.asarray(p_btw, dtype=np.float64)
+#     p_end = np.asarray(p_end, dtype=np.float64)
 
-    secant_points = np.linspace(point_1, point_2, num=count + 2)[1:-1]
-    secant_vectors = [unit_vector(point - center) for point in secant_points]
-
-    return np.array([center + vector * radius for vector in secant_vectors])
+#     return _arc_length_3point(p_start, p_btw, p_end)
 
 
-def arc_mid(axis: VectorType, center: PointType, point_1: PointType, point_2: PointType) -> PointType:
+@jit(nopython=True, cache=True)
+def divide_arc(center: NPPointType, point_1: NPPointType, point_2: NPPointType, count: int) -> NPPointListType:
+    radius = np.linalg.norm(center - point_1)
+    step = (point_2 - point_1) / (count + 1)
+    result = np.empty((count, 3))
+
+    for i in range(count):
+        secant_point = point_1 + step * (i + 1)
+        secant_vector = secant_point - center
+        secant_length = np.linalg.norm(secant_vector)
+
+        result[i] = center + radius * secant_vector / secant_length
+
+    return result
+
+
+# def divide_arc(center: PointType, point_1: PointType, point_2: PointType, count: int) -> NPPointListType:
+#     # Kudos to this guy for his shrewd solution
+#     # https://math.stackexchange.com/questions/3717427
+#     # (extended here to create more than 1 point)
+#     center = np.asarray(center, dtype=np.float64)
+#     point_1 = np.asarray(point_1, dtype=np.float64)
+#     point_2 = np.asarray(point_2, dtype=np.float64)
+
+#     return _divide_arc(center, point_1, point_2, count)
+
+
+def arc_mid(center: PointType, point_1: PointType, point_2: PointType) -> PointType:
     """Returns the midpoint of the specified arc in 3D space"""
-    return divide_arc(axis, center, point_1, point_2, 1)[0]
+    return divide_arc(center, point_1, point_2, 1)[0]
 
 
 def mirror_matrix(normal: VectorType):

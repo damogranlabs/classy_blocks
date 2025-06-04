@@ -32,11 +32,6 @@ class ProjectedFaceTests(BlockTestCase):
 
         self.assertNotEqual(pface_1, pface_2)
 
-    def test_description(self):
-        pface = ProjectedFace(self.side_1, "terrain")
-
-        self.assertEqual(pface.description, "\tproject (5 1 2 6) terrain\n")
-
 
 class FaceListTests(BlockTestCase):
     def setUp(self):
@@ -79,9 +74,3 @@ class FaceListTests(BlockTestCase):
         self.flist.add(self.vertices, self.loft)
 
         self.assertEqual(self.flist.faces[0].label, "terrain")
-
-    def test_description(self):
-        self.loft.project_side("bottom", "terrain")
-        self.flist.add(self.vertices, self.loft)
-
-        self.assertEqual(self.flist.description, "faces\n(\n\tproject (0 1 2 3) terrain\n);\n\n")

@@ -67,7 +67,7 @@ class Series(ElementBase):
         normal = np.asarray(normal, dtype=DTYPE)
         origin = np.asarray(origin, dtype=DTYPE)
 
-        # TODO: do this within a single array
+        # TODO: do this within a single array (numba?)
         for i, point in enumerate(self.points):
             if f.point_to_plane_distance(origin, normal, point) > TOL:
                 distance = f.point_to_plane_distance(origin, normal, point)

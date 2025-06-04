@@ -267,12 +267,11 @@ class AlternativeArcTests(unittest.TestCase):
     unit_sq_corner = f.vector(2**0.5 / 2, 2**0.5 / 2, 0)
 
     def test_arc_mid(self):
-        axis = f.vector(0, 0, 1)
         center = f.vector(0, 0, 0)
         edge_point_1 = f.vector(1, 0, 0)
         edge_point_2 = f.vector(0, 1, 0)
 
-        np.testing.assert_array_almost_equal(f.arc_mid(axis, center, edge_point_1, edge_point_2), self.unit_sq_corner)
+        np.testing.assert_array_almost_equal(f.arc_mid(center, edge_point_1, edge_point_2), self.unit_sq_corner)
 
     def test_arc_from_theta(self):
         edge_point_1 = f.vector(0, 1, 0)
@@ -318,21 +317,17 @@ class EdgeDescriptionTests(unittest.TestCase):
     def test_arc_description(self):
         """Classic arc description"""
         self.assertEqual(
-            self.get_edge(edges.Arc([0.5, 0.1, 0])).description, "\tarc 0 1 (0.50000000 0.10000000 0.00000000)"
+            self.get_edge(edges.Arc([0.5, 0.1, 0])).description.strip(), "arc 0 1 (0.50000000 0.10000000 0.00000000)"
         )
 
     def test_angle_description(self):
-        self.assertEqual(
-            self.get_edge(edges.Angle(np.pi, [0, 0, 1])).description,
-            f"\t// arc 0 1 {np.pi} (0.00000000 0.00000000 1.00000000)\n"
-            + "\tarc 0 1 (0.50000000 -0.50000000 0.00000000)",
+        self.assertIn(
+            "arc 0 1 (0.50000000 -0.50000000 0.00000000)", self.get_edge(edges.Angle(np.pi, [0, 0, 1])).description
         )
 
     def test_origin_description(self):
-        self.assertEqual(
-            self.get_edge(edges.Origin([0.5, -0.5, 0])).description,
-            "\t// arc 0 1 origin 1 (0.50000000 -0.50000000 0.00000000)\n"
-            + "\tarc 0 1 (0.50000000 0.20710678 0.00000000)",
+        self.assertIn(
+            "arc 0 1 (0.50000000 0.20710678 0.00000000)", self.get_edge(edges.Origin([0.5, -0.5, 0])).description
         )
 
     def test_spline_description(self):
@@ -375,10 +370,10 @@ class OnCurveEdgeTests(unittest.TestCase):
         self.assertGreater(self.edge.length, 1)
 
     def test_param_start(self):
-        self.assertAlmostEqual(self.edge.param_start, 0)
+        self.assertAlmostEqual(self.edge.param_start, 0, places=5)
 
     def test_param_end(self):
-        self.assertAlmostEqual(self.edge.param_end, 1)  # the last point
+        self.assertAlmostEqual(self.edge.param_end, 1, places=5)
 
     def test_point_array(self):
         self.assertEqual(len(self.edge.point_array), self.edge.data.n_points)

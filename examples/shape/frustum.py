@@ -1,4 +1,5 @@
 import os
+
 import numpy as np
 
 import classy_blocks as cb
@@ -24,16 +25,14 @@ frustum = cb.Frustum(axis_point_1, axis_point_2, radius_point_1, radius_2, radiu
 cylinder = cb.Cylinder.chain(frustum, 6, start_face=True)
 
 pos = cylinder.sketch_1.positions
-pos[:9] += np.array([-0.3,0,0])
+pos[:9] += np.array([-0.3, 0, 0])
 cylinder.sketch_1.update(pos)
 cylinder.sketch_1.add_edges()
 
 pos = frustum.sketch_1.positions
-pos[:9] += np.array([-0.3,0,0])
+pos[:9] += np.array([-0.3, 0, 0])
 frustum.sketch_1.update(pos)
 frustum.sketch_1.add_edges()
-
-
 
 
 cylinder.set_end_patch("inlet")
@@ -48,5 +47,5 @@ frustum.chop_tangential(start_size=core_size)
 
 mesh.add(cylinder)
 mesh.add(frustum)
+mesh.modify_patch("walls", "wall")
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")
-

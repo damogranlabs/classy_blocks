@@ -77,12 +77,9 @@ class Point(ElementBase):
         if not isinstance(label, list):
             label = [label]
 
-        self.projected_to += label
-
-    @property
-    def description(self) -> str:
-        """Returns a string representation to be written to blockMeshDict"""
-        return vector_format(self.position)
+        for lbl in label:
+            if lbl not in self.projected_to:
+                self.projected_to.append(lbl)
 
     @property
     def parts(self):
@@ -96,7 +93,7 @@ class Point(ElementBase):
         return f.norm(self.position - other.position) < TOL
 
     def __repr__(self):
-        return f"Point {self.description}"
+        return f"Point {vector_format(self.position)}"
 
     def __str__(self):
         return repr(self)
@@ -112,4 +109,4 @@ class Vector(Point):
         return self.position
 
     def __repr__(self):
-        return f"Vector {self.description}"
+        return f"Vector {vector_format(self.position)}"

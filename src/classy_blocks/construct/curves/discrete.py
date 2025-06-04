@@ -46,10 +46,15 @@ class DiscreteCurve(PointCurveBase):
 
     def get_closest_param(self, point: PointType) -> float:
         """Returns the index of point on this curve where distance to supplied
-        point is the smallest.
+        point is the smallest."""
+        point = np.array(point)
+        all_points = self.discretize()
 
-        For DiscreteCurve, argument param_start is ignored since all points are checked."""
-        return super().get_closest_param(point)
+        distances = np.linalg.norm(all_points.T - point[:, None], axis=0)
+        params = np.linspace(self.bounds[0], self.bounds[1], num=len(distances))
+
+        i_distance = np.argmin(distances)
+        return params[i_distance]
 
     @property
     def center(self):

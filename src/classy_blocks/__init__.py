@@ -44,7 +44,7 @@ from .optimize.clamps.curve import CurveClamp, LineClamp, RadialClamp
 from .optimize.clamps.free import FreeClamp
 from .optimize.clamps.surface import ParametricSurfaceClamp, PlaneClamp
 from .optimize.links import LinkBase, RotationLink, SymmetryLink, TranslationLink
-from .optimize.optimizer import MeshOptimizer, SketchOptimizer
+from .optimize.optimizer import MeshOptimizer, ShapeOptimizer, SketchOptimizer
 from .optimize.smoother import MeshSmoother, SketchSmoother
 
 __all__ = [
@@ -113,6 +113,7 @@ __all__ = [
     "Scaling",
     "SemiCylinder",
     "Shape",
+    "ShapeOptimizer",
     "Shear",
     "Shell",
     "SimpleGrader",

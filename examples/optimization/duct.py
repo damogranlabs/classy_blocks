@@ -7,8 +7,8 @@ from classy_blocks.optimize.optimizer import ShapeOptimizer
 
 mesh = cb.Mesh()
 
-start_sketch = cb.SplineDisk([0, 0, 0], [2.5, 0, 0], [0, 1, 0], 0, 0)
-end_sketch = cb.SplineDisk([0, 0, 0], [1, 0, 0], [0, 2.5, 0], 0, 0).translate([0, 0, 1])
+start_sketch = cb.SplineDisk([0, 0, 0], [2, 0, 0], [0, 1, 0], 0, 0)
+end_sketch = cb.SplineDisk([0, 0, 0], [1, 0, 0], [0, 2, 0], 0, 0).translate([0, 0, 1])
 
 shape = cb.LoftedShape(start_sketch, end_sketch)
 

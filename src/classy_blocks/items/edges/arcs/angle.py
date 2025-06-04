@@ -7,6 +7,7 @@ from classy_blocks.construct import edges
 from classy_blocks.construct.point import Point
 from classy_blocks.items.edges.arcs.arc_base import ArcEdgeBase
 from classy_blocks.util import functions as f
+from classy_blocks.util.constants import vector_format
 
 
 def arc_from_theta(edge_point_1: PointType, edge_point_2: PointType, angle: float, axis: VectorType) -> PointType:
@@ -37,7 +38,7 @@ def arc_from_theta(edge_point_1: PointType, edge_point_2: PointType, angle: floa
 
     center = pm - length * axis / 2 - rm * mag_chord / 2 / np.tan(angle / 2)
 
-    return f.arc_mid(axis, center, edge_point_1, edge_point_2)
+    return f.arc_mid(center, edge_point_1, edge_point_2)
 
 
 @dataclasses.dataclass
@@ -57,8 +58,9 @@ class AngleEdge(ArcEdgeBase):
         # produce two lines
         # one with this edge's specification
         # arc <vertex-1> <vertex-2> <angle> (axis) alternative edge specification:
-        out = f"\t// arc {self.vertex_1.index} {self.vertex_2.index} "
-        out += f"{self.data.angle} {self.data.axis.description}\n"
+        # TODO! Test output with the new Writer
+        native = f"// arc {self.vertex_1.index} {self.vertex_2.index} "
+        native += f"{self.data.angle} {vector_format(self.data.axis.position)}"
 
         # the other is a classic three-point arc definition
-        return out + super().description
+        return super().description + native
