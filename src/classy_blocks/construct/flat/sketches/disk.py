@@ -215,12 +215,11 @@ class OneCoreDisk(DiskBase):
 
         super().__init__([*pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], quad_map)
 
-    @property
-    def center(self):
-        return self.faces[0].center
+        # correct origo_point as it is not the same as with FourCoreDisk-based sketches
+        self.origo_point = Point(center_point)
 
     @property
-    def origo(self):
+    def center(self):
         return self.faces[0].center
 
     @property
@@ -371,6 +370,7 @@ class WrappedDisk(DiskBase):
         ]
 
         super().__init__([*square_points, *arc_points, *outer_points], quad_map)
+        self.origo_point = Point(center_point)
 
     @property
     def grid(self):
