@@ -14,7 +14,7 @@ class TranslationLinkTests(unittest.TestCase):
         link.leader = np.array([3, 3, 3])
         link.update()
 
-        np.testing.assert_equal(link.follower, [4, 4, 4])
+        np.testing.assert_almost_equal(link.follower, [4, 4, 4])
 
 
 class RotationLinkTests(unittest.TestCase):
@@ -36,14 +36,14 @@ class RotationLinkTests(unittest.TestCase):
 
         link = RotationLink(leader, follower, [0, 0, 1], origin)
 
-        np.testing.assert_equal(link._get_radius(link.leader), [1, 0, 0])
+        np.testing.assert_almost_equal(link._get_radius(link.leader), [1, 0, 0])
 
     def test_rotate(self):
         link = RotationLink(self.leader, self.follower, [0, 0, 1], [0, 0, 0])
         link.leader = np.array([0, 1, 0])
         link.update()
 
-        np.testing.assert_equal(link.follower, [-1, 0, 0])
+        np.testing.assert_almost_equal(link.follower, [-1, 0, 0])
 
     def test_rotate_negative(self):
         """Rotate in negative direction"""
@@ -52,7 +52,7 @@ class RotationLinkTests(unittest.TestCase):
         link.leader = np.array([0, -1, 0])
         link.update()
 
-        np.testing.assert_equal(link.follower, [1, 0, 0])
+        np.testing.assert_almost_equal(link.follower, [1, 0, 0])
 
     @parameterized.expand(
         (
@@ -108,4 +108,4 @@ class SymmetryLinkTests(unittest.TestCase):
         link.leader = np.array([0, 0, 2])
         link.update()
 
-        np.testing.assert_equal(link.follower, [0, 0, -2])
+        np.testing.assert_almost_equal(link.follower, [0, 0, -2])

@@ -61,27 +61,40 @@ def angle_between(vect_1: VectorType, vect_2: VectorType) -> float:
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
 
-def rotation_matrix(axis: VectorType, theta: float):
-    """
-    Return the rotation matrix associated with counterclockwise rotation about
-    the given axis by theta radians.
-    # Kudos to
-    # https://stackoverflow.com/questions/6802577/rotation-of-3d-vector
-    #import math
-    #
-    # axis = np.asarray(axis)
-    # axis = axis / math.sqrt(np.dot(axis, axis))
-    # a = math.cos(theta / 2.0)
-    # b, c, d = -axis * math.sin(theta / 2.0)
-    # aa, bb, cc, dd = a * a, b * b, c * c, d * d
-    # bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
-    # return np.array([[aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac)],
-    #                  [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
-    #                  [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]])
+@jit(nopython=True, cache=True)
+def _rotation_matrix(axis: NPVectorType, angle: float):
+    axis = axis / np.sqrt(np.dot(axis, axis))
+    a = np.cos(angle / 2.0)
+    b, c, d = -axis * np.sin(angle / 2.0)
+    aa, bb, cc, dd = a * a, b * b, c * c, d * d
+    bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
 
-    # Also Kudos to the guy with another answer for the same question (used here):"""
-    axis = np.asarray(axis)
-    return scipy.linalg.expm(np.cross(np.eye(3), axis / norm(axis) * theta))
+    return np.array(
+        [
+            [aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac)],
+            [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
+            [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc],
+        ]
+    )
+
+
+def rotation_matrix(axis: VectorType, angle: float):
+    """Returns the rotation matrix associated with counterclockwise rotation about
+    the given axis by theta radians."""
+    # Kudos to https://stackoverflow.com/questions/6802577/rotation-of-3d-vector
+    axis = np.asarray(axis, dtype=constants.DTYPE)
+
+    return _rotation_matrix(axis, angle)
+
+
+@jit(nopython=True, cache=True)
+def _rotate(point: NPPointType, angle: float, axis: NPVectorType, origin: NPPointType) -> NPPointType:
+    # Rotation matrix associated with counterclockwise rotation about
+    # the given axis by theta radians. Kudos to
+    # https://stackoverflow.com/questions/6802577/rotation-of-3d-vector
+
+    rotated_point = np.dot(_rotation_matrix(axis, angle), point - origin)
+    return rotated_point + origin
 
 
 def rotate(point: PointType, angle: float, axis: VectorType, origin: PointType) -> NPPointType:
@@ -90,8 +103,7 @@ def rotate(point: PointType, angle: float, axis: VectorType, origin: PointType) 
     axis = np.asarray(axis, dtype=constants.DTYPE)
     origin = np.asarray(origin, dtype=constants.DTYPE)
 
-    rotated_point = np.dot(rotation_matrix(axis, angle), point - origin)
-    return rotated_point + origin
+    return _rotate(point, angle, axis, origin)
 
 
 def scale(point: PointType, ratio: float, origin: Optional[PointType]) -> NPPointType:
@@ -201,14 +213,6 @@ def arc_length_3point(p_start: NPPointType, p_btw: NPPointType, p_end: NPPointTy
     return angle * np.linalg.norm(radius)
 
 
-# def arc_length_3point(p_start: NPPointType, p_btw: NPPointType, p_end: NPPointType) -> float:
-#     p_start = np.asarray(p_start, dtype=np.float64)
-#     p_btw = np.asarray(p_btw, dtype=np.float64)
-#     p_end = np.asarray(p_end, dtype=np.float64)
-
-#     return _arc_length_3point(p_start, p_btw, p_end)
-
-
 @jit(nopython=True, cache=True)
 def divide_arc(center: NPPointType, point_1: NPPointType, point_2: NPPointType, count: int) -> NPPointListType:
     radius = np.linalg.norm(center - point_1)
@@ -223,17 +227,6 @@ def divide_arc(center: NPPointType, point_1: NPPointType, point_2: NPPointType, 
         result[i] = center + radius * secant_vector / secant_length
 
     return result
-
-
-# def divide_arc(center: PointType, point_1: PointType, point_2: PointType, count: int) -> NPPointListType:
-#     # Kudos to this guy for his shrewd solution
-#     # https://math.stackexchange.com/questions/3717427
-#     # (extended here to create more than 1 point)
-#     center = np.asarray(center, dtype=np.float64)
-#     point_1 = np.asarray(point_1, dtype=np.float64)
-#     point_2 = np.asarray(point_2, dtype=np.float64)
-
-#     return _divide_arc(center, point_1, point_2, count)
 
 
 def arc_mid(center: PointType, point_1: PointType, point_2: PointType) -> PointType:

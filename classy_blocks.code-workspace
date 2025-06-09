@@ -13,16 +13,14 @@
             "scipy"
         ],
         "editor.autoClosingBrackets": "never",
-        "isort.importStrategy": "fromEnvironment",
-        "editor.defaultFormatter": null,
+        "editor.defaultFormatter": "charliermarsh.ruff",
         "ruff.organizeImports": true
     },
     "extensions": {
         "recommendations": [
             "ms-python.vscode-pylance",
             "ms-python.python",
-            "charliermarsh.ruff",
-            "ms-python.black-formatter"
+            "charliermarsh.ruff"
         ]
     },
 }

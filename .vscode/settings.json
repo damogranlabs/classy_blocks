@@ -7,8 +7,6 @@
             "source.organizeImports.ruff": "always"
         },
     },
-    "python.analysis.typeCheckingMode": "basic",
-    "python.analysis.diagnosticMode": "openFilesOnly",
     "python.testing.pytestEnabled": false,
     "files.exclude": {
         "**/.git": true,

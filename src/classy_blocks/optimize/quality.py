@@ -17,12 +17,12 @@ def scale_quality(base: float, exponent: float, factor: float, value: float) -> 
 
 @numba.jit(nopython=True, cache=True)
 def scale_non_ortho(angle: float) -> float:
-    return scale_quality(1.25, 0.35, 0.8, angle)
+    return scale_quality(1.5, 0.25, 0.5, angle)
 
 
 @numba.jit(nopython=True, cache=True)
 def scale_inner_angle(angle: float) -> float:
-    return scale_quality(1.5, 0.25, 0.15, np.abs(angle))
+    return scale_quality(1.5, 0.25, 0.5, np.abs(angle))
 
 
 @numba.jit(nopython=True, cache=True)
@@ -146,12 +146,12 @@ def get_hex_quality(grid_points: NPPointListType, cell_indexes: NPIndexType) -> 
     quality = 0
 
     for side in side_indexes:
-        # Non-ortho angle is measured between two lines;
-        # neighbour_center-to-this_center and face_center-to-this_center,
-        # but for cells on the boundary simply face center is taken.
-        # For this kind of optimization it is quite sufficient to take
-        # only the latter as it's not much different and we'll optimize
-        # other cells too.
+        # Non-ortho angle in a hexahedron is measured between two vectors:
+        # <neighbour_center-this_center> and <face_normal>
+        # but since cells on the boundary don't have a neighbour
+        # simply <face_center> is taken.
+        # For this kind of optimization it is quite sufficient to
+        # take <face_center> for all cells.
         side_points = take(cell_points, side)
         side_center, side_normal, side_aspect = get_quad_normal(side_points)
         center_vector = cell_center - side_center

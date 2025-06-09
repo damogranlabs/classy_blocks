@@ -28,14 +28,14 @@ class EdgeTransformTests(unittest.TestCase):
         arc_edge = ArcEdge(self.vertex_1, self.vertex_2, edges.Arc([0.5, 0, 0]))
 
         arc_edge.translate([1, 1, 1])
-        np.testing.assert_array_equal(arc_edge.data.point.position, [1.5, 1, 1])
+        np.testing.assert_almost_equal(arc_edge.data.point.position, [1.5, 1, 1])
 
     def test_angle_edge_rotate_1(self):
         angle_edge = AngleEdge(self.vertex_1, self.vertex_2, edges.Angle(np.pi / 2, [0, 0, 1]))
 
         angle_edge.rotate(np.pi / 2, [0, 0, 1], [0, 0, 0])
 
-        np.testing.assert_array_equal(angle_edge.data.axis.components, [0, 0, 1])
+        np.testing.assert_almost_equal(angle_edge.data.axis.components, [0, 0, 1])
 
         self.assertEqual(angle_edge.data.angle, np.pi / 2)
 
@@ -44,7 +44,7 @@ class EdgeTransformTests(unittest.TestCase):
 
         angle_edge.rotate(np.pi / 2, [1, 0, 0], [0, 0, 0])
 
-        np.testing.assert_array_equal(angle_edge.data.axis.components, [0, -1, 0])
+        np.testing.assert_almost_equal(angle_edge.data.axis.components, [0, -1, 0])
 
         self.assertEqual(angle_edge.data.angle, np.pi / 2)
 
@@ -63,7 +63,7 @@ class EdgeTransformTests(unittest.TestCase):
 
         spline_edge.translate([1, 1, 1])
 
-        np.testing.assert_array_equal(
+        np.testing.assert_almost_equal(
             spline_edge.point_array,
             [
                 [1.25, 1.1, 1],
@@ -119,21 +119,21 @@ class EdgeFactoryTests(unittest.TestCase):
 
         self.assertIsInstance(edge, AngleEdge)
         self.assertEqual(angle, edge.data.angle)
-        np.testing.assert_array_equal(axis, edge.data.axis.components)
+        np.testing.assert_almost_equal(axis, edge.data.axis.components)
 
     def test_spline(self):
         points = [[0.3, 0.25, 0], [0.6, 0.1, 0], [0.3, 0.25, 0]]
         edg = factory.create(self.vertex_1, self.vertex_2, edges.Spline(points))
 
         self.assertIsInstance(edg, SplineEdge)
-        np.testing.assert_array_equal(points, edg.point_array)
+        np.testing.assert_almost_equal(points, edg.point_array)
 
     def test_polyline(self):
         points = [[0.3, 0.25, 0], [0.6, 0.1, 0], [0.3, 0.25, 0]]
         edg = factory.create(self.vertex_1, self.vertex_2, edges.PolyLine(points))
 
         self.assertIsInstance(edg, SplineEdge)
-        np.testing.assert_array_equal(points, edg.point_array)
+        np.testing.assert_almost_equal(points, edg.point_array)
 
     def test_project_edge_single(self):
         label = "terrain"

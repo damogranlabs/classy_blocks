@@ -8,7 +8,7 @@ from classy_blocks.util import functions as f
 
 class TestFunctions(unittest.TestCase):
     def assert_np_equal(self, a, b, msg=None):
-        return np.testing.assert_array_equal(a, b, err_msg=msg)
+        return np.testing.assert_almost_equal(a, b, err_msg=msg)
 
     def assert_np_almost_equal(self, a, b, msg=None):
         return np.testing.assert_array_almost_equal(a, b, err_msg=msg)

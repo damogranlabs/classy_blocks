@@ -49,7 +49,7 @@ class OptimizerBase(abc.ABC):
             return self.grid.update(junction.index, clamp.position)
 
         try:
-            scipy.optimize.minimize(fquality, clamp.params, bounds=clamp.bounds, method=method)
+            scipy.optimize.minimize(fquality, clamp.params, bounds=clamp.bounds, method=method, tol=1e-2)
 
             reporter.junction_final = junction.quality
             reporter.grid_final = self.grid.quality

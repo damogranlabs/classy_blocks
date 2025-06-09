@@ -45,7 +45,7 @@ class ElbowChainingTests(unittest.TestCase):
         self.assertEqual(len(self.mesh.blocks), 24)
         self.assertEqual(len(self.mesh.vertices), 3 * 17)
 
-        np.testing.assert_allclose(chained_shape.sketch_2.center, end_center)
+        np.testing.assert_allclose(chained_shape.sketch_2.center, end_center, atol=1e-7)
 
     def test_to_elbow_end(self):
         """Chain an elbow to an elbow on an end sketch"""
