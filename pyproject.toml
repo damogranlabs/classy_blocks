@@ -3,7 +3,7 @@ name = "classy_blocks"
 version = "1.8.0"
 description = "Python classes for easier creation of openFoam's blockMesh dictionaries."
 readme = "README.md"
-license = "MIT"
+license = {file = "LICENSE"}
 keywords = ["classy_blocks", "OpenFOAM", "blockMesh"]
 authors = [{ name = "Nejc Jurkovic", email = "kandelabr@gmail.com" }]
 requires-python = ">=3.8"
