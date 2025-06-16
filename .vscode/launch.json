@@ -6,7 +6,7 @@
     "configurations": [
         {
             "name": "Python: classy example",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "cwd": "${fileDirname}",

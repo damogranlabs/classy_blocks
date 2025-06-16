@@ -27,6 +27,7 @@ class Axis:
             for nei_wire in other.wires:
                 if this_wire.is_coincident(nei_wire):
                     self.neighbours.add(other)
+                    break
 
     def add_inline(self, other: "Axis") -> None:
         """Adds an axis that comes before/after this one"""
@@ -35,6 +36,7 @@ class Axis:
             for this_wire in self.wires:
                 for nei_wire in other.wires:
                     this_wire.add_inline(nei_wire)
+                    break
 
     def is_aligned(self, other: "Axis") -> bool:
         """Returns True if wires of the other axis are aligned

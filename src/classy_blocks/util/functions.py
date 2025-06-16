@@ -229,7 +229,8 @@ def divide_arc(center: NPPointType, point_1: NPPointType, point_2: NPPointType, 
     return result
 
 
-def arc_mid(center: PointType, point_1: PointType, point_2: PointType) -> PointType:
+@jit(nopython=True, cache=True)
+def arc_mid(center: NPPointType, point_1: NPPointType, point_2: NPPointType) -> PointType:
     """Returns the midpoint of the specified arc in 3D space"""
     return divide_arc(center, point_1, point_2, 1)[0]
 

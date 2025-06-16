@@ -1,7 +1,5 @@
 from typing import Tuple, get_args
 
-import numpy as np
-
 from classy_blocks.assemble.depot import Depot
 from classy_blocks.assemble.dump import AssembledDump
 from classy_blocks.assemble.settings import Settings
@@ -15,25 +13,26 @@ from classy_blocks.lists.face_list import FaceList
 from classy_blocks.lists.patch_list import PatchList
 from classy_blocks.lists.vertex_list import VertexList
 from classy_blocks.lookup.point_registry import HexPointRegistry
-from classy_blocks.optimize.grid import HexGrid
 from classy_blocks.util import constants
 
 
 class MeshAssembler:
-    def __init__(self, depot: Depot, settings: Settings):
+    def __init__(self, depot: Depot, settings: Settings, merge_tol=constants.TOL):
         self.depot = depot
         self.settings = settings
+        self.merge_tol = merge_tol
 
         # once the mesh is assembled, adding new stuff to depot will break things;
         # better (and faster) is to cache status quo
         self._operations = self.depot.operations
-        self._grid = HexGrid.from_elements(self._operations)
+
+        self._points = HexPointRegistry.from_operations(self._operations, self.merge_tol)
 
     def _create_blocks(self, vertex_list: VertexList) -> BlockList:
         block_list = BlockList()
 
         for iop, operation in enumerate(self._operations):
-            op_indexes = self._grid.addressing[iop]
+            op_indexes = self._points.cell_addressing[iop]
             op_vertices = [vertex_list.vertices[i] for i in op_indexes]
 
             # duplicate vertices on slave patches
@@ -111,14 +110,11 @@ class MeshAssembler:
         return patch_list, face_list
 
     def _update_neighbours(self, block_list: BlockList) -> None:
-        points = np.array([[v.position for v in b.vertices] for b in block_list.blocks])
-
-        navigator = HexPointRegistry(HexPointRegistry.flatten(points, 8 * len(block_list.blocks)), constants.TOL)
-        block_list.update_neighbours(navigator)
+        block_list.update_neighbours(self._points)
 
     def assemble(self) -> AssembledDump:
         # Create reused/indexes vertices from operations' points
-        vertex_list = VertexList([Vertex(pos, i) for i, pos in enumerate(self._grid.points)])
+        vertex_list = VertexList([Vertex(pos, i) for i, pos in enumerate(self._points.unique_points)])
         # Create blocks from vertices; when there's a slave patch specified in an operation,
         # duplicate vertices for that patch
         block_list = self._create_blocks(vertex_list)

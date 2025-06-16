@@ -6,13 +6,6 @@
     ],
     "settings": {
         "python.languageServer": "Pylance",
-        "cSpell.words": [
-            "astype",
-            "linspace",
-            "Pylance",
-            "scipy"
-        ],
-        "editor.autoClosingBrackets": "never",
         "editor.defaultFormatter": "charliermarsh.ruff",
         "ruff.organizeImports": true
     },
