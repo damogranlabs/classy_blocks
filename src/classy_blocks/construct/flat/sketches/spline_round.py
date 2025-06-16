@@ -191,8 +191,14 @@ class SplineRound(DiskBase):
             p_1 = face.point_array[((i + 1) % 2) + 1]  # Outer point on diagonal
 
             spline_curve_0_1 = self.outer_spline(
-                p_0, p_1, radi[int((i + 1) / 2) % 2], sides[int((i + 1) / 2) % 2],
-                radi[int((i + 3) / 2) % 2], sides[int((i + 3) / 2) % 2], center, reverse=i % 2 == 1
+                p_0,
+                p_1,
+                radi[int((i + 1) / 2) % 2],
+                sides[int((i + 1) / 2) % 2],
+                radi[int((i + 3) / 2) % 2],
+                sides[int((i + 3) / 2) % 2],
+                center,
+                reverse=i % 2 == 1,
             )
             face.add_edge(1, Spline(spline_curve_0_1))
 
