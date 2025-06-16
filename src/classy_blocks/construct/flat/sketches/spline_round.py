@@ -184,14 +184,15 @@ class SplineRound(DiskBase):
 
     def add_outer_spline_edges(self, center: Optional[NPPointType] = None) -> None:
         """Add curved edge as spline to outside of sketch"""
-        sides = [self.side_1, self.side_2, self.side_2, self.side_1]
-        radi = [self.radius_1, self.radius_2, self.radius_2, self.radius_1]
+        sides = [self.side_1, self.side_2]
+        radi = [self.radius_1, self.radius_2]
         for i, face in enumerate(self.shell):
             p_0 = face.point_array[(i % 2) + 1]  # Outer point on radius
             p_1 = face.point_array[((i + 1) % 2) + 1]  # Outer point on diagonal
 
             spline_curve_0_1 = self.outer_spline(
-                p_0, p_1, radi[i % 4], sides[i % 4], radi[(i + 1) % 4], sides[(i + 1) % 4], center, reverse=i % 2 == 1
+                p_0, p_1, radi[int((i + 1) / 2) % 2], sides[int((i + 1) / 2) % 2],
+                radi[int((i + 3) / 2) % 2], sides[int((i + 3) / 2) % 2], center, reverse=i % 2 == 1
             )
             face.add_edge(1, Spline(spline_curve_0_1))
 
