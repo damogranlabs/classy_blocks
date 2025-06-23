@@ -12,6 +12,7 @@ from classy_blocks.construct.stack import Stack
 from classy_blocks.items.block import Block
 from classy_blocks.items.patch import Patch
 from classy_blocks.items.vertex import Vertex
+from classy_blocks.util.constants import TOL
 from classy_blocks.write.vtk import write_vtk
 from classy_blocks.write.writer import MeshWriter
 
@@ -65,7 +66,7 @@ class Mesh:
         the data remains but it will not contribute to the mesh"""
         self.depot.delete_solid(operation)
 
-    def assemble(self) -> AssembledDump:
+    def assemble(self, merge_tol: float = TOL) -> AssembledDump:
         """Converts classy_blocks entities (operations and shapes) to
         actual vertices, edges, blocks and other stuff to be inserted into
         blockMeshDict. After this has been done, the above objects
@@ -74,7 +75,7 @@ class Mesh:
             assert isinstance(self.dump, AssembledDump)
             return self.dump
 
-        assembler = MeshAssembler(self.depot, self.settings)
+        assembler = MeshAssembler(self.depot, self.settings, merge_tol)
         self.dump = assembler.assemble()
         return self.dump
 
@@ -107,12 +108,12 @@ class Mesh:
         self.clear()
         self.assemble()
 
-    def write(self, output_path: str, debug_path: Optional[str] = None) -> None:
+    def write(self, output_path: str, debug_path: Optional[str] = None, merge_tol: float = TOL) -> None:
         """Writes a blockMeshDict to specified location. If debug_path is specified,
         a VTK file is created first where each block is a single cell, to see simplified
         blocking in case blockMesh fails with an unfriendly error message."""
         if not self.is_assembled:
-            self.assemble()
+            self.assemble(merge_tol)
 
         if debug_path is not None:
             write_vtk(debug_path, self.vertices, self.blocks)

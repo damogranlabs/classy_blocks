@@ -188,3 +188,19 @@ class MeshTests(BlockTestCase):
         self.mesh.assemble()
 
         self.assertFalse(self.mesh.blocks[0].visible)
+
+    def test_assemble_noncoincident(self):
+        """Assemble a mesh with non-coincident vertices"""
+        box = Box([0, 0, 0], [1, 1, 1])
+        box.set_patch("left", "left_patch")
+        box.set_patch("front", "front_patch")
+        self.mesh.add(box)
+
+        box2 = Box([1.001, 1.001, 1.001], [2, 2, 2])
+        box2.set_patch("right", "right_patch")
+        box2.set_patch("back", "back_patch")
+        self.mesh.add(box2)
+
+        self.mesh.assemble(merge_tol=0.002)
+
+        self.assertEqual(len(self.mesh.vertices), 15)
