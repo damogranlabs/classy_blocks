@@ -6,7 +6,7 @@ readme = "README.md"
 license = "MIT"
 keywords = ["classy_blocks", "OpenFOAM", "blockMesh"]
 authors = [{ name = "Nejc Jurkovic", email = "kandelabr@gmail.com" }]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = ["numpy", "scipy", "nptyping", "numba", "parameterized"]
 
 [project.urls]
@@ -19,7 +19,7 @@ dependencies = ["numpy", "scipy", "nptyping", "numba", "parameterized"]
 dev = ["pytest", "parameterized", "ruff~=0.9", "mypy~=1.2", "pre-commit"]
 
 [build-system]
-requires = ["setuptools >= 61.0"]
+requires = ["setuptools >= 80.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.ruff]
