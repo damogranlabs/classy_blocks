@@ -1,6 +1,4 @@
-# classy_blocks
-
-![Flywheel](showcase/flywheel.png "Flywheel")
+![classy_blocks logo](docs/classy_logo.png "classy_blocks logo")
 
 Python classes for easier creation of OpenFOAM's blockMesh dictionaries.
 

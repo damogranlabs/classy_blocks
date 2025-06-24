@@ -88,7 +88,6 @@ class OptimizerBase(abc.ABC):
         return np.linalg.norm(sensitivities)
 
     def optimize_iteration(self, method: MinimizationMethodType) -> None:
-        print(method)
         clamps = sorted(self.grid.clamps, key=lambda c: self._get_sensitivity(c), reverse=True)
 
         for clamp in clamps:
