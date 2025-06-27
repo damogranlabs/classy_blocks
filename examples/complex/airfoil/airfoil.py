@@ -5,6 +5,8 @@ import numpy as np
 import classy_blocks as cb
 from classy_blocks.util import functions as f
 
+# TODO! Rewrite this to use a MappedSketch and get rid of 3D optimization of a 2D domain
+
 # This rather lengthy tutorial does the following:
 # - reads 2D airfoil points*
 # - rotates the airfoil to a desired angle of attack

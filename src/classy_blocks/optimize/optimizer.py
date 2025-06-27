@@ -34,7 +34,7 @@ class OptimizerBase(abc.ABC):
     def add_link(self, link: LinkBase) -> None:
         self.grid.add_link(link)
 
-    def optimize_clamp(self, clamp: ClampBase, method: MinimizationMethodType) -> None:
+    def optimize_clamp(self, clamp: ClampBase, method: MinimizationMethodType, relax: bool, iteration_no: int) -> None:
         """Move clamp.vertex so that quality at junction is improved;
         rollback changes if grid quality decreased after optimization"""
         initial_params = copy.copy(clamp.params)
@@ -46,10 +46,22 @@ class OptimizerBase(abc.ABC):
         def fquality(params):
             # move all vertices according to X
             clamp.update_params(params)
-            return self.grid.update(junction.index, clamp.position)
+            quality = self.grid.update(junction.index, clamp.position)
+            return quality
 
         try:
             scipy.optimize.minimize(fquality, clamp.params, bounds=clamp.bounds, method=method, tol=1e-2)
+
+            if relax:
+                relaxation_factor = 1 - 2 ** -(iteration_no + 1)
+                if relaxation_factor > 0.9:
+                    relaxation_factor = 1
+
+                for i, param in enumerate(clamp.params):
+                    clamp.params[i] = initial_params[i] + relaxation_factor * (param - initial_params[i])
+
+                # update the position after relaxation
+                fquality(clamp.params)
 
             reporter.junction_final = junction.quality
             reporter.grid_final = self.grid.quality
@@ -78,36 +90,45 @@ class OptimizerBase(abc.ABC):
             self.grid.update(junction.index, clamp.position)
             return junction.quality
 
-        sensitivities = np.asarray(
-            scipy.optimize.approx_fprime(clamp.params, lambda p: fquality(clamp, junction, p), epsilon=10 * TOL)
-        )
+        try:
+            sensitivities = np.asarray(
+                scipy.optimize.approx_fprime(clamp.params, lambda p: fquality(clamp, junction, p), epsilon=10 * TOL)
+            )
+        except ValueError:
+            clamp.update_params(initial_params)
+            self.grid.update(junction.index, clamp.position)
+            return np.ones(len(clamp.params))
 
         clamp.update_params(initial_params)
         self.grid.update(junction.index, clamp.position)
 
         return np.linalg.norm(sensitivities)
 
-    def optimize_iteration(self, method: MinimizationMethodType) -> None:
+    def optimize_iteration(self, method: MinimizationMethodType, relax: bool, iteration_no: int) -> None:
         clamps = sorted(self.grid.clamps, key=lambda c: self._get_sensitivity(c), reverse=True)
 
         for clamp in clamps:
-            self.optimize_clamp(clamp, method)
+            self.optimize_clamp(clamp, method, relax, iteration_no)
 
     def optimize(
-        self, max_iterations: int = 20, tolerance: float = 0.1, method: MinimizationMethodType = "SLSQP"
+        self,
+        max_iterations: int = 20,
+        tolerance: float = 0.1,
+        method: MinimizationMethodType = "SLSQP",
+        relax: bool = False,
     ) -> IterationDriver:
         """Move vertices, defined and restrained with Clamps
         so that better mesh quality is obtained.
 
         Within each iteration, all vertices will be moved, starting with the one with the most influence on quality.
-        Lower tolerance values"""
+        Lower tolerance values."""
         driver = IterationDriver(max_iterations, tolerance)
 
         start_time = time.time()
 
         while not driver.converged:
             driver.begin_iteration(self.grid.quality)
-            self.optimize_iteration(method)
+            self.optimize_iteration(method, relax, len(driver.iterations))
             driver.end_iteration(self.grid.quality)
 
         end_time = time.time()

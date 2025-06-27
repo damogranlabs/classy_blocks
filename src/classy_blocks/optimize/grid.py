@@ -127,7 +127,7 @@ class GridBase:
         """Returns summed qualities of all junctions"""
         # It is only called when optimizing linked clamps
         # or at the end of an iteration.
-        return sum(junction.quality for junction in self.junctions)
+        return sum(junction.quality**2 for junction in self.junctions) ** 0.5
 
     def update(self, index: int, position: NPPointType) -> float:
         self.points[index] = position

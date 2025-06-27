@@ -62,4 +62,7 @@ class Junction:
         else:
             quality_function = get_quad_quality
 
-        return sum(quality_function(self.points, np.array(cell.indexes, dtype=np.int32)) for cell in self.cells)
+        return (
+            sum(quality_function(self.points, np.array(cell.indexes, dtype=np.int32)) ** 2 for cell in self.cells)
+            ** 0.5
+        )

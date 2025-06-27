@@ -17,17 +17,17 @@ def scale_quality(base: float, exponent: float, factor: float, value: float) -> 
 
 @numba.jit(nopython=True, cache=True)
 def scale_non_ortho(angle: float) -> float:
-    return scale_quality(1.5, 0.25, 0.5, angle)
+    return scale_quality(1.4, 0.25, 0.5, angle)
 
 
 @numba.jit(nopython=True, cache=True)
 def scale_inner_angle(angle: float) -> float:
-    return scale_quality(1.5, 0.25, 0.5, np.abs(angle))
+    return scale_quality(1.4, 0.25, 0.5, np.abs(angle))
 
 
 @numba.jit(nopython=True, cache=True)
 def scale_aspect(ratio: float) -> float:
-    return scale_quality(3, 2.5, 3, np.log10(ratio))
+    return scale_quality(4, 3, 3, np.log10(ratio))
 
 
 @numba.jit(nopython=True, cache=True)
@@ -74,6 +74,41 @@ def get_quad_normal(points: NPPointListType) -> Tuple[NPVectorType, NPVectorType
 
 
 @numba.jit(nopython=True, cache=True)
+def is_quad_convex(points: NPPointListType) -> bool:
+    # Compute normal using the first three points
+    normal = np.cross(points[1] - points[0], points[2] - points[1])
+    normal /= np.linalg.norm(normal)
+
+    sign = 0
+    for i in range(4):
+        prev_leg = points[i] - points[(i - 1) % 4]
+        next_leg = points[(i + 1) % 4] - points[i]
+        cross = np.cross(prev_leg, next_leg)
+        dot = np.dot(cross, normal)
+        if i == 0:
+            sign = np.sign(dot)
+            if sign == 0:
+                return False  # Degenerate
+        else:
+            if np.sign(dot) != sign:
+                return False
+    return True
+
+
+@numba.jit(nopython=True, cache=True)
+def scale_angle(angle: float) -> float:
+    n = 4
+    m = 10
+    threshold = 65
+    a = m / (n * threshold ** (n - 1))
+
+    if angle <= threshold:
+        return a * angle**n
+
+    return a * threshold**n + m * (angle - threshold)
+
+
+@numba.jit(nopython=True, cache=True)
 def get_quad_non_ortho_quality(
     quad_points: NPPointListType, quad_center: NPPointType, quad_normal: NPPointType
 ) -> float:
@@ -92,7 +127,9 @@ def get_quad_non_ortho_quality(
         center_vector /= np.linalg.norm(center_vector)
 
         angle = 180 * np.arccos(np.dot(side_normal, center_vector)) / np.pi
-        quality += scale_non_ortho(angle)
+        if not is_quad_convex(quad_points):
+            angle += 180
+        quality += scale_angle(angle)
 
     return quality
 
@@ -113,7 +150,10 @@ def get_quad_angle_quality(quad_points: NPPointListType) -> float:
         side_2 /= np.linalg.norm(side_2) + VSMALL
 
         angle = 180 * np.arccos(np.dot(side_1, side_2)) / np.pi - 90
-        quality += scale_inner_angle(angle)
+        if not is_quad_convex(quad_points):
+            angle += 180
+
+        quality += scale_angle(angle)
 
     return quality
 
@@ -129,6 +169,7 @@ def get_quad_quality(grid_points: NPPointListType, cell_indexes: NPIndexType) ->
     # inner angles
     quality += get_quad_angle_quality(cell_points)
 
+    # aspect ratio
     quality += scale_aspect(cell_aspect)
 
     return quality
@@ -140,8 +181,6 @@ def get_hex_quality(grid_points: NPPointListType, cell_indexes: NPIndexType) -> 
     cell_center = get_center_point(cell_points)
 
     side_indexes = np.array([[0, 1, 2, 3], [7, 6, 5, 4], [4, 0, 3, 7], [6, 2, 1, 5], [0, 4, 5, 1], [7, 3, 2, 6]])
-
-    max_aspect = 1
 
     quality = 0
 
@@ -158,14 +197,14 @@ def get_hex_quality(grid_points: NPPointListType, cell_indexes: NPIndexType) -> 
 
         center_vector /= np.linalg.norm(center_vector)
 
-        angle = 180 * np.arccos(np.dot(side_normal, center_vector)) / np.pi
-        quality += scale_non_ortho(angle)
+        angle = 180 * np.arccos(min(1 - VSMALL, np.dot(side_normal, center_vector))) / np.pi
+        if not is_quad_convex(side_points):
+            angle = 180 - angle
+        quality += scale_angle(angle)
 
-        max_aspect = max(max_aspect, side_aspect)
-
-        # take inner angles and aspect from quad calculation
+        # take inner angles and aspect from quad calculation;
         quality += get_quad_angle_quality(side_points)
 
-    quality += scale_aspect(max_aspect)
+        quality += scale_aspect(side_aspect)
 
     return quality
