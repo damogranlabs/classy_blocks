@@ -10,27 +10,17 @@ from classy_blocks.util.constants import VSMALL
 NPIndexType = NDArray[Shape["*, 1"], Int32]
 
 
-@numba.jit(nopython=True, cache=True)
+@numba.jit(nopython=True)
 def scale_quality(base: float, exponent: float, factor: float, value: float) -> float:
     return factor * base ** (exponent * value) - factor
 
 
-@numba.jit(nopython=True, cache=True)
-def scale_non_ortho(angle: float) -> float:
-    return scale_quality(1.4, 0.25, 0.5, angle)
-
-
-@numba.jit(nopython=True, cache=True)
-def scale_inner_angle(angle: float) -> float:
-    return scale_quality(1.4, 0.25, 0.5, np.abs(angle))
-
-
-@numba.jit(nopython=True, cache=True)
+@numba.jit(nopython=True)
 def scale_aspect(ratio: float) -> float:
     return scale_quality(4, 3, 3, np.log10(ratio))
 
 
-@numba.jit(nopython=True, cache=True)
+@numba.jit(nopython=True)
 def take(points: NPPointListType, indexes: NPIndexType):
     n_points = len(indexes)
     dim = points.shape[1]
@@ -43,12 +33,12 @@ def take(points: NPPointListType, indexes: NPIndexType):
     return result
 
 
-@numba.jit(nopython=True, cache=True)
+@numba.jit(nopython=True)
 def get_center_point(points: NPPointListType) -> NPPointType:
     return np.sum(points, axis=0) / len(points)
 
 
-@numba.jit(nopython=True, cache=True)
+@numba.jit(nopython=True)
 def get_quad_normal(points: NPPointListType) -> Tuple[NPVectorType, NPVectorType, float]:
     normal = np.zeros(3)
     center = get_center_point(points)
@@ -73,29 +63,7 @@ def get_quad_normal(points: NPPointListType) -> Tuple[NPVectorType, NPVectorType
     return center, normal / np.linalg.norm(normal), max_length / (min_length + VSMALL)
 
 
-@numba.jit(nopython=True, cache=True)
-def is_quad_convex(points: NPPointListType) -> bool:
-    # Compute normal using the first three points
-    normal = np.cross(points[1] - points[0], points[2] - points[1])
-    normal /= np.linalg.norm(normal)
-
-    sign = 0
-    for i in range(4):
-        prev_leg = points[i] - points[(i - 1) % 4]
-        next_leg = points[(i + 1) % 4] - points[i]
-        cross = np.cross(prev_leg, next_leg)
-        dot = np.dot(cross, normal)
-        if i == 0:
-            sign = np.sign(dot)
-            if sign == 0:
-                return False  # Degenerate
-        else:
-            if np.sign(dot) != sign:
-                return False
-    return True
-
-
-@numba.jit(nopython=True, cache=True)
+@numba.jit(nopython=True)
 def scale_angle(angle: float) -> float:
     n = 4
     m = 10
@@ -108,74 +76,59 @@ def scale_angle(angle: float) -> float:
     return a * threshold**n + m * (angle - threshold)
 
 
-@numba.jit(nopython=True, cache=True)
-def get_quad_non_ortho_quality(
-    quad_points: NPPointListType, quad_center: NPPointType, quad_normal: NPPointType
-) -> float:
-    quality = 0
+@numba.jit(nopython=True)
+def get_quad_non_ortho(points: NPPointListType, center: NPPointType, normal: NPVectorType, corner: int) -> float:
+    this_point = points[corner]
+    next_point = points[(corner + 1) % 4]
 
-    for i in range(4):
-        point_1 = quad_points[i]
-        point_2 = quad_points[(i + 1) % 4]
+    # non-ortho angle: angle between side_normal and center-side_center
+    side_center = (this_point + next_point) / 2
+    side_vector = next_point - this_point
+    side_normal = np.cross(normal, side_vector)
+    side_normal /= np.linalg.norm(side_normal) + VSMALL
 
-        side_center = (point_1 + point_2) / 2
-        side_vector = point_2 - point_1
-        side_normal = np.cross(quad_normal, side_vector)
-        side_normal /= np.linalg.norm(side_normal)
+    center_vector = center - side_center
+    center_vector /= np.linalg.norm(center_vector) + VSMALL
 
-        center_vector = quad_center - side_center
-        center_vector /= np.linalg.norm(center_vector)
-
-        angle = 180 * np.arccos(np.dot(side_normal, center_vector)) / np.pi
-        if not is_quad_convex(quad_points):
-            angle += 180
-        quality += scale_angle(angle)
-
-    return quality
+    # non-orthogonality angle covers values from 0 to +/-180 degrees
+    # and values above +/-70-ish are unacceptable regardless of the orientation;
+    # therefore it makes no sense checking for inverted/degenerate quads
+    return 180 * np.arccos(np.dot(side_normal, center_vector)) / np.pi
 
 
-@numba.jit(nopython=True, cache=True)
-def get_quad_angle_quality(quad_points: NPPointListType) -> float:
-    quality = 0
+@numba.jit(nopython=True)
+def get_quad_inner_angle(points: NPPointListType, normal: NPVectorType, corner: int) -> float:
+    next_side = points[(corner + 1) % 4] - points[corner]
+    next_side /= np.linalg.norm(next_side) + VSMALL
+    prev_side = points[(corner - 1) % 4] - points[corner]
+    prev_side /= np.linalg.norm(prev_side) + VSMALL
 
-    for i in range(4):
-        corner_point = quad_points[i]
-        next_point = quad_points[(i + 1) % 4]
-        prev_point = quad_points[(i - 1) % 4]
+    inner_angle = 180 * np.arccos(np.dot(next_side, prev_side)) / np.pi
+    # ranges from 0 to 360 degrees but arccos only covert 0...180;
+    # use normal to check for the rest
+    if np.dot(np.cross(next_side, prev_side), normal) < 0:
+        inner_angle += 180
 
-        side_1 = next_point - corner_point
-        side_1 /= np.linalg.norm(side_1) + VSMALL
-
-        side_2 = prev_point - corner_point
-        side_2 /= np.linalg.norm(side_2) + VSMALL
-
-        angle = 180 * np.arccos(np.dot(side_1, side_2)) / np.pi - 90
-        if not is_quad_convex(quad_points):
-            angle += 180
-
-        quality += scale_angle(angle)
-
-    return quality
+    return inner_angle
 
 
-@numba.jit(nopython=True, cache=True)
+@numba.jit(nopython=True)
 def get_quad_quality(grid_points: NPPointListType, cell_indexes: NPIndexType) -> float:
-    cell_points = take(grid_points, cell_indexes)
-    cell_center, cell_normal, cell_aspect = get_quad_normal(cell_points)
+    quality = 0
+    quad_points = take(grid_points, cell_indexes)
+    center, normal, aspect = get_quad_normal(quad_points)
 
-    # non-ortho
-    quality = get_quad_non_ortho_quality(cell_points, cell_center, cell_normal)
+    for i in range(4):
+        non_ortho_angle = get_quad_non_ortho(quad_points, center, normal, i)
+        quality += scale_angle(non_ortho_angle)
 
-    # inner angles
-    quality += get_quad_angle_quality(cell_points)
-
-    # aspect ratio
-    quality += scale_aspect(cell_aspect)
+        inner_angle = get_quad_inner_angle(quad_points, normal, i) - 90
+        quality += scale_angle(inner_angle)
 
     return quality
 
 
-@numba.jit(nopython=True, cache=True)
+@numba.jit(nopython=True)
 def get_hex_quality(grid_points: NPPointListType, cell_indexes: NPIndexType) -> float:
     cell_points = take(grid_points, cell_indexes)
     cell_center = get_center_point(cell_points)
@@ -193,17 +146,17 @@ def get_hex_quality(grid_points: NPPointListType, cell_indexes: NPIndexType) -> 
         # take <face_center> for all cells.
         side_points = take(cell_points, side)
         side_center, side_normal, side_aspect = get_quad_normal(side_points)
+
         center_vector = cell_center - side_center
+        center_vector /= np.linalg.norm(center_vector) + VSMALL
 
-        center_vector /= np.linalg.norm(center_vector)
-
-        angle = 180 * np.arccos(min(1 - VSMALL, np.dot(side_normal, center_vector))) / np.pi
-        if not is_quad_convex(side_points):
-            angle = 180 - angle
-        quality += scale_angle(angle)
+        non_ortho_angle = 180 * np.arccos(min(1 - VSMALL, np.dot(side_normal, center_vector))) / np.pi
+        quality += scale_angle(non_ortho_angle)
 
         # take inner angles and aspect from quad calculation;
-        quality += get_quad_angle_quality(side_points)
+        for i in range(4):
+            inner_angle = get_quad_inner_angle(side_points, side_normal, i) - 90
+            quality += scale_angle(inner_angle)
 
         quality += scale_aspect(side_aspect)
 

@@ -1,4 +1,4 @@
-![classy_blocks logo](docs/classy_logo.png "classy_blocks logo")
+![classy_blocks logo](docs/classy_logo.svg "classy_blocks logo")
 
 Python classes for easier creation of OpenFOAM's blockMesh dictionaries.
 

@@ -157,3 +157,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# IDEs on hold
+.idea
+.vscode

@@ -5,13 +5,14 @@
         }
     ],
     "settings": {
-        "python.languageServer": "Pylance",
+        "python.languageServer": "Jedi",
         "editor.defaultFormatter": "charliermarsh.ruff",
-        "ruff.organizeImports": true
+        "ruff.organizeImports": true,
+        "ruff.nativeServer": true,
+        "python.testing.unittestEnabled": true,
     },
     "extensions": {
         "recommendations": [
-            "ms-python.vscode-pylance",
             "ms-python.python",
             "charliermarsh.ruff"
         ]

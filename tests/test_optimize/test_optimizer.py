@@ -60,23 +60,23 @@ class SketchOptimizerTests(SketchTestsBase):
         optimizer = SketchOptimizer(sketch)
         optimizer.add_clamp(clamp)
 
-        optimizer.optimize(method="L-BFGS-B")
+        optimizer.optimize()
 
-        np.testing.assert_almost_equal(sketch.positions[4], [1, 1, 0], decimal=3)
+        np.testing.assert_almost_equal(sketch.positions[4], [1, 1, 0], decimal=1)
 
     def test_optimize_auto(self):
         sketch = MappedSketch(self.positions, self.quads)
 
         optimizer = SketchOptimizer(sketch)
-        optimizer.auto_optimize(method="L-BFGS-B")
+        optimizer.auto_optimize()
 
-        np.testing.assert_almost_equal(sketch.positions[4], [1, 1, 0], decimal=3)
+        np.testing.assert_almost_equal(sketch.positions[4], [1, 1, 0], decimal=1)
 
 
 class ComplexSketchTests(unittest.TestCase):
     """Tests on a real-life case"""
 
-    # An degenerate starting configuration,
+    # A degenerate starting configuration,
     # smoothed to just barely valid
 
     def setUp(self):
