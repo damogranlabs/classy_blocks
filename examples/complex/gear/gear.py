@@ -180,7 +180,7 @@ for operation in stack.shapes[-1].operations:
 mesh.add(stack)
 
 for i, angle in enumerate(np.linspace(0, 2 * np.pi, num=gear.teeth, endpoint=False)[1:]):
-    print(f"Adding tooth {i+2}")
+    print(f"Adding tooth {i + 2}")
     mesh.add(stack.copy().rotate(angle, [0, 0, 1], [0, 0, 0]))
 
 print("Writing mesh...")

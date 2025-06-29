@@ -5,7 +5,10 @@ import classy_blocks as cb
 mesh = cb.Mesh()
 
 pipe_wall = cb.ExtrudedRing(
-    [0, 0, 0], [2, 2, 0], [-0.707, 0.707, 0], 0.8  # axis_point_1  # axis_point_2  # outer_radius  # inner_radius
+    [0, 0, 0],
+    [2, 2, 0],
+    [-0.707, 0.707, 0],
+    0.8,  # axis_point_1  # axis_point_2  # outer_radius  # inner_radius
 )
 
 core_size = 0.1

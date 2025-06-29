@@ -1,11 +1,9 @@
-import os
+from typing import ClassVar
 
 import numpy as np
 
 import classy_blocks as cb
 from classy_blocks.util import functions as f
-
-# TODO! Rewrite this to use a MappedSketch and get rid of 3D optimization of a 2D domain
 
 # This rather lengthy tutorial does the following:
 # - reads 2D airfoil points*
@@ -19,7 +17,7 @@ from classy_blocks.util import functions as f
 # airfoil meshes but serves as a demonstration of:
 # - creation and manipulation of curves
 # - usage of OnCurve edges
-# - optimization of 2D geometry with translation links on points in 3rd dimension
+# - Sketch optimization (2D geometry)
 
 # * A word on trailing edges
 # NACA equations produce a blunt trailing edge if no correction is applied
@@ -29,16 +27,11 @@ from classy_blocks.util import functions as f
 # Also, real-life geometry will not work with infinitely
 # sharp trailing edges (or people around them won't).
 
-# ** This is a default for 2D OpenFOAM cases.
-# It will make postprocessing easier but in cases where
-# chords are on a much different scale (say, 0.1 or 10),
-# optimization will probably have difficulties.
-# That is because it tries to keep aspect ratios of blocks
-# as near to 1 as possible but for 2D cases it doesn't matter.
+# ** This is a default for 2D OpenFOAM cases
 
 
 FILE_NAME = "naca2414.dat"
-ANGLE_OF_ATTACK = 20  # in degrees
+ANGLE_OF_ATTACK = 10  # in degrees
 CHORD = 0.5  # desired chord (provided the one from points is 1)
 OPTIMIZE = True  # Set to False to skip optimization
 
@@ -46,13 +39,10 @@ CELL_SIZE = 0.025
 BL_THICKNESS = 0.001  # thickness of boundary layer cells
 C2C_EXPANSION = 1.1  # expansion ratio in boundary layer
 
-thickness = f.vector(0, 0, 1)  # a shortcut
+mesh = cb.Mesh()
 
 
-### Load curves
-# one for bottom faces, one for top faces;
-# Optimization will refer to the bottom curve, top points
-# simply follow their 'leader' points.
+### Load airfoil curve
 def get_curve(z: float) -> cb.SplineInterpolatedCurve:
     """Loads 2D points from a Selig file and
     converts it to 3D by adding a provided z-coordinate."""
@@ -84,125 +74,110 @@ points[6] = [1.5 * CHORD, -CHORD / 2, 0]
 points[7] = [CHORD, -CHORD / 2, 0]
 points[8] = [0, -CHORD / 2, 0]
 
-for i, point in enumerate(foil_curve.discretize(count=7)):
-    # points 9...15
-    points[i + 9] = point
+# points 9...15 with point 12 being set first
+param_12 = foil_curve.get_closest_param(points[0])
+curve_params = np.concatenate(
+    (np.linspace(0, param_12, num=3, endpoint=False), [param_12], np.linspace(param_12, 1, num=4)[1:])
+)
 
-points[12] = foil_curve.get_point(foil_curve.get_closest_param(points[0]))
-
-points[16] = np.average(np.take(points, (9, 4, 3, 2), axis=0), axis=0)
-points[17] = np.average(np.take(points, (15, 5, 6, 7), axis=0), axis=0)
-
-
-### Create lofts:
-def get_loft(indexes):
-    bottom_face = cb.Face(np.take(points, indexes, axis=0))
-    top_face = bottom_face.copy().translate(thickness)
-
-    loft = cb.Loft(bottom_face, top_face)
-    loft.set_patch(["top", "bottom"], "topAndBottom")
-
-    return loft
+for i, t in enumerate(curve_params):
+    points[i + 9] = foil_curve.get_point(t)
 
 
-mesh = cb.Mesh()
+# create a sketch on the bottom
+class AirfoilSketch(cb.MappedSketch):
+    quads: ClassVar = [
+        [12, 11, 1, 0],  # 0
+        [11, 10, 2, 1],  # 1
+        [10, 9, 16, 2],  # 2
+        [9, 15, 17, 16],  # 3
+        [15, 14, 7, 17],  # 4
+        [14, 13, 8, 7],  # 5
+        [13, 12, 0, 8],  # 6
+        [2, 16, 4, 3],  # 7
+        [16, 17, 5, 4],  # 8
+        [17, 7, 6, 5],  # 9
+    ]
 
-loft_indexes = [
-    [12, 11, 1, 0],  # 0
-    [11, 10, 2, 1],  # 1
-    [10, 9, 16, 2],  # 2
-    [9, 15, 17, 16],  # 3
-    [15, 14, 7, 17],  # 4
-    [14, 13, 8, 7],  # 5
-    [13, 12, 0, 8],  # 6
-    [2, 16, 4, 3],  # 7
-    [16, 17, 5, 4],  # 8
-    [17, 7, 6, 5],  # 9
-]
+    def __init__(self, points):
+        super().__init__(points, self.quads)
 
-lofts = [get_loft(quad) for quad in loft_indexes]
+        # determine initial positions for points 16 and 17
+        # with smoothing
+        smoother = cb.SketchSmoother(self)
+        smoother.smooth()
 
-# Create curved edges
-for i in (0, 1, 2, 4, 5, 6):
-    loft = lofts[i]
-    loft.bottom_face.add_edge(0, cb.OnCurve(foil_curve))
-    loft.top_face.add_edge(0, cb.OnCurve(top_foil_curve))
+        # Optimize:
+        optimizer = cb.SketchOptimizer(self)
+        pos = self.positions
 
-# Round edges of blocks 0 and 6
-for i in (0, 6):
-    lofts[i].bottom_face.add_edge(2, cb.Origin([0, 0, 0]))
-    lofts[i].top_face.add_edge(2, cb.Origin(thickness))
+        # Points that slide along the airfoil curve
+        for i, point_index in enumerate((10, 11, 12, 13, 14)):
+            initial_param = curve_params[i]
+            optimizer.add_clamp(cb.CurveClamp(pos[point_index], foil_curve, initial_param))
+
+        # Points that move in their X-Y plane
+        for i in (16, 17):
+            optimizer.add_clamp(cb.PlaneClamp(pos[i], pos[i], [0, 0, 1]))
+
+        # Points that move along domain edges
+        def optimize_along_line(point_index, line_index_1, line_index_2):
+            clamp = cb.LineClamp(pos[point_index], pos[line_index_1], pos[line_index_2])
+            optimizer.add_clamp(clamp)
+
+        optimize_along_line(2, 1, 3)
+        optimize_along_line(7, 8, 6)
+        optimize_along_line(4, 3, 6)
+        optimize_along_line(5, 3, 6)
+
+        # point 0: on arc
+        clamp = cb.RadialClamp(pos[0], [0, 0, 0], [0, 0, 1])
+        optimizer.add_clamp(clamp)
+
+        optimizer.optimize(tolerance=1e-5, method="SLSQP", relax=True)
+
+        # edges were added in super().__init__() but now positions have changed and
+        # we have to adjust for that
+        self.add_edges()
+
+    def add_edges(self):
+        for i in (0, 1, 2, 4, 5, 6):
+            self.faces[i].add_edge(0, cb.OnCurve(foil_curve.copy()))
+
+        for i in (0, 6):
+            self.faces[i].add_edge(2, cb.Origin([0, 0, 0]))
+
+
+### Create an extruded shape
+base = AirfoilSketch(points)
+shape = cb.ExtrudedShape(base, [0, 0, 1])
 
 ### Set cell size/grading;
 # Keep in mind that not all blocks need exact specification as
 # chopping will propagate automatically through blocking
-lofts[0].chop(2, count=1)  # 1 cell in the 3rd dimension
+shape.chop(2, count=1)  # 1 cell in the 3rd dimension (2D domain)
 # keep consistent first cell thickness by using edge grading
-lofts[1].chop(1, start_size=BL_THICKNESS, c2c_expansion=C2C_EXPANSION, take="max", preserve="start_size")
-lofts[8].chop(1, start_size=CELL_SIZE, take="max")
+shape.operations[1].chop(1, start_size=BL_THICKNESS, c2c_expansion=C2C_EXPANSION, take="max", preserve="start_size")
+# This is guesswork! Can be solved with a different blocking (that will product more even block sizes),
+# a lot of math (check the cell size of block 3) or an automatic grader (TODO).
+shape.operations[8].chop(1, start_size=BL_THICKNESS, end_size=CELL_SIZE, preserve="end_size")
 
-for i in (0, 1, 2, 3, 4, 5, 6):
-    lofts[i].chop(0, start_size=CELL_SIZE, take="max")
+### Set patches
+shape.set_start_patch("topAndBottom")
+shape.set_end_patch("topAndBottom")
 
-for loft in lofts:
-    mesh.add(loft)
+for i in range(7):
+    shape.operations[i].set_patch("front", "airfoil")
 
-### Optimize:
-mesh.assemble()
-finder = cb.GeometricFinder(mesh)
-optimizer = cb.MeshOptimizer(mesh)
-
-
-# Some helper functions
-def find_vertex(index):
-    return list(finder.find_in_sphere(points[index]))[0]
-
-
-def make_link(leader):
-    # Find the respective point in the top plane and
-    # create a link so that it will follow when
-    # leader's position changes
-    follower_position = leader.position + thickness
-    follower = list(finder.find_in_sphere(follower_position))[0]
-
-    return cb.TranslationLink(leader.position, follower.position)
-
-
-# Points that slide along airfoil curve
-for index in (10, 11, 12, 13, 14):
-    opt_vertex = find_vertex(index)
-    clamp = cb.CurveClamp(opt_vertex.position, foil_curve)
-    optimizer.add_link(make_link(opt_vertex))
-
-    optimizer.add_clamp(clamp)
-
-# Points that move in their X-Y plane
-for index in (16, 17):
-    opt_vertex = find_vertex(index)
-    clamp = cb.PlaneClamp(opt_vertex.position, [0, 0, 0], [0, 0, 1])
-    optimizer.add_link(make_link(opt_vertex))
-    optimizer.add_clamp(clamp)
-
-
-# Points that move along domain edges
-def optimize_along_line(point_index, line_index_1, line_index_2):
-    opt_vertex = find_vertex(point_index)
-    clamp = cb.LineClamp(opt_vertex.position, points[line_index_1], points[line_index_2])
-    optimizer.add_link(make_link(opt_vertex))
-    optimizer.add_clamp(clamp)
-
-
-optimize_along_line(2, 1, 3)
-optimize_along_line(7, 8, 6)
-optimize_along_line(4, 3, 6)
-optimize_along_line(5, 3, 6)
-
-if OPTIMIZE:
-    optimizer.optimize(tolerance=1e-3, method="SLSQP")
-    mesh.backport()
-    mesh.clear()
-
-### Write the mesh
+mesh.modify_patch("airfoil", "wall")
 mesh.modify_patch("topAndBottom", "empty")
 mesh.set_default_patch("freestream", "patch")
-mesh.write(os.path.join("..", "..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")
+
+mesh.add(shape)
+
+# Chop remaining blocks with an automatic grader (see the comment at manual grading above)
+grader = cb.SimpleGrader(mesh, CELL_SIZE)
+grader.grade(take="max")
+
+### Write the mesh
+mesh.write("../../case/system/blockMeshDict", debug_path="debug.vtk")

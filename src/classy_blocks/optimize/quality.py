@@ -33,12 +33,12 @@ def take(points: NPPointListType, indexes: NPIndexType):
     return result
 
 
-@numba.jit(nopython=True)
+@numba.jit(nopython=True, cache=True)
 def get_center_point(points: NPPointListType) -> NPPointType:
     return np.sum(points, axis=0) / len(points)
 
 
-@numba.jit(nopython=True)
+@numba.jit(nopython=True, cache=True)
 def get_quad_normal(points: NPPointListType) -> Tuple[NPVectorType, NPVectorType, float]:
     normal = np.zeros(3)
     center = get_center_point(points)
@@ -63,7 +63,7 @@ def get_quad_normal(points: NPPointListType) -> Tuple[NPVectorType, NPVectorType
     return center, normal / np.linalg.norm(normal), max_length / (min_length + VSMALL)
 
 
-@numba.jit(nopython=True)
+@numba.jit(nopython=True, cache=True)
 def scale_angle(angle: float) -> float:
     n = 4
     m = 10
@@ -76,7 +76,7 @@ def scale_angle(angle: float) -> float:
     return a * threshold**n + m * (angle - threshold)
 
 
-@numba.jit(nopython=True)
+@numba.jit(nopython=True, cache=True)
 def get_quad_non_ortho(points: NPPointListType, center: NPPointType, normal: NPVectorType, corner: int) -> float:
     this_point = points[corner]
     next_point = points[(corner + 1) % 4]
@@ -96,7 +96,7 @@ def get_quad_non_ortho(points: NPPointListType, center: NPPointType, normal: NPV
     return 180 * np.arccos(np.dot(side_normal, center_vector)) / np.pi
 
 
-@numba.jit(nopython=True)
+@numba.jit(nopython=True, cache=True)
 def get_quad_inner_angle(points: NPPointListType, normal: NPVectorType, corner: int) -> float:
     next_side = points[(corner + 1) % 4] - points[corner]
     next_side /= np.linalg.norm(next_side) + VSMALL
@@ -112,7 +112,7 @@ def get_quad_inner_angle(points: NPPointListType, normal: NPVectorType, corner: 
     return inner_angle
 
 
-@numba.jit(nopython=True)
+@numba.jit(nopython=True, cache=True)
 def get_quad_quality(grid_points: NPPointListType, cell_indexes: NPIndexType) -> float:
     quality = 0
     quad_points = take(grid_points, cell_indexes)
@@ -125,10 +125,12 @@ def get_quad_quality(grid_points: NPPointListType, cell_indexes: NPIndexType) ->
         inner_angle = get_quad_inner_angle(quad_points, normal, i) - 90
         quality += scale_angle(inner_angle)
 
+    quality += scale_aspect(aspect)
+
     return quality
 
 
-@numba.jit(nopython=True)
+@numba.jit(nopython=True, cache=True)
 def get_hex_quality(grid_points: NPPointListType, cell_indexes: NPIndexType) -> float:
     cell_points = take(grid_points, cell_indexes)
     cell_center = get_center_point(cell_points)

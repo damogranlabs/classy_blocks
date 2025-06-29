@@ -3,10 +3,10 @@ import numpy as np
 import classy_blocks as cb
 
 box = cb.Box([0, 0, 0], [1, 1, 1])
-        
+
 base_face = box.bottom_face
 neighbour_face = base_face.copy().translate([4, 0, 0])
-common_face = base_face.copy().rotate(np.pi/2, [0, 1, 0]).translate([2, 0, 2])
+common_face = base_face.copy().rotate(np.pi / 2, [0, 1, 0]).translate([2, 0, 2])
 
 left_loft = cb.Loft(base_face, common_face)
 right_loft = cb.Loft(neighbour_face, common_face.copy().shift(2).invert())
