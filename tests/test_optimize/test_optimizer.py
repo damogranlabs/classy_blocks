@@ -60,7 +60,7 @@ class SketchOptimizerTests(SketchTestsBase):
         optimizer = SketchOptimizer(sketch)
         optimizer.add_clamp(clamp)
 
-        optimizer.optimize()
+        optimizer.optimize(method="L-BFGS-B")
 
         np.testing.assert_almost_equal(sketch.positions[4], [1, 1, 0], decimal=1)
 
