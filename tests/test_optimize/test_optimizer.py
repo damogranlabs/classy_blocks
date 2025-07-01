@@ -31,7 +31,7 @@ class MeshOptimizerTests(BoxTestsBase):
 
         clamp = FreeClamp(vertex.position)
         optimizer.add_clamp(clamp)
-        optimizer.optimize(method="L-BFGS-B")
+        optimizer.optimize(method="Powell")
 
         np.testing.assert_almost_equal(vertex.position, [0, 0, 0], decimal=1)
 

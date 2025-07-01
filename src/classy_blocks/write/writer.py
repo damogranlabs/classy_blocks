@@ -1,3 +1,4 @@
+from dataclasses import asdict
 from typing import Callable, List
 
 from classy_blocks.assemble.dump import AssembledDump
@@ -52,6 +53,19 @@ def format_settings(settings: Settings):
     for pair in settings.merged_patches:
         out += f"\t({pair[0]} {pair[1]})\n"
     out += ");\n\n"
+
+    for key, value in asdict(settings).items():
+        if key in ("patch_settings", "merged_patches", "default_patch", "geometry"):
+            # FIXME: this is a temporary fix, Writer will handle that anyway
+            continue
+
+        key_words = key.split("_")
+        dict_key = key_words[0] + "".join(word.capitalize() for word in key_words[1:])
+
+        if value is not None:
+            out += f"{dict_key} {value};\n"
+
+    out += "\n"
 
     return out
 
