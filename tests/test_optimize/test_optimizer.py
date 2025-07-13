@@ -1,19 +1,31 @@
 import unittest
 
 import numpy as np
+from parameterized import parameterized
 
 from classy_blocks.base.exceptions import ClampExistsError
 from classy_blocks.construct.flat.sketches.mapped import MappedSketch
 from classy_blocks.optimize.clamps.free import FreeClamp
 from classy_blocks.optimize.clamps.surface import PlaneClamp
 from classy_blocks.optimize.links import TranslationLink
-from classy_blocks.optimize.optimizer import MeshOptimizer, SketchOptimizer
+from classy_blocks.optimize.optimizer import MeshOptimizer, OptimizationData, OptimizerBase, SketchOptimizer
 from classy_blocks.optimize.smoother import SketchSmoother
 from classy_blocks.util import functions as f
 from tests.test_optimize.optimize_fixtures import BoxTestsBase, SketchTestsBase
 
 
 class MeshOptimizerTests(BoxTestsBase):
+    @parameterized.expand(
+        (
+            (0.5, 0, 0.5),
+            (0.5, 1, 0.75),
+            (1.0, 0, 1),  # relaxation disabled
+        )
+    )
+    def test_relaxation(self, relaxation, iteration, result):
+        data = OptimizationData(relaxation=relaxation)
+        self.assertAlmostEqual(OptimizerBase.relaxation_factor(data, iteration), result)
+
     def test_add_junction_existing(self):
         optimizer = MeshOptimizer(self.mesh)
         optimizer.add_clamp(FreeClamp(self.mesh.vertices[0].position))
@@ -31,7 +43,7 @@ class MeshOptimizerTests(BoxTestsBase):
 
         clamp = FreeClamp(vertex.position)
         optimizer.add_clamp(clamp)
-        optimizer.optimize(method="Powell")
+        optimizer.optimize(method="Powell", abs_tol=0.1)
 
         np.testing.assert_almost_equal(vertex.position, [0, 0, 0], decimal=1)
 
@@ -39,6 +51,7 @@ class MeshOptimizerTests(BoxTestsBase):
         vertex = self.get_vertex([0, 0, 0])
         vertex.move_to([0.3, 0.3, 0.3])
         follower_vertex = next(iter(self.finder.find_in_sphere([0, 1, 0])))
+        follower_vertex.move_to([0.3, 1.3, 0.3])
 
         link = TranslationLink(vertex.position, follower_vertex.position)
         clamp = FreeClamp(vertex.position)
@@ -46,6 +59,7 @@ class MeshOptimizerTests(BoxTestsBase):
         optimizer = MeshOptimizer(self.mesh)
         optimizer.add_clamp(clamp)
         optimizer.add_link(link)
+
         optimizer.optimize(method="L-BFGS-B")
 
         self.assertGreater(f.norm(follower_vertex.position - f.vector(0, 1, 0)), 0)

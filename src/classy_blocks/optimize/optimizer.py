@@ -1,5 +1,6 @@
 import abc
 import copy
+import dataclasses
 import time
 from typing import List, Literal
 
@@ -12,12 +13,88 @@ from classy_blocks.mesh import Mesh
 from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.clamps.surface import PlaneClamp
 from classy_blocks.optimize.grid import GridBase, HexGrid, QuadGrid
-from classy_blocks.optimize.iteration import ClampOptimizationData, IterationDriver
 from classy_blocks.optimize.links import LinkBase
 from classy_blocks.optimize.mapper import Mapper
 from classy_blocks.util.constants import TOL
+from classy_blocks.util.tools import report
 
 MinimizationMethodType = Literal["SLSQP", "L-BFGS-B", "Nelder-Mead", "Powell"]
+
+
+@dataclasses.dataclass
+class OptimizationData:
+    # maximum number of iterations; the optimizer will quit at the last iteration
+    # regardless of achieved quality
+    max_iterations: int = 20
+    # absolute tolerance; if overall grid quality stays within given interval
+    # between iterations the optimizer will quit
+    abs_tol: float = 10
+    # relative tolerance; if relative change between iterations is less than
+    # given, the optimizer will quit
+    rel_tol: float = 0.01
+    # method that will be used for scipy.optimize.minimize
+    # (only those that support all required features are valid)
+    method: MinimizationMethodType = "SLSQP"
+    # relaxation base; every subsequent iteration will increase under-relaxation
+    # until it's larger than relaxation_threshold; then it will fix it to 1.
+    # Relaxation is identical to OpenFOAM's field relaxation
+    relaxation: float = 1
+    relaxation_threshold: float = 0.9
+
+    # print more-or-less pretty info about optimization
+    report: bool = True
+    # convergence tolerance for a single joint
+    # as passed to scipy.optimize.minimize
+    clamp_tol: float = 1e-3
+
+
+@dataclasses.dataclass
+class OptimizationRecord:
+    vertex_index: int
+    grid_initial: float = -1
+    junction_initial: float = -1
+    junction_final: float = -1
+    grid_final: float = -1
+
+    rolled_back: bool = False
+
+
+class OptimizationReporter:
+    COL_W = 15
+
+    def __init__(self) -> None:
+        # TODO: add typing and move to a separate file
+        self.time_start = None
+
+    def start_optimization(self):
+        self.time_start = time.time()
+
+    def start_iteration(self, iteration_no: int) -> None:
+        report(f"Optimization iteration {iteration_no}")
+        headers = ["Vertex", "Initial", "Local", "Improvement", "Final", "Status"]
+        for h in headers:
+            report(f"{h:>{self.COL_W}s}")
+
+    def report_start(self) -> None:
+        report(f"{self.index:>6}", end="   ")
+        report(f"{self.grid_initial:.3e}", end="   ")
+        report(f"{self.junction_initial:.3e}", end="   ")
+
+    def report_end(self) -> None:
+        report(f"{self.improvement: >11.0f}", end="   ")
+        report(f"{self.grid_final:.3e}", end="   ")
+
+    def start_clamp(self):
+        pass
+
+    def end_clamp(self):
+        pass
+
+    def end_iteration(self):
+        pass
+
+    def end_optimization(self):
+        pass
 
 
 class OptimizerBase(abc.ABC):
@@ -34,120 +111,92 @@ class OptimizerBase(abc.ABC):
     def add_link(self, link: LinkBase) -> None:
         self.grid.add_link(link)
 
-    def optimize_clamp(self, clamp: ClampBase, method: MinimizationMethodType, relax: bool, iteration_no: int) -> None:
+    def optimize_clamp(self, clamp: ClampBase, data: OptimizationData, relaxation_factor: float) -> OptimizationRecord:
         """Move clamp.vertex so that quality at junction is improved;
         rollback changes if grid quality decreased after optimization"""
-        initial_params = copy.copy(clamp.params)
         junction = self.grid.get_junction_from_clamp(clamp)
+        record = OptimizationRecord(junction.index)
+        record.grid_initial = self.grid.quality
+        record.junction_initial = junction.quality
 
-        reporter = ClampOptimizationData(junction.index, self.grid.quality, junction.quality)
-        reporter.report_start()
+        initial_params = copy.copy(clamp.params)
 
         def fquality(params):
-            # move all vertices according to X
             clamp.update_params(params)
             quality = self.grid.update(junction.index, clamp.position)
             return quality
 
         try:
-            scipy.optimize.minimize(fquality, clamp.params, bounds=clamp.bounds, method=method, tol=1e-2)
-
-            if relax:
-                relaxation_factor = 1 - 2 ** -(iteration_no + 1)
-                if relaxation_factor > 0.9:
-                    relaxation_factor = 1
-
-                for i, param in enumerate(clamp.params):
-                    clamp.params[i] = initial_params[i] + relaxation_factor * (param - initial_params[i])
-
-                # update the position after relaxation
-                fquality(clamp.params)
-
-            reporter.junction_final = junction.quality
-            reporter.grid_final = self.grid.quality
-
-            if np.isnan(reporter.improvement) or reporter.improvement <= 0:
-                reporter.rollback()
-
-                clamp.update_params(initial_params)
-                self.grid.update(junction.index, clamp.position)
-        except ValueError:
-            # a degenerate cell (currently) cannot be untangled;
-            # try with a different junction
-            reporter.skip()
-            clamp.update_params(initial_params)
-            self.grid.update(junction.index, clamp.position)
-
-        reporter.report_end()
-
-    def _get_sensitivity(self, clamp):
-        """Returns maximum partial derivative at current params"""
-        junction = self.grid.get_junction_from_clamp(clamp)
-        initial_params = copy.copy(clamp.params)
-
-        def fquality(clamp, junction, params):
-            clamp.update_params(params)
-            self.grid.update(junction.index, clamp.position)
-            return junction.quality
-
-        try:
-            sensitivities = np.asarray(
-                scipy.optimize.approx_fprime(clamp.params, lambda p: fquality(clamp, junction, p), epsilon=10 * TOL)
+            results = scipy.optimize.minimize(
+                fquality, clamp.params, bounds=clamp.bounds, method=data.method, tol=data.clamp_tol
             )
+            if not results.success:
+                # TODO! Differentiate different fail modes and report them in output
+                raise ValueError
+
+            for i, param in enumerate(results.x):
+                clamp.params[i] = initial_params[i] + relaxation_factor * (param - initial_params[i])
+
+            # update the position after relaxation
+            record.junction_final = fquality(clamp.params)
+            record.grid_final = self.grid.quality
+
+            improvement = record.grid_initial - record.grid_final
+            if np.isnan(improvement) or improvement <= 0:
+                raise ValueError
         except ValueError:
             clamp.update_params(initial_params)
-            self.grid.update(junction.index, clamp.position)
-            return np.ones(len(clamp.params))
+            record.rolled_back = True
 
-        clamp.update_params(initial_params)
         self.grid.update(junction.index, clamp.position)
+        return record
 
-        return np.linalg.norm(sensitivities)
+    def optimize_iteration(self, data: OptimizationData, relaxation_factor: float) -> None:
+        for clamp in self.grid.clamps:
+            self.optimize_clamp(clamp, data, relaxation_factor)
 
-    def optimize_iteration(self, method: MinimizationMethodType, relax: bool, iteration_no: int) -> None:
-        clamps = sorted(self.grid.clamps, key=lambda c: self._get_sensitivity(c), reverse=True)
+    @staticmethod
+    def relaxation_factor(data: OptimizationData, iteration_no: int) -> float:
+        if data.relaxation == 1:
+            # relaxation disabled
+            return 1
+        relax_base = 1 / data.relaxation
+        relaxation_factor = 1 - relax_base ** -(iteration_no + 1)
+        # it makes no sense to relax after positions have been fixed approximately
+        if relaxation_factor > data.relaxation_threshold:
+            relaxation_factor = 1
 
-        for clamp in clamps:
-            self.optimize_clamp(clamp, method, relax, iteration_no)
+        return relaxation_factor
 
     def optimize(
-        self,
-        max_iterations: int = 20,
-        tolerance: float = 0.1,
-        method: MinimizationMethodType = "SLSQP",
-        relax: bool = False,
-    ) -> IterationDriver:
-        """Move vertices, defined and restrained with Clamps
+        self, max_iterations: int = 20, tolerance: float = 0.1, method: MinimizationMethodType = "SLSQP", **kwargs
+    ) -> bool:
+        """Move vertices as defined and restrained with Clamps
         so that better mesh quality is obtained.
 
         Within each iteration, all vertices will be moved, starting with the one with the most influence on quality.
-        Lower tolerance values."""
-        driver = IterationDriver(max_iterations, tolerance)
+        Lower tolerance values.
 
-        start_time = time.time()
+        TODO:
+        Returns True is optimization was successful (tolerance reached)"""
+        data = OptimizationData(max_iterations=max_iterations, rel_tol=tolerance, method=method, **kwargs)
+        last_quality = self.grid.quality
 
-        while not driver.converged:
-            driver.begin_iteration(self.grid.quality)
-            self.optimize_iteration(method, relax, len(driver.iterations))
-            driver.end_iteration(self.grid.quality)
+        for i in range(max_iterations):
+            rlf = self.relaxation_factor(data, i)
+            print(f"Optimizing {i}, relaxation: {rlf}")
+            self.optimize_iteration(data, rlf)
+            this_quality = self.grid.quality
 
-        end_time = time.time()
-
-        if self.report:
-            end_quality = driver.iterations[-1].final_quality
-            start_quality = driver.iterations[0].initial_quality
-            abs_improvement = start_quality - end_quality
-            rel_improvement = abs_improvement / start_quality
-
-            print(
-                f"Overall improvement: {start_quality:.3e} > {end_quality:.3e}"
-                f"({abs_improvement:.3e}, {rel_improvement * 100:.0f}%)"
-            )
-            print(f"Elapsed time: {end_time - start_time:.0f}s")
+            if last_quality - this_quality < data.abs_tol:
+                break
+            last_quality = this_quality
+        else:
+            self.backport()
+            return False
 
         self.backport()
-
-        return driver
+        return True  # TODO: return properly
 
     @abc.abstractmethod
     def backport(self) -> None:
@@ -200,7 +249,7 @@ class SketchOptimizer(OptimizerBase):
 
     def auto_optimize(
         self, max_iterations: int = 20, tolerance: float = 0.1, method: MinimizationMethodType = "SLSQP"
-    ) -> IterationDriver:
+    ) -> bool:
         """Adds a PlaneClamp to all non-boundary points and optimize the sketch.
         To include boundary points (those that can be moved along a line or a curve),
         add clamps manually before calling this method."""

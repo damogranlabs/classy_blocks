@@ -47,22 +47,6 @@ class CellBase(abc.ABC):
 
         raise NoCommonSidesError
 
-    def add_neighbour(self, candidate: "CellBase") -> bool:
-        """Adds the provided block to appropriate
-        location in self.neighbours and returns True if
-        this and provided block share a face;
-        does nothing and returns False otherwise"""
-
-        if candidate == self:
-            return False
-
-        try:
-            orient = self.get_common_side(candidate)
-            self.neighbours[orient] = candidate
-            return True
-        except NoCommonSidesError:
-            return False
-
     @property
     def boundary(self) -> Set[int]:
         """Returns a list of indexes that define sides on boundary"""
