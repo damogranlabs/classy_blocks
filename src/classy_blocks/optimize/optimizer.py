@@ -1,8 +1,7 @@
 import abc
 import copy
-import dataclasses
 import time
-from typing import List, Literal
+from typing import List
 
 import numpy as np
 import scipy.optimize
@@ -15,94 +14,29 @@ from classy_blocks.optimize.clamps.surface import PlaneClamp
 from classy_blocks.optimize.grid import GridBase, HexGrid, QuadGrid
 from classy_blocks.optimize.links import LinkBase
 from classy_blocks.optimize.mapper import Mapper
+from classy_blocks.optimize.records import (
+    ClampRecord,
+    IterationRecord,
+    MinimizationMethodType,
+    OptimizationData,
+    OptimizationRecord,
+)
+from classy_blocks.optimize.report import OptimizationReporterBase, SilentReporter, TextReporter
 from classy_blocks.util.constants import TOL
-from classy_blocks.util.tools import report
-
-MinimizationMethodType = Literal["SLSQP", "L-BFGS-B", "Nelder-Mead", "Powell"]
-
-
-@dataclasses.dataclass
-class OptimizationData:
-    # maximum number of iterations; the optimizer will quit at the last iteration
-    # regardless of achieved quality
-    max_iterations: int = 20
-    # absolute tolerance; if overall grid quality stays within given interval
-    # between iterations the optimizer will quit
-    abs_tol: float = 10
-    # relative tolerance; if relative change between iterations is less than
-    # given, the optimizer will quit
-    rel_tol: float = 0.01
-    # method that will be used for scipy.optimize.minimize
-    # (only those that support all required features are valid)
-    method: MinimizationMethodType = "SLSQP"
-    # relaxation base; every subsequent iteration will increase under-relaxation
-    # until it's larger than relaxation_threshold; then it will fix it to 1.
-    # Relaxation is identical to OpenFOAM's field relaxation
-    relaxation: float = 1
-    relaxation_threshold: float = 0.9
-
-    # print more-or-less pretty info about optimization
-    report: bool = True
-    # convergence tolerance for a single joint
-    # as passed to scipy.optimize.minimize
-    clamp_tol: float = 1e-3
-
-
-@dataclasses.dataclass
-class OptimizationRecord:
-    vertex_index: int
-    grid_initial: float = -1
-    junction_initial: float = -1
-    junction_final: float = -1
-    grid_final: float = -1
-
-    rolled_back: bool = False
-
-
-class OptimizationReporter:
-    COL_W = 15
-
-    def __init__(self) -> None:
-        # TODO: add typing and move to a separate file
-        self.time_start = None
-
-    def start_optimization(self):
-        self.time_start = time.time()
-
-    def start_iteration(self, iteration_no: int) -> None:
-        report(f"Optimization iteration {iteration_no}")
-        headers = ["Vertex", "Initial", "Local", "Improvement", "Final", "Status"]
-        for h in headers:
-            report(f"{h:>{self.COL_W}s}")
-
-    def report_start(self) -> None:
-        report(f"{self.index:>6}", end="   ")
-        report(f"{self.grid_initial:.3e}", end="   ")
-        report(f"{self.junction_initial:.3e}", end="   ")
-
-    def report_end(self) -> None:
-        report(f"{self.improvement: >11.0f}", end="   ")
-        report(f"{self.grid_final:.3e}", end="   ")
-
-    def start_clamp(self):
-        pass
-
-    def end_clamp(self):
-        pass
-
-    def end_iteration(self):
-        pass
-
-    def end_optimization(self):
-        pass
 
 
 class OptimizerBase(abc.ABC):
     """Provides tools for 2D (sketch) or 3D (mesh blocking) optimization"""
 
+    reporter: OptimizationReporterBase
+
     def __init__(self, grid: GridBase, report: bool = True):
         self.grid = grid
-        self.report = report
+
+        if not report:
+            self.reporter = SilentReporter()
+        else:
+            self.reporter = TextReporter()
 
     def add_clamp(self, clamp: ClampBase) -> None:
         """Adds a clamp to optimization. Raises an exception if it already exists"""
@@ -111,14 +45,12 @@ class OptimizerBase(abc.ABC):
     def add_link(self, link: LinkBase) -> None:
         self.grid.add_link(link)
 
-    def optimize_clamp(self, clamp: ClampBase, data: OptimizationData, relaxation_factor: float) -> OptimizationRecord:
+    def optimize_clamp(self, clamp: ClampBase, data: OptimizationData, relaxation_factor: float) -> ClampRecord:
         """Move clamp.vertex so that quality at junction is improved;
         rollback changes if grid quality decreased after optimization"""
         junction = self.grid.get_junction_from_clamp(clamp)
-        record = OptimizationRecord(junction.index)
-        record.grid_initial = self.grid.quality
-        record.junction_initial = junction.quality
-
+        crecord = ClampRecord(junction.index, self.grid.quality, junction.quality)
+        self.reporter.clamp_start(crecord)
         initial_params = copy.copy(clamp.params)
 
         def fquality(params):
@@ -127,33 +59,44 @@ class OptimizerBase(abc.ABC):
             return quality
 
         try:
-            results = scipy.optimize.minimize(
+            result = scipy.optimize.minimize(
                 fquality, clamp.params, bounds=clamp.bounds, method=data.method, tol=data.clamp_tol
             )
-            if not results.success:
-                # TODO! Differentiate different fail modes and report them in output
-                raise ValueError
+            if not result.success:
+                raise ValueError(result.message)
 
-            for i, param in enumerate(results.x):
+            # relax and update
+            for i, param in enumerate(result.x):
                 clamp.params[i] = initial_params[i] + relaxation_factor * (param - initial_params[i])
 
-            # update the position after relaxation
-            record.junction_final = fquality(clamp.params)
-            record.grid_final = self.grid.quality
+            crecord.grid_final = fquality(clamp.params)
 
-            improvement = record.grid_initial - record.grid_final
-            if np.isnan(improvement) or improvement <= 0:
-                raise ValueError
-        except ValueError:
-            clamp.update_params(initial_params)
-            record.rolled_back = True
+            if np.isnan(crecord.improvement) or crecord.improvement <= 0:
+                raise ValueError("No improvement")
+        except ValueError as e:
+            # roll back to the initial state
+            fquality(initial_params)
+            crecord.rolled_back = True
+            crecord.error_message = str(e)
 
-        self.grid.update(junction.index, clamp.position)
-        return record
+        crecord.junction_final = junction.quality
+        crecord.grid_final = self.grid.quality
+        self.reporter.clamp_end(crecord)
 
-    def optimize_iteration(self, data: OptimizationData, relaxation_factor: float) -> None:
+        return crecord
+
+    def optimize_iteration(self, data: OptimizationData, iteration_no: int) -> IterationRecord:
+        rlf = self.relaxation_factor(data, iteration_no)
+        irecord = IterationRecord(iteration_no, self.grid.quality, rlf)
+        self.reporter.iteration_start(iteration_no)
+
         for clamp in self.grid.clamps:
-            self.optimize_clamp(clamp, data, relaxation_factor)
+            self.optimize_clamp(clamp, data, rlf)
+
+        irecord.grid_final = self.grid.quality
+        self.reporter.iteration_end(irecord)
+
+        return irecord
 
     @staticmethod
     def relaxation_factor(data: OptimizationData, iteration_no: int) -> float:
@@ -180,21 +123,23 @@ class OptimizerBase(abc.ABC):
         TODO:
         Returns True is optimization was successful (tolerance reached)"""
         data = OptimizationData(max_iterations=max_iterations, rel_tol=tolerance, method=method, **kwargs)
-        last_quality = self.grid.quality
+        orecord = OptimizationRecord(time.time(), self.grid.quality)  # TODO: cache repeating quality queries
 
         for i in range(max_iterations):
-            rlf = self.relaxation_factor(data, i)
-            print(f"Optimizing {i}, relaxation: {rlf}")
-            self.optimize_iteration(data, rlf)
-            this_quality = self.grid.quality
+            iter_record = self.optimize_iteration(data, i)
 
-            if last_quality - this_quality < data.abs_tol:
+            if iter_record.abs_improvement < data.abs_tol:
+                orecord.termination = "abs"
                 break
-            last_quality = this_quality
+            if iter_record.rel_improvement < data.rel_tol:
+                orecord.termination = "rel"
+                break
         else:
-            self.backport()
-            return False
+            orecord.termination = "limit"
 
+        orecord.grid_final = self.grid.quality
+        orecord.time_end = time.time()
+        self.reporter.optimization_end(orecord)
         self.backport()
         return True  # TODO: return properly
 
