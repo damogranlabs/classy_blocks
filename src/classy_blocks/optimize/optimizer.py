@@ -14,7 +14,7 @@ from classy_blocks.optimize.clamps.surface import PlaneClamp
 from classy_blocks.optimize.grid import GridBase, HexGrid, QuadGrid
 from classy_blocks.optimize.links import LinkBase
 from classy_blocks.optimize.mapper import Mapper
-from classy_blocks.optimize.records import (
+from classy_blocks.optimize.record import (
     ClampRecord,
     IterationRecord,
     MinimizationMethodType,
@@ -120,7 +120,6 @@ class OptimizerBase(abc.ABC):
         Within each iteration, all vertices will be moved, starting with the one with the most influence on quality.
         Lower tolerance values.
 
-        TODO:
         Returns True is optimization was successful (tolerance reached)"""
         data = OptimizationData(max_iterations=max_iterations, rel_tol=tolerance, method=method, **kwargs)
         orecord = OptimizationRecord(time.time(), self.grid.quality)  # TODO: cache repeating quality queries
@@ -141,7 +140,8 @@ class OptimizerBase(abc.ABC):
         orecord.time_end = time.time()
         self.reporter.optimization_end(orecord)
         self.backport()
-        return True  # TODO: return properly
+
+        return orecord.termination in ("abs", "rel")
 
     @abc.abstractmethod
     def backport(self) -> None:

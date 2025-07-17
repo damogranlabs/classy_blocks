@@ -27,7 +27,7 @@ class MeshOptimizerTests(BoxTestsBase):
         self.assertAlmostEqual(OptimizerBase.relaxation_factor(data, iteration), result)
 
     def test_add_junction_existing(self):
-        optimizer = MeshOptimizer(self.mesh)
+        optimizer = MeshOptimizer(self.mesh, report=False)
         optimizer.add_clamp(FreeClamp(self.mesh.vertices[0].position))
 
         with self.assertRaises(ClampExistsError):
@@ -39,7 +39,7 @@ class MeshOptimizerTests(BoxTestsBase):
         vertex = self.get_vertex([0, 0, 0])
         vertex.move_to([0.3, 0.3, 0.3])
 
-        optimizer = MeshOptimizer(self.mesh)
+        optimizer = MeshOptimizer(self.mesh, report=False)
 
         clamp = FreeClamp(vertex.position)
         optimizer.add_clamp(clamp)
@@ -56,7 +56,7 @@ class MeshOptimizerTests(BoxTestsBase):
         link = TranslationLink(vertex.position, follower_vertex.position)
         clamp = FreeClamp(vertex.position)
 
-        optimizer = MeshOptimizer(self.mesh)
+        optimizer = MeshOptimizer(self.mesh, report=False)
         optimizer.add_clamp(clamp)
         optimizer.add_link(link)
 
@@ -71,7 +71,7 @@ class SketchOptimizerTests(SketchTestsBase):
         sketch = MappedSketch(self.positions, self.quads)
         clamp = PlaneClamp([1.2, 1.6, 0], [0, 0, 0], [0, 0, 1])
 
-        optimizer = SketchOptimizer(sketch)
+        optimizer = SketchOptimizer(sketch, report=False)
         optimizer.add_clamp(clamp)
 
         optimizer.optimize(method="L-BFGS-B")
@@ -81,7 +81,7 @@ class SketchOptimizerTests(SketchTestsBase):
     def test_optimize_auto(self):
         sketch = MappedSketch(self.positions, self.quads)
 
-        optimizer = SketchOptimizer(sketch)
+        optimizer = SketchOptimizer(sketch, report=False)
         optimizer.auto_optimize(method="L-BFGS-B")
 
         np.testing.assert_almost_equal(sketch.positions[4], [1, 1, 0], decimal=1)
@@ -139,7 +139,7 @@ class ComplexSketchTests(unittest.TestCase):
     def test_optimize(self):
         smoother = SketchSmoother(self.sketch)
         smoother.smooth()
-        optimizer = SketchOptimizer(self.sketch)
+        optimizer = SketchOptimizer(self.sketch, report=False)
         initial_quality = optimizer.grid.quality
 
         optimizer.auto_optimize(tolerance=1e-6, method="Nelder-Mead")
