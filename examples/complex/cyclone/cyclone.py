@@ -80,7 +80,7 @@ for region in optimize_regions:
     for clamp in region.get_clamps(mesh):
         optimizer.add_clamp(clamp)
 
-optimizer.optimize(tolerance=1e-3, relax=True, max_iterations=10)
+optimizer.optimize(tolerance=1e-3, max_iterations=20)
 
 # Now Block objects contain optimization results but those are not reflected in
 # user-created Operations. Mesh.backport() will copy the data back.

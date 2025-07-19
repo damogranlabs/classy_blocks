@@ -8,7 +8,7 @@ from classy_blocks.construct.flat.sketches.mapped import MappedSketch
 from classy_blocks.optimize.clamps.free import FreeClamp
 from classy_blocks.optimize.clamps.surface import PlaneClamp
 from classy_blocks.optimize.links import TranslationLink
-from classy_blocks.optimize.optimizer import MeshOptimizer, OptimizationData, OptimizerBase, SketchOptimizer
+from classy_blocks.optimize.optimizer import MeshOptimizer, SketchOptimizer
 from classy_blocks.optimize.smoother import SketchSmoother
 from classy_blocks.util import functions as f
 from tests.test_optimize.optimize_fixtures import BoxTestsBase, SketchTestsBase
@@ -23,8 +23,9 @@ class MeshOptimizerTests(BoxTestsBase):
         )
     )
     def test_relaxation(self, relaxation, iteration, result):
-        data = OptimizationData(relaxation=relaxation)
-        self.assertAlmostEqual(OptimizerBase.relaxation_factor(data, iteration), result)
+        optimizer = MeshOptimizer(self.mesh)
+        optimizer.config.relaxation = relaxation
+        self.assertAlmostEqual(optimizer.relaxation_factor(iteration), result)
 
     def test_add_junction_existing(self):
         optimizer = MeshOptimizer(self.mesh, report=False)
@@ -43,7 +44,7 @@ class MeshOptimizerTests(BoxTestsBase):
 
         clamp = FreeClamp(vertex.position)
         optimizer.add_clamp(clamp)
-        optimizer.optimize(method="Powell", abs_tol=0.1)
+        optimizer.optimize(method="Powell", tolerance=0.1)
 
         np.testing.assert_almost_equal(vertex.position, [0, 0, 0], decimal=1)
 
