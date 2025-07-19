@@ -6,7 +6,7 @@ from classy_blocks.util.tools import report
 
 class OptimizationReporterBase(abc.ABC):
     @abc.abstractmethod
-    def iteration_start(self, iteration_no: int) -> None:
+    def iteration_start(self, iteration_no: int, relaxation: float) -> None:
         pass
 
     @abc.abstractmethod
@@ -27,7 +27,7 @@ class OptimizationReporterBase(abc.ABC):
 
 
 class SilentReporter(OptimizationReporterBase):
-    def iteration_start(self, iteration_no: int) -> None:
+    def iteration_start(self, iteration_no: int, relaxation: float) -> None:
         pass
 
     def clamp_start(self, crecord: ClampRecord) -> None:
@@ -44,8 +44,9 @@ class SilentReporter(OptimizationReporterBase):
 
 
 class TextReporter(OptimizationReporterBase):
-    def iteration_start(self, iteration_no: int) -> None:
+    def iteration_start(self, iteration_no: int, relaxation: float) -> None:
         report(f"Optimization iteration {iteration_no}")
+        report(f"Relaxation: {relaxation}")
         report("{:6s}".format("Vertex"), end="")
         report("{:>12s}".format("Initial"), end="")
         report("{:>12s}".format("Local"), end="")

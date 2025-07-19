@@ -116,7 +116,7 @@ class OptimizerBase(abc.ABC):
     def _optimize_iteration(self, iteration_no: int) -> IterationRecord:
         rlf = self.relaxation_factor(iteration_no)
         irecord = IterationRecord(iteration_no, self.grid.quality, rlf)
-        self.reporter.iteration_start(iteration_no)
+        self.reporter.iteration_start(iteration_no, rlf)
 
         for clamp in self.grid.clamps:
             self._optimize_clamp(clamp, rlf)
