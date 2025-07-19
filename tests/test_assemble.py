@@ -1,5 +1,4 @@
 import unittest
-from typing import List
 
 from parameterized import parameterized
 
@@ -88,7 +87,7 @@ class RegistryTests(unittest.TestCase):
         )
     )
     def test_cell_registry(self, point, cells) -> None:
-        boxes: List[Operation] = [
+        boxes: list[Operation] = [
             Box([0, 0, 0], [1, 1, 1]),  # lower left
             Box([0, 0, 0], [1, 1, 1]).translate([1, 0, 0]),  # lower right
             Box([0, 0, 0], [1, 1, 1]).translate([1, 1, 0]),  # upper right

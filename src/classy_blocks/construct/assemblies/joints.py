@@ -1,5 +1,4 @@
 import abc
-from typing import List
 
 import numpy as np
 
@@ -93,8 +92,8 @@ class JointBase(Assembly, abc.ABC):
         center_point = np.asarray(center_point)
         radius_point = np.asarray(radius_point)
 
-        self.assemblies: List[CuspCylinder] = []
-        shapes: List[Shape] = []
+        self.assemblies: list[CuspCylinder] = []
+        shapes: list[Shape] = []
 
         rotate_angles = self._get_angles(branches)
         rotation_axis = radius_point - start_point

@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from classy_blocks.assemble.assembler import MeshAssembler
 from classy_blocks.assemble.depot import Depot
@@ -48,7 +48,7 @@ class Mesh:
         will be assigned this patch"""
         self.settings.default_patch = {"name": name, "kind": kind}
 
-    def modify_patch(self, name: str, kind: str, settings: Optional[List[str]] = None) -> None:
+    def modify_patch(self, name: str, kind: str, settings: Optional[list[str]] = None) -> None:
         """Fetches a patch named 'patch' and modifies its type and optionally
         other settings. They are passed on to blockMeshDict as a list of strings
         as-is, with no additional brain power used"""
@@ -132,18 +132,18 @@ class Mesh:
         return self.dump.is_assembled
 
     @property
-    def vertices(self) -> List[Vertex]:
+    def vertices(self) -> list[Vertex]:
         return self.dump.vertices
 
     @property
-    def patches(self) -> List[Patch]:
+    def patches(self) -> list[Patch]:
         return list(self.dump.patches)
 
     @property
-    def operations(self) -> List[Operation]:
+    def operations(self) -> list[Operation]:
         """Returns a list of operations from all entities in depot"""
         return self.depot.operations
 
     @property
-    def blocks(self) -> List[Block]:
+    def blocks(self) -> list[Block]:
         return self.dump.blocks

@@ -1,4 +1,4 @@
-from typing import Optional, Set
+from typing import Optional
 
 import numpy as np
 
@@ -15,12 +15,12 @@ class FinderBase:
     def __init__(self, mesh: Mesh):
         self.mesh = mesh
 
-    def _find_by_position(self, position: PointType, radius: Optional[float] = None) -> Set[Vertex]:
+    def _find_by_position(self, position: PointType, radius: Optional[float] = None) -> set[Vertex]:
         """Returns a list of vertices that are
         inside a sphere of given radius; if that is not given,
         constants.TOL is taken"""
 
-        found_vertices: Set[Vertex] = set()
+        found_vertices: set[Vertex] = set()
 
         if radius is None:
             radius = constants.TOL

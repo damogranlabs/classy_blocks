@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from parameterized import parameterized
 
 from classy_blocks.items.block import Block
@@ -9,7 +7,7 @@ from tests.fixtures.block import BlockTestCase
 class AxisTests(BlockTestCase):
     """Tests of the Axis object"""
 
-    def add_blocks(self) -> Tuple[Block, Block]:
+    def add_blocks(self) -> tuple[Block, Block]:
         block_0 = self.make_block(0)
         block_1 = self.make_block(1)
 

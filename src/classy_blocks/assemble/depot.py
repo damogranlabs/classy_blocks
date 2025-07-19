@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import Union
 
 from classy_blocks.construct.assemblies.assembly import Assembly
 from classy_blocks.construct.operations.operation import Operation
@@ -12,8 +12,8 @@ class Depot:
     """Collects, stores and serves user-added AdditiveType stuff"""
 
     def __init__(self) -> None:
-        self.solids: List[AdditiveType] = []
-        self.deleted: List[Operation] = []
+        self.solids: list[AdditiveType] = []
+        self.deleted: list[Operation] = []
 
     def add_solid(self, solid: AdditiveType) -> None:
         self.solids.append(solid)
@@ -22,8 +22,8 @@ class Depot:
         self.deleted.append(operation)
 
     @property
-    def operations(self) -> List[Operation]:
-        operations: List[Operation] = []
+    def operations(self) -> list[Operation]:
+        operations: list[Operation] = []
 
         for solid in self.solids:
             if isinstance(solid, Operation):

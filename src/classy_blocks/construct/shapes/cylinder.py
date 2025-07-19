@@ -1,4 +1,4 @@
-from typing import ClassVar, List, Type, Union
+from typing import ClassVar, Union
 
 import numpy as np
 
@@ -21,7 +21,7 @@ class SemiCylinder(RoundSolidShape):
     axis_point_2: position of end face
     radius_point_1: defines starting point and radius"""
 
-    sketch_class: ClassVar[Union[Type[Disk], Type[HalfDisk], Type[QuarterDisk]]] = HalfDisk
+    sketch_class: ClassVar[Union[type[Disk], type[HalfDisk], type[QuarterDisk]]] = HalfDisk
 
     def __init__(self, axis_point_1: PointType, axis_point_2: PointType, radius_point_1: PointType):
         axis_point_1 = np.asarray(axis_point_1)
@@ -34,7 +34,7 @@ class SemiCylinder(RoundSolidShape):
                 "Axis and radius vectors are not perpendicular", f"Difference: {diff}, tolerance: {TOL}"
             )
 
-        transform_2: List[tr.Transformation] = [tr.Translation(axis)]
+        transform_2: list[tr.Transformation] = [tr.Translation(axis)]
 
         super().__init__(self.sketch_class(axis_point_1, radius_point_1, axis), transform_2, None)
 
@@ -54,7 +54,7 @@ class QuarterCylinder(RoundSolidShape):
     axis_point_2: position of end face
     radius_point_1: defines starting point and radius"""
 
-    sketch_class: ClassVar[Union[Type[Disk], Type[HalfDisk], Type[QuarterDisk]]] = QuarterDisk
+    sketch_class: ClassVar[Union[type[Disk], type[HalfDisk], type[QuarterDisk]]] = QuarterDisk
 
     def __init__(self, axis_point_1: PointType, axis_point_2: PointType, radius_point_1: PointType):
         axis_point_1 = np.asarray(axis_point_1)
@@ -67,7 +67,7 @@ class QuarterCylinder(RoundSolidShape):
                 "Axis and radius vectors are not perpendicular", f"Difference: {diff}, tolerance: {TOL}"
             )
 
-        transform_2: List[tr.Transformation] = [tr.Translation(axis)]
+        transform_2: list[tr.Transformation] = [tr.Translation(axis)]
 
         super().__init__(self.sketch_class(axis_point_1, radius_point_1, axis), transform_2, None)
 

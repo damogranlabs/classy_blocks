@@ -1,6 +1,6 @@
 import abc
 import warnings
-from typing import Optional, Tuple, Union
+from typing import Optional, Union
 
 import numpy as np
 import scipy.optimize
@@ -15,7 +15,7 @@ from classy_blocks.util.constants import TOL
 class CurveBase(ElementBase):
     """A parametric/analytic/interpolated curve in 3D space: <point> = f(t)"""
 
-    bounds: Tuple[float, float]
+    bounds: tuple[float, float]
 
     def _check_param(self, param: Union[int, float]) -> Union[int, float]:
         """Checks that the passed parameter is legit for the given set of points"""
@@ -24,7 +24,7 @@ class CurveBase(ElementBase):
 
         return param
 
-    def _get_params(self, param_from: Optional[float] = None, param_to: Optional[float] = None) -> Tuple[float, float]:
+    def _get_params(self, param_from: Optional[float] = None, param_to: Optional[float] = None) -> tuple[float, float]:
         """Always take lower/upper bound if params are not supplied"""
         if param_from is None:
             param_from = self.bounds[0]

@@ -1,4 +1,4 @@
-from typing import List, Set, Type, TypeVar
+from typing import TypeVar
 
 import numpy as np
 import scipy.spatial
@@ -38,7 +38,7 @@ class PointRegistryBase:
     def _compile_unique(self) -> NPPointListType:
         # create a list of unique vertices, taken from the list of operations
         unique_points = []
-        handled_indexes: Set[int] = set()
+        handled_indexes: set[int] = set()
 
         for point in self._repeated_points:
             coincident_indexes = self._repeated_point_tree.query_ball_point(point, r=self.merge_tol, workers=1)
@@ -50,7 +50,7 @@ class PointRegistryBase:
 
         return np.array(unique_points)
 
-    def _query_unique(self, positions) -> List[int]:
+    def _query_unique(self, positions) -> list[int]:
         """A shortcut to KDTree.query_ball_point()"""
         result = self._unique_point_tree.query_ball_point(positions, r=self.merge_tol, workers=1)
 
@@ -59,7 +59,7 @@ class PointRegistryBase:
 
         return result
 
-    def _query_repeated(self, positions) -> List[int]:
+    def _query_repeated(self, positions) -> list[int]:
         result = self._repeated_point_tree.query_ball_point(positions, r=self.merge_tol, workers=1)
 
         if len(np.shape(positions)) > 1:
@@ -75,7 +75,7 @@ class PointRegistryBase:
 
         return indexes[0]
 
-    def find_point_cells(self, position: PointType) -> List[int]:
+    def find_point_cells(self, position: PointType) -> list[int]:
         """Returns indexes of every cell that has a point at given position"""
         indexes = [i // self.cell_size for i in self._query_repeated(position)]
 
@@ -87,11 +87,11 @@ class PointRegistryBase:
         end_index = start_index + self.cell_size
         return self._repeated_points[start_index:end_index]
 
-    def find_cell_indexes(self, cell: int) -> List[int]:
+    def find_cell_indexes(self, cell: int) -> list[int]:
         """Returns indexes of points that define this cell"""
         return self.cell_addressing[cell]
 
-    def find_cell_neighbours(self, cell: int) -> List[int]:
+    def find_cell_neighbours(self, cell: int) -> list[int]:
         """Returns indexes of this and every touching cell"""
         cell_points = self.find_cell_points(cell)
 
@@ -108,7 +108,7 @@ class PointRegistryBase:
 
     @classmethod
     def from_addresses(
-        cls: Type[PointRegistryType], points: NPPointListType, addressing: List[IndexType], merge_tol: float = TOL
+        cls: type[PointRegistryType], points: NPPointListType, addressing: list[IndexType], merge_tol: float = TOL
     ) -> PointRegistryType:
         all_points = cls.flatten(
             [np.take(points, addr, axis=0) for addr in addressing], len(addressing) * cls.cell_size
@@ -131,7 +131,7 @@ class QuadPointRegistry(PointRegistryBase):
     cell_size = 4
 
     @classmethod
-    def from_sketch(cls: Type[PointRegistryType], sketch: Sketch, merge_tol: float = TOL) -> PointRegistryType:
+    def from_sketch(cls: type[PointRegistryType], sketch: Sketch, merge_tol: float = TOL) -> PointRegistryType:
         return cls(
             cls.flatten([face.point_array for face in sketch.faces], len(sketch.faces) * cls.cell_size), merge_tol
         )
@@ -144,7 +144,7 @@ class HexPointRegistry(PointRegistryBase):
 
     @classmethod
     def from_operations(
-        cls: Type[PointRegistryType], operations: List[Operation], merge_tol: float = TOL
+        cls: type[PointRegistryType], operations: list[Operation], merge_tol: float = TOL
     ) -> PointRegistryType:
         all_points = cls.flatten([op.point_array for op in operations], len(operations) * cls.cell_size)
 

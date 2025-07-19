@@ -22,7 +22,7 @@ mesh.assemble()
 
 # move the middle vertex to a sub-optimal position
 finder = cb.GeometricFinder(mesh)
-mid_vertex = list(finder.find_in_sphere([0, 0, 0]))[0]
+mid_vertex = next(iter(finder.find_in_sphere([0, 0, 0])))
 mid_vertex.translate([0.6, 0.6, 0.6])
 
 # find a better spot for the above point using automatic optimization

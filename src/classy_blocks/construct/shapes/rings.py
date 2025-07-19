@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import Union
 
 import numpy as np
 
@@ -130,7 +130,7 @@ class RevolvedRing(ExtrudedRing):
 
         revolve = Revolve(cross_section, angle, self.axis, self.axis_point_1)
 
-        self.revolves: List[Operation] = [
+        self.revolves: list[Operation] = [
             revolve.copy().rotate(i * angle, self.axis, self.center_point) for i in range(n_segments)
         ]
 
@@ -151,7 +151,7 @@ class RevolvedRing(ExtrudedRing):
 
     # methods/properties that differ from a lofted-sketch type of shape
     @property
-    def operations(self) -> List[Operation]:
+    def operations(self) -> list[Operation]:
         return self.revolves
 
     def chop_axial(self, **kwargs):

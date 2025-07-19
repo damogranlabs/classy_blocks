@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.grading.chop import Chop
@@ -6,9 +6,9 @@ from classy_blocks.items.wires.wire import Wire
 
 
 class WireManager:
-    def __init__(self, wires: List[Wire]):
+    def __init__(self, wires: list[Wire]):
         self.wires = wires
-        self.chops: List[Chop] = []
+        self.chops: list[Chop] = []
 
     def __getitem__(self, index) -> Wire:
         return self.wires[index]
@@ -46,7 +46,7 @@ class WireManager:
         return True
 
     @property
-    def undefined(self) -> List[Wire]:
+    def undefined(self) -> list[Wire]:
         """Returns a list of wires that have no gradings defined"""
         return [wire for wire in self.wires if not wire.is_defined]
 

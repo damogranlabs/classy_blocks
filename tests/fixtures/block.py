@@ -1,4 +1,4 @@
-from typing import List, get_args
+from typing import get_args
 
 from classy_blocks.cbtyping import DirectionType
 from classy_blocks.construct.flat.face import Face
@@ -12,7 +12,7 @@ from tests.fixtures.data import DataTestCase
 class BlockTestCase(DataTestCase):
     """Block item tests"""
 
-    def make_vertices(self, index: int) -> List[Vertex]:
+    def make_vertices(self, index: int) -> list[Vertex]:
         """Generates Vertex objects for testing"""
         data = self.get_single_data(index)
         points = data.points

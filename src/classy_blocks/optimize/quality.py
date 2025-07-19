@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import numba  # type:ignore
 import numpy as np
 from nptyping import Int32, NDArray, Shape
@@ -39,7 +37,7 @@ def get_center_point(points: NPPointListType) -> NPPointType:
 
 
 @numba.jit(nopython=True, cache=True)
-def get_quad_normal(points: NPPointListType) -> Tuple[NPVectorType, NPVectorType, float]:
+def get_quad_normal(points: NPPointListType) -> tuple[NPVectorType, NPVectorType, float]:
     normal = np.zeros(3)
     center = get_center_point(points)
 

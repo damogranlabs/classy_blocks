@@ -1,5 +1,3 @@
-from typing import Dict, List, Tuple
-
 from classy_blocks.base.exceptions import EdgeNotFoundError
 from classy_blocks.construct.edges import EdgeData
 from classy_blocks.construct.operations.operation import Operation
@@ -7,7 +5,7 @@ from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
 from classy_blocks.items.vertex import Vertex
 
-EdgeLocationType = Tuple[int, int]
+EdgeLocationType = tuple[int, int]
 
 
 def get_location(vertex_1, vertex_2):
@@ -21,7 +19,7 @@ class EdgeList:
     """Handling of the 'edges' part of blockMeshDict"""
 
     def __init__(self) -> None:
-        self.edges: Dict[EdgeLocationType, Edge] = {}
+        self.edges: dict[EdgeLocationType, Edge] = {}
 
     def find(self, vertex_1: Vertex, vertex_2: Vertex) -> Edge:
         location = get_location(vertex_1, vertex_2)
@@ -47,7 +45,7 @@ class EdgeList:
 
         return edge
 
-    def add_from_operation(self, vertices: List[Vertex], operation: Operation) -> List[Tuple[int, int, Edge]]:
+    def add_from_operation(self, vertices: list[Vertex], operation: Operation) -> list[tuple[int, int, Edge]]:
         """Queries the operation for edge data and creates edge objects from it"""
         data_frame = operation.edges
         edges = []

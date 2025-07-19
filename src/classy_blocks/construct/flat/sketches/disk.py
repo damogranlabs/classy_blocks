@@ -1,5 +1,5 @@
 import abc
-from typing import ClassVar, List, Optional
+from typing import ClassVar, Optional
 
 import numpy as np
 
@@ -32,7 +32,7 @@ class FanPattern:
     def get_outer_points(self, angles) -> NPPointListType:
         return np.array([f.rotate(self.radius_point, a, self.normal, self.center_point) for a in angles])
 
-    def get_inner_points(self, angles, ratios: List[float]) -> NPPointListType:
+    def get_inner_points(self, angles, ratios: list[float]) -> NPPointListType:
         """Inner points are scaled back by defined ratios
         that repeat over the circumference"""
         points = self.get_outer_points(angles)
@@ -70,7 +70,7 @@ class DiskBase(MappedSketch, abc.ABC):
         0.792025,
     )
 
-    def __init__(self, positions: PointListType, quads: List[IndexType]):
+    def __init__(self, positions: PointListType, quads: list[IndexType]):
         # Center point as a constant.
         self.origo_point = Point(positions[0])
 
@@ -177,11 +177,11 @@ class DiskBase(MappedSketch, abc.ABC):
         return len(self.grid[1])
 
     @property
-    def core(self) -> List[Face]:
+    def core(self) -> list[Face]:
         return self.grid[0]
 
     @property
-    def shell(self) -> List[Face]:
+    def shell(self) -> list[Face]:
         return self.grid[-1]
 
     @property

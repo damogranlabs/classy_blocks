@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional
 
 import numpy as np
 
@@ -13,7 +13,7 @@ class AnalyticCurve(FunctionCurveBase):
 
     `P = f(t)`"""
 
-    def __init__(self, function: ParamCurveFuncType, bounds: Tuple[float, float]):
+    def __init__(self, function: ParamCurveFuncType, bounds: tuple[float, float]):
         self.function = function
         self.bounds = bounds
 
@@ -34,7 +34,7 @@ class LineCurve(AnalyticCurve):
 
     To extend the line  beyond given points, provide custom 'bounds'."""
 
-    def __init__(self, point_1: PointType, point_2: PointType, bounds: Tuple[float, float] = (0, 1)):
+    def __init__(self, point_1: PointType, point_2: PointType, bounds: tuple[float, float] = (0, 1)):
         self.point_1 = Point(point_1)
         self.point_2 = Point(point_2)
 
@@ -60,7 +60,7 @@ class CircleCurve(AnalyticCurve):
     this curve to an arc."""
 
     def __init__(
-        self, origin: PointType, rim: PointType, normal: VectorType, bounds: Tuple[float, float] = (0, 2 * np.pi)
+        self, origin: PointType, rim: PointType, normal: VectorType, bounds: tuple[float, float] = (0, 2 * np.pi)
     ):
         self.origin = Point(origin)
         self.rim = Point(rim)

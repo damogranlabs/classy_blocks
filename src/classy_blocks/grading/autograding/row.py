@@ -1,5 +1,4 @@
 import dataclasses
-from typing import List, Set
 
 from classy_blocks.cbtyping import ChopTakeType, DirectionType
 from classy_blocks.items.block import Block
@@ -22,15 +21,15 @@ class Entry:
         return self.block.axes[self.heading]
 
     @property
-    def wires(self) -> List[Wire]:
+    def wires(self) -> list[Wire]:
         return self.axis.wires.wires
 
     @property
-    def neighbours(self) -> Set[Axis]:
+    def neighbours(self) -> set[Axis]:
         return self.axis.neighbours
 
     @property
-    def lengths(self) -> List[float]:
+    def lengths(self) -> list[float]:
         return [wire.length for wire in self.wires]
 
 
@@ -43,7 +42,7 @@ class Row:
     chopped by specifying a single block only (for example, direction 2 in a cylinder)"""
 
     def __init__(self) -> None:
-        self.entries: List[Entry] = []
+        self.entries: list[Entry] = []
 
         # the whole row must share the same cell count;
         # it's determined if it's greater than 0
@@ -88,7 +87,7 @@ class Row:
                 self.count = wire.grading.count
 
     def get_length(self, take: ChopTakeType = "avg"):
-        lengths: List[float] = []
+        lengths: list[float] = []
         for entry in self.entries:
             lengths += entry.lengths
 
@@ -100,11 +99,11 @@ class Row:
 
         return sum(lengths) / len(self.entries) / 4  # "avg"
 
-    def get_axes(self) -> List[Axis]:
+    def get_axes(self) -> list[Axis]:
         return [entry.axis for entry in self.entries]
 
-    def get_wires(self) -> List[Wire]:
-        wires: List[Wire] = []
+    def get_wires(self) -> list[Wire]:
+        wires: list[Wire] = []
 
         for axis in self.get_axes():
             wires += axis.wires
@@ -112,5 +111,5 @@ class Row:
         return wires
 
     @property
-    def blocks(self) -> List[Block]:
+    def blocks(self) -> list[Block]:
         return [entry.block for entry in self.entries]

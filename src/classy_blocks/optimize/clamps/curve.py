@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import Optional
 
 import numpy as np
 
@@ -46,7 +46,7 @@ class LineClamp(ClampBase):
     (and beyond if different bounds are specified)."""
 
     def __init__(
-        self, position: PointType, point_1: PointType, point_2: PointType, bounds: Optional[Tuple[float, float]] = None
+        self, position: PointType, point_1: PointType, point_2: PointType, bounds: Optional[tuple[float, float]] = None
     ):
         position = np.array(position)
         point_1 = np.array(point_1)
@@ -61,7 +61,7 @@ class LineClamp(ClampBase):
         super().__init__(position, function, [list(bounds)])
 
     @property
-    def initial_guess(self) -> List[float]:
+    def initial_guess(self) -> list[float]:
         # Finding the closest point on a line is reliable enough
         # so that specific initial parameters are not needed
         return [0]
@@ -76,7 +76,7 @@ class RadialClamp(ClampBase):
     at the same position all the way around the circle (with radius <r>)"""
 
     def __init__(
-        self, position: PointType, center: PointType, normal: VectorType, bounds: Optional[List[float]] = None
+        self, position: PointType, center: PointType, normal: VectorType, bounds: Optional[list[float]] = None
     ):
         position = np.array(position)
         initial_point = np.copy(position)

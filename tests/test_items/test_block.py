@@ -1,5 +1,3 @@
-from typing import List
-
 import numpy as np
 from parameterized import parameterized
 
@@ -209,7 +207,7 @@ class BlockSimpleGradingTests(BlockTestCase):
 class BlockEdgeGradingTests(BlockTestCase):
     """Refer to test_edge_grading.py for more involved (function) tests"""
 
-    def make_vertices(self, index: int) -> List[Vertex]:
+    def make_vertices(self, index: int) -> list[Vertex]:
         vertices = super().make_vertices(index)
 
         if index == 1:

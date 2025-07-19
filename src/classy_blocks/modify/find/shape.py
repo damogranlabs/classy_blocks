@@ -1,5 +1,3 @@
-from typing import List, Set
-
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketches.disk import Disk
 from classy_blocks.construct.point import Point
@@ -23,29 +21,29 @@ class RoundSolidFinder(FinderBase):
 
         return self.shape.sketch_1
 
-    def _find_from_points(self, points: List[Point]) -> Set[Vertex]:
-        vertices: Set[Vertex] = set()
+    def _find_from_points(self, points: list[Point]) -> set[Vertex]:
+        vertices: set[Vertex] = set()
 
         for point in points:
             vertices.update(self._find_by_position(point.position))
 
         return vertices
 
-    def _find_from_faces(self, faces: List[Face]) -> Set[Vertex]:
-        vertices: Set[Vertex] = set()
+    def _find_from_faces(self, faces: list[Face]) -> set[Vertex]:
+        vertices: set[Vertex] = set()
 
         for face in faces:
             vertices.update(self._find_from_points(face.points))
 
         return vertices
 
-    def find_core(self, end_face: bool = False) -> Set[Vertex]:
+    def find_core(self, end_face: bool = False) -> set[Vertex]:
         """Returns a list of vertices that define
         inner vertices of a round shape"""
         faces = self._get_sketch(end_face).core
         return self._find_from_faces(faces)
 
-    def find_shell(self, end_face: bool = False) -> Set[Vertex]:
+    def find_shell(self, end_face: bool = False) -> set[Vertex]:
         """Returns a list of vertices on the
         outer edge of the shape.
 

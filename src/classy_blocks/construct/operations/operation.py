@@ -1,5 +1,5 @@
 import warnings
-from typing import Dict, List, Optional, Union, get_args
+from typing import Optional, Union, get_args
 
 import numpy as np
 from typing_extensions import Unpack
@@ -37,12 +37,12 @@ class Operation(ElementBase):
         self.bottom_face = bottom_face
         self.top_face = top_face
 
-        self.side_edges: List[EdgeData] = [Line(), Line(), Line(), Line()]
-        self.side_projects: List[Optional[str]] = [None, None, None, None]
-        self.side_patches: List[Optional[str]] = [None, None, None, None]
+        self.side_edges: list[EdgeData] = [Line(), Line(), Line(), Line()]
+        self.side_projects: list[Optional[str]] = [None, None, None, None]
+        self.side_patches: list[Optional[str]] = [None, None, None, None]
 
         # instructions for cell counts and gradings
-        self.chops: Dict[DirectionType, List[Chop]] = {0: [], 1: [], 2: []}
+        self.chops: dict[DirectionType, list[Chop]] = {0: [], 1: [], 2: []}
 
         # optionally, put the block in a cell zone
         self.cell_zone = ""
@@ -175,7 +175,7 @@ class Operation(ElementBase):
                 for point_index in (index_1, index_2):
                     face.points[point_index].project(label)
 
-    def set_patch(self, sides: Union[OrientType, List[OrientType]], name: str) -> None:
+    def set_patch(self, sides: Union[OrientType, list[OrientType]], name: str) -> None:
         """Assign a patch to given side of the block;
 
         Args:
@@ -213,7 +213,7 @@ class Operation(ElementBase):
         return [self.bottom_face, self.top_face, *self.side_edges]
 
     @property
-    def points(self) -> List[Point]:
+    def points(self) -> list[Point]:
         """Returns a list of Point objects that define this Operation"""
         return self.bottom_face.points + self.top_face.points
 
@@ -252,7 +252,7 @@ class Operation(ElementBase):
         to using them for a loft/extrude etc (they point inside the operation by default)."""
         return Face([self.point_array[i] for i in constants.FACE_MAP[side]])
 
-    def get_all_faces(self) -> Dict[OrientType, Face]:
+    def get_all_faces(self) -> dict[OrientType, Face]:
         """Returns a list of all faces"""
         return {orient: self.get_face(orient) for orient in get_args(OrientType)}
 
@@ -275,7 +275,7 @@ class Operation(ElementBase):
         vector that connects returned face and 'point' (viewer)."""
         point = np.array(point)
         faces = self.get_all_faces()
-        orients: List[OrientType] = ["bottom", "left", "front"]
+        orients: list[OrientType] = ["bottom", "left", "front"]
 
         for orient in orients:
             faces[orient].invert()
@@ -285,9 +285,9 @@ class Operation(ElementBase):
         return face_list[np.argmax(dotps)]
 
     @property
-    def patch_names(self) -> Dict[OrientType, str]:
+    def patch_names(self) -> dict[OrientType, str]:
         """Returns patches names on sides where they are specified"""
-        patch_names: Dict[OrientType, str] = {}
+        patch_names: dict[OrientType, str] = {}
 
         def add(orient, name):
             if name is not None:
@@ -353,7 +353,7 @@ class Operation(ElementBase):
         return super().transform(transforms)
 
     @classmethod
-    def from_series(cls, faces: List[Face]) -> "Operation":
+    def from_series(cls, faces: list[Face]) -> "Operation":
         """Creates a Loft from a list of faces.
         At least two are required.
         From faces in between, side edges are created:
@@ -368,7 +368,7 @@ class Operation(ElementBase):
         if len(faces) == 2:
             return loft
 
-        edge_points: List[List[NPPointType]] = []
+        edge_points: list[list[NPPointType]] = []
 
         # collect points for splines on each side
         for i in range(4):

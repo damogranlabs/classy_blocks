@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import Union
 
 from classy_blocks.cbtyping import IndexType, NPPointType
 from classy_blocks.construct.flat.face import Face
@@ -18,9 +18,9 @@ class Mapper:
     def __init__(self, merge_tol: float = TOL) -> None:
         self.tol = merge_tol
 
-        self.points: List[NPPointType] = []
-        self.indexes: List[IndexType] = []
-        self.elements: List[Union[Face, Operation]] = []
+        self.points: list[NPPointType] = []
+        self.indexes: list[IndexType] = []
+        self.elements: list[Union[Face, Operation]] = []
 
     def _add_point(self, point: NPPointType) -> int:
         # TODO: this code is repeated several times all over;
@@ -45,7 +45,7 @@ class Mapper:
         self.elements.append(element)
 
     @classmethod
-    def from_map(cls, points: List[NPPointType], indexes: List[IndexType], elements: List[ElementType]) -> "Mapper":
+    def from_map(cls, points: list[NPPointType], indexes: list[IndexType], elements: list[ElementType]) -> "Mapper":
         """Creates a ready-made mapper from a sketch/shape that already has points/indexes defined"""
         if len(indexes) != len(elements):
             raise ValueError("Number of indexes and elements don't match!")

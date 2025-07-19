@@ -1,4 +1,4 @@
-from typing import Tuple, get_args
+from typing import get_args
 
 from classy_blocks.assemble.depot import Depot
 from classy_blocks.assemble.dump import AssembledDump
@@ -89,7 +89,7 @@ class MeshAssembler:
             if solid.geometry is not None:
                 self.settings.add_geometry(solid.geometry)
 
-    def _create_patches(self, block_list: BlockList) -> Tuple[PatchList, FaceList]:
+    def _create_patches(self, block_list: BlockList) -> tuple[PatchList, FaceList]:
         patch_list = PatchList()
         face_list = FaceList()
 

@@ -1,5 +1,3 @@
-from typing import List, Set
-
 from classy_blocks.base.exceptions import VertexNotFoundError
 from classy_blocks.cbtyping import NPPointType
 from classy_blocks.construct.point import Point
@@ -12,7 +10,7 @@ class DuplicatedEntry:
     """A pair vertex:{set of slave patches} that describes
     a duplicated vertex on mentioned patches"""
 
-    def __init__(self, vertex: Vertex, patches: Set[str]):
+    def __init__(self, vertex: Vertex, patches: set[str]):
         self.vertex = vertex
         self.patches = patches
 
@@ -25,14 +23,14 @@ class DuplicatedEntry:
 class VertexList:
     """Handling of the 'vertices' part of blockMeshDict"""
 
-    def __init__(self, vertices: List[Vertex]) -> None:
+    def __init__(self, vertices: list[Vertex]) -> None:
         self.vertices = vertices
 
         # a collection of duplicated vertices
         # belonging to a certain patch name
-        self.duplicated: List[DuplicatedEntry] = []
+        self.duplicated: list[DuplicatedEntry] = []
 
-    def find_duplicated(self, position: NPPointType, slave_patches: Set[str]) -> Vertex:
+    def find_duplicated(self, position: NPPointType, slave_patches: set[str]) -> Vertex:
         """Finds an appropriate entry in self.duplicated, if any"""
         # TODO: use vertex indexing
         for dupe in self.duplicated:
@@ -42,7 +40,7 @@ class VertexList:
 
         raise VertexNotFoundError(f"No duplicated vertex found: {position} {slave_patches}")
 
-    def add_duplicated(self, point: Point, slave_patches: Set[str]) -> Vertex:
+    def add_duplicated(self, point: Point, slave_patches: set[str]) -> Vertex:
         """Re-use existing vertices when there's already one at the position;
         unless that vertex belongs to a slave of a face-merged pair -
         in that case add a duplicate in the same position anyway"""

@@ -1,4 +1,5 @@
-from typing import List, Sequence, Type, Union
+from collections.abc import Sequence
+from typing import Union
 
 import numpy as np
 
@@ -30,11 +31,11 @@ from classy_blocks.util.constants import TOL
 class GridBase:
     """A list of cells and junctions"""
 
-    cell_class: Type[CellBase]
-    connection_registry_class: Type[ConnectionRegistryBase]
-    face_registry_class: Type[FaceRegistryBase]
+    cell_class: type[CellBase]
+    connection_registry_class: type[ConnectionRegistryBase]
+    face_registry_class: type[FaceRegistryBase]
 
-    def __init__(self, points: NPPointListType, addressing: List[IndexType]):
+    def __init__(self, points: NPPointListType, addressing: list[IndexType]):
         # work on a fixed point array and only refer to it instead of building
         # new numpy arrays for every calculation
         self.points = points
@@ -113,8 +114,8 @@ class GridBase:
         self.junctions[leader_index].add_link(link, follower_index)
 
     @property
-    def clamps(self) -> List[ClampBase]:
-        clamps: List[ClampBase] = []
+    def clamps(self) -> list[ClampBase]:
+        clamps: list[ClampBase] = []
 
         for junction in self.junctions:
             if junction.clamp is not None:
@@ -178,7 +179,7 @@ class HexGrid(GridBase):
         merge_tol: float = TOL,
     ) -> "HexGrid":
         """Creates a grid from a list of elements"""
-        ops: List[Operation] = []
+        ops: list[Operation] = []
         for element in elements:
             if isinstance(element, Operation):
                 ops.append(element)

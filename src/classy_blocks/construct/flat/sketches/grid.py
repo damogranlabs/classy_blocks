@@ -1,5 +1,3 @@
-from typing import List
-
 import numpy as np
 
 from classy_blocks.cbtyping import PointType
@@ -27,7 +25,7 @@ class Grid(Sketch):
         coords_1 = np.linspace(point_1[0], point_2[0], num=count_1 + 1)
         coords_2 = np.linspace(point_1[1], point_2[1], num=count_2 + 1)
 
-        self._grid: List[List[Face]] = []
+        self._grid: list[list[Face]] = []
 
         for iy in range(count_2):
             self.grid.append([])

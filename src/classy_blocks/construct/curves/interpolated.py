@@ -1,5 +1,5 @@
 import abc
-from typing import Optional, Type
+from typing import Optional
 
 import numpy as np
 
@@ -23,7 +23,7 @@ class InterpolatedCurveBase(FunctionCurveBase, abc.ABC):
     Length, discretization, center and other calculated properties
     are based on that function rather than specified points."""
 
-    _interpolator: Type[InterpolatorBase]
+    _interpolator: type[InterpolatorBase]
 
     def __init__(self, points: PointListType, extrapolate: bool = False, equalize: bool = True):
         self.series = Series(points)

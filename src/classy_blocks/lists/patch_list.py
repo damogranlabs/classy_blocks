@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Dict, List, Optional, Set
+from typing import Optional
 
 from classy_blocks.base.exceptions import PatchNotFoundError
 from classy_blocks.cbtyping import OrientType
@@ -14,10 +14,10 @@ class PatchList:
 
     def __init__(self) -> None:
         self.patches: OrderedDict[str, Patch] = OrderedDict()
-        self.default: Dict[str, str] = {}
-        self.merged: List[List[str]] = []  # data for the mergePatchPairs entry
+        self.default: dict[str, str] = {}
+        self.merged: list[list[str]] = []  # data for the mergePatchPairs entry
 
-    def add(self, vertices: List[Vertex], operation: Operation) -> None:
+    def add(self, vertices: list[Vertex], operation: Operation) -> None:
         """Create Patches from operation's patch_names"""
         for orient, name in operation.patch_names.items():
             self.add_side(name, orient, vertices)
@@ -29,7 +29,7 @@ class PatchList:
 
         return self.patches[name]
 
-    def find(self, vertices: Set[Vertex]) -> Patch:
+    def find(self, vertices: set[Vertex]) -> Patch:
         # TODO: use FaceRegistry
         for patch in self.patches.values():
             for side in patch.sides:
@@ -38,11 +38,11 @@ class PatchList:
 
         raise PatchNotFoundError
 
-    def add_side(self, patch_name: str, orient: OrientType, vertices: List[Vertex]) -> None:
+    def add_side(self, patch_name: str, orient: OrientType, vertices: list[Vertex]) -> None:
         """Adds a quad to an existing patch or creates a new one"""
         self.get(patch_name).add_side(Side(orient, vertices))
 
-    def modify(self, name: str, kind: str, settings: Optional[List[str]] = None) -> None:
+    def modify(self, name: str, kind: str, settings: Optional[list[str]] = None) -> None:
         """Changes patch's properties"""
         patch = self.get(name)
         patch.kind = kind

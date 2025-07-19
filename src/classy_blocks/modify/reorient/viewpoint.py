@@ -1,5 +1,3 @@
-from typing import Dict, List
-
 import numpy as np
 from scipy.spatial import ConvexHull
 
@@ -13,7 +11,7 @@ from classy_blocks.util import functions as f
 class Triangle:
     """A 'Simplex' in scipy terms, but in 3D this is just a triangle."""
 
-    def __init__(self, points: List[NPPointType]):
+    def __init__(self, points: list[NPPointType]):
         self.points = points
 
     @property
@@ -41,7 +39,7 @@ class Triangle:
 class Quadrangle:
     """A block face."""
 
-    def __init__(self, triangles: List[Triangle]):
+    def __init__(self, triangles: list[Triangle]):
         if len(triangles) > 2:
             raise DegenerateGeometryError("A Quadrangle can only be defined with two triangles!")
 
@@ -56,10 +54,10 @@ class Quadrangle:
         self.points = [*unique_points, *common_points]  # will be sorted later
 
     @staticmethod
-    def get_unique_points(list_1: List[NPPointType], list_2: List[NPPointType]) -> List[NPPointType]:
+    def get_unique_points(list_1: list[NPPointType], list_2: list[NPPointType]) -> list[NPPointType]:
         """Returns points from list_1 that are not in list_2"""
         common_points = Quadrangle.get_common_points(list_1, list_2)
-        unique_points: List[NPPointType] = []
+        unique_points: list[NPPointType] = []
 
         for point in [*list_1, *list_2]:
             unique = True
@@ -75,9 +73,9 @@ class Quadrangle:
         return unique_points
 
     @staticmethod
-    def get_common_points(list_1: List[NPPointType], list_2: List[NPPointType]) -> List[NPPointType]:
+    def get_common_points(list_1: list[NPPointType], list_2: list[NPPointType]) -> list[NPPointType]:
         """Returns points on the same position in both lists"""
-        common_points: List[NPPointType] = []
+        common_points: list[NPPointType] = []
 
         for point_1 in list_1:
             for point_2 in list_2:
@@ -113,7 +111,7 @@ class ViewpointReorienter:
         self.observer = np.array(observer)
         self.ceiling = np.array(ceiling)
 
-    def _make_triangles(self, points: NPPointListType) -> List[Triangle]:
+    def _make_triangles(self, points: NPPointListType) -> list[Triangle]:
         """Creates triangles from hull's simplices"""
         hull = ConvexHull(points)
         center = np.average(points, axis=0)
@@ -129,7 +127,7 @@ class ViewpointReorienter:
 
         return triangles
 
-    def _get_normals(self, center: NPPointType) -> Dict[OrientType, NPVectorType]:
+    def _get_normals(self, center: NPPointType) -> dict[OrientType, NPVectorType]:
         v_observer = f.unit_vector(np.array(self.observer) - center)
         v_ceiling = f.unit_vector(np.array(self.ceiling) - center)
 
@@ -149,7 +147,7 @@ class ViewpointReorienter:
             "right": -v_left,
         }
 
-    def _get_aligned(self, triangles: List[Triangle], vector: NPVectorType) -> List[Triangle]:
+    def _get_aligned(self, triangles: list[Triangle], vector: NPVectorType) -> list[Triangle]:
         return sorted(triangles, key=lambda t: np.dot(t.normal, vector))[-2:]
 
     def reorient(self, operation: Operation):
@@ -158,7 +156,7 @@ class ViewpointReorienter:
 
         remaining_triangles = set(triangles)
 
-        quads: Dict[OrientType, Quadrangle] = {}
+        quads: dict[OrientType, Quadrangle] = {}
 
         for key, normal in normals.items():
             # Take two most nicely aligned triangles

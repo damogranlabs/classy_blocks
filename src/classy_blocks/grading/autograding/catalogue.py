@@ -1,5 +1,5 @@
 import functools
-from typing import Dict, List, get_args
+from typing import get_args
 
 from classy_blocks.base.exceptions import BlockNotFoundError, NoInstructionError
 from classy_blocks.cbtyping import DirectionType
@@ -23,7 +23,7 @@ class Instruction:
 
     def __init__(self, block: Block):
         self.block = block
-        self.directions: List[bool] = [False] * 3
+        self.directions: list[bool] = [False] * 3
 
     @property
     def is_defined(self):
@@ -39,13 +39,13 @@ class RowCatalogue:
     def __init__(self, mesh: Mesh):
         self.mesh = mesh
 
-        self.rows: Dict[DirectionType, List[Row]] = {0: [], 1: [], 2: []}
+        self.rows: dict[DirectionType, list[Row]] = {0: [], 1: [], 2: []}
         self.instructions = [Instruction(block) for block in mesh.blocks]
 
         for i in get_args(DirectionType):
             self._populate(i)
 
-    def _get_undefined_instructions(self, direction: DirectionType) -> List[Instruction]:
+    def _get_undefined_instructions(self, direction: DirectionType) -> list[Instruction]:
         return [i for i in self.instructions if not i.directions[direction]]
 
     def _find_instruction(self, block: Block):
@@ -82,7 +82,7 @@ class RowCatalogue:
             self._add_block_to_row(row, undefined_instructions[0], direction)
             self.rows[direction].append(row)
 
-    def get_row_blocks(self, block: Block, direction: DirectionType) -> List[Block]:
+    def get_row_blocks(self, block: Block, direction: DirectionType) -> list[Block]:
         for row in self.rows[direction]:
             if block in row.blocks:
                 return row.blocks

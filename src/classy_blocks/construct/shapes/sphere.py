@@ -1,5 +1,3 @@
-from typing import Dict, List
-
 import numpy as np
 
 from classy_blocks.cbtyping import NPPointType, NPVectorType, PointType, VectorType
@@ -11,7 +9,7 @@ from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
 
-def get_named_points(qdisk: QuarterDisk) -> Dict[str, NPPointType]:
+def get_named_points(qdisk: QuarterDisk) -> dict[str, NPPointType]:
     """Returns a dictionary of named points for easier construction of sphere;
     points refer to QuarterDisk:
 
@@ -43,7 +41,7 @@ def eighth_sphere_lofts(
     normal: NPVectorType,
     geometry_label: str,
     diagonal_angle: float = np.pi / 5,
-) -> List[Loft]:
+) -> list[Loft]:
     """A collection of 4 lofts for an eighth of a sphere;
     used to construct all other sphere pieces and derivatives"""
     # An 8th of a sphere has 3 equal flat sides and one round;
@@ -71,7 +69,7 @@ def eighth_sphere_lofts(
     point_p2u = f.rotate(bpoints["P2"], -diagonal_angle, axes["diagonal"], center_point)
 
     # 4 lofts for an eighth sphere, 1 core and 3 shell
-    lofts: List[Loft] = []
+    lofts: list[Loft] = []
 
     # core
     core = Loft(

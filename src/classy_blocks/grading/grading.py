@@ -37,7 +37,6 @@ https://gitlab.com/herpes-free-engineer-hpe/blockmeshgradingweb/-/blob/master/ca
 import dataclasses
 import math
 import warnings
-from typing import List
 
 from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.cbtyping import GradingSpecType
@@ -57,9 +56,9 @@ class Grading:
         self.inverted: bool = False
 
         # a list of user-input data
-        self.chops: List[Chop] = []
+        self.chops: list[Chop] = []
         # results from chop.calculate():
-        self._chop_data: List[ChopData] = []
+        self._chop_data: list[ChopData] = []
 
     def add_chop(self, chop: Chop) -> None:
         if not (0 < chop.length_ratio <= 1):
@@ -72,7 +71,7 @@ class Grading:
         self._chop_data = []
 
     @property
-    def chop_data(self) -> List[ChopData]:
+    def chop_data(self) -> list[ChopData]:
         if len(self._chop_data) < len(self.chops):
             # Chops haven't been calculated yet
             self._chop_data = []
@@ -82,7 +81,7 @@ class Grading:
 
         return self._chop_data
 
-    def get_specification(self, inverted: bool) -> List[GradingSpecType]:
+    def get_specification(self, inverted: bool) -> list[GradingSpecType]:
         if inverted:
             chops = list(reversed(self.chop_data))
         else:
@@ -91,7 +90,7 @@ class Grading:
         return [data.get_specification(inverted) for data in chops]
 
     @property
-    def specification(self) -> List[GradingSpecType]:
+    def specification(self) -> list[GradingSpecType]:
         # a list of [length_ratio, count, total_expansion] for each chop
         return self.get_specification(self.inverted)
 

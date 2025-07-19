@@ -1,5 +1,4 @@
 import functools
-from typing import List
 
 import numpy as np
 
@@ -18,8 +17,8 @@ class SharedPoint:
     def __init__(self, point: Point):
         self.point = point
 
-        self.faces: List[Face] = []
-        self.indexes: List[int] = []
+        self.faces: list[Face] = []
+        self.indexes: list[int] = []
 
     def add(self, face: Face, index: int) -> None:
         """Adds an identifies face's point to the list of points at the same position"""
@@ -56,7 +55,7 @@ class SharedPointStore:
     """A collection of shared points"""
 
     def __init__(self) -> None:
-        self.shared_points: List[SharedPoint] = []
+        self.shared_points: list[SharedPoint] = []
 
     def find_by_point(self, point: Point) -> SharedPoint:
         for shpoint in self.shared_points:
@@ -83,11 +82,11 @@ class SharedPointStore:
 class AwareFace:
     """A face that is aware of their neighbours by using shared points"""
 
-    def __init__(self, face: Face, shared_points: List[SharedPoint]):
+    def __init__(self, face: Face, shared_points: list[SharedPoint]):
         self.face = face
         self.shared_points = shared_points
 
-    def get_offset_points(self, amount: float) -> List[NPPointType]:
+    def get_offset_points(self, amount: float) -> list[NPPointType]:
         """Offsets self.face in direction prescribed by shared points"""
         return [self.face.points[i].copy().translate(self.shared_points[i].normal * amount).position for i in range(4)]
 
@@ -105,7 +104,7 @@ class AwareFaceStore:
     """Operations on a number of faces; used for creating offset shapes
     a.k.a. Shell"""
 
-    def __init__(self, faces: List[Face]):
+    def __init__(self, faces: list[Face]):
         self.faces = faces
 
     @functools.cached_property
@@ -123,15 +122,15 @@ class AwareFaceStore:
         return AwareFace(face, shared_points)
 
     @functools.cached_property
-    def aware_faces(self) -> List[AwareFace]:
-        aware_faces: List[AwareFace] = []
+    def aware_faces(self) -> list[AwareFace]:
+        aware_faces: list[AwareFace] = []
 
         for face in self.faces:
             aware_faces.append(self.get_aware_face(face))
 
         return aware_faces
 
-    def get_offset_lofts(self, amount: float) -> List[Loft]:
+    def get_offset_lofts(self, amount: float) -> list[Loft]:
         offset_faces = [awf.get_offset_face(amount) for awf in self.aware_faces]
 
         return [Loft(face, offset_faces[i]) for i, face in enumerate(self.faces)]
@@ -159,7 +158,7 @@ class Shell(Shape):
     Shell.operations will hold Lofts in the same order as
     passed faces. Use axis=2 for chopping in offset direction."""
 
-    def __init__(self, faces: List[Face], amount: float):
+    def __init__(self, faces: list[Face], amount: float):
         self.faces = faces
         self.amount = amount
 

@@ -1,9 +1,9 @@
-from typing import ClassVar, Dict, List, Set, Tuple
+from typing import ClassVar
 
 from classy_blocks.cbtyping import IndexType, NPPointListType
 from classy_blocks.util.constants import EDGE_PAIRS
 
-ConnectionType = Tuple[int, int]
+ConnectionType = tuple[int, int]
 
 
 def get_key(index_1: int, index_2: int):
@@ -30,14 +30,14 @@ class Connection:
 
 
 class ConnectionRegistryBase:
-    edge_pairs: ClassVar[List[ConnectionType]]
+    edge_pairs: ClassVar[list[ConnectionType]]
 
-    def __init__(self, points: NPPointListType, addressing: List[IndexType]):
+    def __init__(self, points: NPPointListType, addressing: list[IndexType]):
         self.points = points
         self.addressing = addressing
 
-        self.connections: Dict[ConnectionType, Connection] = {}
-        self.nodes: Dict[int, Set[Connection]] = {i: set() for i in range(len(self.points))}
+        self.connections: dict[ConnectionType, Connection] = {}
+        self.nodes: dict[int, set[Connection]] = {i: set() for i in range(len(self.points))}
 
         for i in range(len(self.addressing)):
             cell_indexes = self.addressing[i]
@@ -53,7 +53,7 @@ class ConnectionRegistryBase:
                     self.nodes[index_1].add(connection)
                     self.nodes[index_2].add(connection)
 
-    def get_connected_indexes(self, index: int) -> Set[int]:
+    def get_connected_indexes(self, index: int) -> set[int]:
         return {c.get_other_index(index) for c in self.nodes[index]}
 
 

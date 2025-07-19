@@ -1,4 +1,5 @@
-from typing import List, Optional, Sequence
+from collections.abc import Sequence
+from typing import Optional
 
 from classy_blocks.base import transforms as tr
 from classy_blocks.cbtyping import DirectionType, OrientType
@@ -88,13 +89,13 @@ class RoundHollowShape(RoundSolidShape):
     def __init__(
         self,
         sketch_1: Annulus,
-        sketch_2_transform: List[tr.Transformation],
-        sketch_mid_transform: Optional[List[tr.Transformation]] = None,
+        sketch_2_transform: list[tr.Transformation],
+        sketch_mid_transform: Optional[list[tr.Transformation]] = None,
     ):
         super().__init__(sketch_1, sketch_2_transform, sketch_mid_transform)
 
     @property
-    def shell(self) -> List[Loft]:
+    def shell(self) -> list[Loft]:
         """The 'outer' (that is, 'all') operations"""
         return self.operations
 

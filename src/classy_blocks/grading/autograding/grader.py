@@ -1,4 +1,4 @@
-from typing import List, Tuple, get_args
+from typing import get_args
 
 from classy_blocks.cbtyping import ChopTakeType, DirectionType
 from classy_blocks.grading.autograding.probe import Probe
@@ -18,7 +18,7 @@ class GraderBase:
         self.dump.block_list.update_lengths()  # TODO: move to a better place
         self.probe = Probe(self.mesh)
 
-    def _chop_wire(self, wire: Wire, chops: List[Chop]) -> None:
+    def _chop_wire(self, wire: Wire, chops: list[Chop]) -> None:
         """A shortcut"""
         wire.grading.clear()
         for chop in chops:
@@ -26,7 +26,7 @@ class GraderBase:
 
         wire.copy_to_coincidents()
 
-    def check_at_wall(self, row: Row) -> Tuple[bool, bool]:
+    def check_at_wall(self, row: Row) -> tuple[bool, bool]:
         """Returns True if any block on given row has a wall patch
         (at start and/or end, respectively)."""
         start = False

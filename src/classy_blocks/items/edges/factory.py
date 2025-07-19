@@ -1,5 +1,3 @@
-from typing import Type
-
 from classy_blocks.cbtyping import EdgeKindType
 from classy_blocks.construct.edges import EdgeData
 from classy_blocks.items.edges.arcs.angle import AngleEdge
@@ -20,7 +18,7 @@ class EdgeFactory:
     def __init__(self):
         self.kinds = {}
 
-    def register_kind(self, kind: EdgeKindType, creator: Type[Edge]) -> None:
+    def register_kind(self, kind: EdgeKindType, creator: type[Edge]) -> None:
         """Introduces a new edge kind to this factory"""
         self.kinds[kind] = creator
 

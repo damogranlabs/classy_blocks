@@ -1,5 +1,3 @@
-from typing import Dict, List, Tuple
-
 import numpy as np
 
 from classy_blocks.cbtyping import DirectionType, OrientType
@@ -18,7 +16,7 @@ VBIG = 1e12
 # a more intuitive and quicker way to set patches,
 # according to this sketch: https://www.openfoam.com/documentation/user-guide/blockMesh.php
 # the same for all blocks
-FACE_MAP: Dict[OrientType, Tuple[int, int, int, int]] = {
+FACE_MAP: dict[OrientType, tuple[int, int, int, int]] = {
     "bottom": (0, 1, 2, 3),
     "top": (4, 5, 6, 7),
     "left": (4, 0, 3, 7),
@@ -27,7 +25,7 @@ FACE_MAP: Dict[OrientType, Tuple[int, int, int, int]] = {
     "back": (7, 6, 2, 3),
 }
 
-SIDES_MAP: List[OrientType] = [
+SIDES_MAP: list[OrientType] = [
     "front",
     "right",
     "back",
@@ -36,7 +34,7 @@ SIDES_MAP: List[OrientType] = [
 
 # Connects block axis (direction) and orients
 # (read: Direction 0 goes from right to left, etc.
-DIRECTION_MAP: Dict[DirectionType, Tuple[OrientType, OrientType]] = {
+DIRECTION_MAP: dict[DirectionType, tuple[OrientType, OrientType]] = {
     0: ("left", "right"),
     1: ("front", "back"),
     2: ("bottom", "top"),

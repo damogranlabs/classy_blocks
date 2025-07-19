@@ -1,5 +1,5 @@
 import abc
-from typing import ClassVar, Dict, List, Optional, Set, Tuple
+from typing import ClassVar, Optional
 
 from classy_blocks.base.exceptions import NoCommonSidesError
 from classy_blocks.cbtyping import IndexType, NPPointListType, OrientType
@@ -8,19 +8,19 @@ from classy_blocks.util.constants import EDGE_PAIRS
 
 
 class CellBase(abc.ABC):
-    side_names: ClassVar[List[OrientType]]
-    side_indexes: ClassVar[List[IndexType]]
-    edge_pairs: ClassVar[List[Tuple[int, int]]]
+    side_names: ClassVar[list[OrientType]]
+    side_indexes: ClassVar[list[IndexType]]
+    edge_pairs: ClassVar[list[tuple[int, int]]]
 
     def __init__(self, index: int, grid_points: NPPointListType, indexes: IndexType):
         self.index = index
         self.grid_points = grid_points
         self.indexes = indexes
 
-        self.neighbours: Dict[OrientType, Optional[CellBase]] = {name: None for name in self.side_names}
+        self.neighbours: dict[OrientType, Optional[CellBase]] = {name: None for name in self.side_names}
         self.connections = [CellConnection(set(pair), {indexes[pair[0]], indexes[pair[1]]}) for pair in self.edge_pairs]
 
-    def get_common_indexes(self, candidate: "CellBase") -> Set[int]:
+    def get_common_indexes(self, candidate: "CellBase") -> set[int]:
         """Returns indexes of common vertices between this and provided cell"""
         this_indexes = set(self.indexes)
         cnd_indexes = set(candidate.indexes)
@@ -48,7 +48,7 @@ class CellBase(abc.ABC):
         raise NoCommonSidesError
 
     @property
-    def boundary(self) -> Set[int]:
+    def boundary(self) -> set[int]:
         """Returns a list of indexes that define sides on boundary"""
         boundary = set()
 

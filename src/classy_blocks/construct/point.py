@@ -1,4 +1,4 @@
-from typing import List, Optional, TypeVar
+from typing import Optional, TypeVar
 
 import numpy as np
 
@@ -20,7 +20,7 @@ class Point(ElementBase):
         if not np.shape(self.position) == (3,):
             raise PointCreationError("Provide a point in 3D space", f"Position: {position}")
 
-        self.projected_to: List[str] = []
+        self.projected_to: list[str] = []
 
     def move_to(self, position: PointType) -> None:
         """Move this point to supplied position"""

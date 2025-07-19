@@ -1,5 +1,3 @@
-from typing import List
-
 import numpy as np
 
 from classy_blocks.base.exceptions import AnnulusCreationError
@@ -43,7 +41,7 @@ class Annulus(Sketch):
             check_coplanar=True,
         )
 
-        self.core: List[Face] = []
+        self.core: list[Face] = []
         self.shell = [face.copy().rotate(i * segment_angle, normal, center_point) for i in range(n_segments)]
 
         if self.inner_radius > self.outer_radius:
@@ -58,7 +56,7 @@ class Annulus(Sketch):
             )
 
     @property
-    def faces(self) -> List[Face]:
+    def faces(self) -> list[Face]:
         return self.shell
 
     @property

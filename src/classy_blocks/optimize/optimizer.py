@@ -2,7 +2,6 @@ import abc
 import copy
 import dataclasses
 import time
-from typing import List
 
 import numpy as np
 import scipy.optimize
@@ -197,7 +196,7 @@ class MeshOptimizer(OptimizerBase):
 
 
 class ShapeOptimizer(OptimizerBase):
-    def __init__(self, operations: List[Operation], report: bool = True, merge_tol: float = TOL):
+    def __init__(self, operations: list[Operation], report: bool = True, merge_tol: float = TOL):
         self.mapper = Mapper(merge_tol)
 
         for operation in operations:

@@ -1,5 +1,5 @@
 import abc
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
 import numpy as np
 import scipy.optimize
@@ -15,9 +15,9 @@ class ClampBase(abc.ABC):
     def __init__(
         self,
         position: PointType,
-        function: Callable[[List[float]], NPPointType],
-        bounds: Optional[List[List[float]]] = None,
-        initial_params: Optional[List[float]] = None,
+        function: Callable[[list[float]], NPPointType],
+        bounds: Optional[list[list[float]]] = None,
+        initial_params: Optional[list[float]] = None,
     ):
         self.position = np.array(position)
         self.function = function
@@ -28,10 +28,10 @@ class ClampBase(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def initial_guess(self) -> List[float]:
+    def initial_guess(self) -> list[float]:
         """Returns initial guess for get_params_from_vertex"""
 
-    def get_params(self) -> List[float]:
+    def get_params(self) -> list[float]:
         """Returns parameters from initial vertex position"""
 
         def distance_from_vertex(params):
@@ -41,7 +41,7 @@ class ClampBase(abc.ABC):
 
         return result.x
 
-    def update_params(self, params: List[float]):
+    def update_params(self, params: list[float]):
         """Updates parameters to given."""
         self.params = params
         self.position = self.function(self.params)

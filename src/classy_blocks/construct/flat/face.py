@@ -1,6 +1,6 @@
 import collections
 import copy
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import numpy as np
 
@@ -30,7 +30,7 @@ class Face(ElementBase):
         of this face: 0-1, 1-2, 2-3, 3-0."""
 
     def __init__(
-        self, points: PointListType, edges: Optional[List[Optional[EdgeData]]] = None, check_coplanar: bool = False
+        self, points: PointListType, edges: Optional[list[Optional[EdgeData]]] = None, check_coplanar: bool = False
     ):
         # Points
         points = np.asarray(points, dtype=constants.DTYPE)
@@ -43,7 +43,7 @@ class Face(ElementBase):
 
         self.points = [Point(p) for p in points]
         # Edges
-        self.edges: List[EdgeData] = [Line(), Line(), Line(), Line()]
+        self.edges: list[EdgeData] = [Line(), Line(), Line(), Line()]
         if edges is not None:
             if len(edges) != 4:
                 raise FaceCreationError(
@@ -82,7 +82,7 @@ class Face(ElementBase):
         else:
             self.edges[corner] = edge_data
 
-    def remove_edges(self, corners: Optional[List[int]] = None) -> None:
+    def remove_edges(self, corners: Optional[list[int]] = None) -> None:
         """Removes edges (replaces with Lines) from given corners
         (edges <corner>-<corner+1>).
         If no corners are provided, all are cleared."""

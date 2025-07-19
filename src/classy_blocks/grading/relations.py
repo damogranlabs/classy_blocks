@@ -1,6 +1,6 @@
 import inspect
 import sys
-from typing import Callable, Dict
+from typing import Callable
 
 import numpy as np
 import scipy.optimize
@@ -246,7 +246,7 @@ def get_total_expansion__start_size__end_size(length, start_size, end_size):
     return end_size / start_size
 
 
-def get_calculation_functions() -> Dict[str, Callable]:
+def get_calculation_functions() -> dict[str, Callable]:
     # gather available functions for calculation of grading parameters
     functions = dict()
     for name, function in inspect.getmembers(sys.modules[__name__], inspect.isfunction):

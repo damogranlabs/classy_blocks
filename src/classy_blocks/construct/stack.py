@@ -1,4 +1,5 @@
-from typing import List, Optional, Sequence, Union
+from collections.abc import Sequence
+from typing import Optional, Union
 
 import numpy as np
 
@@ -16,7 +17,7 @@ class Stack(ElementBase):
     stacked on top of each other."""
 
     def __init__(self) -> None:
-        self.shapes: List[LoftedShape] = []
+        self.shapes: list[LoftedShape] = []
 
     @property
     def grid(self):
@@ -24,7 +25,7 @@ class Stack(ElementBase):
         first two dimensions within a shape, the third along the stack."""
         return [shape.grid for shape in self.shapes]
 
-    def get_slice(self, axis: DirectionType, index: int) -> List[Operation]:
+    def get_slice(self, axis: DirectionType, index: int) -> list[Operation]:
         """Returns all operation with given index in specified axis.
         For cartesian grids this is equivalent to 'lofts on the same plane';
         This does not work with custom/mapped sketches that do not
@@ -39,7 +40,7 @@ class Stack(ElementBase):
         if axis == 2:
             return self.shapes[index].operations
 
-        operations: List[Operation] = []
+        operations: list[Operation] = []
 
         if axis == 0:
             for shape in self.shapes:
@@ -57,7 +58,7 @@ class Stack(ElementBase):
             shape.grid[0][0].chop(2, **kwargs)
 
     @property
-    def operations(self) -> List[Operation]:
+    def operations(self) -> list[Operation]:
         return f.flatten_2d_list([shape.operations for shape in self.shapes])
 
     @property

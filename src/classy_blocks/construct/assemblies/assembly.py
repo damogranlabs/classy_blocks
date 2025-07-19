@@ -1,5 +1,5 @@
 import abc
-from typing import List, Sequence
+from collections.abc import Sequence
 
 import numpy as np
 
@@ -21,8 +21,8 @@ class Assembly(ElementBase, abc.ABC):
         return np.average([shape.center for shape in self.shapes])
 
     @property
-    def operations(self) -> List[Operation]:
-        operations: List[Operation] = []
+    def operations(self) -> list[Operation]:
+        operations: list[Operation] = []
 
         for shape in self.shapes:
             operations += shape.operations

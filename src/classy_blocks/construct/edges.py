@@ -1,5 +1,4 @@
 import warnings
-from typing import List
 
 from classy_blocks.base.element import ElementBase
 from classy_blocks.base.exceptions import EdgeCreationError
@@ -111,7 +110,7 @@ class Project(EdgeData):
         self.check_length()
 
     @staticmethod
-    def convert_label(label: ProjectToType) -> List[str]:
+    def convert_label(label: ProjectToType) -> list[str]:
         """Makes sure label is always a list of strings
         of length 1 or 2"""
         if isinstance(label, str):

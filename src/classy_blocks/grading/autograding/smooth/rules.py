@@ -1,6 +1,5 @@
 import dataclasses
 import warnings
-from typing import List, Tuple
 
 import scipy.optimize
 
@@ -10,7 +9,7 @@ from classy_blocks.grading.autograding.rules import ChopRules
 from classy_blocks.grading.chop import Chop
 
 
-def distribute_cells(count, length, size_before, size_after) -> List[Chop]:
+def distribute_cells(count, length, size_before, size_after) -> list[Chop]:
     # TODO: put back in SmoothRules
     if length < max(size_before, size_after):
         return [Chop(count=count)]
@@ -61,7 +60,7 @@ class SmoothRules(ChopRules):
     def is_squeezed(self, count, info) -> bool:
         return info.length < self.cell_size * count
 
-    def define_sizes(self, size_before: CellSizeType, size_after: CellSizeType) -> Tuple[float, float]:
+    def define_sizes(self, size_before: CellSizeType, size_after: CellSizeType) -> tuple[float, float]:
         """Defines start and end cell size.
         size_before and size_after are taken from preceding/following wires;
         when a size is None, this is the last/first wire."""
@@ -73,7 +72,7 @@ class SmoothRules(ChopRules):
 
         return size_before, size_after
 
-    def get_squeezed_chops(self, count: int, _info: WireInfo) -> List[Chop]:
+    def get_squeezed_chops(self, count: int, _info: WireInfo) -> list[Chop]:
         return [Chop(count=count)]
 
     def get_chops(self, count, info):

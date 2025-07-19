@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 from classy_blocks.assemble.dump import AssembledDump
 from classy_blocks.base.exceptions import PatchNotFoundError
@@ -86,7 +86,7 @@ class WireCatalogue:
         # WireInfo is stored at indexes [vertex_1][vertex_2];
         # if a coincident wire is inverted, it will reside at
         # [vertex_2][vertex_1]
-        self.data: Dict[int, Dict[int, Optional[WireInfo]]] = {}
+        self.data: dict[int, dict[int, Optional[WireInfo]]] = {}
 
         self._populate()
 
@@ -112,7 +112,7 @@ class WireCatalogue:
                 info.starts_at_wall = info.starts_at_wall or starts
                 info.ends_at_wall = info.ends_at_wall or ends
 
-    def _get_wire_boundaries(self, wire: Wire, block: Block) -> Tuple[bool, bool]:
+    def _get_wire_boundaries(self, wire: Wire, block: Block) -> tuple[bool, bool]:
         """Finds out whether a Wire starts or ends on a wall patch"""
         start_orient = DIRECTION_MAP[wire.direction][0]
         end_orient = DIRECTION_MAP[wire.direction][1]
@@ -160,10 +160,10 @@ class Probe:
         # build a wire database
         self.wires = WireCatalogue(self.mesh)
 
-    def get_row_blocks(self, block: Block, direction: DirectionType) -> List[Block]:
+    def get_row_blocks(self, block: Block, direction: DirectionType) -> list[Block]:
         return self.rows.get_row_blocks(block, direction)
 
-    def get_rows(self, direction: DirectionType) -> List[Row]:
+    def get_rows(self, direction: DirectionType) -> list[Row]:
         return self.rows.rows[direction]
 
     def get_wire_info(self, wire: Wire) -> WireInfo:

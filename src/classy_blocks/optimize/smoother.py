@@ -1,5 +1,5 @@
 import abc
-from typing import Iterable, List, Set
+from collections.abc import Iterable
 
 import numpy as np
 
@@ -16,12 +16,12 @@ class SmootherBase(abc.ABC):
     def __init__(self, grid: GridBase):
         self.grid = grid
 
-        self.inner: List[Junction] = []
+        self.inner: list[Junction] = []
         for junction in self.grid.junctions:
             if not junction.is_boundary:
                 self.inner.append(junction)
 
-        self.fixed: Set[int] = set()
+        self.fixed: set[int] = set()
 
     def fix_indexes(self, indexes: Iterable[int]) -> None:
         self.fixed.update(set(indexes))

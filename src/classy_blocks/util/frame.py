@@ -1,4 +1,4 @@
-from typing import ClassVar, Dict, Generic, List, Optional, Set, Tuple, TypeVar
+from typing import ClassVar, Generic, Optional, TypeVar
 
 from classy_blocks.cbtyping import DirectionType
 from classy_blocks.util import constants
@@ -21,10 +21,10 @@ class Frame(Generic[BeamT]):
     After the Frame is created, entities must be added separately
     with appropriate methods."""
 
-    valid_pairs: ClassVar[List[Set[int]]] = [set(pair) for pair in constants.EDGE_PAIRS]
+    valid_pairs: ClassVar[list[set[int]]] = [set(pair) for pair in constants.EDGE_PAIRS]
 
     def __init__(self) -> None:
-        self.beams: List[Dict[int, Optional[BeamT]]] = [{} for _ in range(8)]
+        self.beams: list[dict[int, Optional[BeamT]]] = [{} for _ in range(8)]
 
         # create wires and connections for quicker addressing
         for axis in (0, 1, 2):
@@ -42,7 +42,7 @@ class Frame(Generic[BeamT]):
         self.beams[corner_1][corner_2] = beam
         self.beams[corner_2][corner_1] = beam
 
-    def get_axis_beams(self, axis: DirectionType) -> List[BeamT]:
+    def get_axis_beams(self, axis: DirectionType) -> list[BeamT]:
         """Returns all non-None beams from given axis"""
         beams = []
 
@@ -54,7 +54,7 @@ class Frame(Generic[BeamT]):
 
         return beams
 
-    def get_all_beams(self) -> List[Tuple[int, int, BeamT]]:
+    def get_all_beams(self) -> list[tuple[int, int, BeamT]]:
         """Returns all non-None entries in self.beams"""
         beams = []
         listed = []

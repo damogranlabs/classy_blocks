@@ -1,7 +1,7 @@
 """Abstract base classes for different Shape types"""
 
 import abc
-from typing import Generic, List, Optional, TypeVar, Union
+from typing import Generic, Optional, TypeVar, Union
 
 import numpy as np
 
@@ -23,7 +23,7 @@ class Shape(ElementBase, abc.ABC):
 
     @property
     @abc.abstractmethod
-    def operations(self) -> List[Operation]:
+    def operations(self) -> list[Operation]:
         """Operations from which the shape is build"""
 
     @property
@@ -42,7 +42,7 @@ class Shape(ElementBase, abc.ABC):
 
     @property
     @abc.abstractmethod
-    def grid(self) -> List[List[Operation]]:
+    def grid(self) -> list[list[Operation]]:
         """A 2-dimensional array consisting of Operations, grouped by their position
         (like [[core], [shell]] or [[rows], [columns]])"""
 
@@ -53,7 +53,7 @@ class LoftedShape(Shape, abc.ABC, Generic[SketchT]):
     from calculated cross-sections (Elbow, Cylinder, Ring, ..."""
 
     def __init__(
-        self, sketch_1: SketchT, sketch_2: SketchT, sketch_mid: Optional[Union[SketchT, List[SketchT]]] = None
+        self, sketch_1: SketchT, sketch_2: SketchT, sketch_mid: Optional[Union[SketchT, list[SketchT]]] = None
     ):
         if len(sketch_1.faces) != len(sketch_2.faces):
             raise ShapeCreationError("Start and end sketch have different number of faces!")
@@ -71,7 +71,7 @@ class LoftedShape(Shape, abc.ABC, Generic[SketchT]):
         self.sketch_2 = sketch_2
         self.sketch_mid = sketch_mid
 
-        self.lofts: List[List[Loft]] = []
+        self.lofts: list[list[Loft]] = []
 
         for i, list_1 in enumerate(self.sketch_1.grid):
             self.lofts.append([])

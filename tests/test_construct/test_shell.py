@@ -1,5 +1,3 @@
-from typing import List
-
 import numpy as np
 from parameterized import parameterized
 
@@ -190,7 +188,7 @@ class AwareFaceTests(SharedPointTests):
 
 
 class AwareFaceStoreTests(SharedPointTests):
-    def get_aws(self, orients: List[OrientType]) -> AwareFaceStore:
+    def get_aws(self, orients: list[OrientType]) -> AwareFaceStore:
         faces = [self.get_face(orient) for orient in orients]
 
         return AwareFaceStore(faces)
@@ -230,7 +228,7 @@ class AwareFaceStoreTests(SharedPointTests):
 
 
 class ShellTests(ShellTestsBase):
-    def get_shell_faces(self, orients: List[OrientType]):
+    def get_shell_faces(self, orients: list[OrientType]):
         box = Box([0, 0, 0], [1, 1, 1])
 
         faces = []
@@ -244,7 +242,7 @@ class ShellTests(ShellTestsBase):
 
         return faces
 
-    def get_shell(self, orients: List[OrientType]):
+    def get_shell(self, orients: list[OrientType]):
         return Shell(self.get_shell_faces(orients), 0.5)
 
     @parameterized.expand(
@@ -264,7 +262,7 @@ class ShellTests(ShellTestsBase):
         self.assertEqual(len(shell.operations[0].chops[2]), 1)
 
     def test_set_outer_patch(self) -> None:
-        orients: List[OrientType] = ["front", "right"]
+        orients: list[OrientType] = ["front", "right"]
         shell = self.get_shell(orients)
         shell.set_outer_patch("roof")
 

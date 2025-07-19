@@ -1,5 +1,4 @@
 import abc
-from typing import List
 
 from classy_blocks.base.exceptions import MeshNotAssembledError
 from classy_blocks.items.block import Block
@@ -21,22 +20,22 @@ class DumpBase(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def vertices(self) -> List[Vertex]:
+    def vertices(self) -> list[Vertex]:
         pass
 
     @property
     @abc.abstractmethod
-    def patches(self) -> List[Patch]:
+    def patches(self) -> list[Patch]:
         pass
 
     @property
     @abc.abstractmethod
-    def blocks(self) -> List[Block]:
+    def blocks(self) -> list[Block]:
         pass
 
     @property
     @abc.abstractmethod
-    def edges(self) -> List[Edge]:
+    def edges(self) -> list[Edge]:
         pass
 
     @abc.abstractmethod

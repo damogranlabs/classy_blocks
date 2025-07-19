@@ -1,4 +1,5 @@
-from typing import Any, Callable, Dict, List, Literal, Optional, Sequence, Tuple, TypedDict, Union
+from collections.abc import Sequence
+from typing import Any, Callable, Literal, Optional, TypedDict, Union
 
 from nptyping import Float, NDArray, Shape
 
@@ -28,10 +29,10 @@ OrientType = Literal["left", "right", "front", "back", "top", "bottom"]
 DirectionType = Literal[0, 1, 2]
 
 # Project vertex/edge to one or multiple geometries
-ProjectToType = Union[str, List[str]]
+ProjectToType = Union[str, list[str]]
 
 # A list of indexes that define a quad
-IndexType = List[int]
+IndexType = list[int]
 
 
 # the complete guide to chopping
@@ -53,9 +54,9 @@ class ChopArgs(TypedDict, total=False):
 
 
 # what goes into blockMeshDict's block grading specification
-GradingSpecType = Tuple[float, int, float]
+GradingSpecType = tuple[float, int, float]
 # Used by autograders
 CellSizeType = Optional[float]
 
 # Geometry definition
-GeometryType = Dict[str, List[str]]
+GeometryType = dict[str, list[str]]

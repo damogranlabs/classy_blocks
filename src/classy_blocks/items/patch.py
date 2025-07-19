@@ -1,5 +1,4 @@
 import warnings
-from typing import List, Set
 
 from classy_blocks.items.side import Side
 
@@ -10,10 +9,10 @@ class Patch:
     def __init__(self, name: str):
         self.name = name
 
-        self.sides: Set[Side] = set()
+        self.sides: set[Side] = set()
 
         self.kind = "patch"  # 'type'
-        self.settings: List[str] = []
+        self.settings: list[str] = []
 
         self.slave = False
 

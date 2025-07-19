@@ -36,14 +36,13 @@ Top 'floor':
 
 import dataclasses
 import unittest
-from typing import List
 
 import numpy as np
 
 from classy_blocks.construct import edges
 from classy_blocks.grading.chop import Chop
 
-fl: List[List[float]] = [  # points on the 'floor'; z=0
+fl: list[list[float]] = [  # points on the 'floor'; z=0
     [0, 0, 0],  # 0
     [1, 0, 0],  # 1
     [1, 1, 0],  # 2
@@ -64,16 +63,16 @@ class TestOperationData:
     """to store predefined data for test block creation"""
 
     # points from which to create the block
-    point_indexes: List[int]
+    point_indexes: list[int]
 
     # edges; parameters correspond to block.add_edge() args
-    edges: List = dataclasses.field(default_factory=list)
+    edges: list = dataclasses.field(default_factory=list)
 
     # chop counts (for each axis, use None to not chop)
-    chops: List[List[Chop]] = dataclasses.field(default_factory=lambda: [[], [], []])
+    chops: list[list[Chop]] = dataclasses.field(default_factory=lambda: [[], [], []])
 
     # calls to set_patch()
-    patches: List = dataclasses.field(default_factory=list)
+    patches: list = dataclasses.field(default_factory=list)
 
     # other thingamabobs
     description: str = ""
@@ -141,6 +140,6 @@ class DataTestCase(unittest.TestCase):
         return test_data[index]
 
     @staticmethod
-    def get_all_data() -> List[TestOperationData]:
+    def get_all_data() -> list[TestOperationData]:
         """Returns all prepared block data"""
         return test_data

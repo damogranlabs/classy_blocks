@@ -1,5 +1,5 @@
 import warnings
-from typing import List, Union
+from typing import Union
 
 import numpy as np
 
@@ -14,8 +14,8 @@ class MappedSketch(Sketch):
     """A sketch that is created from predefined points.
     The points are connected to form quads which define Faces."""
 
-    def __init__(self, positions: PointListType, quads: List[IndexType]):
-        self._faces: List[Face] = []
+    def __init__(self, positions: PointListType, quads: list[IndexType]):
+        self._faces: list[Face] = []
         self.indexes = quads
 
         for quad in self.indexes:
@@ -60,7 +60,7 @@ class MappedSketch(Sketch):
 
         return np.array([all_points[indexes.index(i)] for i in range(max_index + 1)])
 
-    def merge(self, other: Union[List["MappedSketch"], "MappedSketch"]):
+    def merge(self, other: Union[list["MappedSketch"], "MappedSketch"]):
         """Adds a sketch or list of sketches to itself.
         New faces and indexes are appended and all duplicate points are removed."""
 

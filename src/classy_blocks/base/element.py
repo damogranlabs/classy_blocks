@@ -1,6 +1,7 @@
 import abc
 import copy
-from typing import Dict, List, Optional, Sequence, TypeVar
+from collections.abc import Sequence
+from typing import Optional, TypeVar
 
 from classy_blocks.base import transforms as tr
 from classy_blocks.cbtyping import NPPointType, PointType, VectorType
@@ -68,7 +69,7 @@ class ElementBase(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def parts(self: ElementBaseT) -> List[ElementBaseT]:
+    def parts(self: ElementBaseT) -> list[ElementBaseT]:
         """A list of lower-dimension elements
         from which this element is built, for instance:
         - an edge has a single arc point,
@@ -81,7 +82,7 @@ class ElementBase(abc.ABC):
         """Center of this entity; used as default origin for transforms"""
 
     @property
-    def geometry(self) -> Optional[Dict]:
+    def geometry(self) -> Optional[dict]:
         """A searchable surface, defined in an entity itself;
         (like, for instance, sphere's blocks are automatically
         projected to an ad-hoc defined searchableSphere"""

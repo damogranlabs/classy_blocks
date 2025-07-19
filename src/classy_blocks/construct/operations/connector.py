@@ -1,5 +1,3 @@
-from typing import List
-
 import numpy as np
 
 from classy_blocks.construct.flat.face import Face
@@ -62,7 +60,7 @@ class Connector(Operation):
         self.operation_1 = operation_1
         self.operation_2 = operation_2
 
-        all_pairs: List[FacePair] = []
+        all_pairs: list[FacePair] = []
         for orient_1, face_1 in operation_1.get_all_faces().items():
             if orient_1 in ("bottom", "left", "front"):
                 face_1.invert()

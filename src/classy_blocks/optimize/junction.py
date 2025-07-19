@@ -1,5 +1,5 @@
 import dataclasses
-from typing import List, Optional, Set
+from typing import Optional
 
 import numpy as np
 
@@ -26,12 +26,12 @@ class Junction:
         self.points = points
         self.index = index
 
-        self.cells: Set[CellBase] = set()
+        self.cells: set[CellBase] = set()
 
-        self.neighbours: Set[Junction] = set()
+        self.neighbours: set[Junction] = set()
 
         self.clamp: Optional[ClampBase] = None
-        self.links: List[IndexedLink] = []
+        self.links: list[IndexedLink] = []
 
     @property
     def point(self) -> NPPointType:

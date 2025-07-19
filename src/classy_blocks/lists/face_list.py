@@ -1,5 +1,4 @@
 import dataclasses
-from typing import List
 
 from classy_blocks.cbtyping import OrientType
 from classy_blocks.construct.flat.face import Face
@@ -24,7 +23,7 @@ class FaceList:
     """Handling of projected faces (the 'faces' part of blockMeshDict)"""
 
     def __init__(self) -> None:
-        self.faces: List[ProjectedFace] = []
+        self.faces: list[ProjectedFace] = []
 
     def find_existing(self, side: Side) -> bool:
         """Returns true if side in arguments exists already"""
@@ -34,7 +33,7 @@ class FaceList:
 
         return False
 
-    def add(self, vertices: List[Vertex], operation: Operation) -> None:
+    def add(self, vertices: list[Vertex], operation: Operation) -> None:
         """Collect projected sides from operation data"""
 
         for index, orient in enumerate(SIDES_MAP):
@@ -47,7 +46,7 @@ class FaceList:
         self.add_face(vertices, "bottom", operation.bottom_face)
         self.add_face(vertices, "top", operation.top_face)
 
-    def add_face(self, vertices: List[Vertex], orient: OrientType, face: Face) -> None:
+    def add_face(self, vertices: list[Vertex], orient: OrientType, face: Face) -> None:
         """Add a face to faces list (if it is projected to anything)"""
         if face.projected_to is not None:
             self.add_side(Side(orient, vertices), face.projected_to)

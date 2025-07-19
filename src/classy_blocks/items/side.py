@@ -1,5 +1,3 @@
-from typing import List
-
 from classy_blocks.base.exceptions import SideCreationError
 from classy_blocks.cbtyping import OrientType
 from classy_blocks.items.vertex import Vertex
@@ -10,7 +8,7 @@ class Side:
     """A Block has 6 'sides', defined by vertices but addressed by OrientType;
     new faces can be created from those and patches are assigned to this"""
 
-    def __init__(self, orient: OrientType, vertices: List[Vertex]):
+    def __init__(self, orient: OrientType, vertices: list[Vertex]):
         if len(vertices) != 8:
             raise SideCreationError("Pass exactly 8 of block vertices", f"Given {len(vertices)} vertice(s)")
 

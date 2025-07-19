@@ -1,5 +1,3 @@
-from typing import List, Set
-
 from classy_blocks.base.exceptions import InconsistentGradingsError
 from classy_blocks.cbtyping import DirectionType
 from classy_blocks.grading.chop import Chop
@@ -13,13 +11,13 @@ class Axis:
     """One of block axes, indexed 0, 1, 2
     and wires - edges that are defined along the same direction."""
 
-    def __init__(self, direction: DirectionType, wires: List[Wire]):
+    def __init__(self, direction: DirectionType, wires: list[Wire]):
         self.direction = direction
         self.wires = WireManager(wires)
-        self.chops: List[Chop] = []
+        self.chops: list[Chop] = []
 
         # will be added after blocks are added to mesh
-        self.neighbours: Set[Axis] = set()
+        self.neighbours: set[Axis] = set()
 
     def add_neighbour(self, other: "Axis") -> None:
         """Adds an 'axis' from another block if it shares at least one wire"""
@@ -75,7 +73,7 @@ class Axis:
         return False
 
     @property
-    def lengths(self) -> List[float]:
+    def lengths(self) -> list[float]:
         return [w.length for w in self.wires]
 
     def grade(self) -> None:
@@ -135,11 +133,11 @@ class Axis:
             wire.check_consistency()
 
     @property
-    def start_vertices(self) -> Set[Vertex]:
+    def start_vertices(self) -> set[Vertex]:
         return {wire.vertices[0] for wire in self.wires}
 
     @property
-    def end_vertices(self) -> Set[Vertex]:
+    def end_vertices(self) -> set[Vertex]:
         return {wire.vertices[1] for wire in self.wires}
 
     @property

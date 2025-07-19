@@ -1,5 +1,3 @@
-from typing import List
-
 from classy_blocks.base.exceptions import EdgeNotFoundError
 from classy_blocks.construct.edges import Arc, PolyLine, Project, Spline
 from classy_blocks.construct.flat.face import Face
@@ -17,7 +15,7 @@ class EdgeListTests(DataTestCase):
         self.vl = VertexList([])
         self.el = EdgeList()
 
-    def get_vertices(self, index: int) -> List[Vertex]:
+    def get_vertices(self, index: int) -> list[Vertex]:
         vertices = []
 
         for point in self.get_single_data(index).points:

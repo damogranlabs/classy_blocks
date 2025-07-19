@@ -1,5 +1,3 @@
-from typing import List, Set
-
 from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.items.block import Block
 from classy_blocks.lookup.point_registry import HexPointRegistry
@@ -10,7 +8,7 @@ class BlockList:
     count/grading propagation and whatnot"""
 
     def __init__(self) -> None:
-        self.blocks: List[Block] = []
+        self.blocks: list[Block] = []
 
     def add(self, block: Block) -> None:
         """Add blocks"""
@@ -43,7 +41,7 @@ class BlockList:
         undefined_blocks = set(self.blocks)
 
         while len(undefined_blocks) > 0:
-            removed: Set[Block] = set()
+            removed: set[Block] = set()
 
             for block in undefined_blocks:
                 if block.is_defined:
@@ -62,7 +60,7 @@ class BlockList:
             undefined_blocks -= removed
 
     def check_definitions(self) -> None:
-        undefined_blocks: List[Block] = []
+        undefined_blocks: list[Block] = []
 
         for block in self.blocks:
             if not block.is_defined:

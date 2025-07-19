@@ -1,6 +1,6 @@
 import dataclasses
 from functools import lru_cache
-from typing import Callable, List, Optional, Set, Union
+from typing import Callable, Optional, Union
 
 from classy_blocks.cbtyping import ChopPreserveType, ChopTakeType, GradingSpecType
 from classy_blocks.grading import relations as rel
@@ -19,7 +19,7 @@ class ChopRelation:
     function: Callable[[float, float, float], Union[int, float]]
 
     @property
-    def inputs(self) -> Set[str]:
+    def inputs(self) -> set[str]:
         """Input parameters for this chop function"""
         return {self.input_1, self.input_2}
 
@@ -39,7 +39,7 @@ class ChopRelation:
 
     @staticmethod
     @lru_cache(maxsize=1)
-    def get_possible_combinations() -> List["ChopRelation"]:
+    def get_possible_combinations() -> list["ChopRelation"]:
         calculation_functions = rel.get_calculation_functions()
 
         return [ChopRelation.from_function(f) for _, f in calculation_functions.items()]
@@ -95,7 +95,7 @@ class Chop:
         """Calculates cell count and total expansion ratio for this chop
         by calling functions that take known variables and return new values"""
         data = dataclasses.asdict(self)
-        calculated: Set[str] = set()
+        calculated: set[str] = set()
         length = length * self.length_ratio
 
         for key in data.keys():

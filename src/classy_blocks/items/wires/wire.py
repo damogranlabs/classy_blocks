@@ -1,6 +1,5 @@
 import dataclasses
 import functools
-from typing import List, Set
 
 from classy_blocks.base.exceptions import InconsistentGradingsError
 from classy_blocks.cbtyping import DirectionType
@@ -11,7 +10,7 @@ from classy_blocks.items.edges.factory import factory
 from classy_blocks.items.vertex import Vertex
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def get_length(wire: "Wire") -> float:
     return wire.edge.length
 
@@ -32,7 +31,7 @@ class Wire:
     """Represents two vertices that define an edge;
     supplies tools to create and compare, etc"""
 
-    def __init__(self, vertices: List[Vertex], direction: DirectionType, corner_1: int, corner_2: int):
+    def __init__(self, vertices: list[Vertex], direction: DirectionType, corner_1: int, corner_2: int):
         self.corners = [corner_1, corner_2]
         self.vertices = [vertices[corner_1], vertices[corner_2]]
 
@@ -47,11 +46,11 @@ class Wire:
 
         # multiple wires can be at the same spot; this list holds other
         # coincident wires from different blocks
-        self.coincidents: Set[Wire] = set()
+        self.coincidents: set[Wire] = set()
         # wires that precede this (end with this wire's beginning vertex)
-        self.before: Set[WireJoint] = set()
+        self.before: set[WireJoint] = set()
         # wires that follow this (start with this wire's end vertex)
-        self.after: Set[WireJoint] = set()
+        self.after: set[WireJoint] = set()
 
         self.key = hash(tuple(sorted([v.index for v in self.vertices])))
 

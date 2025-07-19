@@ -1,5 +1,5 @@
 from dataclasses import asdict
-from typing import Callable, List
+from typing import Callable
 
 from classy_blocks.assemble.dump import AssembledDump
 from classy_blocks.assemble.settings import Settings
@@ -28,7 +28,7 @@ def format_geometry(geometry: GeometryType) -> str:
     return out
 
 
-def format_list(name: str, items: List, formatter: Callable) -> str:
+def format_list(name: str, items: list, formatter: Callable) -> str:
     out = f"{name}\n(\n"
 
     for item in items:

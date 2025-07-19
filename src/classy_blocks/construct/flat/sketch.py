@@ -1,6 +1,6 @@
 import abc
 import copy
-from typing import ClassVar, List, TypeVar
+from typing import ClassVar, TypeVar
 
 from classy_blocks.base.element import ElementBase
 from classy_blocks.cbtyping import NPPointType, NPVectorType
@@ -14,16 +14,16 @@ class Sketch(ElementBase):
 
     # indexes of faces that are to be chopped (within a Shape)
     # for axis 0 and axis 1; axis 2 is the 3rd dimension
-    chops: ClassVar[List[List[int]]] = []
+    chops: ClassVar[list[list[int]]] = []
 
     @property
     @abc.abstractmethod
-    def faces(self) -> List[Face]:
+    def faces(self) -> list[Face]:
         """Faces that form this sketch"""
 
     @property
     @abc.abstractmethod
-    def grid(self) -> List[List[Face]]:
+    def grid(self) -> list[list[Face]]:
         """A 2-dimensional list of faces that form this sketch;
         addressed as x-y for cartesian sketches and as radius-angle
         for radial sketches.

@@ -1,4 +1,4 @@
-from typing import List, get_args
+from typing import get_args
 
 from classy_blocks.cbtyping import DirectionType, IndexType, OrientType
 from classy_blocks.grading.chop import Chop
@@ -13,7 +13,7 @@ from classy_blocks.util.frame import Frame
 class Block:
     """A Block and everything that belongs to it"""
 
-    def __init__(self, index: int, vertices: List[Vertex]):
+    def __init__(self, index: int, vertices: list[Vertex]):
         # index in blockMeshDict
         self.index = index
 
@@ -51,7 +51,7 @@ class Block:
 
         self.wires[corner_1][corner_2].edge = edge
 
-    def get_axis_wires(self, direction: DirectionType) -> List[Wire]:
+    def get_axis_wires(self, direction: DirectionType) -> list[Wire]:
         """Returns a list of wires that run in the given axis"""
         return self.wires.get_axis_beams(direction)
 
@@ -79,7 +79,7 @@ class Block:
             for cnd_wire in candidate.wire_list:
                 this_wire.add_coincident(cnd_wire)
 
-    def add_chops(self, direction: DirectionType, chops: List[Chop]) -> None:
+    def add_chops(self, direction: DirectionType, chops: list[Chop]) -> None:
         self.axes[direction].chops += chops
 
     def update_wires(self) -> None:
@@ -92,13 +92,13 @@ class Block:
             axis.grade()
 
     @property
-    def wire_list(self) -> List[Wire]:
+    def wire_list(self) -> list[Wire]:
         """A flat list of all wires"""
         # TODO: no daisy chaining!
         return self.axes[0].wires.wires + self.axes[1].wires.wires + self.axes[2].wires.wires
 
     @property
-    def edge_list(self) -> List[Edge]:
+    def edge_list(self) -> list[Edge]:
         """A list of edges from all wires"""
         all_edges = []
 
@@ -121,7 +121,7 @@ class Block:
     def indexes(self) -> IndexType:
         return [vertex.index for vertex in self.vertices]
 
-    def get_side_vertices(self, orient: OrientType) -> List[Vertex]:
+    def get_side_vertices(self, orient: OrientType) -> list[Vertex]:
         return [self.vertices[i] for i in constants.FACE_MAP[orient]]
 
     def __hash__(self) -> int:
