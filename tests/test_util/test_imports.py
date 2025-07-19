@@ -92,11 +92,13 @@ class ImportsTests(unittest.TestCase):
 
     def test_import_optimizer(self):
         _ = cb.MeshOptimizer
+        _ = cb.ShapeOptimizer
         _ = cb.SketchOptimizer
         _ = cb.MeshSmoother
         _ = cb.SketchSmoother
 
     def test_import_assemblies(self):
+        _ = cb.Assembly
         _ = cb.NJoint
         _ = cb.TJoint
         _ = cb.LJoint

@@ -1,4 +1,5 @@
 from .base.transforms import Mirror, Rotation, Scaling, Shear, Translation
+from .construct.assemblies.assembly import Assembly
 from .construct.assemblies.joints import LJoint, NJoint, TJoint
 from .construct.curves.analytic import AnalyticCurve, CircleCurve, LineCurve
 from .construct.curves.curve import CurveBase
@@ -6,6 +7,7 @@ from .construct.curves.discrete import DiscreteCurve
 from .construct.curves.interpolated import LinearInterpolatedCurve, SplineInterpolatedCurve
 from .construct.edges import Angle, Arc, OnCurve, Origin, PolyLine, Project, Spline
 from .construct.flat.face import Face
+from .construct.flat.sketch import Sketch
 from .construct.flat.sketches.disk import FourCoreDisk, HalfDisk, OneCoreDisk, Oval, WrappedDisk
 from .construct.flat.sketches.grid import Grid
 from .construct.flat.sketches.mapped import MappedSketch
@@ -51,6 +53,7 @@ __all__ = [
     "AnalyticCurve",
     "Angle",
     "Arc",
+    "Assembly",
     "Box",
     "CircleCurve",
     "ClampBase",
@@ -117,6 +120,7 @@ __all__ = [
     "Shear",
     "Shell",
     "SimpleGrader",
+    "Sketch",
     "SketchOptimizer",
     "SketchSmoother",
     "SmoothGrader",
