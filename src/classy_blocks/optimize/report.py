@@ -46,7 +46,7 @@ class SilentReporter(OptimizationReporterBase):
 class TextReporter(OptimizationReporterBase):
     def iteration_start(self, iteration_no: int, relaxation: float) -> None:
         report(f"Optimization iteration {iteration_no}")
-        report(f"Relaxation: {relaxation}")
+        report(f"Relaxation: {relaxation:.4f}")
         report("{:6s}".format("Vertex"), end="")
         report("{:>12s}".format("Initial"), end="")
         report("{:>12s}".format("Local"), end="")
