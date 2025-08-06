@@ -21,7 +21,7 @@ from classy_blocks.optimize.record import (
     OptimizationRecord,
 )
 from classy_blocks.optimize.report import OptimizationReporterBase, SilentReporter, TextReporter
-from classy_blocks.util.constants import TOL
+from classy_blocks.util.constants import TOL, VSMALL
 
 
 @dataclasses.dataclass
@@ -38,11 +38,12 @@ class OptimizerConfig:
     # method that will be used for scipy.optimize.minimize
     # (only those that support all required features are valid)
     method: MinimizationMethodType = "SLSQP"
-    # relaxation base; every subsequent iteration will increase under-relaxation
+    # relaxation: every subsequent iteration will increase under-relaxation
     # until it's larger than relaxation_threshold; then it will fix it to 1.
     # Relaxation is identical to OpenFOAM's field relaxation
-    relaxation: float = 1  # disabled by default
-    relaxation_threshold: float = 0.9
+    relaxation_start: float = 1  # disabled by default
+    relaxation_iterations: int = 5  # number of relaxed iterations
+    relaxation_threshold: float = 0.9  # value where relaxation factor snaps to 1
 
     # convergence tolerance for a single joint
     # as passed to scipy.optimize.minimize
@@ -126,16 +127,26 @@ class OptimizerBase(abc.ABC):
         return irecord
 
     def relaxation_factor(self, iteration_no: int) -> float:
-        if self.config.relaxation == 1:
-            # relaxation disabled
-            return 1
-        relax_base = 1 / self.config.relaxation
-        relaxation_factor = 1 - relax_base ** -(iteration_no + 1)
-        # it makes no sense to relax after positions have been fixed approximately
-        if relaxation_factor > self.config.relaxation_threshold:
-            relaxation_factor = 1
+        iter_no = iteration_no
+        threshold = self.config.relaxation_threshold
+        start_relax = self.config.relaxation_start
+        target_iter = self.config.relaxation_iterations
 
-        return relaxation_factor
+        if iter_no >= target_iter:
+            return 1.0
+        if start_relax >= threshold:
+            return 1.0
+
+        k = -np.log(1 - (threshold - start_relax) / (threshold - start_relax + VSMALL))
+
+        # Normalize iteration to [0, 1]
+        t = iter_no / target_iter
+
+        # increase the factor slowly at the beginning and quicker at the end
+        # Slow start, fast finish
+        value = start_relax + (threshold - start_relax) * (1 - np.exp(-k * (t**3)))
+
+        return value
 
     def optimize(
         self,

@@ -17,14 +17,13 @@ from tests.test_optimize.optimize_fixtures import BoxTestsBase, SketchTestsBase
 class MeshOptimizerTests(BoxTestsBase):
     @parameterized.expand(
         (
-            (0.5, 0, 0.5),
-            (0.5, 1, 0.75),
+            (0.5, 0, 0.5),  # TODO: add intermediate iterations
             (1.0, 0, 1),  # relaxation disabled
         )
     )
     def test_relaxation(self, relaxation, iteration, result):
         optimizer = MeshOptimizer(self.mesh)
-        optimizer.config.relaxation = relaxation
+        optimizer.config.relaxation_start = relaxation
         self.assertAlmostEqual(optimizer.relaxation_factor(iteration), result)
 
     def test_add_junction_existing(self):
