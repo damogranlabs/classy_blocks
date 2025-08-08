@@ -67,15 +67,15 @@ class PointTests(unittest.TestCase):
         point.project("terrain")
         point.project("also_terrain")
 
-        self.assertListEqual(point.projected_to, ["terrain", "also_terrain"])
+        self.assertListEqual(point.projected_to, ["also_terrain", "terrain"])
 
     def test_project_twice_mixed(self):
         point = self.point
 
         point.project("terrain")
-        point.project(["also_terrain", "also_also_terrain"])
+        point.project(["also_also_terrain", "also_terrain"])
 
-        self.assertListEqual(point.projected_to, ["terrain", "also_terrain", "also_also_terrain"])
+        self.assertListEqual(point.projected_to, ["also_also_terrain", "also_terrain", "terrain"])
 
     def test_mirror_default_origin(self):
         point = self.point

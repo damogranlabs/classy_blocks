@@ -32,6 +32,6 @@ class Vertex(Point):
     def from_point(cls, point: Point, index: int):
         """Creates a Vertex from point, including other properties"""
         vertex = cls(point.position, index)
-        vertex.projected_to = point.projected_to
+        vertex.project(point.projected_to)
 
         return vertex

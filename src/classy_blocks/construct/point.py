@@ -20,7 +20,7 @@ class Point(ElementBase):
         if not np.shape(self.position) == (3,):
             raise PointCreationError("Provide a point in 3D space", f"Position: {position}")
 
-        self.projected_to: list[str] = []
+        self._projected_to: set[str] = set()
 
     def move_to(self, position: PointType) -> None:
         """Move this point to supplied position"""
@@ -77,9 +77,7 @@ class Point(ElementBase):
         if not isinstance(label, list):
             label = [label]
 
-        for lbl in label:
-            if lbl not in self.projected_to:
-                self.projected_to.append(lbl)
+        self._projected_to.update(label)
 
     @property
     def parts(self):
@@ -88,6 +86,10 @@ class Point(ElementBase):
     @property
     def center(self):
         return self.position
+
+    @property
+    def projected_to(self) -> list[str]:
+        return sorted(list(self._projected_to))
 
     def __eq__(self, other):
         return f.norm(self.position - other.position) < TOL
