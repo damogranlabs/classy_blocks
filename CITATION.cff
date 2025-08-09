@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: classy_blocks
+abstract: "A Python library for generating block-structured meshes in OpenFOAM and other CFD workflows."
+repository-code: "https://github.com/damogranlabs/classy_blocks"
+license: "MIT"
+doi: 10.5281/zenodo.16785017
+authors:
+  - family-names: Jurkovič
+    given-names: Nejc
+keywords:
+  - "CFD"
+  - "OpenFOAM"
+  - "meshing"
+  - "block-structured"
+  - "blockMesh"
+  - "blockMeshDict"
+  - "geometry"
+  - "modeling"
+  - "hexahedral"
+  - "parametric"
