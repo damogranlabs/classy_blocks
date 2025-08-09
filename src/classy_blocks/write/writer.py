@@ -1,3 +1,5 @@
+import datetime
+import sys
 from dataclasses import asdict
 from typing import Callable
 
@@ -77,7 +79,7 @@ class MeshWriter:
 
     def write(self, output_path: str):
         with open(output_path, "w", encoding="utf-8") as output:
-            output.write(constants.MESH_HEADER)
+            output.write(constants.MESH_HEADER.format(script=sys.argv[0], timestamp=str(datetime.datetime.now())))
 
             output.write(format_geometry(self.settings.geometry))
 

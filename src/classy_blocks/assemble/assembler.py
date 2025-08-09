@@ -68,7 +68,7 @@ class MeshAssembler:
             vertices = block.vertices
 
             for ipnt, point in enumerate(operation.points):
-                vertices[ipnt].projected_to += point.projected_to
+                vertices[ipnt].project(point.projected_to)
                 edge_list.add_from_operation(vertices, operation)
 
         # and add them to blocks

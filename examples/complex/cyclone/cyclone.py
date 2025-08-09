@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import os
-from typing import List
 
 import numpy as np
 import parameters as params
@@ -22,7 +21,7 @@ mesh = cb.Mesh()
 
 # A Region is an independent part of the mesh, constructed from
 # various other entities but each Region has the same methods and properties.
-def add_regions(regions: List[Region]) -> None:
+def add_regions(regions: list[Region]) -> None:
     for region in regions:
         for element in region.elements:
             mesh.add(element)
@@ -74,6 +73,7 @@ mesh.vertices[22].move_to(np.average(neighbours, axis=0))
 
 # Now, optimize the bad blocks in the inlet.
 optimizer = cb.MeshOptimizer(mesh)
+optimizer.config.relaxation_start = 0.5
 
 clamps = []
 for region in optimize_regions:

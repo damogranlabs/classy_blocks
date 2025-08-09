@@ -60,19 +60,19 @@ def vector_format(vector) -> str:
 
 MESH_HEADER = (
     "/*---------------------------------------------------------------------------*\\\n"
-    "| =========                 |                                                 |\n"
+    "| =========                |                                                 |\n"
     "| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n"
-    "|  \\    /   O peration     | Version:  v1806/v10                             |\n"
-    "|   \\  /    A nd           | Web:      https://www.OpenFOAM.com              |\n"
-    "|    \\/     M anipulation  |           https://www.OpenFOAM.org              |\n"
+    "|  \\    /   O peration     | Script: {script:<40s}|\n"
+    "|   \\  /    A nd           | Time: {timestamp:<42s}|\n"
+    "|    \\/     M anipulation  |                                                 |\n"
     "\\*---------------------------------------------------------------------------*/\n"
     "FoamFile\n"
-    "{\n"
+    "{{\n"
     "    version     2.0;\n"
     "    format      ascii;\n"
     "    class       dictionary;\n"
     "    object      blockMeshDict;\n"
-    "}\n"
+    "}}\n"
     "// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n\n"
 )
 

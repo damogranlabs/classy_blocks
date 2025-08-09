@@ -70,7 +70,7 @@ class VertexTests(DataTestCase):
         v = Vertex([0.0, 0.0, 0.0], 0)
         v.project(["terrain", "walls", "border"])
 
-        expected = "project (0.00000000 0.00000000 0.00000000) (terrain walls border) // 0"
+        expected = "project (0.00000000 0.00000000 0.00000000) (border terrain walls) // 0"
 
         self.assertEqual(format_vertex(v), expected)
 

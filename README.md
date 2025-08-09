@@ -3,6 +3,7 @@
 Python classes for easier creation of OpenFOAM's blockMesh dictionaries.
 
 # About
+
 _blockMesh_ is a very powerful mesher but the amount of manual labour it requires to make even the simplest meshes makes it mostly useless. Even attempts to simplify or parametrize blockMeshDicts with `#calc` or even the dreadful `m4` quickly become unmanageable and cryptic.
 
 classy_blocks' aim is to minimize the amount of meticulous work by providing a
@@ -10,10 +11,13 @@ more intuitive workflow, off-the-shelf parts and some automatic helpers for buil
 Still it is not an automatic mesher and therefore some kinds of geometry are more suited than others.
 
 ## Tutorial
+
 Check out the [classy_blocks tutorial on damogranlabs.com](https://damogranlabs.com/2023/04/classy_blocks-tutorial-part-1-the-basics/)!
 
 ## Useful For
+
 ### Fields
+
 - Turbomachinery (impellers, propellers)
 - Microfluidics
 - Flow around buildings
@@ -22,6 +26,7 @@ Check out the [classy_blocks tutorial on damogranlabs.com](https://damogranlabs.
 - Solids (heat transfer, mechanical stresses)
 
 ### Cases
+
 - Simpler rotational geometry (immersed rotors, mixers, cyclones)
 - Pipes/channels
 - Tanks/plenums/containers
@@ -33,60 +38,65 @@ Check out the [classy_blocks tutorial on damogranlabs.com](https://damogranlabs.
 - Overset meshes
 
 ## Not Good For
+
 - External aerodynamics of vehicles (too complex to mesh manually, without refinement generates too many cells)
 - Complex geometry in general
 - One-off simulations (use automatic meshers)
 
 # How To Use It
+
 - To install the current _stable_ version from pypi, use `pip install classy_blocks`
-- To download the cutting-edge development version, install the development branch from github: `pip install git+https://github.com/damogranlabs/classy_blocks.git@development`
+- To download the cutting-edge development version, install the development branch from Github: `pip install git+https://github.com/damogranlabs/classy_blocks.git@development`
 - If you want to run examples, follow instructions in [Examples](#examples)
-- If you want to contribute, follow instructions in [CONTRIBUTING.rst](CONTRIBUTING.rst)
+- If you want to contribute, follow instructions in [CONTRIBUTING.md](CONTRIBUTING.md)
 
 # Features
 
 ## Workflow
+
 As opposed to blockMesh, where the user is expected to manually enter pre-calculated vertices, edges, blocks and whatnot, classy_blocks tries to mimic procedural modeling of modern 3D CAD programs. Here, a Python script contains steps that describe geometry of blocks, their cell count, grading, patches and so on. At the end, the procedure is translated directly to blockMeshDict and no manual editing of the latter should be required.
 
 ## Building Elements
+
 _Unchecked items are not implemented yet but are on a TODO list_
 
 - [x] Manual definition of a Block with Vertices, Edges and Faces
 - [x] Operations (Loft, Extrude, Revolve)
-    - [x] Loft
-    - [x] Extrude
-    - [x] Revolve
-    - [x] Wedge (a shortcut to Revolve for 2D axisymmetric cases)
-    - [x] Connector (A Loft between two existing Operations)
+  - [x] Loft
+  - [x] Extrude
+  - [x] Revolve
+  - [x] Wedge (a shortcut to Revolve for 2D axisymmetric cases)
+  - [x] Connector (A Loft between two existing Operations)
 - [x] Sketches of common cross-sections
-    - [x] Quarter and Semi circle
-    - [x] Circle
-    - [x] Boxed circle
-    - [x] Oval with straight sides
-    - [x] Ellipse (and ovals in various configurations)
-    - [x] Cartesian grid
+  - [x] Quarter and Semi circle
+  - [x] Circle
+  - [x] Boxed circle
+  - [x] Oval with straight sides
+  - [x] Ellipse (and ovals in various configurations)
+  - [x] Cartesian grid
 - [x] Simple way of creating custom Sketches
 - [x] Easy shape creation from Sketches
 - [x] Predefined Shapes
-    - [x] Box (shortcut to Block aligned with coordinate system)
-    - [x] Elbow (bent pipe of various diameters/cross-sections)
-    - [x] Cone Frustum (truncated cone)
-    - [x] Cylinder
-    - [x] Ring (annulus)
-    - [x] Hemisphere
+  - [x] Box (shortcut to Block aligned with coordinate system)
+  - [x] Elbow (bent pipe of various diameters/cross-sections)
+  - [x] Cone Frustum (truncated cone)
+  - [x] Cylinder
+  - [x] Ring (annulus)
+  - [x] Hemisphere
 - [x] Stacks (collections of similar Shapes stacked on top of each other)
 - [x] Predefined parametric Objects
-    - [x] T-joint (round pipes)
-    - [x] X-joint
-    - [x] N-joint (multiple pipes)
-- [ ] Other building tools
-    - [x] Use existing Operation's Face to generate a new Operation
-    - [x] Chain Shape's start/end surface to generate a new Shape
-    - [x] Expand Shape's outer surface to generate a new Shape (Cylinder/Annulus > Annulus)
-    - [x] Contract Shape's inner surface into a new Shape (Annulus > Cylinder/Annulus)
-    - [x] Offset Operation's faces to form new operations
+  - [x] T-joint (round pipes)
+  - [x] X-joint
+  - [x] N-joint (multiple pipes)
+- [x] Other building tools
+  - [x] Use existing Operation's Face to generate a new Operation
+  - [x] Chain Shape's start/end surface to generate a new Shape
+  - [x] Expand Shape's outer surface to generate a new Shape (Cylinder/Annulus > Annulus)
+  - [x] Contract Shape's inner surface into a new Shape (Annulus > Cylinder/Annulus)
+  - [x] Offset Operation's faces to form new operations (Shell)
 
 ## Modifiers
+
 After blocks have been placed, it is possible to create new geometry based on placed blocks or to modify them.
 
 - [x] Move Vertex/Edge/Face
@@ -95,6 +105,7 @@ After blocks have been placed, it is possible to create new geometry based on pl
 - [x] Optimize point position of a Sketch or mesh vertices
 
 ## Meshing Specification
+
 - [x] Simple definition of all supported kinds of edges with a dedicated class (Arc/Origin/Angle/Spline/PolyLine/Project)
 - [x] Automatic sorting/reorienting of block vertices based on specified _front_ and _top_ points
 - [x] Automatic calculation of cell count and grading by specifying any of a number of parameters (cell-to-cell expansion ratio, start cell width, end cell width, total expansion ratio)
@@ -116,6 +127,7 @@ How to run:
 - Open `examples/case/case.foam` in ParaView to view the result
 
 For instance:
+
 ```bash
 cd examples/chaining
 python tank.py
@@ -161,8 +173,8 @@ mesh.add(revolve)
 
 > See `examples/operations` for an example of each operation.
 
-
 ## Shapes
+
 Some basic shapes are ready-made so that there's no need for workout with Operations.
 
 A simple Cylinder:
@@ -204,6 +216,7 @@ Venturi tube
 > See `examples/chaining` for an example of each operation.
 
 ## Custom Sketches and Shapes
+
 A Sketch is a collection of faces - essentially a 2D geometric object, split into quadrangles. Each Face in a Sketch is transformed into 3D space, creating a Shape.
 
 A number of predefined Sketches is available to choose from but it's easy to create a custom one.
@@ -220,6 +233,7 @@ Points that define a custom sketch can only be placed approximately. Their posit
 > See `examples/shape/custom` for an example with a custom sketch.
 
 ## Stacks
+
 A collection of similar Shapes; a Stack is created by starting with a Sketch, then transforming it a number of times, obtaining Shapes, stacked on top of each other.
 
 An Oval sketch, translated and rotated to obtain a Shape from which a Stack is made.
@@ -235,10 +249,10 @@ stack = ExtrudedStack(base, side * 2, 2)
 # ...
 mesh.delete(stack.grid[0][1][1])
 ```
+
 ![Cube](showcase/cube.png "Flow around a Cube")
 
 > See `examples/stack/cube.py` for the full script.
-
 
 An electric heater in water, a mesh with two cellZones. The heater zone with surrounding fuild of square cross-section is an extruded `WrappedDisk` followed by a `RevolvedStack` of the same cross-sections. The center is then filled with a `SemiCylinder`.
 ![Heater](showcase/heater.png "Heater")
@@ -246,12 +260,14 @@ An electric heater in water, a mesh with two cellZones. The heater zone with sur
 > See `examples/complex/heater` for the full script.
 
 ## Assemblies
+
 A collection of pre-assembled parametric Shapes, ready to be used for further construction.
 
 Three pipes, joined in a single point.
 ![N-Joint](showcase/n_joint.png)
 
 ## Automatic Grading
+
 After blocks have been positioned their cell count must be defined. This can be done manually with something like `operation.chop(axis, start_size=..., c2c_expansion=...)` or anything that `.chop()` method supports. Not all blocks need to be chopped as cell counts will be propagated throughout the mesh so it is advisable to only _chop_ the minimum required.
 
 All that can also be avoided by using automatic graders, for instance, `SmoothGrader` will set counts so that desired cell size will be obtained but will also use multigrading to keep cell sizes between neighbouring blocks as uniform as possible.
@@ -270,7 +286,6 @@ That includes searchable surfaces such as spheres and cylinders and triangulated
 Projecting a block side to a geometry is straightforward; edges, however, can be projected to a single geometry (will 'snap' to the closest point) or to an intersection of two surfaces, which will define it exactly.
 
 Geometry is specified as a simple dictionary of strings and is thrown in blockMeshDict exactly as provided by the user.
-
 
 ```python
 geometry = {
@@ -375,6 +390,7 @@ Airfoil core with blunt trailing edge (imported points from NACA generator) and 
 ![Airfoil](showcase/airfoil.png "Airfoil core mesh")
 
 ## Automatic Edge Grading
+
 When setting cell counts and expansion ratios, it is possible to specify which value to keep constant. Mostly this will be used for keeping thickness of the first cell at the wall consistent to maintain desired `y+` throughout the mesh. This is done by simple specifying a `preserve="..."` keyword.
 
 Example: a block chopped in a classic way where cell sizes will increase when block size increases:
@@ -389,12 +405,12 @@ By showing `block_ids` with a proper color scale the blocking can be visualized.
 This is useful when blockMesh fails with errors reporting invalid/inside-out blocks but VTK will
 happily show anything.
 
-## Also!
+## Also
 
 2D mesh for studying Karman Vortex Street
 ![Karman Vortex Street](showcase/karman.png "Karman vortex street")
 
-A parametric, Low-Re mesh of a real-life impeller *(not included in examples)*
+A parametric, Low-Re mesh of a real-life impeller _(not included in examples)_
 ![Impeller - Low Re](showcase/impeller_full.png "Low-Re Impeller")
 
 A gear, made from a curve of a single tooth, calculated by
@@ -408,9 +424,10 @@ A complex example: parametric, Low-Re mesh of a cyclone
 
 # Prerequisites
 
-Package (python) dependencies can be found in *pyproject.toml* file.
+Package (python) dependencies can be found in _pyproject.toml_ file.
 Other dependencies that must be installed:
-- python3.8 and higher
+
+- python3.9 and higher
 - OpenFoam: .org or .com version is supported, foam-extend's blockMesh doesn't support multigrading but is otherwise also compatible. BlockMesh is not required to run Python scripts. There is an ongoing effort to create VTK meshes from within classy_blocks. See the wip_mesher branch for the latest updates.
 
 # Technical Information
