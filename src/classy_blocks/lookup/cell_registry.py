@@ -3,6 +3,7 @@ from classy_blocks.util import functions as f
 
 
 class CellRegistry:
+    # Works for both quads and hexas
     def __init__(self, addressing: list[IndexType]):
         self.addressing = addressing
 

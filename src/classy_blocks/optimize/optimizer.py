@@ -13,7 +13,6 @@ from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.clamps.surface import PlaneClamp
 from classy_blocks.optimize.grid import GridBase, HexGrid, QuadGrid
 from classy_blocks.optimize.links import LinkBase
-from classy_blocks.optimize.mapper import Mapper
 from classy_blocks.optimize.record import (
     ClampRecord,
     IterationRecord,
@@ -208,19 +207,15 @@ class MeshOptimizer(OptimizerBase):
 
 class ShapeOptimizer(OptimizerBase):
     def __init__(self, operations: list[Operation], report: bool = True, merge_tol: float = TOL):
-        self.mapper = Mapper(merge_tol)
-
-        for operation in operations:
-            self.mapper.add(operation)
-
-        grid = HexGrid(np.array(self.mapper.points), self.mapper.indexes)
+        grid = HexGrid.from_elements(operations, merge_tol)
 
         super().__init__(grid, report)
+        self.operations = operations
 
     def _backport(self) -> None:
         # Move every point of every operation to wherever it is now
-        for iop, indexes in enumerate(self.mapper.indexes):
-            operation = self.mapper.elements[iop]
+        for iop, indexes in enumerate(self.grid.addressing):
+            operation = self.operations[iop]
 
             for ipnt, i in enumerate(indexes):
                 operation.points[ipnt].move_to(self.grid.points[i])

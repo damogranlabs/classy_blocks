@@ -18,12 +18,11 @@ from classy_blocks.lookup.connection_registry import (
     QuadConnectionRegistry,
 )
 from classy_blocks.lookup.face_registry import FaceRegistryBase, HexFaceRegistry, QuadFaceRegistry
-from classy_blocks.lookup.point_registry import HexPointRegistry
+from classy_blocks.lookup.point_registry import HexPointRegistry, QuadPointRegistry
 from classy_blocks.optimize.cell import CellBase, HexCell, QuadCell
 from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.junction import Junction
 from classy_blocks.optimize.links import LinkBase
-from classy_blocks.optimize.mapper import Mapper
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
 
@@ -153,18 +152,15 @@ class QuadGrid(GridBase):
     face_registry_class = QuadFaceRegistry
 
     @classmethod
-    def from_sketch(cls, sketch: Sketch) -> "QuadGrid":
+    def from_sketch(cls, sketch: Sketch, merge_tol: float = TOL) -> "QuadGrid":
         if isinstance(sketch, MappedSketch):
             # Use the mapper's indexes (provided by the user!)
             return cls(sketch.positions, sketch.indexes)
 
         # automatically create a mapping for arbitrary sketches
-        # TODO: replace Mapper with assemble.*registry, then delete the whole Mapper business
-        mapper = Mapper()
-        for face in sketch.faces:
-            mapper.add(face)
+        preg = QuadPointRegistry.from_sketch(sketch, merge_tol)
 
-        return cls(np.array(mapper.points), mapper.indexes)
+        return cls(preg.unique_points, preg.cell_addressing)
 
 
 class HexGrid(GridBase):
