@@ -76,14 +76,13 @@ class OptimizerBase(abc.ABC):
         """Move clamp.vertex so that quality at junction is improved;
         rollback changes if grid quality decreased after optimization"""
         junction = self.grid.get_junction_from_clamp(clamp)
-        crecord = ClampRecord(junction.index, self.grid.quality, junction.quality)
+        crecord = ClampRecord(junction.index, self.grid.quality)
         self.reporter.clamp_start(crecord)
         initial_params = copy.copy(clamp.params)
 
         def fquality(params):
             clamp.update_params(params)
-            quality = self.grid.update(junction.index, clamp.position)
-            return quality
+            return self.grid.update(junction.index, clamp.position)
 
         try:
             result = scipy.optimize.minimize(
@@ -106,7 +105,6 @@ class OptimizerBase(abc.ABC):
             crecord.rolled_back = True
             crecord.error_message = str(e)
 
-        crecord.junction_final = junction.quality
         crecord.grid_final = self.grid.quality
         self.reporter.clamp_end(crecord)
 

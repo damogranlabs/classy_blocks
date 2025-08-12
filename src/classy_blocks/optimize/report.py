@@ -49,7 +49,6 @@ class TextReporter(OptimizationReporterBase):
         report(f"Relaxation: {relaxation:.4f}")
         report("{:6s}".format("Vertex"), end="")
         report("{:>12s}".format("Initial"), end="")
-        report("{:>12s}".format("Local"), end="")
         report("{:>12s}".format("Improvement"), end="")
         report("{:>12s}".format("Final"), end="")
         report("{:>12s}".format("Status"))
@@ -57,14 +56,13 @@ class TextReporter(OptimizationReporterBase):
     def clamp_start(self, crecord: ClampRecord) -> None:
         report(f"{crecord.vertex_index:>6}", end="")
         report(f"{crecord.grid_initial:12.3e}", end="")
-        report(f"{crecord.junction_initial:12.3e}", end="")
 
     def clamp_end(self, crecord: ClampRecord) -> None:
         report(f"{crecord.improvement:12.0f}", end="")
         report(f"{crecord.grid_final:12.3e}", end="")
 
         if crecord.rolled_back:
-            report(f"Rollback ({crecord.error_message})")
+            report(f" Rollback ({crecord.error_message})", end="")
 
         report("")  # a.k.a. new line
 

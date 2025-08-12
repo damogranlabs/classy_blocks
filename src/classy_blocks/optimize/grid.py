@@ -133,17 +133,19 @@ class GridBase:
         self.points[index] = position
 
         junction = self.junctions[index]
+        quality = junction.quality  # quality is a sum of this junction and all linked ones
 
         if len(junction.links) > 0:
             for indexed_link in junction.links:
+                # update follower position
                 indexed_link.link.leader = position
                 indexed_link.link.update()
-
+                # update grid points
                 self.points[indexed_link.follower_index] = indexed_link.link.follower
+                # add linked junctions' quality to the sum
+                quality += self.junctions[indexed_link.follower_index].quality
 
-            return self.quality
-
-        return junction.quality
+        return quality
 
 
 class QuadGrid(GridBase):
