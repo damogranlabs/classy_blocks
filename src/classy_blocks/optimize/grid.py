@@ -136,14 +136,18 @@ class GridBase:
         quality = junction.quality  # quality is a sum of this junction and all linked ones
 
         if len(junction.links) > 0:
-            for indexed_link in junction.links:
+            for tie in junction.links:
                 # update follower position
-                indexed_link.link.leader = position
-                indexed_link.link.update()
+                link = tie.leader
+
+                link.leader = position
+                link.update()
+
                 # update grid points
-                self.points[indexed_link.follower_index] = indexed_link.link.follower
+                self.points[tie.follower_index] = tie.leader.follower
+
                 # add linked junctions' quality to the sum
-                quality += self.junctions[indexed_link.follower_index].quality
+                quality += self.junctions[tie.follower_index].quality
 
         return quality
 

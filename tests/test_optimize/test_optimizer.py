@@ -59,7 +59,7 @@ class MeshOptimizerTests(BoxTestsBase):
         optimizer = MeshOptimizer(self.mesh, report=False)
         optimizer.add_clamp(clamp)
         optimizer.add_link(link)
-        optimizer.optimize()  # method="L-BFGS-B")
+        optimizer.optimize(method="Powell")
 
         self.assertGreater(f.norm(follower_vertex.position - f.vector(0, 1, 0)), 0)
         np.testing.assert_almost_equal(vertex.position, [0, 0, 0], decimal=1)

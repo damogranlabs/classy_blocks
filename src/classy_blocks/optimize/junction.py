@@ -12,9 +12,8 @@ from classy_blocks.optimize.quality import get_hex_quality, get_quad_quality
 
 
 @dataclasses.dataclass
-class IndexedLink:
-    # TODO: refactor / deuglify
-    link: LinkBase
+class LinkTie:
+    leader: LinkBase
     follower_index: int
 
 
@@ -31,7 +30,7 @@ class Junction:
         self.neighbours: set[Junction] = set()
 
         self.clamp: Optional[ClampBase] = None
-        self.links: list[IndexedLink] = []
+        self.links: list[LinkTie] = []
 
     @property
     def point(self) -> NPPointType:
@@ -44,7 +43,7 @@ class Junction:
         self.clamp = clamp
 
     def add_link(self, link: LinkBase, follower_index: int) -> None:
-        self.links.append(IndexedLink(link, follower_index))
+        self.links.append(LinkTie(link, follower_index))
 
     @property
     def is_boundary(self) -> bool:

@@ -147,9 +147,9 @@ class OptimizerBase(abc.ABC):
 
     def optimize(
         self,
-        max_iterations: int = 20,
-        tolerance: float = 0.1,
-        method: MinimizationMethodType = "SLSQP",
+        max_iterations: int | None = None,
+        tolerance: float | None = None,
+        method: MinimizationMethodType | None = None,
     ) -> bool:
         """Move vertices as defined and restrained with Clamps
         so that better mesh quality is obtained.
@@ -161,12 +161,16 @@ class OptimizerBase(abc.ABC):
         for fine tuning, modify optimizer.config attribute.
 
         Returns True is optimization was successful (tolerance reached)"""
-        self.config.max_iterations = max_iterations
-        self.config.rel_tol = tolerance
-        self.config.method = method
+        if max_iterations is not None:
+            self.config.max_iterations = max_iterations
+        if tolerance is not None:
+            self.config.rel_tol = tolerance
+        if method is not None:
+            self.config.method = method
+
         orecord = OptimizationRecord(time.time(), self.grid.quality)  # TODO: cache repeating quality queries
 
-        for i in range(max_iterations):
+        for i in range(self.config.max_iterations):
             iter_record = self._optimize_iteration(i)
 
             if iter_record.abs_improvement < self.config.abs_tol:
