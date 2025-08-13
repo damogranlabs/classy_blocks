@@ -2,6 +2,7 @@ import abc
 import copy
 import dataclasses
 import time
+from typing import Optional
 
 import numpy as np
 import scipy.optimize
@@ -147,9 +148,9 @@ class OptimizerBase(abc.ABC):
 
     def optimize(
         self,
-        max_iterations: int | None = None,
-        tolerance: float | None = None,
-        method: MinimizationMethodType | None = None,
+        max_iterations: Optional[int] = None,
+        tolerance: Optional[float] = None,
+        method: Optional[MinimizationMethodType] = None,
     ) -> bool:
         """Move vertices as defined and restrained with Clamps
         so that better mesh quality is obtained.
