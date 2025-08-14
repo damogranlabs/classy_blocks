@@ -73,7 +73,7 @@ class SketchOptimizerTests(SketchTestsBase):
         optimizer = SketchOptimizer(sketch, report=False)
         optimizer.add_clamp(clamp)
 
-        optimizer.optimize(method="L-BFGS-B")
+        optimizer.optimize(method="SLSQP")
 
         np.testing.assert_almost_equal(sketch.positions[4], [1, 1, 0], decimal=1)
 
@@ -81,7 +81,7 @@ class SketchOptimizerTests(SketchTestsBase):
         sketch = MappedSketch(self.positions, self.quads)
 
         optimizer = SketchOptimizer(sketch, report=False)
-        optimizer.auto_optimize(method="L-BFGS-B")
+        optimizer.auto_optimize(method="SLSQP")
 
         np.testing.assert_almost_equal(sketch.positions[4], [1, 1, 0], decimal=1)
 

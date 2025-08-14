@@ -95,18 +95,20 @@ class OptimizerBase(abc.ABC):
             # relax and update
             for i, param in enumerate(result.x):
                 clamp.params[i] = initial_params[i] + relaxation_factor * (param - initial_params[i])
+            fquality(clamp.params)
 
-            crecord.grid_final = fquality(clamp.params)
+            # always check grid quality, not clamp's
+            crecord.grid_final = self.grid.quality
 
-            if np.isnan(crecord.improvement) or crecord.improvement <= 0:
+            if not crecord.improvement > 0:
                 raise ValueError("No improvement")
         except ValueError as e:
             # roll back to the initial state
             fquality(initial_params)
             crecord.rolled_back = True
             crecord.error_message = str(e)
+            crecord.grid_final = self.grid.quality
 
-        crecord.grid_final = self.grid.quality
         self.reporter.clamp_end(crecord)
 
         return crecord
@@ -236,7 +238,10 @@ class SketchOptimizer(OptimizerBase):
         self.sketch.update(self.grid.points)
 
     def auto_optimize(
-        self, max_iterations: int = 20, tolerance: float = 0.1, method: MinimizationMethodType = "SLSQP"
+        self,
+        max_iterations: Optional[int] = None,
+        tolerance: Optional[float] = None,
+        method: Optional[MinimizationMethodType] = None,
     ) -> bool:
         """Adds a PlaneClamp to all non-boundary points and optimize the sketch.
         To include boundary points (those that can be moved along a line or a curve),
