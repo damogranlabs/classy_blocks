@@ -73,7 +73,7 @@ class SketchOptimizerTests(SketchTestsBase):
         optimizer = SketchOptimizer(sketch, report=False)
         optimizer.add_clamp(clamp)
 
-        optimizer.optimize(method="SLSQP")
+        optimizer.optimize(method="L-BFGS-B")
 
         np.testing.assert_almost_equal(sketch.positions[4], [1, 1, 0], decimal=1)
 
@@ -81,9 +81,19 @@ class SketchOptimizerTests(SketchTestsBase):
         sketch = MappedSketch(self.positions, self.quads)
 
         optimizer = SketchOptimizer(sketch, report=False)
-        optimizer.auto_optimize(method="SLSQP")
+        optimizer.auto_optimize(method="L-BFGS-B")
 
         np.testing.assert_almost_equal(sketch.positions[4], [1, 1, 0], decimal=1)
+
+    def test_bad_algo(self):
+        # make sure that if the user chooses a non-suitable algorithm
+        # the optimization will at least not worsen the mesh
+        sketch = MappedSketch(self.positions, self.quads)
+
+        optimizer = SketchOptimizer(sketch, report=False)
+        optimizer.auto_optimize(method="SLSQP")
+
+        np.testing.assert_array_almost_equal(self.positions[4], [1.2, 1.6, 0])
 
 
 class ComplexSketchTests(unittest.TestCase):
