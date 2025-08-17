@@ -1,7 +1,7 @@
 import dataclasses
 from typing import Literal
 
-MinimizationMethodType = Literal["SLSQP", "L-BFGS-B", "Nelder-Mead", "Powell"]
+MinimizationMethodType = Literal["SLSQP", "L-BFGS-B", "Nelder-Mead", "Powell", "trust-constr"]
 
 TerminationReason = Literal["running", "abs", "rel", "limit"]
 

@@ -2,6 +2,7 @@ import abc
 import copy
 import dataclasses
 import time
+from dataclasses import field
 from typing import Optional
 
 import numpy as np
@@ -48,6 +49,10 @@ class OptimizerConfig:
     # convergence tolerance for a single joint
     # as passed to scipy.optimize.minimize
     clamp_tol: float = 1e-3
+    # additional options passed to Scipy's minimize method,
+    # depending on chosen algotirhm; see documentation of scipy.optimize.minimize
+    # and specifically the chosen algorithm
+    options: dict = field(default_factory=dict)
 
 
 class OptimizerBase(abc.ABC):
@@ -87,7 +92,12 @@ class OptimizerBase(abc.ABC):
 
         try:
             result = scipy.optimize.minimize(
-                fquality, clamp.params, bounds=clamp.bounds, method=self.config.method, tol=self.config.clamp_tol
+                fquality,
+                clamp.params,
+                bounds=clamp.bounds,
+                method=self.config.method,
+                tol=self.config.clamp_tol,
+                options=self.config.options,
             )
             if not result.success:
                 raise ValueError(result.message)

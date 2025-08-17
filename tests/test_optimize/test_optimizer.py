@@ -73,7 +73,7 @@ class SketchOptimizerTests(SketchTestsBase):
         optimizer = SketchOptimizer(sketch, report=False)
         optimizer.add_clamp(clamp)
 
-        optimizer.optimize(method="L-BFGS-B")
+        optimizer.optimize(method="trust-constr")
 
         np.testing.assert_almost_equal(sketch.positions[4], [1, 1, 0], decimal=1)
 
@@ -81,19 +81,36 @@ class SketchOptimizerTests(SketchTestsBase):
         sketch = MappedSketch(self.positions, self.quads)
 
         optimizer = SketchOptimizer(sketch, report=False)
-        optimizer.auto_optimize(method="L-BFGS-B")
+        optimizer.auto_optimize(method="trust-constr")
 
         np.testing.assert_almost_equal(sketch.positions[4], [1, 1, 0], decimal=1)
 
     def test_bad_algo(self):
         # make sure that if the user chooses a non-suitable algorithm
-        # the optimization will at least not worsen the mesh
+        # the optimization will at least not ruin the mesh
         sketch = MappedSketch(self.positions, self.quads)
 
         optimizer = SketchOptimizer(sketch, report=False)
         optimizer.auto_optimize(method="SLSQP")
 
         np.testing.assert_array_almost_equal(self.positions[4], [1.2, 1.6, 0])
+
+    def test_algo_options(self):
+        # pass an additional option to optimizer
+        sketch_1 = MappedSketch(self.positions, self.quads)
+        optimizer_1 = SketchOptimizer(sketch_1, report=False)
+        optimizer_1.config.method = "trust-constr"
+        optimizer_1.config.options = {"xtol": 0.1}
+
+        sketch_2 = MappedSketch(self.positions, self.quads)
+        optimizer_2 = SketchOptimizer(sketch_2, report=False)
+        optimizer_2.config.method = "trust-constr"
+        optimizer_2.config.options = {"xtol": 1}
+
+        optimizer_1.auto_optimize()
+        optimizer_2.auto_optimize()
+
+        self.assertGreater(optimizer_2.grid.quality, optimizer_1.grid.quality)
 
 
 class ComplexSketchTests(unittest.TestCase):
