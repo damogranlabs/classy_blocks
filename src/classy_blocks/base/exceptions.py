@@ -138,6 +138,10 @@ class InvalidLinkError(Exception):
     """Raised when a link has been added that doesn't connect two actual points"""
 
 
+class OptimizationError(Exception):
+    """Raised when optimization of a clamp produced results worse than before"""
+
+
 ### Mesh assembly/writing
 class MeshNotAssembledError(Exception):
     """Raised when looking for assembled items on a non-assembled mesh"""

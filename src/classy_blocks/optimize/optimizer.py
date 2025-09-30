@@ -8,6 +8,7 @@ from typing import Optional
 import numpy as np
 import scipy.optimize
 
+from classy_blocks.base.exceptions import OptimizationError
 from classy_blocks.construct.flat.sketches.mapped import MappedSketch
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.mesh import Mesh
@@ -84,6 +85,7 @@ class OptimizerBase(abc.ABC):
         junction = self.grid.get_junction_from_clamp(clamp)
         crecord = ClampRecord(junction.index, self.grid.quality)
         self.reporter.clamp_start(crecord)
+        initial_position = copy.copy(junction.point)
         initial_params = copy.copy(clamp.params)
 
         def fquality(params):
@@ -100,7 +102,7 @@ class OptimizerBase(abc.ABC):
                 options=self.config.options,
             )
             if not result.success:
-                raise ValueError(result.message)
+                raise OptimizationError(result.message)
 
             # relax and update
             for i, param in enumerate(result.x):
@@ -111,10 +113,10 @@ class OptimizerBase(abc.ABC):
             crecord.grid_final = self.grid.quality
 
             if not crecord.improvement > 0:
-                raise ValueError("No improvement")
-        except ValueError as e:
+                raise OptimizationError("No improvement")
+        except OptimizationError as e:
             # roll back to the initial state
-            fquality(initial_params)
+            self.grid.update(junction.index, initial_position)
             crecord.rolled_back = True
             crecord.error_message = str(e)
             crecord.grid_final = self.grid.quality
