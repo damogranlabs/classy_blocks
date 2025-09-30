@@ -15,7 +15,7 @@ def scale_quality(base: float, exponent: float, factor: float, value: float) -> 
 
 @numba.jit(nopython=True)
 def scale_aspect(ratio: float) -> float:
-    return scale_quality(4, 3, 3, np.log10(ratio))
+    return scale_quality(4, 3, 2, np.log10(ratio))
 
 
 @numba.jit(nopython=True)
@@ -63,9 +63,9 @@ def get_quad_normal(points: NPPointListType) -> tuple[NPVectorType, NPVectorType
 
 @numba.jit(nopython=True, cache=True)
 def scale_angle(angle: float) -> float:
-    n = 4
-    m = 10
-    threshold = 65
+    n = 6
+    m = 100
+    threshold = 75
     a = m / (n * threshold ** (n - 1))
 
     if angle <= threshold:

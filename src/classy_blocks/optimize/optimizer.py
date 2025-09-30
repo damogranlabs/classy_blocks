@@ -79,6 +79,26 @@ class OptimizerBase(abc.ABC):
     def add_link(self, link: LinkBase) -> None:
         self.grid.add_link(link)
 
+    def _get_sensitivity(self, clamp: ClampBase):
+        """Returns maximum partial derivative at current params"""
+        junction = self.grid.get_junction_from_clamp(clamp)
+        initial_position = copy.copy(junction.point)
+
+        def fquality(clamp, junction, params):
+            try:
+                clamp.update_params(params)
+                quality = self.grid.update(junction.index, clamp.position)
+                self.grid.update(junction.index, initial_position)
+
+                return quality
+            except Exception as e:
+                print(e)
+                return 0
+
+        sensitivities = scipy.optimize.approx_fprime(clamp.params, lambda p: fquality(clamp, junction, p), epsilon=TOL)
+
+        return np.linalg.norm(sensitivities)
+
     def _optimize_clamp(self, clamp: ClampBase, relaxation_factor: float) -> ClampRecord:
         """Move clamp.vertex so that quality at junction is improved;
         rollback changes if grid quality decreased after optimization"""
@@ -130,7 +150,8 @@ class OptimizerBase(abc.ABC):
         irecord = IterationRecord(iteration_no, self.grid.quality, rlf)
         self.reporter.iteration_start(iteration_no, rlf)
 
-        for clamp in self.grid.clamps:
+        clamps = sorted(self.grid.clamps, key=lambda c: self._get_sensitivity(c), reverse=True)
+        for clamp in clamps:
             self._optimize_clamp(clamp, rlf)
 
         irecord.grid_final = self.grid.quality
