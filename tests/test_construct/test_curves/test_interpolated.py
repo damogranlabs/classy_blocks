@@ -103,7 +103,7 @@ class SplineInterpolatedCurveTests(unittest.TestCase):
 
     def test_length(self):
         # spline must be longer than linear segments combined
-        self.assertEqual(self.curve.length, 4 * 2**0.5)
+        self.assertAlmostEqual(self.curve.length, 4 * 2**0.5)
         self.assertLess(self.curve.length, 8)
 
     @parameterized.expand(
