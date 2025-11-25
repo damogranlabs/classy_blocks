@@ -2,6 +2,7 @@ from typing import get_args
 
 from classy_blocks.cbtyping import DirectionType, IndexType, OrientType
 from classy_blocks.grading.chop import Chop
+from classy_blocks.grading.collector import ChopCollector
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.axis import Axis
@@ -79,8 +80,8 @@ class Block:
             for cnd_wire in candidate.wire_list:
                 this_wire.add_coincident(cnd_wire)
 
-    def add_chops(self, direction: DirectionType, chops: list[Chop]) -> None:
-        self.axes[direction].chops += chops
+    def add_chops(self, direction: DirectionType, chops: ChopCollector) -> None:
+        self.axes[direction].chops += chops.axis_chops
 
     def update_wires(self) -> None:
         for wire in self.wire_list:

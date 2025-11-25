@@ -1,5 +1,6 @@
 from classy_blocks.base.exceptions import InconsistentGradingsError
 from classy_blocks.cbtyping import DirectionType
+from classy_blocks.grading.collector import ChopCollector
 from classy_blocks.grading.chop import Chop
 from classy_blocks.grading.grading import Grading
 from classy_blocks.items.vertex import Vertex

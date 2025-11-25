@@ -20,6 +20,7 @@ from classy_blocks.construct.edges import Arc, EdgeData, Line, Project, Spline
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.point import Point
 from classy_blocks.grading.chop import Chop
+from classy_blocks.grading.collector import ChopCollector
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import SIDES_MAP
@@ -42,7 +43,7 @@ class Operation(ElementBase):
         self.side_patches: list[Optional[str]] = [None, None, None, None]
 
         # instructions for cell counts and gradings
-        self.chops: dict[DirectionType, list[Chop]] = {0: [], 1: [], 2: []}
+        self.chops: dict[DirectionType, ChopCollector] = {0: ChopCollector(), 1: ChopCollector(), 2: ChopCollector()}
 
         # optionally, put the block in a cell zone
         self.cell_zone = ""
@@ -92,16 +93,16 @@ class Operation(ElementBase):
         Use length_ratio for multigrading (see documentation):
         https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading"""
 
-        self.chops[axis].append(Chop(**kwargs))
+        self.chops[axis].chop_axis(Chop(**kwargs))
 
     def unchop(self, axis: Optional[DirectionType] = None) -> None:
         """Removes existing chops from an operation (comes handy after copying etc.)"""
         if axis is None:
             for i in get_args(DirectionType):
-                self.chops[i] = []
+                self.chops[i].clear()
             return
 
-        self.chops[axis] = []
+        self.chops[axis].clear()
 
     def project_corner(self, corner: int, label: ProjectToType) -> None:
         """Project the vertex at given corner (local index 0...7) to a single
