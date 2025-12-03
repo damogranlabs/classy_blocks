@@ -1,7 +1,6 @@
 from typing import get_args
 
 from classy_blocks.cbtyping import DirectionType, IndexType, OrientType
-from classy_blocks.grading.chop import Chop
 from classy_blocks.grading.collector import ChopCollector
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.vertex import Vertex
@@ -17,9 +16,8 @@ class Block:
     def __init__(self, index: int, vertices: list[Vertex]):
         # index in blockMeshDict
         self.index = index
-
-        # vertices, edges, counts and gradings
         self.vertices = vertices
+        self.chops = ChopCollector()
 
         # wires and axes
         self.wires = Frame[Wire]()
@@ -52,6 +50,9 @@ class Block:
 
         self.wires[corner_1][corner_2].edge = edge
 
+    def set_chops(self, collector: ChopCollector) -> None:
+        self.chops = collector
+
     def get_axis_wires(self, direction: DirectionType) -> list[Wire]:
         """Returns a list of wires that run in the given axis"""
         return self.wires.get_axis_beams(direction)
@@ -80,17 +81,10 @@ class Block:
             for cnd_wire in candidate.wire_list:
                 this_wire.add_coincident(cnd_wire)
 
-    def add_chops(self, direction: DirectionType, chops: ChopCollector) -> None:
-        self.axes[direction].chops += chops.axis_chops
-
     def update_wires(self) -> None:
         for wire in self.wire_list:
             # set actual grading.length after adding edges
             wire.update()
-
-    def grade(self) -> None:
-        for axis in self.axes:
-            axis.grade()
 
     @property
     def wire_list(self) -> list[Wire]:
@@ -110,13 +104,9 @@ class Block:
         return all_edges
 
     @property
-    def is_defined(self) -> bool:
+    def is_graded(self) -> bool:
         """Returns True if counts and gradings are defined for all axes"""
-        return all(axis.is_defined for axis in self.axes)
-
-    def check_consistency(self) -> None:
-        for axis in self.axes:
-            axis.check_consistency()
+        return all(axis.is_graded for axis in self.axes)
 
     @property
     def indexes(self) -> IndexType:

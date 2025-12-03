@@ -37,9 +37,9 @@ class BlockTestCase(DataTestCase):
 
             block.add_edge(corner_1, corner_2, edge)
 
+        collector = ChopCollector()
         for i in get_args(DirectionType):
-            collector = ChopCollector()
-            collector.axis_chops = block_data.chops[i]
+            collector.chop_axis(i, block_data.chops[i])
             block.add_chops(i, collector)
 
         return block

@@ -1,6 +1,7 @@
 import numpy as np
 from parameterized import parameterized
 
+from classy_blocks.cbtyping import DirectionType
 from classy_blocks.construct.edges import Arc
 from classy_blocks.grading.chop import Chop
 from classy_blocks.grading.collector import ChopCollector
@@ -12,9 +13,10 @@ from classy_blocks.write.formats import format_block
 from tests.fixtures.block import BlockTestCase
 
 
-def _mkcollector(chops: list[Chop]) -> ChopCollector:
+def _mkcollector(axis: DirectionType, chops: list[Chop]) -> ChopCollector:
     col = ChopCollector()
-    col.axis_chops = chops
+    for chop in chops:
+        col.chop_axis(axis, chop)
 
     return col
 
@@ -172,7 +174,7 @@ class BlockSimpleGradingTests(BlockTestCase):
     def test_is_defined_1(self):
         """block.is_defined with 1 grading"""
         block_0 = self.make_block(0)
-        block_0.add_chops(0, _mkcollector([Chop(count=10)]))
+        block_0.add_chops(0, _mkcollector(0, [Chop(count=10)]))
 
         block_0.grade()
 
@@ -181,8 +183,8 @@ class BlockSimpleGradingTests(BlockTestCase):
     def test_is_defined_2(self):
         """block.is_defined with 2 gradings"""
         block_0 = self.make_block(0)
-        block_0.add_chops(0, _mkcollector([Chop(count=10)]))
-        block_0.add_chops(1, _mkcollector([Chop(count=10)]))
+        block_0.add_chops(0, _mkcollector(0, [Chop(count=10)]))
+        block_0.add_chops(1, _mkcollector(1, [Chop(count=10)]))
 
         block_0.grade()
 
@@ -191,9 +193,9 @@ class BlockSimpleGradingTests(BlockTestCase):
     def test_is_defined_3(self):
         """block.is_defined with 3 gradings"""
         block_0 = self.make_block(0)
-        block_0.add_chops(0, _mkcollector([Chop(count=10)]))
-        block_0.add_chops(1, _mkcollector([Chop(count=10)]))
-        block_0.add_chops(2, _mkcollector([Chop(count=10)]))
+        block_0.add_chops(0, _mkcollector(0, [Chop(count=10)]))
+        block_0.add_chops(1, _mkcollector(1, [Chop(count=10)]))
+        block_0.add_chops(2, _mkcollector(2, [Chop(count=10)]))
 
         block_0.grade()
 
@@ -202,10 +204,10 @@ class BlockSimpleGradingTests(BlockTestCase):
     def test_is_defined_4(self):
         """block.is_defined with 4 gradings"""
         block_0 = self.make_block(0)
-        block_0.add_chops(0, _mkcollector([Chop(count=10)]))
-        block_0.add_chops(0, _mkcollector([Chop(count=10)]))
-        block_0.add_chops(1, _mkcollector([Chop(count=10)]))
-        block_0.add_chops(2, _mkcollector([Chop(count=10)]))
+        block_0.add_chops(0, _mkcollector(0, [Chop(count=10)]))
+        block_0.add_chops(0, _mkcollector(0, [Chop(count=10)]))
+        block_0.add_chops(1, _mkcollector(1, [Chop(count=10)]))
+        block_0.add_chops(2, _mkcollector(2, [Chop(count=10)]))
 
         block_0.grade()
 
@@ -232,12 +234,12 @@ class BlockEdgeGradingTests(BlockTestCase):
 
         # clear chops so that they are added manually for each test
         for axis in block.axes:
-            axis.wires.chops = []
+            axis.wires.chops.clear()
 
         return block
 
     def chop(self, block: Block, axis, **kwargs):
-        block.add_chops(axis, _mkcollector([Chop(**kwargs)]))
+        block.add_chops(axis, _mkcollector(axis, [Chop(**kwargs)]))
 
     def calculate(self, block):
         block.update_wires()

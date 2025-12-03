@@ -38,10 +38,6 @@ class DumpBase(abc.ABC):
     def edges(self) -> list[Edge]:
         pass
 
-    @abc.abstractmethod
-    def finalize(self) -> None:
-        pass
-
 
 class EmptyDump(DumpBase):
     @property
@@ -62,9 +58,6 @@ class EmptyDump(DumpBase):
 
     @property
     def edges(self):
-        raise MeshNotAssembledError("The Mesh is not assembled")
-
-    def finalize(self):
         raise MeshNotAssembledError("The Mesh is not assembled")
 
 
@@ -103,6 +96,3 @@ class AssembledDump(DumpBase):
     @property
     def edges(self):
         return list(self.edge_list.edges.values())
-
-    def finalize(self):
-        self.block_list.assemble()

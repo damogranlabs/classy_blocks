@@ -7,9 +7,10 @@ BeamT = TypeVar("BeamT")
 
 
 class Frame(Generic[BeamT]):
-    """A two-dimensional dictionary for holding data
-    between each end of hexahedra edges (called 'beam' generically
-    like a cuve's frame would be created from those);
+    """
+    A two-dimensional dictionary for holding data
+    between each end of hexahedra edges
+    (an edge is called 'beam' generically to distinguish it from actual Edges)
 
     An edge/wire/whatever object between vertices 0 and 1
     can be accessed as frame[0][1]. Diagonals are not available.

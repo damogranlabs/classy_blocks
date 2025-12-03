@@ -1,10 +1,8 @@
-from typing import get_args
 
 from classy_blocks.assemble.depot import Depot
 from classy_blocks.assemble.dump import AssembledDump
 from classy_blocks.assemble.settings import Settings
 from classy_blocks.base.exceptions import EdgeNotFoundError
-from classy_blocks.cbtyping import DirectionType
 from classy_blocks.items.block import Block
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.lists.block_list import BlockList
@@ -47,9 +45,7 @@ class MeshAssembler:
                 op_vertices[corner] = vertex_list.add_duplicated(point, patches)
 
             block = Block(iop, op_vertices)
-
-            for direction in get_args(DirectionType):
-                block.add_chops(direction, operation.chops[direction])
+            block.set_chops(operation.chops)
 
             block.cell_zone = operation.cell_zone
             block.visible = operation not in self.depot.deleted

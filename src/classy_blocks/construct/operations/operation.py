@@ -19,7 +19,7 @@ from classy_blocks.cbtyping import (
 from classy_blocks.construct.edges import Arc, EdgeData, Line, Project, Spline
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.point import Point
-from classy_blocks.grading.chop import Chop
+from classy_blocks.grading.chop import Chop, EdgeChop
 from classy_blocks.grading.collector import ChopCollector
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
@@ -43,7 +43,7 @@ class Operation(ElementBase):
         self.side_patches: list[Optional[str]] = [None, None, None, None]
 
         # instructions for cell counts and gradings
-        self.chops: dict[DirectionType, ChopCollector] = {0: ChopCollector(), 1: ChopCollector(), 2: ChopCollector()}
+        self.chops = ChopCollector()
 
         # optionally, put the block in a cell zone
         self.cell_zone = ""
@@ -68,32 +68,52 @@ class Operation(ElementBase):
         self.side_edges[corner_idx] = edge_data
 
     def chop(self, axis: DirectionType, **kwargs: Unpack[ChopArgs]) -> None:
-        """Chop the operation (count/grading) either in given axis:
-            0: along first edge of a face
-            1: along second edge of a face
-            2: between faces / along operation path
-        or between the specified corners (only valid combinations apply).
+        """
+        Chop the whole operation (set cell count and optional grading) in one direction.
 
-        kwargs:
-        Available grading parameters are:
-         - start_size: width of start cell
-         - end_size: width of end cell
-         - count: cell count in given direction
-         - c2c_expansion: cell-to-cell expansion ratio (default=1)
-         - total_expansion: ratio between first and last cell size
+        Parameters
+        ----------
+        Axis : int
+            Direction in which to apply the chop:
+            * **0** - along the first edge of a face
+            * **1** - along the second edge of a face
+            * **2** - between faces / along the operation path
 
-        For a simple case with a uniform cell size (no grading)
-        you must specify start_size or count, default for c2c_expansion is 1.
-        To define a graded block/edge, use any valid combination of the above parameters.
+        Keyword arguments
+        ----------------
+        start_size : float, optional
+            Width of the first cell.
+        end_size : float, optional
+            Width of the last cell.
+        count : int, optional
+            Number of cells in the chosen direction.
+        c2c_expansion : float, optional
+            Cell-to-cell expansion ratio (default = 1).
+        total_expansion : float, optional
+            Ratio between the first and last cell size.
+        take : optional
+            Edge length to use when computing the cell count. Use 'min', 'max' or 'avg' (the default)
+        preserve : optional
+            Which parameter to maintain consistent when distributing chops to other blocks in the same row.
+            Can be ``c2c_expansion``, ``start_size`` or ``end_size``. The default is ``total_expansion``.
+        length_ratio : optional
+            To use multi-graded blocks, add multiple chops to the same axis by calling ``.chop()`` multiple times.
+            Each chop takes a fraction of length (should total to 1) which is specified by ``length_ratio``.
+            https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
 
-        For axis chops, the 'take' parameter will define which edge
-        length will be taken for cell count calculation. When an edge is chopped,
-        axis chops in edge's axis will be ignored.
+        Notes
+        -----
+        * Specify one or two chopping parameters (start/end size, c2c expansion, total expansion, count).
+        That specifies grading completely. Using more than two makes the calculation over-defined and
+        will yield inconsistent results or will throw an exception.
+        * When only one parameter is given, ``c2c_expansion`` defaults to 1 and a uniform cell size is produced.
+        * ``total_expansion`` cannot be used with ``c2c_expansion`` = 1.
+        * ``take`` controls which edge length in given axis is taken when calculating grading.
+        """
+        self.chops.chop_axis(axis, Chop(**kwargs))
 
-        Use length_ratio for multigrading (see documentation):
-        https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading"""
-
-        self.chops[axis].chop_axis(Chop(**kwargs))
+    def chop_edge(self, corner_1: int, corner_2: int, **kwargs: Unpack[ChopArgs]) -> None:
+        self.chops.chop_edge(corner_1, corner_2, EdgeChop(**kwargs))
 
     def unchop(self, axis: Optional[DirectionType] = None) -> None:
         """Removes existing chops from an operation (comes handy after copying etc.)"""

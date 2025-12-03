@@ -1,27 +1,28 @@
-from classy_blocks.grading.chop import Chop
+from classy_blocks.cbtyping import DirectionType
+from classy_blocks.grading.chop import Chop, EdgeChop
+from classy_blocks.util.frame import Frame
 
 
 class ChopCollector:
-    def __init__(self):
-        self.axis_chops: list[Chop] = []
-        self.edge_chops: dict[int, list[Chop]] = {
-            0: [],
-            1: [],
-            2: [],
-            3: [],
-        }
+    def _prepare(self) -> None:
+        self.axis_chops: dict[DirectionType, list[Chop]] = {0: [], 1: [], 2: []}
+        self.edge_chops = Frame[list[EdgeChop]]()
 
-    def chop_axis(self, chop: Chop) -> None:
-        self.axis_chops.append(chop)
+    def __init__(self) -> None:
+        self._prepare()
 
-    def chop_edge(self, i_edge: int, chop: Chop) -> None:
-        self.edge_chops[i_edge].append(chop)
+    def chop_axis(self, axis: DirectionType, chop: Chop) -> None:
+        self.axis_chops[axis].append(chop)
 
-    def clear(self):
-        self.__init__()
+    def chop_edge(self, corner_1: int, corner_2: int, chop: Chop) -> None:
+        chops = self.edge_chops[corner_1][corner_2]
+        chops.append(chop)
+
+    def clear(self) -> None:
+        self._prepare()
 
     def __len__(self):
         return len(self.axis_chops)
 
-    def __getitem__(self, i: int):
+    def __getitem__(self, i: DirectionType):
         return self.axis_chops[i]

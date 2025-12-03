@@ -4,8 +4,8 @@ from typing import Optional
 from classy_blocks.assemble.dump import AssembledDump
 from classy_blocks.base.exceptions import PatchNotFoundError
 from classy_blocks.cbtyping import DirectionType, OrientType
-from classy_blocks.grading.autograding.catalogue import RowCatalogue
-from classy_blocks.grading.autograding.row import Row
+from classy_blocks.grading.graders.catalogue import RowCatalogue
+from classy_blocks.grading.graders.row import Row
 from classy_blocks.items.block import Block
 from classy_blocks.items.wires.wire import Wire
 from classy_blocks.mesh import Mesh

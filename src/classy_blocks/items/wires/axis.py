@@ -1,8 +1,4 @@
-from classy_blocks.base.exceptions import InconsistentGradingsError
 from classy_blocks.cbtyping import DirectionType
-from classy_blocks.grading.collector import ChopCollector
-from classy_blocks.grading.chop import Chop
-from classy_blocks.grading.grading import Grading
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.manager import WireManager
 from classy_blocks.items.wires.wire import Wire
@@ -15,7 +11,6 @@ class Axis:
     def __init__(self, direction: DirectionType, wires: list[Wire]):
         self.direction = direction
         self.wires = WireManager(wires)
-        self.chops: list[Chop] = []
 
         # will be added after blocks are added to mesh
         self.neighbours: set[Axis] = set()
@@ -77,62 +72,6 @@ class Axis:
     def lengths(self) -> list[float]:
         return [w.length for w in self.wires]
 
-    def grade(self) -> None:
-        if self.is_defined:
-            return
-
-        if len(self.wires.undefined) < 4:
-            # some wires have defined gradings; share those with others
-            self.wires.propagate_gradings()
-            return
-
-        if len(self.chops) == 0:
-            # nothing to work with
-            return
-
-        # create Grading from chops, if there are any
-        grading = Grading(0)
-        for chop in self.chops:
-            grading.add_chop(chop)
-
-        take = self.chops[0].take
-
-        if take == "avg":
-            # make a fake grading with an average length,
-            # calculate count from it, then copy it with the same
-            # count to all wires
-            avg_length = sum(self.lengths) / 4
-            grading.length = avg_length
-            for wire in self.wires:
-                wire.grading = grading.copy(wire.length, False)
-        else:
-            # take a specific wire
-            wires_by_length = list(sorted(self.wires, key=lambda w: w.length))
-            if self.chops[0].take == "max":
-                # chop the longest wire, then propagate
-                wire = wires_by_length[-1]
-            else:  # "min"
-                wire = wires_by_length[0]
-
-            wire.grading = grading
-            wire.update()
-
-        # copy grading to all wires in this axis
-        self.wires.propagate_gradings()
-
-    @property
-    def is_defined(self) -> bool:
-        """Returns True if this axis's counts and gradings are defined"""
-        return self.wires.is_defined
-
-    def check_consistency(self) -> None:
-        counts = set(wire.grading.count for wire in self.wires)
-        if len(counts) != 1:
-            raise InconsistentGradingsError(f"Axis Wires have different counts! {counts} {self}")
-
-        for wire in self.wires:
-            wire.check_consistency()
-
     @property
     def start_vertices(self) -> set[Vertex]:
         return {wire.vertices[0] for wire in self.wires}
@@ -148,6 +87,10 @@ class Axis:
     @property
     def is_simple(self) -> bool:
         return self.wires.is_simple
+
+    @property
+    def is_graded(self):
+        return all(wire.is_graded for wire in self.wires)
 
     def __str__(self):
         return f"Axis {self.direction} (" + "|".join(str(wire) for wire in self.wires.wires) + ")"

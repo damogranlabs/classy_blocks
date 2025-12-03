@@ -1,7 +1,6 @@
 import dataclasses
 import functools
 
-from classy_blocks.base.exceptions import InconsistentGradingsError
 from classy_blocks.cbtyping import DirectionType
 from classy_blocks.construct.edges import Line
 from classy_blocks.grading.grading import Grading
@@ -38,7 +37,6 @@ class Wire:
         self.direction: DirectionType = direction
 
         # the default edge is 'line' but will be replaced if the user wishes so
-        # (that is, not included in edge.factory.registry)
         self.edge: Edge = factory.create(self.vertices[0], self.vertices[1], Line())
 
         # grading/counts of this wire
@@ -61,11 +59,6 @@ class Wire:
     def update(self) -> None:
         """Re-sets grading's edge length after the edge has changed"""
         self.grading.length = self.length
-
-    @property
-    def is_valid(self) -> bool:
-        """A pair with two equal vertices is useless"""
-        return self.vertices[0] != self.vertices[1]
 
     def is_coincident(self, candidate: "Wire") -> bool:
         """Returns True if this wire is in the same spot than the argument,
@@ -103,27 +96,8 @@ class Wire:
         elif candidate.vertices[1] == self.vertices[1]:
             self.after.add(WireJoint(candidate, False))
 
-    def copy_to_coincidents(self):
-        """Copies the grading to all coincident wires"""
-        for coincident in self.coincidents:
-            if coincident.grading.is_defined:
-                continue
-
-            coincident.grading = self.grading.copy(self.length, not coincident.is_aligned(self))
-
-    def check_consistency(self) -> None:
-        """Check that coincident wires have the same length and grading"""
-        for wire in self.coincidents:
-            if wire.length != self.length:
-                raise InconsistentGradingsError(f"Coincident wires have different lengths! {self} - {wire}")
-
-            if self.grading != wire.grading:
-                raise InconsistentGradingsError(
-                    f"Coincident wires have different gradings! {self}:{self.grading} - {wire}:{wire.grading}"
-                )
-
     @property
-    def is_defined(self) -> bool:
+    def is_graded(self) -> bool:
         return self.grading.is_defined
 
     def __repr__(self):

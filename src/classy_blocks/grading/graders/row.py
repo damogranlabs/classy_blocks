@@ -1,5 +1,6 @@
 import dataclasses
 
+from classy_blocks.base.exceptions import InconsistentGradingsError
 from classy_blocks.cbtyping import ChopTakeType, DirectionType
 from classy_blocks.items.block import Block
 from classy_blocks.items.wires.axis import Axis
@@ -50,7 +51,6 @@ class Row:
 
     def add_block(self, block: Block, heading: DirectionType) -> None:
         axis = block.axes[heading]
-        axis.grade()
 
         # check neighbours for alignment
         if len(self.entries) == 0:
@@ -70,21 +70,6 @@ class Row:
                 raise RuntimeError("No neighbour found!")
 
         self.entries.append(Entry(block, heading, flipped))
-
-        # take count from block, if it's manually defined
-        # TODO: make this a separate method
-        # TODO: un-ififif by handling axis' chops separately
-        for wire in axis.wires:
-            if wire.is_defined:
-                if self.count != 0:
-                    if self.count != wire.grading.count:
-                        # TODO! Custom exception
-                        raise RuntimeError(
-                            f"Inconsistent counts (existing {self.count}, replaced with {wire.grading.count}, "
-                            f"block {block.index} direction {axis.direction})"
-                        )
-
-                self.count = wire.grading.count
 
     def get_length(self, take: ChopTakeType = "avg"):
         lengths: list[float] = []
@@ -109,6 +94,14 @@ class Row:
             wires += axis.wires
 
         return wires
+
+    def set_count(self, count: int) -> None:
+        if self.count != 0:
+            if count != self.count:
+                # TODO: a nicer message
+                raise InconsistentGradingsError("Inconsistent counts on row")
+
+        self.count = count
 
     @property
     def blocks(self) -> list[Block]:

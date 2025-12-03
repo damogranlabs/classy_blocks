@@ -122,3 +122,14 @@ class Chop:
                     calculated.add(output)
 
         raise ValueError(f"Could not calculate count and grading for given parameters: {data}")
+
+
+@dataclasses.dataclass
+class EdgeChop(Chop):
+    def __post_init__(self) -> None:
+        """Do not allow the user to set counts on edge chops;
+        count will *always* be inherited from axis chops"""
+        if self.count is not None:
+            raise ValueError("Count in edge chops will be inherited from a well-defined mesh.")
+
+        super().__post_init__()

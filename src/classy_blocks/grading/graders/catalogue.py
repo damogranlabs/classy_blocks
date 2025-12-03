@@ -3,7 +3,7 @@ from typing import get_args
 
 from classy_blocks.base.exceptions import BlockNotFoundError, NoInstructionError
 from classy_blocks.cbtyping import DirectionType
-from classy_blocks.grading.autograding.row import Row
+from classy_blocks.grading.graders.row import Row
 from classy_blocks.items.block import Block
 from classy_blocks.items.wires.axis import Axis
 from classy_blocks.mesh import Mesh
