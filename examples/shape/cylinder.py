@@ -26,7 +26,22 @@ cylinder.chop_axial(count=30)
 cylinder.chop_radial(start_size=core_size, end_size=bl_thickness)
 cylinder.chop_tangential(start_size=core_size)
 
+# chop a single edge of a single operation
+# case 1: remove grading
+cylinder.shell[0].chop_edge(0, 1, c2c_expansion=1)
+# case 2: make a thicker first cell
+cylinder.shell[1].chop_edge(0, 1, end_size=5 * bl_thickness)
+# case 3: weird random multigrading
+cylinder.shell[2].chop_edge(0, 1, length_ratio=0.5, count=2)
+cylinder.shell[2].chop_edge(0, 1, c2c_expansion=1 / 1.5)
+
+
 mesh.add(cylinder)
 mesh.modify_patch("walls", "wall")
+
+from classy_blocks.grading.graders.manual import ManualGrader
+
+grader = ManualGrader(mesh)
+grader.grade()
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

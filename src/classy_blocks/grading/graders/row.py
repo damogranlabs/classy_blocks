@@ -53,6 +53,7 @@ class Row:
         axis = block.axes[heading]
 
         # check neighbours for alignment
+        # TODO: is this even necessary?
         if len(self.entries) == 0:
             flipped = False
         else:

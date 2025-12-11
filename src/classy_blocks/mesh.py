@@ -120,10 +120,10 @@ class Mesh:
 
         # gradings: define after writing VTK;
         # if it is not specified correctly, this will raise an exception
-        from classy_blocks.grading.graders.manual.grader import ManualGrader
+        # from classy_blocks.grading.graders.manual.grader import ManualGrader
 
-        grader = ManualGrader(self)
-        grader.grade()
+        # grader = ManualGrader(self)
+        # grader.grade()
 
         assert isinstance(self.dump, AssembledDump)  # to pacify type checker
         writer = MeshWriter(self.dump, self.settings)

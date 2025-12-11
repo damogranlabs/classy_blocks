@@ -89,7 +89,7 @@ class Axis:
         return self.wires.is_simple
 
     @property
-    def is_graded(self):
+    def is_graded(self):  # TODO: change to is_chopped
         return all(wire.is_graded for wire in self.wires)
 
     def __str__(self):

@@ -80,10 +80,21 @@ class Chop:
     take: ChopTakeType = "avg"
     preserve: ChopPreserveType = "total_expansion"
 
-    def __post_init__(self) -> None:
-        # default: take c2c_expansion=1 if there's less than 2 parameters given
+    @property
+    def defined_params(self) -> int:
         grading_params = [self.start_size, self.end_size, self.count, self.total_expansion, self.c2c_expansion]
-        if len(grading_params) - grading_params.count(None) < 2:
+        return len(grading_params) - grading_params.count(None)
+
+    def check(self):
+        # check that the user did not overdefine the chop;
+        # if more than 2 parameters are given, the results might change between runs because
+        # of the iterative calculation
+        if self.defined_params > 2:
+            # TODO: test
+            raise ValueError("Over-defined Chop; speficy at most 2 grading parameters!")
+
+        # default: take c2c_expansion=1 if there's less than 2 parameters given
+        if self.defined_params < 2:
             if self.c2c_expansion is None:
                 self.c2c_expansion = 1
 
@@ -92,6 +103,8 @@ class Chop:
             self.count = max(int(self.count), 1)
 
     def calculate(self, length: float) -> ChopData:
+        self.check()
+
         """Calculates cell count and total expansion ratio for this chop
         by calling functions that take known variables and return new values"""
         data = dataclasses.asdict(self)
@@ -122,14 +135,3 @@ class Chop:
                     calculated.add(output)
 
         raise ValueError(f"Could not calculate count and grading for given parameters: {data}")
-
-
-@dataclasses.dataclass
-class EdgeChop(Chop):
-    def __post_init__(self) -> None:
-        """Do not allow the user to set counts on edge chops;
-        count will *always* be inherited from axis chops"""
-        if self.count is not None:
-            raise ValueError("Count in edge chops will be inherited from a well-defined mesh.")
-
-        super().__post_init__()

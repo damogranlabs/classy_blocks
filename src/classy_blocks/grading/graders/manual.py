@@ -2,12 +2,14 @@ from typing import get_args
 
 from classy_blocks.base.exceptions import InconsistentGradingsError, UndefinedGradingsError
 from classy_blocks.cbtyping import ChopTakeType, DirectionType
+from classy_blocks.grading.chop import Chop
 from classy_blocks.grading.graders.probe import Probe
 from classy_blocks.grading.grading import Grading
 from classy_blocks.items.block import Block
 from classy_blocks.items.wires.axis import Axis
 from classy_blocks.items.wires.wire import Wire
 from classy_blocks.mesh import Mesh
+from classy_blocks.util.constants import AXIS_PAIRS
 
 
 class ManualGrader:
@@ -32,6 +34,7 @@ class ManualGrader:
                 return
 
         # set a new grading on this wire
+        # TODO: test for inverted stuff
         wire.grading = grading
 
     def _chop_axis(self, block: Block, direction: DirectionType) -> int:
@@ -105,12 +108,55 @@ class ManualGrader:
 
         return graded
 
+    def _chop_edge(self, wire: Wire, chops: list[Chop]) -> None:
+        # remember the wire's count and discard all previous chops;
+        # then re-chop using user-specified chops on those wires
+        if not wire.grading.is_defined:
+            raise UndefinedGradingsError(
+                "Edge-chopping an un-defined wire; define the mesh fully prior to specifying edge grading"
+            )
+
+        wire_count = wire.grading.count
+        grading = Grading(wire.length)
+
+        # add all but the last chop
+        for chop in chops[:-1]:
+            chop = grading.add_chop(chop)
+
+        # for the last chop, use up the remaining count
+        remaining_count = wire_count - grading.count
+        if remaining_count < 1:
+            raise ValueError(f"Wrong edge grading specification! Remaining count = {remaining_count}")
+
+        # update the chop with remaining count and check if it adds up
+        last_chop = chops[-1]
+
+        if last_chop.count is None:
+            last_chop.count = remaining_count
+
+        if last_chop.count is not None and last_chop.count != remaining_count:
+            raise ValueError(f"Multiple edge chops on count don't add up: {chops[-1].count} != {remaining_count}")
+
+        grading.add_chop(last_chop)
+
+        wire.grading = grading
+
+        # replace gradings in coincident wires
+        print(f"Replacing {wire.coincidents}")
+        for coincident in wire.coincidents:
+            coincident.grading = grading.copy(wire.length, not coincident.is_aligned(wire))
+
     def grade(self, _take: ChopTakeType = "avg") -> None:
         # _take isn't needed here - it's defined per-block in chops
         for direction in get_args(DirectionType):
             rows = self.probe.get_rows(direction)
 
+            # TODO: benchmark
+            # TODO: tests
+            # TODO: too many indents!
+            # TODO: check check_consistency()!
             for row in rows:
+                # find counts for each row - check that there's no clashes
                 for entry in row.entries:
                     axis_count = self._chop_axis(entry.block, entry.heading)
                     if axis_count != 0:
@@ -127,5 +173,18 @@ class ManualGrader:
 
                     if iteration > len(axes):
                         raise UndefinedGradingsError("")
+
+                # edge grading!
+                # find all wires that have edge_chops in ChopCollector and replace
+                # edge chops on those wires
+                for entry in row.entries:
+                    chops = entry.block.chops
+                    if not chops.is_edge_chopped:
+                        continue
+
+                    for pair in AXIS_PAIRS[entry.heading]:
+                        edge_chops = chops.edge_chops[pair[0]][pair[1]]
+                        if edge_chops:
+                            self._chop_edge(entry.axis.wires[pair[0]], edge_chops)
 
         # self.dump.block_list.check_consistency()
