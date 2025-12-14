@@ -1,5 +1,5 @@
-from classy_blocks.grading.graders.manual import ManualGrader
+from classy_blocks.grading.graders.manual import Broadcaster
 
 
-class SimpleGrader(ManualGrader):
+class SimpleGrader(Broadcaster):
     pass

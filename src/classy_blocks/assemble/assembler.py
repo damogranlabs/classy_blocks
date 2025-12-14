@@ -1,4 +1,3 @@
-
 from classy_blocks.assemble.depot import Depot
 from classy_blocks.assemble.dump import AssembledDump
 from classy_blocks.assemble.settings import Settings
@@ -20,10 +19,7 @@ class MeshAssembler:
         self.settings = settings
         self.merge_tol = merge_tol
 
-        # once the mesh is assembled, adding new stuff to depot will break things;
-        # better (and faster) is to cache status quo
         self._operations = self.depot.operations
-
         self._points = HexPointRegistry.from_operations(self._operations, self.merge_tol)
 
     def _create_blocks(self, vertex_list: VertexList) -> BlockList:

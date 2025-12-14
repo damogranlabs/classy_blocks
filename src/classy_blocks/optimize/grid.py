@@ -3,6 +3,7 @@ from typing import Union
 
 import numpy as np
 
+from classy_blocks.assemble.dump import AssembledDump
 from classy_blocks.base.exceptions import InvalidLinkError, NoJunctionError
 from classy_blocks.cbtyping import IndexType, NPPointListType, NPPointType
 from classy_blocks.construct.assemblies.assembly import Assembly
@@ -192,9 +193,9 @@ class HexGrid(GridBase):
         return cls(preg.unique_points, preg.cell_addressing)
 
     @classmethod
-    def from_mesh(cls, mesh) -> "HexGrid":
+    def from_dump(cls, dump: AssembledDump) -> "HexGrid":
         """Creates a grid from an assembled Mesh object"""
-        points = np.array([vertex.position for vertex in mesh.vertices])
-        addresses = [block.indexes for block in mesh.blocks]
+        points = np.array([vertex.position for vertex in dump.vertices])
+        addresses = [block.indexes for block in dump.blocks]
 
         return cls(points, addresses)

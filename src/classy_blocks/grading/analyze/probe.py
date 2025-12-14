@@ -2,13 +2,13 @@ import dataclasses
 from typing import Optional
 
 from classy_blocks.assemble.dump import AssembledDump
+from classy_blocks.assemble.settings import Settings
 from classy_blocks.base.exceptions import PatchNotFoundError
 from classy_blocks.cbtyping import DirectionType, OrientType
-from classy_blocks.grading.graders.catalogue import RowCatalogue
-from classy_blocks.grading.graders.row import Row
+from classy_blocks.grading.analyze.catalogue import RowCatalogue
+from classy_blocks.grading.analyze.row import Row
 from classy_blocks.items.block import Block
 from classy_blocks.items.wires.wire import Wire
-from classy_blocks.mesh import Mesh
 from classy_blocks.optimize.grid import HexGrid
 from classy_blocks.util.constants import DIRECTION_MAP
 
@@ -75,13 +75,12 @@ class WireCatalogue:
     many wires can be located at the same spot and only some of them can be
     on 'walls'; gather data first so that wall-bounded wires aren't ignored"""
 
-    def __init__(self, mesh: Mesh):
-        self.mesh = mesh
-        assert isinstance(self.mesh.dump, AssembledDump)
-        self.dump = self.mesh.dump
+    def __init__(self, dump: AssembledDump, settings: Settings):
+        self.dump = dump
+        self.settings = settings
 
         # finds blocks' neighbours
-        self.grid = HexGrid.from_mesh(self.mesh)
+        self.grid = HexGrid.from_dump(dump)
 
         # WireInfo is stored at indexes [vertex_1][vertex_2];
         # if a coincident wire is inverted, it will reside at
@@ -97,7 +96,7 @@ class WireCatalogue:
         return self.data[index_1].get(index_2)
 
     def _populate(self) -> None:
-        for block in self.mesh.blocks:
+        for block in self.dump.blocks:
             for wire in block.wire_list:
                 start_index, end_index = wire.vertices[0].index, wire.vertices[1].index
 
@@ -116,7 +115,7 @@ class WireCatalogue:
         """Finds out whether a Wire starts or ends on a wall patch"""
         start_orient = DIRECTION_MAP[wire.direction][0]
         end_orient = DIRECTION_MAP[wire.direction][1]
-        block_index = self.mesh.blocks.index(block)
+        block_index = self.dump.blocks.index(block)
 
         def find_patch(orient: OrientType) -> bool:
             # search for external faces;
@@ -132,7 +131,7 @@ class WireCatalogue:
                 if patch.kind == "wall":
                     return True
             except PatchNotFoundError:
-                if self.mesh.settings.default_patch.get("kind") == "wall":
+                if self.settings.default_patch.get("kind") == "wall":
                     return True
 
             return False
@@ -151,14 +150,12 @@ class WireCatalogue:
 class Probe:
     """Examines the mesh and gathers required data for auto chopping"""
 
-    def __init__(self, mesh: Mesh):
-        self.mesh = mesh
-
+    def __init__(self, dump: AssembledDump, settings: Settings):
         # maps blocks to rows
-        self.rows = RowCatalogue(self.mesh)
+        self.rows = RowCatalogue(dump.block_list)
 
         # build a wire database
-        self.wires = WireCatalogue(self.mesh)
+        self.wires = WireCatalogue(dump, settings)
 
     def get_row_blocks(self, block: Block, direction: DirectionType) -> list[Block]:
         return self.rows.get_row_blocks(block, direction)

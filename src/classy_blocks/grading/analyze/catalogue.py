@@ -3,15 +3,15 @@ from typing import get_args
 
 from classy_blocks.base.exceptions import BlockNotFoundError, NoInstructionError
 from classy_blocks.cbtyping import DirectionType
-from classy_blocks.grading.graders.row import Row
+from classy_blocks.grading.analyze.row import Row
 from classy_blocks.items.block import Block
 from classy_blocks.items.wires.axis import Axis
-from classy_blocks.mesh import Mesh
+from classy_blocks.lists.block_list import BlockList
 
 
-@functools.lru_cache(maxsize=3000)  # that's for 1000 blocks
-def get_block_from_axis(mesh: Mesh, axis: Axis) -> Block:
-    for block in mesh.blocks:
+@functools.lru_cache(maxsize=9000)  # that's for 3000 blocks
+def get_block_from_axis(block_list: BlockList, axis: Axis) -> Block:
+    for block in block_list.blocks:
         if axis in block.axes:
             return block
 
@@ -36,11 +36,11 @@ class Instruction:
 class RowCatalogue:
     """A collection of rows on a specified axis"""
 
-    def __init__(self, mesh: Mesh):
-        self.mesh = mesh
+    def __init__(self, block_list: BlockList):
+        self.block_list = block_list
 
         self.rows: dict[DirectionType, list[Row]] = {0: [], 1: [], 2: []}
-        self.instructions = [Instruction(block) for block in mesh.blocks]
+        self.instructions = [Instruction(block) for block in block_list.blocks]
 
         for i in get_args(DirectionType):
             self._populate(i)
@@ -63,7 +63,7 @@ class RowCatalogue:
         block = instruction.block
 
         for neighbour_axis in block.axes[direction].neighbours:
-            neighbour_block = get_block_from_axis(self.mesh, neighbour_axis)
+            neighbour_block = get_block_from_axis(self.block_list, neighbour_axis)
 
             if neighbour_block in row.blocks:
                 continue

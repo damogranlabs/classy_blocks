@@ -29,3 +29,6 @@ class BlockList:
         for block in self.blocks:
             for wire in block.wire_list:
                 wire.update()
+
+    def __hash__(self):
+        return id(self)

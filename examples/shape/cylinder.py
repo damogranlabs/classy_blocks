@@ -39,9 +39,4 @@ cylinder.shell[2].chop_edge(0, 1, c2c_expansion=1 / 1.5)
 mesh.add(cylinder)
 mesh.modify_patch("walls", "wall")
 
-from classy_blocks.grading.graders.manual import ManualGrader
-
-grader = ManualGrader(mesh)
-grader.grade()
-
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

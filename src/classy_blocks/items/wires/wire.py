@@ -3,7 +3,7 @@ import functools
 
 from classy_blocks.cbtyping import DirectionType
 from classy_blocks.construct.edges import Line
-from classy_blocks.grading.grading import Grading
+from classy_blocks.grading.define.grading import Grading
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
 from classy_blocks.items.vertex import Vertex

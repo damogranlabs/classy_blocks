@@ -3,7 +3,7 @@ from functools import lru_cache
 from typing import Callable, Optional, Union
 
 from classy_blocks.cbtyping import ChopPreserveType, ChopTakeType, GradingSpecType
-from classy_blocks.grading import relations as rel
+from classy_blocks.grading.define import relations as rel
 
 
 @dataclasses.dataclass

@@ -4,8 +4,8 @@ import numpy as np
 from parameterized import parameterized
 
 from classy_blocks.cbtyping import DirectionType
-from classy_blocks.grading.autograding.catalogue import get_block_from_axis
-from classy_blocks.grading.autograding.probe import Probe
+from classy_blocks.grading.catalogue import get_block_from_axis
+from classy_blocks.grading.probe import Probe
 from classy_blocks.mesh import Mesh
 from tests.test_grading.test_autograde import AutogradeTestsBase
 

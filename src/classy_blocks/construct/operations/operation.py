@@ -19,8 +19,8 @@ from classy_blocks.cbtyping import (
 from classy_blocks.construct.edges import Arc, EdgeData, Line, Project, Spline
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.point import Point
-from classy_blocks.grading.chop import Chop
-from classy_blocks.grading.collector import ChopCollector
+from classy_blocks.grading.define.chop import Chop
+from classy_blocks.grading.define.collector import ChopCollector
 from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import SIDES_MAP

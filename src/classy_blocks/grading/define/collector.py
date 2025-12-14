@@ -1,5 +1,5 @@
 from classy_blocks.cbtyping import DirectionType
-from classy_blocks.grading.chop import Chop
+from classy_blocks.grading.define.chop import Chop
 from classy_blocks.util.frame import Frame
 
 

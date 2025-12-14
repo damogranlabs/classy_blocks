@@ -1,7 +1,7 @@
 from typing import get_args
 
 from classy_blocks.cbtyping import DirectionType, IndexType, OrientType
-from classy_blocks.grading.collector import ChopCollector
+from classy_blocks.grading.define.collector import ChopCollector
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.axis import Axis

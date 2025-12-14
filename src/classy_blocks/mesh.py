@@ -9,6 +9,7 @@ from classy_blocks.construct.assemblies.assembly import Assembly
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.shape import Shape
 from classy_blocks.construct.stack import Stack
+from classy_blocks.grading.graders.manager import GradingManager
 from classy_blocks.items.block import Block
 from classy_blocks.items.patch import Patch
 from classy_blocks.items.vertex import Vertex
@@ -118,14 +119,13 @@ class Mesh:
         if debug_path is not None:
             write_vtk(debug_path, self.vertices, self.blocks)
 
+        assert isinstance(self.dump, AssembledDump)  # to pacify type checker
         # gradings: define after writing VTK;
         # if it is not specified correctly, this will raise an exception
-        # from classy_blocks.grading.graders.manual.grader import ManualGrader
 
-        # grader = ManualGrader(self)
-        # grader.grade()
+        manager = GradingManager(self.dump, self.settings)
+        manager.grade()
 
-        assert isinstance(self.dump, AssembledDump)  # to pacify type checker
         writer = MeshWriter(self.dump, self.settings)
         writer.write(output_path)
 
