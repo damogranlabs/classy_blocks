@@ -18,21 +18,13 @@ class WireGrader:
     def __init__(self, wire: Wire):
         self.wire = wire
 
-    @property
-    def grading(self) -> Grading:
-        return self.wire.grading
-
     @staticmethod
     def copy(from_wire: Wire, to_wire: Wire) -> None:
         """Copies grading from another wire but takes care to orient it properly"""
         if to_wire.grading.is_defined:
-            raise InconsistentGradingsError(f"Copying grading from a defined wire! (From {from_wire} to {to_wire})")
+            raise InconsistentGradingsError(f"Copying grading to a defined wire! (From {from_wire} to {to_wire})")
 
         to_wire.grading = from_wire.grading.copy(to_wire.length, not to_wire.is_aligned(from_wire))
-
-    def reuse(self, source: Wire) -> None:
-        """Re-uses an existing grading on this wire"""
-        self.copy(source, self.wire)
 
     def assign(self, grading: Grading) -> None:
         """Assigns a Grading to a wire;
@@ -43,24 +35,24 @@ class WireGrader:
                     raise InconsistentGradingsError("Different counts on coincident wires")  # TODO: a nicer message
 
                 # reuse a coincident grading
-                self.reuse(coincident)
+                self.copy(coincident, self.wire)
                 return
 
         # set a new grading on this wire
         self.wire.grading = grading
 
-    def copy_to_coincidents(self) -> bool:
-        """Copies this wire's gradings to all coincidents; returns False if all coincident wires are defined already"""
-        if not self.grading.is_defined:
+    def copy_to_coincidents(self, override: bool = False) -> None:
+        """Copies this wire's gradings to all coincidents;
+        returns False if all coincident wires are defined already"""
+        if not self.wire.grading.is_defined:
             raise UndefinedGradingsError(f"Inheriting from a non-graded wire! {self.wire}")
 
-        changed = False
-
         for coincident in self.wire.coincidents:
-            self.copy(self.wire, coincident)
-            changed = True
+            if override:
+                coincident.grading.clear()
 
-        return changed
+            if not coincident.is_graded:
+                self.copy(self.wire, coincident)
 
     def re_chop(self, chops: list[Chop]) -> None:
         """Takes a wire that's chopped already and change
@@ -78,7 +70,7 @@ class WireGrader:
 
         # add all but the last chop
         for chop in chops[:-1]:
-            chop = grading.add_chop(chop)
+            grading.add_chop(chop)
 
         # for the last chop, use up the remaining count
         remaining_count = wire_count - grading.count
@@ -99,19 +91,13 @@ class WireGrader:
         self.wire.grading = grading
 
         # replace gradings in coincident wires
-        # TODO: use a common method
-        raise NotImplementedError
-        # for coincident in self.wire.coincidents:
-        # coincident.grading = grading.copy(self.wire.length, not coincident.is_aligned(wire))
+        self.copy_to_coincidents(override=True)
 
 
 class AxisGrader:
     def __init__(self, block: Block, direction: DirectionType):
         self.block = block
         self.direction: DirectionType = direction
-
-        if len(self.chops) > 0:
-            print(f"Axis with mucho chops {self.axis}, {self.chops}")
 
     @property
     def axis(self) -> Axis:
@@ -192,9 +178,6 @@ class GradingDistributor:
 
         return message
 
-    def _get_neighbours(self, wire: Wire) -> set[Axis]:
-        return {self.wire_to_axis[w] for w in wire.coincidents}
-
     def _complete_axis(self, axis: Axis) -> bool:
         """Takes an Axis with a defined wire and copies its grading to all non-defined wires of this axis.
         Returns True if the axis is completely graded (all wires), False otherwise."""
@@ -208,55 +191,47 @@ class GradingDistributor:
 
         for wire in axis.wires:
             if not wire.is_graded:
-                wgr = WireGrader(wire)
-                wgr.reuse(take_from)
+                wire.grading = take_from.grading.copy(wire.length, False)
 
         return True
 
-    def _copy_to_neighbours(self, axis: Axis) -> set[Axis]:
-        """Copy all of this axis' wires to their coincidents"""
+    def _propagate_wires(self, axis: Axis) -> set[Axis]:
+        """Propagates all wires of this axis to their coincidents"""
         fresh_neighbours: set[Axis] = set()
 
         for wire in axis.wires:
-            # TODO: profile and cache *Graders if necessary
             if not wire.is_graded:
                 continue
 
             wire_grader = WireGrader(wire)
-            if wire_grader.copy_to_coincidents():
-                for coincident in wire.coincidents:
-                    fresh_neighbours.update(self._get_neighbours(coincident))
+            wire_grader.copy_to_coincidents()
+            for coincident in wire.coincidents:
+                fresh_neighbours.add(self.wire_to_axis[coincident])
 
         return fresh_neighbours
 
     def distribute(self) -> None:
         max_iterations = len(self.axes)
         iteration = 0
-
-        # Axes that have been successfull used to propagate gradings before
-        # won't be checked again as their neighbours will already be defined after
         seed_axes = self.defined
 
         while not self.is_done:
             if iteration > max_iterations:
                 raise UndefinedGradingsError("Cannot grade all blocks! " + self._list_ungraded())
 
-            # axes that are seeds' neighbours and will have to be completed
-            # after coincident wires have been copied to
-            partial_axes: set[Axis] = set()
-
+            # copy from seeds to their neighbours
+            fresh_neighbours: set[Axis] = set()
             for axis in seed_axes:
-                partial_axes.update(self._copy_to_neighbours(axis))
-                print(f"Added {partial_axes} to fresh_axes")
-                self.defined.update(partial_axes)
+                fresh_neighbours.update(self._propagate_wires(axis))
+            fresh_neighbours -= self.defined
 
-            # complete the partial axes, then use them as seeds for the next iteration
-            seed_axes.clear()
-
-            for axis in partial_axes:
+            # the freshly touched axes most probably don't have all the
+            # wires defined yet; complete them by copying grading from defined wires
+            for axis in fresh_neighbours:
                 if self._complete_axis(axis):
-                    print(f"Completed {axis}")
-                    seed_axes.add(axis)
+                    self.defined.add(axis)
+
+            seed_axes = fresh_neighbours
 
             iteration += 1
 
@@ -276,11 +251,6 @@ class GradingManager:
                 # this will raise an exception if called twice with a different count
                 row.set_count(axis_count)
 
-    def _propagate_gradings(self, row: Row):
-        # TODO: think of better names for ... everything
-        distributor = GradingDistributor(row)
-        distributor.distribute()
-
     def _grade_edges(self, row: Row) -> None:
         # edge grading!
         # find all wires that have edge_chops in ChopCollector and replace
@@ -293,13 +263,31 @@ class GradingManager:
             for pair in AXIS_PAIRS[entry.heading]:
                 edge_chops = chops.edge_chops[pair[0]][pair[1]]
                 if edge_chops:
-                    self._chop_edge(entry.axis.wires[pair[0]], edge_chops)
+                    wire_grader = WireGrader(entry.axis.wires[pair[0]])
+                    wire_grader.re_chop(edge_chops)
 
     def _check_consistency(self, row: Row) -> None:
-        # TODO: do
-        # self.dump.block_list.check_consistency()
+        axes = row.get_axes()
 
-        pass
+        count = axes[0].count
+
+        def _raise_count():
+            raise InconsistentGradingsError(f"Different counts detected ({count} vs. {axis.count})")
+
+        for axis in row.get_axes():
+            if axis.count != count:
+                _raise_count()
+
+            for wire in axis.wires:
+                if wire.grading.count != count:
+                    _raise_count()
+
+                for coincident in wire.coincidents:
+                    if wire.grading != coincident.grading:
+                        raise InconsistentGradingsError(
+                            "Different gradings on coincident wires!"
+                            f" ({wire.grading} on {wire} vs. {coincident.grading} on {coincident})"
+                        )
 
     def grade(self):
         for direction in get_args(DirectionType):
@@ -314,8 +302,11 @@ class GradingManager:
 
             for row in rows:
                 # start from graded axes and propagate gradings throughout the row
-                self._propagate_gradings(row)
+                distributor = GradingDistributor(row)
+                distributor.distribute()
 
             for row in rows:
-                # self._grade_edges(row)
+                self._grade_edges(row)
+
+            for row in rows:
                 self._check_consistency(row)

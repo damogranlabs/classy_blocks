@@ -4,9 +4,9 @@ import numpy as np
 from parameterized import parameterized
 
 from classy_blocks.base.exceptions import UndefinedGradingsError
-from classy_blocks.grading import relations as rel
-from classy_blocks.grading.chop import Chop, ChopRelation
-from classy_blocks.grading.grading import Grading
+from classy_blocks.grading.define import relations as rel
+from classy_blocks.grading.define.chop import Chop, ChopRelation
+from classy_blocks.grading.define.grading import Grading
 
 
 class TestGrading(unittest.TestCase):

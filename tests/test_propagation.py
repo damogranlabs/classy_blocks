@@ -21,7 +21,8 @@ class PropagationTests(BlockTestCase):
 
         self.mesh.add(op_1)
 
-        self.mesh.assemble().finalize()
+        self.mesh.assemble()
+        self.mesh.grade()
 
         self.assertListEqual(
             self.mesh.blocks[0].axes[1].wires[2].grading.specification,
@@ -41,7 +42,8 @@ class PropagationTests(BlockTestCase):
 
         self.mesh.add(op_1)
 
-        self.mesh.assemble().finalize()
+        self.mesh.assemble()
+        self.mesh.grade()
 
         spec_0 = self.mesh.blocks[0].axes[1].wires[1].grading.get_specification(False)
         spec_1 = self.mesh.blocks[1].axes[1].wires[1].grading.get_specification(False)

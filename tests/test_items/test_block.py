@@ -3,13 +3,12 @@ from parameterized import parameterized
 
 from classy_blocks.cbtyping import DirectionType
 from classy_blocks.construct.edges import Arc
-from classy_blocks.grading.chop import Chop
-from classy_blocks.grading.collector import ChopCollector
+from classy_blocks.grading.define.chop import Chop
+from classy_blocks.grading.define.collector import ChopCollector
 from classy_blocks.items.block import Block
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.items.wires.wire import Wire
 from classy_blocks.util import functions as f
-from classy_blocks.write.formats import format_block
 from tests.fixtures.block import BlockTestCase
 
 
@@ -157,147 +156,6 @@ class BlockTests(BlockTestCase):
 
     def test_repr(self):
         self.assertEqual(str(self.make_block(0)), "Block 0")
-
-
-class BlockSimpleGradingTests(BlockTestCase):
-    """Tests of neighbours, copying grading and whatnot simple variant;
-    edge grading is tested with use of Loft operations and so on, that is in test_edge_grading"""
-
-    def test_is_defined_0(self):
-        """block.is_defined with no gradings"""
-        block_0 = self.make_block(0)
-
-        block_0.grade()
-
-        self.assertFalse(block_0.is_defined)
-
-    def test_is_defined_1(self):
-        """block.is_defined with 1 grading"""
-        block_0 = self.make_block(0)
-        block_0.add_chops(0, _mkcollector(0, [Chop(count=10)]))
-
-        block_0.grade()
-
-        self.assertFalse(block_0.is_defined)
-
-    def test_is_defined_2(self):
-        """block.is_defined with 2 gradings"""
-        block_0 = self.make_block(0)
-        block_0.add_chops(0, _mkcollector(0, [Chop(count=10)]))
-        block_0.add_chops(1, _mkcollector(1, [Chop(count=10)]))
-
-        block_0.grade()
-
-        self.assertFalse(block_0.is_defined)
-
-    def test_is_defined_3(self):
-        """block.is_defined with 3 gradings"""
-        block_0 = self.make_block(0)
-        block_0.add_chops(0, _mkcollector(0, [Chop(count=10)]))
-        block_0.add_chops(1, _mkcollector(1, [Chop(count=10)]))
-        block_0.add_chops(2, _mkcollector(2, [Chop(count=10)]))
-
-        block_0.grade()
-
-        self.assertTrue(block_0.is_defined)
-
-    def test_is_defined_4(self):
-        """block.is_defined with 4 gradings"""
-        block_0 = self.make_block(0)
-        block_0.add_chops(0, _mkcollector(0, [Chop(count=10)]))
-        block_0.add_chops(0, _mkcollector(0, [Chop(count=10)]))
-        block_0.add_chops(1, _mkcollector(1, [Chop(count=10)]))
-        block_0.add_chops(2, _mkcollector(2, [Chop(count=10)]))
-
-        block_0.grade()
-
-        self.assertTrue(block_0.is_defined)
-
-
-class BlockEdgeGradingTests(BlockTestCase):
-    """Refer to test_edge_grading.py for more involved (function) tests"""
-
-    def make_vertices(self, index: int) -> list[Vertex]:
-        vertices = super().make_vertices(index)
-
-        if index == 1:
-            # move vertices 8 and 10 away so that an irregular block shape is
-            # obtained, appropriate for edgeGrading in axes 0 and 1
-            displacement = f.vector(0.3, -0.3, 0)
-
-            vertices[1].translate(displacement)
-
-        return vertices
-
-    def make_block(self, index: int) -> Block:
-        block = super().make_block(index)
-
-        # clear chops so that they are added manually for each test
-        for axis in block.axes:
-            axis.wires.chops.clear()
-
-        return block
-
-    def chop(self, block: Block, axis, **kwargs):
-        block.add_chops(axis, _mkcollector(axis, [Chop(**kwargs)]))
-
-    def calculate(self, block):
-        block.update_wires()
-        block.grade()
-
-    def test_edge_grading_output(self):
-        """Switch to edgeGrading when a chop is to be 'preserved'"""
-        block = self.make_block(1)
-        self.chop(block, 0, start_size=0.01, end_size=0.2, preserve="start_size")
-        self.chop(block, 1, count=10)
-        self.chop(block, 2, count=10)
-        self.calculate(block)
-
-        self.assertIn("edgeGrading", format_block(block))
-
-    def test_edge_multigrading(self):
-        """Switch to edgeGrading when `preserve` keyword is provided"""
-        block = self.make_block(1)
-        self.chop(block, 0, length_ratio=0.5, start_size=0.01, end_size=0.1)
-        self.chop(block, 0, length_ratio=0.5, end_size=0.01, start_size=0.1, preserve="end_size")
-        self.chop(block, 1, count=10)
-        self.chop(block, 2, count=10)
-        self.calculate(block)
-
-        self.assertIn("edgeGrading", format_block(block))
-
-    def test_copy_grading(self):
-        """Copy data from neighbours"""
-        block_0 = self.make_block(0)
-        block_1 = self.make_block(1)
-
-        self.chop(block_0, 0, count=10)
-        self.chop(block_0, 1, count=10)
-        self.chop(block_0, 2, count=10)
-        self.chop(block_1, 0, start_size=0.1, end_size=0.01, preserve="end_size")
-        self.chop(block_1, 1, count=10)
-
-        block_0.add_neighbour(block_1)
-        block_1.add_neighbour(block_0)
-
-        self.calculate(block_0)
-        self.calculate(block_1)
-
-        # block_0 must be simpleGraded, block_1 edge
-        self.assertIn("simpleGrading", format_block(block_0))
-        self.assertIn("edgeGrading", format_block(block_1))
-
-    def test_single_grading(self):
-        """Output simpleGrading when there is no need for edgeGrading"""
-        block = self.make_block(2)
-        self.chop(block, 0, count=10)
-        self.chop(block, 1, count=10)
-        self.chop(block, 2, start_size=0.1, end_size=0.01, preserve="start_size")
-
-        self.calculate(block)
-
-        # block_0 must be simpleGraded, block_1 edge
-        self.assertIn("simpleGrading", format_block(block))
 
 
 class WireframeTests(BlockTestCase):

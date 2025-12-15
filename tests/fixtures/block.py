@@ -3,7 +3,7 @@ from typing import get_args
 from classy_blocks.cbtyping import DirectionType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.loft import Loft
-from classy_blocks.grading.collector import ChopCollector
+from classy_blocks.grading.define.collector import ChopCollector
 from classy_blocks.items.block import Block
 from classy_blocks.items.edges.factory import factory
 from classy_blocks.items.vertex import Vertex
@@ -39,8 +39,9 @@ class BlockTestCase(DataTestCase):
 
         collector = ChopCollector()
         for i in get_args(DirectionType):
-            collector.chop_axis(i, block_data.chops[i])
-            block.add_chops(i, collector)
+            for chop in block_data.chops[i]:
+                collector.chop_axis(i, chop)
+        block.set_chops(collector)
 
         return block
 

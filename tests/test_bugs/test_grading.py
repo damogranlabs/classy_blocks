@@ -37,8 +37,8 @@ class GradingBugTests(unittest.TestCase):
         mesh.add(left_loft)
         mesh.add(right_loft)
 
-        dump = mesh.assemble()
-        dump.block_list.assemble()
+        mesh.assemble()
+        mesh.grade()
 
         self.assertIn("simpleGrading ( 5 5 5 )", formats.format_block(mesh.blocks[0]))
         self.assertIn("simpleGrading ( 0.2 5 1 )", formats.format_block(mesh.blocks[1]))

@@ -40,7 +40,7 @@ import unittest
 import numpy as np
 
 from classy_blocks.construct import edges
-from classy_blocks.grading.chop import Chop
+from classy_blocks.grading.define.chop import Chop
 
 fl: list[list[float]] = [  # points on the 'floor'; z=0
     [0, 0, 0],  # 0

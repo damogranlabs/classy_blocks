@@ -49,10 +49,10 @@ class SmootherBase(abc.ABC):
 
 
 class MeshSmoother(SmootherBase):
-    def __init__(self, mesh: Mesh):
+    def __init__(self, mesh: Mesh, merge_tol: float = TOL):
         self.mesh = mesh
 
-        super().__init__(HexGrid.from_mesh(self.mesh))
+        super().__init__(HexGrid.from_dump(self.mesh.assemble(merge_tol=merge_tol)))
 
     def backport(self):
         for i, point in enumerate(self.grid.points):

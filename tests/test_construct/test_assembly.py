@@ -75,7 +75,9 @@ class AssemblyTests(unittest.TestCase):
 
         mesh.add(joint)
         mesh.assemble()
-        mesh.dump.finalize()
+        mesh.grade()
+
+        # TODO: missing assert?
 
     def test_set_patches(self):
         branches = 5

@@ -105,7 +105,8 @@ class MeshTests(BlockTestCase):
         cyl.chop_tangential(count=1)
 
         self.mesh.add(cyl)
-        self.mesh.assemble().finalize()
+        self.mesh.assemble()
+        self.mesh.grade()
 
         for block in self.mesh.blocks:
             self.assertEqual(block.axes[2].count, 10)
@@ -118,7 +119,8 @@ class MeshTests(BlockTestCase):
         cyl.chop_axial(count=1)
 
         self.mesh.add(cyl)
-        self.mesh.assemble().finalize()
+        self.mesh.assemble()
+        self.mesh.grade()
 
         for block in self.mesh.blocks:
             self.assertEqual(block.axes[1].count, 10)

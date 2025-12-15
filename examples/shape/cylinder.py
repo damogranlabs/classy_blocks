@@ -34,6 +34,8 @@ cylinder.shell[1].chop_edge(0, 1, end_size=5 * bl_thickness)
 # case 3: weird random multigrading
 cylinder.shell[2].chop_edge(0, 1, length_ratio=0.5, count=2)
 cylinder.shell[2].chop_edge(0, 1, c2c_expansion=1 / 1.5)
+# case 4: chop one block differently so that neighbour block will be edge-graded
+cylinder.shell[1].chop(2, count=30, start_size=0.01)
 
 
 mesh.add(cylinder)

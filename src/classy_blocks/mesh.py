@@ -109,6 +109,16 @@ class Mesh:
         self.clear()
         self.assemble()
 
+    def grade(self) -> None:
+        """Converts chops from operations into gradings on Blocks.
+        Will fail if the mesh has not been assembled yet and will also raise an
+        exception if chops are over- or under-defined.
+        Is called automatically when writing the mesh."""
+        assert isinstance(self.dump, AssembledDump)  # to pacify type checker
+
+        manager = GradingManager(self.dump, self.settings)
+        manager.grade()
+
     def write(self, output_path: str, debug_path: Optional[str] = None, merge_tol: float = TOL) -> None:
         """Writes a blockMeshDict to specified location. If debug_path is specified,
         a VTK file is created first where each block is a single cell, to see simplified
@@ -119,13 +129,11 @@ class Mesh:
         if debug_path is not None:
             write_vtk(debug_path, self.vertices, self.blocks)
 
-        assert isinstance(self.dump, AssembledDump)  # to pacify type checker
         # gradings: define after writing VTK;
         # if it is not specified correctly, this will raise an exception
+        self.grade()
 
-        manager = GradingManager(self.dump, self.settings)
-        manager.grade()
-
+        assert isinstance(self.dump, AssembledDump)  # to pacify type checker
         writer = MeshWriter(self.dump, self.settings)
         writer.write(output_path)
 

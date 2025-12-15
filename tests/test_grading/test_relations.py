@@ -7,8 +7,8 @@ import unittest
 
 from parameterized import parameterized
 
-from classy_blocks.grading import relations as rel
-from classy_blocks.grading.chop import ChopRelation
+from classy_blocks.grading.define import relations as rel
+from classy_blocks.grading.define.chop import ChopRelation
 from classy_blocks.util import functions as f
 
 

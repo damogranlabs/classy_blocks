@@ -231,9 +231,10 @@ class OptimizerBase(abc.ABC):
 
 
 class MeshOptimizer(OptimizerBase):
-    def __init__(self, mesh: Mesh, report: bool = True):
+    def __init__(self, mesh: Mesh, report: bool = True, merge_tol: float = TOL):
         self.mesh = mesh
-        grid = HexGrid.from_mesh(self.mesh)
+
+        grid = HexGrid.from_dump(self.mesh.assemble(merge_tol=merge_tol))
 
         super().__init__(grid, report)
 

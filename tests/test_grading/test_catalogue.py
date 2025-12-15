@@ -1,6 +1,6 @@
 from classy_blocks.base.exceptions import BlockNotFoundError, NoInstructionError
 from classy_blocks.construct.shapes.cylinder import Cylinder
-from classy_blocks.grading.autograding.catalogue import Instruction, RowCatalogue
+from classy_blocks.grading.analyze.catalogue import Instruction, RowCatalogue
 from classy_blocks.mesh import Mesh
 from tests.fixtures.block import BlockTestCase
 
@@ -26,9 +26,9 @@ class RowCatalogueTests(BlockTestCase):
         self.mesh = Mesh()
 
         self.mesh.add(Cylinder([0, 0, 0], [1, 0, 0], [0, 1, 0]))
-        self.mesh.assemble()
+        dump = self.mesh.assemble()
 
-        self.catalogue = RowCatalogue(self.mesh)
+        self.catalogue = RowCatalogue(dump.block_list)
 
     def test_row_blocks_exception(self):
         with self.assertRaises(BlockNotFoundError):
