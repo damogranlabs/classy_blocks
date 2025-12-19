@@ -103,5 +103,5 @@ class Wire:
     def __repr__(self):
         return f"Wire {self.corners[0]}-{self.corners[1]} ({self.vertices[0].index}-{self.vertices[1].index})"
 
-    def __hash__(self):
-        return self.key
+    # def __hash__(self):
+    #     return self.key

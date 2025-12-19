@@ -110,6 +110,10 @@ class TestGrading(unittest.TestCase):
 
             _ = self.g.specification
 
+    def test_over_defined(self):
+        with self.assertRaises(ValueError):
+            _ = Chop(count=10, start_size=0.05, end_size=0.1)
+
     def test_wrong_combination(self):
         """Add a chop with specified total_ and c2c_expansion"""
         with self.assertRaises(ValueError):

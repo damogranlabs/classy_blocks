@@ -22,7 +22,8 @@ class WireGrader:
     def copy(from_wire: Wire, to_wire: Wire) -> None:
         """Copies grading from another wire but takes care to orient it properly"""
         if to_wire.grading.is_defined:
-            raise InconsistentGradingsError(f"Copying grading to a defined wire! (From {from_wire} to {to_wire})")
+            if to_wire.grading != from_wire.grading:
+                raise InconsistentGradingsError(f"Copying grading to a defined wire! (From {from_wire} to {to_wire})")
 
         to_wire.grading = from_wire.grading.copy(to_wire.length, not to_wire.is_aligned(from_wire))
 
@@ -140,7 +141,6 @@ class AxisGrader:
             grader = WireGrader(wire)
             # TODO: assign priority to Chop so it's possible
             # to tell whether to copy the grading to coincidents or take an existing one from them
-            # TODO: put this grading-copy-logic into the WireGrader, duh?
             grader.assign(grading.copy(wire.length, False))
 
         return grading.count
@@ -152,11 +152,19 @@ class GradingDistributor:
         self.axes = set(row.get_axes())
 
         # each wire belongs to an axis; create a lookup dict
-        self.wire_to_axis: dict[Wire, Axis] = {}
+        self.wire_to_axis: dict[Wire, set[Axis]] = {}
 
         for axis in self.axes:
             for wire in axis.wires:
-                self.wire_to_axis[wire] = axis
+                if wire not in self.wire_to_axis:
+                    self.wire_to_axis[wire] = set()
+
+                self.wire_to_axis[wire].add(axis)
+                for coincident in wire.coincidents:
+                    if coincident not in self.wire_to_axis:
+                        self.wire_to_axis[coincident] = set()
+
+                    self.wire_to_axis[coincident].add(axis)
 
         self.defined: set[Axis] = set(axis for axis in self.axes if axis.is_graded)
 
@@ -206,7 +214,7 @@ class GradingDistributor:
             wire_grader = WireGrader(wire)
             wire_grader.copy_to_coincidents()
             for coincident in wire.coincidents:
-                fresh_neighbours.add(self.wire_to_axis[coincident])
+                fresh_neighbours.update(self.wire_to_axis[coincident])
 
         return fresh_neighbours
 

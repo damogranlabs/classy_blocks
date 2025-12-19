@@ -85,18 +85,15 @@ class Chop:
         grading_params = [self.start_size, self.end_size, self.count, self.total_expansion, self.c2c_expansion]
         return len(grading_params) - grading_params.count(None)
 
+    def __post_init__(self):
+        self.check()
+
     def check(self):
         # check that the user did not overdefine the chop;
         # if more than 2 parameters are given, the results might change between runs because
         # of the iterative calculation
         if self.defined_params > 2:
-            # TODO: test
             raise ValueError("Over-defined Chop; speficy at most 2 grading parameters!")
-
-        # default: take c2c_expansion=1 if there's less than 2 parameters given
-        if self.defined_params < 2:
-            if self.c2c_expansion is None:
-                self.c2c_expansion = 1
 
         # also: count can only be an integer
         if self.count is not None:
@@ -104,6 +101,11 @@ class Chop:
 
     def calculate(self, length: float) -> ChopData:
         self.check()
+
+        # default: take c2c_expansion=1 if there's less than 2 parameters given
+        if self.defined_params < 2:
+            if self.c2c_expansion is None:
+                self.c2c_expansion = 1
 
         """Calculates cell count and total expansion ratio for this chop
         by calling functions that take known variables and return new values"""

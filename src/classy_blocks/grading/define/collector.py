@@ -33,8 +33,5 @@ class ChopCollector:
     def is_edge_chopped(self) -> bool:
         return self._edge_chops_count > 0
 
-    def __len__(self):
-        return len(self.axis_chops)
-
     def __getitem__(self, i: DirectionType):
         return self.axis_chops[i]

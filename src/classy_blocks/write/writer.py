@@ -58,7 +58,6 @@ def format_settings(settings: Settings):
 
     for key, value in asdict(settings).items():
         if key in ("patch_settings", "merged_patches", "default_patch", "geometry"):
-            # FIXME: this is a temporary fix, Writer will handle that anyway
             continue
 
         key_words = key.split("_")
@@ -86,7 +85,7 @@ class MeshWriter:
             output.write(format_list("vertices", self.dump.vertices, format_vertex))
             output.write(format_list("blocks", self.dump.blocks, format_block))
             output.write(format_list("edges", self.dump.edges, format_edge))
-            output.write(format_list("boundary", list(self.dump.patch_list.patches.values()), format_patch))
+            output.write(format_list("boundary", list(self.dump.patches), format_patch))
             output.write(format_list("faces", self.dump.face_list.faces, format_face))
 
             output.write(format_settings(self.settings))

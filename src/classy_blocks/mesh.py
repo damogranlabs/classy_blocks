@@ -114,6 +114,8 @@ class Mesh:
         Will fail if the mesh has not been assembled yet and will also raise an
         exception if chops are over- or under-defined.
         Is called automatically when writing the mesh."""
+        self.assemble()
+
         assert isinstance(self.dump, AssembledDump)  # to pacify type checker
 
         manager = GradingManager(self.dump, self.settings)

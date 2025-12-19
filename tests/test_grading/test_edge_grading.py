@@ -3,8 +3,8 @@ from typing import get_args
 
 import numpy as np
 
-from classy_blocks.base.exceptions import InconsistentGradingsError
-from classy_blocks.cbtyping import DirectionType
+from classy_blocks.base.exceptions import InconsistentGradingsError, UndefinedGradingsError
+from classy_blocks.cbtyping import DirectionType, GradingSpecType
 from classy_blocks.construct.edges import Arc
 from classy_blocks.construct.operations.box import Box
 from classy_blocks.construct.operations.connector import Connector
@@ -150,3 +150,70 @@ class EdgeGradingTests(unittest.TestCase):
 
         for block in self.mesh.blocks:
             self.assertTrue(" ( 10 10 10 ) simpleGrading" in formats.format_block(block))
+
+
+class BoxEdgeChopTests(unittest.TestCase):
+    """Edge chopping on a single operation"""
+
+    def setUp(self):
+        self.box = Box([0, 0, 0], [1, 1, 1])
+        self.mesh = Mesh()
+
+        self.mesh.add(self.box)
+
+    def finalize(self):
+        self.mesh.assemble()
+        self.mesh.grade()
+
+    def get_grading(self, direction: DirectionType, i_wire: int) -> list[GradingSpecType]:
+        self.finalize()
+
+        return self.mesh.blocks[0].axes[direction].wires[i_wire].grading.specification
+
+    def test_edge_chop_solo_fail(self):
+        """Cannot use edge chopping if the mesh is not fully defined"""
+        self.box.chop_edge(0, 1, count=30)
+
+        with self.assertRaises(UndefinedGradingsError):
+            self.finalize()
+
+    def test_edge_chop_solo_success(self):
+        for i in get_args(DirectionType):
+            self.box.chop(i, count=(i + 1) * 5)
+
+        self.box.chop_edge(0, 1, start_size=0.05)
+
+        self.finalize()
+
+        # one edge is graded, the rest are simple
+        self.assertAlmostEqual(self.get_grading(0, 0)[0][2], 9.043586, places=5)
+        self.assertAlmostEqual(self.get_grading(0, 1)[0][2], 1)
+
+    def test_edge_chop_multiple(self):
+        """Do multiple chops and let the last chop define the remaining count automatically"""
+
+        self.box.chop(0, count=20)
+        self.box.chop(1, count=10)
+        self.box.chop(2, count=10)
+
+        self.box.chop_edge(0, 1, length_ratio=0.49, start_size=0.1)  # 5 cells
+        self.box.chop_edge(0, 1, length_ratio=0.51, end_size=0.05)  # the rest
+
+        self.finalize()
+
+        self.assertEqual(self.get_grading(0, 0)[0][1], 5)
+        self.assertEqual(self.get_grading(0, 0)[1][1], 15)
+
+    def test_clear(self):
+        for i in get_args(DirectionType):
+            self.box.chop(i, count=(i + 1) * 5)
+        self.box.chop_edge(0, 1, start_size=0.5)
+        self.box.chop_edge(1, 2, count=30)
+
+        self.box.chops.clear()
+
+        self.assertListEqual(self.box.chops.axis_chops[0], [])
+        self.assertListEqual(self.box.chops.axis_chops[1], [])
+        self.assertListEqual(self.box.chops.axis_chops[2], [])
+
+        self.assertFalse(self.box.chops.is_edge_chopped)
