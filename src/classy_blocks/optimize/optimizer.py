@@ -52,7 +52,7 @@ class OptimizerConfig:
     # as passed to scipy.optimize.minimize
     clamp_tol: float = 1e-3
     # additional options passed to Scipy's minimize method,
-    # depending on chosen algotirhm; see documentation of scipy.optimize.minimize
+    # depending on chosen algorithm; see documentation of scipy.optimize.minimize
     # and specifically the chosen algorithm
     options: dict = field(default_factory=dict)
 
@@ -110,6 +110,10 @@ class OptimizerBase(abc.ABC):
         initial_params = copy.copy(clamp.params)
 
         def fquality(params):
+            if clamp.bounds is not None:
+                for i, b in enumerate(clamp.bounds):
+                    params[i] = np.clip(params[i], b[0], b[1])
+
             clamp.update_params(params)
             return self.grid.update(junction.index, clamp.position)
 
@@ -173,11 +177,10 @@ class OptimizerBase(abc.ABC):
 
         k = -np.log(1 - (threshold - start_relax) / (threshold - start_relax + VSMALL))
 
-        # Normalize iteration to [0, 1]
+        # normalize iteration to [0, 1]
         t = iter_no / target_iter
 
         # increase the factor slowly at the beginning and quicker at the end
-        # Slow start, fast finish
         value = start_relax + (threshold - start_relax) * (1 - np.exp(-k * (t**3)))
 
         return value
