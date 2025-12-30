@@ -20,7 +20,7 @@ mesh.add(quarter_cylinder)
 
 # Use an automatic grader that will try to make cells in neighbouring blocks
 # as similar in size as possible
-grader = cb.SmoothGrader(mesh, 0.05)
+grader = cb.SimpleGrader(mesh, 0.05)
 grader.grade()
 
 mesh.set_default_patch("walls", "wall")

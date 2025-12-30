@@ -14,7 +14,6 @@ coarse_box.set_patch("top", "box_slave")
 mesh.add(coarse_box)
 
 fine_box = coarse_box.copy().translate([0, 0, 1])
-fine_box.chops = {}
 for i in (0, 1, 2):
     fine_box.unchop(i)
     fine_box.chop(i, count=25)

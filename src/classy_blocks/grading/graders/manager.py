@@ -104,15 +104,14 @@ class AxisGrader:
     def axis(self) -> Axis:
         return self.block.axes[self.direction]
 
-    @property
-    def chops(self) -> list[Chop]:
+    def get_chops(self) -> list[Chop]:
         """Returns chop for this axis only (no edge chops!)"""
         return self.block.chops.axis_chops[self.direction]
 
     def grade(self) -> int:
         """Takes all Chops from block and creates Grading objects for all wires on this axis.
         Returns calculated count if anything was done or 0 if nothing was defined."""
-        chops = self.chops
+        chops = self.get_chops()
 
         if not chops:
             # no chops are defined
@@ -144,6 +143,19 @@ class AxisGrader:
             grader.assign(grading.copy(wire.length, False))
 
         return grading.count
+
+
+class RowGrader:
+    def __init__(self, row: Row):
+        self.row = row
+
+    def grade(self) -> None:
+        for entry in self.row.entries:
+            axis_grader = AxisGrader(entry.block, entry.heading)
+            axis_count = axis_grader.grade()
+            if axis_count != 0:
+                # this will raise an exception if called twice with a different count
+                self.row.set_count(axis_count)
 
 
 class GradingDistributor:
@@ -251,13 +263,9 @@ class GradingManager:
     def __init__(self, dump: AssembledDump, settings: Settings):
         self.probe = Probe(dump, settings)
 
-    def _chop_axes(self, row: Row) -> None:
-        for entry in row.entries:
-            axis_grader = AxisGrader(entry.block, entry.heading)
-            axis_count = axis_grader.grade()
-            if axis_count != 0:
-                # this will raise an exception if called twice with a different count
-                row.set_count(axis_count)
+    def _grade_row(self, row: Row) -> None:
+        grader = RowGrader(row)
+        grader.grade()
 
     def _grade_edges(self, row: Row) -> None:
         # edge grading!
@@ -306,7 +314,7 @@ class GradingManager:
             for row in rows:
                 # convert user-specified axis chops to gradings
                 # and set count on this row (must be constant accross the row)
-                self._chop_axes(row)
+                self._grade_row(row)
 
             for row in rows:
                 # start from graded axes and propagate gradings throughout the row

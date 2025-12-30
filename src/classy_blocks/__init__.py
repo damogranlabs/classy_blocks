@@ -34,6 +34,7 @@ from .construct.shapes.rings import ExtrudedRing, RevolvedRing
 from .construct.shapes.shell import Shell
 from .construct.shapes.sphere import EighthSphere, Hemisphere, QuarterSphere
 from .construct.stack import ExtrudedStack, RevolvedStack, TransformedStack
+from .grading.graders.fixed import FixedCountGrader, SimpleGrader
 from .mesh import Mesh
 from .modify.find.geometric import GeometricFinder
 from .modify.find.shape import RoundSolidFinder
@@ -66,6 +67,7 @@ __all__ = [
     "ExtrudedShape",
     "ExtrudedStack",
     "Face",
+    "FixedCountGrader",
     "FourCoreDisk",
     "FreeClamp",
     "Frustum",
@@ -115,6 +117,7 @@ __all__ = [
     "ShapeOptimizer",
     "Shear",
     "Shell",
+    "SimpleGrader",
     "Sketch",
     "SketchOptimizer",
     "SketchSmoother",

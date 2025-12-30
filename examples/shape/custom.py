@@ -1,4 +1,5 @@
 import os
+from typing import ClassVar
 
 import numpy as np
 
@@ -12,7 +13,7 @@ mesh = cb.Mesh()
 
 
 class RoundSquare(cb.MappedSketch):
-    quads = [
+    quads: ClassVar = [
         [20, 0, 1, 12],
         [12, 1, 2, 13],
         [13, 2, 3, 21],
@@ -32,7 +33,7 @@ class RoundSquare(cb.MappedSketch):
         [21, 22, 23, 20],
     ]
 
-    chops = [[0], [0, 1, 4, 5, 8, 12]]
+    chops: ClassVar = [[0], [0, 1, 4, 5, 8, 12]]
 
     def __init__(self, center: PointType, side: float, corner_round: float):
         center = np.array(center)
@@ -69,8 +70,8 @@ shape.chop(2, count=5)
 mesh.add(shape)
 mesh.assemble()
 
-grader = cb.SmoothGrader(mesh, 0.03)
-grader.grade(take="max")
+grader = cb.SimpleGrader(mesh, 0.03, take="max")
+grader.grade()
 
 mesh.set_default_patch("walls", "wall")
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")
