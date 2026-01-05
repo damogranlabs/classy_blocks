@@ -587,7 +587,7 @@ class QuarterSplineRing(QuarterSplineDisk):
         super().__init__(center_point, corner_1_point, corner_2_point, side_1, side_2, **kwargs)
 
     def correct_disk(self, corner_1_point: NPPointType, corner_2_point: NPPointType):
-        """Method to convert a disk to a ting"""
+        """Method to convert a disk to a ring"""
 
         # First adjust circular disk to SplineDisk
         super().correct_disk(corner_1_point, corner_2_point)
@@ -693,7 +693,7 @@ class HalfSplineRing(HalfSplineDisk):
         super().__init__(center_point, corner_1_point, corner_2_point, side_1, side_2, **kwargs)
 
     def correct_disk(self, corner_1_point: NPPointType, corner_2_point: NPPointType):
-        """Method to convert a disk to a ting"""
+        """Method to convert a disk to a ring"""
 
         # First adjust circular disk to SplineDisk
         super().correct_disk(corner_1_point, corner_2_point)
@@ -805,7 +805,7 @@ class SplineRing(SplineDisk):
         super().__init__(center_point, corner_1_point, corner_2_point, side_1, side_2, **kwargs)
 
     def correct_disk(self, corner_1_point: NPPointType, corner_2_point: NPPointType):
-        """Method to convert a disk to a ting"""
+        """Method to convert a disk to a ring"""
 
         # First adjust circular disk to splinedisk
         super().correct_disk(corner_1_point, corner_2_point)
