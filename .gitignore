@@ -161,3 +161,6 @@ dmypy.json
 # IDEs on hold
 .idea
 .vscode
+
+# Mac specific
+.DS_Store
