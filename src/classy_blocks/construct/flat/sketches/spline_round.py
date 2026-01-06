@@ -388,7 +388,6 @@ class HalfSplineDisk(SplineRound, HalfDisk):
             side_2: Straight length for oval shape
         """
         SplineRound.__init__(self, side_1, side_2, **kwargs)
-        HalfDisk.__init__(self, center_point, corner_1_point, normal=self.u_0)
 
         corner_1_point = np.asarray(corner_1_point)
         corner_2_point = np.asarray(corner_2_point)
@@ -464,7 +463,6 @@ class SplineDisk(SplineRound, FourCoreDisk):
             side_2: Straight length for oval shape
         """
         SplineRound.__init__(self, side_1, side_2, **kwargs)
-        FourCoreDisk.__init__(self, center_point, corner_1_point, normal=self.u_0)
 
         corner_1_point = np.asarray(corner_1_point)
         corner_2_point = np.asarray(corner_2_point)
