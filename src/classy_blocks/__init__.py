@@ -34,7 +34,9 @@ from .construct.shapes.rings import ExtrudedRing, RevolvedRing
 from .construct.shapes.shell import Shell
 from .construct.shapes.sphere import EighthSphere, Hemisphere, QuarterSphere
 from .construct.stack import ExtrudedStack, RevolvedStack, TransformedStack
-from .grading.graders.fixed import FixedCountGrader, SimpleGrader
+from .grading.graders.fixed import FixedCountGrader
+from .grading.graders.inflation import InflationGrader
+from .grading.graders.simple import SimpleGrader
 from .mesh import Mesh
 from .modify.find.geometric import GeometricFinder
 from .modify.find.shape import RoundSolidFinder
@@ -77,6 +79,7 @@ __all__ = [
     "HalfSplineDisk",
     "HalfSplineRing",
     "Hemisphere",
+    "InflationGrader",
     "LJoint",
     "LineClamp",
     "LineCurve",

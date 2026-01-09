@@ -126,6 +126,7 @@ class WireCatalogue:
                 return False
 
             vertices = set(block.get_side_vertices(orient))
+
             try:
                 patch = self.dump.patch_list.find(vertices)
                 if patch.kind == "wall":
