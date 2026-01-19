@@ -285,8 +285,8 @@ class HalfDisk(DiskBase):
         ratios = [self.core_ratio, self.diagonal_ratio]
         angles = np.linspace(0, np.pi, num=5)
 
-        super().__init__(
-            [center_point, *pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], quad_map
+        DiskBase.__init__(
+            self, [center_point, *pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], quad_map
         )
 
     @property
@@ -322,8 +322,8 @@ class FourCoreDisk(DiskBase):
         ratios = [self.core_ratio, self.diagonal_ratio]
         angles = np.linspace(0, 2 * np.pi, num=8, endpoint=False)
 
-        super().__init__(
-            [center_point, *pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], quad_map
+        DiskBase.__init__(
+            self, [center_point, *pattern.get_inner_points(angles, ratios), *pattern.get_outer_points(angles)], quad_map
         )
 
     @property

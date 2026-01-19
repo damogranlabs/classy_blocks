@@ -51,13 +51,7 @@ class Series(ElementBase):
         if origin is None:
             origin = f.vector(0, 0, 0)
 
-        normal = np.array(normal)
-        matrix = f.mirror_matrix(normal)
-
-        self.points -= origin
-
-        mirrored_points = np.dot(self.points - origin, matrix.T)
-        self.points = mirrored_points + origin
+        self.points = f.mirror(self.points, normal, origin)
 
         return self
 

@@ -90,7 +90,6 @@ class SymmetryLink(LinkBase):
         self.origin = np.array(origin)
 
         super().__init__(leader, follower)
-        self.transform()
 
     def _get_follower(self) -> NPPointType:
         return f.mirror(self.leader, self.normal, self.origin)

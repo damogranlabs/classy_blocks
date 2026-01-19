@@ -109,3 +109,11 @@ class SymmetryLinkTests(unittest.TestCase):
         link.update()
 
         np.testing.assert_almost_equal(link.follower, [0, 0, -2])
+
+    def test_move_displaced_origin(self):
+        link = SymmetryLink([0, 0, 1], [0, 0, -1], [0, 0, 1], [2, 0, 0])
+
+        link.leader = np.array([0, 0, 2])
+        link.update()
+
+        np.testing.assert_almost_equal(link.follower, [0, 0, -2])

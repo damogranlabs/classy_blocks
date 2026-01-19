@@ -98,4 +98,4 @@ class RadialClamp(ClampBase):
 
     @property
     def initial_guess(self):
-        return [0]
+        return [0.0]

@@ -1,8 +1,10 @@
+from classy_blocks.construct.flat.sketch import Sketch
 from classy_blocks.items.block import Block
 from classy_blocks.items.vertex import Vertex
+from classy_blocks.optimize.grid import QuadGrid
 
 
-def write_vtk(path: str, vertices: list[Vertex], blocks: list[Block]) -> None:
+def mesh_to_vtk(path: str, vertices: list[Vertex], blocks: list[Block]) -> None:
     """Generates a simple VTK file where each block is a hexahedral cell;
     useful for debugging blockMesh's FATAL_ERRORs"""
     # A sample VTK file with all cell types; only hexahedrons are used (cell type 12)
@@ -95,3 +97,33 @@ def write_vtk(path: str, vertices: list[Vertex], blocks: list[Block]) -> None:
 
         for i in range(n_blocks):
             output.write(f"{i}\n")
+
+
+def sketch_to_vtk(sketch: Sketch, filename: str) -> None:
+    """Outputs a sketch to VTK"""
+    grid = QuadGrid.from_sketch(sketch)
+
+    points = grid.points
+    indexes = grid.addressing
+    n_quads = len(indexes)
+
+    with open(filename, "w") as f:
+        f.write("# vtk DataFile Version 2.0\n")
+        f.write("Quadrangle mesh\n")
+        f.write("ASCII\n")
+        f.write("DATASET POLYDATA\n")
+        f.write(f"POINTS {len(points)} float\n")
+        for pt in points:
+            f.write(f"{pt[0]} {pt[1]} {pt[2]}\n")
+
+        f.write(f"\nPOLYGONS {len(indexes)} {len(indexes) * 5}\n")
+        for quad in indexes:
+            f.write(f"4 {quad[0]} {quad[1]} {quad[2]} {quad[3]}\n")
+
+        # cell data
+        f.write(f"\nCELL_DATA {n_quads}\n")
+        f.write("SCALARS block_ids float 1\n")
+        f.write("LOOKUP_TABLE default\n")
+
+        for i in range(n_quads):
+            f.write(f"{i}\n")

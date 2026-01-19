@@ -32,3 +32,5 @@ class QualityTests(unittest.TestCase):
         quality_2 = quality.get_quad_quality(grid_points, np.array([0, 1, 4, 3]))
 
         self.assertGreater(quality_2, quality_1)
+
+    # TODO: test with quad angles 179-180-181 degrees

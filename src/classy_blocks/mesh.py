@@ -14,7 +14,7 @@ from classy_blocks.items.block import Block
 from classy_blocks.items.patch import Patch
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.util.constants import TOL
-from classy_blocks.write.vtk import write_vtk
+from classy_blocks.write.vtk import mesh_to_vtk
 from classy_blocks.write.writer import MeshWriter
 
 AdditiveType = Union[Operation, Shape, Stack, Assembly]
@@ -129,7 +129,7 @@ class Mesh:
             self.assemble(merge_tol)
 
         if debug_path is not None:
-            write_vtk(debug_path, self.vertices, self.blocks)
+            mesh_to_vtk(debug_path, self.vertices, self.blocks)
 
         # gradings: define after writing VTK;
         # if it is not specified correctly, this will raise an exception

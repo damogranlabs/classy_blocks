@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from classy_blocks.base.exceptions import CylinderCreationError, FrustumCreationError
+from classy_blocks.base.transforms import Mirror
 from classy_blocks.construct.edges import Line
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketches.disk import Disk, OneCoreDisk
@@ -307,6 +308,14 @@ class CylinderTests(unittest.TestCase):
     def test_mirror(self):
         cyl_1 = self.cylinder
         cyl_2 = self.cylinder.copy().mirror(-cyl_1.sketch_1.normal, cyl_1.sketch_1.center)
+
+        np.testing.assert_almost_equal(
+            cyl_2.sketch_2.center - cyl_2.sketch_1.center, cyl_1.sketch_1.center - cyl_1.sketch_2.center
+        )
+
+    def _test_mirror_transform(self):
+        cyl_1 = self.cylinder
+        cyl_2 = self.cylinder.copy().transform([Mirror(-cyl_1.sketch_1.normal, cyl_1.sketch_1.center)])
 
         np.testing.assert_almost_equal(
             cyl_2.sketch_2.center - cyl_2.sketch_1.center, cyl_1.sketch_1.center - cyl_1.sketch_2.center

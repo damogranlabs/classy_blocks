@@ -387,7 +387,7 @@ class HalfSplineDisk(SplineRound, HalfDisk):
             side_1: Straight length for oval shape
             side_2: Straight length for oval shape
         """
-        super().__init__(side_1, side_2, **kwargs)
+        SplineRound.__init__(self, side_1, side_2, **kwargs)
 
         corner_1_point = np.asarray(corner_1_point)
         corner_2_point = np.asarray(corner_2_point)
@@ -396,7 +396,7 @@ class HalfSplineDisk(SplineRound, HalfDisk):
 
         # Create a HalfDisk
         self.disk_initialized = False
-        super(SplineRound, self).__init__(center_point, corner_1_point, normal=self.u_0)
+        HalfDisk.__init__(self, center_point, corner_1_point, normal=self.u_0)
         self.disk_initialized = True
 
         # Adjust to actual shape
@@ -462,7 +462,7 @@ class SplineDisk(SplineRound, FourCoreDisk):
             side_1: Straight length for oval shape
             side_2: Straight length for oval shape
         """
-        super().__init__(side_1, side_2, **kwargs)
+        SplineRound.__init__(self, side_1, side_2, **kwargs)
 
         corner_1_point = np.asarray(corner_1_point)
         corner_2_point = np.asarray(corner_2_point)
@@ -471,7 +471,7 @@ class SplineDisk(SplineRound, FourCoreDisk):
 
         # Create a FourCoreDisk
         self.disk_initialized = False
-        super(SplineRound, self).__init__(center_point, corner_1_point, normal=self.u_0)
+        FourCoreDisk.__init__(self, center_point, corner_1_point, normal=self.u_0)
         self.disk_initialized = True
 
         # Adjust to actual shape
@@ -587,7 +587,7 @@ class QuarterSplineRing(QuarterSplineDisk):
         super().__init__(center_point, corner_1_point, corner_2_point, side_1, side_2, **kwargs)
 
     def correct_disk(self, corner_1_point: NPPointType, corner_2_point: NPPointType):
-        """Method to convert a disk to a ting"""
+        """Method to convert a disk to a ring"""
 
         # First adjust circular disk to SplineDisk
         super().correct_disk(corner_1_point, corner_2_point)
@@ -646,7 +646,7 @@ class QuarterSplineRing(QuarterSplineDisk):
         return None
 
 
-class HalfSplineRing(HalfSplineDisk):
+class HalfSplineRing(HalfSplineDisk, QuarterSplineRing):
     """Ring based on SplineRound."""
 
     chops: ClassVar = [
@@ -690,10 +690,10 @@ class HalfSplineRing(HalfSplineDisk):
             corner_1_point = corner_1_point + self.width_1 * self.u_1
             corner_2_point = corner_2_point + self.width_2 * self.u_2
 
-        super().__init__(center_point, corner_1_point, corner_2_point, side_1, side_2, **kwargs)
+        HalfSplineDisk.__init__(self, center_point, corner_1_point, corner_2_point, side_1, side_2, **kwargs)
 
     def correct_disk(self, corner_1_point: NPPointType, corner_2_point: NPPointType):
-        """Method to convert a disk to a ting"""
+        """Method to convert a disk to a ring"""
 
         # First adjust circular disk to SplineDisk
         super().correct_disk(corner_1_point, corner_2_point)
@@ -758,7 +758,7 @@ class HalfSplineRing(HalfSplineDisk):
         return None
 
 
-class SplineRing(SplineDisk):
+class SplineRing(SplineDisk, QuarterSplineRing):
     """Ring based on SplineRound."""
 
     chops: ClassVar = [
@@ -802,10 +802,10 @@ class SplineRing(SplineDisk):
             corner_1_point = corner_1_point + self.width_1 * self.u_1
             corner_2_point = corner_2_point + self.width_2 * self.u_2
 
-        super().__init__(center_point, corner_1_point, corner_2_point, side_1, side_2, **kwargs)
+        SplineDisk.__init__(self, center_point, corner_1_point, corner_2_point, side_1, side_2, **kwargs)
 
     def correct_disk(self, corner_1_point: NPPointType, corner_2_point: NPPointType):
-        """Method to convert a disk to a ting"""
+        """Method to convert a disk to a ring"""
 
         # First adjust circular disk to splinedisk
         super().correct_disk(corner_1_point, corner_2_point)
@@ -841,36 +841,6 @@ class SplineRing(SplineDisk):
             - (self.side_2 + r_2 * np.sin(np.pi / 4)) * self.u_2
         )
         self.update(pos)
-
-    def add_edges(self) -> None:
-        # Don't run add_edges in QuarterDisk.__init__()
-        if not self.disk_initialized:
-            return
-
-        # Outside
-        # Circular
-        if (
-            self.side_1 < constants.TOL
-            and self.side_2 < constants.TOL
-            and abs(self.radius_1 - self.radius_2) < constants.TOL
-        ):
-            for face in self.shell:
-                face.add_edge(1, Origin(self.origo))
-        else:
-            self.add_outer_spline_edges()
-
-        # Inside
-        # Circular
-        if (
-            self.side_1 < constants.TOL
-            and self.side_2 < constants.TOL
-            and abs(self.radius_1 - self.radius_2) < constants.TOL
-            and abs(self.width_1 - self.width_2) < constants.TOL
-        ):
-            for face in self.shell:
-                face.add_edge(3, Origin(self.origo))
-        else:
-            self.add_inner_spline_edges()
 
     @property
     def grid(self):

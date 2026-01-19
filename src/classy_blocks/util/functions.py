@@ -1,4 +1,4 @@
-"""Mathematical functions for general everyday household use"""
+"""Matheratical functions for general everyday household use"""
 
 from itertools import chain
 from typing import Literal, Optional, Union
@@ -235,44 +235,40 @@ def arc_mid(center: NPPointType, point_1: NPPointType, point_2: NPPointType) -> 
     return divide_arc(center, point_1, point_2, 1)[0]
 
 
-def mirror_matrix(normal: VectorType):
-    n_x = normal[0]
-    n_y = normal[1]
-    n_z = normal[2]
+def mirror(points: Union[PointType, PointListType], normal: VectorType, origin: PointType):
+    """
+    Mirrors one or more 3D points over a plane defined by origin and normal.
 
-    return np.array(
-        [
-            [
-                1 - 2 * n_x**2,
-                -2 * n_x * n_y,
-                -2 * n_x * n_z,
-            ],
-            [
-                -2 * n_x * n_y,
-                1 - 2 * n_y**2,
-                -2 * n_y * n_z,
-            ],
-            [
-                -2 * n_x * n_z,
-                -2 * n_y * n_z,
-                1 - 2 * n_z**2,
-            ],
-        ]
-    )
+    Parameters
+    ----------
+    points : point (3,) or array of points (N, 3)
+        Points to mirror (N can be 1 for a single point).
+    origin : (3,) array_like
+        A point on the plane.
+    normal : (3,) array_like
+        Plane normal (need not be normalized).
 
+    Returns
+    -------
+    mirrored : (3,) ndarray (N, 3) ndarray or
+        A single mirrored point if a single point was given, otherwise an array of mirrored points.
+    """
+    points = np.asarray(points).astype(constants.DTYPE)
+    shape = np.shape(points)
 
-def mirror(point: PointType, normal: VectorType, origin: PointType):
-    """Mirror a point around a plane, given by a normal and origin"""
-    # brainlessly copied from https://gamemath.com/book/matrixtransforms.html
-    point = np.asarray(point)
+    points = np.atleast_2d(points)
+    origin = np.asarray(origin, dtype=constants.DTYPE)
     normal = unit_vector(normal)
-    origin = np.asarray(origin)
 
-    point -= origin
-    rotated = point.dot(mirror_matrix(normal))
-    rotated += origin
+    v = points - origin  # (N, 3)
+    dist = np.dot(v, normal)  # (N,)
+    mirrored = points - 2 * dist[:, np.newaxis] * normal
 
-    return rotated
+    if shape == (3,):
+        # return the same shape as passed
+        return mirrored[0]
+
+    return mirrored
 
 
 def point_to_plane_distance(origin: PointType, normal: VectorType, point: PointType) -> float:

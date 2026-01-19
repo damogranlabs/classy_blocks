@@ -148,6 +148,8 @@ class GridBase:
 
             # add linked junctions' quality to the sum
             quality += self.junctions[tie.follower_index].quality
+            for neighbour in junction.neighbours:
+                quality += neighbour.quality
 
         return quality
 

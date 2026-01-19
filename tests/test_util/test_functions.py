@@ -214,6 +214,12 @@ class TestFunctions(unittest.TestCase):
 
         np.testing.assert_almost_equal(mirrored, [0, 0, 0])
 
+    def test_mirror_array(self):
+        points = [[2, 2, 2], [4, 4, 4]]
+        mirrored = f.mirror(points, [1, 1, 1], [1, 1, 1])
+
+        np.testing.assert_almost_equal(mirrored, [[0, 0, 0], [-2, -2, -2]])
+
     @parameterized.expand(
         (
             ([1, 0, 0], [0, 0, 1], [2, 0, 0]),

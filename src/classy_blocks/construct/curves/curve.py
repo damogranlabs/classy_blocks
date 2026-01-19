@@ -62,6 +62,10 @@ class CurveBase(ElementBase):
     def get_closest_param(self, point: PointType) -> float:
         """Finds the parameter on curve where point is the closest to given point."""
 
+    def get_closest_point(self, point: PointType) -> NPPointType:
+        # TODO: test
+        return self.get_point(self.get_closest_param(point))
+
     def get_param_at_length(self, length: float) -> float:
         """Returns parameter at specified length along the curve"""
         return scipy.optimize.brentq(lambda p: self.get_length(0, p) - length, self.bounds[0], self.bounds[1])

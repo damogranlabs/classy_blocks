@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.6]
+
+### Added
+
+- Convenience methods:
+  - `Curve.get_closest_point()`
+  - A new VTK writer for sketches: `classy_blocks.write.vtk.sketch_to_vtk()`, useful for debugging sketches alone
+  - Make `SketchOptimizer` work on all sketches, not just `cb.MappedSketch`
+
+### Changed
+
+- Bugfix: mirror a point over an arbitrary plane; also now supports mirroring a point array
+- Bugfix: when finding points to connect clamps to junctions before optimization, do not call transform() on clamps or it will move them, making the optimizer unable to find actual junctions
+- Bugfix: ignore optimization iterations with zero or negative improvement
+
 ## [1.9.5]
 
 ### Added

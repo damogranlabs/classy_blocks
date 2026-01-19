@@ -69,7 +69,7 @@ class Face(ElementBase):
     def update(self, points: PointListType) -> None:
         """Moves points from current position to given"""
         for i, point in enumerate(points):
-            self.points[i].position = np.array(point, dtype=constants.DTYPE)
+            self.points[i].move_to(point)
 
     def add_edge(self, corner: int, edge_data: Union[EdgeData, None]) -> None:
         """Replaces an existing edge between corner and (corner+1);

@@ -17,11 +17,11 @@ radius_point_1 = f.vector(0.0, 0.0, 2.0)
 
 
 one_core_disk = OneCoreDisk(axis_point_1, radius_point_1, axis_point_1 - axis_point_2)
-quarter_cylinder = cb.ExtrudedShape(one_core_disk, f.norm(axis_point_2 - axis_point_1))
-quarter_cylinder.chop(0, count=5)
-quarter_cylinder.chop(1, count=10)
-quarter_cylinder.chop(2, count=20)
-mesh.add(quarter_cylinder)
+cylinder = cb.ExtrudedShape(one_core_disk, f.norm(axis_point_2 - axis_point_1))
+cylinder.chop(0, count=5)
+cylinder.chop(1, count=10)
+cylinder.chop(2, count=20)
+mesh.add(cylinder)
 
 mesh.set_default_patch("walls", "wall")
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")
