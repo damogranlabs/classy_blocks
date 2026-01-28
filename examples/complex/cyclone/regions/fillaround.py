@@ -1,4 +1,3 @@
-import parameters as params
 from regions.region import Region
 
 import classy_blocks as cb
@@ -36,10 +35,6 @@ class FillAround(Region):
         connector_2 = cb.Connector(shell[-1], loft_2)
 
         self._operations = [connector_1, *ring.shell[1:-4], connector_2]
-
-    def chop(self):
-        self.elements[1].chop(2, start_size=params.BULK_SIZE)
-        self.elements[1].chop(0, end_size=params.BL_THICKNESS, c2c_expansion=1 / params.C2C_EXPANSION)
 
     @property
     def elements(self):

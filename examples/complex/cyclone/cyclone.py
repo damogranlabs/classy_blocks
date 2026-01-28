@@ -14,6 +14,7 @@ from regions.region import Region
 from regions.skirt import Skirt
 
 import classy_blocks as cb
+from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.util import functions as f
 
 mesh = cb.Mesh()
@@ -26,7 +27,6 @@ def add_regions(regions: list[Region]) -> None:
         for element in region.elements:
             mesh.add(element)
 
-        region.chop()
         region.project()
         region.set_patches()
 
@@ -50,7 +50,12 @@ add_regions(optimize_regions)
 mesh.assemble()
 
 # Now coincident points have been merged into Vertices and each got its own index.
-# We do mesh.write(..., debug_path="debug.vtk") and view debug.vtk's points in ParaView.
+# write out the current blocking and get vertex numbers from paraview
+try:
+    mesh.write("...", debug_path="pre-optimization.vtk")
+except UndefinedGradingsError:
+    pass
+
 # We'll redistribute (and fix) inner ring points evenly or optimization
 # will find a better solution with a thin block in the
 vindexes = [68, 69, 70, 84, 82, 80, 78, 76, 74, 71, 67, 66]
@@ -73,14 +78,16 @@ mesh.vertices[22].move_to(np.average(neighbours, axis=0))
 
 # Now, optimize the bad blocks in the inlet.
 optimizer = cb.MeshOptimizer(mesh)
-optimizer.config.relaxation_start = 0.5
+optimizer.config.relaxation_iterations = 5
+optimizer.config.method = "SLSQP"
+optimizer.config.abs_tol = 200
 
 clamps = []
 for region in optimize_regions:
     for clamp in region.get_clamps(mesh):
         optimizer.add_clamp(clamp)
 
-optimizer.optimize(tolerance=1e-3, max_iterations=20)
+optimizer.optimize()
 
 # Now Block objects contain optimization results but those are not reflected in
 # user-created Operations. Mesh.backport() will copy the data back.
@@ -127,7 +134,7 @@ add_regions([core, cone, outlet])
 
 
 # What's left is to mirror the inlet and upper rings to form a round inlet;
-# Operation.mirror() is what we need but chopping needs to be done separately.
+# Operation.mirror() is what we need
 def mirror_region(region: Region):
     mirrored = []
     for element in region.elements:
@@ -139,18 +146,18 @@ def mirror_region(region: Region):
 
 
 fillaround_mirror = mirror_region(fillaround)
-fillaround_mirror[1].unchop(2)
-fillaround_mirror[1].chop(2, start_size=params.BULK_SIZE, end_size=params.BL_THICKNESS)
-
 inner_ring_mirror = mirror_region(inner_ring)
-inner_ring_mirror[0].unchop(2)
-inner_ring_mirror[0].chop(1, start_size=params.BULK_SIZE)
 
 mirror_region(skirt)
 mirror_region(inlet)
 mirror_region(inlet_extension)
 
 mesh.set_default_patch("walls", "wall")
+
+
+grader = cb.InflationGrader(mesh, params.BL_THICKNESS, params.BULK_SIZE)
+grader.grade()
+
 mesh.add_geometry(geometry.surfaces)
 mesh.settings.scale = params.MESH_SCALE
 mesh.write(os.path.join("..", "..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

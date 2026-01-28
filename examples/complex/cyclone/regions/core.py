@@ -1,4 +1,5 @@
-from typing import ClassVar, List, Sequence
+from collections.abc import Sequence
+from typing import ClassVar
 
 import numpy as np
 import parameters as params
@@ -62,11 +63,11 @@ class NineCoreDisk(cb.MappedSketch):
         smoother.smooth()
 
     @property
-    def core(self) -> List[cb.Face]:
+    def core(self) -> list[cb.Face]:
         return self.faces[:9]
 
     @property
-    def shell(self) -> List[cb.Face]:
+    def shell(self) -> list[cb.Face]:
         return self.faces[9:]
 
     def add_edges(self):
@@ -102,10 +103,6 @@ class DozenBlockCylinder(RoundSolidShape):
         transforms: Sequence[Transformation] = [Translation(sketch.normal * length)]
         super().__init__(sketch, transforms)
 
-    def chop_tangential(self, **kwargs):
-        for operation in self.shell[:6]:
-            operation.chop(1, **kwargs)
-
     def chop_radial(self, **kwargs):
         self.shell[0].chop(0, **kwargs)
 
@@ -125,7 +122,7 @@ class Core(Region):
 
 class Outlet(Region):
     def __init__(self, core_cylinder: DozenBlockCylinder):
-        self.operations = [
+        self.operations: list[cb.Operation] = [
             cb.Extrude(op.bottom_face.copy().translate([0, 0, self.geo.l["outlet"]]), [0, 0, -self.geo.l["outlet"]])
             for op in core_cylinder.operations
         ]

@@ -1,7 +1,4 @@
-from typing import List
-
 import numpy as np
-import parameters as params
 from regions.region import Region
 
 import classy_blocks as cb
@@ -11,7 +8,7 @@ from classy_blocks.util import functions as f
 class InnerRing(Region):
     """A ring, created by extruding innermost faces of given shapes"""
 
-    radial_clamps = {60, 61, 62, 63, 64, 65}
+    radial_clamps = (60, 61, 62, 63, 64, 65)
 
     def _move_to_radius(self, point):
         polar = f.to_polar(point, axis="z")
@@ -51,7 +48,7 @@ class InnerRing(Region):
         if np.dot(location, normal) > 0:
             face.invert()
 
-    def __init__(self, lofts: List[cb.Loft]):
+    def __init__(self, lofts: list[cb.Loft]):
         center_point = f.vector(0, 0, self.geo.z["skirt"])
         outer_faces = [loft.get_closest_face(center_point) for loft in lofts]
 
@@ -69,9 +66,6 @@ class InnerRing(Region):
     @property
     def elements(self):
         return self.lofts
-
-    def chop(self):
-        self.elements[0].chop(2, end_size=params.BL_THICKNESS, c2c_expansion=1 / params.C2C_EXPANSION)
 
     def project(self):
         for element in self.elements:

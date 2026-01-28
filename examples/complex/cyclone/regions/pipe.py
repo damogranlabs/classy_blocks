@@ -1,7 +1,4 @@
-from typing import List
-
 import numpy as np
-import parameters as params
 from regions.region import Region
 
 import classy_blocks as cb
@@ -13,7 +10,7 @@ class Pipe(Region):
     def __init__(self, outer: Region):
         self.outer = outer
 
-        faces: List[cb.Face] = []
+        faces: list[cb.Face] = []
 
         for operation in outer.elements:
             face = operation.get_closest_face(self.center)
@@ -50,10 +47,6 @@ class Pipe(Region):
     @property
     def elements(self):
         return self.shell.operations
-
-    def chop(self):
-        self.shell.chop(length_ratio=0.5, start_size=params.BL_THICKNESS, c2c_expansion=params.C2C_EXPANSION)
-        self.shell.chop(length_ratio=0.5, end_size=params.BL_THICKNESS, c2c_expansion=1 / params.C2C_EXPANSION)
 
     def project(self):
         for operation in self.elements:

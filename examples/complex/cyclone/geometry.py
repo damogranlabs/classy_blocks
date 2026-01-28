@@ -1,5 +1,4 @@
 import dataclasses
-from typing import Dict, List
 
 from parameters import (
     D_BODY,
@@ -35,7 +34,7 @@ class Geometry:
             raise GeometryConstraintError("Outlet inside is too short")
 
     @property
-    def r(self) -> Dict[str, float]:
+    def r(self) -> dict[str, float]:
         """Radii as defined in parameters"""
         return {
             "inlet": DIM_SCALE * D_INLET / 2,
@@ -46,7 +45,7 @@ class Geometry:
         }
 
     @property
-    def l(self) -> Dict["str", "float"]:  # noqa: E743
+    def l(self) -> dict["str", "float"]:  # noqa: E743
         """Lengths that matter"""
         skirt = 0.1 * self.r["inlet"]
         l_body = DIM_SCALE * L_BODY - skirt - self.r["inlet"]
@@ -65,7 +64,7 @@ class Geometry:
         }
 
     @property
-    def inlet(self) -> List[NPPointType]:
+    def inlet(self) -> list[NPPointType]:
         point_2 = f.vector(0, -self.r["body"] + self.r["inlet"], 0)
         point_0 = point_2 + f.vector(-self.l["inlet"], 0, 0)
         point_1 = point_2 + f.vector(-self.r["body"] * 1.1, 0, 0)
@@ -73,7 +72,7 @@ class Geometry:
         return [point_0, point_1, point_2]
 
     @property
-    def z(self) -> Dict[str, float]:
+    def z(self) -> dict[str, float]:
         """z-coordinates of cyclone parts"""
         z_in_sk = self.r["inlet"] + self.l["skirt"]
         return {

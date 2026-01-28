@@ -1,4 +1,4 @@
-from typing import List, Sequence
+from collections.abc import Sequence
 
 import parameters as params
 from geometry import geometry as geo
@@ -21,10 +21,10 @@ class ChainSketch(Sketch):
         return [self.faces]
 
     @staticmethod
-    def _get_faces(ops: Sequence[Operation]) -> List[cb.Face]:
+    def _get_faces(ops: Sequence[Operation]) -> list[cb.Face]:
         """Skims faces from given operations and reorders them so
         that they are ready for extruding or whatever"""
-        faces: List[cb.Face] = []
+        faces: list[cb.Face] = []
 
         for operation in ops:
             # TODO: copy edges and other data too
@@ -43,7 +43,7 @@ class ChainSketch(Sketch):
         return faces
 
     @staticmethod
-    def _add_arcs(faces: List[cb.Face]) -> None:
+    def _add_arcs(faces: list[cb.Face]) -> None:
         """Adds arc edges between outermost points of outermost faces
         to create round shape"""
         # add arcs to outermost radius (body and cone)
@@ -60,7 +60,7 @@ class ChainSketch(Sketch):
                 if abs(polar_1[0] - max_radius) < 2 * TOL and abs(polar_2[0] - max_radius) < 2 * TOL:
                     face.add_edge(i, cb.Origin([0, 0, polar_1[2]]))
 
-    def __init__(self, regions: List[Region]):
+    def __init__(self, regions: list[Region]):
         # gather faces
         ops: Sequence[Operation] = []
         for region in regions:
@@ -85,15 +85,6 @@ class ChainSketch(Sketch):
 
 
 class BodyShape(RoundSolidShape):
-    def chop_axial(self, **kwargs):
-        self.operations[0].chop(2, **kwargs)
-
-    def chop_radial(self, **kwargs):
-        pass
-
-    def chop_tangential(self, **kwargs):
-        pass
-
     @property
     def shell(self):
         return []
@@ -131,6 +122,3 @@ class Cone(UpperBody):
                 Scaling(self.geo.r["cone"] / self.geo.r["body"], f.vector(0, 0, self.geo.z["cone"])),
             ],
         )
-
-    def chop(self):
-        self.elements[0].chop(2, start_size=params.BULK_SIZE)

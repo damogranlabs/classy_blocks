@@ -16,7 +16,7 @@ class LayerStackTests(unittest.TestCase):
     def test_inflation_layer_count(self):
         layer = InflationLayer(self.params, 0.6)
 
-        self.assertEqual(layer.count, 11)
+        self.assertEqual(layer.count, 12)
 
     def test_inflation_layer_size(self):
         layer = InflationLayer(self.params, 0.6)
@@ -36,7 +36,7 @@ class LayerStackTests(unittest.TestCase):
     def test_buffer_count(self):
         layer = BufferLayer(self.params, 1)
 
-        self.assertEqual(layer.count, 6)
+        self.assertEqual(layer.count, 4)
 
     def test_buffer_length_truncated(self):
         max_length = 1 - self.params.bl_thickness
@@ -52,7 +52,7 @@ class LayerStackTests(unittest.TestCase):
     def test_bulk_layer(self):
         layer = BulkLayer(self.params, 1)
 
-        self.assertEqual(layer.count, 10)
+        self.assertEqual(layer.count, 11)
 
     def test_stack_inflation_short(self):
         # block size is less than boundary layer thickness
@@ -67,7 +67,7 @@ class LayerStackTests(unittest.TestCase):
         self.assertEqual(len(stack.layers), 1)
 
     def test_stack_buffer(self):
-        stack = LayerStack(self.params, self.params.bl_thickness + self.params.buffer_start_size)
+        stack = LayerStack(self.params, self.params.bl_thickness + 2 * self.params.buffer_start_size)
 
         self.assertEqual(len(stack.layers), 2)
 

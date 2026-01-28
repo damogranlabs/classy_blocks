@@ -1,4 +1,5 @@
 import abc
+import copy
 import dataclasses
 
 from classy_blocks.assemble.dump import AssembledDump
@@ -85,7 +86,7 @@ class Layer(abc.ABC):
         self, length_limit: float = VBIG, count_limit: int = 10**12, size_limit: float = VBIG
     ) -> tuple[float, float, int]:
         # stop construction of the layer when it hits any of the above limits
-        count = 0
+        count = 1
         size = self.start_size
         length = self.start_size
 
@@ -103,7 +104,7 @@ class Layer(abc.ABC):
             size *= self.c2c_expansion
             count += 1
 
-        return length - size, size / self.c2c_expansion, max(1, count)
+        return length, size, count
 
     def __init__(
         self, params: InflationParams, length_limit: float = VBIG, count_limit: int = 10**12, size_limit: float = VBIG
@@ -117,10 +118,26 @@ class Layer(abc.ABC):
         # layers define chops differently
         pass
 
-    def invert(self) -> None:
+    def invert(self) -> "Layer":
         # inverts the data for a chop
         self.end_size, self.start_size = self.start_size, self.end_size
         self.c2c_expansion = 1 / self.c2c_expansion
+
+        return self
+
+    def copy(self) -> "Layer":
+        return copy.deepcopy(self)
+
+    def __repr__(self):
+        data = {
+            "start_size": self.start_size,
+            "c2c_expansion": self.c2c_expansion,
+            "length": self.length,
+            "count": self.count,
+            "end_size": self.end_size,
+            "length_ratio": self.length_ratio,
+        }
+        return str(data)
 
 
 class InflationLayer(Layer):
@@ -130,17 +147,21 @@ class InflationLayer(Layer):
         super().__init__(params, length_limit=min(params.bl_thickness, remaining_length))
 
     def get_chop(self):
-        return Chop(start_size=self.params.first_cell_size, c2c_expansion=self.params.c2c_expansion)
+        return Chop(
+            length_ratio=self.length_ratio,
+            start_size=self.start_size,
+            c2c_expansion=self.c2c_expansion,
+        )
 
 
 class BufferLayer(Layer):
     def __init__(self, params: InflationParams, remaining_length: float):
         self.start_size = params.buffer_start_size
         self.c2c_expansion = params.buffer_expansion
-        super().__init__(params, size_limit=remaining_length)
+        super().__init__(params, size_limit=params.bulk_cell_size, length_limit=remaining_length)
 
     def get_chop(self):
-        return Chop(count=self.count, c2c_expansion=self.c2c_expansion)
+        return Chop(length_ratio=self.length_ratio, count=self.count, c2c_expansion=self.c2c_expansion)
 
 
 class BulkLayer(Layer):
@@ -150,7 +171,7 @@ class BulkLayer(Layer):
         super().__init__(params, length_limit=remaining_length)
 
     def get_chop(self):
-        return Chop(count=self.count)
+        return Chop(length_ratio=self.length_ratio, count=self.count)
 
 
 class LayerStack:
@@ -165,7 +186,7 @@ class LayerStack:
 
     def _construct(self) -> list[Layer]:
         layers: list[Layer] = []
-        remaining_length = self.length
+        remaining_length = self.total_length
 
         inflation_layer = InflationLayer(self.params, remaining_length)
         remaining_length -= inflation_layer.length
@@ -186,12 +207,30 @@ class LayerStack:
 
         return layers
 
-    def __init__(self, params: InflationParams, length: float):
+    def __init__(self, params: InflationParams, total_length: float):
         self.params = params
-        self.length = length
+        self.total_length = total_length
 
         self.layers = self._construct()
         self._normalize_ratios()
+
+    def invert(self) -> "LayerStack":
+        for layer in self.layers:
+            layer.invert()
+
+        self.layers.reverse()
+
+        return self
+
+    def mirror(self) -> "LayerStack":
+        # duplicates layers and inverts the other half;
+        # must be done on half of ref_length
+        for layer in reversed(self.layers):
+            self.layers.append(layer.copy().invert())
+
+        self._normalize_ratios()
+
+        return self
 
     @property
     def count(self) -> int:
@@ -199,7 +238,7 @@ class LayerStack:
 
     @property
     def remaining_length(self) -> float:
-        return self.length - sum(layer.length for layer in self.layers)
+        return self.total_length - sum(layer.length for layer in self.layers)
 
 
 class InflationAxisGrader(AxisGrader):
@@ -211,7 +250,7 @@ class InflationAxisGrader(AxisGrader):
     def get_stack(self) -> LayerStack:
         return LayerStack(self.params, self.ref_length)
 
-    def get_chops(self):
+    def get_chops(self) -> list[Chop]:
         stack = self.get_stack()
         return [layer.get_chop() for layer in stack.layers]
 
@@ -219,14 +258,17 @@ class InflationAxisGrader(AxisGrader):
 class InvertedInflationAxisGrader(InflationAxisGrader):
     def get_stack(self):
         stack = super().get_stack()
-        for layer in stack.layers:
-            layer.invert()
+        stack.invert()
 
         return stack
 
 
 class DoubleInflationAxisGrader(InflationAxisGrader):
-    pass
+    def get_stack(self) -> LayerStack:
+        stack = LayerStack(self.params, self.ref_length / 2)
+        stack.mirror()
+
+        return stack
 
 
 class BulkAxisGrader(FixedAxisGrader):

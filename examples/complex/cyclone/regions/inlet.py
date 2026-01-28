@@ -1,5 +1,4 @@
 import numpy as np
-import parameters as params
 from regions.region import Region
 
 import classy_blocks as cb
@@ -11,9 +10,9 @@ cb.HalfDisk.core_ratio = 0.6
 
 
 class InletPipe(Region):
-    line_clamps = {20, 18, 16, 13, 12}
-    plane_clamps = {0, 1, 8, 9, 5, 4, 11, 10}
-    free_clamps = {3, 2, 6, 7}
+    line_clamps = (20, 18, 16, 13, 12)
+    plane_clamps = (0, 1, 8, 9, 5, 4, 11, 10)
+    free_clamps = (3, 2, 6, 7)
 
     def __init__(self):
         self.inlet = self.create_inlet()
@@ -66,9 +65,6 @@ class InletPipe(Region):
         have tops facing z-axis"""
         return self.inlet.core
 
-    def chop(self):
-        self.inlet.chop_axial(start_size=params.BULK_SIZE)
-
     @property
     def elements(self):
         return self.inlet.operations
@@ -86,9 +82,6 @@ class InletExtension(Region):
 
         for i, operation in enumerate(self.extension.operations):
             operation.top_face = inlet.elements[i].bottom_face
-
-    def chop(self):
-        self.extension.chop_axial(start_size=params.BULK_SIZE)
 
     @property
     def elements(self):

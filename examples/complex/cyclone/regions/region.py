@@ -1,5 +1,4 @@
 import abc
-from typing import List, Set
 
 from geometry import geometry
 
@@ -11,24 +10,20 @@ from classy_blocks.util import functions as f
 class Region(abc.ABC):
     """A logical unit of the mesh that can be constructed independently"""
 
-    line_clamps: Set[int] = set()
-    radial_clamps: Set[int] = set()
-    plane_clamps: Set[int] = set()
-    free_clamps: Set[int] = set()
+    line_clamps: tuple[int, ...] = ()
+    radial_clamps: tuple[int, ...] = ()
+    plane_clamps: tuple[int, ...] = ()
+    free_clamps: tuple[int, ...] = ()
 
     geo = geometry
 
     @property
     @abc.abstractmethod
-    def elements(self) -> List[Operation]:
+    def elements(self) -> list[Operation]:
         """Entities of any type to be added to the mesh"""
 
-    @abc.abstractmethod
-    def chop(self) -> None:
-        """Chops elements to cells"""
-
     def get_line_clamps(self, mesh):
-        clamps: Set[cb.ClampBase] = set()
+        clamps: set[cb.ClampBase] = set()
 
         for index in self.line_clamps:
             vertex = mesh.vertices[index]
@@ -40,8 +35,8 @@ class Region(abc.ABC):
 
         return clamps
 
-    def get_free_clamps(self, mesh: cb.Mesh) -> Set[cb.ClampBase]:
-        clamps: Set[cb.ClampBase] = set()
+    def get_free_clamps(self, mesh: cb.Mesh) -> set[cb.ClampBase]:
+        clamps: set[cb.ClampBase] = set()
 
         for index in self.free_clamps:
             vertex = mesh.vertices[index]
@@ -49,8 +44,8 @@ class Region(abc.ABC):
 
         return clamps
 
-    def get_plane_clamps(self, mesh: cb.Mesh) -> Set[cb.ClampBase]:
-        clamps: Set[cb.ClampBase] = set()
+    def get_plane_clamps(self, mesh: cb.Mesh) -> set[cb.ClampBase]:
+        clamps: set[cb.ClampBase] = set()
 
         for index in self.plane_clamps:
             vertex = mesh.vertices[index]
@@ -59,8 +54,8 @@ class Region(abc.ABC):
 
         return clamps
 
-    def get_radial_clamps(self, mesh: cb.Mesh) -> Set[cb.ClampBase]:
-        clamps: Set[cb.ClampBase] = set()
+    def get_radial_clamps(self, mesh: cb.Mesh) -> set[cb.ClampBase]:
+        clamps: set[cb.ClampBase] = set()
 
         for index in self.radial_clamps:
             vertex = mesh.vertices[index]
@@ -69,7 +64,7 @@ class Region(abc.ABC):
 
         return clamps
 
-    def get_clamps(self, mesh: cb.Mesh) -> Set[cb.ClampBase]:
+    def get_clamps(self, mesh: cb.Mesh) -> set[cb.ClampBase]:
         """Returns a list of clamps to be used for mesh optimization"""
         clamps = self.get_line_clamps(mesh)
         clamps.update(self.get_radial_clamps(mesh))
