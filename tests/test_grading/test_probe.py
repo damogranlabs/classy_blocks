@@ -1,16 +1,46 @@
+import unittest
 from typing import get_args
 
 import numpy as np
 from parameterized import parameterized
 
 from classy_blocks.cbtyping import DirectionType
+from classy_blocks.construct.flat.sketches.grid import Grid
+from classy_blocks.construct.operations.box import Box
+from classy_blocks.construct.shapes.cylinder import Cylinder
+from classy_blocks.construct.shapes.frustum import Frustum
+from classy_blocks.construct.stack import ExtrudedStack
 from classy_blocks.grading.analyze.catalogue import get_block_from_axis
 from classy_blocks.grading.analyze.probe import Probe
 from classy_blocks.mesh import Mesh
-from tests.test_grading.test_autograde import AutogradeTestsBase
 
 
-class ProbeTests(AutogradeTestsBase):
+class ProbeTests(unittest.TestCase):
+    def get_stack(self) -> ExtrudedStack:
+        # create a simple 4x4 grid for easy navigation
+        base = Grid([0, 0, 0], [1, 1, 0], 4, 4)
+        return ExtrudedStack(base, 1, 4)
+
+    def get_flipped_stack(self) -> ExtrudedStack:
+        stack = self.get_stack()
+
+        for i in (5, 6, 8, 9):
+            stack.operations[i].rotate(np.pi, [0, 1, 0])
+
+        return stack
+
+    def get_cylinder(self) -> Cylinder:
+        return Cylinder([0, 0, 0], [1, 0, 0], [0, 1, 0])
+
+    def get_frustum(self) -> Frustum:
+        return Frustum([0, 0, 0], [1, 0, 0], [0, 1, 0], 0.3)
+
+    def get_box(self) -> Box:
+        return Box([0, 0, 0], [1, 1, 1])
+
+    def setUp(self):
+        self.mesh = Mesh()
+
     def test_block_from_axis_fail(self):
         mesh_1 = self.mesh
         mesh_1.add(self.get_stack())

@@ -109,6 +109,7 @@ upper = UpperBody(upper_sketch, geometry.l["upper"])
 # it extends the above rings plus adds pipe thickness and core
 lower_sketch = ChainSketch([upper])
 lower = LowerBody(lower_sketch, geometry.l["lower"])
+lower.elements[0].chop(2, start_size=params.BULK_SIZE)
 
 pipe = Pipe(lower)
 
@@ -155,7 +156,7 @@ mirror_region(inlet_extension)
 mesh.set_default_patch("walls", "wall")
 
 
-grader = cb.InflationGrader(mesh, params.BL_THICKNESS, params.BULK_SIZE)
+grader = cb.InflationGrader(mesh, params.BL_THICKNESS, params.BULK_SIZE, c2c_expansion=params.C2C_EXPANSION)
 grader.grade()
 
 mesh.add_geometry(geometry.surfaces)

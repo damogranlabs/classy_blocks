@@ -132,7 +132,7 @@ def get_count__total_expansion__c2c_expansion(length, total_expansion, c2c_expan
 
     if abs(c2c_expansion - 1) <= constants.TOL:
         raise ValueError(
-            "Cell-to-cell expansion - 1 should be less than tolerance:"
+            "Cell-to-cell expansion - 1 should be greater than tolerance:"
             f"\n\tCell-to-cell expansion ratio: {c2c_expansion}"
             f"\n\tTolerance: {constants.TOL}"
         )

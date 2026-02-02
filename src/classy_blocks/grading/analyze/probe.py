@@ -113,16 +113,15 @@ class WireCatalogue:
 
     def _get_wire_boundaries(self, wire: Wire, block: Block) -> tuple[bool, bool]:
         """Finds out whether a Wire starts or ends on a wall patch"""
+        # only check  patches, perpendicular to the wire;
+        # wires lying on wall surfaces aren't eligible for wall/inflation grading
         start_orient = DIRECTION_MAP[wire.direction][0]
         end_orient = DIRECTION_MAP[wire.direction][1]
         block_index = self.dump.blocks.index(block)
 
-        def find_patch(orient: OrientType) -> bool:
-            # search for external faces;
-            # either this block has one or any of its neighbours at the start
-            # or end of this wire
+        def is_on_wall(orient: OrientType) -> bool:
             if self.grid.cells[block_index].neighbours[orient] is not None:
-                # Internal face
+                # this block side has a neighbour and cannot be a wall patch
                 return False
 
             vertices = set(block.get_side_vertices(orient))
@@ -137,7 +136,7 @@ class WireCatalogue:
 
             return False
 
-        return (find_patch(start_orient), find_patch(end_orient))
+        return (is_on_wall(start_orient), is_on_wall(end_orient))
 
     def get_info(self, wire: Wire) -> WireInfo:
         info = self.data[wire.vertices[0].index][wire.vertices[1].index]

@@ -6,13 +6,40 @@ from classy_blocks.grading.graders.inflation import (
     InflationLayer,
     InflationParams,
     LayerStack,
+    sum_length,
 )
 
 
-class LayerStackTests(unittest.TestCase):
+class ParamsTests(unittest.TestCase):
     def setUp(self):
-        self.params = InflationParams(0.002, 0.1)
+        self.params = InflationParams(0.002, 0.1, 1.2, 30, 2)
 
+    def test_bl_thickness(self):
+        self.assertEqual(self.params.bl_thickness, 0.06)
+
+    def test_inflation_count(self):
+        self.assertEqual(self.params.inflation_count, 11)
+
+    def test_inflation_end_size(self):
+        self.assertAlmostEqual(self.params.inflation_end_size, 0.012383, places=5)
+
+    def test_buffer_start_size(self):
+        self.assertAlmostEqual(self.params.buffer_start_size, 0.012383 * 2, places=5)
+
+    def test_buffer_count(self):
+        self.assertEqual(self.params.buffer_count, 3)
+
+    def test_sum_length_simple(self):
+        self.assertAlmostEqual(sum_length(0.1, 10, 1), 1)
+
+    def test_sum_length_graded(self):
+        self.assertAlmostEqual(sum_length(0.1, 10, 2), 102.3)
+
+    def test_buffer_thickness(self):
+        self.assertAlmostEqual(self.params.buffer_thickness, 0.173369, places=5)
+
+
+class LayerStackTests(ParamsTests):
     def test_inflation_layer_count(self):
         layer = InflationLayer(self.params, 0.6)
 

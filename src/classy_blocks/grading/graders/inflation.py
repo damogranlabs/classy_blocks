@@ -1,6 +1,7 @@
 import abc
 import copy
 import dataclasses
+from typing import Union
 
 from classy_blocks.assemble.dump import AssembledDump
 from classy_blocks.cbtyping import ChopTakeType, DirectionType
@@ -62,12 +63,12 @@ class InflationParams:
     @property
     def buffer_count(self) -> int:
         return gr.get_count__total_expansion__c2c_expansion(
-            1, self.bulk_cell_size / self.inflation_end_size, self.buffer_expansion
+            1, self.bulk_cell_size / self.buffer_start_size, self.buffer_expansion
         )
 
     @property
     def buffer_thickness(self) -> float:
-        return sum_length(self.inflation_end_size, self.buffer_count, self.buffer_expansion)
+        return sum_length(self.buffer_start_size, self.buffer_count, self.buffer_expansion)
 
 
 class Layer(abc.ABC):
@@ -328,7 +329,7 @@ class InflationGrader(GradingManager, AutoGraderMixin):
 
         super().__init__(mesh.dump, mesh.settings)
 
-    def _get_grader(self, row: Row) -> type[InflationAxisGrader | BulkAxisGrader]:
+    def _get_grader(self, row: Row) -> Union[type[InflationAxisGrader], type[BulkAxisGrader]]:
         # use simple grader's method for rows that don't touch walls
         # but a more sophisticated method for rows on-the-wall
         starts_at_wall = False
@@ -338,12 +339,15 @@ class InflationGrader(GradingManager, AutoGraderMixin):
             for wire in entry.wires:
                 wire_info = self.probe.get_wire_info(wire)
                 if wire_info.starts_at_wall:
-                    starts_at_wall = True
+                    if not entry.flipped:
+                        starts_at_wall = True
                 if wire_info.ends_at_wall:
-                    ends_at_wall = True
+                    if not entry.flipped:
+                        ends_at_wall = True
 
-            if starts_at_wall and ends_at_wall:
-                return DoubleInflationAxisGrader
+                if starts_at_wall and ends_at_wall:
+                    print(f"Starts and ends: {wire_info.wire.vertices[0].index, wire_info.wire.vertices[1].index}")
+                    return DoubleInflationAxisGrader
 
         if starts_at_wall:
             return InflationAxisGrader
