@@ -64,6 +64,7 @@ _Unchecked items are not implemented yet but are on a TODO list_
   - [x] Extrude
   - [x] Revolve
   - [x] Wedge (a shortcut to Revolve for 2D axisymmetric cases)
+  - [ ] Three-sided pyramid (for axisymmetric cases through the axis)
   - [x] Connector (A Loft between two existing Operations)
 - [x] Sketches (collections of 2D faces) of common cross-sections
   - [x] Quarter and Semi circle
@@ -380,7 +381,7 @@ Airfoil core with blunt trailing edge (imported points from NACA generator) and 
 
 In classy_blocks lingo, _chopping_ means setting block's cell count and optionally grading. For best control it can be specified manually with something like `operation.chop(axis, start_size=..., c2c_expansion=...)` (or any other supported combination of parameters) but it only needs to be done on a single block in a _row_ of connected blocks. All touching blocks will inherit user-specified chops automatically.
 
-## Edge Grading
+### Edge Grading
 
 When setting cell counts and expansion ratios, it is possible to specify which value to keep constant. When propagating chops through the mesh this will keep the required value constant. For instance, thickness of the first cell at the wall can be maintained to keep desired `y+` throughout the mesh. This is done by simply specifying a `preserve="..."` keyword.
 
@@ -391,14 +392,14 @@ The same case but with a specified `preserve="start_size"` keyword for the botto
 
 It is also possible to locate a specific edge and modify its grading by using `operation.chop_edge(corner_1, corner_2, ...)`. For example, this cylinder with wall boundary layers has some edges manually redefined:
 
-![Manual edge grading](showcase/edges_grading.png "Manual edge grading")
+![Manual edge grading](showcase/edge_grading.png "Manual edge grading")
 
-## Automatic Grading
+### Automatic Grading
 
 classy_blocks offers automatic graders that will set cell counts and gradings throughout the whole mesh with no user intervention:
 
-- `FixedCountGrader` will simply set the same cell count on all blocks.
-- `SimpleGrader` will try to maintain user-specified cell size.
+- `FixedCountGrader` will simply set the same cell count on all blocks (useful for debugging during mesh development).
+- `SimpleGrader` will try to maintain user-specified cell size (a high-Re mesh).
 - `InflationGrader` will require the user to set wall patches first, then it will set cell sizes on the wall to maintain required first cell thickness,
 make a boundary (inflation) layer that will maintain specified cell-to-cell expansion. Between the last boundary-layer cell and the bulk, a _buffer_ layer will be created with a larger (user-specified) cell-to-cell expansion to save on cell count.
 
