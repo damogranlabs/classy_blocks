@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0]
+
+### Added
+
+- Edge grading:
+  - Added `Operation.chop_edge(corner_1, corner_2, ...)` that offers
+  fine-control of grading of each edge; see `examples/advanced/edge_grading.py`
+  for more info
+- Automatic grading:
+  - A complete rewrite of automatic graders (`FixedCountGrader`, `SimpleGrader`)
+  - Resurrected `InflationGrader` and this time it works (proved on the cyclone case)
+- Example for spline sketches/shapes
+
+- Optimization:
+  - Added manual clipping to bounds
+    (scipy's methods often ignore them)
+
+### Changed
+
+- Optimization
+  - Bugfix: optimization with links now takes more distant neighbours into account
+    (a problem with certain cases)
+
+### Removed
+
+- Automatic grading: removed `SmoothGrader`
+  (proves to be useless in real world and difficult to control);
+  better to use edge grading (see `.chop_edge()`)
+
 ## [1.9.6]
 
 ### Added

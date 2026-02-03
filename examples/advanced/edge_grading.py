@@ -1,33 +1,48 @@
-# NOT FINISHED!
-# TODO: add operation.grade_edge() and show its usage in this example
+"""A simple cylinder but with custom grading of selected edges"""
+
 import os
 
 import classy_blocks as cb
 
 mesh = cb.Mesh()
 
-start = cb.Box([0, 0, 0], [1, 1, 0.1])
+axis_point_1 = [0, 0, 0]
+axis_point_2 = [1, 0, 0]
+radius_point_1 = [0, 1, 0]
 
-start.chop(0, start_size=0.1)
-start.chop(1, length_ratio=0.5, start_size=0.01, c2c_expansion=1.2, preserve="start_size")
-start.chop(1, length_ratio=0.5, end_size=0.01, c2c_expansion=1 / 1.2, preserve="end_size")
-start.chop(2, count=1)
-mesh.add(start)
+cylinder = cb.Cylinder(axis_point_1, axis_point_2, radius_point_1)
 
-expand_start = start.get_face("right")
-expand = cb.Loft(expand_start, expand_start.copy().translate([1, 0, 0]).scale(2))
-expand.chop(2, start_size=0.1)
-mesh.add(expand)
+cylinder.set_start_patch("inlet")
+cylinder.set_end_patch("outlet")
+cylinder.set_outer_patch("walls")
 
-contract_start = expand.get_face("top")
-contract = cb.Loft(contract_start, contract_start.copy().translate([1, 0, 0]).scale(0.25))
-contract.chop(2, start_size=0.1)
-mesh.add(contract)
+# Chop and grade
+bl_thickness = 1e-3
+core_size = 0.1
 
-end = cb.Extrude(contract.get_face("top"), 1)
-end.chop(2, start_size=0.1)
-mesh.add(end)
+# Edge chopping can only be done on a completely specified mesh;
+cylinder.chop_axial(count=30)
+cylinder.chop_radial(start_size=core_size, end_size=bl_thickness)
+cylinder.chop_tangential(start_size=core_size)
 
-mesh.set_default_patch("walls", "wall")
+# After all edges have been specified (chopped),
+# specific ones can be changed manually.
+# Keep in mind that count is already fixed and cannot be changed.
+
+# Case 1: remove grading
+cylinder.shell[0].chop_edge(0, 1, c2c_expansion=1)
+# Case 2: make a thicker first cell
+cylinder.shell[1].chop_edge(0, 1, end_size=5 * bl_thickness)
+# Case 3: weird random multigrading
+cylinder.shell[2].chop_edge(0, 1, length_ratio=0.5, count=2)
+cylinder.shell[2].chop_edge(0, 1, c2c_expansion=1 / 1.5)
+# Case 4: chop one block differently so that neighbour block will be edge-graded
+cylinder.shell[1].chop(2, count=30, start_size=0.01)
+
+
+mesh.add(cylinder)
+cylinder.set_start_patch("walls")
+cylinder.set_end_patch("walls")
+mesh.modify_patch("walls", "wall")
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

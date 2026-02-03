@@ -4,11 +4,9 @@ Python classes for easier creation of OpenFOAM's blockMesh dictionaries.
 
 # About
 
-_blockMesh_ is a very powerful mesher but the amount of manual labour it requires to make even the simplest meshes makes it mostly useless. Even attempts to simplify or parametrize blockMeshDicts with `#calc` or even the dreadful `m4` quickly become unmanageable and cryptic.
+`blockMesh` is a very powerful mesher but creating even simple meshes requires a lot of manual work. Attempts to simplify or parametrize blockMeshDicts with `#calc` or `m4` often become cryptic and hard to maintain.
 
-classy_blocks' aim is to minimize the amount of meticulous work by providing a
-more intuitive workflow, off-the-shelf parts and some automatic helpers for building and optimization of block-structured hexahedral meshes.
-Still it is not an automatic mesher and therefore some kinds of geometry are more suited than others.
+`classy_blocks` aims to reduce this overhead by providing a more intuitive workflow, reusable building blocks and automatic helpers for constructing and optimizing block-structured hexahedral meshes. Nonetheless, it is not an automatic mesher, so some geometries are better suited than others.
 
 ## Tutorial
 
@@ -54,7 +52,7 @@ Check out the [classy_blocks tutorial on damogranlabs.com](https://damogranlabs.
 
 ## Workflow
 
-As opposed to blockMesh, where the user is expected to manually enter pre-calculated vertices, edges, blocks and whatnot, classy_blocks tries to mimic procedural modeling of modern 3D CAD programs. Here, a Python script contains steps that describe geometry of blocks, their cell count, grading, patches and so on. At the end, the procedure is translated directly to blockMeshDict and no manual editing of the latter should be required.
+As opposed to blockMesh where the user is expected to manually enter pre-calculated vertices, edges, blocks and whatnot, classy_blocks tries to mimic procedural modeling of modern 3D CAD programs. Here, a Python script contains steps that describe geometry of blocks, their cell count, grading, patches and so on. At the end, the procedure is translated directly to blockMeshDict and no manual editing of the latter should be required.
 
 ## Building Elements
 
@@ -67,7 +65,7 @@ _Unchecked items are not implemented yet but are on a TODO list_
   - [x] Revolve
   - [x] Wedge (a shortcut to Revolve for 2D axisymmetric cases)
   - [x] Connector (A Loft between two existing Operations)
-- [x] Sketches of common cross-sections
+- [x] Sketches (collections of 2D faces) of common cross-sections
   - [x] Quarter and Semi circle
   - [x] Circle
   - [x] Boxed circle
@@ -102,19 +100,19 @@ After blocks have been placed, it is possible to create new geometry based on pl
 - [x] Move Vertex/Edge/Face
 - [x] Delete a Block created by a Shape or Object
 - [x] Project Vertex/Edge/Face
-- [x] Optimize point position of a Sketch or mesh vertices
+- [x] Optimize point position of a sketch/shape (with arbitrarily constrained movement)
 
 ## Meshing Specification
 
 - [x] Simple definition of all supported kinds of edges with a dedicated class (Arc/Origin/Angle/Spline/PolyLine/Project)
 - [x] Automatic sorting/reorienting of block vertices based on specified _front_ and _top_ points
 - [x] Automatic calculation of cell count and grading by specifying any of a number of parameters (cell-to-cell expansion ratio, start cell width, end cell width, total expansion ratio)
-- [ ] [Edge grading](https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-450004.3.1.3) (separate specification for each edge)
+- [x] [Edge grading](https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-450004.3.1.3) (separate specification for each edge)
 - [x] Automatic propagation of grading and cell count from a single block to all connected blocks as required by blockMesh
 - [x] Projections of vertices, edges and block faces to geometry (triangulated and [searchable surfaces](https://www.openfoam.com/documentation/guides/latest/doc/guide-meshing-snappyhexmesh-geometry.html#meshing-snappyhexmesh-searchable-objects))
 - [x] Face merging as described by [blockMesh user guide](https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.3-mesh-generation-with-the-blockmesh-utility#x13-470004.3.2). Breaks the pure-hexahedral-mesh rule but can often save the day for trickier geometries. Automatic duplication of points on merged block faces
 - [x] Auto grading for high-Re meshes
-- [ ] Auto grading for Low-Re meshes: boundary layer with specified cell-to-cell expansion, transition with 2:1 expansion, and specified 'bulk' cell size
+- [x] Auto grading for Low-Re meshes: boundary layer with specified cell-to-cell expansion, transition with 2:1 (or user-defined) expansion, and specified 'bulk' cell size
 
 # Examples
 
@@ -266,17 +264,6 @@ A collection of pre-assembled parametric Shapes, ready to be used for further co
 Three pipes, joined in a single point.
 ![N-Joint](showcase/n_joint.png)
 
-## Automatic Grading
-
-After blocks have been positioned their cell count must be defined. This can be done manually with something like `operation.chop(axis, start_size=..., c2c_expansion=...)` or anything that `.chop()` method supports. Not all blocks need to be chopped as cell counts will be propagated throughout the mesh so it is advisable to only _chop_ the minimum required.
-
-All that can also be avoided by using automatic graders, for instance, `SmoothGrader` will set counts so that desired cell size will be obtained but will also use multigrading to keep cell sizes between neighbouring blocks as uniform as possible.
-
-![SmoothGrader, automatic grading of blocks](showcase/smooth_grader.png)
-
-Also other, quicker and simpler graders are available.
-The ultimate grader that will also create inflation layers on walls for resolved boundary layer is in development.
-
 ## Projection To Geometry
 
 [Any geometry that snappyHexMesh understands](https://www.openfoam.com/documentation/guides/latest/doc/guide-meshing-snappyhexmesh-geometry.html)
@@ -389,14 +376,35 @@ Airfoil core with blunt trailing edge (imported points from NACA generator) and 
 (see `examples/complex/airfoil.py`). A simulation-ready mesh needs additional blocks to expand domain further away from the airfoil.
 ![Airfoil](showcase/airfoil.png "Airfoil core mesh")
 
-## Automatic Edge Grading
+## Chopping
 
-When setting cell counts and expansion ratios, it is possible to specify which value to keep constant. Mostly this will be used for keeping thickness of the first cell at the wall consistent to maintain desired `y+` throughout the mesh. This is done by simple specifying a `preserve="..."` keyword.
+In classy_blocks lingo, _chopping_ means setting block's cell count and optionally grading. For best control it can be specified manually with something like `operation.chop(axis, start_size=..., c2c_expansion=...)` (or any other supported combination of parameters) but it only needs to be done on a single block in a _row_ of connected blocks. All touching blocks will inherit user-specified chops automatically.
+
+## Edge Grading
+
+When setting cell counts and expansion ratios, it is possible to specify which value to keep constant. When propagating chops through the mesh this will keep the required value constant. For instance, thickness of the first cell at the wall can be maintained to keep desired `y+` throughout the mesh. This is done by simply specifying a `preserve="..."` keyword.
 
 Example: a block chopped in a classic way where cell sizes will increase when block size increases:
 ![Classic block grading](showcase/classy_classic_grading.png "Classic block grading")
 The same case but with a specified `preserve="start_size"` keyword for the bottom and `preserve="end_size"` for the top edge:
 ![Grading for consistent cell size](showcase/classy_edges_grading.png "Classy block grading")
+
+It is also possible to locate a specific edge and modify its grading by using `operation.chop_edge(corner_1, corner_2, ...)`. For example, this cylinder with wall boundary layers has some edges manually redefined:
+
+![Manual edge grading](showcase/edges_grading.png "Manual edge grading")
+
+## Automatic Grading
+
+classy_blocks offers automatic graders that will set cell counts and gradings throughout the whole mesh with no user intervention:
+
+- `FixedCountGrader` will simply set the same cell count on all blocks.
+- `SimpleGrader` will try to maintain user-specified cell size.
+- `InflationGrader` will require the user to set wall patches first, then it will set cell sizes on the wall to maintain required first cell thickness,
+make a boundary (inflation) layer that will maintain specified cell-to-cell expansion. Between the last boundary-layer cell and the bulk, a _buffer_ layer will be created with a larger (user-specified) cell-to-cell expansion to save on cell count.
+
+All automatic graders will only grade what the user has not chopped yet - so it's easy to override grader's doings by manually chopping shapes first.
+
+> Check out `examples/complex/cyclone` to see that almost no manual chopping is required to grade the whole mesh!
 
 ## Debugging
 
