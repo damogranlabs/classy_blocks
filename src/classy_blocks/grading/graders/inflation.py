@@ -114,10 +114,15 @@ class Layer(abc.ABC):
         # stop construction of the layer when it hits any of the above limits
         self.length, self.end_size, self.count = self._construct(length_limit, count_limit, size_limit)
 
-    @abc.abstractmethod
-    def get_chop(self) -> Chop:
-        # layers define chops differently
-        pass
+    def get_chop(self):
+        # since everything required for a grading specification
+        # is already specified, just provide count and total expansion;
+        # that's the two values chops calculate
+        return Chop(
+            length_ratio=self.length_ratio,
+            count=self.count,
+            total_expansion=self.end_size / self.start_size,
+        )
 
     def invert(self) -> "Layer":
         # inverts the data for a chop
@@ -147,22 +152,12 @@ class InflationLayer(Layer):
         self.c2c_expansion = params.c2c_expansion
         super().__init__(params, length_limit=min(params.bl_thickness, remaining_length))
 
-    def get_chop(self):
-        return Chop(
-            length_ratio=self.length_ratio,
-            start_size=self.start_size,
-            c2c_expansion=self.c2c_expansion,
-        )
-
 
 class BufferLayer(Layer):
     def __init__(self, params: InflationParams, remaining_length: float):
         self.start_size = params.buffer_start_size
         self.c2c_expansion = params.buffer_expansion
         super().__init__(params, size_limit=params.bulk_cell_size, length_limit=remaining_length)
-
-    def get_chop(self):
-        return Chop(length_ratio=self.length_ratio, count=self.count, c2c_expansion=self.c2c_expansion)
 
 
 class BulkLayer(Layer):
@@ -224,10 +219,12 @@ class LayerStack:
         return self
 
     def mirror(self) -> "LayerStack":
-        # duplicates layers and inverts the other half;
-        # must be done on half of ref_length
-        for layer in reversed(self.layers):
-            self.layers.append(layer.copy().invert())
+        # rebuild the stack using half the length
+        start_half = LayerStack(self.params, self.total_length / 2)
+        end_half = LayerStack(self.params, self.total_length / 2).invert()
+
+        self.layers = start_half.layers + end_half.layers
+        print(self.layers)
 
         self._normalize_ratios()
 
@@ -346,7 +343,6 @@ class InflationGrader(GradingManager, AutoGraderMixin):
                         ends_at_wall = True
 
                 if starts_at_wall and ends_at_wall:
-                    print(f"Starts and ends: {wire_info.wire.vertices[0].index, wire_info.wire.vertices[1].index}")
                     return DoubleInflationAxisGrader
 
         if starts_at_wall:
