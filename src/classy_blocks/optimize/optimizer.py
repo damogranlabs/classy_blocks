@@ -93,7 +93,6 @@ class OptimizerBase(abc.ABC):
 
                 return quality
             except Exception as e:
-                print(e)
                 return 0
 
         sensitivities = scipy.optimize.approx_fprime(clamp.params, lambda p: fquality(clamp, junction, p), epsilon=TOL)

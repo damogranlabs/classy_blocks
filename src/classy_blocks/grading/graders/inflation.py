@@ -224,7 +224,6 @@ class LayerStack:
         end_half = LayerStack(self.params, self.total_length / 2).invert()
 
         self.layers = start_half.layers + end_half.layers
-        print(self.layers)
 
         self._normalize_ratios()
 
