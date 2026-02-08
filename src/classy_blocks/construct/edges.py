@@ -35,6 +35,12 @@ class Line(EdgeData):
     kind = "line"
 
 
+class Collapsed(EdgeData):
+    """An edge, collapsed to a single point to form a three-sided pyramid"""
+
+    kind = "collapsed"
+
+
 class Arc(EdgeData):
     """Parameters for an arc edge: classic OpenFOAM circular arc
     definition with a single point lying anywhere on the arc"""

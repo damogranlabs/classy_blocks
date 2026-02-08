@@ -3,6 +3,7 @@ from classy_blocks.construct.edges import EdgeData
 from classy_blocks.items.edges.arcs.angle import AngleEdge
 from classy_blocks.items.edges.arcs.arc import ArcEdge
 from classy_blocks.items.edges.arcs.origin import OriginEdge
+from classy_blocks.items.edges.collapsed import CollapsedEdge
 from classy_blocks.items.edges.curve import OnCurveEdge, PolyLineEdge, SplineEdge
 from classy_blocks.items.edges.edge import Edge
 
@@ -30,6 +31,7 @@ class EdgeFactory:
 
 factory = EdgeFactory()
 factory.register_kind("line", LineEdge)
+factory.register_kind("collapsed", CollapsedEdge)
 factory.register_kind("arc", ArcEdge)
 factory.register_kind("origin", OriginEdge)
 factory.register_kind("angle", AngleEdge)

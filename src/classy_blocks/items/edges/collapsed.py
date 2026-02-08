@@ -5,15 +5,14 @@ from classy_blocks.items.edges.edge import Edge
 
 
 @dataclasses.dataclass
-class LineEdge(Edge):
-    """A default Line edge; doesn't need an explicit definition and is not output to blockMeshDict"""
+class CollapsedEdge(Edge):
+    """A collapsed edge; only used to specify a three-sided pyramid"""
 
-    data: edges.Line
+    data: edges.Collapsed
 
     @property
     def length(self):
-        # straight line
-        return super().length
+        return 0
 
     @property
     def description(self):
@@ -21,5 +20,5 @@ class LineEdge(Edge):
         return ""
 
     @property
-    def is_valid(self):
-        return False
+    def is_valid(self) -> bool:
+        return True
