@@ -6,10 +6,10 @@ from parameterized import parameterized
 from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.grading.define import relations as rel
 from classy_blocks.grading.define.chop import Chop, ChopRelation
-from classy_blocks.grading.define.grading import Grading
+from classy_blocks.grading.define.grading import CollapsedGrading, Grading
 
 
-class TestGrading(unittest.TestCase):
+class GradingTests(unittest.TestCase):
     def setUp(self):
         self.g = Grading(1)
 
@@ -265,3 +265,42 @@ class TestGrading(unittest.TestCase):
         grading.add_chop(Chop(count=10))
 
         self.assertEqual(str(grading), "Grading (1 chops 1)")
+
+
+class CollapsedGradingTests(unittest.TestCase):
+    def test_add_chop_count(self):
+        g = CollapsedGrading()
+        g.add_chop(Chop(count=10))
+
+        self.assertEqual(g.count, 10)
+
+    def test_add_chop_nocount(self):
+        # chops with no count specification can't be added
+        g = CollapsedGrading()
+
+        with self.assertRaises(RuntimeError):
+            g.add_chop(Chop(start_size=0.1, end_size=1))
+
+    def test_count_multi(self):
+        g = CollapsedGrading()
+
+        g.add_chop(Chop(count=10))
+        g.add_chop(Chop(count=20))
+
+        self.assertEqual(g.count, 30)
+
+    def test_clear(self):
+        g = CollapsedGrading()
+        g.add_chop(Chop(count=10))
+
+        g.clear()
+
+        self.assertListEqual(g.chops, [])
+        self.assertEqual(g.count, 0)
+
+    def test_description(self):
+        g = CollapsedGrading()
+        g.add_chop(Chop(count=10))
+        g.add_chop(Chop(count=20))
+
+        self.assertEqual(g.description, "30")

@@ -34,6 +34,7 @@ calculations meticulously transcribed from the blockmesh grading calculator:
 https://gitlab.com/herpes-free-engineer-hpe/blockmeshgradingweb/-/blob/master/calcBlockMeshGrading.coffee
 (since block length is always known, there's less wrestling but the calculation principle is similar)"""
 
+import abc
 import dataclasses
 import math
 import warnings
@@ -44,37 +45,29 @@ from classy_blocks.grading.define.chop import Chop, ChopData
 from classy_blocks.util import constants
 
 
-class Grading:
+class GradingBase(abc.ABC):
     """Grading specification for a single edge"""
 
-    def __init__(self, length: float):
-        # "multi-grading" specification according to:
-        # https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
-        self.length = length  # to be updated when adding/modifying block edges
+    length: float
+    chops: list[Chop]
+    inverted: bool
 
-        # will change specification to match a wire from end to start
-        self.inverted: bool = False
-
-        # a list of user-input data
-        self.chops: list[Chop] = []
-        # results from chop.calculate():
-        self._chop_data: list[ChopData] = []
-
+    @abc.abstractmethod
     def add_chop(self, chop: Chop) -> None:
         if not (0 < chop.length_ratio <= 1):
             raise ValueError(f"Length ratio must be between 0 and (including) 1, got {chop.length_ratio}")
 
         self.chops.append(chop)
 
+    @abc.abstractmethod
     def clear(self) -> None:
-        self.chops = []
-        self._chop_data = []
+        """Removes all added grading data"""
 
     @property
     def chop_data(self) -> list[ChopData]:
         if len(self._chop_data) < len(self.chops):
             # Chops haven't been calculated yet
-            self._chop_data = []
+            self._chop_data: list[ChopData] = []
 
             for chop in self.chops:
                 self._chop_data.append(chop.calculate(self.length))
@@ -110,6 +103,53 @@ class Grading:
         chop = self.chops[-1]
         return chop.calculate(self.length).end_size
 
+    @abc.abstractmethod
+    def copy(self, length: float, invert: bool = False) -> "GradingBase":
+        """Copies the grading while maintaining consistent grading
+        across the mesh"""
+
+    @property
+    @abc.abstractmethod
+    def count(self) -> int:
+        """Return number of cells, summed over all sub-divisions"""
+
+    @property
+    @abc.abstractmethod
+    def is_defined(self) -> bool:
+        """Returns True is grading is defined"""
+
+    @property
+    @abc.abstractmethod
+    def description(self) -> str:
+        """Output string for blockMeshDict"""
+        # TODO! Put this into writer
+
+
+class Grading(GradingBase):
+    def __init__(self, length: float):
+        # "multi-grading" specification according to:
+        # https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
+        self.length = length  # to be updated when adding/modifying block edges
+
+        # will change specification to match a wire from end to start
+        self.inverted: bool = False
+
+        # a list of user-input data
+        self.chops: list[Chop] = []
+        # results from chop.calculate():
+        self._chop_data: list[ChopData] = []
+
+    def add_chop(self, chop: Chop):
+        super().add_chop(chop)
+
+    @property
+    def count(self):
+        return sum(d.count for d in self.chop_data)
+
+    @property
+    def is_defined(self):
+        return len(self.chops) > 0
+
     def copy(self, length: float, invert: bool = False) -> "Grading":
         """Creates a new grading with the same chops (counts) on a different length,
         keeping chop.preserve quantity constant;
@@ -138,21 +178,13 @@ class Grading:
 
         return new_grading
 
-    @property
-    def count(self) -> int:
-        """Return number of cells, summed over all sub-divisions"""
-        return sum(d.count for d in self.chop_data)
+    def clear(self) -> None:
+        """Removes all added grading data"""
+        self.chops = []
+        self._chop_data = []
 
     @property
-    def is_defined(self) -> bool:
-        """Return True is grading is defined;
-        It is if there's at least one division added"""
-        return len(self.chops) > 0
-
-    @property
-    def description(self) -> str:
-        """Output string for blockMeshDict"""
-        # TODO! Put this into writer
+    def description(self):
         if not self.is_defined:
             raise UndefinedGradingsError(f"Grading not defined: {self}")
 
@@ -202,3 +234,44 @@ class Grading:
             return f"Grading ({len(self.chops)} chops {self.description})"
 
         return f"Grading ({len(self.chops)})"
+
+
+class CollapsedGrading(GradingBase):
+    def __init__(self):
+        self.length = 0
+        self.inverted = False
+        self.chops = []
+        self._count = 0
+
+    def add_chop(self, chop: Chop):
+        if chop.count is None:
+            raise RuntimeError("Adding a chop without count to a collapsed edge")
+
+        self._count += chop.count
+
+    @property
+    def count(self):
+        return self._count
+
+    @property
+    def is_defined(self):
+        return self.count > 0
+
+    def copy(self, _length: float, _invert: bool = False) -> "CollapsedGrading":
+        new_grading = CollapsedGrading()
+        new_grading.add_chop(Chop(count=self.count))
+
+        return new_grading
+
+    def clear(self):
+        self._count = 0
+
+    @property
+    def description(self):
+        return str(self.count)
+
+    def __eq__(self, other):
+        return self.count == other.count
+
+    def __repr__(self):
+        return f"CollapsedGrading(count={self.count})"

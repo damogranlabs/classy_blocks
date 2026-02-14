@@ -73,6 +73,11 @@ class Wire:
 
         return self.vertices == candidate.vertices
 
+    def add_edge(self, edge: Edge) -> None:
+        self.edge = edge
+
+        # change the grading type if the edge is collapsed
+
     def add_coincident(self, candidate: "Wire") -> None:
         """Adds a reference to a coincident wire, if it's aligned"""
         if self.is_coincident(candidate):
