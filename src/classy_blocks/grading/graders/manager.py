@@ -7,7 +7,7 @@ from classy_blocks.cbtyping import DirectionType
 from classy_blocks.grading.analyze.probe import Probe
 from classy_blocks.grading.analyze.row import Row
 from classy_blocks.grading.define.chop import Chop
-from classy_blocks.grading.define.grading import Grading
+from classy_blocks.grading.define.grading import Grading, GradingBase
 from classy_blocks.items.block import Block
 from classy_blocks.items.wires.axis import Axis
 from classy_blocks.items.wires.wire import Wire
@@ -27,19 +27,18 @@ class WireGrader:
 
         to_wire.grading = from_wire.grading.copy(to_wire.length, not to_wire.is_aligned(from_wire))
 
-    def assign(self, grading: Grading) -> None:
+    def assign(self, grading: GradingBase) -> None:
         """Assigns a Grading to a wire;
         inherits a grading from a coincident wire if there's one"""
         for coincident in self.wire.coincidents:
             if coincident.is_graded:
-                if coincident.grading.count != grading.count:
-                    raise InconsistentGradingsError("Different counts on coincident wires")  # TODO: a nicer message
+                if coincident.grading != grading:
+                    raise InconsistentGradingsError("Different gradings on coincident wires")  # TODO: a nicer message
 
                 # reuse a coincident grading
                 self.copy(coincident, self.wire)
                 return
 
-        # set a new grading on this wire
         self.wire.grading = grading
 
     def copy_to_coincidents(self, override: bool = False) -> None:

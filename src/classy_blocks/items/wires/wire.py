@@ -3,7 +3,7 @@ import functools
 
 from classy_blocks.cbtyping import DirectionType
 from classy_blocks.construct.edges import Line
-from classy_blocks.grading.define.grading import Grading
+from classy_blocks.grading.define.grading import Grading, GradingBase
 from classy_blocks.items.edges.edge import Edge
 from classy_blocks.items.edges.factory import factory
 from classy_blocks.items.vertex import Vertex
@@ -40,7 +40,7 @@ class Wire:
         self.edge: Edge = factory.create(self.vertices[0], self.vertices[1], Line())
 
         # grading/counts of this wire
-        self.grading = Grading(0)
+        self.grading: GradingBase = Grading(0)
 
         # multiple wires can be at the same spot; this list holds other
         # coincident wires from different blocks
@@ -76,8 +76,6 @@ class Wire:
     def add_edge(self, edge: Edge) -> None:
         self.edge = edge
 
-        # change the grading type if the edge is collapsed
-
     def add_coincident(self, candidate: "Wire") -> None:
         """Adds a reference to a coincident wire, if it's aligned"""
         if self.is_coincident(candidate):
@@ -104,6 +102,10 @@ class Wire:
     @property
     def is_graded(self) -> bool:
         return self.grading.is_defined
+
+    @property
+    def is_collapsed(self):
+        return self.vertices[0] == self.vertices[1]
 
     def __repr__(self):
         return f"Wire {self.corners[0]}-{self.corners[1]} ({self.vertices[0].index}-{self.vertices[1].index})"

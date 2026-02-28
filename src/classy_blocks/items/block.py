@@ -48,7 +48,7 @@ class Block:
                 f"Invalid corner 1 ({corner_1}) or corner 2 ({corner_2}) index. Use block-local indexing (0...7)."
             )
 
-        self.wires[corner_1][corner_2].edge = edge
+        self.wires[corner_1][corner_2].add_edge(edge)
 
     def set_chops(self, collector: ChopCollector) -> None:
         self.chops = collector

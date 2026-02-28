@@ -38,11 +38,14 @@ import abc
 import dataclasses
 import math
 import warnings
+from typing import TypeVar
 
 from classy_blocks.base.exceptions import UndefinedGradingsError
 from classy_blocks.cbtyping import GradingSpecType
 from classy_blocks.grading.define.chop import Chop, ChopData
 from classy_blocks.util import constants
+
+GradingT = TypeVar("GradingT", bound="GradingBase")
 
 
 class GradingBase(abc.ABC):
@@ -103,10 +106,41 @@ class GradingBase(abc.ABC):
         chop = self.chops[-1]
         return chop.calculate(self.length).end_size
 
-    @abc.abstractmethod
-    def copy(self, length: float, invert: bool = False) -> "GradingBase":
-        """Copies the grading while maintaining consistent grading
-        across the mesh"""
+    def copy(self, length: float, invert: bool = False) -> "Grading|CollapsedGrading":
+        """Creates a new grading with the same chops (counts) on a different length,
+        keeping chop.preserve quantity constant;
+
+        the 'length' parameter is the new wire's length;
+        'invert' does not set the grading.inverted flag but flips the original value"""
+        new_grading: GradingBase
+
+        if length > constants.TOL:
+            new_grading = Grading(length)
+
+            for data in self.chop_data:
+                # take count from calculated chops;
+                # it is of utmost importance it stays the same
+                old_data = dataclasses.asdict(data)
+                new_args = {
+                    "length_ratio": data.length_ratio,
+                    "count": old_data["count"],
+                    data.preserve: old_data[data.preserve],
+                    "preserve": data.preserve,
+                    "take": data.take,
+                }
+
+                new_grading.add_chop(Chop(**new_args))
+
+            new_grading.inverted = self.inverted
+            if invert:
+                new_grading.inverted = not new_grading.inverted
+
+            return new_grading
+
+        new_grading = CollapsedGrading()
+        new_grading.add_chop(Chop(count=self.count))
+
+        return new_grading
 
     @property
     @abc.abstractmethod
@@ -149,34 +183,6 @@ class Grading(GradingBase):
     @property
     def is_defined(self):
         return len(self.chops) > 0
-
-    def copy(self, length: float, invert: bool = False) -> "Grading":
-        """Creates a new grading with the same chops (counts) on a different length,
-        keeping chop.preserve quantity constant;
-
-        the 'length' parameter is the new wire's length;
-        'invert' does not set the grading.inverted flag but flips the original value"""
-        new_grading = Grading(length)
-
-        for data in self.chop_data:
-            # take count from calculated chops;
-            # it is of utmost importance it stays the same
-            old_data = dataclasses.asdict(data)
-            new_args = {
-                "length_ratio": data.length_ratio,
-                "count": old_data["count"],
-                data.preserve: old_data[data.preserve],
-                "preserve": data.preserve,
-                "take": data.take,
-            }
-
-            new_grading.add_chop(Chop(**new_args))
-
-        new_grading.inverted = self.inverted
-        if invert:
-            new_grading.inverted = not new_grading.inverted
-
-        return new_grading
 
     def clear(self) -> None:
         """Removes all added grading data"""
@@ -257,18 +263,19 @@ class CollapsedGrading(GradingBase):
     def is_defined(self):
         return self.count > 0
 
-    def copy(self, _length: float, _invert: bool = False) -> "CollapsedGrading":
-        new_grading = CollapsedGrading()
-        new_grading.add_chop(Chop(count=self.count))
-
-        return new_grading
-
     def clear(self):
         self._count = 0
 
     @property
     def description(self):
         return str(self.count)
+
+    @classmethod
+    def from_grading(cls, source: GradingBase) -> "CollapsedGrading":
+        grading = cls()
+        grading.add_chop(Chop(count=source.count))
+
+        return grading
 
     def __eq__(self, other):
         return self.count == other.count
