@@ -301,6 +301,5 @@ class CollapsedGradingTests(unittest.TestCase):
     def test_description(self):
         g = CollapsedGrading()
         g.add_chop(Chop(count=10))
-        g.add_chop(Chop(count=20))
 
-        self.assertEqual(g.description, "30")
+        self.assertEqual(g.description, "1")

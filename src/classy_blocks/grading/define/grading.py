@@ -67,15 +67,9 @@ class GradingBase(abc.ABC):
         """Removes all added grading data"""
 
     @property
+    @abc.abstractmethod
     def chop_data(self) -> list[ChopData]:
-        if len(self._chop_data) < len(self.chops):
-            # Chops haven't been calculated yet
-            self._chop_data: list[ChopData] = []
-
-            for chop in self.chops:
-                self._chop_data.append(chop.calculate(self.length))
-
-        return self._chop_data
+        pass
 
     def get_specification(self, inverted: bool) -> list[GradingSpecType]:
         if inverted:
@@ -173,6 +167,17 @@ class Grading(GradingBase):
         # results from chop.calculate():
         self._chop_data: list[ChopData] = []
 
+    @property
+    def chop_data(self):
+        if len(self._chop_data) < len(self.chops):
+            # Chops haven't been calculated yet
+            self._chop_data: list[ChopData] = []
+
+            for chop in self.chops:
+                self._chop_data.append(chop.calculate(self.length))
+
+        return self._chop_data
+
     def add_chop(self, chop: Chop):
         super().add_chop(chop)
 
@@ -256,6 +261,10 @@ class CollapsedGrading(GradingBase):
         self._count += chop.count
 
     @property
+    def chop_data(self):
+        return [ChopData(1, 1, 1, self.count, 1, 1)]
+
+    @property
     def count(self):
         return self._count
 
@@ -268,14 +277,7 @@ class CollapsedGrading(GradingBase):
 
     @property
     def description(self):
-        return str(self.count)
-
-    @classmethod
-    def from_grading(cls, source: GradingBase) -> "CollapsedGrading":
-        grading = cls()
-        grading.add_chop(Chop(count=source.count))
-
-        return grading
+        return "1"
 
     def __eq__(self, other):
         return self.count == other.count
