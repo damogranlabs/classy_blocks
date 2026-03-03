@@ -12,9 +12,6 @@ base = cb.Face(
     [None, None, cb.Spline([[0.75, 0.15, 0], [0.50, 0.20, 0], [0.25, 0.25, 0]]), None],
 )
 
-# move it away from the axis of rotation
-# x axis = [1, 0, 0]
-base.translate([0, 1, 0])
 
 # create a wedge, then copy it along x-axis,
 # representing an annular seal with grooves
