@@ -346,7 +346,6 @@ class InflationGrader(GradingManager, AutoGraderMixin):
                         ends_at_wall = True
 
                 if starts_at_wall and ends_at_wall:
-                    print(f"Starts and ends: {wire_info.wire.vertices[0].index, wire_info.wire.vertices[1].index}")
                     return DoubleInflationAxisGrader
 
         if starts_at_wall:

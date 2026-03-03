@@ -119,9 +119,6 @@ class AxisGrader:
         axis = self.axis
         lengths = axis.lengths
         take = chops[0].take
-        grading = Grading(0)
-        for chop in chops:
-            grading.add_chop(chop)
 
         if take == "avg":
             length = sum(lengths) / 4
@@ -133,7 +130,9 @@ class AxisGrader:
             else:
                 length = lengths[0]
 
-        grading.length = length
+        grading = Grading(length)
+        for chop in chops:
+            grading.add_chop(chop)
 
         for wire in axis.wires:
             grader = WireGrader(wire)

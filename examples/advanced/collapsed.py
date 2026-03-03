@@ -19,13 +19,8 @@ mesh.add(extrude)
 mesh.add(revolve)
 mesh.assemble()
 
-# grader = cb.FixedCountGrader(mesh)
-# mesh.grade()
-# mesh.set_default_patch("walls", "wall")
-
-for i in (0, 1, 2):
-    loft.chop(i, count=5)
-    extrude.chop(i, count=5)
-    revolve.chop(i, count=5)
+grader = cb.FixedCountGrader(mesh)
+grader.grade()
+mesh.set_default_patch("walls", "wall")
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")
