@@ -32,8 +32,8 @@ class WireGrader:
         inherits a grading from a coincident wire if there's one"""
         for coincident in self.wire.coincidents:
             if coincident.is_graded:
-                if coincident.grading != grading:
-                    raise InconsistentGradingsError("Different gradings on coincident wires")  # TODO: a nicer message
+                if coincident.grading.count != grading.count:
+                    raise InconsistentGradingsError("Different counts on coincident wires")  # TODO: a nicer message
 
                 # reuse a coincident grading
                 self.copy(coincident, self.wire)
