@@ -154,7 +154,7 @@ class GradingBase(abc.ABC):
 
 
 class Grading(GradingBase):
-    def __init__(self, length: float):
+    def __init__(self, length: float) -> None:
         # "multi-grading" specification according to:
         # https://cfd.direct/openfoam/user-guide/v9-blockMesh/#multi-grading
         self.length = length  # to be updated when adding/modifying block edges
@@ -248,7 +248,7 @@ class Grading(GradingBase):
 
 
 class CollapsedGrading(GradingBase):
-    def __init__(self):
+    def __init__(self) -> None:
         self.length = 0
         self.inverted = False
         self.chops = []

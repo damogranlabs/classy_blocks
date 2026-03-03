@@ -92,7 +92,7 @@ class OptimizerBase(abc.ABC):
                 self.grid.update(junction.index, initial_position)
 
                 return quality
-            except Exception as e:
+            except (RuntimeError, ValueError):
                 return 0
 
         sensitivities = scipy.optimize.approx_fprime(clamp.params, lambda p: fquality(clamp, junction, p), epsilon=TOL)
