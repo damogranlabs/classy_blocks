@@ -64,7 +64,7 @@ _Unchecked items are not implemented yet but are on a TODO list_
   - [x] Extrude
   - [x] Revolve
   - [x] Wedge (a shortcut to Revolve for 2D axisymmetric cases)
-  - [ ] Three-sided pyramid (for axisymmetric cases through the axis)
+  - [x] Three-sided pyramid (for axisymmetric cases through the axis)
   - [x] Connector (A Loft between two existing Operations)
 - [x] Sketches (collections of 2D faces) of common cross-sections
   - [x] Quarter and Semi circle

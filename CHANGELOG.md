@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0]
+
+### Added
+
+- Capability to work with collapsed edges - triangular faces, three-sided pyramids etc;
+  just specify the same point twice, the rest will  be handled automatically.
+
+## Changed
+
+- Minor fixes on automatic graders for more accurate cell sizing
+
 ## [1.10.0]
 
 ### Added
