@@ -1,6 +1,6 @@
 import abc
-import warnings
 import dataclasses
+import warnings
 
 import numpy as np
 
