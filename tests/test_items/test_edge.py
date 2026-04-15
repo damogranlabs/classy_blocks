@@ -1,4 +1,5 @@
 import unittest
+import warnings
 
 import numpy as np
 
@@ -94,6 +95,14 @@ class EdgeFactoryTests(unittest.TestCase):
 
         self.assertIsInstance(edg, ArcEdge)
         np.testing.assert_array_almost_equal(arc_point, edg.data.point.position)
+
+    def test_arc_warn_drop(self):
+        arc_point = [0.5, 1e-9, 0]
+
+        edg = factory.create(self.vertex_1, self.vertex_2, edges.Arc(arc_point))
+
+        with self.assertWarns(Warning):
+            _ = edg.is_valid
 
     def test_default_origin(self):
         origin = [0.5, -0.5, 0]

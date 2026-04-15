@@ -1,4 +1,5 @@
 import abc
+import warnings
 import dataclasses
 
 import numpy as np
@@ -38,13 +39,22 @@ class ArcEdgeBase(Edge, abc.ABC):
             # are collinear, blockMesh will find an arc with
             # infinite radius and crash.
             # so, check for collinearity; if the three points
-            # are actually collinear, this edge is redundant and can be
-            # silently dropped
+            # are actually collinear, this edge is redundant and can be dropped;
+            # however, warn the user as this edge might be important
 
             # cross-product of three collinear vertices must be zero
             arm_1 = self.vertex_1.position - self.third_point.position
             arm_2 = self.vertex_2.position - self.third_point.position
 
-            return abs(f.norm(np.cross(arm_1, arm_2))) > constants.TOL
+            valid = abs(f.norm(np.cross(arm_1, arm_2))) > constants.TOL
+
+            if not valid:
+                message = (
+                    f"Dropping arc edge between vertices {self.vertex_1.index} and {self.vertex_2.index};"
+                    + " lower util.constants.TOL to include it"
+                )
+                warnings.warn(message, stacklevel=1)
+
+            return valid
 
         return False
