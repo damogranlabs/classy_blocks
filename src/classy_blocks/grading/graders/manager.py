@@ -277,7 +277,7 @@ class GradingManager:
             for pair in AXIS_PAIRS[entry.heading]:
                 edge_chops = chops.edge_chops[pair[0]][pair[1]]
                 if edge_chops:
-                    wire_grader = WireGrader(entry.axis.wires[pair[0]])
+                    wire_grader = WireGrader(entry.block.wires[pair[0]][pair[1]])
                     wire_grader.re_chop(edge_chops)
 
     def _check_consistency(self, row: Row) -> None:

@@ -189,6 +189,19 @@ class BoxEdgeChopTests(unittest.TestCase):
         self.assertAlmostEqual(self.get_grading(0, 0)[0][2], 9.043586, places=5)
         self.assertAlmostEqual(self.get_grading(0, 1)[0][2], 1)
 
+    def test_edge_chop_axis_47(self):
+        # bug fix check: access edges with corner index > 3
+        for i in get_args(DirectionType):
+            self.box.chop(i, count=10)
+
+        self.box.chop_edge(4, 7, start_size=0.05)
+
+        self.finalize()
+
+        # one edge is graded, the rest are simple
+        self.assertAlmostEqual(self.get_grading(0, 0)[0][2], 1)
+        self.assertAlmostEqual(self.get_grading(1, 3)[0][2], 3.433788, places=5)
+
     def test_edge_chop_multiple(self):
         """Do multiple chops and let the last chop define the remaining count automatically"""
 
