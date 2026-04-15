@@ -7,9 +7,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [1.11.1]
 
+### Added
+
+- Issue a warning when dropping an arc edge. When distance between arc point and
+the line between edge vertices is less than tolerance specified in `constants.TOL`, the edge is assumed invalid.
+The edges are still dropped but the user is warned about that.
+
 ### Changed
 
-Bug fix: edge grading of corners with indexes higher than 3
+- Bug fix: edge grading of corners with indexes higher than 3
 
 ## [1.11.0]
 
