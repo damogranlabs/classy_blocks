@@ -57,20 +57,25 @@ class RowCatalogue:
         raise NoInstructionError(f"No instruction found for block {block}")
 
     def _add_block_to_row(self, row: Row, instruction: Instruction, direction: DirectionType) -> None:
-        row.add_block(instruction.block, direction)
-        instruction.directions[direction] = True
+        tasks = [(instruction, direction)]
 
-        block = instruction.block
+        while tasks:
+            current_instruction, current_direction = tasks.pop()
 
-        for neighbour_axis in block.axes[direction].neighbours:
-            neighbour_block = get_block_from_axis(self.block_list, neighbour_axis)
-
-            if neighbour_block in row.blocks:
+            if current_instruction.block in row.blocks:
                 continue
 
-            instruction = self._find_instruction(neighbour_block)
+            row.add_block(current_instruction.block, current_direction)
+            current_instruction.directions[current_direction] = True
 
-            self._add_block_to_row(row, instruction, neighbour_block.get_axis_direction(neighbour_axis))
+            block = current_instruction.block
+
+            for neighbour_axis in block.axes[current_direction].neighbours:
+                neighbour_block = get_block_from_axis(self.block_list, neighbour_axis)
+
+                neighbour_instruction = self._find_instruction(neighbour_block)
+
+                tasks.append((neighbour_instruction, neighbour_block.get_axis_direction(neighbour_axis)))
 
     def _populate(self, direction: DirectionType) -> None:
         while True:
