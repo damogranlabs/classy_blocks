@@ -5,7 +5,7 @@ description = "Python classes for easier creation of openFoam's blockMesh dictio
 readme = "README.md"
 license = "MIT"
 keywords = ["classy_blocks", "OpenFOAM", "blockMesh"]
-authors = [{ name = "Nejc Jurkovic", email = "kandelabr@gmail.com" }]
+authors = [{ name = "Nejc Jurkovic", email = "nejc.jurkovic@proton.me" }]
 requires-python = ">=3.9"
 dependencies = ["numpy", "scipy", "nptyping", "numba"]
 
