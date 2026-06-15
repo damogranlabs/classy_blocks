@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.1]
+
+### Changed
+
+- Bugfix: stack overflow with a large number of blocks (contribution by @fsimonis)
+- Fixed the advanced/edge_grading example (multiple chops per row)
+
 ## [1.11.0]
 
 ### Added
@@ -12,7 +19,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Capability to work with collapsed edges - triangular faces, three-sided pyramids etc;
   just specify the same point twice, the rest will  be handled automatically.
 
-## Changed
+### Changed
 
 - Minor fixes on automatic graders for more accurate cell sizing
 
