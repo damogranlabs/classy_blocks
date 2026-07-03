@@ -145,3 +145,7 @@ class OptimizationError(Exception):
 ### Mesh assembly/writing
 class MeshNotAssembledError(Exception):
     """Raised when looking for assembled items on a non-assembled mesh"""
+
+
+class EmptyMeshError(Exception):
+    """Raised when assembling a mesh with no added operations"""

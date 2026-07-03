@@ -1,5 +1,6 @@
 import numpy as np
 
+from classy_blocks.base.exceptions import EmptyMeshError
 from classy_blocks.construct.operations.box import Box
 from classy_blocks.construct.shapes.cylinder import Cylinder
 from classy_blocks.construct.shapes.sphere import EighthSphere
@@ -206,3 +207,8 @@ class MeshTests(BlockTestCase):
         self.mesh.assemble(merge_tol=0.002)
 
         self.assertEqual(len(self.mesh.vertices), 15)
+
+    def test_assemble_empty(self):
+        # Raise an exception whjn there's no geometry in the mesh"""
+        with self.assertRaises(EmptyMeshError):
+            self.mesh.assemble()

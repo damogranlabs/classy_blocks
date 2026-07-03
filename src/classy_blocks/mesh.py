@@ -4,6 +4,7 @@ from classy_blocks.assemble.assembler import MeshAssembler
 from classy_blocks.assemble.depot import Depot
 from classy_blocks.assemble.dump import AssembledDump, DumpBase, EmptyDump
 from classy_blocks.assemble.settings import Settings
+from classy_blocks.base.exceptions import EmptyMeshError
 from classy_blocks.cbtyping import GeometryType
 from classy_blocks.construct.assemblies.assembly import Assembly
 from classy_blocks.construct.operations.operation import Operation
@@ -72,6 +73,9 @@ class Mesh:
         actual vertices, edges, blocks and other stuff to be inserted into
         blockMeshDict. After this has been done, the above objects
         cease to have any function or influence on mesh."""
+        if len(self.depot.solids) == 0:
+            raise EmptyMeshError("There is nothing in the mesh!")
+
         if self.is_assembled:
             assert isinstance(self.dump, AssembledDump)
             return self.dump
