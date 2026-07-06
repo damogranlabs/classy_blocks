@@ -56,9 +56,43 @@ class Operation(ElementBase):
 
         return Project(label)
 
+    def _update_edge(self, edge: EdgeData, data: EdgeData) -> EdgeData:
+        if isinstance(edge, Project) and isinstance(data, Project):
+            # Update the existing edge by adding geometry to project to
+            for label in data.label:
+                edge.add_label(label)
+            return edge
+
+        # otherwise just replace the edge
+        return data
+
+    def add_edge(self, corner_1: int, corner_2: int, data: EdgeData) -> None:
+        # decide where the required edge sits
+        loc = edge_map[corner_1][corner_2]
+        corner = loc.start_corner
+
+        # bottom or top face?
+        if loc.side == "bottom":
+            self.bottom_face.edges[corner] = self._update_edge(self.bottom_face.edges[corner], data)
+            return
+
+        if loc.side == "top":
+            self.top_face.edges[corner] = self._update_edge(self.top_face.edges[corner], data)
+            return
+
+        # sides
+        self.side_edges[corner] = self._update_edge(self.side_edges[corner], data)
+
     def add_side_edge(self, corner_idx: int, edge_data: EdgeData) -> None:
         """Add an edge between two vertices at the same
         corner of the lower and upper face (index and index+4 or vice versa)."""
+
+        warnings.warn(
+            "operation.add_side_edge() is deprecated and will be removed in future versions!"
+            " Use operation.add_edge() instead",
+            category=DeprecationWarning,
+            stacklevel=1,
+        )
         if corner_idx < 0 or corner_idx > 3:
             raise EdgeCreationError(
                 "Unable to create side edge between two faces: corner must be an index to a bottom Vertex (0...3)",
@@ -138,6 +172,12 @@ class Operation(ElementBase):
     def project_edge(self, corner_1: int, corner_2: int, label: ProjectToType) -> None:
         """Replace an edge between given corners with a Projected one
         or add geometry to an already projected edge"""
+        warnings.warn(
+            "operation.project_edge() is deprecated and will be removed in future versions!"
+            "Use operation.add_edge() instead",
+            category=DeprecationWarning,
+            stacklevel=1,
+        )
         # decide where the required edge sits
         loc = edge_map[corner_1][corner_2]
         corner = loc.start_corner

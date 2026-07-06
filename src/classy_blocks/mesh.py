@@ -7,6 +7,7 @@ from classy_blocks.assemble.settings import Settings
 from classy_blocks.base.exceptions import EmptyMeshError
 from classy_blocks.cbtyping import GeometryType
 from classy_blocks.construct.assemblies.assembly import Assembly
+from classy_blocks.construct.geometry import SearchableGeometry
 from classy_blocks.construct.operations.operation import Operation
 from classy_blocks.construct.shape import Shape
 from classy_blocks.construct.stack import Stack
@@ -56,11 +57,14 @@ class Mesh:
         as-is, with no additional brain power used"""
         self.settings.modify_patch(name, kind, settings)
 
-    def add_geometry(self, geometry: GeometryType) -> None:
+    def add_geometry(self, geometry: Union[SearchableGeometry, GeometryType]) -> None:
         """Adds named entry in the 'geometry' section of blockMeshDict;
         'geometry' is in the form of dictionary {'geometry_name': [list of properties]};
         properties are as specified by searchable* class in documentation.
         See examples/advanced/project for an example."""
+        if isinstance(geometry, SearchableGeometry):
+            geometry = geometry.get_data()
+
         self.settings.add_geometry(geometry)
 
     def delete(self, operation: Operation) -> None:

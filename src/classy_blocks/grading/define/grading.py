@@ -168,10 +168,10 @@ class Grading(GradingBase):
         self._chop_data: list[ChopData] = []
 
     @property
-    def chop_data(self):
+    def chop_data(self) -> list[ChopData]:
         if len(self._chop_data) < len(self.chops):
             # Chops haven't been calculated yet
-            self._chop_data: list[ChopData] = []
+            self._chop_data = []
 
             for chop in self.chops:
                 self._chop_data.append(chop.calculate(self.length))

@@ -1,10 +1,11 @@
 import abc
 import copy
 from collections.abc import Sequence
-from typing import Optional, TypeVar
+from typing import Optional, TypeVar, Union
 
 from classy_blocks.base import transforms as tr
-from classy_blocks.cbtyping import NPPointType, PointType, VectorType
+from classy_blocks.cbtyping import GeometryType, NPPointType, PointType, VectorType
+from classy_blocks.construct.geometry import SearchableGeometry
 
 ElementBaseT = TypeVar("ElementBaseT", bound="ElementBase")
 
@@ -82,7 +83,7 @@ class ElementBase(abc.ABC):
         """Center of this entity; used as default origin for transforms"""
 
     @property
-    def geometry(self) -> Optional[dict]:
+    def geometry(self) -> Optional[Union[GeometryType, SearchableGeometry]]:
         """A searchable surface, defined in an entity itself;
         (like, for instance, sphere's blocks are automatically
         projected to an ad-hoc defined searchableSphere"""

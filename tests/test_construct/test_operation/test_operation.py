@@ -5,7 +5,7 @@ from parameterized import parameterized
 
 from classy_blocks.base.exceptions import EdgeCreationError
 from classy_blocks.base.transforms import Mirror
-from classy_blocks.construct.edges import Arc, Project, Spline
+from classy_blocks.construct.edges import Arc, Origin, Project, Spline
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.extrude import Extrude
 from classy_blocks.construct.operations.loft import Loft
@@ -23,6 +23,32 @@ class OperationTests(BlockTestCase):
         """Fail if the user supplies an inappropriate corner to add_side_edge()"""
         with self.assertRaises(EdgeCreationError):
             self.loft.add_side_edge(4, Arc([0, 1, 0]))
+
+    def test_add_edge_top(self):
+        self.loft.add_edge(0, 1, Arc([0, 1, 0]))
+
+        self.assertIsInstance(self.loft.edges[0][1], Arc)
+
+    def test_add_edge_side(self):
+        self.loft.add_edge(0, 4, Arc([1, 1.5, 1]))
+
+        self.assertIsInstance(self.loft.edges[0][4], Arc)
+
+    def test_add_edge_replace(self):
+        self.loft.add_edge(0, 4, Arc([1, 1.5, 1]))
+        self.loft.add_edge(0, 4, Origin([0.5, 0.5, 0.5]))
+
+        self.assertIsInstance(self.loft.edges[0][4], Origin)
+
+    def test_add_edge_update_projected(self):
+        self.loft.add_edge(0, 4, Project("floor"))
+        self.loft.add_edge(0, 4, Project("wall"))
+
+        self.assertListEqual(self.loft.edges[0][4].label, ["floor", "wall"])
+
+    def test_add_edge_invalid_indexes(self):
+        with self.assertRaises(KeyError):
+            self.loft.add_edge(0, 5, Project("Test"))
 
     def test_set_patch_single(self):
         """Set patch of a single side"""

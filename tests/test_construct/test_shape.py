@@ -250,10 +250,8 @@ class SphereTests(unittest.TestCase):
 
     def test_geometry(self):
         sphere = Hemisphere([0, 0, 0], [1, 0, 0], [0, 0, 1])
-        geometry = sphere.geometry
-        keys = list(geometry.keys())
 
-        self.assertEqual(sphere.geometry[keys[0]][-1], "radius 1.0")
+        self.assertEqual(sphere.geometry.radius, 1)
 
 
 class FrustumTests(unittest.TestCase):

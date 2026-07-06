@@ -3,9 +3,9 @@ import numpy as np
 from classy_blocks.cbtyping import NPPointType, NPVectorType, PointType, VectorType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketches.disk import QuarterDisk
+from classy_blocks.construct.geometry import SearchableSphere
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.shape import Shape
-from classy_blocks.util import constants
 from classy_blocks.util import functions as f
 
 
@@ -191,14 +191,7 @@ class EighthSphere(Shape):
 
     @property
     def geometry(self):
-        return {
-            self.geometry_label: [
-                "type searchableSphere",
-                f"origin {constants.vector_format(self.center_point)}",
-                f"centre {constants.vector_format(self.center_point)}",
-                f"radius {self.radius}",
-            ]
-        }
+        return SearchableSphere(self.geometry_label, self.center_point, self.radius)
 
 
 class QuarterSphere(EighthSphere):

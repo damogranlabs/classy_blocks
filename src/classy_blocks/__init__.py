@@ -19,6 +19,14 @@ from .construct.flat.sketches.spline_round import (
     SplineDisk,
     SplineRing,
 )
+from .construct.geometry import (
+    SearchableCone,
+    SearchableCylinder,
+    SearchablePlaneEmbeddedPoints,
+    SearchablePlanePointAndNormal,
+    SearchableSphere,
+    TriSurface,
+)
 from .construct.operations.box import Box
 from .construct.operations.connector import Connector
 from .construct.operations.extrude import Extrude
@@ -115,6 +123,11 @@ __all__ = [
     "RotationLink",
     "RoundSolidFinder",
     "Scaling",
+    "SearchableCone",
+    "SearchableCylinder",
+    "SearchablePlaneEmbeddedPoints",
+    "SearchablePlanePointAndNormal",
+    "SearchableSphere",
     "SemiCylinder",
     "Shape",
     "ShapeOptimizer",
@@ -133,6 +146,7 @@ __all__ = [
     "TransformedStack",
     "Translation",
     "TranslationLink",
+    "TriSurface",
     "ViewpointReorienter",
     "Wedge",
     "WrappedDisk",

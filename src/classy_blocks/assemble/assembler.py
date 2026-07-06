@@ -2,6 +2,7 @@ from classy_blocks.assemble.depot import Depot
 from classy_blocks.assemble.dump import AssembledDump
 from classy_blocks.assemble.settings import Settings
 from classy_blocks.base.exceptions import EdgeNotFoundError
+from classy_blocks.construct.geometry import SearchableGeometry
 from classy_blocks.items.block import Block
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.lists.block_list import BlockList
@@ -79,7 +80,11 @@ class MeshAssembler:
     def _add_geometry(self):
         for solid in self.depot.solids:
             if solid.geometry is not None:
-                self.settings.add_geometry(solid.geometry)
+                # TODO: unify and un-if the geometry specification
+                if isinstance(solid.geometry, SearchableGeometry):
+                    self.settings.add_geometry(solid.geometry.get_data())
+                else:
+                    self.settings.add_geometry(solid.geometry)
 
     def _create_patches(self, block_list: BlockList) -> tuple[PatchList, FaceList]:
         patch_list = PatchList()
