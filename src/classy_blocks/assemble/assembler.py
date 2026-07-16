@@ -39,7 +39,7 @@ class MeshAssembler:
                 if len(patches) == 0:
                     continue
 
-                op_vertices[corner] = vertex_list.add_duplicated(point, patches)
+                op_vertices[corner] = vertex_list.add_duplicated(point, patches, op_vertices[corner])
 
             block = Block(iop, op_vertices)
             block.set_chops(operation.chops)

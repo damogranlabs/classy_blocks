@@ -50,7 +50,24 @@ class Wire:
         # wires that follow this (start with this wire's end vertex)
         self.after: set[WireJoint] = set()
 
-        self.key = hash(tuple(sorted([v.index for v in self.vertices])))
+        # Coincidence is based on vertex *position* (canonical index), not the
+        # blockMeshDict index; this way wires that touch a vertex duplicated for a
+        # face-merged slave patch are still recognized as coincident with their
+        # non-merged neighbours. The merged-face patches are added to the key so that
+        # the two sides of a merged interface (an in-face wire on the slave side vs.
+        # the master side) remain independent and may keep different cell counts.
+        self.key = hash(
+            (
+                frozenset(v.canonical_index for v in self.vertices),
+                frozenset(self.merged_face_patches),
+            )
+        )
+
+    @property
+    def merged_face_patches(self) -> set[str]:
+        """Slave patches for which this whole wire lies inside a merged face,
+        i.e. both of its vertices were duplicated for the same slave patch."""
+        return self.vertices[0].duplicated_patches & self.vertices[1].duplicated_patches
 
     @property
     def length(self) -> float:
@@ -71,7 +88,9 @@ class Wire:
         if not self.is_coincident(candidate):
             raise RuntimeError(f"Wires are not coincident: {self}, {candidate}")
 
-        return self.vertices == candidate.vertices
+        # compare by position (canonical index) so that duplicated vertices
+        # don't wrongly report an inverted orientation
+        return [v.canonical_index for v in self.vertices] == [v.canonical_index for v in candidate.vertices]
 
     def add_edge(self, edge: Edge) -> None:
         self.edge = edge

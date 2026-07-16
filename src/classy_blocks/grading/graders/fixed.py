@@ -33,3 +33,6 @@ class FixedCountGrader(GradingManager, AutoGraderMixin):
             entry = row.entries[0]
             axis_grader = FixedAxisGrader(entry.block, entry.heading, self.count)
             axis_grader.grade()
+            # TODO: row.count stays 0 after auto-grading (only manual chops set it
+            # via RowGrader.set_count). Harmless now because nothing downstream reads
+            # row.count post-grade, but fragile; consider set_count() here.
