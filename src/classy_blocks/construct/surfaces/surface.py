@@ -2,26 +2,19 @@ import abc
 
 import numpy as np
 
-from classy_blocks.cbtyping import NPPointListType, NPPointType, PointType, VectorType
+from classy_blocks.cbtyping import NPPointListType, NPPointType, PointType
 from classy_blocks.util.constants import TOL
 
 
 class SurfaceBase(abc.ABC):
     """A queryable surface in 3D space; the surface analog of CurveBase.
 
-    Transformation is intentionally not supported: a triangulated surface
-    usually serves as a fixed reference. If it must move, transform the source
-    file (or the underlying trimesh) instead."""
+    Transformation is intentionally not supported here: subclasses that need it
+    (e.g. RevolvedSurface) mix in ElementBase themselves."""
 
     @abc.abstractmethod
     def get_closest_point(self, point: PointType) -> NPPointType:
         """Returns the point on the surface closest to the given point."""
-
-    @abc.abstractmethod
-    def get_cross_sections(self, point: PointType, normal: VectorType) -> list[NPPointListType]:
-        """Intersects the surface with the plane defined by (point, normal).
-        Returns one ordered point array per disjoint loop; an empty list when
-        the plane misses the surface."""
 
     @staticmethod
     def sort_points(loops: list[NPPointListType], far_point: PointType, tol: float = TOL) -> NPPointListType:

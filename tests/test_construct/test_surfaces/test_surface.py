@@ -65,6 +65,18 @@ class SortPointsMergeTests(unittest.TestCase):
         self.assertEqual(len(coarse), 3)  # ...but is merged at tol=0.01
 
 
+class SurfaceBaseContractTests(unittest.TestCase):
+    def test_only_get_closest_point_is_abstract(self):
+        # A subclass implementing solely get_closest_point must be concrete,
+        # proving get_cross_sections is no longer an abstract requirement.
+        class Dummy(SurfaceBase):
+            def get_closest_point(self, point):
+                _ = point  # to silence ruff (?!)
+                return np.array([0.0, 0.0, 0.0])
+
+        Dummy()  # must not raise TypeError about abstract methods
+
+
 class PublicApiTests(unittest.TestCase):
     def test_exports(self):
         import classy_blocks as cb

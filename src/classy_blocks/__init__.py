@@ -42,6 +42,7 @@ from .construct.shapes.rings import ExtrudedRing, RevolvedRing
 from .construct.shapes.shell import Shell
 from .construct.shapes.sphere import EighthSphere, Hemisphere, QuarterSphere
 from .construct.stack import ExtrudedStack, RevolvedStack, TransformedStack
+from .construct.surfaces.revolved import RevolvedSurface
 from .construct.surfaces.surface import SurfaceBase
 from .construct.surfaces.triangulated import TriangulatedSurface
 from .grading.graders.fixed import FixedCountGrader
@@ -121,6 +122,7 @@ __all__ = [
     "RevolvedRing",
     "RevolvedShape",
     "RevolvedStack",
+    "RevolvedSurface",
     "Rotation",
     "RotationLink",
     "RoundSolidFinder",
