@@ -59,9 +59,7 @@ class RevolvedSurface(SurfaceBase, ElementBase):
         return f.rotate(self.curve.get_point(param), angle, self.axis, self.origin)
 
     def _reference_radial(self) -> NPPointType:
-        """Unit radial direction of the curve's meridional half-plane, taken
-        from the discretized curve point farthest from the axis (robustly
-        off-axis)."""
+        """Unit radial vector to the discretized curve point farthest from the axis."""
         axis = self.axis
         relative = self.curve.discretize() - self.origin
         radial = relative - np.outer(relative @ axis, axis)
@@ -96,15 +94,14 @@ class RevolvedSurface(SurfaceBase, ElementBase):
         origin: Optional[PointType] = None,
         angle_bounds: tuple[float, float] = (-np.pi, np.pi),
     ) -> "RevolvedSurface":
-        """Extracts a meridian profile from a triangulated surface of revolution
+        """Extracts a cross-section profile from a triangulated surface of revolution
         and builds a RevolvedSurface from it.
 
-        'anchor' is a single off-axis point: its azimuth selects the meridional
-        cutting plane, and its side of the axis selects which half of the section
-        to keep. Its position along the axis is irrelevant; the profile is always
-        ordered from the minimum-axis end upward."""
+        'anchor' is a single off-axis point: defines the cutting plane and side.
+        Its position along the axis is irrelevant; the profile is always ordered from the minimum-axis end upward."""
         axis_unit = f.unit_vector(axis)
         origin = mesh.centroid if origin is None else np.asarray(origin, dtype=float)
+        assert origin is not None
         anchor = np.asarray(anchor, dtype=float)
 
         offset = anchor - origin
@@ -117,7 +114,7 @@ class RevolvedSurface(SurfaceBase, ElementBase):
 
         loops = TriangulatedSurface(mesh).get_cross_sections(origin, normal)
         if not loops:
-            raise ValueError("RevolvedSurface.from_mesh: meridional cut produced no profile (plane misses the mesh)")
+            raise ValueError("RevolvedSurface.from_mesh: cut produced no profile (plane misses the mesh)")
 
         points = np.concatenate(loops)
         kept = points[(points - origin) @ perp >= 0]
