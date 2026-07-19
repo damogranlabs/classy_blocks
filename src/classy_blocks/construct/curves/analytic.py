@@ -3,7 +3,7 @@ from typing import Optional
 import numpy as np
 
 from classy_blocks.cbtyping import NPVectorType, ParamCurveFuncType, PointType, VectorType
-from classy_blocks.construct.curves.curve import FunctionCurveBase
+from classy_blocks.construct.curves.curve import Cusp, FunctionCurveBase
 from classy_blocks.construct.point import Point
 from classy_blocks.util import functions as f
 
@@ -26,6 +26,9 @@ class AnalyticCurve(FunctionCurveBase):
         # numerical integration is not reliable and can often yield totally wrong results
         # (like a negative length or similar)
         return f.polyline_length(self.discretize(param_from, param_to, count=100))
+
+    def find_cusps(self, threshold: float) -> list[Cusp]:
+        raise NotImplementedError("Finding cusps on arbitrary analytic curves is currently not supported")
 
 
 class LineCurve(AnalyticCurve):
@@ -52,6 +55,9 @@ class LineCurve(AnalyticCurve):
     def center(self):
         # this one is easy
         return (self.point_1.position + self.point_2.position) / 2
+
+    def find_cusps(self, threshold: float) -> list[Cusp]:
+        raise NotImplementedError("There are no cusps on a line")
 
 
 class CircleCurve(AnalyticCurve):
@@ -84,3 +90,6 @@ class CircleCurve(AnalyticCurve):
     @property
     def parts(self):
         return [self.origin, self.rim, self.atop]
+
+    def find_cusps(self, threshold: float) -> list[Cusp]:
+        raise NotImplementedError("No cusps on a circle")

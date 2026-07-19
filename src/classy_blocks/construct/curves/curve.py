@@ -1,15 +1,33 @@
 import abc
 import warnings
+from dataclasses import dataclass
 from typing import Optional, Union
 
 import numpy as np
 import scipy.optimize
 
 from classy_blocks.base.element import ElementBase
-from classy_blocks.cbtyping import NPPointListType, NPPointType, NPVectorType, ParamCurveFuncType, PointType
+from classy_blocks.cbtyping import (
+    FloatListType,
+    NPPointListType,
+    NPPointType,
+    NPVectorType,
+    ParamCurveFuncType,
+    PointType,
+)
 from classy_blocks.construct.series import Series
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import TOL
+
+
+@dataclass
+class Cusp:
+    """A point where a curve turns sharply, as returned by CurveBase.find_cusps.
+    'angle' is the turning angle in radians (0 = straight, pi = full reversal)."""
+
+    param: float
+    point: NPPointType
+    angle: float
 
 
 class CurveBase(ElementBase):
@@ -97,6 +115,12 @@ class CurveBase(ElementBase):
         (https://en.wikipedia.org/wiki/Frenet%E2%80%93Serret_formulas)"""
         return f.unit_vector(np.cross(self.get_tangent(param, delta), self.get_normal(param, delta)))
 
+    @abc.abstractmethod
+    def find_cusps(self, threshold: float) -> list[Cusp]:
+        """Returns all points where the curve's direction turns by more than
+        'threshold' radians, in curve order. Curve types whose cusps are not
+        well-defined (smooth analytic and spline curves) raise NotImplementedError."""
+
 
 class PointCurveBase(CurveBase):
     """A base object for curves, defined by a list of points"""
@@ -110,6 +134,25 @@ class PointCurveBase(CurveBase):
     def center(self):
         warnings.warn("Using an approximate default curve center (average)!", stacklevel=2)
         return np.average(self.discretize(), axis=0)
+
+    @property
+    def _point_params(self) -> FloatListType:
+        """Curve parameters of the defining points (self.series), by index."""
+        return np.linspace(self.bounds[0], self.bounds[1], len(self.series))
+
+    def find_cusps(self, threshold: float) -> list[Cusp]:
+        points = self.series.points
+        params = self._point_params
+
+        directions = np.diff(points, axis=0)
+        directions /= np.linalg.norm(directions, axis=1)[:, None]
+        dots = np.sum(directions[:-1] * directions[1:], axis=1)
+        # a zero-length segment (coincident consecutive points) yields a NaN angle here,
+        # which fails the threshold test below and is silently skipped
+        angles = np.arccos(np.clip(dots, -1, 1))
+
+        (indices,) = np.nonzero(angles > threshold)
+        return [Cusp(float(params[i + 1]), points[i + 1].copy(), float(angles[i])) for i in indices]
 
 
 class FunctionCurveBase(PointCurveBase):

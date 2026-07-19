@@ -1,10 +1,11 @@
 import abc
+import warnings
 from typing import Optional
 
 import numpy as np
 
-from classy_blocks.cbtyping import PointListType
-from classy_blocks.construct.curves.curve import FunctionCurveBase
+from classy_blocks.cbtyping import FloatListType, PointListType
+from classy_blocks.construct.curves.curve import Cusp, FunctionCurveBase
 from classy_blocks.construct.curves.interpolators import InterpolatorBase, LinearInterpolator, SplineInterpolator
 from classy_blocks.construct.series import Series
 from classy_blocks.util import functions as f
@@ -34,6 +35,10 @@ class InterpolatedCurveBase(FunctionCurveBase, abc.ABC):
     def segments(self) -> int:
         """Returns number of points this curve was created from"""
         return len(self.series) - 1
+
+    @property
+    def _point_params(self) -> FloatListType:
+        return self.function.params
 
     @property
     def parts(self):
@@ -67,3 +72,7 @@ class LinearInterpolatedCurve(InterpolatedCurveBase):
 
 class SplineInterpolatedCurve(InterpolatedCurveBase):
     _interpolator = SplineInterpolator
+
+    def find_cusps(self, threshold: float) -> list[Cusp]:
+        warnings.warn("Using cusp-finding on an interpolated spline curve will refer to defining points", stacklevel=1)
+        return super().find_cusps(threshold)
