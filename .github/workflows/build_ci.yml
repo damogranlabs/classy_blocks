@@ -1,6 +1,11 @@
 name: Test and analyze
 
-on: [ push ]
+# push: safety net for direct pushes to protected branches.
+# pull_request: gates PRs against a merge commit (branch + target), not just the branch alone.
+on:
+    push:
+        branches: [ development, release, master ]
+    pull_request:
 
 permissions:
     contents: read
