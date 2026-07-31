@@ -1,6 +1,7 @@
 """Abstract base classes for different Shape types"""
 
 import abc
+import warnings
 from typing import Generic, Optional, TypeVar, Union
 
 import numpy as np
@@ -72,6 +73,9 @@ class LoftedShape(Shape, abc.ABC, Generic[SketchT]):
         self.sketch_mid = sketch_mid
 
         self.lofts: list[list[Loft]] = []
+        # True when the end transform inverts the sketch winding
+        # (e.g. a rotation in the direction opposite to it)
+        self._inverted = False
 
         for i, list_1 in enumerate(self.sketch_1.grid):
             self.lofts.append([])
@@ -80,19 +84,34 @@ class LoftedShape(Shape, abc.ABC, Generic[SketchT]):
                 face_2 = self.sketch_2.grid[i][j]
 
                 mid_faces = [sketch.grid[i][j] for sketch in sketch_mid]
-                loft = Loft.from_series([face_1, *mid_faces, face_2])
+
+                series = [face_1, *mid_faces, face_2]
+                if f.is_loft_inverted(face_1.point_array, face_2.point_array):
+                    series = [face_2, *mid_faces, face_1]
+                    self._inverted = True
+
+                loft = Loft.from_series(series)
 
                 self.lofts[-1].append(loft)
 
+        if self._inverted:
+            warnings.warn(
+                "This shape's lofts were inside-out and have been auto-flipped "
+                "(start/end faces swapped) to keep blocks outward-facing.",
+                stacklevel=1,
+            )
+
     def set_start_patch(self, name: str) -> None:
         """Assign the faces of start sketch to a named patch"""
+        orient = "top" if self._inverted else "bottom"
         for operation in self.operations:
-            operation.set_patch("bottom", name)
+            operation.set_patch(orient, name)
 
     def set_end_patch(self, name: str) -> None:
         """Assign the faces of end sketch to a named patch"""
+        orient = "bottom" if self._inverted else "top"
         for operation in self.operations:
-            operation.set_patch("top", name)
+            operation.set_patch(orient, name)
 
     @property
     def operations(self):

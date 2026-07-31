@@ -115,6 +115,26 @@ def scale(point: PointType, ratio: float, origin: Optional[PointType]) -> NPPoin
     return origin + (point - origin) * ratio
 
 
+def is_loft_inverted(bottom_points: PointListType, top_points: PointListType) -> bool:
+    """Whether a loft between two faces is wound inside-out
+    (the blockMesh 'Block is inside-out' condition)"""
+    points = np.concatenate(
+        (np.asarray(bottom_points, dtype=constants.DTYPE), np.asarray(top_points, dtype=constants.DTYPE))
+    )
+
+    # hex cell-model faces from OpenFOAM's etc/cellModels
+    faces = ((0, 4, 7, 3), (1, 2, 6, 5), (0, 1, 5, 4), (3, 7, 6, 2), (0, 3, 2, 1), (4, 5, 6, 7))
+
+    volume = 0.0
+
+    for face in faces:
+        face_points = points[list(face)]
+        area = 0.5 * sum(np.cross(face_points[i] - face_points[0], face_points[i + 1] - face_points[0]) for i in (1, 2))
+        volume += np.dot(face_points.mean(axis=0), area) / 3.0
+
+    return volume < 0
+
+
 def to_polar(point: PointType, axis: Literal["x", "z"] = "z") -> NPVectorType:
     """Convert (x, y, z) point to (radius, angle, height);
     the axis of the new polar coordinate system can be chosen ('x' or 'z')"""
