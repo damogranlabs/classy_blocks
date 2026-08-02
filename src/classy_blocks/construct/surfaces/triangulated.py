@@ -26,4 +26,4 @@ class TriangulatedSurface(SurfaceBase):
         if section is None:
             return []
 
-        return [np.asarray(loop) for loop in section.discrete]
+        return [np.asarray(entity.discrete(section.vertices)) for entity in section.entities]

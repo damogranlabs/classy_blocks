@@ -46,6 +46,12 @@ class CrossSectionTests(unittest.TestCase):
         box_2.apply_translation([5, 0, 0])
         self.two_boxes = TriangulatedSurface(trimesh.util.concatenate([box_1, box_2]))
 
+        capped = trimesh.creation.cylinder(radius=1.0, height=2.0, sections=48)
+        walls = np.abs(capped.face_normals[:, 2]) < 0.5
+        tube = trimesh.Trimesh(capped.vertices.copy(), capped.faces[walls].copy(), process=True)
+        tube.remove_unreferenced_vertices()
+        self.open_tube = TriangulatedSurface(tube)
+
     def test_single_loop_from_box(self):
         loops = self.box.get_cross_sections([0, 0, 0], [0, 0, 1])
 
@@ -58,6 +64,12 @@ class CrossSectionTests(unittest.TestCase):
 
     def test_two_loops_from_two_boxes(self):
         loops = self.two_boxes.get_cross_sections([0, 0, 0], [0, 0, 1])
+
+        self.assertEqual(len(loops), 2)
+
+    def test_open_mesh_yields_wall_segments(self):
+        # a capless tube sections into open line segments, not a closed loop
+        loops = self.open_tube.get_cross_sections([0, 0, 0], [0, -1, 0])
 
         self.assertEqual(len(loops), 2)
 

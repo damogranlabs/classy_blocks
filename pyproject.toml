@@ -29,6 +29,9 @@ line-length = 120
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "UP", "YTT", "B", "A", "ARG", "RUF"]
 
+[tool.mypy]
+files = ["src", "tests"]
+
 [[tool.mypy.overrides]]
 module = "scipy,scipy.*,parameterized.*"
 ignore_missing_imports = true
