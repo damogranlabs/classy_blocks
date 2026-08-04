@@ -39,7 +39,7 @@ class MeshAssembler:
                 if len(patches) == 0:
                     continue
 
-                op_vertices[corner] = vertex_list.add_duplicated(point, patches, op_vertices[corner])
+                op_vertices[corner] = vertex_list.add_duplicated(point, patches)
 
             block = Block(iop, op_vertices)
             block.set_chops(operation.chops)
@@ -106,8 +106,8 @@ class MeshAssembler:
 
         return patch_list, face_list
 
-    def _update_neighbours(self, block_list: BlockList) -> None:
-        block_list.update_neighbours(self._points)
+    def _update_neighbours(self, block_list: BlockList, vertex_list: VertexList) -> None:
+        block_list.update_neighbours(self._points, vertex_list)
 
     def assemble(self) -> AssembledDump:
         # Create reused/indexes vertices from operations' points
@@ -121,7 +121,7 @@ class MeshAssembler:
         # extract auto-generated geometry specs from shapes (like Sphere etc.)
         self._add_geometry()
         # update blocks' neighbours
-        self._update_neighbours(block_list)
+        self._update_neighbours(block_list, vertex_list)
         # scrape patch and projection info from operations
         patch_list, face_list = self._create_patches(block_list)
 

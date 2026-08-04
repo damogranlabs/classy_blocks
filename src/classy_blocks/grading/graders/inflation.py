@@ -362,5 +362,4 @@ class InflationGrader(GradingManager, AutoGraderMixin):
             row_length = self._get_row_length(row)
             axis_grader = self._get_grader(row)(entry.block, entry.heading, self.params, row_length)
 
-            axis_grader.grade()
-            # TODO: row.count stays 0 after auto-grading (see FixedCountGrader._grade_row)
+            row.set_count(axis_grader.grade())

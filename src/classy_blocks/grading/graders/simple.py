@@ -26,5 +26,4 @@ class SimpleGrader(GradingManager, AutoGraderMixin):
         if row.count == 0:
             entry = row.entries[0]
             axis_grader = FixedAxisGrader(entry.block, entry.heading, self._get_row_count(row))
-            axis_grader.grade()
-            # TODO: row.count stays 0 after auto-grading (see FixedCountGrader._grade_row)
+            row.set_count(axis_grader.grade())
