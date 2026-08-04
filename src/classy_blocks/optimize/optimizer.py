@@ -101,10 +101,8 @@ class OptimizerBase(abc.ABC):
 
     def _optimize_clamp(self, clamp: ClampBase, relaxation_factor: float) -> ClampRecord:
         """Move clamp.vertex so that quality at junction is improved;
-        rollback changes if grid quality decreased after optimization"""
+        rollback changes if local quality decreased after optimization"""
         junction = self.grid.get_junction_from_clamp(clamp)
-        crecord = ClampRecord(junction.index, self.grid.quality)
-        self.reporter.clamp_start(crecord)
         initial_position = copy.copy(junction.point)
         initial_params = copy.copy(clamp.params)
 
@@ -115,6 +113,14 @@ class OptimizerBase(abc.ABC):
 
             clamp.update_params(params)
             return self.grid.update(junction.index, clamp.position)
+
+        # Only take into account the local quality - cells around this vertex and
+        # everything around linked vertices - instead of the whole grid quality.
+        # Moving a vertex only affects the cells that touch it (and its linked
+        # followers), so the local improvement equals the global improvement exactly
+        # while avoiding an O(number of cells) sweep on every clamp on large meshes.
+        crecord = ClampRecord(junction.index, self.grid.update(junction.index, initial_position))
+        self.reporter.clamp_start(crecord)
 
         try:
             result = scipy.optimize.minimize(
@@ -131,27 +137,26 @@ class OptimizerBase(abc.ABC):
             # relax and update
             for i, param in enumerate(result.x):
                 clamp.params[i] = initial_params[i] + relaxation_factor * (param - initial_params[i])
-            fquality(clamp.params)
-
-            # always check grid quality, not clamp's
-            crecord.grid_final = self.grid.quality
+            crecord.grid_final = fquality(clamp.params)
 
             if not crecord.improvement > 0:
                 raise OptimizationError("No improvement")
         except OptimizationError as e:
             # roll back to the initial state
-            self.grid.update(junction.index, initial_position)
+            crecord.grid_final = self.grid.update(junction.index, initial_position)
             crecord.rolled_back = True
             crecord.error_message = str(e)
-            crecord.grid_final = self.grid.quality
 
         self.reporter.clamp_end(crecord)
 
         return crecord
 
-    def _optimize_iteration(self, iteration_no: int) -> IterationRecord:
+    def _optimize_iteration(self, iteration_no: int, initial_quality: float) -> IterationRecord:
+        # Grid quality at the start of this iteration is exactly what it was
+        # at the end of the previous one; it is passed in instead of queried again
+        # because a full sweep over all cells is not free.
         rlf = self.relaxation_factor(iteration_no)
-        irecord = IterationRecord(iteration_no, self.grid.quality, rlf)
+        irecord = IterationRecord(iteration_no, initial_quality, rlf)
         self.reporter.iteration_start(iteration_no, rlf)
 
         clamps = sorted(self.grid.clamps, key=lambda c: self._get_sensitivity(c), reverse=True)
@@ -207,10 +212,12 @@ class OptimizerBase(abc.ABC):
         if method is not None:
             self.config.method = method
 
-        orecord = OptimizationRecord(time.time(), self.grid.quality)  # TODO: cache repeating quality queries
+        quality = self.grid.quality
+        orecord = OptimizationRecord(time.time(), quality)
 
         for i in range(self.config.max_iterations):
-            iter_record = self._optimize_iteration(i)
+            iter_record = self._optimize_iteration(i, quality)
+            quality = iter_record.grid_final
 
             if iter_record.abs_improvement < 0:
                 # can happen during the relaxed iterations
@@ -224,7 +231,7 @@ class OptimizerBase(abc.ABC):
         else:
             orecord.termination = "limit"
 
-        orecord.grid_final = self.grid.quality
+        orecord.grid_final = quality
         orecord.time_end = time.time()
         self.reporter.optimization_end(orecord)
         self._backport()

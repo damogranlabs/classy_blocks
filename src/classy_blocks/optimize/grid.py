@@ -125,10 +125,11 @@ class GridBase:
 
     @property
     def quality(self) -> float:
-        """Returns summed qualities of all junctions"""
-        # It is only called when optimizing linked clamps
-        # or at the end of an iteration.
-        return sum(junction.quality for junction in self.junctions)
+        """Returns summed qualities of all cells"""
+        # Summing junctions instead would evaluate each cell once for every
+        # corner it touches - 8 times for a hexahedron, 4 for a quadrangle.
+        # It is only called at the beginning and at the end of an iteration.
+        return sum(cell.quality for cell in self.cells)
 
     def update(self, index: int, position: NPPointType) -> float:
         self.points[index] = position

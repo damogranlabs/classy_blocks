@@ -1,9 +1,12 @@
 import abc
-from typing import ClassVar, Optional
+from typing import ClassVar, Optional, Union
+
+import numpy as np
 
 from classy_blocks.base.exceptions import NoCommonSidesError
 from classy_blocks.cbtyping import IndexType, NPPointListType, OrientType
 from classy_blocks.optimize.connection import CellConnection
+from classy_blocks.optimize.quality import NPIndexType, get_hex_quality, get_quad_quality
 from classy_blocks.util.constants import EDGE_PAIRS
 
 
@@ -12,25 +15,32 @@ class CellBase(abc.ABC):
     side_indexes: ClassVar[list[IndexType]]
     edge_pairs: ClassVar[list[tuple[int, int]]]
 
-    def __init__(self, index: int, grid_points: NPPointListType, indexes: IndexType):
+    def __init__(self, index: int, grid_points: NPPointListType, indexes: Union[IndexType, NPIndexType]):
         self.index = index
         self.grid_points = grid_points
-        self.indexes = indexes
+        # in a format that quality functions understand
+        self.indexes: NPIndexType = np.asarray(indexes, dtype=np.int32)
 
         self.neighbours: dict[OrientType, Optional[CellBase]] = {name: None for name in self.side_names}
+
         self.connections = [CellConnection(set(pair), {indexes[pair[0]], indexes[pair[1]]}) for pair in self.edge_pairs]
+
+    @property
+    @abc.abstractmethod
+    def quality(self) -> float:
+        """Returns this cell's quality; the higher the value, the worse the cell"""
 
     def get_common_indexes(self, candidate: "CellBase") -> set[int]:
         """Returns indexes of common vertices between this and provided cell"""
-        this_indexes = set(self.indexes)
-        cnd_indexes = set(candidate.indexes)
+        this_indexes = set(self.indexes.tolist())
+        cnd_indexes = set(candidate.indexes.tolist())
 
         return this_indexes.intersection(cnd_indexes)
 
     def get_corner(self, index: int) -> int:
         """Converts vertex index to local index
         (position of this vertex in the list)"""
-        return self.indexes.index(index)
+        return self.indexes.tolist().index(index)
 
     def get_common_side(self, candidate: "CellBase") -> OrientType:
         """Returns orient of this cell that is shared with candidate"""
@@ -56,7 +66,7 @@ class CellBase(abc.ABC):
             side_indexes = self.side_indexes[i]
 
             if self.neighbours[side_name] is None:
-                boundary.update({self.indexes[si] for si in side_indexes})
+                boundary.update(self.indexes[side_indexes].tolist())
 
         return boundary
 
@@ -73,6 +83,10 @@ class QuadCell(CellBase):
     side_indexes: ClassVar = [[0, 1], [1, 2], [2, 3], [3, 0]]
     edge_pairs: ClassVar = [(0, 1), (1, 2), (2, 3), (3, 0)]
 
+    @property
+    def quality(self) -> float:
+        return get_quad_quality(self.grid_points, self.indexes)
+
 
 class HexCell(CellBase):
     """A block, treated as a single cell;
@@ -85,3 +99,7 @@ class HexCell(CellBase):
     side_names: ClassVar = ["bottom", "top", "left", "right", "front", "back"]
     side_indexes: ClassVar = [[0, 1, 2, 3], [7, 6, 5, 4], [4, 0, 3, 7], [6, 2, 1, 5], [0, 4, 5, 1], [7, 3, 2, 6]]
     edge_pairs: ClassVar = EDGE_PAIRS
+
+    @property
+    def quality(self) -> float:
+        return get_hex_quality(self.grid_points, self.indexes)

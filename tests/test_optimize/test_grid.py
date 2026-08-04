@@ -64,6 +64,11 @@ class HexGridTests(MeshTestCase):
     def test_neighbours(self, junction, count):
         self.assertEqual(len(self.grid.junctions[junction].neighbours), count)
 
+    def test_quality_counts_each_cell_once(self):
+        """Grid quality is a sum over cells; summing junctions would count
+        each cell once for every corner it touches"""
+        self.assertAlmostEqual(self.grid.quality, sum(cell.quality for cell in self.grid.cells))
+
 
 class QuadGridTests(SketchTestsBase):
     def test_from_sketch(self):
@@ -95,6 +100,9 @@ class QuadGridTests(SketchTestsBase):
 
     def test_positions(self):
         np.testing.assert_equal(self.grid.points, self.positions)
+
+    def test_quality_counts_each_cell_once(self):
+        self.assertAlmostEqual(self.grid.quality, sum(cell.quality for cell in self.grid.cells))
 
     @parameterized.expand(
         (

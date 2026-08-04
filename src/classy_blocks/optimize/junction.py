@@ -1,14 +1,11 @@
 import dataclasses
 from typing import Optional
 
-import numpy as np
-
 from classy_blocks.base.exceptions import ClampExistsError
 from classy_blocks.cbtyping import NPPointListType, NPPointType
-from classy_blocks.optimize.cell import CellBase, HexCell
+from classy_blocks.optimize.cell import CellBase
 from classy_blocks.optimize.clamps.clamp import ClampBase
 from classy_blocks.optimize.links import LinkBase
-from classy_blocks.optimize.quality import get_hex_quality, get_quad_quality
 
 
 @dataclasses.dataclass
@@ -56,9 +53,5 @@ class Junction:
 
     @property
     def quality(self) -> float:
-        if isinstance(next(iter(self.cells)), HexCell):
-            quality_function = get_hex_quality
-        else:
-            quality_function = get_quad_quality
-
-        return sum(quality_function(self.points, np.array(cell.indexes, dtype=np.int32)) for cell in self.cells)
+        """Returns summed qualities of all cells that touch this junction"""
+        return sum(cell.quality for cell in self.cells)

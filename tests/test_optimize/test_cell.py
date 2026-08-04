@@ -3,6 +3,7 @@ from parameterized import parameterized
 
 from classy_blocks.base.exceptions import NoCommonSidesError
 from classy_blocks.optimize.cell import HexCell
+from classy_blocks.optimize.quality import get_hex_quality
 from tests.fixtures.mesh import MeshTestCase
 
 
@@ -50,3 +51,11 @@ class CellTests(MeshTestCase):
             cell_2 = self.get_cell(2)
 
             cell_1.get_common_side(cell_2)
+
+    def test_quality(self):
+        cell = self.get_cell(0)
+
+        self.assertAlmostEqual(
+            cell.quality,
+            get_hex_quality(self.mesh_points, np.array(self.mesh.blocks[0].indexes, dtype=np.int32)),
+        )

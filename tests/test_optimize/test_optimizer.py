@@ -9,9 +9,25 @@ from classy_blocks.optimize.clamps.free import FreeClamp
 from classy_blocks.optimize.clamps.surface import PlaneClamp
 from classy_blocks.optimize.links import TranslationLink
 from classy_blocks.optimize.optimizer import MeshOptimizer, SketchOptimizer
+from classy_blocks.optimize.record import IterationRecord, OptimizationRecord
+from classy_blocks.optimize.report import SilentReporter
 from classy_blocks.optimize.smoother import SketchSmoother
 from classy_blocks.util import functions as f
 from tests.test_optimize.optimize_fixtures import BoxTestsBase, SketchTestsBase
+
+
+class RecordingReporter(SilentReporter):
+    """Keeps records instead of printing them"""
+
+    def __init__(self):
+        self.iterations: list[IterationRecord] = []
+        self.optimizations: list[OptimizationRecord] = []
+
+    def iteration_end(self, srecord: IterationRecord) -> None:
+        self.iterations.append(srecord)
+
+    def optimization_end(self, orecord: OptimizationRecord) -> None:
+        self.optimizations.append(orecord)
 
 
 class MeshOptimizerTests(BoxTestsBase):
@@ -63,6 +79,29 @@ class MeshOptimizerTests(BoxTestsBase):
 
         self.assertGreater(f.norm(follower_vertex.position - f.vector(0, 1, 0)), 0)
         np.testing.assert_almost_equal(vertex.position, [0, 0, 0], decimal=1)
+
+    def test_records_chain(self):
+        """Quality is carried from one iteration to the next instead of
+        being queried again; the reported values must still be the real ones"""
+        vertex = self.get_vertex([0, 0, 0])
+        vertex.move_to([0.3, 0.3, 0.3])
+
+        optimizer = MeshOptimizer(self.mesh, report=False)
+        optimizer.add_clamp(FreeClamp(vertex.position))
+
+        reporter = RecordingReporter()
+        optimizer.reporter = reporter
+
+        initial_quality = optimizer.grid.quality
+        optimizer.optimize(method="Powell")
+
+        self.assertEqual(reporter.iterations[0].grid_initial, initial_quality)
+
+        for previous, this in zip(reporter.iterations[:-1], reporter.iterations[1:]):
+            self.assertEqual(this.grid_initial, previous.grid_final)
+
+        self.assertEqual(reporter.optimizations[-1].grid_initial, initial_quality)
+        self.assertEqual(reporter.optimizations[-1].grid_final, optimizer.grid.quality)
 
 
 class SketchOptimizerTests(SketchTestsBase):
