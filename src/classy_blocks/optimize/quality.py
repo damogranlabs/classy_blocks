@@ -112,7 +112,7 @@ def get_quad_inner_angle(points: NPPointListType, normal: NPVectorType, corner: 
 
 @numba.jit(nopython=True, cache=True)
 def get_quad_quality(grid_points: NPPointListType, cell_indexes: NPIndexType) -> float:
-    quality = 0
+    quality: float = 0
     quad_points = take(grid_points, cell_indexes)
     center, normal, aspect = get_quad_normal(quad_points)
 
@@ -135,7 +135,7 @@ def get_hex_quality(grid_points: NPPointListType, cell_indexes: NPIndexType) -> 
 
     side_indexes = np.array([[0, 1, 2, 3], [7, 6, 5, 4], [4, 0, 3, 7], [6, 2, 1, 5], [0, 4, 5, 1], [7, 3, 2, 6]])
 
-    quality = 0
+    quality: float = 0
 
     for side in side_indexes:
         # Non-ortho angle in a hexahedron is measured between two vectors:
