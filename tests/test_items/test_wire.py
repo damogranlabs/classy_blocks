@@ -23,6 +23,11 @@ class WireTests(DataTestCase):
         """The test subject"""
         return Wire(self.vertices, self.axis, self.corner_1, self.corner_2)
 
+    @property
+    def inverted_wire(self) -> Wire:
+        """The test subject, pointing the other way"""
+        return Wire(self.vertices, self.axis, self.corner_2, self.corner_1)
+
     def test_coincident_aligned(self):
         """Coincident pair (__eq__()) with an aligned pair"""
         wire_1 = self.wire
@@ -33,10 +38,7 @@ class WireTests(DataTestCase):
     def test_coincident_inverted(self):
         """Coincident pair (__eq__()) with an inverted pair"""
         wire_1 = self.wire
-        wire_2 = copy.copy(self.wire)
-
-        # invert the other one
-        wire_2.vertices.reverse()
+        wire_2 = self.inverted_wire
 
         self.assertTrue(wire_1.is_coincident(wire_2))
 
@@ -75,15 +77,6 @@ class WireTests(DataTestCase):
     def test_is_inverted(self):
         """Alignment: opposite"""
         wire_1 = self.wire
-        wire_2 = copy.copy(self.wire)
-
-        wire_2.vertices.reverse()
+        wire_2 = self.inverted_wire
 
         self.assertFalse(wire_1.is_aligned(wire_2))
-
-    def test_add_inline_duplicate(self):
-        wire = self.wire
-
-        wire.add_inline(wire)
-        self.assertEqual(len(wire.after), 0)
-        self.assertEqual(len(wire.before), 0)

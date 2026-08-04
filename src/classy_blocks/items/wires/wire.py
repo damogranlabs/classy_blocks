@@ -1,4 +1,3 @@
-import dataclasses
 import functools
 
 from classy_blocks.cbtyping import DirectionType
@@ -12,18 +11,6 @@ from classy_blocks.items.vertex import Vertex
 @functools.cache
 def get_length(wire: "Wire") -> float:
     return wire.edge.length
-
-
-@dataclasses.dataclass
-class WireJoint:
-    """Remembers an inline wire (before/after) and
-    its orientation (same direction/inverted)."""
-
-    wire: "Wire"
-    same_dir: bool
-
-    def __hash__(self):
-        return id(self.wire)
 
 
 class Wire:
@@ -45,29 +32,21 @@ class Wire:
         # multiple wires can be at the same spot; this list holds other
         # coincident wires from different blocks
         self.coincidents: set[Wire] = set()
-        # wires that precede this (end with this wire's beginning vertex)
-        self.before: set[WireJoint] = set()
-        # wires that follow this (start with this wire's end vertex)
-        self.after: set[WireJoint] = set()
 
-        # Coincidence is based on vertex *position* (canonical index), not the
-        # blockMeshDict index; this way wires that touch a vertex duplicated for a
-        # face-merged slave patch are still recognized as coincident with their
-        # non-merged neighbours. The merged-face patches are added to the key so that
-        # the two sides of a merged interface (an in-face wire on the slave side vs.
-        # the master side) remain independent and may keep different cell counts.
-        self.key = hash(
-            (
-                frozenset(v.canonical_index for v in self.vertices),
-                frozenset(self.merged_face_patches),
-            )
-        )
+        # Where this wire is; a naive guess until locate() is called.
+        self.canonical = (self.vertices[0].index, self.vertices[1].index)
+        self.key: tuple[frozenset[int], frozenset[str]] = (frozenset(self.canonical), frozenset())
 
-    @property
-    def merged_face_patches(self) -> set[str]:
-        """Slave patches for which this whole wire lies inside a merged face,
-        i.e. both of its vertices were duplicated for the same slave patch."""
-        return self.vertices[0].duplicated_patches & self.vertices[1].duplicated_patches
+    def locate(self, canonical: tuple[int, int], merged_patches: frozenset[str]) -> None:
+        """Tells this wire where it *is*, as opposed to which vertices it uses.
+
+        Vertex numbering does not answer that question because face merging duplicates
+        vertices on slave patches; 'canonical' holds indexes of unique points instead.
+        'merged_patches' are slave patches this whole wire lies within; they go into
+        the key so that the two sides of a merged interface stay independent and may
+        keep different cell counts. See BlockList.update_neighbours."""
+        self.canonical = canonical
+        self.key = (frozenset(canonical), merged_patches)
 
     @property
     def length(self) -> float:
@@ -88,9 +67,7 @@ class Wire:
         if not self.is_coincident(candidate):
             raise RuntimeError(f"Wires are not coincident: {self}, {candidate}")
 
-        # compare by position (canonical index) so that duplicated vertices
-        # don't wrongly report an inverted orientation
-        return [v.canonical_index for v in self.vertices] == [v.canonical_index for v in candidate.vertices]
+        return self.canonical == candidate.canonical
 
     def add_edge(self, edge: Edge) -> None:
         self.edge = edge
@@ -99,24 +76,6 @@ class Wire:
         """Adds a reference to a coincident wire, if it's aligned"""
         if self.is_coincident(candidate):
             self.coincidents.add(candidate)
-
-    def add_inline(self, candidate: "Wire") -> None:
-        """Adds a reference to a wire that is before or after this one
-        in the same direction"""
-        # this assumes the lines are inline and in the same axis
-        # TODO: Test
-        # TODO: one-liner, bitte
-        if candidate == self:
-            return
-
-        if candidate.vertices[1] == self.vertices[0]:
-            self.before.add(WireJoint(candidate, True))
-        elif candidate.vertices[0] == self.vertices[0]:
-            self.before.add(WireJoint(candidate, False))
-        elif candidate.vertices[0] == self.vertices[1]:
-            self.after.add(WireJoint(candidate, True))
-        elif candidate.vertices[1] == self.vertices[1]:
-            self.after.add(WireJoint(candidate, False))
 
     @property
     def is_graded(self) -> bool:

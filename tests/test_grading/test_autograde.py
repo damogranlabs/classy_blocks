@@ -172,18 +172,18 @@ class RespectManualChopsMergedTests(unittest.TestCase):
 
         return mesh
 
-    def test_manual_chop_propagates_to_coincident(self):
-        # box_c is manually chopped in x; box_b must inherit that count through
-        # the shared (non-merged) top face, everything else is auto
+    def test_inherited_grading_not_inverted(self):
+        # box_c is manually chopped in x and box_b inherits that grading through
+        # the shared (non-merged) top face, whose corners the merge duplicated;
+        # the duplication must not make the two axes look oppositely oriented
         box_a, box_b, box_c = self.get_merged_boxes()
-        box_c.chop(0, count=9)
+        box_c.chop(0, start_size=0.02, end_size=0.4)
 
         mesh = self.get_mesh(box_a, box_b, box_c)
         FixedCountGrader(mesh, 5).grade()
 
-        self.assertEqual(mesh.blocks[2].axes[0].count, 9)  # box_c, manual
-        self.assertEqual(mesh.blocks[1].axes[0].count, 9)  # box_b, inherited
-        self.assertEqual(mesh.blocks[0].axes[0].count, 5)  # box_a, auto
+        self.assertIn("simpleGrading ( 20.0 1 1 )", formats.format_block(mesh.blocks[2]))  # box_c, manual
+        self.assertIn("simpleGrading ( 20.0 1 1 )", formats.format_block(mesh.blocks[1]))  # box_b, not 0.05
 
     def test_merged_interface_stays_independent(self):
         # a manual chop on the slave's in-merge-face direction must NOT leak to
@@ -191,6 +191,25 @@ class RespectManualChopsMergedTests(unittest.TestCase):
         # boxes so the sole connection between them is the merged face itself.
         box_a = Box([0, 0, 0], [1, 1, 1])
         box_b = Box([1, 0, 0], [2, 1, 1])
+        box_a.set_patch("right", "a_right")
+        box_b.set_patch("left", "b_left")
+        box_b.chop(1, count=12)  # in-face direction
+
+        mesh = Mesh()
+        mesh.add(box_a)
+        mesh.add(box_b)
+        mesh.merge_patches("a_right", "b_left")
+
+        FixedCountGrader(mesh, 5).grade()
+
+        self.assertEqual(mesh.blocks[1].axes[1].count, 12)  # box_b, manual
+        self.assertEqual(mesh.blocks[0].axes[1].count, 5)  # box_a, independent
+
+
+class PartialOverlapTests(unittest.TestCase):
+    def test_two_box(self):
+        box_a = Box([0, 0, 0], [1, 1, 1])
+        box_b = Box([1, 0, 0], [2, 2, 1])
         box_a.set_patch("right", "a_right")
         box_b.set_patch("left", "b_left")
         box_b.chop(1, count=12)  # in-face direction

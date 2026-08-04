@@ -15,59 +15,11 @@ from classy_blocks.util.constants import DIRECTION_MAP
 
 @dataclasses.dataclass
 class WireInfo:
-    """Gathers data about a wire; its location, cell sizes, neighbours and wires before/after"""
+    """Gathers data about a wire; its location and whether it starts or ends on a wall"""
 
     wire: Wire
     starts_at_wall: bool
     ends_at_wall: bool
-
-    @property
-    def length(self) -> float:
-        return self.wire.length
-
-    @property
-    def size_after(self) -> Optional[float]:
-        """Returns average cell size in wires that come after this one (in series/inline);
-        None if this is the last wire"""
-        # TODO: merge this with size_before somehow
-        sum_size: float = 0
-        defined_count: int = 0
-
-        for joint in self.wire.after:
-            if joint.wire.grading.is_defined:
-                defined_count += 1
-
-                if joint.same_dir:
-                    sum_size += joint.wire.grading.start_size
-                else:
-                    sum_size += joint.wire.grading.end_size
-
-        if defined_count == 0:
-            return None
-
-        return sum_size / defined_count
-
-    @property
-    def size_before(self) -> Optional[float]:
-        """Returns average cell size in wires that come before this one (in series/inline);
-        None if this is the first wire"""
-        # TODO: merge this with size_after somehow
-        sum_size: float = 0
-        defined_count: int = 0
-
-        for joint in self.wire.before:
-            if joint.wire.grading.is_defined:
-                defined_count += 1
-
-                if joint.same_dir:
-                    sum_size += joint.wire.grading.end_size
-                else:
-                    sum_size += joint.wire.grading.start_size
-
-        if defined_count == 0:
-            return None
-
-        return sum_size / defined_count
 
 
 class WireCatalogue:

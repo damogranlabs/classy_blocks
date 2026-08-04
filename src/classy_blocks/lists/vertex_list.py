@@ -1,5 +1,3 @@
-from typing import Optional
-
 from classy_blocks.base.exceptions import VertexNotFoundError
 from classy_blocks.cbtyping import NPPointType
 from classy_blocks.construct.point import Point
@@ -42,7 +40,7 @@ class VertexList:
 
         raise VertexNotFoundError(f"No duplicated vertex found: {position} {slave_patches}")
 
-    def add_duplicated(self, point: Point, slave_patches: set[str], original: Optional[Vertex] = None) -> Vertex:
+    def add_duplicated(self, point: Point, slave_patches: set[str]) -> Vertex:
         """Re-use existing vertices when there's already one at the position;
         unless that vertex belongs to a slave of a face-merged pair -
         in that case add a duplicate in the same position anyway"""
@@ -60,10 +58,6 @@ class VertexList:
             vertex = self.find_duplicated(point.position, slave_patches)
         except VertexNotFoundError:
             vertex = Vertex.from_point(point, len(self.vertices))
-            # remember where this duplicate came from so that grading coincidence
-            # with non-merged neighbours can still be established (see Vertex)
-            vertex.duplicated_from = original
-            vertex.duplicated_patches = set(slave_patches)
             self.vertices.append(vertex)
             self.duplicated.append(DuplicatedEntry(vertex, slave_patches))
 
