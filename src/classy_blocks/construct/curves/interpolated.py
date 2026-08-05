@@ -31,6 +31,8 @@ class InterpolatedCurveBase(FunctionCurveBase, abc.ABC):
         self.function = self._interpolator(self.series, extrapolate, equalize)
         self.bounds = (0, 1)
 
+        self._params = self.function.params
+
     @property
     def segments(self) -> int:
         """Returns number of points this curve was created from"""
@@ -38,7 +40,7 @@ class InterpolatedCurveBase(FunctionCurveBase, abc.ABC):
 
     @property
     def _point_params(self) -> FloatListType:
-        return self.function.params
+        return self._params
 
     @property
     def parts(self):
