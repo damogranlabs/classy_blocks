@@ -1,16 +1,17 @@
 from collections.abc import Sequence
 from typing import Any, Callable, Literal, Optional, TypedDict, Union
 
-from nptyping import Float, NDArray, Shape
+from numpy import floating
+from numpy.typing import NDArray
 
 # A plain list of floats
-FloatListType = NDArray[Shape["1, *"], Float]
+FloatListType = NDArray[floating]
 
 # A single point can be specified as a list of floats or as a numpy array
-NPPointType = NDArray[Shape["3, 1"], Any]
+NPPointType = NDArray[Any]
 PointType = Union[Sequence[Union[int, float]], NPPointType]
 # Similar: a list of points
-NPPointListType = NDArray[Shape["*, 3"], Any]
+NPPointListType = NDArray[Any]
 PointListType = Union[NPPointListType, Sequence[PointType], Sequence[NPPointType]]
 # same as PointType but with a different name to avoid confusion
 NPVectorType = NPPointType

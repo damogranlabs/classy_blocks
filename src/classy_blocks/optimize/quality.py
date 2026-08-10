@@ -1,11 +1,11 @@
 import numba  # type:ignore
 import numpy as np
-from nptyping import Int32, NDArray, Shape
+from numpy.typing import NDArray
 
 from classy_blocks.cbtyping import NPPointListType, NPPointType, NPVectorType
 from classy_blocks.util.constants import VSMALL
 
-NPIndexType = NDArray[Shape["*, 1"], Int32]
+NPIndexType = NDArray[np.int32]
 
 
 @numba.jit(nopython=True)
