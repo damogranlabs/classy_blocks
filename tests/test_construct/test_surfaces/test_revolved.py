@@ -4,6 +4,7 @@ import unittest
 
 import numpy as np
 import trimesh
+from parameterized import parameterized
 
 from classy_blocks.construct.curves.interpolated import LinearInterpolatedCurve
 from classy_blocks.construct.surfaces.revolved import RevolvedSurface
@@ -174,6 +175,42 @@ class RevolvedSurfaceClosestPointTests(unittest.TestCase):
         result = sector.get_closest_point([0, 5, 0])
         self.assertAlmostEqual(float(np.hypot(result[0], result[1])), 2.0, places=6)
         self.assertAlmostEqual(float(np.arctan2(result[1], result[0])), np.pi / 4, places=6)
+
+    def test_closest_params_along_reference_meridian(self):
+        # halfway up the profile (z = 0), no rotation
+        param, angle = self.surface.get_closest_params([10, 0, 0])
+        self.assertAlmostEqual(param, 0.5, places=6)
+        self.assertAlmostEqual(angle, 0, places=6)
+
+    def test_closest_params_at_arbitrary_azimuth_and_height(self):
+        # z = 0.3 on a profile spanning z in [-1, 1] -> param 0.65; azimuth 45 degrees
+        param, angle = self.surface.get_closest_params([5, 5, 0.3])
+        self.assertAlmostEqual(param, 0.65, places=6)
+        self.assertAlmostEqual(angle, np.pi / 4, places=6)
+
+    def test_closest_params_sector_clamps_angle(self):
+        curve = LinearInterpolatedCurve([[2, 0, -1], [2, 0, 1]])
+        sector = RevolvedSurface(curve, axis=[0, 0, 1], angle_bounds=(-np.pi / 4, np.pi / 4))
+
+        _, angle = sector.get_closest_params([0, 5, 0])
+        self.assertAlmostEqual(angle, np.pi / 4, places=6)
+
+    @parameterized.expand(
+        [
+            ([10, 0, 0],),
+            ([0, 10, 0],),
+            ([5, 5, 0.3],),
+            ([0, 0, 5],),
+            ([-3, -4, -0.8],),
+        ]
+    )
+    def test_closest_params_feed_get_point(self, point):
+        """get_point() on the closest params yields the closest point"""
+        params = self.surface.get_closest_params(point)
+
+        np.testing.assert_allclose(
+            self.surface.get_point(*params), self.surface.get_closest_point(point), atol=1e-9
+        )
 
 
 class RevolvedSurfaceFromMeshTests(unittest.TestCase):

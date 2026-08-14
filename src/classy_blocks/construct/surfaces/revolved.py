@@ -67,7 +67,10 @@ class RevolvedSurface(SurfaceBase, ElementBase):
         farthest = int(np.argmax(radii))
         return radial[farthest] / radii[farthest]
 
-    def get_closest_point(self, point: PointType) -> NPPointType:
+    def get_closest_params(self, point: PointType) -> tuple[float, float]:
+        """Finds the parameters (curve parameter, revolution angle) at which this surface
+        is the closest to the given point; feed them to get_point() to obtain that point.
+        The angle is clamped to angle_bounds, the parameter to the curve's bounds."""
         axis = self.axis
         origin = self.origin
         reference = self._reference_radial()
@@ -82,8 +85,10 @@ class RevolvedSurface(SurfaceBase, ElementBase):
         angle = float(np.clip(angle, self.angle_bounds[0], self.angle_bounds[1]))
 
         in_plane = f.rotate(point, -angle, axis, origin)
-        closest = self.curve.get_closest_point(in_plane)
-        return f.rotate(closest, angle, axis, origin)
+        return self.curve.get_closest_param(in_plane), angle
+
+    def get_closest_point(self, point: PointType) -> NPPointType:
+        return self.get_point(*self.get_closest_params(point))
 
     @classmethod
     def from_mesh(
