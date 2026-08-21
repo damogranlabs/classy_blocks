@@ -7,7 +7,7 @@ license = "MIT"
 keywords = ["classy_blocks", "OpenFOAM", "blockMesh"]
 authors = [{ name = "Nejc Jurkovic", email = "nejc.jurkovic@proton.me" }]
 requires-python = ">=3.9"
-dependencies = ["numpy", "scipy", "numba"]
+dependencies = ["numpy", "scipy", "numba", "trimesh[easy]"]
 
 [project.urls]
 "Homepage" = "https://github.com/damogranlabs/classy_blocks"
@@ -28,6 +28,9 @@ line-length = 120
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "UP", "YTT", "B", "A", "ARG", "RUF"]
+
+[tool.mypy]
+files = ["src", "tests"]
 
 [[tool.mypy.overrides]]
 module = "scipy,scipy.*,parameterized.*"
