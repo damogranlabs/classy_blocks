@@ -3,8 +3,8 @@ import numpy as np
 from classy_blocks.cbtyping import NPPointType, NPVectorType, PointType, VectorType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.flat.sketches.disk import QuarterDisk
-from classy_blocks.construct.geometry import SearchableSphere
 from classy_blocks.construct.operations.loft import Loft
+from classy_blocks.construct.searchables import SearchableSphere
 from classy_blocks.construct.shape import Shape
 from classy_blocks.util import functions as f
 

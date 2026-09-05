@@ -19,14 +19,6 @@ from .construct.flat.sketches.spline_round import (
     SplineDisk,
     SplineRing,
 )
-from .construct.geometry import (
-    SearchableCone,
-    SearchableCylinder,
-    SearchablePlaneEmbeddedPoints,
-    SearchablePlanePointAndNormal,
-    SearchableSphere,
-    TriSurface,
-)
 from .construct.operations.box import Box
 from .construct.operations.connector import Connector
 from .construct.operations.extrude import Extrude
@@ -34,6 +26,14 @@ from .construct.operations.loft import Loft
 from .construct.operations.operation import Operation
 from .construct.operations.revolve import Revolve
 from .construct.operations.wedge import Wedge
+from .construct.searchables import (
+    SearchableCone,
+    SearchableCylinder,
+    SearchablePlaneEmbeddedPoints,
+    SearchablePlanePointAndNormal,
+    SearchableSphere,
+    SearchableTriSurface,
+)
 from .construct.shape import ExtrudedShape, LoftedShape, RevolvedShape, Shape
 from .construct.shapes.cylinder import Cylinder, QuarterCylinder, SemiCylinder
 from .construct.shapes.elbow import Elbow
@@ -132,6 +132,7 @@ __all__ = [
     "SearchablePlaneEmbeddedPoints",
     "SearchablePlanePointAndNormal",
     "SearchableSphere",
+    "SearchableTriSurface",
     "SemiCylinder",
     "Shape",
     "ShapeOptimizer",
@@ -151,7 +152,6 @@ __all__ = [
     "TransformedStack",
     "Translation",
     "TranslationLink",
-    "TriSurface",
     "TriangulatedSurface",
     "ViewpointReorienter",
     "Wedge",

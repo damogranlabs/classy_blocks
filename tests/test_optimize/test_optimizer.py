@@ -19,7 +19,7 @@ from tests.test_optimize.optimize_fixtures import BoxTestsBase, SketchTestsBase
 class RecordingReporter(SilentReporter):
     """Keeps records instead of printing them"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.iterations: list[IterationRecord] = []
         self.optimizations: list[OptimizationRecord] = []
 

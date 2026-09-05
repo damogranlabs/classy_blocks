@@ -4,7 +4,7 @@ import numpy as np
 import trimesh
 
 from classy_blocks.base.element import ElementBase
-from classy_blocks.cbtyping import NPPointType, PointType, VectorType
+from classy_blocks.cbtyping import NPPointListType, NPPointType, PointType, VectorType
 from classy_blocks.construct.curves.curve import CurveBase
 from classy_blocks.construct.curves.interpolated import LinearInterpolatedCurve
 from classy_blocks.construct.point import Point
@@ -62,7 +62,7 @@ class RevolvedSurface(SurfaceBase, ElementBase):
         """Unit radial vector to the discretized curve point farthest from the axis."""
         axis = self.axis
         relative = self.curve.discretize() - self.origin
-        radial = relative - np.outer(relative @ axis, axis)
+        radial: NPPointListType = relative - np.outer(relative @ axis, axis)
         radii = np.linalg.norm(radial, axis=1)
         farthest = int(np.argmax(radii))
         return radial[farthest] / radii[farthest]
@@ -76,7 +76,7 @@ class RevolvedSurface(SurfaceBase, ElementBase):
         reference = self._reference_radial()
 
         relative = np.asarray(point, dtype=float) - origin
-        radial = relative - (relative @ axis) * axis
+        radial: NPPointListType = relative - (relative @ axis) * axis
 
         # signed azimuth of the query about the axis, measured from the meridian;
         # arctan2 is magnitude-invariant so unnormalized 'radial' is fine, and an

@@ -5,7 +5,7 @@ from typing import Optional, TypeVar, Union
 
 from classy_blocks.base import transforms as tr
 from classy_blocks.cbtyping import GeometryType, NPPointType, PointType, VectorType
-from classy_blocks.construct.geometry import SearchableGeometry
+from classy_blocks.construct.searchables import SearchableGeometry
 
 ElementBaseT = TypeVar("ElementBaseT", bound="ElementBase")
 

@@ -13,7 +13,7 @@ ep_plane = cb.SearchablePlaneEmbeddedPoints("plane_2", [1, 0, 0], [0, 0, 1], [1,
 s_sphere = cb.SearchableSphere("sphere_1", [0, 0, 0], 2)
 s_cylinder = cb.SearchableCylinder("cylinder_1", [0, 0, 0], [1, 0, 0], 1)
 s_cone = cb.SearchableCone("cone_1", [0, 0, 0], 2, 1, [1, 0, 0], 1, 0.5)
-trisurf = cb.TriSurface("terrain", "terrain.stl")
+trisurf = cb.SearchableTriSurface("terrain", "terrain.stl")
 
 mesh.add_geometry(pnn_plane)
 mesh.add_geometry(ep_plane)

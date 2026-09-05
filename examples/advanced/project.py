@@ -2,27 +2,9 @@ import os
 
 import classy_blocks as cb
 
-geometry = {
-    "terrain": [
-        "type triSurfaceMesh",
-        "name terrain",
-        'file "terrain.stl"',
-    ],
-    "left_wall": [
-        "type       searchablePlane",
-        "planeType  pointAndNormal",
-        "point      (-1 0 0)",
-        "normal     (1  0  0)",
-        "pointAndNormalDict { point (-1 0 0); normal (1 0 0); }",  # ESI version
-    ],
-    "front_wall": [
-        "type       searchablePlane",
-        "planeType  pointAndNormal",
-        "point      (0 -1 0)",
-        "normal     (0  1  0)",
-        "pointAndNormalDict { point (0 -1 0); normal (0 1 0); }",  # ESI version
-    ],
-}
+terrain_surface = cb.SearchableTriSurface("terrain", "terrain.stl")
+left_wall = cb.SearchablePlanePointAndNormal("left_wall", [-1, 0, 0], [1, 0, 0])
+front_wall = cb.SearchablePlanePointAndNormal("front_wall", [0, -1, 0], [0, 1, 0])
 
 mesh = cb.Mesh()
 
@@ -63,6 +45,8 @@ box.set_patch("bottom", "terrain")
 mesh.add(box)
 
 mesh.set_default_patch("atmosphere", "patch")
-mesh.add_geometry(geometry)
+mesh.add_geometry(terrain_surface)
+mesh.add_geometry(left_wall)
+mesh.add_geometry(front_wall)
 
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")

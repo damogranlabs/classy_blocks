@@ -2,7 +2,7 @@ from classy_blocks.assemble.depot import Depot
 from classy_blocks.assemble.dump import AssembledDump
 from classy_blocks.assemble.settings import Settings
 from classy_blocks.base.exceptions import EdgeNotFoundError
-from classy_blocks.construct.geometry import SearchableGeometry
+from classy_blocks.construct.searchables import SearchableGeometry
 from classy_blocks.items.block import Block
 from classy_blocks.items.vertex import Vertex
 from classy_blocks.lists.block_list import BlockList

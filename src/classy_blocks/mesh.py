@@ -7,8 +7,8 @@ from classy_blocks.assemble.settings import Settings
 from classy_blocks.base.exceptions import EmptyMeshError
 from classy_blocks.cbtyping import GeometryType
 from classy_blocks.construct.assemblies.assembly import Assembly
-from classy_blocks.construct.geometry import SearchableGeometry
 from classy_blocks.construct.operations.operation import Operation
+from classy_blocks.construct.searchables import SearchableGeometry
 from classy_blocks.construct.shape import Shape
 from classy_blocks.construct.stack import Stack
 from classy_blocks.grading.graders.manager import GradingManager

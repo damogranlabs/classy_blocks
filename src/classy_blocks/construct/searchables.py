@@ -53,16 +53,7 @@ class SearchablePlanePointAndNormal(SearchableGeometry):
         return "searchablePlane"
 
     def __post_init__(self):
-        # duplicate keywords to be compatible with both OF branches
-        # return {
-        #     self.geometry_label: [
-        #         "type searchableSphere",
-        #         f"origin {constants.vector_format(self.center_point)}",
-        #         f"centre {constants.vector_format(self.center_point)}",
-        #         f"radius {self.radius}",
-        #     ]
-        # }
-        #
+        # add duplicate keywords to be compatible with both OF branches
         self.base = self.base_point
         self.normal = self.normal_vector
         self.plane_type = "pointAndNormal"
@@ -111,7 +102,7 @@ class SearchableCone(SearchableGeometry):
 
 
 @dataclasses.dataclass
-class TriSurface(SearchableGeometry):
+class SearchableTriSurface(SearchableGeometry):
     file: str
 
     @property
