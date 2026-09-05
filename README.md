@@ -276,19 +276,8 @@ Projecting a block side to a geometry is straightforward; edges, however, can be
 Geometry is specified as a simple dictionary of strings and is thrown in blockMeshDict exactly as provided by the user.
 
 ```python
-geometry = {
-    'terrain': [
-        'type triSurfaceMesh',
-        'name terrain',
-        'file "terrain.stl"',
-    ],
-    'left_wall': [
-        'type       searchablePlane',
-        'planeType  pointAndNormal',
-        'point      (-1 0 0)',
-        'normal     (1  0  0)',
-    ]
-}
+terrain_surface = cb.SearchableTriSurface("terrain", "terrain.stl")
+left_wall = cb.SearchablePlanePointAndNormal("left_wall", [-1, 0, 0], [1, 0, 0])
 
 box = cb.Box([-1., -1., -1.], [1., 1., 1.])
 box.project_side('bottom', 'terrain')
@@ -458,4 +447,4 @@ If you are stuck, try reading the [classy_blocks tutorial on damogranlabs.com](h
 
 You are free to join the [OpenFOAM Discord channel](https://discord.gg/P9p9eHn) where classy_blocks users and developers hang out.
 
-If you have collosal plans for meshing but no resources, write an email to [Nejc Jurkovic](mailto:kandelabr@gmail.com) and we'll discuss your options.
+If you have collosal plans for meshing but no resources, write an email to [Nejc Jurkovic](mailto:nejc.jurkovic@proton.me) and we'll discuss your options.

@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0]
+
+### Added
+
+- Easy-to-add **Searchable geometry**  to save the user from writing cryptic dicts for mesh.add_geometry():
+  - SearchablePlanePointAndNormal
+  - SearchablePlaneEmbeddedPoints (3-point plane definition)
+  - SearchableSphere
+  - SearchableCylinder
+  - SearchableCone
+  - SearchableTriSurface
+- Curves: finding cusp points for interpolated curves (based on their source points)
+- Surfaces framework: definition and handling of surfaces
+  - TriangulatedSurface: finding closest point, extracting cross-section curves
+  - RevolvedSurface: Created by revolving a Curve around an axis; can also be made by cross-secting a TriangulatedSurface
+- Raise an exception (instead of crashing) when writing an empty mesh
+- A Square Frustum example (custom sketches)
+
+### Changed
+
+- Improved Optimization speed (8x+)
+- Bug: fixes failed autograding on meshes with face merging
+
+### Removed
+
 ## [1.11.2]
 
 ### Changed

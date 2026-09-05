@@ -1,13 +1,13 @@
 [project]
 name = "classy_blocks"
-version = "1.11.2"
+version = "1.12.0"
 description = "Python classes for easier creation of openFoam's blockMesh dictionaries."
 readme = "README.md"
 license = "MIT"
 keywords = ["classy_blocks", "OpenFOAM", "blockMesh"]
 authors = [{ name = "Nejc Jurkovic", email = "nejc.jurkovic@proton.me" }]
 requires-python = ">=3.9"
-dependencies = ["numpy", "scipy", "numba", "trimesh[easy]"]
+dependencies = ["numpy", "scipy", "numba", "trimesh[easy]", "typing_extensions"]
 
 [project.urls]
 "Homepage" = "https://github.com/damogranlabs/classy_blocks"
