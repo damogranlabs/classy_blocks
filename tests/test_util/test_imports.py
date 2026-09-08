@@ -69,6 +69,7 @@ class ImportsTests(unittest.TestCase):
         _ = cb.RevolvedRing
         _ = cb.Hemisphere
         _ = cb.Shell
+        _ = cb.MappedShape
 
     def test_import_mesh(self):
         _ = cb.Mesh

@@ -32,7 +32,7 @@ DirectionType = Literal[0, 1, 2]
 # Project vertex/edge to one or multiple geometries
 ProjectToType = Union[str, list[str]]
 
-# A list of indexes that define a quad
+# A list of indexes that define a quad/hex
 IndexType = list[int]
 
 
