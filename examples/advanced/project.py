@@ -49,4 +49,6 @@ mesh.add_geometry(terrain_surface)
 mesh.add_geometry(left_wall)
 mesh.add_geometry(front_wall)
 
+mesh.modify_patch("terrain", "wall", ["inGroups (wall fixed)"])
+
 mesh.write(os.path.join("..", "case", "system", "blockMeshDict"), debug_path="debug.vtk")
