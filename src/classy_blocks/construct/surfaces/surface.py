@@ -18,28 +18,28 @@ class SurfaceBase(abc.ABC):
 
     @staticmethod
     def sort_points(loops: list[NPPointListType], far_point: PointType, tol: float = TOL) -> NPPointListType:
-        """Chains loops (as returned by get_cross_sections) into a single ordered
-        path: start at the point closest to 'far_point', then repeatedly append
-        the nearest not-yet-used point. 'far_point' anchors where the path starts
-        and therefore its direction.
+        """Chains ordered loops (as returned by get_cross_sections) into a single
+        path. Each loop keeps its own point order; only its direction is chosen.
+        Starting from 'far_point', the loop with an end nearest to the current
+        path end is appended next, flipped if needed, so 'far_point' anchors
+        where the path starts and therefore its direction.
 
         Consecutive points within 'tol' of each other along the resulting path
         are merged (dropped): this removes coincident points such as closed-loop
         closing vertices and thins over-refined sections. Raise 'tol' to coarsen;
         the default merges only effectively-identical points."""
-        points = np.concatenate([np.asarray(loop) for loop in loops]) if loops else np.empty((0, 3))
-        if len(points) == 0:
-            return points
-
-        remaining = list(range(len(points)))
-        start = int(np.argmin(np.linalg.norm(points - np.asarray(far_point), axis=1)))
-        order = [remaining.pop(start)]
+        remaining = [np.asarray(loop) for loop in loops]
+        chained: list[NPPointListType] = [np.empty((0, 3))]
+        end = np.asarray(far_point)
 
         while remaining:
-            distances = np.linalg.norm(points[remaining] - points[order[-1]], axis=1)
-            order.append(remaining.pop(int(np.argmin(distances))))
+            ends = np.array([[loop[0], loop[-1]] for loop in remaining])
+            index, flip = np.unravel_index(np.argmin(np.linalg.norm(ends - end, axis=2)), ends.shape[:2])
+            loop = remaining.pop(index)
+            chained.append((loop, loop[::-1])[flip])
+            end = chained[-1][-1]
 
-        path = points[order]
+        path = np.concatenate(chained)
         keep = np.ones(len(path), dtype=bool)
         keep[1:] = np.linalg.norm(np.diff(path, axis=0), axis=1) > tol
         return path[keep]

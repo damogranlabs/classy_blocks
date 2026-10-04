@@ -208,9 +208,7 @@ class RevolvedSurfaceClosestPointTests(unittest.TestCase):
         """get_point() on the closest params yields the closest point"""
         params = self.surface.get_closest_params(point)
 
-        np.testing.assert_allclose(
-            self.surface.get_point(*params), self.surface.get_closest_point(point), atol=1e-9
-        )
+        np.testing.assert_allclose(self.surface.get_point(*params), self.surface.get_closest_point(point), atol=1e-9)
 
 
 class RevolvedSurfaceFromMeshTests(unittest.TestCase):
@@ -271,6 +269,18 @@ class RevolvedSurfaceCoverageTests(unittest.TestCase):
         surface = RevolvedSurface.from_mesh(self.cylinder, axis=[0, 0, 1], anchor=[1, 0, 0], origin=[0, 0, 0])
         profile = surface.curve.discretize()
         self.assertLess(profile[0][2], profile[-1][2])  # starts near z=-2, ends near z=+2
+
+    def test_thin_flange_keeps_its_corner(self):
+        # revolved (r, z) profile: a 0.05-wide flange at the bottom, then a straight wall
+        mesh = trimesh.creation.revolve([[1.05, 0], [1, 0], [1, 0.3], [1, 0.6], [1, 0.9]], sections=64)
+        surface = RevolvedSurface.from_mesh(mesh, axis=[0, 0, 1], anchor=[1, 0, 0], origin=[0, 0, 0])
+
+        cusps = surface.curve.find_cusps(0.1)
+
+        np.testing.assert_allclose(surface.curve.get_point(0), [1.05, 0, 0], atol=1e-6)
+        self.assertEqual(len(cusps), 1)
+        np.testing.assert_allclose(cusps[0].point, [1, 0, 0], atol=1e-6)
+        self.assertAlmostEqual(cusps[0].angle, np.pi / 2, places=6)
 
     def test_empty_side_raises(self):
         box = trimesh.creation.box(extents=[2, 2, 2])
