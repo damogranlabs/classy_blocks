@@ -12,19 +12,35 @@ class SortPointsTests(unittest.TestCase):
         self.assertEqual(len(result), 0)
 
     def test_single_loop_starts_nearest_far_point(self):
-        # a straight run of points along +x, deliberately out of order
-        loop = np.array([[2, 0, 0], [0, 0, 0], [3, 0, 0], [1, 0, 0]])
+        loop = np.array([[3, 0, 0], [2, 0, 0], [1, 0, 0], [0, 0, 0]])
 
         result = SurfaceBase.sort_points([loop], far_point=[-10, 0, 0])
 
         np.testing.assert_allclose(result, [[0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0]])
 
     def test_far_point_flips_direction(self):
-        loop = np.array([[2, 0, 0], [0, 0, 0], [3, 0, 0], [1, 0, 0]])
+        loop = np.array([[0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0]])
 
         result = SurfaceBase.sort_points([loop], far_point=[10, 0, 0])
 
         np.testing.assert_allclose(result, [[3, 0, 0], [2, 0, 0], [1, 0, 0], [0, 0, 0]])
+
+    def test_keeps_loop_order_around_thin_flange(self):
+        # a flange narrower than the point spacing: its inner corner is the point nearest
+        # to far_point, and the nearest neighbour of the flange tip is past the corner
+        loop = np.array([[1.05, 0, 0], [1, 0, 0], [1, 0, 0.3], [1, 0, 0.6], [1, 0, 0.9]])
+
+        result = SurfaceBase.sort_points([loop], far_point=[0, 0, -10])
+
+        np.testing.assert_allclose(result, loop)
+
+    def test_joins_loops_at_nearest_ends(self):
+        loop_1 = np.array([[1, 0, 0], [0, 0, 0]])
+        loop_2 = np.array([[3, 0, 0], [2, 0, 0]])
+
+        result = SurfaceBase.sort_points([loop_2, loop_1], far_point=[-10, 0, 0])
+
+        np.testing.assert_allclose(result, [[0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0]])
 
     def test_joins_two_loops(self):
         loop_1 = np.array([[0, 0, 0], [1, 0, 0]])
