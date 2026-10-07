@@ -270,6 +270,15 @@ class RevolvedSurfaceCoverageTests(unittest.TestCase):
         profile = surface.curve.discretize()
         self.assertLess(profile[0][2], profile[-1][2])  # starts near z=-2, ends near z=+2
 
+    @parameterized.expand([(-10,), (-1.2,), (10,)])
+    def test_profile_runs_bottom_to_top_away_from_origin(self, shift):
+        # mesh sits along the axis away from origin; direction must not depend on where
+        mesh = trimesh.creation.revolve([[1.05, 0], [1, 0], [1, 0.3], [1, 0.6], [1, 0.9]], sections=64)
+        mesh.apply_translation([0, 0, shift])
+        surface = RevolvedSurface.from_mesh(mesh, axis=[0, 0, 1], anchor=[1, 0, 0], origin=[0, 0, 0])
+
+        np.testing.assert_allclose(surface.curve.get_point(0), [1.05, 0, shift], atol=1e-6)
+
     def test_thin_flange_keeps_its_corner(self):
         # revolved (r, z) profile: a 0.05-wide flange at the bottom, then a straight wall
         mesh = trimesh.creation.revolve([[1.05, 0], [1, 0], [1, 0.3], [1, 0.6], [1, 0.9]], sections=64)

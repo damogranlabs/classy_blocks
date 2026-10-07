@@ -102,8 +102,12 @@ class RevolvedSurface(SurfaceBase, ElementBase):
         """Extracts a cross-section profile from a triangulated surface of revolution
         and builds a RevolvedSurface from it.
 
+        Profile direction: the curve always runs bottom-to-top along 'axis', that is,
+        curve parameter 0 is at the mesh's lowest end (minimum along 'axis') and the
+        last parameter at its highest. Reverse 'axis' to get top-to-bottom.
+
         'anchor' is a single off-axis point: defines the cutting plane and side.
-        Its position along the axis is irrelevant; the profile is always ordered from the minimum-axis end upward."""
+        Its position along the axis is irrelevant."""
         axis_unit = f.unit_vector(axis)
         origin = mesh.centroid if origin is None else np.asarray(origin, dtype=float)
         assert origin is not None
@@ -122,7 +126,10 @@ class RevolvedSurface(SurfaceBase, ElementBase):
         if not loops:
             raise ValueError("RevolvedSurface.from_mesh: cut produced no profile on the anchor's side of the axis")
 
-        far_point = origin - f.norm(mesh.extents) * axis_unit
+        # the profile starts nearest to far_point, so put it well below the mesh's lowest point
+        # along the axis (wherever the mesh sits relative to origin): bottom-to-top ordering
+        lowest = float(np.min((mesh.vertices - origin) @ axis_unit))
+        far_point = origin + (lowest - f.norm(mesh.extents)) * axis_unit
         profile = SurfaceBase.sort_points(loops, far_point=far_point)
         return cls(LinearInterpolatedCurve(profile), axis_unit, origin, angle_bounds)
 
@@ -135,5 +142,6 @@ class RevolvedSurface(SurfaceBase, ElementBase):
         origin: Optional[PointType] = None,
         angle_bounds: tuple[float, float] = (-np.pi, np.pi),
     ) -> "RevolvedSurface":
-        """Loads a mesh (STL/OBJ/...) via trimesh, then delegates to from_mesh."""
+        """Loads a mesh (STL/OBJ/...) via trimesh, then delegates to from_mesh.
+        The profile runs bottom-to-top along 'axis' (see from_mesh)."""
         return cls.from_mesh(trimesh.load_mesh(path), axis, anchor, origin, angle_bounds)
