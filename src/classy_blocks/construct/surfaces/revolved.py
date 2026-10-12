@@ -117,17 +117,13 @@ class RevolvedSurface(SurfaceBase, ElementBase):
         perp = f.unit_vector(radial)
         normal = f.unit_vector(np.cross(axis_unit, radial))
 
-        loops = TriangulatedSurface(mesh).get_cross_sections(origin, normal)
+        half = mesh.slice_plane(origin, perp)
+        loops = TriangulatedSurface(half).get_cross_sections(origin, normal)
         if not loops:
-            raise ValueError("RevolvedSurface.from_mesh: cut produced no profile (plane misses the mesh)")
-
-        points = np.concatenate(loops)
-        kept = points[(points - origin) @ perp >= 0]
-        if len(kept) == 0:
-            raise ValueError("RevolvedSurface.from_mesh: no profile points on the anchor's side of the axis")
+            raise ValueError("RevolvedSurface.from_mesh: cut produced no profile on the anchor's side of the axis")
 
         far_point = origin - f.norm(mesh.extents) * axis_unit
-        profile = SurfaceBase.sort_points([kept], far_point=far_point)
+        profile = SurfaceBase.sort_points(loops, far_point=far_point)
         return cls(LinearInterpolatedCurve(profile), axis_unit, origin, angle_bounds)
 
     @classmethod

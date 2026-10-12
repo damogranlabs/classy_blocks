@@ -36,6 +36,17 @@ class TriangulatedSurfaceClosestPointTests(unittest.TestCase):
 
         np.testing.assert_allclose(surface.get_closest_point([5, 0, 0]), [1, 0, 0], atol=1e-6)
 
+    def test_from_file_remembers_path(self):
+        directory = tempfile.mkdtemp()
+        trimesh.creation.box().export(os.path.join(directory, "box.stl"))
+
+        surface = TriangulatedSurface.from_file(os.path.join(directory, ".", "box.stl"))
+
+        self.assertEqual(surface.path, os.path.join(directory, "box.stl"))
+
+    def test_mesh_has_no_path(self):
+        self.assertIsNone(self.box.path)
+
 
 class CrossSectionTests(unittest.TestCase):
     def setUp(self):
