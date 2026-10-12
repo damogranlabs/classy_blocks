@@ -164,3 +164,7 @@ dmypy.json
 
 # Mac specific
 .DS_Store
+
+# polyscope
+.polyscope.ini
+imgui.ini
