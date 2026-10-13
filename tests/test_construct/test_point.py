@@ -77,6 +77,12 @@ class PointTests(unittest.TestCase):
 
         self.assertListEqual(point.projected_to, ["also_also_terrain", "also_terrain", "terrain"])
 
+    def test_matrix(self):
+        point = self.point
+        point.matrix([[1, 0, 0, 1], [0, 1, 0, 2], [0, 0, 1, 3], [0, 0, 0, 1]])
+
+        np.testing.assert_almost_equal(point.position, [2, 3, 4])
+
     def test_mirror_default_origin(self):
         point = self.point
         point.mirror([1, 1, 1])

@@ -4,7 +4,7 @@ import numpy as np
 
 from classy_blocks.base.element import ElementBase
 from classy_blocks.base.exceptions import ArrayCreationError
-from classy_blocks.cbtyping import PointListType, PointType, VectorType
+from classy_blocks.cbtyping import MatrixType, PointListType, PointType, VectorType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import DTYPE, TOL
 
@@ -69,6 +69,10 @@ class Series(ElementBase):
                 amount = distance / np.tan(angle)
 
                 self.points[i] += direction * amount
+        return self
+
+    def matrix(self, matrix: MatrixType):
+        self.points = f.transform(self.points, matrix)
         return self
 
     @property

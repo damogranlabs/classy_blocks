@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from typing import Optional, TypeVar, Union
 
 from classy_blocks.base import transforms as tr
-from classy_blocks.cbtyping import GeometryType, NPPointType, PointType, VectorType
+from classy_blocks.cbtyping import GeometryType, MatrixType, NPPointType, PointType, VectorType
 from classy_blocks.construct.searchables import SearchableGeometry
 
 ElementBaseT = TypeVar("ElementBaseT", bound="ElementBase")
@@ -61,6 +61,14 @@ class ElementBase(abc.ABC):
     ) -> ElementBaseT:
         for component in self.parts:
             component.shear(normal, origin, direction, angle)
+
+        return self
+
+    def matrix(self: ElementBaseT, matrix: MatrixType) -> ElementBaseT:
+        """Transform with a homogeneous 4x4 matrix (rotation/scaling/shear/... + translation),
+        for instance one obtained from trimesh.registration"""
+        for component in self.parts:
+            component.matrix(matrix)
 
         return self
 
@@ -127,5 +135,8 @@ class ElementBase(abc.ABC):
                 if isinstance(t7m, tr.Shear):
                     part.shear(t7m.normal, t7m.origin, t7m.direction, t7m.angle)
                     continue
+
+                if isinstance(t7m, tr.Matrix):
+                    part.matrix(t7m.matrix)
 
         return self

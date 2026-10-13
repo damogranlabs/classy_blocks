@@ -4,7 +4,7 @@ import numpy as np
 from parameterized import parameterized
 
 from classy_blocks.base.exceptions import EdgeCreationError
-from classy_blocks.base.transforms import Mirror
+from classy_blocks.base.transforms import Matrix, Mirror
 from classy_blocks.construct.edges import Arc, Origin, Project, Spline
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.extrude import Extrude
@@ -503,6 +503,25 @@ class OperationTransformTests(unittest.TestCase):
     def test_mirror(self):
         extrude = Extrude(self.loft.bottom_face, [0, 0, 1])
         mirror = extrude.copy().mirror([0, 0, 1], [0, 0, 0])
+
+        np.testing.assert_equal(extrude.bottom_face.center, mirror.top_face.center)
+
+    def test_matrix_translate(self):
+        extrude = Extrude(self.loft.bottom_face, [0, 0, 1])
+        moved = extrude.copy().matrix([[1, 0, 0, 1], [0, 1, 0, 2], [0, 0, 1, 3], [0, 0, 0, 1]])
+
+        np.testing.assert_almost_equal(moved.center, extrude.center + f.vector(1, 2, 3))
+
+    def test_matrix_transform(self):
+        extrude = Extrude(self.loft.bottom_face, [0, 0, 1])
+        moved = extrude.copy().transform([Matrix([[1, 0, 0, 1], [0, 1, 0, 2], [0, 0, 1, 3], [0, 0, 0, 1]])])
+
+        np.testing.assert_almost_equal(moved.center, extrude.center + f.vector(1, 2, 3))
+
+    def test_matrix_reflection(self):
+        """A reflecting matrix inverts the operation, the same as mirror()"""
+        extrude = Extrude(self.loft.bottom_face, [0, 0, 1])
+        mirror = extrude.copy().matrix(np.diag([1, 1, -1, 1]))
 
         np.testing.assert_equal(extrude.bottom_face.center, mirror.top_face.center)
 

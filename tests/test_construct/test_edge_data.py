@@ -52,6 +52,13 @@ class EdgeDataTests(unittest.TestCase):
 
         np.testing.assert_array_almost_equal(angle.axis.position, f.unit_vector([1, 0, 0]))
 
+    def test_angle_matrix(self):
+        """Axis in angle edge must be rotated but not translated or scaled"""
+        angle = edges.Angle(1, [1, 1, 0])
+        angle.matrix([[0, -2, 0, 1], [2, 0, 0, 2], [0, 0, 2, 3], [0, 0, 0, 1]])
+
+        np.testing.assert_array_almost_equal(angle.axis.position, f.unit_vector([-1, 1, 0]))
+
     def test_spline_transform(self):
         """Create and transform spline edge"""
         points = np.array([[0, 1, 0], [2**0.5 / 2, 2**0.5 / 2, 0], [1, 0, 0]])

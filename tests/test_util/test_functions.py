@@ -220,6 +220,19 @@ class TestFunctions(unittest.TestCase):
 
         np.testing.assert_almost_equal(mirrored, [[0, 0, 0], [-2, -2, -2]])
 
+    @property
+    def matrix(self):
+        """Rotation by 90 degrees around z, scaling by 2 and translation by [1, 2, 3]"""
+        return [[0, -2, 0, 1], [2, 0, 0, 2], [0, 0, 2, 3], [0, 0, 0, 1]]
+
+    def test_transform_point(self):
+        np.testing.assert_almost_equal(f.transform([1, 0, 0], self.matrix), [1, 4, 3])
+
+    def test_transform_array(self):
+        transformed = f.transform([[1, 0, 0], [0, 1, 1]], self.matrix)
+
+        np.testing.assert_almost_equal(transformed, [[1, 4, 3], [-1, 2, 5]])
+
     @parameterized.expand(
         (
             ([1, 0, 0], [0, 0, 1], [2, 0, 0]),

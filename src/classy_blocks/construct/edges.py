@@ -1,8 +1,18 @@
 import warnings
 
+import numpy as np
+
 from classy_blocks.base.element import ElementBase
 from classy_blocks.base.exceptions import EdgeCreationError
-from classy_blocks.cbtyping import EdgeKindType, NPPointListType, PointListType, PointType, ProjectToType, VectorType
+from classy_blocks.cbtyping import (
+    EdgeKindType,
+    MatrixType,
+    NPPointListType,
+    PointListType,
+    PointType,
+    ProjectToType,
+    VectorType,
+)
 from classy_blocks.construct.curves.curve import CurveBase
 from classy_blocks.construct.curves.discrete import DiscreteCurve
 from classy_blocks.construct.point import Point, Vector
@@ -94,6 +104,11 @@ class Angle(EdgeData):
 
     def scale(self, ratio, origin=None):
         """Axis is not to be scaled"""
+
+    def matrix(self, matrix: MatrixType):
+        """Axis is only rotated/reflected; translation and scaling are discarded"""
+        self.axis.position = f.unit_vector(np.dot(np.asarray(matrix)[:3, :3], self.axis.position))
+        return self
 
     @property
     def parts(self):

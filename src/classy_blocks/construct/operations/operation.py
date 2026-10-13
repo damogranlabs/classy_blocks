@@ -10,6 +10,7 @@ from classy_blocks.base.transforms import Mirror
 from classy_blocks.cbtyping import (
     ChopArgs,
     DirectionType,
+    MatrixType,
     NPPointType,
     OrientType,
     PointType,
@@ -399,6 +400,15 @@ class Operation(ElementBase):
         super().mirror(normal, origin)
 
         self.invert()
+
+        return self
+
+    def matrix(self, matrix: MatrixType):
+        """A matrix with a negative determinant reflects; such operations are inverted, the same as with mirror()"""
+        super().matrix(matrix)
+
+        if np.linalg.det(np.asarray(matrix)[:3, :3]) < 0:
+            self.invert()
 
         return self
 

@@ -8,7 +8,15 @@ import scipy
 import scipy.linalg
 from numba import jit  # type: ignore
 
-from classy_blocks.cbtyping import NPPointListType, NPPointType, NPVectorType, PointListType, PointType, VectorType
+from classy_blocks.cbtyping import (
+    MatrixType,
+    NPPointListType,
+    NPPointType,
+    NPVectorType,
+    PointListType,
+    PointType,
+    VectorType,
+)
 from classy_blocks.util import constants
 
 
@@ -269,6 +277,15 @@ def mirror(points: Union[PointType, PointListType], normal: VectorType, origin: 
         return mirrored[0]
 
     return mirrored
+
+
+def transform(points: Union[PointType, PointListType], matrix: MatrixType) -> NPPointListType:
+    """Applies a 4x4 transformation matrix (rotation/scaling/shear/... + translation)
+    to a single point (3,) or an array of points (N, 3); returns the same shape as given"""
+    points = np.asarray(points, dtype=constants.DTYPE)
+    matrix = np.asarray(matrix, dtype=constants.DTYPE)
+
+    return np.dot(points, matrix[:3, :3].T) + matrix[:3, 3]
 
 
 def point_to_plane_distance(origin: PointType, normal: VectorType, point: PointType) -> float:

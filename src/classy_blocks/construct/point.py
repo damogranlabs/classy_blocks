@@ -4,7 +4,7 @@ import numpy as np
 
 from classy_blocks.base.element import ElementBase
 from classy_blocks.base.exceptions import PointCreationError
-from classy_blocks.cbtyping import NPVectorType, PointType, ProjectToType, VectorType
+from classy_blocks.cbtyping import MatrixType, NPVectorType, PointType, ProjectToType, VectorType
 from classy_blocks.util import functions as f
 from classy_blocks.util.constants import DTYPE, TOL, vector_format
 
@@ -70,6 +70,10 @@ class Point(ElementBase):
             amount = distance / np.tan(angle)
 
             self.position += direction * amount
+        return self
+
+    def matrix(self, matrix: MatrixType):
+        self.position = f.transform(self.position, matrix)
         return self
 
     def project(self, label: ProjectToType) -> None:

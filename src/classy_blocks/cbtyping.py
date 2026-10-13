@@ -16,6 +16,8 @@ PointListType = Union[NPPointListType, Sequence[PointType], Sequence[NPPointType
 # same as PointType but with a different name to avoid confusion
 NPVectorType = NPPointType
 VectorType = PointType
+# a homogeneous 4x4 transformation matrix
+MatrixType = Union[Sequence[Sequence[float]], NDArray[Any]]
 
 # parametric curve
 ParamCurveFuncType = Callable[[float], NPPointType]
