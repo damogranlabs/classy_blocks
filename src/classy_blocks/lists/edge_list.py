@@ -33,9 +33,9 @@ class EdgeList:
         """Adds an edge between given vertices or returns an existing one"""
         location = get_location(vertex_1, vertex_2)
 
-        # if this edge exists in the list, return it regardless of what's
-        # specified in edge_data; redefinitions of the same edges are ignored
+        # an existing edge only takes what it can from a redefinition (projections from other blocks)
         if location in self.edges:
+            self.edges[location].data.merge(data)
             return self.edges[location]
 
         edge = factory.create(vertex_1, vertex_2, data)

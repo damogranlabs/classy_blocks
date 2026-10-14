@@ -60,6 +60,22 @@ class EdgeListTests(DataTestCase):
 
         self.assertEqual(len(self.el.edges), 1)
 
+    def test_add_existing_projected(self):
+        """Projections of the same edge from different blocks are merged"""
+        vertices = self.get_vertices(0)
+        self.el.add(vertices[0], vertices[1], Project("terrain"))
+        edge = self.el.add(vertices[1], vertices[0], Project("walls"))
+
+        self.assertEqual(edge.data.label, ["terrain", "walls"])
+
+    def test_add_existing_ignored(self):
+        """Other redefinitions of an existing edge are ignored"""
+        vertices = self.get_vertices(0)
+        self.el.add(vertices[0], vertices[1], Project("terrain"))
+        edge = self.el.add(vertices[0], vertices[1], Arc([0.5, 0.5, 0]))
+
+        self.assertEqual(edge.data.label, ["terrain"])
+
     def test_add_invalid(self):
         """Add a circular edge that's actually a line"""
         vertices = self.get_vertices(0)

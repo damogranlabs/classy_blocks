@@ -7,9 +7,10 @@ from trimesh.proximity import closest_point
 from trimesh.registration import procrustes
 
 from classy_blocks.base.exceptions import MappedShapeCreationError
-from classy_blocks.cbtyping import MatrixType, NPPointListType
+from classy_blocks.cbtyping import GeometryType, MatrixType, NPPointListType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.loft import Loft
+from classy_blocks.construct.searchables import SearchableTriSurface
 from classy_blocks.construct.shape import Shape
 from classy_blocks.construct.shapes.mapped.association import Kind, Label, associate
 from classy_blocks.construct.shapes.mapped.description import MappedShapeDescription
@@ -50,6 +51,21 @@ class MappedShape(Shape):
         self.labels = associate(points, description.patches, features)
 
         self._lofts = [Loft(Face(points[hexa[:4]]), Face(points[hexa[4:]])) for hexa in description.hexas]
+        self._set_patches()
+        self._project()
+
+    def _set_patches(self) -> None:
+        for name, faces in self.description.patches.items():
+            for face in faces:
+                hexa, side = self.description.locate(face)
+                self._lofts[hexa].set_patch(side, name)
+
+    def _project(self) -> None:
+        """Projects sides and their edges to surfaces; an edge between two surfaces gets both"""
+        for name in self.fitted:
+            for face in self.description.patches[name]:
+                hexa, side = self.description.locate(face)
+                self._lofts[hexa].project_side(side, name, edges=True)
 
     def _register(self, iterations: int = 100) -> MatrixType:
         """Finds a matrix transform that moves initial description's points
@@ -111,6 +127,14 @@ class MappedShape(Shape):
             optimizer.add_clamp(clamp)
 
         return optimizer.optimize(tolerance=1e-5)
+
+    @property
+    def geometry(self) -> GeometryType:
+        return {
+            label: data
+            for name, surface in self.description.surfaces.items()
+            for label, data in SearchableTriSurface(name, str(surface.path)).get_data().items()
+        }
 
     @classmethod
     def from_file(cls, path: str) -> "MappedShape":

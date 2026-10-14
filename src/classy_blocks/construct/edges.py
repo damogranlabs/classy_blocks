@@ -38,6 +38,14 @@ class EdgeData(ElementBase):
         # what goes into blockMeshDict's edge definition
         return self.kind
 
+    @property
+    def projections(self) -> list[str]:
+        """Labels of geometry this edge is projected to"""
+        return []
+
+    def merge(self, other: "EdgeData") -> None:
+        """Takes what it can from another definition of the same edge; by default, nothing"""
+
 
 class Line(EdgeData):
     """A 'line' edge is created by default and needs no extra parameters"""
@@ -149,6 +157,13 @@ class Project(EdgeData):
 
         self.label.sort()
         self.check_length()
+
+    @property
+    def projections(self) -> list[str]:
+        return self.label
+
+    def merge(self, other: EdgeData) -> None:
+        self.add_label(other.projections)
 
 
 class OnCurve(EdgeData):

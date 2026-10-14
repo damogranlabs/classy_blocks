@@ -67,6 +67,30 @@ class MappedShapeConformTests(unittest.TestCase):
         np.testing.assert_allclose(distances, 0, atol=1e-6)
         np.testing.assert_allclose(shape.points[[0, 2, 6, 8]], POINTS[[0, 2, 6, 8]], atol=1e-6)
 
+    def test_patches(self):
+        loft = self.shape({}).operations[0]
+
+        self.assertEqual(loft.patch_names["front"], "miny")
+
+    def test_sides_are_projected(self):
+        loft = self.shape({}).operations[0]
+
+        self.assertEqual(loft.side_projects[0], "miny")
+
+    def test_curve_edges_are_projected_to_both_surfaces(self):
+        loft = self.shape({}).operations[0]
+
+        self.assertEqual(loft.bottom_face.edges[0].label, ["miny", "minz"])
+
+    def test_shared_edge(self):
+        """The edge between blocks lies on a single surface"""
+        first, second = self.shape({}).operations
+
+        self.assertEqual(first.side_edges[1].label, ["miny"])
+
+    def test_geometry(self):
+        self.assertEqual(set(self.shape({}).geometry), set(box_sides()))
+
     def test_a_mismatch_is_reported(self):
         with self.assertRaises(MappedShapeCreationError):
             self.shape({"minx": "maxy"})

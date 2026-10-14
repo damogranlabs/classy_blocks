@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from classy_blocks.cbtyping import IndexType, NPPointListType
+from classy_blocks.cbtyping import IndexType, NPPointListType, OrientType
 from classy_blocks.construct.surfaces.triangulated import TriangulatedSurface
 from classy_blocks.optimize.cell import HexCell
 
@@ -25,12 +25,22 @@ class MappedShapeDescription:
     # TODO: morphing and optimization data
 
     @functools.cached_property
+    def sides(self) -> np.ndarray:
+        """Point indexes of each hexa's sides, in the order of HexCell.side_names"""
+        return np.asarray(self.hexas)[:, HexCell.side_indexes]
+
+    @functools.cached_property
     def inner(self) -> list[int]:
         """Indexes of points that blocks use but don't lie on the outside of the shape"""
-        sides = np.sort(np.asarray(self.hexas)[:, HexCell.side_indexes].reshape(-1, 4), axis=1)
-        unique, counts = np.unique(sides, axis=0, return_counts=True)
+        unique, counts = np.unique(np.sort(self.sides, axis=2).reshape(-1, 4), axis=0, return_counts=True)
 
         return np.setdiff1d(np.unique(self.hexas), unique[counts == 1]).tolist()
+
+    def locate(self, face: IndexType) -> tuple[int, OrientType]:
+        """The hexa and its side that the face belongs to"""
+        hexa, side = np.argwhere((np.sort(self.sides, axis=2) == np.sort(face)).all(axis=2))[0]
+
+        return int(hexa), HexCell.side_names[side]
 
     @classmethod
     def load(cls, path: str) -> "MappedShapeDescription":
