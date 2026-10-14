@@ -1,3 +1,5 @@
+from typing import Callable
+
 import numpy as np
 import trimesh
 from scipy.interpolate import RBFInterpolator
@@ -9,9 +11,21 @@ from classy_blocks.cbtyping import MatrixType, NPPointListType
 from classy_blocks.construct.flat.face import Face
 from classy_blocks.construct.operations.loft import Loft
 from classy_blocks.construct.shape import Shape
-from classy_blocks.construct.shapes.mapped.association import associate
+from classy_blocks.construct.shapes.mapped.association import Kind, Label, associate
 from classy_blocks.construct.shapes.mapped.description import MappedShapeDescription
 from classy_blocks.construct.shapes.mapped.features import Features
+from classy_blocks.optimize.clamps.clamp import ClampBase
+from classy_blocks.optimize.clamps.curve import CurveClamp
+from classy_blocks.optimize.clamps.free import FreeClamp
+from classy_blocks.optimize.clamps.surface import TriangulatedSurfaceClamp
+from classy_blocks.optimize.optimizer import ShapeOptimizer
+
+# corners have no clamp: they stay where they are
+CLAMPS: dict[Kind, Callable] = {
+    Kind.FREE: lambda point, _: FreeClamp(point),
+    Kind.SURFACE: TriangulatedSurfaceClamp,
+    Kind.CURVE: CurveClamp,
+}
 
 
 class MappedShape(Shape):
@@ -26,9 +40,14 @@ class MappedShape(Shape):
             name: np.unique(faces) for name, faces in description.patches.items() if name in description.surfaces
         }
 
+        features = Features.from_surfaces(description.surfaces)
+
         points = np.array(description.points)
         if self.fitted:  # without surfaces, the description is taken as it is
-            points = self._conform(trimesh.transform_points(points, self._register()))
+            points = trimesh.transform_points(points, self._register())
+            points = self._conform(points, associate(points, description.patches, features))
+
+        self.labels = associate(points, description.patches, features)
 
         self._lofts = [Loft(Face(points[hexa[:4]]), Face(points[hexa[4:]])) for hexa in description.hexas]
 
@@ -50,10 +69,9 @@ class MappedShape(Shape):
 
         return matrix
 
-    def _conform(self, points: NPPointListType) -> NPPointListType:
+    def _conform(self, points: NPPointListType, labels: list[Label]) -> NPPointListType:
         """Moves points to their targets: surfaces, curves or corners;
         the free ones follow by a smooth interpolation of their displacements."""
-        labels = associate(points, self.description.patches, Features.from_surfaces(self.description.surfaces))
         errors = [f"Point {i}: {label.error}" for i, label in enumerate(labels) if label.error]
         if errors:
             raise MappedShapeCreationError("Description doesn't match the surfaces", "\n\t".join(errors))
@@ -72,6 +90,27 @@ class MappedShape(Shape):
     def grid(self):
         # Grid is irrelevant for arbitrary mapped shapes
         return [self.operations]
+
+    @property
+    def points(self) -> NPPointListType:
+        """Current positions of description's points"""
+        points = np.array(self.description.points)
+        points[np.ravel(self.description.hexas)] = np.concatenate([loft.point_array for loft in self._lofts])
+
+        return points
+
+    def optimize(self, report: bool = True) -> bool:
+        """Improves blocking quality by moving points along what they are stuck to;
+        points on the outside without a surface stay where they are."""
+        optimizer = ShapeOptimizer(self.operations, report=report)
+        points = self.points
+        pinned = [i for i, label in enumerate(self.labels) if label.kind in (Kind.SURFACE, Kind.CURVE)]
+
+        for i in [*self.description.inner, *pinned]:
+            clamp: ClampBase = CLAMPS[self.labels[i].kind](points[i], self.labels[i].target)
+            optimizer.add_clamp(clamp)
+
+        return optimizer.optimize(tolerance=1e-5)
 
     @classmethod
     def from_file(cls, path: str) -> "MappedShape":

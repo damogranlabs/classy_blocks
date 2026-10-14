@@ -1,12 +1,14 @@
 import unittest
 
 import numpy as np
+import trimesh
 
 from classy_blocks.cbtyping import NPPointType
 from classy_blocks.construct.curves.analytic import AnalyticCurve
+from classy_blocks.construct.surfaces.triangulated import TriangulatedSurface
 from classy_blocks.optimize.clamps.curve import CurveClamp, LineClamp, RadialClamp
 from classy_blocks.optimize.clamps.free import FreeClamp
-from classy_blocks.optimize.clamps.surface import ParametricSurfaceClamp, PlaneClamp
+from classy_blocks.optimize.clamps.surface import ParametricSurfaceClamp, PlaneClamp, TriangulatedSurfaceClamp
 from classy_blocks.util import functions as f
 
 
@@ -175,3 +177,30 @@ class SurfaceClampTests(ClampTestsBase):
         clamp = ParametricSurfaceClamp(position, self.function, [[0.0, np.pi], [0.0, np.pi]])
 
         np.testing.assert_array_almost_equal(clamp.params, [np.pi, np.pi])
+
+
+class TriangulatedSurfaceClampTests(unittest.TestCase):
+    def setUp(self):
+        self.surface = TriangulatedSurface(trimesh.creation.icosphere(subdivisions=3))
+        self.position = self.surface.get_closest_point([1, 0.2, 0.1])
+
+    def distance(self, point: NPPointType) -> float:
+        return trimesh.proximity.closest_point(self.surface.mesh, [point])[1][0]
+
+    def test_init(self):
+        clamp = TriangulatedSurfaceClamp(self.position, self.surface)
+
+        np.testing.assert_array_almost_equal(clamp.params, [0, 0])
+
+    def test_init_off_surface(self):
+        clamp = TriangulatedSurfaceClamp([1.5, 0.3, 0.15], self.surface)
+
+        self.assertAlmostEqual(self.distance(clamp.function(clamp.params)), 0)
+
+    def test_move_stays_on_surface(self):
+        clamp = TriangulatedSurfaceClamp(self.position, self.surface)
+
+        clamp.update_params([0.2, 0.3])
+
+        self.assertGreater(f.norm(clamp.position - self.position), 0.1)
+        self.assertAlmostEqual(self.distance(clamp.position), 0)

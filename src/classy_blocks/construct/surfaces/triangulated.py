@@ -4,7 +4,7 @@ from typing import Optional
 import numpy as np
 import trimesh
 
-from classy_blocks.cbtyping import NPPointListType, NPPointType, PointType, VectorType
+from classy_blocks.cbtyping import NPPointListType, NPPointType, NPVectorType, PointType, VectorType
 from classy_blocks.construct.surfaces.surface import SurfaceBase
 
 
@@ -26,6 +26,11 @@ class TriangulatedSurface(SurfaceBase):
     def get_closest_point(self, point: PointType) -> NPPointType:
         closest, _, _ = trimesh.proximity.closest_point(self.mesh, [np.asarray(point)])
         return closest[0]
+
+    def get_normal(self, point: PointType) -> NPVectorType:
+        """Normal of the triangle closest to the point"""
+        _, _, triangle = trimesh.proximity.closest_point(self.mesh, [np.asarray(point)])
+        return self.mesh.face_normals[triangle[0]]
 
     def get_cross_sections(self, point: PointType, normal: VectorType) -> list[NPPointListType]:
         section = self.mesh.section(plane_origin=np.asarray(point), plane_normal=np.asarray(normal))

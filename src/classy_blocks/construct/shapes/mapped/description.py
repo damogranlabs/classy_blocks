@@ -1,3 +1,4 @@
+import functools
 import json
 import os
 from dataclasses import dataclass
@@ -6,6 +7,7 @@ import numpy as np
 
 from classy_blocks.cbtyping import IndexType, NPPointListType
 from classy_blocks.construct.surfaces.triangulated import TriangulatedSurface
+from classy_blocks.optimize.cell import HexCell
 
 
 @dataclass
@@ -21,6 +23,14 @@ class MappedShapeDescription:
     surfaces: dict[str, TriangulatedSurface]
 
     # TODO: morphing and optimization data
+
+    @functools.cached_property
+    def inner(self) -> list[int]:
+        """Indexes of points that blocks use but don't lie on the outside of the shape"""
+        sides = np.sort(np.asarray(self.hexas)[:, HexCell.side_indexes].reshape(-1, 4), axis=1)
+        unique, counts = np.unique(sides, axis=0, return_counts=True)
+
+        return np.setdiff1d(np.unique(self.hexas), unique[counts == 1]).tolist()
 
     @classmethod
     def load(cls, path: str) -> "MappedShapeDescription":

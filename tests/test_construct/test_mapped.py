@@ -57,9 +57,38 @@ class MappedShapeConformTests(unittest.TestCase):
         np.testing.assert_allclose(points[~sliding], expected[~sliding], atol=1e-6)
         np.testing.assert_allclose(points[sliding, 1:], expected[sliding, 1:], atol=1e-6)
 
+    def test_optimization_keeps_points_on_the_box(self):
+        shape = self.shape({})
+        shape.optimize(report=False)
+
+        _, distances, _ = trimesh.proximity.closest_point(
+            trimesh.creation.box(bounds=[[0, 0, 0], [2, 1, 1]]), shape.points
+        )
+        np.testing.assert_allclose(distances, 0, atol=1e-6)
+        np.testing.assert_allclose(shape.points[[0, 2, 6, 8]], POINTS[[0, 2, 6, 8]], atol=1e-6)
+
     def test_a_mismatch_is_reported(self):
         with self.assertRaises(MappedShapeCreationError):
             self.shape({"minx": "maxy"})
+
+
+class MappedShapeDescriptionInnerTests(unittest.TestCase):
+    def test_no_inner_points(self):
+        self.assertEqual(blocking(HEXAS, {}).inner, [])
+
+    def test_a_point_in_the_middle(self):
+        """Eight blocks around the middle of a 3x3x3 lattice of points"""
+        grid = np.indices((3, 3, 3)).reshape(3, -1).T
+        index = {tuple(point): i for i, point in enumerate(grid)}
+        corners = [(0, 0, 0), (1, 0, 0), (1, 1, 0), (0, 1, 0), (0, 0, 1), (1, 0, 1), (1, 1, 1), (0, 1, 1)]
+        hexas = [
+            [index[(x + dx, y + dy, z + dz)] for dx, dy, dz in corners]
+            for x in range(2)
+            for y in range(2)
+            for z in range(2)
+        ]
+
+        self.assertEqual(MappedShapeDescription(grid, hexas, {}, {}).inner, [index[(1, 1, 1)]])
 
 
 class MappedShapeDescriptionLoadTests(unittest.TestCase):
