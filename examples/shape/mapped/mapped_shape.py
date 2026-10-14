@@ -3,7 +3,8 @@ import classy_blocks as cb
 mesh = cb.Mesh()
 
 
-shape = cb.MappedShape.from_file("untitled.shape")
+shape = cb.MappedShape.from_file("port.shape")
+
 mesh.add(shape)
 
 cb.FixedCountGrader(mesh).grade()

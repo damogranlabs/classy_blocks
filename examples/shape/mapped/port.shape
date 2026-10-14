@@ -51,7 +51,7 @@
    [21, 20, 19, 18],
    [14, 13, 12, 11]
   ],
-  "port": [
+  "channel": [
    [0, 1, 2, 3],
    [7, 6, 5, 4],
    [23, 7, 22, 24],
@@ -80,7 +80,7 @@
  },
  "surfaces": {
   "inlet": "inlet.stl",
-  "port": "port.stl",
+  "channel": "channel.stl",
   "stem": "stem.stl",
   "outlet": "outlet.stl"
  }

@@ -1,3 +1,4 @@
+import dataclasses
 import json
 import os
 import tempfile
@@ -6,11 +7,13 @@ import unittest
 import numpy as np
 import trimesh
 
+from classy_blocks.base.exceptions import MappedShapeCreationError
 from classy_blocks.construct.shapes.mapped.description import MappedShapeDescription
 from classy_blocks.construct.shapes.mapped.mapped import MappedShape
 from classy_blocks.construct.surfaces.triangulated import TriangulatedSurface
 from classy_blocks.mesh import Mesh
 from tests.fixtures import data
+from tests.test_construct.test_mapped_features import HEXAS, POINTS, blocking, box_sides, surfaces
 
 
 class MappedShapeTests(unittest.TestCase):
@@ -34,6 +37,29 @@ class MappedShapeTests(unittest.TestCase):
         mesh.assemble()
 
         self.assertEqual(len(mesh.dump.blocks), 3)
+
+
+class MappedShapeConformTests(unittest.TestCase):
+    def shape(self, names: dict[str, str]) -> MappedShape:
+        """Two blocks, a bit off the 2x1x1 box, fitted to it"""
+        description = blocking(HEXAS, names)
+        moved = description.points * 1.1 + np.random.default_rng(0).uniform(-0.05, 0.05, (len(POINTS), 3))
+
+        return MappedShape(dataclasses.replace(description, points=moved, surfaces=surfaces(box_sides())))
+
+    def test_points_land_on_the_box(self):
+        points = np.concatenate([loft.point_array for loft in self.shape({}).operations])
+
+        expected = np.concatenate([POINTS[hexa] for hexa in HEXAS])
+        # the middle points are free to slide along their edges
+        sliding = np.isclose(expected[:, 0], 1)
+
+        np.testing.assert_allclose(points[~sliding], expected[~sliding], atol=1e-6)
+        np.testing.assert_allclose(points[sliding, 1:], expected[sliding, 1:], atol=1e-6)
+
+    def test_a_mismatch_is_reported(self):
+        with self.assertRaises(MappedShapeCreationError):
+            self.shape({"minx": "maxy"})
 
 
 class MappedShapeDescriptionLoadTests(unittest.TestCase):

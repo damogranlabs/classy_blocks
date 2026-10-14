@@ -14,7 +14,7 @@ import trimesh
 from scipy.sparse.csgraph import connected_components, depth_first_order
 
 from classy_blocks.cbtyping import NPPointListType, NPPointType, PointType
-from classy_blocks.construct.curves.discrete import DiscreteCurve
+from classy_blocks.construct.curves.interpolated import LinearInterpolatedCurve
 from classy_blocks.construct.surfaces.triangulated import TriangulatedSurface
 
 RELATIVE_TOLERANCE = 1e-5  # of the surfaces' combined bounding-box diagonal
@@ -32,7 +32,7 @@ class Corner:
         return self.point
 
 
-Target = Union[TriangulatedSurface, DiscreteCurve, Corner]
+Target = Union[TriangulatedSurface, LinearInterpolatedCurve, Corner]
 
 
 def _on(surface: TriangulatedSurface, points: NPPointListType, tolerance: float) -> np.ndarray:
@@ -89,7 +89,7 @@ class Shared:
 class Features:
     surfaces: dict[str, TriangulatedSurface]
     # surfaces may meet in several places: each piece is its own curve or corner
-    curves: dict[Names, list[DiscreteCurve]]
+    curves: dict[Names, list[LinearInterpolatedCurve]]
     corners: dict[Names, list[Corner]]
 
     @functools.cached_property
@@ -122,14 +122,14 @@ class Features:
             for name, other in itertools.combinations(surfaces, 2)
         }
         curves = {
-            names: [DiscreteCurve(polyline) for polyline in found.polylines()]
+            names: [LinearInterpolatedCurve(polyline) for polyline in found.polylines()]
             for names, found in shared.items()
             if len(found.edges) > 0
         }
 
         gathered: dict[Names, list[NPPointType]] = defaultdict(list)
         for names, pieces in curves.items():
-            points = np.concatenate([curve.discretize() for curve in pieces])
+            points = np.concatenate([curve.series.points for curve in pieces])
             others = [name for name in surfaces if name not in names]
             on = (
                 np.array([_on(surfaces[name], points, tolerance) for name in others])

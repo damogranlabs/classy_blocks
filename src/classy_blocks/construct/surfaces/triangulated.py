@@ -18,13 +18,10 @@ class TriangulatedSurface(SurfaceBase):
         self.path = path
 
     @classmethod
-    def from_file(cls, path: str, solid: Optional[str] = None) -> "TriangulatedSurface":
+    def from_file(cls, path: str) -> "TriangulatedSurface":
         """Loads a surface from a file (STL/OBJ/...); trimesh detects the format.
-        From a file with several solids (a multi-solid STL) it takes the named one, otherwise the whole file."""
-        meshes = trimesh.load_scene(path).geometry
-        mesh = meshes[solid] if solid in meshes else trimesh.load_mesh(path)
-
-        return cls(mesh, os.path.abspath(path))
+        Multi-solid meshes are currently not supported - the whole file is taken as a single solid."""
+        return cls(trimesh.load_mesh(path), os.path.abspath(path))
 
     def get_closest_point(self, point: PointType) -> NPPointType:
         closest, _, _ = trimesh.proximity.closest_point(self.mesh, [np.asarray(point)])

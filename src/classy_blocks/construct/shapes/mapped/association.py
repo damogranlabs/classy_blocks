@@ -7,7 +7,7 @@ from typing import Optional
 
 import numpy as np
 
-from classy_blocks.construct.shapes.mapped.description import MappedShapeDescription
+from classy_blocks.cbtyping import IndexType, NPPointListType
 from classy_blocks.construct.shapes.mapped.features import Features, Names, Target
 
 
@@ -36,15 +36,13 @@ class Label:
         return f"No feature where {', '.join(sorted(self.names))} meet" * missing
 
 
-def associate(description: MappedShapeDescription, features: Features) -> list[Label]:
+def associate(points: NPPointListType, patches: dict[str, list[IndexType]], features: Features) -> list[Label]:
     """Labels for every point; patches without a surface of the same name don't count"""
     names: dict[int, set[str]] = defaultdict(set)
-    surfaced = {name: faces for name, faces in description.patches.items() if name in features.surfaces}
+    surfaced = {name: faces for name, faces in patches.items() if name in features.surfaces}
     for name, faces in surfaced.items():
         for point in np.unique(np.asarray(faces, dtype=int)):
             names[int(point)].add(name)
 
-    found = [frozenset(names[point]) for point in range(len(description.points))]
-    return [
-        Label(point_names, features.find(point_names, point)) for point_names, point in zip(found, description.points)
-    ]
+    found = [frozenset(names[point]) for point in range(len(points))]
+    return [Label(point_names, features.find(point_names, point)) for point_names, point in zip(found, points)]

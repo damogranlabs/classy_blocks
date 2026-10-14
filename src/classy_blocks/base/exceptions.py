@@ -57,6 +57,10 @@ class ExtrudedRingCreationError(ShapeCreationError):
     pass
 
 
+class MappedShapeCreationError(ShapeCreationError):
+    pass
+
+
 class GeometryConstraintError(Exception):
     """Raised when input parameters produce an invalid geometry"""
 

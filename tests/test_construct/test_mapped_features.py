@@ -7,7 +7,7 @@ from typing import Optional
 import numpy as np
 import trimesh
 
-from classy_blocks.construct.shapes.mapped.association import Kind, associate
+from classy_blocks.construct.shapes.mapped.association import Kind, Label, associate
 from classy_blocks.construct.shapes.mapped.description import MappedShapeDescription
 from classy_blocks.construct.shapes.mapped.features import Features
 from classy_blocks.construct.surfaces.triangulated import TriangulatedSurface
@@ -66,8 +66,12 @@ def blocking(hexas: list[list[int]], names: dict[str, str]) -> MappedShapeDescri
     return MappedShapeDescription(POINTS, hexas, dict(patches), {})
 
 
+def associated(description: MappedShapeDescription, features: Features) -> list[Label]:
+    return associate(description.points, description.patches, features)
+
+
 def kinds(description: MappedShapeDescription, features: Features) -> list[Kind]:
-    return [label.kind for label in associate(description, features)]
+    return [label.kind for label in associated(description, features)]
 
 
 class FeaturesTests(unittest.TestCase):
@@ -81,12 +85,17 @@ class FeaturesTests(unittest.TestCase):
     def test_a_curve_runs_along_the_edge(self):
         (curve,) = Features.from_surfaces(surfaces(box_sides())).curves[frozenset(["minx", "miny"])]
 
-        np.testing.assert_allclose(sorted(curve.discretize()[:, 2]), [0, 1])
-        np.testing.assert_allclose(curve.discretize()[:, :2], 0)
+        np.testing.assert_allclose(sorted(curve.series.points[:, 2]), [0, 1])
+        np.testing.assert_allclose(curve.series.points[:, :2], 0)
+
+    def test_a_curve_point_projects_between_its_vertices(self):
+        (curve,) = Features.from_surfaces(surfaces(box_sides())).curves[frozenset(["minx", "miny"])]
+
+        np.testing.assert_allclose(curve.get_closest_point([-1, -1, 0.3]), [0, 0, 0.3], atol=1e-6)
 
     def test_pipe_ends_are_closed_curves(self):
         features = Features.from_surfaces(pipe({"top": 1, "bottom": -1}))
-        curve = features.curves[frozenset(["side", "top"])][0].discretize()
+        curve = features.curves[frozenset(["side", "top"])][0].series.points
 
         self.assertEqual(len(features.curves), 2)
         self.assertEqual(features.corners, {})
@@ -136,24 +145,14 @@ class MultiSolidTests(unittest.TestCase):
         with open(self.path, "w") as handle:
             handle.write(text)
 
-    def test_a_named_solid(self):
-        surface = TriangulatedSurface.from_file(self.path, "maxz")
-
-        np.testing.assert_allclose(surface.mesh.vertices[:, 2], 1)
-
     def test_the_whole_file_without_a_name(self):
         self.assertEqual(len(TriangulatedSurface.from_file(self.path).mesh.faces), 12)
-
-    def test_same_features_as_separate_files(self):
-        features = Features.from_surfaces({name: TriangulatedSurface.from_file(self.path, name) for name in SIDES})
-
-        self.assertEqual((len(features.curves), len(features.corners)), (12, 8))
 
 
 class MultiplePiecesTests(unittest.TestCase):
     def test_points_stick_to_their_own_corner(self):
         features = Features.from_surfaces(surfaces(box_sides({"minx": "ends", "maxx": "ends"})))
-        labels = associate(blocking(HEXAS, {"minx": "ends", "maxx": "ends"}), features)
+        labels = associated(blocking(HEXAS, {"minx": "ends", "maxx": "ends"}), features)
 
         np.testing.assert_allclose([labels[0].target.point, labels[2].target.point], [[0, 0, 0], [2, 0, 0]])
 
@@ -174,13 +173,13 @@ class AssociationTests(unittest.TestCase):
         self.assertEqual((labels.count(Kind.CORNER), labels.count(Kind.CURVE)), (8, 4))
 
     def test_a_patch_without_a_surface_leaves_its_points_free(self):
-        labels = associate(blocking(HEXAS, {"minx": "inlet"}), self.features)
+        labels = associated(blocking(HEXAS, {"minx": "inlet"}), self.features)
 
         self.assertEqual(labels[0].names, frozenset(["miny", "minz"]))
         self.assertEqual(labels[0].kind, Kind.CURVE)
 
     def test_a_wrong_surface_is_a_mismatch(self):
-        labels = associate(blocking(HEXAS, {"minx": "maxy"}), self.features)
+        labels = associated(blocking(HEXAS, {"minx": "maxy"}), self.features)
 
         self.assertEqual(labels[0].kind, Kind.FREE)
         self.assertEqual(labels[0].error, "No feature where maxy, miny, minz meet")

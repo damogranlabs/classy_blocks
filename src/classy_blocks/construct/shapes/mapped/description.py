@@ -4,22 +4,21 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from classy_blocks.cbtyping import IndexType, PointListType
-from classy_blocks.construct.surfaces.surface import SurfaceBase
+from classy_blocks.cbtyping import IndexType, NPPointListType
 from classy_blocks.construct.surfaces.triangulated import TriangulatedSurface
 
 
 @dataclass
 class MappedShapeDescription:
     # a list of points defining the whole shape
-    points: PointListType
+    points: NPPointListType
     # point connectivity; each block is represented
     # by 8-tuple (same vertex ordering as in blockMesh)
     hexas: list[IndexType]
     # faces, defined here, belong to a patch
     patches: dict[str, list[IndexType]]
     # patch faces will be mapped to specified surfaces
-    surfaces: dict[str, SurfaceBase]
+    surfaces: dict[str, TriangulatedSurface]
 
     # TODO: morphing and optimization data
 
@@ -34,8 +33,5 @@ class MappedShapeDescription:
             np.asarray(content["points"], dtype=float).reshape(-1, 3),
             [[int(i) for i in hexa] for hexa in content["hexas"]],
             {name: [[int(i) for i in face] for face in faces] for name, faces in content["patches"].items()},
-            {
-                name: TriangulatedSurface.from_file(os.path.join(base, rel), name)
-                for name, rel in content["surfaces"].items()
-            },
+            {name: TriangulatedSurface.from_file(os.path.join(base, rel)) for name, rel in content["surfaces"].items()},
         )
