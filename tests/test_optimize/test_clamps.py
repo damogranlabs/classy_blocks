@@ -132,21 +132,48 @@ class SurfaceClampTests(ClampTestsBase):
 
         clamp.update_params([1, 0])
 
-        self.assertAlmostEqual(self.position[0], 0)
+        self.assertAlmostEqual(clamp.position[0], 0)
+        self.assertAlmostEqual(f.norm(clamp.position), 1)
 
     def test_plane_move_v(self):
         clamp = PlaneClamp(self.position, [0, 0, 0], [1, 0, 0])
 
         clamp.update_params([0, 1])
 
-        self.assertAlmostEqual(self.position[0], 0)
+        self.assertAlmostEqual(clamp.position[0], 0)
+        self.assertAlmostEqual(f.norm(clamp.position), 1)
 
     def test_plane_move_uv(self):
         clamp = PlaneClamp(self.position, [0, 0, 0], [1, 0, 0])
 
         clamp.update_params([1, 1])
 
-        self.assertAlmostEqual(self.position[0], 0)
+        self.assertAlmostEqual(clamp.position[0], 0)
+        self.assertAlmostEqual(f.norm(clamp.position), np.sqrt(2))
+
+    def test_plane_basis_orthonormal(self):
+        for normal in ([1, 0, 0], [0, 0, -1], [1, 1, 1], [-1, -1, -1], [1, 1e-9, 0], [0.3, -2, 0.7]):
+            with self.subTest(normal=normal):
+                clamp = PlaneClamp(self.position, [0, 0, 0], normal)
+                basis = np.array([clamp.u_dir, clamp.v_dir, clamp.normal])
+
+                np.testing.assert_array_almost_equal(basis @ basis.T, np.eye(3))
+
+    def test_plane_oblique_stays_in_plane(self):
+        point = np.array([1, 2, 3])
+        normal = f.unit_vector([-1, -1, -1])
+        clamp = PlaneClamp(self.position, point, normal)
+
+        clamp.update_params([1.5, -2.5])
+
+        self.assertAlmostEqual(np.dot(clamp.position - point, normal), 0)
+
+    def test_plane_deterministic(self):
+        clamp_1 = PlaneClamp(self.position, [0, 0, 0], [1, 1, 1])
+        clamp_2 = PlaneClamp(self.position, [0, 0, 0], [1, 1, 1])
+
+        np.testing.assert_array_equal(clamp_1.u_dir, clamp_2.u_dir)
+        np.testing.assert_array_equal(clamp_1.v_dir, clamp_2.v_dir)
 
     def test_parametric_init(self):
         clamp = ParametricSurfaceClamp(self.position, self.function)

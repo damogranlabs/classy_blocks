@@ -16,11 +16,16 @@ class PlaneClamp(ClampBase):
         point = np.array(point, dtype=DTYPE)
         normal = f.unit_vector(normal)
 
-        # choose a vector that is not collinear with normal
-        random_dir = f.unit_vector(normal + np.random.random(3))
+        # build an in-plane basis from the coordinate axis least aligned with normal;
+        # deterministic and always well-conditioned (angle to normal >= ~54.7 deg)
+        ref_dir = np.eye(3, dtype=DTYPE)[np.argmin(np.abs(normal))]
 
-        u_dir = f.unit_vector(np.cross(random_dir, normal))
-        v_dir = f.unit_vector(np.cross(u_dir, normal))
+        u_dir = f.unit_vector(np.cross(normal, ref_dir))
+        v_dir = np.cross(normal, u_dir)  # already unit length and orthogonal
+
+        self.normal = normal
+        self.u_dir = u_dir
+        self.v_dir = v_dir
 
         def position_function(params) -> NPPointType:
             return point + params[0] * u_dir + params[1] * v_dir
