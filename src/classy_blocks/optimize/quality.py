@@ -137,6 +137,21 @@ def get_hex_quality(grid_points: NPPointListType, cell_indexes: NPIndexType) -> 
 
     quality: float = 0
 
+    # inverted corners: the three edges meeting at a corner must form a right-handed system;
+    # face angles and non-orthogonality alone don't catch all cases (warped faces)
+    corner_neighbours = np.array([[1, 3, 4], [2, 0, 5], [3, 1, 6], [0, 2, 7], [7, 5, 0], [4, 6, 1], [5, 7, 2], [6, 4, 3]])
+    for corner in range(8):
+        point = cell_points[corner]
+        e1 = cell_points[corner_neighbours[corner][0]] - point
+        e2 = cell_points[corner_neighbours[corner][1]] - point
+        e3 = cell_points[corner_neighbours[corner][2]] - point
+        e1 /= np.linalg.norm(e1) + VSMALL
+        e2 /= np.linalg.norm(e2) + VSMALL
+        e3 /= np.linalg.norm(e3) + VSMALL
+        jacobian = np.dot(np.cross(e1, e2), e3)
+        if jacobian < 0.1:
+            quality += 1e4 * (0.1 - jacobian)
+
     for side in side_indexes:
         # Non-ortho angle in a hexahedron is measured between two vectors:
         # <neighbour_center-this_center> and <face_normal>
